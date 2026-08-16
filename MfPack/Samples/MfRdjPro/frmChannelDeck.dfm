@@ -9,7 +9,7 @@ object frmChannelDeck: TfrmChannelDeck
   BorderStyle = bsSingle
   Caption = 'Channel'
   ClientHeight = 988
-  ClientWidth = 294
+  ClientWidth = 301
   Color = 4865081
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 316
@@ -33,8 +33,8 @@ object frmChannelDeck: TfrmChannelDeck
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 294
-    Height = 576
+    Width = 301
+    Height = 580
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -48,14 +48,15 @@ object frmChannelDeck: TfrmChannelDeck
     TabOrder = 0
     object Bevel4: TBevel
       Left = 0
-      Top = 509
-      Width = 294
+      Top = 513
+      Width = 301
       Height = 67
       Align = alBottom
+      ExplicitTop = 509
       ExplicitWidth = 287
     end
     object Bevel1: TBevel
-      Left = 175
+      Left = 179
       Top = 12
       Width = 54
       Height = 493
@@ -70,7 +71,7 @@ object frmChannelDeck: TfrmChannelDeck
       Height = 493
     end
     object Bevel3: TBevel
-      Left = 119
+      Left = 121
       Top = 12
       Width = 53
       Height = 493
@@ -146,11 +147,12 @@ object frmChannelDeck: TfrmChannelDeck
       PeakHoldDuration = 0.500000000000000000
     end
     object lblVolumePerc: TLabel
-      Left = 83
-      Top = 16
-      Width = 16
+      Left = 65
+      Top = 17
+      Width = 50
       Height = 15
       Alignment = taCenter
+      AutoSize = False
       Caption = '0%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -196,11 +198,12 @@ object frmChannelDeck: TfrmChannelDeck
       ParentFont = False
     end
     object lblPitch: TLabel
-      Left = 139
-      Top = 16
-      Width = 16
+      Left = 120
+      Top = 15
+      Width = 50
       Height = 15
       Alignment = taCenter
+      AutoSize = False
       Caption = '0%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -210,7 +213,7 @@ object frmChannelDeck: TfrmChannelDeck
       ParentFont = False
     end
     object lblP: TLabel
-      Left = 130
+      Left = 132
       Top = 484
       Width = 31
       Height = 14
@@ -254,10 +257,12 @@ object frmChannelDeck: TfrmChannelDeck
       Layout = tlCenter
     end
     object lblBarPositionTime: TLabel
-      Left = 233
+      Left = 235
       Top = 12
-      Width = 57
+      Width = 60
       Height = 15
+      Alignment = taCenter
+      AutoSize = False
       Caption = '00:00:00.00'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -286,7 +291,7 @@ object frmChannelDeck: TfrmChannelDeck
       Layout = tlCenter
     end
     object Label4: TLabel
-      Left = 193
+      Left = 191
       Top = 305
       Width = 24
       Height = 14
@@ -306,7 +311,7 @@ object frmChannelDeck: TfrmChannelDeck
     end
     object Label5: TLabel
       Left = 199
-      Top = 151
+      Top = 152
       Width = 9
       Height = 14
       Margins.Left = 2
@@ -342,7 +347,7 @@ object frmChannelDeck: TfrmChannelDeck
     object bldBeat: TMfBeatLed
       Left = 0
       Top = 0
-      Width = 294
+      Width = 301
       Height = 11
       Margins.Left = 0
       Margins.Top = 0
@@ -382,7 +387,7 @@ object frmChannelDeck: TfrmChannelDeck
       Layout = tlCenter
     end
     object lblPeq: TLabel
-      Left = 189
+      Left = 192
       Top = 484
       Width = 24
       Height = 14
@@ -419,6 +424,22 @@ object frmChannelDeck: TfrmChannelDeck
       ParentShowHint = False
       ShowHint = False
       WordWrap = True
+    end
+    object lblBalMaster: TLabel
+      Left = 122
+      Top = 562
+      Width = 55
+      Height = 14
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Balance'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
     end
     object tbVolume: TMfTrackBar
       Left = 69
@@ -460,7 +481,7 @@ object frmChannelDeck: TfrmChannelDeck
     end
     object tbPitch: TMfTrackBar
       Left = 128
-      Top = 37
+      Top = 33
       Width = 39
       Height = 442
       Margins.Left = 0
@@ -497,9 +518,9 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbPitchDblClick
     end
     object tbBalance: TMfTrackBar
-      Left = 4
+      Left = 1
       Top = 520
-      Width = 296
+      Width = 295
       Height = 40
       Margins.Left = 0
       Margins.Top = 0
@@ -533,7 +554,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbBalanceDblClick
     end
     object tbEqQ: TMfTrackBar
-      Left = 183
+      Left = 184
       Top = 17
       Width = 39
       Height = 133
@@ -571,7 +592,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbEqQDblClick
     end
     object tbEqCenterFreqHz: TMfTrackBar
-      Left = 183
+      Left = 185
       Top = 171
       Width = 39
       Height = 133
@@ -610,7 +631,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbEqCenterFreqHzDblClick
     end
     object tbEqGainDb: TMfTrackBar
-      Left = 183
+      Left = 185
       Top = 325
       Width = 39
       Height = 133
@@ -687,8 +708,8 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbInputGainDblClick
     end
     object pbProgress: TMfLevelProgressBar
-      Left = 244
-      Top = 32
+      Left = 242
+      Top = 33
       Width = 39
       Height = 473
       Color = clGray
@@ -813,9 +834,9 @@ object frmChannelDeck: TfrmChannelDeck
   end
   object pnlMid: TPanel
     Left = 0
-    Top = 613
-    Width = 294
-    Height = 303
+    Top = 617
+    Width = 301
+    Height = 299
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -827,17 +848,17 @@ object frmChannelDeck: TfrmChannelDeck
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    object Bevel5: TBevel
-      Left = 0
-      Top = 193
-      Width = 297
-      Height = 54
-    end
     object Bevel6: TBevel
-      Left = 222
-      Top = 137
-      Width = 75
+      Left = 224
+      Top = 136
+      Width = 73
       Height = 57
+    end
+    object Bevel5: TBevel
+      Left = 1
+      Top = 192
+      Width = 296
+      Height = 54
     end
     object btnPFL: TMPxpButton
       Left = 7
@@ -955,7 +976,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnClick = btnPFLClick
     end
     object chkMute: TMPxpButton
-      Left = 80
+      Left = 79
       Top = 87
       Width = 67
       Height = 40
@@ -1967,7 +1988,7 @@ object frmChannelDeck: TfrmChannelDeck
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 294
+    Width = 301
     Height = 37
     Align = alTop
     Color = 4865081
@@ -2004,7 +2025,7 @@ object frmChannelDeck: TfrmChannelDeck
   object pnlBottom: TPanel
     Left = 0
     Top = 916
-    Width = 294
+    Width = 301
     Height = 72
     Margins.Left = 0
     Margins.Top = 0
@@ -2026,7 +2047,7 @@ object frmChannelDeck: TfrmChannelDeck
     object Bevel8: TBevel
       Left = 0
       Top = 13
-      Width = 294
+      Width = 301
       Height = 33
       Align = alBottom
       ExplicitWidth = 287
@@ -2068,7 +2089,7 @@ object frmChannelDeck: TfrmChannelDeck
     object lblStatus: TLabel
       Left = 0
       Top = 46
-      Width = 294
+      Width = 301
       Height = 26
       Hint = 'Select an audio file'
       Align = alBottom

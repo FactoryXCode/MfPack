@@ -1,15 +1,54 @@
-# RDJ Pro managed LAN address: 192.168.1.227
-factoryxradio.asuscomm.com, http://192.168.1.227 {
+factoryxradio.asuscomm.com {
+
+    root * C:\Caddy
 
     log {
-        output file C:\Caddy\cast-access.log {
+        output file C:\Caddy\Caddy.log {
             roll_keep 2
         }
         format json
     }
 
-    root * C:\Caddy
-    file_server
+    handle /admin* {
+        respond "Forbidden" 403
+    }
+
+    handle /admin.xsl* {
+        respond "Forbidden" 403
+    }
+
+    handle /live* {
+        reverse_proxy 127.0.0.1:8000 {
+            flush_interval -1
+            transport http {
+                read_timeout 0
+                write_timeout 0
+                dial_timeout 10s
+            }
+        }
+    }
+
+    handle /video.mjpg* {
+        reverse_proxy 127.0.0.1:8000 {
+            flush_interval -1
+            transport http {
+                read_timeout 0
+                write_timeout 0
+                dial_timeout 10s
+            }
+        }
+    }
+
+    handle /status* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle /video/* {
+        root * C:\Caddy
+        header Cache-Control "no-store"
+        header Access-Control-Allow-Origin "*"
+        file_server
+    }
 
     handle /stream/* {
         root * C:\Caddy
@@ -22,15 +61,7 @@ factoryxradio.asuscomm.com, http://192.168.1.227 {
         file_server
     }
 
-    handle /live* {
-        reverse_proxy 127.0.0.1:8000
-    }
-
-    handle /status* {
-        reverse_proxy 127.0.0.1:8000
-    }
-
-    handle /admin* {
-        respond "Forbidden" 403
+    handle {
+        file_server
     }
 }

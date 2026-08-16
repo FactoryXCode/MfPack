@@ -1,14 +1,9 @@
 ## **MfRdj Install/Setup instructions**
 
-**Icecast**
-Install IceCast on the computer that will be the broadcast server (local network) or just your own computer.
-The install file can be found at ..\MfPack\Samples\MfRdjJ\Binaries\icecast_win64_2.5.0.zip
-When done, replace the icecast.xml with the icecast.xml,
-located at: ..\MfPack\Samples\MfRdjJ\Binaries\IceCast_defXML\icecast.xml  
 
 **Caddy**
 Install Caddy by unpacking the zip (..\MfPack\Samples\MfRdjJ\Binaries\Caddy_PWA.zip)
-By default we advise you to copy the contents to C:\Caddy on the same machine IceCast is installed.
+By default we advise you to copy the contents to C:\Caddy on a server or your local pc.
 
 To make all work correctly, you should activate port forwarding in your router.
 
@@ -66,29 +61,6 @@ Enable Sstreamswitch detection".
 **Open tab "Broadcast"**
 If you don't want to use IceCast streaming, you can skip this (close the setup dialog) 
 
-**Note:**
-  These steps needs to be done when you use your local computer for IceCast/Caddy.
-  When IceCast/Caddy are running on a server or network station, 
-  read the instructions in MfRDJ Installation & Setup Guide.md/pdf.
-
-**IceCast Settings**
-Host: 127.0.0.1                Port: 8000
-Mount: /live
-User name: Source
-Password: Your_Password
-Broadcast name: Your broadcast station name
-Description: A brief description, like show title.
-Genre: Various
-Broadcast URL: Can be empty
-Enable Public Stream if you want to stream over the Internet. 
-
-**IceCast Server Manager**
-Host: 127.0.0.1         Port: 8000
-EXE Path: C:\Icecast\bin\icecast.exe (Or where ever you installed IceCast)
-Config Path: C:\Icecast\icecast.xml (Or where ever IceCast's configfile is (XML))
-HTTP PATH: /
-Working Dir: C:\Icecast (Or where ever you installed IceCast)
-Startup Delay: 3000 (default 3 seconds)
 
 **Caddy/json settings**
 Caddy Path: C:\Caddy (Or where ever you installed Caddy)
@@ -97,7 +69,5 @@ Caddy json Path: C:\Caddy\nowplaying.json
 Caddy Command: caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile (leave this untouched, unless you know what you are doing).
 
 Close Setup (**OK**)
-
-For router settings read  MfRDJ Installation & Setup Guide.md/pdf.
 
 <eof>       

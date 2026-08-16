@@ -5,7 +5,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
   BorderStyle = bsSingle
   Caption = 'LoopbackDeckfrm'
   ClientHeight = 988
-  ClientWidth = 249
+  ClientWidth = 260
   Color = 4865081
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 395
@@ -26,8 +26,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 249
-    Height = 578
+    Width = 260
+    Height = 580
     Align = alTop
     BevelOuter = bvNone
     Color = 5850948
@@ -35,8 +35,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     TabOrder = 0
     object Bevel7: TBevel
       Left = 0
-      Top = 509
-      Width = 262
+      Top = 512
+      Width = 255
       Height = 67
     end
     object Bevel5: TBevel
@@ -71,7 +71,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object lblVolumePerc: TLabel
-      Left = 89
+      Left = 92
       Top = 15
       Width = 16
       Height = 15
@@ -193,7 +193,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       PeakHoldDuration = 0.500000000000000000
     end
     object lblPitch: TLabel
-      Left = 149
+      Left = 154
       Top = 15
       Width = 16
       Height = 15
@@ -244,7 +244,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     object bldBeat: TMfBeatLed
       Left = 0
       Top = 0
-      Width = 249
+      Width = 260
       Height = 11
       Margins.Left = 0
       Margins.Top = 0
@@ -259,10 +259,11 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       HoldTimeMs = 10
       FadeTimeMs = 380
       Transparent = False
+      ExplicitWidth = 249
     end
     object Bevel6: TBevel
       Left = 189
-      Top = 10
+      Top = 12
       Width = 66
       Height = 493
       ParentCustomHint = False
@@ -270,7 +271,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ShowHint = False
     end
     object Label3: TLabel
-      Left = 211
+      Left = 213
       Top = 465
       Width = 21
       Height = 13
@@ -289,7 +290,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label4: TLabel
-      Left = 211
+      Left = 213
       Top = 308
       Width = 22
       Height = 13
@@ -308,7 +309,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label5: TLabel
-      Left = 218
+      Left = 219
       Top = 155
       Width = 8
       Height = 13
@@ -327,8 +328,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object lblInputGainValue: TLabel
-      Left = 18
-      Top = 325
+      Left = 19
+      Top = 324
       Width = 32
       Height = 15
       Alignment = taCenter
@@ -366,7 +367,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label1: TLabel
-      Left = 210
+      Left = 212
       Top = 487
       Width = 21
       Height = 13
@@ -384,9 +385,25 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ParentFont = False
       Layout = tlCenter
     end
+    object lblBalMaster: TLabel
+      Left = 98
+      Top = 561
+      Width = 55
+      Height = 14
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Balance'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+    end
     object tbVolume: TMfTrackBar
-      Left = 82
-      Top = 36
+      Left = 80
+      Top = 38
       Width = 39
       Height = 442
       Margins.Left = 0
@@ -423,9 +440,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbVolumeDblClick
     end
     object tbBalance: TMfTrackBar
-      Left = 9
-      Top = 519
-      Width = 234
+      Left = 4
+      Top = 518
+      Width = 246
       Height = 40
       Margins.Left = 0
       Margins.Top = 0
@@ -460,7 +477,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object tbPitch: TMfTrackBar
       Left = 143
-      Top = 36
+      Top = 38
       Width = 39
       Height = 442
       Margins.Left = 0
@@ -497,7 +514,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbPitchDblClick
     end
     object tbEqQ: TMfTrackBar
-      Left = 204
+      Left = 205
       Top = 23
       Width = 39
       Height = 134
@@ -535,8 +552,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqQDblClick
     end
     object tbEqCenterFreqHz: TMfTrackBar
-      Left = 203
-      Top = 175
+      Left = 205
+      Top = 177
       Width = 39
       Height = 134
       Margins.Left = 0
@@ -574,8 +591,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqCenterFreqHzDblClick
     end
     object tbEqGainDb: TMfTrackBar
-      Left = 203
-      Top = 333
+      Left = 204
+      Top = 332
       Width = 39
       Height = 134
       Margins.Left = 0
@@ -613,7 +630,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object tbInputGain: TMfTrackBar
       Left = 14
-      Top = 343
+      Top = 345
       Width = 39
       Height = 135
       Margins.Left = 0
@@ -653,19 +670,20 @@ object frmLoopbackDeck: TfrmLoopbackDeck
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 249
+    Width = 260
     Height = 37
     Align = alTop
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
     object shpLiveCap: TShape
-      Left = 160
-      Top = 4
+      Left = 162
+      Top = 5
       Width = 87
       Height = 29
-      Brush.Color = 5850948
+      Brush.Style = bsClear
       Pen.Color = 5668864
+      Pen.Width = 3
     end
     object lblCaption: TLabel
       Left = 8
@@ -689,18 +707,18 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object shpLive: TShape
-      Left = 162
-      Top = 6
-      Width = 83
-      Height = 25
-      Brush.Color = 5668864
+      Left = 166
+      Top = 9
+      Width = 79
+      Height = 21
+      Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblLive: TLabel
-      Left = 166
+      Left = 167
       Top = 9
-      Width = 75
-      Height = 19
+      Width = 79
+      Height = 20
       Alignment = taCenter
       AutoSize = False
       Caption = 'LIVE'
@@ -710,13 +728,14 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
-      Transparent = False
+      Transparent = True
+      Layout = tlCenter
     end
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 924
-    Width = 249
+    Width = 260
     Height = 64
     Align = alBottom
     BevelOuter = bvNone
@@ -727,7 +746,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     object lblStatus: TLabel
       Left = 0
       Top = 38
-      Width = 249
+      Width = 260
       Height = 26
       Align = alBottom
       AutoSize = False
@@ -738,13 +757,15 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
+      ExplicitWidth = 249
     end
     object Bevel8: TBevel
       Left = 0
       Top = 5
-      Width = 249
+      Width = 260
       Height = 33
       Align = alBottom
+      ExplicitWidth = 249
     end
     object lblPlayed: TLabel
       Left = 5
@@ -783,23 +804,23 @@ object frmLoopbackDeck: TfrmLoopbackDeck
   end
   object pnlMid: TPanel
     Left = 0
-    Top = 615
-    Width = 249
-    Height = 309
+    Top = 617
+    Width = 260
+    Height = 307
     Align = alClient
     BevelOuter = bvNone
     Color = 4865081
     ParentBackground = False
     TabOrder = 3
     object Bevel1: TBevel
-      Left = 4
-      Top = 151
-      Width = 251
-      Height = 130
+      Left = 0
+      Top = 222
+      Width = 258
+      Height = 84
     end
     object lblProcess: TLabel
       Left = 13
-      Top = 222
+      Top = 243
       Width = 48
       Height = 17
       Alignment = taRightJustify
@@ -813,7 +834,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object lblProcessId: TLabel
       Left = 30
-      Top = 251
+      Top = 272
       Width = 31
       Height = 20
       Alignment = taRightJustify
@@ -826,9 +847,25 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Font.Style = []
       ParentFont = False
     end
+    object Label2: TLabel
+      Left = 8
+      Top = 215
+      Width = 59
+      Height = 14
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Source'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = False
+    end
     object edtProcessName: TEdit
       Left = 67
-      Top = 220
+      Top = 241
       Width = 180
       Height = 25
       Color = 4865081
@@ -843,20 +880,19 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Text = '-'
     end
     object btnSelectProcess: TMPxpButton
-      Left = 12
-      Top = 158
-      Width = 107
-      Height = 47
+      Left = 33
+      Top = 7
+      Width = 93
+      Height = 53
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
       Alignment = taCenter
       AllowAllUp = True
-      Caption = 'Select source'
-      Color = 5914932
-      ColorWhenDown = 11363625
-      ColorWhenUp = 5914932
+      Caption = 'Source'
+      Color = clNavy
+      ColorWhenUp = clNavy
       Behavior = bbPushButton
       Checked = False
       Font.Charset = DEFAULT_CHARSET
@@ -866,23 +902,22 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Font.Style = [fsBold]
       GlyphTransparentColor = clFuchsia
       GlyphTransparent = True
-      HotTrackColor = clWhite
       HotTrackFont.Charset = DEFAULT_CHARSET
       HotTrackFont.Color = clWindowText
       HotTrackFont.Height = -18
       HotTrackFont.Name = 'Segoe UI'
       HotTrackFont.Style = []
       Layout = blGlyphRight
-      LightColor = 12348265
+      LightColor = clSkyBlue
       ParentColor = False
       ParentFont = False
-      ShadowColor = clSkyBlue
+      ShadowColor = clAqua
       SlowDecease = True
-      Style = bsModern
+      WordWrap = True
       OnClick = btnSelectProcessClick
     end
     object btnPlayStop: TMPxpButton
-      Left = 81
+      Left = 131
       Top = 7
       Width = 93
       Height = 53
@@ -915,7 +950,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnClick = btnPlayStopClick
     end
     object chkMute: TMPxpButton
-      Left = 78
+      Left = 95
       Top = 87
       Width = 67
       Height = 40
@@ -1030,7 +1065,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnClick = chkMuteClick
     end
     object chkCrossFade: TMPxpButton
-      Left = 189
+      Left = 168
       Top = 87
       Width = 67
       Height = 40
@@ -1145,7 +1180,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnClick = chkCrossFadeClick
     end
     object btnPFL: TMPxpButton
-      Left = 5
+      Left = 23
       Top = 87
       Width = 66
       Height = 40
@@ -1261,7 +1296,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object edtPID: TEdit
       Left = 67
-      Top = 249
+      Top = 270
       Width = 180
       Height = 25
       Color = 4865081

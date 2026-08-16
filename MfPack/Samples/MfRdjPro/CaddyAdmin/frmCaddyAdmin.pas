@@ -601,7 +601,7 @@ begin
   if not EnsurePasswordConfigured then
     Exit;
 
-  if not PromptPassword('RDJPro Caddy Admin',
+  if not PromptPassword('Caddy Admin',
                         'Enter admin password:',
                         Password) then
     Exit;

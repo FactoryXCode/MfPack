@@ -504,10 +504,11 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Font.Style = []
       GradientEndColor = clGray
       GradientStartColor = 5850948
-      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goRowSelect]
+      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goEditing, goRowSelect]
       ParentFont = False
       TabOrder = 2
       OnMouseDown = grdPlaylistMouseDown
+      ExplicitLeft = 642
     end
   end
   object pnlTop: TPanel
@@ -521,9 +522,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentBackground = False
     TabOrder = 0
     object Bevel2: TBevel
-      Left = 4
-      Top = 1
-      Width = 581
+      Left = 6
+      Top = -1
+      Width = 638
       Height = 94
     end
     object lblSearch: TLabel
@@ -604,10 +605,10 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnClick = btnSearchClick
     end
     object btnClearSearch: TMPxpButton
-      Left = 530
-      Top = 7
-      Width = 45
-      Height = 80
+      Left = 532
+      Top = 6
+      Width = 106
+      Height = 40
       Hint = 'Clear Search'
       Alignment = taCenter
       AllowAllUp = True
@@ -702,8 +703,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnDblClick = cbPlaylistsDblClick
       end
       object btnDeletePlaylist: TMPxpButton
-        Left = 273
-        Top = 18
+        Left = 500
+        Top = 24
         Width = 106
         Height = 40
         Hint = 'Delete current playlist'
@@ -742,8 +743,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnDeletePlaylistClick
       end
       object btnSavePlaylist: TMPxpButton
-        Left = 386
-        Top = 18
+        Left = 274
+        Top = 24
         Width = 107
         Height = 40
         Hint = 'Save current playlist'
@@ -782,8 +783,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnSavePlaylistClick
       end
       object btnNewPlaylist: TMPxpButton
-        Left = 499
-        Top = 18
+        Left = 387
+        Top = 24
         Width = 107
         Height = 40
         Hint = 'Add a new playlist'
@@ -865,7 +866,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     object edFileName: TEdit
       Left = 102
       Top = 60
-      Width = 421
+      Width = 536
       Height = 27
       Hint = 'Search for an audiofile'
       Alignment = taCenter

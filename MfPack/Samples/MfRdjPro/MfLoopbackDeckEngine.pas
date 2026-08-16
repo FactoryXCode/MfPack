@@ -73,6 +73,8 @@ uses
   System.Classes,
   System.SyncObjs,
   System.Math,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
   {WinMM}
@@ -687,7 +689,6 @@ var
   Rectified: Double;
   Onset: Double;
   HopOnsetAvg: Double;
-  HopOnsetValue: Single;
   HopEnergyAvg: Double;
   GateThreshold: Double;
   EnvCopy: TSingleDynArray;
@@ -771,10 +772,7 @@ begin
             if (HopEnergyAvg < GateThreshold) then
               AppendEnvelopeBin(0.0)
             else
-              begin
-                HopOnsetValue := HopOnsetAvg;
-                AppendEnvelopeBin(HopOnsetValue);
-              end;
+              AppendEnvelopeBin(_Single(HopOnsetAvg));
 
             FAnalysisHopPos := 0;
             FAnalysisAcc := 0.0;
@@ -854,18 +852,19 @@ begin
                 // compare detected beat phase against the existing grid at the current position,
                 // wrap to nearest beat, then apply only a limited correction per analysis pass.
                 StableOffsetAtPos := NormalizeBeatOffsetToPosition(FBeatOffset100ns,
-                                                                   BeatLen100ns,
-                                                                   EndPosition100ns);
+                                                                              BeatLen100ns,
+                                                                              EndPosition100ns);
                 DetectedOffsetAtPos := NormalizeBeatOffsetToPosition(NewBeatOffset100ns,
-                                                                     BeatLen100ns,
-                                                                     EndPosition100ns);
+                                                                                BeatLen100ns,
+                                                                                EndPosition100ns);
                 PhaseError100ns := WrapPhaseError100ns(DetectedOffsetAtPos - StableOffsetAtPos,
-                                                        BeatLen100ns);
+                                                                   BeatLen100ns);
                 SnapDeadband100ns := BeatLen100ns * 0.03;
                 MaxAdjust100ns := BeatLen100ns * 0.10;
 
-                if Abs(PhaseError100ns) >= SnapDeadband100ns then
+                if (Abs(PhaseError100ns) >= SnapDeadband100ns) then
                   begin
+
                     AppliedAdjust100ns := ClampDouble(PhaseError100ns,
                                                       -MaxAdjust100ns,
                                                       MaxAdjust100ns);
@@ -1505,8 +1504,6 @@ var
   BeatPhase: Double;
   BeatIndex: Int64;
   FireBeat: Boolean;
-  TickProc: TThreadProcedure;
-  BeatProc: TThreadProcedure;
 
 begin
 
@@ -1567,32 +1564,26 @@ begin
   end;
 
   if Assigned(TickCb) then
-    begin
-      TickProc := procedure
+    TThread.Queue(nil,
+                  procedure
                   begin
                     if Assigned(TickCb) then
                       TickCb(Self,
                              LocalPosition100ns,
                              LocalCurrentBpm,
                              BeatPhase);
-                  end;
-      TThread.Queue(nil,
-                    TickProc);
-    end;
+                  end);
 
   if FireBeat and Assigned(BeatCb) then
-    begin
-      BeatProc := procedure
+    TThread.Queue(nil,
+                  procedure
                   begin
                     if Assigned(BeatCb) then
                       BeatCb(Self,
                              LocalPosition100ns,
                              BeatIndex,
                              LocalCurrentBpm);
-                  end;
-      TThread.Queue(nil,
-                    BeatProc);
-    end;
+                  end);
 end;
 
 
@@ -1706,23 +1697,17 @@ end;
 
 
 procedure TMfLoopbackDeckEngine.DoState();
-var
-  StateProc: TThreadProcedure;
-
 begin
 
   if Assigned(FOnState) then
-    begin
-      StateProc := procedure
+    TThread.Queue(nil,
+                  procedure
                   begin
 
                     if Assigned(FOnState) then
                       FOnState(Self,
                                FState);
-                  end;
-      TThread.Queue(nil,
-                    StateProc);
-    end;
+                  end);
 end;
 
 

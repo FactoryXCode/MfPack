@@ -10,9 +10,9 @@ object frmMediaServer: TfrmMediaServer
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Media Server'
-  ClientHeight = 356
-  ClientWidth = 434
-  Color = 5850948
+  ClientHeight = 721
+  ClientWidth = 845
+  Color = 9216
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,118 +20,549 @@ object frmMediaServer: TfrmMediaServer
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
-  Position = poScreenCenter
+  OldCreateOrder = True
+  Position = poMainFormCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnResize = FormResize
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
-  object pnlIceCast: TPanel
+  object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 434
-    Height = 356
+    Width = 845
+    Height = 37
+    Align = alTop
+    Alignment = taLeftJustify
+    Color = 4865081
+    ParentBackground = False
+    TabOrder = 0
+    OnMouseDown = pnlCaptionMouseDown
+    object shpOnAirCap: TShape
+      Left = 167
+      Top = 5
+      Width = 95
+      Height = 28
+      Brush.Color = 5850948
+      Pen.Color = 5668864
+      Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblCaption: TLabel
+      Left = 4
+      Top = 11
+      Width = 137
+      Height = 16
+      Hint = 'Master deck'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taCenter
+      Caption = 'Media Server Control'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      Layout = tlCenter
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object shpOnAir: TShape
+      Left = 171
+      Top = 9
+      Width = 87
+      Height = 20
+      Cursor = crDrag
+      Brush.Style = bsClear
+      Pen.Color = 5668864
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblOnAir: TLabel
+      Left = 174
+      Top = 8
+      Width = 84
+      Height = 20
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'ON AIR'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clGreen
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object shpRecordingCap: TShape
+      Left = 369
+      Top = 5
+      Width = 95
+      Height = 28
+      Brush.Color = 5850948
+      Pen.Color = 5668864
+      Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object shpRecording: TShape
+      Left = 373
+      Top = 9
+      Width = 87
+      Height = 20
+      Brush.Style = bsClear
+      Pen.Color = 5668864
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblRecording: TLabel
+      Left = 373
+      Top = 8
+      Width = 87
+      Height = 20
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'REC OFF'
+      Color = 4865081
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clGreen
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object shpBcLocked: TShape
+      Left = 268
+      Top = 5
+      Width = 95
+      Height = 28
+      Brush.Style = bsClear
+      Pen.Color = clLime
+      Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object shpBcLockedCap: TShape
+      Left = 272
+      Top = 9
+      Width = 87
+      Height = 20
+      Cursor = crDrag
+      Brush.Style = bsClear
+      Pen.Color = clLime
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblLockBC: TLabel
+      Left = 273
+      Top = 8
+      Width = 86
+      Height = 20
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'UNLOCKED'
+      Color = 9557760
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clLime
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblBroadcastHealth: TLabel
+      Left = 470
+      Top = 8
+      Width = 299
+      Height = 20
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'HEALTH: IDLE'
+      Color = 4865081
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 5668864
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object btnMinimize: TMPxpButton
+      Left = 778
+      Top = 1
+      Width = 66
+      Height = 35
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Align = alRight
+      Alignment = taCenter
+      AllowAllUp = True
+      Caption = ''
+      Color = 5914932
+      ColorWhenDown = 11363625
+      ColorWhenUp = 5914932
+      Behavior = bbPushButton
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        42010000424D4201000000000000760000002800000011000000110000000100
+        040000000000CC000000C40E0000C40E00001000000000000000000000000000
+        8000008000000080800080000000800080008080000080808000C0C0C0000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000777777777777777770000000FFFFFFFFFFFFFFFFF0000000FFFFFFFFFFFF
+        FFFFF0000000FFFFFFFFFFFFFFFFF00000007777777777777777700000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000}
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackColor = clWhite
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphRight
+      LightColor = 12348265
+      NumGlyphs = 1
+      ParentColor = False
+      ParentFont = False
+      ShadowColor = clSkyBlue
+      Style = bsModern
+      Transparent = True
+      OnClick = btnMinimizeClick
+    end
+  end
+  object pnlRdjProControl: TPanel
+    Left = 0
+    Top = 37
+    Width = 845
+    Height = 684
     Align = alClient
-    Anchors = [akLeft, akTop, akRight]
     BevelOuter = bvNone
     Color = 5850948
     ParentBackground = False
     ShowCaption = False
-    TabOrder = 0
-    ExplicitWidth = 428
-    ExplicitHeight = 339
-    object Panel1: TPanel
+    TabOrder = 1
+    object pnlRdjProControls: TPanel
       Left = 0
-      Top = 37
-      Width = 434
-      Height = 319
-      Align = alClient
+      Top = 0
+      Width = 845
+      Height = 163
+      Align = alTop
       BevelOuter = bvNone
-      Color = 5850948
+      Color = 9598320
+      DoubleBuffered = True
       ParentBackground = False
+      ParentDoubleBuffered = False
       ShowCaption = False
-      TabOrder = 1
-      ExplicitWidth = 428
-      ExplicitHeight = 302
-      object lblIcecastServerStatus: TLabel
-        AlignWithMargins = True
-        Left = 2
-        Top = 297
-        Width = 430
-        Height = 20
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Align = alBottom
-        AutoSize = False
-        Caption = 'Broadcast Ofline'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = 13229826
-        Font.Height = -13
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = False
-        Transparent = False
-        WordWrap = True
-      end
-      object memIcecastLog: TMemo
+      TabOrder = 0
+      object pnlRecorderCtrl: TPanel
         Left = 0
-        Top = 87
-        Width = 434
-        Height = 208
+        Top = 41
+        Width = 845
+        Height = 122
         Align = alClient
-        Color = 9216
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = 13229826
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentFont = False
-        ScrollBars = ssVertical
-        TabOrder = 0
-        ExplicitWidth = 428
-        ExplicitHeight = 191
-      end
-      object Panel2: TPanel
-        Left = 0
-        Top = 0
-        Width = 434
-        Height = 87
-        Align = alTop
         BevelOuter = bvNone
+        Caption = 'pnlRecorderCtrl'
         Color = 5850948
         ParentBackground = False
         ShowCaption = False
-        TabOrder = 1
-        ExplicitWidth = 428
-        object Bevel3: TBevel
-          Left = 12
+        TabOrder = 2
+        object Bevel1: TBevel
+          Left = 10
           Top = 14
-          Width = 215
-          Height = 61
+          Width = 774
+          Height = 56
         end
-        object Label4: TLabel
-          Left = 20
-          Top = 7
-          Width = 60
-          Height = 16
-          Alignment = taCenter
-          Caption = '  Server  '
+        object Label3: TLabel
+          Left = 237
+          Top = 31
+          Width = 83
+          Height = 17
+          Hint = 'Enter a file name without extension.'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Alignment = taRightJustify
+          AutoSize = False
+          Caption = 'FileName:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWhite
           Font.Height = -13
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
           ParentFont = False
-          Transparent = False
+          ParentShowHint = False
+          ShowHint = True
+        end
+        object lblFileExt: TLabel
+          Left = 678
+          Top = 31
+          Width = 29
+          Height = 16
+          Hint = 'Enter a file name without extension.'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Caption = '.mp4'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWhite
+          Font.Height = -13
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          Transparent = True
+        end
+        object lblRecTime: TLabel
+          Left = 0
+          Top = 94
+          Width = 845
+          Height = 28
+          Align = alBottom
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Recorded: 00:00:00.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clAqua
+          Font.Height = -16
+          Font.Name = 'Terminal'
+          Font.Style = [fsBold]
+          ParentFont = False
+          ExplicitWidth = 791
+        end
+        object edRdjProRecFileName: TEdit
+          Left = 324
+          Top = 30
+          Width = 354
+          Height = 20
+          Hint = 'Enter a recording filename (No path)'
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Alignment = taRightJustify
+          AutoSize = False
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = 9216
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWhite
+          Font.Height = -13
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          MaxLength = 30
+          ParentFont = False
+          TabOrder = 0
+          Text = 'RdjPro_recording'
+        end
+        object btnRdjProRecord: TMPxpButton
+          Left = 19
+          Top = 21
+          Width = 94
+          Height = 40
+          Hint = 'Start/stop recording.'
+          Alignment = taCenter
+          Caption = 'Start'
+          Color = clMaroon
+          ColorWhenDown = clRed
+          ColorWhenUp = clMaroon
+          Behavior = bbCheckBox
+          Checked = False
+          ImageIndexUnchecked = 0
+          ImageIndexChecked = 0
+          TabStop = True
+          ShowFocusRect = False
+          Enabled = False
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clMoneyGreen
+          Font.Height = -16
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          GlyphTransparentColor = clBlack
+          GlyphTransparent = False
+          HotTrackFont.Charset = DEFAULT_CHARSET
+          HotTrackFont.Color = clWindowText
+          HotTrackFont.Height = -18
+          HotTrackFont.Name = 'Segoe UI'
+          HotTrackFont.Style = []
+          LightColor = clRed
+          ParentColor = False
+          ParentFont = False
+          ParentShowHint = False
+          ShadowColor = clAqua
+          ShowHint = True
+          SlowDecease = True
+          WordWrap = True
+          OnClick = btnRdjProRecordClick
+        end
+        object chkRecordVideoOnly: TMPxpButton
+          Left = 119
+          Top = 21
+          Width = 100
+          Height = 40
+          Hint = 'Record video only.'
+          Alignment = taCenter
+          Caption = 'Video Only'
+          Color = 6899524
+          ColorWhenDown = 10045252
+          ColorWhenUp = 6899524
+          Behavior = bbCheckBox
+          Checked = False
+          GlyphUnchecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            1900001900000019190019000000190019001919000060606000607E6000956B
+            430000005C002F0000001D00000002000000020002000000130000002F000200
+            2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+            7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+            A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          GlyphChecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+            94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+            D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          ImageIndexUnchecked = 0
+          ImageIndexChecked = 0
+          ShowFocusRect = False
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clAqua
+          Font.Height = -13
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          GlyphTransparentColor = clBlack
+          GlyphTransparent = True
+          HotTrackFont.Charset = DEFAULT_CHARSET
+          HotTrackFont.Color = clWindowText
+          HotTrackFont.Height = -18
+          HotTrackFont.Name = 'Segoe UI'
+          HotTrackFont.Style = []
+          Layout = blGlyphTop
+          LightColor = clAqua
+          ParentColor = False
+          ParentFont = False
+          ParentShowHint = False
+          ShadowColor = clSkyBlue
+          ShowHint = True
+          SlowDecease = True
+          WordWrap = True
+          OnClick = chkRecordVideoOnlyClick
+        end
+      end
+      object pnlServerCtrl: TPanel
+        Left = 0
+        Top = 44
+        Width = 845
+        Height = 126
+        BevelOuter = bvNone
+        Caption = 'pnlServerCtrl'
+        Color = 5850948
+        ParentBackground = False
+        ShowCaption = False
+        TabOrder = 0
+        object Bevel3: TBevel
+          Left = 12
+          Top = 3
+          Width = 119
+          Height = 56
+        end
+        object Bevel2: TBevel
+          Left = 137
+          Top = 3
+          Width = 232
+          Height = 56
         end
         object chkBroadcast: TMPxpButton
-          Left = 247
-          Top = 31
+          Left = 19
+          Top = 11
           Width = 100
           Height = 40
           Hint = 'Start/Stop Broadcasing'
@@ -249,14 +680,14 @@ object frmMediaServer: TfrmMediaServer
           WordWrap = True
           OnClick = chkBroadcastClick
         end
-        object chkStartStopServer: TMPxpButton
-          Left = 17
-          Top = 31
+        object chkRdjProCamera: TMPxpButton
+          Left = 148
+          Top = 11
           Width = 100
           Height = 40
-          Hint = 'Start/Stop server'
+          Hint = 'Start/stop camera preview.'
           Alignment = taCenter
-          Caption = 'Start'
+          Caption = 'Camera'
           Color = 6899524
           ColorWhenDown = 10045252
           ColorWhenUp = 6899524
@@ -366,18 +797,625 @@ object frmMediaServer: TfrmMediaServer
           ShowHint = True
           SlowDecease = True
           WordWrap = True
-          OnClick = chkStartStopServerClick
+          OnClick = chkRdjProCameraClick
         end
-        object chkAutoRestart: TMPxpButton
-          Left = 123
-          Top = 31
+        object chkRdjProStaticImage: TMPxpButton
+          Left = 258
+          Top = 11
           Width = 100
           Height = 40
-          Hint = 'Auto restart the server on disconnect'
+          Hint = 'Use a static image instead of the camera.'
           Alignment = taCenter
-          Caption = 'Auto restart'
+          Caption = 'Static Image'
           Color = 6899524
           ColorWhenDown = 10045252
+          ColorWhenUp = 6899524
+          Behavior = bbCheckBox
+          Checked = False
+          GlyphUnchecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            1900001900000019190019000000190019001919000060606000607E6000956B
+            430000005C002F0000001D00000002000000020002000000130000002F000200
+            2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+            7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+            A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          GlyphChecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+            94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+            D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          ImageIndexUnchecked = 0
+          ImageIndexChecked = 0
+          ShowFocusRect = False
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clAqua
+          Font.Height = -11
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          GlyphTransparentColor = clBlack
+          GlyphTransparent = True
+          HotTrackFont.Charset = DEFAULT_CHARSET
+          HotTrackFont.Color = clWindowText
+          HotTrackFont.Height = -11
+          HotTrackFont.Name = 'Segoe UI'
+          HotTrackFont.Style = []
+          Layout = blGlyphTop
+          LightColor = clAqua
+          ParentColor = False
+          ParentFont = False
+          ParentShowHint = False
+          ShadowColor = clSkyBlue
+          ShowHint = True
+          SlowDecease = True
+          WordWrap = True
+          OnClick = chkRdjProStaticImageClick
+        end
+        object memLog: TMemo
+          Left = 375
+          Top = 2
+          Width = 464
+          Height = 57
+          Color = 9216
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 13229826
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+          ScrollBars = ssVertical
+          TabOrder = 3
+        end
+        object pnlCast: TPanel
+          Left = 0
+          Top = 62
+          Width = 845
+          Height = 64
+          Align = alBottom
+          BevelOuter = bvNone
+          Color = 4865081
+          ParentBackground = False
+          ShowCaption = False
+          TabOrder = 4
+          object lblCastDevice: TLabel
+            Left = 9
+            Top = 10
+            Width = 26
+            Height = 15
+            Caption = 'Cast:'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object lblCastState: TLabel
+            Left = 4
+            Top = 38
+            Width = 223
+            Height = 15
+            Alignment = taCenter
+            AutoSize = False
+            Caption = 'Not connected'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 13229826
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object cmbCastDevices: TComboBox
+            Left = 41
+            Top = 7
+            Width = 190
+            Height = 23
+            Style = csDropDownList
+            TabOrder = 0
+            OnChange = cmbCastDevicesChange
+          end
+          object btnCastDiscover: TMPxpButton
+            Left = 237
+            Top = 6
+            Width = 66
+            Height = 41
+            Margins.Left = 2
+            Margins.Top = 2
+            Margins.Right = 2
+            Margins.Bottom = 2
+            Alignment = taCenter
+            AllowAllUp = True
+            Caption = 'Discover'
+            Color = 5914932
+            ColorWhenDown = 11363625
+            ColorWhenUp = 5914932
+            Behavior = bbPushButton
+            Checked = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            GlyphTransparentColor = clFuchsia
+            GlyphTransparent = True
+            HotTrackColor = clWhite
+            HotTrackFont.Charset = DEFAULT_CHARSET
+            HotTrackFont.Color = clWindowText
+            HotTrackFont.Height = -18
+            HotTrackFont.Name = 'Segoe UI'
+            HotTrackFont.Style = []
+            Layout = blGlyphRight
+            LightColor = 12348265
+            ParentColor = False
+            ParentFont = False
+            ShadowColor = clSkyBlue
+            Style = bsModern
+            Transparent = True
+            OnClick = btnCastDiscoverClick
+          end
+          object btnCastLive: TMPxpButton
+            Left = 311
+            Top = 6
+            Width = 66
+            Height = 41
+            Margins.Left = 2
+            Margins.Top = 2
+            Margins.Right = 2
+            Margins.Bottom = 2
+            Alignment = taCenter
+            AllowAllUp = True
+            Caption = 'Cast live'
+            Color = 5914932
+            ColorWhenDown = 11363625
+            ColorWhenUp = 5914932
+            Behavior = bbPushButton
+            Checked = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            GlyphTransparentColor = clFuchsia
+            GlyphTransparent = True
+            HotTrackColor = clWhite
+            HotTrackFont.Charset = DEFAULT_CHARSET
+            HotTrackFont.Color = clWindowText
+            HotTrackFont.Height = -18
+            HotTrackFont.Name = 'Segoe UI'
+            HotTrackFont.Style = []
+            Layout = blGlyphRight
+            LightColor = 12348265
+            ParentColor = False
+            ParentFont = False
+            ShadowColor = clSkyBlue
+            Style = bsModern
+            Transparent = True
+            OnClick = btnCastLiveClick
+          end
+          object btnCastStop: TMPxpButton
+            Left = 384
+            Top = 6
+            Width = 66
+            Height = 41
+            Margins.Left = 2
+            Margins.Top = 2
+            Margins.Right = 2
+            Margins.Bottom = 2
+            Alignment = taCenter
+            AllowAllUp = True
+            Caption = 'Stop'
+            Color = 5914932
+            ColorWhenDown = 11363625
+            ColorWhenUp = 5914932
+            Behavior = bbPushButton
+            Checked = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = [fsBold]
+            GlyphTransparentColor = clFuchsia
+            GlyphTransparent = True
+            HotTrackColor = clWhite
+            HotTrackFont.Charset = DEFAULT_CHARSET
+            HotTrackFont.Color = clWindowText
+            HotTrackFont.Height = -18
+            HotTrackFont.Name = 'Segoe UI'
+            HotTrackFont.Style = []
+            Layout = blGlyphRight
+            LightColor = 12348265
+            ParentColor = False
+            ParentFont = False
+            ShadowColor = clSkyBlue
+            Style = bsModern
+            Transparent = True
+            OnClick = btnCastStopClick
+          end
+          object trkCastVolume: TMfTrackBar
+            Left = 504
+            Top = 7
+            Width = 268
+            Height = 40
+            TabOrder = 4
+            Color = 4865081
+            ParentColor = False
+            Position = 75
+            ThumbWidth = 60
+            ThumbHeight = 50
+            TransparentColor = clBlack
+            ThumbPictureHorz.Data = {
+              07544269746D617012010000424D120100000000000076000000280000001300
+              00000D00000001000400000000009C000000330B0000330B0000100000001000
+              000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00055555554445555555000000531425454045452413500000531425454045
+              4524135000005314254540454524135000005314254540454524135000005314
+              2545404545241350000053142545404545241350000053142545404545241350
+              0000531425454045452413500000531425454045452413500000531425454045
+              452413500000531425454045452413500000055555554445555555000000}
+            StretchBackground = False
+            ShowTicks = True
+            TickLabelMode = tlDb
+            DbFloor = -50.000000000000000000
+            DbCeil = 6.000000000000000000
+            TickColor = clAqua
+            TickLabelsVisible = False
+            TickPlacementH = tphBoth
+            TickPlacementV = tpvBoth
+            OnChange = trkCastVolumeChange
+          end
+          object chkCastMuted: TMPxpButton
+            Left = 778
+            Top = 7
+            Width = 67
+            Height = 40
+            Alignment = taCenter
+            Caption = 'Mute'
+            Color = 6899524
+            ColorWhenDown = 10045252
+            ColorWhenUp = 6899524
+            Behavior = bbCheckBox
+            Checked = False
+            GlyphUnchecked.Data = {
+              C6040000424DC60400000000000036040000280000000C0000000C0000000100
+              08000000000090000000230B0000230B00000001000000010000000000000000
+              1900001900000019190019000000190019001919000060606000607E6000956B
+              430000005C002F0000001D00000002000000020002000000130000002F000200
+              2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+              7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+              A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+              A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+              00000000000000000010151717151000000000001116181A1A18161100000010
+              16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+              170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+              1E1C1916100000001116181A1A18161100000000001015171715100000000000
+              00000000000000000000}
+            GlyphChecked.Data = {
+              C6040000424DC60400000000000036040000280000000C0000000C0000000100
+              08000000000090000000230B0000230B00000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+              94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+              D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+              00000000000000000010151717151000000000001116181A1A18161100000010
+              16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+              170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+              1E1C1916100000001116181A1A18161100000000001015171715100000000000
+              00000000000000000000}
+            ImageIndexUnchecked = 0
+            ImageIndexChecked = 0
+            ShowFocusRect = False
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clAqua
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            GlyphTransparentColor = clBlack
+            GlyphTransparent = True
+            HotTrackFont.Charset = DEFAULT_CHARSET
+            HotTrackFont.Color = clWindowText
+            HotTrackFont.Height = -18
+            HotTrackFont.Name = 'Segoe UI'
+            HotTrackFont.Style = []
+            Layout = blGlyphTop
+            LightColor = clAqua
+            ParentColor = False
+            ParentFont = False
+            ShadowColor = clSkyBlue
+            SlowDecease = True
+            WordWrap = True
+            OnClick = chkCastMutedClick
+          end
+          object StaticText1: TStaticText
+            Left = 466
+            Top = 20
+            Width = 45
+            Height = 19
+            ParentCustomHint = False
+            Alignment = taRightJustify
+            BevelInner = bvNone
+            BevelOuter = bvNone
+            Caption = 'Volume'
+            Color = 4865081
+            DoubleBuffered = True
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentColor = False
+            ParentDoubleBuffered = False
+            ParentFont = False
+            ParentShowHint = False
+            ShowHint = False
+            TabOrder = 6
+            Transparent = False
+            StyleElements = [seFont]
+          end
+        end
+      end
+      object pnlAudioEndPoints: TPanel
+        Left = 0
+        Top = 0
+        Width = 845
+        Height = 41
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Align = alTop
+        BevelOuter = bvSpace
+        Color = 9598320
+        ParentBackground = False
+        ShowCaption = False
+        TabOrder = 1
+        object chkServerCtrl: TMPxpButton
+          Left = 4
+          Top = 4
+          Width = 107
+          Height = 38
+          Alignment = taCenter
+          Caption = 'Server'
+          Color = 6899524
+          ColorWhenDown = 6899524
+          ColorWhenUp = 6899524
+          Down = True
+          Behavior = bbCheckBox
+          Checked = True
+          GlyphUnchecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            1900001900000019190019000000190019001919000060606000607E6000956B
+            430000005C002F0000001D00000002000000020002000000130000002F000200
+            2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+            7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+            A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+            A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          GlyphChecked.Data = {
+            C6040000424DC60400000000000036040000280000000C0000000C0000000100
+            08000000000090000000230B0000230B00000001000000010000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+            94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+            D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+            00000000000000000010151717151000000000001116181A1A18161100000010
+            16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+            170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+            1E1C1916100000001116181A1A18161100000000001015171715100000000000
+            00000000000000000000}
+          ImageIndexUnchecked = 0
+          ImageIndexChecked = 0
+          ShowFocusRect = False
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clAqua
+          Font.Height = -13
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          GlyphTransparentColor = clBlack
+          GlyphTransparent = True
+          HotTrackFont.Charset = DEFAULT_CHARSET
+          HotTrackFont.Color = clWindowText
+          HotTrackFont.Height = -18
+          HotTrackFont.Name = 'Segoe UI'
+          HotTrackFont.Style = []
+          Layout = blGlyphTop
+          LightColor = clSkyBlue
+          ParentColor = False
+          ParentFont = False
+          ShadowColor = clAqua
+          SlowDecease = True
+          WordWrap = True
+          OnClick = chkServerCtrlClick
+        end
+        object chkRecorderCtrl: TMPxpButton
+          Left = 112
+          Top = 4
+          Width = 107
+          Height = 38
+          Alignment = taCenter
+          Caption = 'Recorder'
+          Color = 6899524
+          ColorWhenDown = 6899524
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
           Checked = False
@@ -477,138 +1515,127 @@ object frmMediaServer: TfrmMediaServer
           HotTrackFont.Name = 'Segoe UI'
           HotTrackFont.Style = []
           Layout = blGlyphTop
-          LightColor = clAqua
+          LightColor = clSkyBlue
           ParentColor = False
           ParentFont = False
-          ParentShowHint = False
-          ShadowColor = clSkyBlue
-          ShowHint = True
+          ShadowColor = clAqua
           SlowDecease = True
           WordWrap = True
-          OnClick = chkAutoRestartClick
+          OnClick = chkRecorderCtrlClick
         end
       end
     end
-    object pnlCaption: TPanel
+    object pnlRdjProPreviewHost: TPanel
       Left = 0
-      Top = 0
-      Width = 434
-      Height = 37
-      Align = alTop
-      Alignment = taLeftJustify
-      Color = 4865081
+      Top = 163
+      Width = 845
+      Height = 497
+      Align = alClient
+      BevelOuter = bvNone
+      Color = 9216
       ParentBackground = False
-      TabOrder = 0
-      OnMouseDown = pnlCaptionMouseDown
-      ExplicitWidth = 428
-      object shpOnAirCap: TShape
-        Left = 254
-        Top = 4
-        Width = 87
-        Height = 29
-        Brush.Color = 5850948
-        Pen.Color = 5668864
+      ShowCaption = False
+      TabOrder = 1
+      object imgRdjProStaticPreview: TImage
+        Left = 0
+        Top = 0
+        Width = 845
+        Height = 497
+        Align = alClient
+        Center = True
+        Proportional = True
+        Stretch = True
+        Visible = False
+        ExplicitTop = -2
+        ExplicitHeight = 88
       end
-      object lblCaption: TLabel
-        Left = 8
-        Top = 11
-        Width = 86
-        Height = 16
-        Hint = 'Master deck'
+    end
+    object pnlBottom: TPanel
+      Left = 0
+      Top = 660
+      Width = 845
+      Height = 24
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alBottom
+      BevelOuter = bvNone
+      Color = 9216
+      DoubleBuffered = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentBackground = False
+      ParentDoubleBuffered = False
+      ParentFont = False
+      TabOrder = 2
+      object lblRecorderStatus: TLabel
+        AlignWithMargins = True
+        Left = 394
+        Top = 2
+        Width = 449
+        Height = 20
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
-        Alignment = taCenter
-        Caption = 'Media Server'
+        Align = alClient
+        AutoSize = False
+        Caption = 'Video Ofline'
+        Color = 9216
         Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWhite
+        Font.Color = 13229826
         Font.Height = -13
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
+        ParentColor = False
         ParentFont = False
         ParentShowHint = False
-        ShowHint = True
-        Layout = tlCenter
+        ShowHint = False
+        Transparent = True
+        WordWrap = True
+        ExplicitTop = 5
+        ExplicitWidth = 395
       end
-      object shpOnAir: TShape
-        Left = 256
-        Top = 6
-        Width = 83
-        Height = 25
-        Brush.Color = 5668864
-        Pen.Color = 5668864
-      end
-      object lblOnAir: TLabel
-        Left = 260
-        Top = 9
-        Width = 75
-        Height = 19
-        Alignment = taCenter
-        AutoSize = False
-        Caption = 'ON AIR'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clGreen
-        Font.Height = -15
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-      end
-      object btnMinimize: TMPxpButton
-        Left = 367
-        Top = 1
-        Width = 66
-        Height = 35
+      object lblIcecastServerStatus: TLabel
+        AlignWithMargins = True
+        Left = 2
+        Top = 2
+        Width = 388
+        Height = 20
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
-        Align = alRight
-        Alignment = taCenter
-        AllowAllUp = True
-        Caption = ''
-        Color = 5914932
-        ColorWhenDown = 11363625
-        ColorWhenUp = 5914932
-        Behavior = bbPushButton
-        Checked = False
+        Align = alLeft
+        AutoSize = False
+        Caption = 'Broadcast Ofline'
+        Color = 9216
         Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWhite
+        Font.Color = 13229826
         Font.Height = -13
-        Font.Name = 'Segoe UI'
+        Font.Name = 'Tahoma'
         Font.Style = [fsBold]
-        Glyph.Data = {
-          42010000424D4201000000000000760000002800000011000000110000000100
-          040000000000CC000000C40E0000C40E00001000000000000000000000000000
-          8000008000000080800080000000800080008080000080808000C0C0C0000000
-          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
-          0000000000000000000000000000000000000000000000000000000000000000
-          0000000000000000000000000000000000000000000000000000000000000000
-          0000777777777777777770000000FFFFFFFFFFFFFFFFF0000000FFFFFFFFFFFF
-          FFFFF0000000FFFFFFFFFFFFFFFFF00000007777777777777777700000000000
-          0000000000000000000000000000000000000000000000000000000000000000
-          0000000000000000000000000000000000000000000000000000000000000000
-          000000000000}
-        GlyphTransparentColor = clFuchsia
-        GlyphTransparent = True
-        HotTrackColor = clWhite
-        HotTrackFont.Charset = DEFAULT_CHARSET
-        HotTrackFont.Color = clWindowText
-        HotTrackFont.Height = -18
-        HotTrackFont.Name = 'Segoe UI'
-        HotTrackFont.Style = []
-        Layout = blGlyphRight
-        LightColor = 12348265
-        NumGlyphs = 1
         ParentColor = False
         ParentFont = False
-        ShadowColor = clSkyBlue
-        Style = bsModern
+        ParentShowHint = False
+        ShowHint = False
         Transparent = True
-        OnClick = btnMinimizeClick
-        ExplicitLeft = 361
+        WordWrap = True
+        ExplicitLeft = 11
+        ExplicitTop = 5
+        ExplicitHeight = 24
       end
     end
+  end
+  object tmrTime: TTimer
+    Enabled = False
+    Interval = 10
+    OnTimer = tmrTimeTimer
+    Left = 620
+    Top = 42
   end
 end

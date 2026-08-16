@@ -388,12 +388,12 @@ begin
     Exit;
 
   if not FileExists(SetupIniFileName) then
-    raise Exception.CreateFmt('RDJ Pro setup INI file not found:'#13#10'%s',
+    raise Exception.CreateFmt('Setup INI file not found:'#13#10'%s',
                               [SetupIniFileName]);
 
   CaddyRoot := ClientCaddyRoot();
   if CaddyRoot = '' then
-    raise Exception.Create('Could not resolve the RDJ Pro Caddy folder from the Caddy configuration path.');
+    raise Exception.Create('Could not resolve the Caddy folder from the Caddy configuration path.');
 
   Ini := TIniFile.Create(SetupIniFileName);
   
@@ -439,14 +439,14 @@ begin
     raise Exception.Create('Log file is empty.');
 
   if Trim(edtProxyHost.Text) = '' then
-    raise Exception.Create('RDJPRO proxy host is empty.');
+    raise Exception.Create('Proxy host is empty.');
 
   if Trim(edtProxyPort.Text) = '' then
-    raise Exception.Create('RDJPRO proxy port is empty.');
+    raise Exception.Create('Proxy port is empty.');
 
   if (Trim(FSetupIniFileName) <> '') and
      (not FileExists(Trim(FSetupIniFileName))) then
-    raise Exception.CreateFmt('RDJ Pro setup INI file not found:'#13#10'%s',
+    raise Exception.CreateFmt('Setup INI file not found:'#13#10'%s',
                               [Trim(FSetupIniFileName)]);
 
   ApplyConfig();

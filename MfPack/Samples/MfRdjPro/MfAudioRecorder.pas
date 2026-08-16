@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: � FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -89,7 +89,6 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
-  WinApi.CoreAudioApi.MMDevApiUtils,
   WinApi.CoreAudioApi.DeviceTopology,
   WinApi.CoreAudioApi.AudioClient,
   WinApi.CoreAudioApi.AudioClientActivationParams,
@@ -1975,7 +1974,7 @@ begin
 
                                        Inc(time100ns,
                                            Round((_Double(NumFramesToRead) * REFTIMES_PER_SEC) /
-                                                 pvMixFormat.Format.nSamplesPerSec));
+                                                  pvMixFormat.Format.nSamplesPerSec));
                                        DoBpmTracking(time100ns);
                                      end;
 

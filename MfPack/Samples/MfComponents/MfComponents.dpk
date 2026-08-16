@@ -13,8 +13,8 @@ package MfComponents;
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS ON}
-{$RANGECHECKS ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
 {$STACKFRAMES ON}
@@ -32,7 +32,7 @@ requires
   rtl,
   vcl,
   DesignIDE,
-  MfPackX319;
+  MfPackX320;
 
 contains
   QueueTimer in 'QueueTimer.pas',
@@ -60,8 +60,7 @@ contains
   MfAudioEndPoint in 'MfAudioEndPoint.pas',
   MfWasApiPlayerEngineComponent in 'MfWasApiPlayerEngineComponent.pas',
   WASAPIEngine in 'WASAPIEngine.pas',
-  MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas',
-  RDJ.InternalMixer in 'RDJ.InternalMixer.pas';
+  MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas';
 
 end.
 

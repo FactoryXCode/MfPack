@@ -180,7 +180,6 @@ type
     tbEchoWowRate: TMfTrackBar;
     chkEchoEnabled: TMPxpButton;
     chkCompEnabled: TMPxpButton;
-    Label13: TLabel;
     btnStart: TMPxpButton;
     btnStop: TMPxpButton;
     pnlNoiseGate: TPanel;
@@ -204,6 +203,9 @@ type
     chkCompressorSettings: TMPxpButton;
     chkEchoSettings: TMPxpButton;
     chkNoiseGate: TMPxpButton;
+    chkCrossFade: TMPxpButton;
+    Label14: TLabel;
+    lblBalMaster: TLabel;
 
 
     procedure FormCreate(Sender: TObject);
@@ -252,6 +254,7 @@ type
     procedure chkGateEnabledClick(Sender: TObject);
     procedure tbGateHoldChange(Sender: TObject);
     procedure chkNoiseGateClick(Sender: TObject);
+    procedure chkCrossFadeClick(Sender: TObject);
     // Parametric eq end
 
   private
@@ -265,6 +268,8 @@ type
     FCurrentDeviceId: string;
     FLastPeakL: Single;
     FLastPeakR: Single;
+    FVolPosLast: Integer;
+    FApplyingXFade: Boolean;
     // Parametric eq
     FAudioRack: TMfWasApiEffectsRack;
     FUpdatingAudioRackGui: Boolean;
@@ -331,9 +336,12 @@ type
     procedure ApplyVolumeToMixer();
     procedure ApplyMuteToMixer();
     procedure ApplyPflToMixer();
+    procedure ApplyTwoDeckXFade(const ANewPos: Integer);
 
   public
     { Public declarations }
+
+    procedure ApplyExternalCrossFadeDelta(const ADelta: Integer);
 
     function MixerReadOutputPcmFloat32(const Frames: Integer;
                                        const OutBuffer: PSingle;
@@ -349,7 +357,9 @@ implementation
 uses
   System.Math,
   WinApi.CoreAudioApi.AudioClient,
-  frmMainMDI;
+  frmMainMDI,
+  frmChannelDeck,
+  frmLoopbackDeck;
 
 
 procedure TFrmMicrophoneDeck.FormCreate(Sender: TObject);
@@ -379,6 +389,8 @@ begin
 
   ClearMeters();
   BuildDefaultUi();
+  FVolPosLast := tbVolume.Position;
+  FApplyingXFade := False;
   UpdateAllCaptions();
   SetUiRunning(False);
   FInitializingUi := False;
@@ -430,7 +442,131 @@ begin
   if FInitializingUi then
     Exit;
 
+  if not FApplyingXFade then
+    ApplyTwoDeckXFade(tbVolume.Position);
+
+  FVolPosLast := tbVolume.Position;
   ApplyVolumeAndBalance();
+end;
+
+
+procedure TFrmMicrophoneDeck.chkCrossFadeClick(Sender: TObject);
+var
+  I: Integer;
+  Count: Integer;
+
+begin
+
+  if not chkCrossFade.Checked then
+    Exit;
+
+  // The checked microphone is one member of the two-deck XFADE pair.
+  Count := 1;
+  for I := 0 to Screen.FormCount - 1 do
+    begin
+      if Screen.Forms[I] is TfrmChannelDeck then
+        begin
+          if TfrmChannelDeck(Screen.Forms[I]).chkCrossFade.Checked then
+            Inc(Count);
+        end
+      else if Screen.Forms[I] is TfrmLoopbackDeck then
+        begin
+          if TfrmLoopbackDeck(Screen.Forms[I]).chkCrossFade.Checked then
+            Inc(Count);
+        end;
+    end;
+
+  if Count > 2 then
+    begin
+      for I := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[I] is TfrmChannelDeck then
+            begin
+              if TfrmChannelDeck(Screen.Forms[I]).chkCrossFade.Checked then
+                begin
+                  TfrmChannelDeck(Screen.Forms[I]).chkCrossFade.Checked := False;
+                  Break;
+                end;
+            end
+          else if Screen.Forms[I] is TfrmLoopbackDeck then
+            begin
+              if TfrmLoopbackDeck(Screen.Forms[I]).chkCrossFade.Checked then
+                begin
+                  TfrmLoopbackDeck(Screen.Forms[I]).chkCrossFade.Checked := False;
+                  Break;
+                end;
+            end;
+        end;
+    end;
+end;
+
+
+procedure TFrmMicrophoneDeck.ApplyTwoDeckXFade(const ANewPos: Integer);
+var
+  Delta: Integer;
+  I: Integer;
+
+begin
+
+  if FApplyingXFade or
+     (not chkCrossFade.Checked) then
+    Exit;
+
+  Delta := ANewPos - FVolPosLast;
+  if Delta = 0 then
+    Exit;
+
+  for I := 0 to Screen.FormCount - 1 do
+    begin
+      if Screen.Forms[I] is TfrmChannelDeck then
+        begin
+          if TfrmChannelDeck(Screen.Forms[I]).chkCrossFade.Checked then
+            begin
+              TfrmChannelDeck(Screen.Forms[I]).ApplyExternalCrossFadeDelta(Delta);
+              Exit;
+            end;
+        end
+      else if Screen.Forms[I] is TfrmLoopbackDeck then
+        begin
+          if TfrmLoopbackDeck(Screen.Forms[I]).chkCrossFade.Checked then
+            begin
+              TfrmLoopbackDeck(Screen.Forms[I]).ApplyExternalCrossFadeDelta(Delta);
+              Exit;
+            end;
+        end;
+    end;
+end;
+
+
+procedure TFrmMicrophoneDeck.ApplyExternalCrossFadeDelta(const ADelta: Integer);
+
+  function ClampI(const X,
+                  A,
+                  B: Integer): Integer; inline;
+  begin
+
+    if X < A then
+      Exit(A);
+    if X > B then
+      Exit(B);
+    Result := X;
+  end;
+
+begin
+
+  if ADelta = 0 then
+    Exit;
+
+  FApplyingXFade := True;
+  try
+    tbVolume.Position := ClampI(tbVolume.Position - ADelta,
+                                tbVolume.Minimum,
+                                tbVolume.Maximum);
+    FVolPosLast := tbVolume.Position;
+    ApplyVolumeAndBalance();
+  finally
+    FApplyingXFade := False;
+  end;
 end;
 
 
@@ -1278,7 +1414,6 @@ begin
   if ALive then
     begin
 
-      shpSignal.Brush.Color := ON_COLOR;
       shpSignal.Pen.Color := ON_COLOR;
       shpSignalCap.Pen.Color := ON_COLOR;
       lblSignal.Font.Color := ON_BRIGHT_COLOR;
@@ -1287,7 +1422,6 @@ begin
   else
     begin
 
-      shpSignal.Brush.Color := OFF_COLOR;
       shpSignal.Pen.Color := OFF_COLOR;
       shpSignalCap.Pen.Color := OFF_COLOR;
       lblSignal.Font.Color := OFF_COLOR;

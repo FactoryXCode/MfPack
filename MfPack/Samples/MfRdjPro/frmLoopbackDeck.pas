@@ -150,6 +150,8 @@ type
     chkCrossFade: TMPxpButton;
     btnPFL: TMPxpButton;
     edtPID: TEdit;
+    lblBalMaster: TLabel;
+    Label2: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -211,6 +213,7 @@ type
     FTimerRunning: Boolean;
     FVolPosLast: Integer;
     FApplyingXFade: Boolean;
+    FClosing: Boolean;
 
     function GetEqEffect(): TMfParametricEqEffect;
     procedure BindAudioRack();
@@ -279,7 +282,7 @@ implementation
 uses
   frmMainMDI,
   frmChannelDeck,
-  MfIcecastBroadcastEngine;
+  MicrophoneDeckFrm;
 
 
 procedure TfrmLoopbackDeck.FormCreate(Sender: TObject);
@@ -301,6 +304,7 @@ begin
   FTempoPercent := 0.0;
   FVolPosLast := tbVolume.Position;
   FApplyingXFade := False;
+  FClosing := False;
 
   edtProcessName.ReadOnly := True;
 
@@ -325,8 +329,13 @@ end;
 procedure TfrmLoopbackDeck.FormDestroy(Sender: TObject);
 begin
 
-  StopCapture();
+  FClosing := True;
+  Timer1.Enabled := False;
+  FTimerRunning := False;
+
   DetachDeckEngineEvents();
+  StopCapture();
+  TThread.RemoveQueuedEvents(nil);
 
   UnregisterFromMixer();
   FreeAndNil(FEngine);
@@ -345,8 +354,7 @@ begin
   SetWindowLong(Handle,
                 GWL_STYLE,
                 GetWindowLong(Handle, GWL_STYLE) and not WS_CAPTION or WS_BORDER);
- // Height := 1538;
- // Width := 415;
+  Width := 261;
 end;
 
 
@@ -642,12 +650,16 @@ procedure TfrmLoopbackDeck.WasApiStateEvent(Sender: TObject;
                                             const AState: TWasApiDeviceState);
 begin
 
+  if FClosing then
+    Exit;
+
   if not Assigned(FEngine) then
     Exit;
 
   case AState of
     dsReady: begin
 
+               // Nothing for the moment.
              end;
     dsPlay:  begin
 
@@ -676,6 +688,12 @@ procedure TfrmLoopbackDeck.DeckTick(Sender: TObject;
                                     const BeatPhase: Double);
 begin
 
+  if FClosing or (csDestroying in ComponentState) then
+    Exit;
+
+  if not Assigned(bldBeat) then
+    Exit;
+
   bldBeat.UpdatePulse(Position100ns);
 
   if (CurrentBpm > 0.0) then
@@ -692,6 +710,12 @@ procedure TfrmLoopbackDeck.DeckBeat(Sender: TObject;
                                     const CurrentBpm: Double);
 begin
 
+  if FClosing or (csDestroying in ComponentState) then
+    Exit;
+
+  if not Assigned(bldBeat) then
+    Exit;
+
   bldBeat.TriggerPulse(Position100ns);
 
   if (CurrentBpm > 0.0) then
@@ -707,6 +731,7 @@ begin
 
   Result := Assigned(FEngine) and FEngine.Active;
 end;
+
 
 procedure TfrmLoopbackDeck.StartCapture();
 var
@@ -747,12 +772,8 @@ begin
       lblStatus.Hint := lblStatus.Caption;
     end
   else
-    if Assigned(MainMDIFrm) and
-       Assigned(MainMDIFrm.IcecastEngine) and
-       (MainMDIFrm.IcecastEngine.State in [bsConnecting,
-                                           bsLive,
-                                           bsReconnecting]) then
-      MainMDIFrm.IcecastEngine.ClearNowPlaying();
+    if Assigned(MainMDIFrm) then
+      MainMDIFrm.ClearNowPlaying();
 end;
 
 
@@ -774,8 +795,11 @@ begin
       lblStatus.Hint := lblStatus.Caption;
     end;
 
-  UpdateMixerChannelState();
-  UpdateUiState();
+  if not FClosing then
+    begin
+      UpdateMixerChannelState();
+      UpdateUiState();
+    end;
 end;
 
 
@@ -961,7 +985,6 @@ begin
   if ALive then
     begin
 
-      shpLive.Brush.Color := ON_COLOR;
       shpLive.Pen.Color := ON_COLOR;
       shpLiveCap.Pen.Color := ON_COLOR;
       lblLive.Font.Color := ON_COLOR;
@@ -969,7 +992,6 @@ begin
   else
     begin
 
-      shpLive.Brush.Color := OFF_COLOR;
       shpLive.Pen.Color := OFF_COLOR;
       shpLiveCap.Pen.Color := OFF_COLOR;
       lblLive.Font.Color := OFF_COLOR;
@@ -1101,6 +1123,14 @@ begin
           if TfrmLoopbackDeck(Screen.Forms[I]).chkCrossFade.Checked then
             begin
               TfrmLoopbackDeck(Screen.Forms[I]).ApplyExternalCrossFadeDelta(Delta);
+              Exit;
+            end;
+        end
+      else if (Screen.Forms[I] is TfrmMicrophoneDeck) then
+        begin
+          if TfrmMicrophoneDeck(Screen.Forms[I]).chkCrossFade.Checked then
+            begin
+              TfrmMicrophoneDeck(Screen.Forms[I]).ApplyExternalCrossFadeDelta(Delta);
               Exit;
             end;
         end;

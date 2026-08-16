@@ -2,9 +2,9 @@ object frmSetup: TfrmSetup
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'RDJ Setup'
-  ClientHeight = 1034
-  ClientWidth = 688
+  Caption = 'RDJ Pro Setup'
+  ClientHeight = 1055
+  ClientWidth = 689
   Color = 5850948
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWhite
@@ -62,11 +62,10 @@ object frmSetup: TfrmSetup
     ShowHint = True
   end
   object pnlBroadCastSettings: TPanel
-    Left = 0
-    Top = 49
-    Width = 688
-    Height = 928
-    Align = alClient
+    Left = -1
+    Top = 54
+    Width = 682
+    Height = 982
     BevelOuter = bvNone
     Color = 5850948
     Padding.Left = 12
@@ -76,41 +75,44 @@ object frmSetup: TfrmSetup
     ParentBackground = False
     ShowCaption = False
     TabOrder = 3
-    object Bevel9: TBevel
-      Left = 8
-      Top = 681
-      Width = 671
-      Height = 202
-      ParentCustomHint = False
-      ParentShowHint = False
-      ShowHint = False
-    end
+    DesignSize = (
+      682
+      982)
     object Bevel8: TBevel
       Left = 8
-      Top = 384
+      Top = 327
       Width = 671
-      Height = 283
+      Height = 78
       ParentCustomHint = False
       ParentShowHint = False
       ShowHint = False
     end
-    object Bevel11: TBevel
-      Left = 4
+    object Bevel10: TBevel
+      Left = 8
+      Top = 427
+      Width = 671
+      Height = 70
+      ParentCustomHint = False
+      ParentShowHint = False
+      ShowHint = False
+    end
+    object Bevel9: TBevel
+      Left = 9
+      Top = 24
+      Width = 670
+      Height = 281
+      ParentCustomHint = False
+      ParentShowHint = False
+      ShowHint = False
+    end
+    object Label18: TLabel
+      Left = 18
       Top = 15
-      Width = 675
-      Height = 355
-      ParentCustomHint = False
-      ParentShowHint = False
-      ShowHint = False
-    end
-    object Label26: TLabel
-      Left = 20
-      Top = 5
-      Width = 130
-      Height = 18
+      Width = 163
+      Height = 17
       Alignment = taCenter
       AutoSize = False
-      Caption = 'IceCast settings'
+      Caption = 'Caddy / json settings'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
       Font.Height = -13
@@ -119,198 +121,9 @@ object frmSetup: TfrmSetup
       ParentFont = False
       Transparent = False
     end
-    object lblBroadcastHost: TLabel
-      Left = 22
-      Top = 37
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Host:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastPort: TLabel
-      Left = 392
-      Top = 37
-      Width = 54
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Port:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastMount: TLabel
-      Left = 22
-      Top = 69
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Mount:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastPassword: TLabel
-      Left = 22
-      Top = 133
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Password:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastName: TLabel
-      Left = 22
-      Top = 180
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Broadcast name:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastDescription: TLabel
-      Left = 22
-      Top = 213
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = ' Description:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastGenre: TLabel
-      Left = 22
-      Top = 247
-      Width = 127
-      Height = 22
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Genre:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadcastUrl: TLabel
-      Left = 22
-      Top = 281
-      Width = 127
-      Height = 22
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Broadcast URL:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblBroadCastUserName: TLabel
-      Left = 25
-      Top = 101
-      Width = 126
-      Height = 22
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'User name:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label8: TLabel
+    object lblCaddyPath: TLabel
       Left = 20
-      Top = 441
+      Top = 49
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -319,7 +132,7 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'EXE Path:'
+      Caption = 'Root Path:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -329,9 +142,9 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
     end
-    object Label9: TLabel
+    object lblCaddyConfigPath: TLabel
       Left = 20
-      Top = 475
+      Top = 80
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -350,188 +163,9 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
     end
-    object Label10: TLabel
-      Left = 20
-      Top = 377
-      Width = 179
-      Height = 17
-      Alignment = taCenter
-      AutoSize = False
-      Caption = 'IceCast server manager'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clAqua
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      Transparent = False
-    end
-    object Label11: TLabel
-      Left = 392
-      Top = 407
-      Width = 54
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Port:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label13: TLabel
-      Left = 20
-      Top = 407
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Host:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label14: TLabel
-      Left = 20
-      Top = 509
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'HTTP Path:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label16: TLabel
-      Left = 20
-      Top = 543
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Working Dir:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label17: TLabel
-      Left = 20
-      Top = 578
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Startup Delay:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object Label18: TLabel
-      Left = 18
-      Top = 672
-      Width = 163
-      Height = 17
-      Alignment = taCenter
-      AutoSize = False
-      Caption = 'Caddy / json settings'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clAqua
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      Transparent = False
-    end
-    object lblCaddyPath: TLabel
-      Left = 20
-      Top = 705
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Caddy Path:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object lblCaddyConfigPath: TLabel
-      Left = 20
-      Top = 739
-      Width = 127
-      Height = 23
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taRightJustify
-      AutoSize = False
-      Caption = 'Caddy Config Path:'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
     object lblCaddyJsonNowPlayingPath: TLabel
       Left = 20
-      Top = 773
+      Top = 112
       Width = 127
       Height = 23
       Hint = 'Caddy'#39's NowPlaying.json path'
@@ -541,7 +175,7 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Caddy json Path:'
+      Caption = 'json Path:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -553,7 +187,7 @@ object frmSetup: TfrmSetup
     end
     object lblCaddyCmdLine: TLabel
       Left = 20
-      Top = 844
+      Top = 256
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -574,7 +208,7 @@ object frmSetup: TfrmSetup
     end
     object Label21: TLabel
       Left = 20
-      Top = 809
+      Top = 144
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -583,7 +217,7 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Caddy Covers Path:'
+      Caption = 'Artwork Path:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -593,640 +227,162 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
     end
-    object edtBroadcastHost: TEdit
-      Left = 155
-      Top = 35
-      Width = 190
-      Height = 26
-      Hint = 'Default: 127.0.0.1'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 0
-      Text = '127.0.0.1'
-    end
-    object edtBroadcastPort: TEdit
-      Left = 453
-      Top = 35
-      Width = 80
-      Height = 26
-      Hint = 'Default: 8000'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      NumbersOnly = True
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-      Text = '8000'
-    end
-    object edtBroadcastMount: TEdit
-      Left = 157
-      Top = 67
-      Width = 188
-      Height = 26
-      Hint = 'Default: /live.aac'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 2
-      Text = '/live.aac'
-    end
-    object edtBroadcastPassword: TEdit
-      Left = 157
-      Top = 131
-      Width = 188
-      Height = 26
-      Hint = 'Default: hackme'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 3
-      Text = 'hackme'
-    end
-    object edtBroadcastName: TEdit
-      Left = 157
-      Top = 178
-      Width = 188
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 4
-      Text = 'Charlie Live'
-    end
-    object edtBroadcastDescription: TEdit
-      Left = 157
-      Top = 211
-      Width = 508
-      Height = 26
-      Hint = 'Default: 8000'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 5
-      Text = 'Recordings'
-    end
-    object edtBroadcastGenre: TEdit
-      Left = 157
-      Top = 245
-      Width = 188
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 6
-      Text = 'Various'
-    end
-    object edtBroadcastUrl: TEdit
-      Left = 157
-      Top = 279
-      Width = 508
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 7
-      Text = 'Recordings'
-    end
-    object chkBroadcastPublic: TMPxpButton
-      Left = 157
-      Top = 313
-      Width = 107
-      Height = 44
+    object Label35: TLabel
+      Left = 20
+      Top = 420
+      Width = 75
+      Height = 17
       Alignment = taCenter
-      Caption = 'Public Stream'
-      Color = 6899524
-      ColorWhenDown = 10045252
-      ColorWhenUp = 6899524
-      Behavior = bbCheckBox
-      Checked = False
-      GlyphUnchecked.Data = {
-        C6040000424DC60400000000000036040000280000000C0000000C0000000100
-        08000000000090000000230B0000230B00000001000000010000000000000000
-        1900001900000019190019000000190019001919000060606000607E6000956B
-        430000005C002F0000001D00000002000000020002000000130000002F000200
-        2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
-        7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
-        A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
-        00000000000000000010151717151000000000001116181A1A18161100000010
-        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
-        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
-        1E1C1916100000001116181A1A18161100000000001015171715100000000000
-        00000000000000000000}
-      GlyphChecked.Data = {
-        C6040000424DC60400000000000036040000280000000C0000000C0000000100
-        08000000000090000000230B0000230B00000001000000010000000000000000
-        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
-        A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
-        94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
-        D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
-        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
-        00000000000000000010151717151000000000001116181A1A18161100000010
-        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
-        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
-        1E1C1916100000001116181A1A18161100000000001015171715100000000000
-        00000000000000000000}
-      ImageIndexUnchecked = 0
-      ImageIndexChecked = 0
-      ShowFocusRect = False
+      AutoSize = False
+      Caption = 'Camera'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
       Font.Height = -13
-      Font.Name = 'Segoe UI'
+      Font.Name = 'Tahoma'
       Font.Style = [fsBold]
-      GlyphTransparentColor = clBlack
-      GlyphTransparent = True
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -18
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = []
-      Layout = blGlyphTop
-      LightColor = clSkyBlue
-      ParentColor = False
       ParentFont = False
-      ShadowColor = clAqua
-      SlowDecease = True
-      WordWrap = True
-      OnClick = chkBroadcastSettingsClick
+      Transparent = False
     end
-    object edtBroadcastUsername: TEdit
-      Left = 155
-      Top = 99
-      Width = 190
-      Height = 26
-      Hint = 'Default: source'
+    object Label25: TLabel
+      Left = 97
+      Top = 449
+      Width = 50
+      Height = 16
+      Alignment = taRightJustify
+      BiDiMode = bdLeftToRight
+      Caption = 'Camera:'
+      ParentBiDiMode = False
+    end
+    object Label22: TLabel
+      Left = 22
+      Top = 176
+      Width = 127
+      Height = 23
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
+      Alignment = taRightJustify
       AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
+      Caption = 'Video Path:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Tahoma'
-      Font.Style = []
+      Font.Style = [fsBold]
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 9
-      Text = 'source'
     end
-    object edtIcecastExePath: TEdit
-      Left = 155
-      Top = 439
-      Width = 474
-      Height = 26
+    object Label24: TLabel
+      Left = 21
+      Top = 208
+      Width = 127
+      Height = 23
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
+      Alignment = taRightJustify
       AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
+      Caption = 'Content Type URL:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Tahoma'
-      Font.Style = []
+      Font.Style = [fsBold]
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 10
-      Text = 'C:\icecast\icecast.exe'
     end
-    object edtIcecastConfigPath: TEdit
-      Left = 155
-      Top = 473
-      Width = 474
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
+    object Label27: TLabel
+      Left = 17
+      Top = 357
+      Width = 130
+      Height = 22
+      Hint = 'MP4 segment file size in milliseconds. Default is 2000 ms'
+      Alignment = taRightJustify
       AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
+      Caption = 'MP4 Segmentsize:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
       Font.Name = 'Tahoma'
-      Font.Style = []
+      Font.Style = [fsBold]
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 11
-      Text = 'C:\icecast\icecast.xml'
     end
-    object edtServerport: TEdit
-      Left = 453
-      Top = 405
-      Width = 80
-      Height = 26
-      Hint = 'Default: 8000'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      NumbersOnly = True
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 12
-      Text = '8000'
-    end
-    object edtServerHost: TEdit
-      Left = 155
-      Top = 405
-      Width = 190
-      Height = 26
-      Hint = 'Default: 127.0.0.1'
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 13
-      Text = '127.0.0.1'
-    end
-    object edtIcecastHttpPath: TEdit
-      Left = 155
-      Top = 507
-      Width = 474
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 14
-      Text = '/'
-    end
-    object edtWorkingDir: TEdit
-      Left = 155
-      Top = 541
-      Width = 474
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 15
-      Text = 'C:\icecast'
-    end
-    object edtIcecastRestartDelayMs: TEdit
-      Left = 155
-      Top = 576
-      Width = 78
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      AutoSize = False
-      BevelKind = bkTile
-      BevelOuter = bvRaised
-      Color = 5850948
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      NumbersOnly = True
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 16
-      Text = '3000'
-    end
-    object chkIcecastAutoRestart: TMPxpButton
-      Left = 155
-      Top = 612
+    object lblMp4SegmentSize: TLabel
+      Left = 540
+      Top = 358
       Width = 107
-      Height = 43
-      Hint = 'Auto Restart server'
+      Height = 16
+      AutoSize = False
+      Caption = '2000 ms'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object Label8: TLabel
+      Left = 20
+      Top = 320
+      Width = 75
+      Height = 17
       Alignment = taCenter
-      Caption = 'Auto Restart'
-      Color = 6899524
-      ColorWhenDown = 10045252
-      ColorWhenUp = 6899524
-      Down = True
-      Behavior = bbCheckBox
-      Checked = True
-      GlyphUnchecked.Data = {
-        C6040000424DC60400000000000036040000280000000C0000000C0000000100
-        08000000000090000000230B0000230B00000001000000010000000000000000
-        1900001900000019190019000000190019001919000060606000607E6000956B
-        430000005C002F0000001D00000002000000020002000000130000002F000200
-        2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
-        7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
-        A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
-        A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
-        00000000000000000010151717151000000000001116181A1A18161100000010
-        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
-        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
-        1E1C1916100000001116181A1A18161100000000001015171715100000000000
-        00000000000000000000}
-      GlyphChecked.Data = {
-        C6040000424DC60400000000000036040000280000000C0000000C0000000100
-        08000000000090000000230B0000230B00000001000000010000000000000000
-        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
-        A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
-        94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
-        D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
-        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
-        00000000000000000010151717151000000000001116181A1A18161100000010
-        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
-        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
-        1E1C1916100000001116181A1A18161100000000001015171715100000000000
-        00000000000000000000}
-      ImageIndexUnchecked = 0
-      ImageIndexChecked = 0
-      ShowFocusRect = False
+      AutoSize = False
+      Caption = 'Mse MP4'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
       Font.Height = -13
-      Font.Name = 'Segoe UI'
+      Font.Name = 'Tahoma'
       Font.Style = [fsBold]
-      GlyphTransparentColor = clBlack
-      GlyphTransparent = True
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -18
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = []
-      Layout = blGlyphTop
-      LightColor = clSkyBlue
-      ParentColor = False
       ParentFont = False
-      ParentShowHint = False
-      ShadowColor = clAqua
-      ShowHint = True
-      SlowDecease = True
+      Transparent = False
+    end
+    object Bevel11: TBevel
+      Left = 8
+      Top = 519
+      Width = 671
+      Height = 117
+    end
+    object lblLocalNetwork: TLabel
+      Left = 20
+      Top = 511
+      Width = 130
+      Height = 17
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Local network'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clAqua
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = False
+    end
+    object lblLocalNetworkHint: TLabel
+      Left = 20
+      Top = 580
+      Width = 638
+      Height = 41
+      AutoSize = False
+      Caption = 'Discover this computer'#39's active IPv4 addresses.'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clSilver
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
       WordWrap = True
-      OnClick = chkBroadcastSettingsClick
     end
     object edtCaddyPath: TEdit
       Left = 155
-      Top = 703
+      Top = 46
       Width = 474
       Height = 26
       Hint = 'Leave empty if Icecast/Caddy is on a server.'
@@ -1246,12 +402,12 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 18
+      TabOrder = 0
       Text = 'C:\Caddy'
     end
     object edtCaddyConfigPath: TEdit
       Left = 155
-      Top = 737
+      Top = 77
       Width = 474
       Height = 26
       Hint = 'Leave empty if Icecast/Caddy is o'
@@ -1271,12 +427,12 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 19
+      TabOrder = 1
       Text = 'C:\Caddy\caddy.cff'
     end
     object edtCaddyJsonNowPlayingPath: TEdit
       Left = 155
-      Top = 772
+      Top = 109
       Width = 474
       Height = 26
       Hint = 'Caddy nowplaying.json path (Path on Server or local)'
@@ -1296,15 +452,17 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 20
+      TabOrder = 2
       Text = 'C:\Caddy\nowplaying.json'
     end
     object edtCaddyCmdLine: TEdit
       Left = 155
-      Top = 842
+      Top = 253
       Width = 516
       Height = 26
-      Hint = 'Caddy commandline. Leave empty if Icecast/Caddy is o'
+      Hint = 
+        'Caddy commandline.'#13#10'Leave empty if Caddy is starting as a servic' +
+        'e.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -1321,123 +479,12 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 21
+      TabOrder = 3
       Text = 'caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile'
-    end
-    object btnGetIceCastExePath: TMPxpButton
-      Left = 631
-      Top = 439
-      Width = 40
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taCenter
-      AllowAllUp = True
-      Caption = '...'
-      Color = 6303744
-      ColorWhenDown = 11363625
-      ColorWhenUp = 6303744
-      Checked = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Segoe UI'
-      Font.Style = [fsBold]
-      GlyphTransparentColor = clFuchsia
-      GlyphTransparent = True
-      HotTrackColor = clAqua
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -18
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = []
-      Layout = blGlyphRight
-      LightColor = 12348265
-      ParentColor = False
-      ParentFont = False
-      ShadowColor = clSkyBlue
-      Style = bsModern
-      OnClick = btnGetIceCastExePathClick
-    end
-    object btnGetIceCastConfigPath: TMPxpButton
-      Left = 631
-      Top = 473
-      Width = 40
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taCenter
-      AllowAllUp = True
-      Caption = '...'
-      Color = 6303744
-      ColorWhenDown = 11363625
-      ColorWhenUp = 6303744
-      Checked = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Segoe UI'
-      Font.Style = [fsBold]
-      GlyphTransparentColor = clFuchsia
-      GlyphTransparent = True
-      HotTrackColor = clAqua
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -18
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = []
-      Layout = blGlyphRight
-      LightColor = 12348265
-      ParentColor = False
-      ParentFont = False
-      ShadowColor = clSkyBlue
-      Style = bsModern
-      OnClick = btnGetIceCastConfigPathClick
-    end
-    object btnGetIceCastWorkingDir: TMPxpButton
-      Left = 631
-      Top = 541
-      Width = 40
-      Height = 26
-      Margins.Left = 2
-      Margins.Top = 2
-      Margins.Right = 2
-      Margins.Bottom = 2
-      Alignment = taCenter
-      AllowAllUp = True
-      Caption = '...'
-      Color = 6303744
-      ColorWhenDown = 11363625
-      ColorWhenUp = 6303744
-      Checked = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Segoe UI'
-      Font.Style = [fsBold]
-      GlyphTransparentColor = clFuchsia
-      GlyphTransparent = True
-      HotTrackColor = clAqua
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -18
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = []
-      Layout = blGlyphRight
-      LightColor = 12348265
-      ParentColor = False
-      ParentFont = False
-      ShadowColor = clSkyBlue
-      Style = bsModern
-      OnClick = btnGetIceCastWorkingDirClick
     end
     object btnGetCaddyPath: TMPxpButton
       Left = 631
-      Top = 703
+      Top = 46
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -1474,7 +521,7 @@ object frmSetup: TfrmSetup
     end
     object btnGetCaddyConfigPath: TMPxpButton
       Left = 631
-      Top = 737
+      Top = 77
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -1511,7 +558,7 @@ object frmSetup: TfrmSetup
     end
     object btnGetCaddyJsonPath: TMPxpButton
       Left = 631
-      Top = 772
+      Top = 110
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -1546,12 +593,12 @@ object frmSetup: TfrmSetup
       Style = bsModern
       OnClick = btnGetCaddyJsonPathClick
     end
-    object edtCaddyCoversPath: TEdit
+    object edtCaddyArtworkPath: TEdit
       Left = 155
-      Top = 807
+      Top = 141
       Width = 474
       Height = 26
-      Hint = 'Enter the Caddy root location '
+      Hint = 'Enter the Caddy artwork location '
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -1568,12 +615,12 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 28
-      Text = 'C:\Caddy'
+      TabOrder = 7
+      Text = 'C:\Caddy\Artwork'
     end
-    object btnCaddyCoversPath: TMPxpButton
+    object btnCaddyArtworkPath: TMPxpButton
       Left = 631
-      Top = 807
+      Top = 142
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -1606,15 +653,283 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ShadowColor = clSkyBlue
       Style = bsModern
-      OnClick = btnCaddyCoversPathClick
+      OnClick = btnCaddyArtworkPathClick
+    end
+    object cbSelectCamera: TComboBox
+      Left = 154
+      Top = 446
+      Width = 361
+      Height = 24
+      Style = csDropDownList
+      Anchors = [akLeft, akTop, akRight]
+      BiDiMode = bdLeftToRight
+      Color = 5850948
+      ParentBiDiMode = False
+      TabOrder = 9
+      OnChange = cbSelectCameraChange
+    end
+    object btnRefreshCameras: TMPxpButton
+      Left = 531
+      Top = 439
+      Width = 106
+      Height = 40
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taCenter
+      AllowAllUp = True
+      Caption = 'Refresh Cameras'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackColor = clAqua
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphRight
+      LightColor = 12348265
+      ParentColor = False
+      ParentFont = False
+      ShadowColor = clSkyBlue
+      Style = bsModern
+      WordWrap = True
+      OnClick = btnOkClick
+    end
+    object edtCaddyVideoPath: TEdit
+      Left = 157
+      Top = 173
+      Width = 474
+      Height = 26
+      Hint = 'Enter the Caddy video location '
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      AutoSize = False
+      BevelKind = bkTile
+      BevelOuter = bvRaised
+      Color = 5850948
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 11
+      Text = 'C:\Caddy\Video'
+    end
+    object btnCaddyVideoPath: TMPxpButton
+      Left = 633
+      Top = 174
+      Width = 40
+      Height = 26
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taCenter
+      AllowAllUp = True
+      Caption = '...'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackColor = clAqua
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphRight
+      LightColor = 12348265
+      ParentColor = False
+      ParentFont = False
+      ShadowColor = clSkyBlue
+      Style = bsModern
+      OnClick = btnCaddyVideoPathClick
+    end
+    object edtCaddyContentTypeURL: TEdit
+      Left = 156
+      Top = 205
+      Width = 474
+      Height = 26
+      Hint = 'Content default = video/mp4'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      AutoSize = False
+      BevelKind = bkTile
+      BevelOuter = bvRaised
+      Color = 5850948
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 13
+      Text = 'video/mp4'
+    end
+    object tbMp4SegmentSize: TMfTrackBar
+      Left = 154
+      Top = 349
+      Width = 377
+      Height = 34
+      TabOrder = 14
+      Color = 5850948
+      ParentColor = False
+      Minimum = 500
+      Maximum = 9000
+      Position = 2000
+      ThumbWidth = 50
+      ThumbHeight = 60
+      TransparentColor = clBlack
+      ThumbPictureHorz.Data = {
+        07544269746D617012010000424D120100000000000076000000280000001300
+        00000D00000001000400000000009C000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00055555554445555555000000531425454045452413500000531425454045
+        4524135000005314254540454524135000005314254540454524135000005314
+        2545404545241350000053142545404545241350000053142545404545241350
+        0000531425454045452413500000531425454045452413500000531425454045
+        452413500000531425454045452413500000055555554445555555000000}
+      ShowTicks = True
+      DbFloor = -50.000000000000000000
+      DbCeil = 6.000000000000000000
+      TickColor = clAqua
+      TickTextColor = clSilver
+      TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
+      SmallChange = 100
+      LargeChange = 100
+      OnChange = tbMp4SegmentSizeChange
+    end
+    object cbLocalIPv4: TComboBox
+      Left = 20
+      Top = 541
+      Width = 299
+      Height = 24
+      Style = csDropDownList
+      Color = 5850948
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 15
+    end
+    object btnDiscoverNetwork: TMPxpButton
+      Left = 327
+      Top = 536
+      Width = 82
+      Height = 34
+      Caption = 'Refresh'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWhite
+      HotTrackFont.Height = -13
+      HotTrackFont.Name = 'Tahoma'
+      HotTrackFont.Style = []
+      ParentColor = False
+      ParentFont = False
+      Style = bsModern
+      OnClick = btnDiscoverNetworkClick
+    end
+    object btnUseLocalIPv4: TMPxpButton
+      Left = 417
+      Top = 536
+      Width = 112
+      Height = 34
+      Caption = 'Use address'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWhite
+      HotTrackFont.Height = -13
+      HotTrackFont.Name = 'Tahoma'
+      HotTrackFont.Style = []
+      ParentColor = False
+      ParentFont = False
+      Style = bsModern
+      OnClick = btnUseLocalIPv4Click
+    end
+    object btnRemoveLocalIPv4: TMPxpButton
+      Left = 537
+      Top = 536
+      Width = 121
+      Height = 34
+      Caption = 'Remove LAN'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWhite
+      HotTrackFont.Height = -13
+      HotTrackFont.Name = 'Tahoma'
+      HotTrackFont.Style = []
+      ParentColor = False
+      ParentFont = False
+      Style = bsModern
+      OnClick = btnRemoveLocalIPv4Click
     end
   end
   object pnlGeneralSettings: TPanel
-    Left = 0
-    Top = 49
-    Width = 688
-    Height = 928
-    Align = alClient
+    Left = -1
+    Top = 52
+    Width = 682
+    Height = 989
     BevelOuter = bvNone
     Color = 5850948
     Padding.Left = 12
@@ -1625,8 +940,8 @@ object frmSetup: TfrmSetup
     ShowCaption = False
     TabOrder = 0
     DesignSize = (
-      688
-      928)
+      682
+      989)
     object Bevel7: TBevel
       Left = 8
       Top = 417
@@ -1644,9 +959,9 @@ object frmSetup: TfrmSetup
     end
     object Bevel5: TBevel
       Left = 8
-      Top = 801
+      Top = 797
       Width = 669
-      Height = 112
+      Height = 144
       ParentCustomHint = False
       ParentShowHint = False
       ShowHint = False
@@ -1681,7 +996,7 @@ object frmSetup: TfrmSetup
     object Label4: TLabel
       Left = 24
       Top = 338
-      Width = 594
+      Width = 582
       Height = 35
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
@@ -1745,9 +1060,9 @@ object frmSetup: TfrmSetup
     end
     object Bevel3: TBevel
       Left = 8
-      Top = 500
+      Top = 498
       Width = 669
-      Height = 286
+      Height = 281
       ParentCustomHint = False
       ParentShowHint = False
       ShowHint = False
@@ -1790,7 +1105,7 @@ object frmSetup: TfrmSetup
     end
     object lblAudioRecBufSize: TLabel
       Left = 509
-      Top = 515
+      Top = 529
       Width = 107
       Height = 16
       AutoSize = False
@@ -1804,7 +1119,7 @@ object frmSetup: TfrmSetup
     end
     object Label6: TLabel
       Left = 15
-      Top = 609
+      Top = 596
       Width = 154
       Height = 20
       Hint = 'Latency in milliseconds. Default = 10 ms'
@@ -1822,7 +1137,7 @@ object frmSetup: TfrmSetup
     end
     object lblSysLatency: TLabel
       Left = 509
-      Top = 596
+      Top = 597
       Width = 107
       Height = 16
       AutoSize = False
@@ -1835,8 +1150,8 @@ object frmSetup: TfrmSetup
       ParentFont = False
     end
     object lblAudioFormat: TLabel
-      Left = 40
-      Top = 655
+      Left = 41
+      Top = 648
       Width = 128
       Height = 23
       Margins.Left = 2
@@ -1857,7 +1172,7 @@ object frmSetup: TfrmSetup
     end
     object Label5: TLabel
       Left = 20
-      Top = 793
+      Top = 787
       Width = 169
       Height = 17
       Alignment = taCenter
@@ -1873,7 +1188,7 @@ object frmSetup: TfrmSetup
     end
     object Label7: TLabel
       Left = 63
-      Top = 818
+      Top = 813
       Width = 128
       Height = 23
       Hint = 'The sub-directory where recordings are stored.'
@@ -1883,7 +1198,7 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Recordings:'
+      Caption = 'Audio Recordings:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -1894,9 +1209,9 @@ object frmSetup: TfrmSetup
       ShowHint = True
     end
     object lblBufferDuration: TLabel
-      Left = 179
-      Top = 561
-      Width = 481
+      Left = 203
+      Top = 560
+      Width = 252
       Height = 23
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
@@ -1908,7 +1223,6 @@ object frmSetup: TfrmSetup
       Font.Style = []
       ParentFont = False
       WordWrap = True
-      ExplicitWidth = 491
     end
     object lblLoopbackDecks: TLabel
       Left = 289
@@ -1957,7 +1271,7 @@ object frmSetup: TfrmSetup
     object lblHint: TLabel
       Left = 18
       Top = 166
-      Width = 625
+      Width = 613
       Height = 23
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
@@ -2001,7 +1315,7 @@ object frmSetup: TfrmSetup
     end
     object Label19: TLabel
       Left = 63
-      Top = 848
+      Top = 873
       Width = 128
       Height = 23
       Hint = 'The sub-directory where recordings are stored.'
@@ -2023,7 +1337,7 @@ object frmSetup: TfrmSetup
     end
     object Label20: TLabel
       Left = 63
-      Top = 878
+      Top = 903
       Width = 128
       Height = 23
       Hint = 'The sub-directory where recordings are stored.'
@@ -2033,7 +1347,29 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Covers:'
+      Caption = 'Caddy Artwork:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object Label23: TLabel
+      Left = 63
+      Top = 843
+      Width = 128
+      Height = 23
+      Hint = 'The sub-directory where recordings are stored.'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Video Recordings:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2127,7 +1463,7 @@ object frmSetup: TfrmSetup
     end
     object tbSysLatency: TMfTrackBar
       Left = 180
-      Top = 601
+      Top = 588
       Width = 311
       Height = 34
       TabOrder = 3
@@ -2158,8 +1494,8 @@ object frmSetup: TfrmSetup
       OnChange = tbSysLatencyChange
     end
     object chkDontOverWrite: TMPxpButton
-      Left = 27
-      Top = 695
+      Left = 38
+      Top = 686
       Width = 200
       Height = 40
       Alignment = taCenter
@@ -2274,8 +1610,8 @@ object frmSetup: TfrmSetup
       SlowDecease = True
     end
     object chkDisableMMCSS: TMPxpButton
-      Left = 233
-      Top = 695
+      Left = 244
+      Top = 686
       Width = 200
       Height = 40
       Alignment = taCenter
@@ -2389,8 +1725,8 @@ object frmSetup: TfrmSetup
       SlowDecease = True
     end
     object chkUsePCMFormat: TMPxpButton
-      Left = 27
-      Top = 739
+      Left = 38
+      Top = 730
       Width = 200
       Height = 40
       Alignment = taCenter
@@ -2504,8 +1840,8 @@ object frmSetup: TfrmSetup
       SlowDecease = True
     end
     object chkEnableStreamSwitchDetection: TMPxpButton
-      Left = 233
-      Top = 739
+      Left = 244
+      Top = 730
       Width = 200
       Height = 40
       Alignment = taCenter
@@ -2620,7 +1956,7 @@ object frmSetup: TfrmSetup
     end
     object cbxOutputFormat: TComboBox
       Left = 180
-      Top = 655
+      Top = 645
       Width = 201
       Height = 24
       Hint = 'Select a playlist'
@@ -2641,9 +1977,9 @@ object frmSetup: TfrmSetup
         'WAV (Lossless)'
         'FLAC (Lossless)')
     end
-    object edRecordingsDirName: TEdit
+    object edAudioRecordingsDirName: TEdit
       Left = 199
-      Top = 816
+      Top = 811
       Width = 426
       Height = 26
       Hint = 'The sub-directory where recordings are stored.'
@@ -2664,7 +2000,7 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 9
-      Text = 'Recordings'
+      Text = 'AudioRecordings'
     end
     object cbLoopbackDecks: TComboBox
       Left = 421
@@ -2684,7 +2020,7 @@ object frmSetup: TfrmSetup
     object cbMainOut: TComboBox
       Left = 180
       Top = 35
-      Width = 463
+      Width = 451
       Height = 24
       Style = csDropDownList
       Anchors = [akLeft, akTop, akRight]
@@ -2694,7 +2030,7 @@ object frmSetup: TfrmSetup
     object cbCueOut: TComboBox
       Left = 181
       Top = 127
-      Width = 462
+      Width = 450
       Height = 24
       Style = csDropDownList
       Anchors = [akLeft, akTop, akRight]
@@ -2821,7 +2157,7 @@ object frmSetup: TfrmSetup
     object cbMicIn: TComboBox
       Left = 231
       Top = 448
-      Width = 412
+      Width = 400
       Height = 24
       Style = csDropDownList
       Anchors = [akLeft, akTop, akRight]
@@ -2949,7 +2285,7 @@ object frmSetup: TfrmSetup
     end
     object edDataBaseDirName: TEdit
       Left = 199
-      Top = 846
+      Top = 871
       Width = 426
       Height = 26
       Hint = 'The sub-directory where recordings are stored.'
@@ -2972,9 +2308,9 @@ object frmSetup: TfrmSetup
       TabOrder = 16
       Text = 'Data'
     end
-    object btnRecordingsDirName: TMPxpButton
+    object btnAudioRecordingsDirName: TMPxpButton
       Left = 629
-      Top = 816
+      Top = 811
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -3007,11 +2343,11 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ShadowColor = clSkyBlue
       Style = bsModern
-      OnClick = btnRecordingsDirNameClick
+      OnClick = btnAudioRecordingsDirNameClick
     end
     object btnDataBaseDirName: TMPxpButton
       Left = 629
-      Top = 846
+      Top = 871
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -3046,9 +2382,9 @@ object frmSetup: TfrmSetup
       Style = bsModern
       OnClick = btnDataBaseDirNameClick
     end
-    object edCoversDirName: TEdit
+    object edArtworkDirName: TEdit
       Left = 199
-      Top = 876
+      Top = 901
       Width = 426
       Height = 26
       Hint = 'The sub-directory where covers are stored.'
@@ -3069,11 +2405,11 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 19
-      Text = 'Covers'
+      Text = 'Artwork'
     end
-    object btnCoversDirName: TMPxpButton
+    object btnArtworkDirName: TMPxpButton
       Left = 629
-      Top = 876
+      Top = 901
       Width = 40
       Height = 26
       Margins.Left = 2
@@ -3106,13 +2442,194 @@ object frmSetup: TfrmSetup
       ParentFont = False
       ShadowColor = clSkyBlue
       Style = bsModern
-      OnClick = btnCoversDirNameClick
+      OnClick = btnArtworkDirNameClick
+    end
+    object edVideoRecordingsDirName: TEdit
+      Left = 199
+      Top = 841
+      Width = 426
+      Height = 26
+      Hint = 'The sub-directory where recordings are stored.'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      AutoSize = False
+      BevelKind = bkTile
+      BevelOuter = bvRaised
+      Color = 5850948
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 21
+      Text = 'VideoRecordings'
+    end
+    object btnVideoRecordingsDirName: TMPxpButton
+      Left = 629
+      Top = 841
+      Width = 40
+      Height = 26
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Alignment = taCenter
+      AllowAllUp = True
+      Caption = '...'
+      Color = 6303744
+      ColorWhenDown = 11363625
+      ColorWhenUp = 6303744
+      Checked = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      GlyphTransparentColor = clFuchsia
+      GlyphTransparent = True
+      HotTrackColor = clAqua
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphRight
+      LightColor = 12348265
+      ParentColor = False
+      ParentFont = False
+      ShadowColor = clSkyBlue
+      Style = bsModern
+      OnClick = btnVideoRecordingsDirNameClick
+    end
+    object chkOverrideSleepMode: TMPxpButton
+      Left = 450
+      Top = 686
+      Width = 200
+      Height = 40
+      Hint = 'Prevents the OS is going to sleep mode while RDJPro is running.'
+      Alignment = taCenter
+      Caption = 'Override System Sleep'
+      Color = 6899524
+      ColorWhenDown = 10045252
+      ColorWhenUp = 6899524
+      Down = True
+      Behavior = bbCheckBox
+      Checked = True
+      GlyphUnchecked.Data = {
+        C6040000424DC60400000000000036040000280000000C0000000C0000000100
+        08000000000090000000230B0000230B00000001000000010000000000000000
+        1900001900000019190019000000190019001919000060606000607E6000956B
+        430000005C002F0000001D00000002000000020002000000130000002F000200
+        2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+        7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+        A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+        00000000000000000010151717151000000000001116181A1A18161100000010
+        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+        1E1C1916100000001116181A1A18161100000000001015171715100000000000
+        00000000000000000000}
+      GlyphChecked.Data = {
+        C6040000424DC60400000000000036040000280000000C0000000C0000000100
+        08000000000090000000230B0000230B00000001000000010000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+        94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+        D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+        00000000000000000010151717151000000000001116181A1A18161100000010
+        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+        1E1C1916100000001116181A1A18161100000000001015171715100000000000
+        00000000000000000000}
+      ImageIndexUnchecked = 0
+      ImageIndexChecked = 0
+      ShowFocusRect = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clAqua
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      GlyphTransparentColor = clBlack
+      GlyphTransparent = True
+      HotTrackColor = clAqua
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphTop
+      LightColor = clSkyBlue
+      ParentColor = False
+      ParentFont = False
+      ParentShowHint = False
+      ShadowColor = clAqua
+      ShowHint = True
+      SlowDecease = True
     end
   end
   object pnlButtons: TPanel
     Left = 0
-    Top = 977
-    Width = 688
+    Top = 998
+    Width = 689
     Height = 57
     Align = alBottom
     BevelOuter = bvNone
@@ -3123,9 +2640,10 @@ object frmSetup: TfrmSetup
     Padding.Bottom = 8
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 1042
     object btnOk: TMPxpButton
-      Left = 443
-      Top = 1
+      Left = 445
+      Top = 7
       Width = 106
       Height = 40
       Margins.Left = 2
@@ -3162,7 +2680,7 @@ object frmSetup: TfrmSetup
     end
     object btnCancel: TMPxpButton
       Left = 557
-      Top = 1
+      Top = 7
       Width = 106
       Height = 40
       Margins.Left = 2
@@ -3201,8 +2719,8 @@ object frmSetup: TfrmSetup
   object pnlAudioEndPoints: TPanel
     Left = 0
     Top = 0
-    Width = 688
-    Height = 49
+    Width = 689
+    Height = 41
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -3217,7 +2735,7 @@ object frmSetup: TfrmSetup
       Left = 4
       Top = 4
       Width = 107
-      Height = 46
+      Height = 38
       Alignment = taCenter
       Caption = 'General'
       Color = 6899524
@@ -3331,10 +2849,10 @@ object frmSetup: TfrmSetup
       OnClick = chkGeneralSettingsClick
     end
     object chkBroadcastSettings: TMPxpButton
-      Left = 117
+      Left = 112
       Top = 4
       Width = 107
-      Height = 46
+      Height = 38
       Alignment = taCenter
       Caption = 'Broadcast'
       Color = 6899524

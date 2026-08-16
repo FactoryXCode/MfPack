@@ -2586,8 +2586,16 @@ begin
     Exit;
 
   Result := ppTargetType.SetUINT64(MF_MT_FRAME_RATE,
-                                   RDJMakeUINT64(Num,
-                                                 Den));
+                                    RDJMakeUINT64(Num,
+                                                  Den));
+  if FAILED(Result) then
+    Exit;
+
+  // Use a one-second GOP.  CreateFragmentedSinkWriter also limits each movie
+  // fragment to one complete coded sequence, so public HLS groups start on an
+  // IDR instead of between predictive frames.
+  Result := ppTargetType.SetUINT32(MF_MT_MAX_KEYFRAME_SPACING,
+                                   (Num + Den - 1) div Den);
   if FAILED(Result) then
     Exit;
 
@@ -2636,8 +2644,27 @@ begin
   if FAILED(Result) then
     Exit;
 
+  // Keep the live HLS AAC description identical to the proven MfPack Cast
+  // transcode path.  The fragmented MP4 sink must advertise AAC-LC with raw
+  // access units; leaving these attributes implicit produces a stream VLC can
+  // accept, but stricter Cast receivers can keep buffering it indefinitely.
+  Result := ppTargetType.SetUINT32(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                   $29);
+  if FAILED(Result) then
+    Exit;
+
+  Result := ppTargetType.SetUINT32(MF_MT_AAC_PAYLOAD_TYPE,
+                                   0);
+  if FAILED(Result) then
+    Exit;
+
   Result := ppTargetType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                    RDJ_FMP4_DEFAULT_AUDIO_AVG_BYTES_PER_SEC);
+  if FAILED(Result) then
+    Exit;
+
+  Result := ppTargetType.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                                   UINT32(True));
 end;
 
 
@@ -2756,9 +2783,6 @@ begin
       // live MSE output that looks like a frozen public stream while memory
       // climbs until the restart/stop path flushes everything at once.
       //
-      // Do not set MF_MPEG4SINK_MAX_CODED_SEQUENCES_PER_FRAGMENT to 1 here.
-      // RDJ_LOG_42 showed that splits the stream into many tiny coded-sequence
-      // fragments, which makes browser playback advance in short bursts.
       Result := MediaSinkAttributes.SetUINT32(MF_MPEG4SINK_MIN_FRAGMENT_DURATION,
                                               RDJ_FMP4_SINK_MIN_FRAGMENT_DURATION_100NS);
       if FAILED(Result) then

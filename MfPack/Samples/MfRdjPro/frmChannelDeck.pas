@@ -97,13 +97,9 @@ uses
   RDJ_Common,
   MfPeakMeterMmcs,
   MfChannelDeckEngine,
-  MPxpButton,
-  MfTrackBar,
   RDJ.InternalMixer,
   MfWasApiEffectsRack,
   MfParametricEqComponent,
-  // Icecast
-  MfIcecastBroadcastEngine,
   // Playlist
   RDJ.PlaylistTypes,
   RDJ.PlaylistDb,
@@ -111,6 +107,9 @@ uses
   RDJ.PlaylistManager,
   RDJ.FilenameParser,
   LWFileBrowserExDlg, // Select single file.
+  // Controls
+  MPxpButton,
+  MfTrackBar,
   MfBeatLed,
   MfLevelProgressBar;
 
@@ -178,6 +177,7 @@ type
     pbProgress: TMfLevelProgressBar;
     Bevel5: TBevel;
     Bevel6: TBevel;
+    lblBalMaster: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure AfterConstruction(); override;
@@ -363,7 +363,9 @@ implementation
 uses
   System.Math,
   frmMainMDI,
-  frmMasterDeck;
+  frmMasterDeck,
+  frmLoopbackDeck,
+  MicrophoneDeckFrm;
 
 
 procedure TfrmChannelDeck.btnEqEnableClick(Sender: TObject);
@@ -1119,8 +1121,30 @@ begin
       Break;
     end;
 
-  if (Other = nil) then
-    Exit;
+  if Other = nil then
+    begin
+      for i := 0 to Screen.FormCount - 1 do
+        begin
+          if Screen.Forms[i] is TfrmLoopbackDeck then
+            begin
+              if TfrmLoopbackDeck(Screen.Forms[i]).chkCrossFade.Checked then
+                begin
+                  TfrmLoopbackDeck(Screen.Forms[i]).ApplyExternalCrossFadeDelta(Delta);
+                  Exit;
+                end;
+            end
+          else if Screen.Forms[i] is TfrmMicrophoneDeck then
+            begin
+              if TfrmMicrophoneDeck(Screen.Forms[i]).chkCrossFade.Checked then
+                begin
+                  TfrmMicrophoneDeck(Screen.Forms[i]).ApplyExternalCrossFadeDelta(Delta);
+                  Exit;
+                end;
+            end;
+        end;
+
+      Exit;
+    end;
 
   FApplyingXFade := True;
   try
@@ -1930,12 +1954,11 @@ begin
               FLastSentNowPlaying) then
     Exit;
 
-  if Assigned(MainMDIFrm) and
-     Assigned(MainMDIFrm.IcecastEngine) then
+  if Assigned(MainMDIFrm) then
     begin
 
-      MainMDIFrm.IcecastEngine.UpdateNowPlaying(Artist,
-                                                Title);
+      MainMDIFrm.UpdateNowPlaying(Artist,
+                                  Title);
       FLastSentNowPlaying := SongText;
     end;
 end;

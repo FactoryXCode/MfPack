@@ -1457,7 +1457,7 @@ begin
 
            // Real seek position = source frame index.
            if (pvSourceWfx.nBlockAlign <> 0) then
-             FReadPos := Double(newOffset div UInt64(pvSourceWfx.nBlockAlign))
+             FReadPos := Round(newOffset / UInt64(pvSourceWfx.nBlockAlign))
            else
              FReadPos := 0.0;
 

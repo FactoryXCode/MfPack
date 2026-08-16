@@ -25,6 +25,7 @@ object frmMasterFxRack: TfrmMasterFxRack
   StyleElements = [seFont, seClient]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnResize = FormResize
   OnShow = FormShow
   TextHeight = 15
   object pnlFlangerEcho: TPanel

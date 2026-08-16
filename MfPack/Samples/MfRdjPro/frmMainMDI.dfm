@@ -2,9 +2,9 @@ object MainMDIFrm: TMainMDIFrm
   Left = 0
   Top = 0
   BorderIcons = []
-  Caption = 'RDJ'
+  Caption = 'RDJ Pro'
   ClientHeight = 836
-  ClientWidth = 1281
+  ClientWidth = 1878
   Color = 5850948
   DefaultMonitor = dmPrimary
   Font.Charset = DEFAULT_CHARSET
@@ -50,7 +50,7 @@ object MainMDIFrm: TMainMDIFrm
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 1281
+    Width = 1878
     Height = 41
     Align = alTop
     BevelOuter = bvNone
@@ -64,7 +64,7 @@ object MainMDIFrm: TMainMDIFrm
     object lblLocalTime: TLabel
       Left = 550
       Top = 0
-      Width = 465
+      Width = 1062
       Height = 41
       Align = alClient
       Alignment = taCenter
@@ -143,7 +143,7 @@ object MainMDIFrm: TMainMDIFrm
       Alignment = taCenter
       AutoSize = False
       BiDiMode = bdLeftToRight
-      Caption = 'RDJ'
+      Caption = 'RDJ Pro'
       Color = clBlack
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 9891585
@@ -159,7 +159,7 @@ object MainMDIFrm: TMainMDIFrm
       OnMouseDown = pnlCaptionMouseDown
     end
     object btnExit: TMPxpButton
-      Left = 1215
+      Left = 1812
       Top = 0
       Width = 66
       Height = 41
@@ -210,6 +210,7 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
+      ExplicitLeft = 1811
     end
     object btnSetup: TMPxpButton
       Left = 105
@@ -292,7 +293,7 @@ object MainMDIFrm: TMainMDIFrm
       OnClick = btnPlaylistClick
     end
     object btnMinimize: TMPxpButton
-      Left = 1081
+      Left = 1678
       Top = 0
       Width = 67
       Height = 41
@@ -345,7 +346,7 @@ object MainMDIFrm: TMainMDIFrm
       OnClick = btnMinimizeClick
     end
     object btnMaxNormal: TMPxpButton
-      Left = 1148
+      Left = 1745
       Top = 0
       Width = 67
       Height = 41
@@ -438,7 +439,7 @@ object MainMDIFrm: TMainMDIFrm
       OnClick = btnEffectsClick
     end
     object btnFooterPnl: TMPxpButton
-      Left = 1015
+      Left = 1612
       Top = 0
       Width = 66
       Height = 41
@@ -695,7 +696,7 @@ object MainMDIFrm: TMainMDIFrm
   object pnlFooter: TPanel
     Left = 0
     Top = 727
-    Width = 1281
+    Width = 1878
     Height = 109
     Align = alBottom
     Color = 4865081
@@ -704,9 +705,9 @@ object MainMDIFrm: TMainMDIFrm
     TabOrder = 1
     OnMouseDown = pnlCaptionMouseDown
     object Panel1: TPanel
-      Left = 75
+      Left = 150
       Top = 1
-      Width = 1205
+      Width = 1727
       Height = 107
       Align = alRight
       BevelOuter = bvNone
@@ -715,18 +716,18 @@ object MainMDIFrm: TMainMDIFrm
       ShowCaption = False
       TabOrder = 0
       object imgDjShowLogo: TImage
-        Left = 428
+        Left = 954
         Top = 4
         Width = 175
         Height = 99
-        Hint = 'DoubleClick to select an image'
+        Hint = 'DoubleClick to select an image.'
         ParentShowHint = False
         ShowHint = True
         Stretch = True
         OnDblClick = imgDjShowLogoDblClick
       end
       object lblDjName: TLabel
-        Left = 107
+        Left = 302
         Top = 5
         Width = 57
         Height = 19
@@ -754,7 +755,7 @@ object MainMDIFrm: TMainMDIFrm
         WordWrap = True
       end
       object lblShow: TLabel
-        Left = 85
+        Left = 280
         Top = 50
         Width = 79
         Height = 21
@@ -781,8 +782,122 @@ object MainMDIFrm: TMainMDIFrm
         Transparent = True
         WordWrap = True
       end
+      object Label1: TLabel
+        Left = -71
+        Top = -229
+        Width = 57
+        Height = 19
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        ParentCustomHint = False
+        Alignment = taRightJustify
+        AutoSize = False
+        BiDiMode = bdLeftToRight
+        Caption = 'DJ Name'
+        Color = 4865081
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentBiDiMode = False
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
+        Transparent = True
+        WordWrap = True
+      end
+      object Label2: TLabel
+        Left = 638
+        Top = 5
+        Width = 52
+        Height = 19
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        ParentCustomHint = False
+        Alignment = taRightJustify
+        AutoSize = False
+        BiDiMode = bdLeftToRight
+        Caption = 'Event'
+        Color = 4865081
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentBiDiMode = False
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
+        Transparent = True
+        WordWrap = True
+      end
+      object Label3: TLabel
+        Left = 638
+        Top = 50
+        Width = 52
+        Height = 21
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        ParentCustomHint = False
+        Alignment = taRightJustify
+        AutoSize = False
+        BiDiMode = bdLeftToRight
+        Caption = 'Title'
+        Color = 4865081
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentBiDiMode = False
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
+        Transparent = True
+        WordWrap = True
+      end
+      object Label4: TLabel
+        Left = 1020
+        Top = 41
+        Width = 46
+        Height = 19
+        Hint = 'DoubleClick to select an image.'
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        ParentCustomHint = False
+        Alignment = taCenter
+        AutoSize = False
+        BiDiMode = bdLeftToRight
+        Caption = 'LOGO'
+        Color = 4865081
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 13229826
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentBiDiMode = False
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        Transparent = True
+        WordWrap = True
+        OnDblClick = imgDjShowLogoDblClick
+      end
       object mmoTextNotes: TMemo
-        Left = 682
+        Left = 1204
         Top = 0
         Width = 523
         Height = 107
@@ -805,7 +920,7 @@ object MainMDIFrm: TMainMDIFrm
         TabOrder = 0
       end
       object btnClearMemo: TMPxpButton
-        Left = 608
+        Left = 1132
         Top = 4
         Width = 71
         Height = 99
@@ -845,7 +960,7 @@ object MainMDIFrm: TMainMDIFrm
         OnClick = btnClearMemoClick
       end
       object mmoShow: TMemo
-        Left = 167
+        Left = 362
         Top = 49
         Width = 261
         Height = 54
@@ -869,7 +984,7 @@ object MainMDIFrm: TMainMDIFrm
         TabOrder = 2
       end
       object mmoDjName: TMemo
-        Left = 167
+        Left = 362
         Top = 4
         Width = 261
         Height = 40
@@ -893,8 +1008,8 @@ object MainMDIFrm: TMainMDIFrm
         TabOrder = 3
       end
       object btnSetDjNameAndShowTitle: TMPxpButton
-        Left = 9
-        Top = 4
+        Left = 207
+        Top = 5
         Width = 71
         Height = 99
         Margins.Left = 2
@@ -932,11 +1047,59 @@ object MainMDIFrm: TMainMDIFrm
         WordWrap = True
         OnClick = btnSetDjNameAndShowTitleClick
       end
+      object mmoEventTitle: TMemo
+        Left = 693
+        Top = 3
+        Width = 261
+        Height = 40
+        Hint = 'Artist/Show/Event'
+        Alignment = taCenter
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        BorderStyle = bsNone
+        Color = 9216
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 13229826
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        Lines.Strings = (
+          'none')
+        MaxLength = 120
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+      end
+      object mmoActivityTitle: TMemo
+        Left = 693
+        Top = 49
+        Width = 261
+        Height = 54
+        Hint = 'Show Title'
+        Alignment = taCenter
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        BorderStyle = bsNone
+        Color = 9216
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 13229826
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        Lines.Strings = (
+          'none')
+        MaxLength = 200
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 6
+      end
     end
   end
   object tmrClock: TTimer
     OnTimer = tmrClockTimer
-    Left = 934
-    Top = 8
+    Left = 1130
+    Top = 78
   end
 end

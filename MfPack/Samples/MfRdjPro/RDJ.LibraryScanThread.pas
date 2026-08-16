@@ -142,9 +142,7 @@ begin
 
   inherited Create(True);
 
-  // The playlist editor owns this thread.  Keeping automatic destruction
-  // disabled lets the owner terminate, join and free it deterministically.
-  FreeOnTerminate := False;
+  FreeOnTerminate := True;
 
   FDbFileName := ADbFileName;
   FFolder := AFolder;

@@ -52,7 +52,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitWidth = 934
     object lblLocation: TLabel
       Left = 10
       Top = 7
@@ -160,8 +159,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitTop = 544
-    ExplicitWidth = 934
     object lblSelectedFile: TLabel
       Left = 14
       Top = 15
@@ -189,8 +186,8 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       ParentFont = False
     end
     object btnOk: TMPxpButton
-      Left = 707
-      Top = 31
+      Left = 708
+      Top = 33
       Width = 107
       Height = 40
       Alignment = taCenter
@@ -264,7 +261,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     Color = 5850948
     ParentBackground = False
     TabOrder = 2
-    ExplicitHeight = 433
     object lbFolders: TListBox
       Left = 0
       Top = 0
@@ -304,8 +300,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     TabOrder = 3
     OnChange = flbFilesChange
     OnDblClick = flbFilesDblClick
-    ExplicitWidth = 422
-    ExplicitHeight = 433
   end
   object pnlPreview: TPanel
     Left = 710
@@ -317,12 +311,10 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     Color = 5850948
     ParentBackground = False
     TabOrder = 4
-    ExplicitLeft = 704
-    ExplicitHeight = 433
     object lblPreview: TLabel
       Left = 0
       Top = 0
-      Width = 48
+      Width = 230
       Height = 17
       Align = alTop
       Alignment = taCenter
@@ -334,6 +326,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Font.Style = [fsBold]
       ParentFont = False
       Layout = tlCenter
+      ExplicitWidth = 48
     end
     object imgPreview: TImage
       Left = 0

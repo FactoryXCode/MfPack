@@ -178,8 +178,8 @@ type
     function GetGuidContextAsString(): string;
     function GetChannels(): UINT;
 
-    function GetMute(): BOOL;
-    procedure SetMute(aValue: BOOL);
+    function GetMute(): Boolean;
+    procedure SetMute(aValue: Boolean);
 
     function GetMasterScalarVolume(): Single;
     procedure SetMasterScalarVolume(aValue: Single);
@@ -263,7 +263,9 @@ type
 
     property MasterScalarVolume: Single read GetMasterScalarVolume write SetMasterScalarVolume;
     property MasterDbVolume: Single read GetMasterDbVolume write SetMasterDbVolume;
-    property Mute: BOOL read GetMute write SetMute default BOOL(False);
+    // Mute is live endpoint state, not form configuration. Use Delphi's native
+    // Boolean for DFM RTTI and never persist the current device state in a DFM.
+    property Mute: Boolean read GetMute write SetMute stored False default False;
 
     // NEW (opt-in): automatically follow Windows default device changes (speakers <-> headphones etc.)
     property FollowDefaultDevice: Boolean read FFollowDefaultDevice write FFollowDefaultDevice default False;
@@ -788,29 +790,29 @@ begin
 end;
 
 
-function TMfAudioEndPoint.GetMute: BOOL;
+function TMfAudioEndPoint.GetMute: Boolean;
 var
   b: INT; // MfPack BOOL workaround
 
 begin
 
-  Result := BOOL(False);
+  Result := False;
 
   if not Assigned(fAudioEndpoint) then
     Exit;
 
   b := 0;
   if Succeeded(fAudioEndpoint.GetMute(b)) then
-    Result := BOOL(b <> 0);
+    Result := b <> 0;
 end;
 
 
-procedure TMfAudioEndPoint.SetMute(aValue: BOOL);
+procedure TMfAudioEndPoint.SetMute(aValue: Boolean);
 begin
 
   if Assigned(fAudioEndpoint) then
     // MfPack: SetMute expects INT {BOOL} (0/1)
-    fAudioEndpoint.SetMute(Abs(Integer(aValue)),
+    fAudioEndpoint.SetMute(Ord(aValue),
                            FguidEventContext);
 end;
 

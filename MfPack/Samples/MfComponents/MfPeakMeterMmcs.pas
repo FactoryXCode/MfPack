@@ -429,10 +429,9 @@ implementation
 constructor TLightMmcssTimerThread.Create(AOwner: TLightMmcssTimer);
 begin
 
-  inherited Create(False);
-
-  FreeOnTerminate := False;
   FOwner := AOwner;
+  inherited Create(False);
+  FreeOnTerminate := False;
 end;
 
 
@@ -1133,8 +1132,8 @@ begin
           if (absR > peakR) then
             peakR := absR;
 
-          sumSqL := sumSqL + Double(sL) * Double(sL);
-          sumSqR := sumSqR + Double(sR) * Double(sR);
+          sumSqL := sumSqL + (sL * sL);
+          sumSqR := sumSqR + (sR * sR);
 
           Inc(p,
               blockAlign);
@@ -1170,8 +1169,8 @@ begin
               if (absR > peakR) then
                 peakR := absR;
 
-              sumSqL := sumSqL + Double(sL) * Double(sL);
-              sumSqR := sumSqR + Double(sR) * Double(sR);
+              sumSqL := sumSqL + _Double(sL) * _Double(sL);
+              sumSqR := sumSqR + _Double(sR) * _Double(sR);
 
               Inc(p,
                   blockAlign);
@@ -1206,8 +1205,8 @@ begin
               if (absR > peakR) then
                 peakR := absR;
 
-              sumSqL := sumSqL + Double(sL) * Double(sL);
-              sumSqR := sumSqR + Double(sR) * Double(sR);
+              sumSqL := sumSqL + _Double(sL) * _Double(sL);
+              sumSqR := sumSqR + _Double(sR) * _Double(sR);
 
               Inc(p,
                   blockAlign);
@@ -1246,8 +1245,8 @@ begin
               if (absR > peakR) then
                 peakR := absR;
 
-              sumSqL := sumSqL + Double(sL) * Double(sL);
-              sumSqR := sumSqR + Double(sR) * Double(sR);
+              sumSqL := sumSqL + _Double(sL) * _Double(sL);
+              sumSqR := sumSqR + _Double(sR) * _Double(sR);
 
               Inc(p,
                 blockAlign);
@@ -1264,8 +1263,8 @@ begin
   if (frames > 0) then
     begin
 
-      rmsL := Single(Sqrt(sumSqL / frames));
-      rmsR := Single(Sqrt(sumSqR / frames));
+      rmsL := _Single(Sqrt(sumSqL / frames));
+      rmsR := _Single(Sqrt(sumSqR / frames));
     end
   else
     begin
@@ -1331,7 +1330,7 @@ var
   coeff: Double;
   hr: HRESULT;
 
-  gL, gR: Single;
+  //gL, gR: Single;
 
   // Display mapping helpers ----------------------------------------------------
   function Clamp01(const x: Single): Single; inline;
@@ -1416,21 +1415,21 @@ begin
         rR := 0.0;
 
       // Default = unity
-      gL := 1.0;
-      gR := 1.0;
+      //gL := 1.0;
+      //gR := 1.0;
 
       // Apply GUI gains only for post-fader behaviour
-      if Assigned(FWasApiEngine) then
-        begin
-
-          FWasApiEngine.GetMeterFaderGains(gL,
-                                           gR);
-
-          pL := pL * gL;
-          pR := pR * gR;
-          rL := rL * gL;
-          rR := rR * gR;
-        end;
+      //if Assigned(FWasApiEngine) then
+      //  begin
+      //
+      //    FWasApiEngine.GetMeterFaderGains(gL,
+      //                                     gR);
+      //
+      //    pL := pL * gL;
+      //    pR := pR * gR;
+      //    rL := rL * gL;
+      //    rR := rR * gR;
+      //  end;
 
       // Channel handling
       if Assigned(FWasApiEngine) then

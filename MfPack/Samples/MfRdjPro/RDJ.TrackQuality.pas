@@ -3,9 +3,13 @@
 interface
 
 uses
+
+  {System}
   System.SysUtils,
   System.IOUtils,
+  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
+  {Application}
   RDJ.PlaylistTypes;
 
 procedure RDJUpdateTrackQuality(var ATrack: TRDJTrack);
@@ -120,10 +124,12 @@ begin
   if (ATrack.FileSize <= 0) and FileExists(ATrack.FullPath) then
     begin
       try
-        if not GetFileSize64(ATrack.FullPath,
-                             ATrack.FileSize) then
+
+       // ATrack.FileSize := TFile.GetSize(ATrack.FullPath);
+        if not GetFileSize64(ATrack.FullPath, ATrack.FileSize) then
           ATrack.FileSize := 0;
       except
+
         ATrack.FileSize := 0;
       end;
     end;

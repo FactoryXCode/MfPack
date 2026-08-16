@@ -64,6 +64,7 @@ interface
 
 uses
 
+  WinApi.Windows,
   WinApi.WinApiTypes,
   {System}
   System.SysUtils,
@@ -78,6 +79,12 @@ const
   MAX_LOOPBACK_DECKS = 4;
   MAX_FX_SLOTS = 16;
 
+  // Live MSE/fMP4 public fragment duration setup.
+  // Stored in milliseconds so the setup GUI can use a trackbar.
+  // Default 2000 ms was proven stable for old Windows 10 servers.
+  RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS = 50;
+  RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS = 6000;
+  RDJ_MSE_PUBLIC_FRAGMENT_TARGET_DEFAULT_MS = 2000;
   AUDIO_BUFFER_MIN_MS = 30;
   AUDIO_BUFFER_MAX_MS = 120;
   AUDIO_BUFFER_DEF_MS = 60;
@@ -100,38 +107,6 @@ type
     Slots: array[0..MAX_FX_SLOTS - 1] of TRDJFxSlotSetup;
   end;
 
-  // Icecast
-  TRDJBroadcastCodec = (bcAac,
-                        bcMp3);
-
-  TRDJBroadcastTapPoint = (btpPreMasterFx,
-                           btpPostMasterFx);
-
-  TRDJBroadcastSetup = record
-    Enabled: Boolean; // Do not store in ini!
-
-    Host: string;
-    Port: Integer;
-    Mount: string;
-    Username: string;
-    Password: string;
-
-    StreamName: string;
-    Description: string;
-    Genre: string;
-    Url: string;
-    PublicStream: Boolean;
-
-    Codec: TRDJBroadcastCodec;
-    BitrateKbps: Integer;
-    SampleRate: Integer;
-    Channels: Integer;
-
-    TapPoint: TRDJBroadcastTapPoint;
-    AutoReconnect: Boolean;
-    BroadcastGainDb: Single;
-  end;
-
 
   TRDJSetup = record
 
@@ -151,11 +126,13 @@ type
     PFLEnabled: Boolean;
     PFLDeviceId: string;
 
-    // AudioClient buffersize (default = 60 ms).
+    SystemOverrideSleepMode: Boolean;
+
+    // AudioClient bufferlength (default = 60 ms).
     AudioBufferMs: Integer;
 
     // Audio recorder
-    AudioRecorderCaptureBufferSize: Integer;
+    AudioRecorderCaptureBufferMs: Integer;
     AudioRecorderSystemLatency: Integer;
     AudioRecorderAutoBufferSize: LongBool;
     AudioRecorderDisableMMCSS: Boolean;
@@ -166,24 +143,17 @@ type
     AudioRecorderRecordPreFx: Boolean;
     AudioRecorderRecordPostFx: Boolean;
 
-    // Icecast broadcast
-    Broadcast: TRDJBroadcastSetup;
-    // Icecast server process manager settings.
-    IcecastExePath: string;
-    IcecastConfigPath: string;
-    IcecastWorkingDir: string;
-    IcecastHost: string;
-    IcecastPort: Word;
-    IcecastHttpPath: string;
-    IcecastAutoRestart: Boolean;
-    IcecastRestartDelayMs: Cardinal;
-    // IceCast/Caddy/json settings
-    IcecastCaddyDir: string;
-    IcecastCaddyConfigFile: string;
-    IcecastNowPlayingJsonFile: string;
-    IcecastCaddyCoversPath: string;
-    IcecastCaddyCommand: string;
-    IcecastCaddyLogFile: string;
+    // Caddy/json settings
+    CaddyDir: string;
+    CaddyConfigFile: string;
+    CaddyNowPlayingJsonFile: string;
+    CaddyArtworkPath: string;
+    CaddyVideoPath: string;
+    CaddyLanAddress: string;
+    CaddyMount: string;
+    CaddyContentTypeURL: string;
+    CaddyCommand: string;
+    CaddyLogFile: string;
 
     // FX racks.
     MasterFxRack: TRDJFxRackSetup;
@@ -195,23 +165,22 @@ type
     // Paths
     AudioRecordingsDir: string;   // text
     AudioRecordingsPath: string;  // hint
+    VideoRecordingsDir: string;   // text
+    VideoRecordingsPath: string;  // hint
     DatabaseDir: string;  // text
     DatabasePath: string; // hint
-    LocalCoversDir: string; // text
-    LocalCoversPath: string; // hint
+    LocalArtworkDir: string; // text
+    LocalArtworkPath: string; // hint
 
-    // CarmenH
-    CarmenProEnabled: Boolean;
-    CarmenProObsExePath: string;
-    CarmenProObsWorkingDir: string;
-    CarmenProObsProfileName: string;
-    CarmenProObsSceneCollection: string;
-    CarmenProMetadataJsonFile: string;
-    CarmenProCameraName: string;
-    CarmenProCameraSymbolicLink: string;
-    CarmenProAutoStartObs: Boolean;
-    CarmenProAutoWriteMetadata: Boolean;
+    // Media server
+    MediaServerEnabled: Boolean;
 
+    // Live MSE/fMP4 public fragment target duration in milliseconds.
+    // The media server groups small internal MF fragments until this target is
+    // reached approximately. Default: 2000 ms.
+    MsePublicSegmentTargetMs: Integer;
+    CameraName: string;
+    CameraSymbolicLink: string;
   end;
 
   TRecordTapPoint = (rtpPreFx,
@@ -236,11 +205,13 @@ type
   procedure SaveSetupToIni(const FileName: string;
                            const ASetupRec: TRDJSetup);
 
+var
+  FRDJSetup: TRDJSetup;
+
 
 implementation
 
 var
-  gSetup: TRDJSetup;
   gSetupIsSet: Boolean = False;
   gSetupLocked: Boolean = False;
 
@@ -305,6 +276,17 @@ begin
 end;
 
 
+function ClampInteger(const AValue, AMin, AMax: Integer): Integer;
+begin
+
+  Result := AValue;
+
+  if Result < AMin then
+    Result := AMin
+  else
+  if Result > AMax then
+    Result := AMax;
+end;
 procedure InitDefaultSetup(var ASetupRec: TRDJSetup);
 var
   i: Integer;
@@ -320,60 +302,20 @@ begin
   ASetupRec.PFLDeviceId := '';
   ASetupRec.MicDeviceId := '';
 
-  // Icecast
+  ASetupRec.SystemOverrideSleepMode := True;
+
+  // Caddy/json.
   // Default settings.
-
-  //ASetupRec.Broadcast.Enabled := False;  do not use it.
-
-  ASetupRec.Broadcast.Host := '127.0.0.1';
-  ASetupRec.Broadcast.Port := 8000;
-  ASetupRec.Broadcast.Mount := '/live';
-  ASetupRec.Broadcast.Username := 'source';
-  ASetupRec.Broadcast.Password := '';
-
-  ASetupRec.Broadcast.StreamName := 'RDJ FactoryX Live';
-  ASetupRec.Broadcast.Description := '';
-  ASetupRec.Broadcast.Genre := '';
-  ASetupRec.Broadcast.Url := '';
-  ASetupRec.Broadcast.PublicStream := False;
-
-  ASetupRec.Broadcast.Codec := bcAac;
-  ASetupRec.Broadcast.BitrateKbps := 128;
-  ASetupRec.Broadcast.SampleRate := 44100;
-  ASetupRec.Broadcast.Channels := 2;
-
-  ASetupRec.Broadcast.TapPoint := btpPostMasterFx;
-  ASetupRec.Broadcast.AutoReconnect := True;
-  ASetupRec.Broadcast.BroadcastGainDb := 0.0;
-
-  // Icecast server manager
-  // Default settings.
-  ASetupRec.IcecastExePath := Format('%s\icecast\icecast.exe',
-                                     [ExtractFileDir(Application.ExeName)]);
-
-  ASetupRec.IcecastConfigPath := Format('%s\icecast\icecast.xml',
-                                        [ExtractFileDir(Application.ExeName)]);
-
-  ASetupRec.IcecastWorkingDir := Format('%s\icecast\',
-                                        [ExtractFileDir(Application.ExeName)]);
-
-  // NOTE: Host and port belongs to the server and can be different from the client,
-  //       because the client can login to other servers too.
-  // Default settings.
-  ASetupRec.IcecastHost := '127.0.0.1';
-  ASetupRec.IcecastPort := 8000;
-  ASetupRec.IcecastHttpPath := '/';
-  ASetupRec.IcecastAutoRestart := True;
-  ASetupRec.IcecastRestartDelayMs := 3000;
-
-  // IceCast/Caddy/json.
-  // Default settings.
-  ASetupRec.IcecastCaddyDir := 'C:\Caddy';
-  ASetupRec.IcecastCaddyConfigFile := 'C:\Caddy\caddy.cff';
-  ASetupRec.IcecastNowPlayingJsonFile := 'C:\Caddy\nowplaying.json';
-  ASetupRec.IcecastCaddyCoversPath := 'C:\Caddy';
-  ASetupRec.IcecastCaddyCommand := 'C:\caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile'; // We need to avoid false uri, better to place Caddy under dir RDJ?
-  ASetupRec.IcecastCaddyLogFile := 'Caddy.log';
+  ASetupRec.CaddyDir := 'C:\Caddy';
+  ASetupRec.CaddyConfigFile := 'C:\Caddy\caddy.cff';
+  ASetupRec.CaddyNowPlayingJsonFile := 'C:\Caddy\nowplaying.json';
+  ASetupRec.CaddyArtworkPath := 'C:\Caddy\Artwork';
+  ASetupRec.CaddyVideoPath := 'C:\Caddy\Video';
+  ASetupRec.CaddyLanAddress := '';
+  ASetupRec.CaddyMount := '';
+  ASetupRec.CaddyContentTypeURL := 'video/mp4';
+  ASetupRec.CaddyCommand := 'C:\caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile'; // We need to avoid false uri, better to place Caddy under dir RDJ?
+  ASetupRec.CaddyLogFile := 'Caddy.log';
 
   // Master rack starts empty by default.
   InitDefaultFxRack(ASetupRec.MasterFxRack);
@@ -394,41 +336,42 @@ begin
   ASetupRec.AudioRecorderRecordPreFx := True;
   ASetupRec.AudioRecorderRecordPostFx := False;
 
-  ASetupRec.AudioRecordingsDir := 'Recordings';
+  // local audio
+  ASetupRec.AudioRecordingsDir := 'AudioRecordings';
   ASetupRec.AudioRecordingsPath := Format('%s\%s\', [ExtractFileDir(Application.ExeName),
-                                          ASetupRec.AudioRecordingsDir]);
+                                                     ASetupRec.AudioRecordingsDir]);
 
   if not DirectoryExists(ASetupRec.AudioRecordingsPath) then
     if not CreateDir(ASetupRec.AudioRecordingsPath) then
       ASetupRec.AudioRecordingsPath := ExpandFileName(ExtractFileDir(Application.ExeName));
 
+  // Local video
+  ASetupRec.VideoRecordingsDir := 'VideoRecordings';
+  ASetupRec.VideoRecordingsPath := Format('%s\%s\', [ExtractFileDir(Application.ExeName),
+                                                     ASetupRec.VideoRecordingsDir]);
+
+  if not DirectoryExists(ASetupRec.VideoRecordingsPath) then
+    if not CreateDir(ASetupRec.VideoRecordingsPath) then
+      ASetupRec.VideoRecordingsPath := ExpandFileName(ExtractFileDir(Application.ExeName));
+
   ASetupRec.DatabaseDir := 'Data';
   ASetupRec.DatabasePath := Format('%s\%s\', [ExtractFileDir(Application.ExeName),
-                                          ASetupRec.DatabaseDir]);
-
+                                              ASetupRec.DatabaseDir]);
+  // Database
   if not DirectoryExists(ASetupRec.DatabasePath) then
     if not CreateDir(ASetupRec.DatabasePath) then
       ASetupRec.DatabasePath := ExpandFileName(ExtractFileDir(Application.ExeName));
 
-  ASetupRec.LocalCoversDir := 'Covers';
-  ASetupRec.LocalCoversPath := Format('%s\%s\', [ExtractFileDir(Application.ExeName),
-                                                 ASetupRec.LocalCoversDir]);
+  // Artwork is published from Caddy's web root. Keep the legacy local fields
+  // synchronized for older code and INI files that still use Paths\Artwork.
+  ASetupRec.LocalArtworkDir := ExtractFileName(ExcludeTrailingPathDelimiter(ASetupRec.CaddyArtworkPath));
+  ASetupRec.LocalArtworkPath := ASetupRec.CaddyArtworkPath;
 
-  if not DirectoryExists(ASetupRec.LocalCoversPath) then
-    if not CreateDir(ASetupRec.LocalCoversPath) then
-      ASetupRec.LocalCoversPath := ExpandFileName(ExtractFileDir(Application.ExeName));
-
-  // CarmenPro
-  ASetupRec.CarmenProEnabled := False;
-  ASetupRec.CarmenProObsExePath := '';
-  ASetupRec.CarmenProObsWorkingDir := '';
-  ASetupRec.CarmenProObsProfileName := 'CarmenPro';
-  ASetupRec.CarmenProObsSceneCollection := 'CarmenPro';
-  ASetupRec.CarmenProMetadataJsonFile := IncludeTrailingPathDelimiter(ASetupRec.IcecastCaddyDir) + 'carmenpro.json';
-  ASetupRec.CarmenProCameraName := '';
-  ASetupRec.CarmenProCameraSymbolicLink := '';
-  ASetupRec.CarmenProAutoStartObs := False;
-  ASetupRec.CarmenProAutoWriteMetadata := True;
+  // Media server camera
+  ASetupRec.MediaServerEnabled := False;
+  ASetupRec.MsePublicSegmentTargetMs := RDJ_MSE_PUBLIC_FRAGMENT_TARGET_DEFAULT_MS;
+  ASetupRec.CameraName := '';
+  ASetupRec.CameraSymbolicLink := '';
 end;
 
 
@@ -438,7 +381,7 @@ begin
   if gSetupLocked then
     Exit;
 
-  gSetup := ASetupRec;
+  FRDJSetup := ASetupRec;
   gSetupIsSet := True;
 end;
 
@@ -450,7 +393,7 @@ begin
 end;
 
 
-function GetGlobalSetup: TRDJSetup;
+function GetGlobalSetup(): TRDJSetup;
 begin
 
   if not gSetupIsSet then
@@ -460,7 +403,7 @@ begin
       Exit;
     end;
 
-  Result := gSetup;
+  Result := FRDJSetup;
 end;
 
 
@@ -630,12 +573,15 @@ begin
                         ASetupRec.ChannelFxRacks[i]);
       end;
 
-
+    // Override system sleep mode setting.
+    ASetupRec.SystemOverrideSleepMode := iniFile.ReadBool('Setup',
+                                                          'SystemOverrideSleepMode',
+                                                          ASetupRec.SystemOverrideSleepMode);
 
     // Audio recorder
-    ASetupRec.AudioRecorderCaptureBufferSize := iniFile.ReadInteger('SetupAudioRecorder',
-                                                                    'CaptureBufferSize',
-                                                                    ASetupRec.AudioRecorderCaptureBufferSize);
+    ASetupRec.AudioRecorderCaptureBufferMs := iniFile.ReadInteger('SetupAudioRecorder',
+                                                                'CaptureBufferMs',
+                                                                ASetupRec.AudioRecorderCaptureBufferMs);
 
     ASetupRec.AudioRecorderAutoBufferSize := iniFile.ReadBool('SetupAudioRecorder',
                                                               'AutoBufferSize',
@@ -682,8 +628,16 @@ begin
                                                        ASetupRec.AudioRecordingsDir);
 
     ASetupRec.AudioRecordingsPath := iniFile.ReadString('Paths',
-                                                        'Recordings',
-                                                         ASetupRec.AudioRecordingsPath);
+                                                         'Recordings',
+                                                          ASetupRec.AudioRecordingsPath);
+
+    ASetupRec.VideoRecordingsDir := iniFile.ReadString('Dir',
+                                                        'VideoRecordings',
+                                                        ASetupRec.VideoRecordingsDir);
+
+    ASetupRec.VideoRecordingsPath := iniFile.ReadString('Paths',
+                                                         'VideoRecordings',
+                                                         ASetupRec.VideoRecordingsPath);
 
     // Database
     ASetupRec.DatabaseDir := iniFile.ReadString('Dir',
@@ -695,144 +649,86 @@ begin
                                                  ASetupRec.DatabasePath);
 
     // Covers
-    ASetupRec.LocalCoversDir := iniFile.ReadString('Dir',
-                                                   'Covers',
-                                                   ASetupRec.LocalCoversDir);
+    ASetupRec.LocalArtworkDir := iniFile.ReadString('Dir',
+                                                   'Artwork',
+                                                   ASetupRec.LocalArtworkDir);
 
-    ASetupRec.LocalCoversPath := iniFile.ReadString('Paths',
-                                                    'Covers',
-                                                    ASetupRec.LocalCoversPath);
+    ASetupRec.LocalArtworkPath := iniFile.ReadString('Paths',
+                                                     'Artwork',
+                                                     ASetupRec.LocalArtworkPath);
 
-    // Icecast
-    //ASetupRec.Broadcast.Enabled := iniFile.ReadBool('SetupBroadcast',
-    //                                                'Enabled',
-    //                                                ASetupRec.Broadcast.Enabled);
 
-    ASetupRec.Broadcast.Host := iniFile.ReadString('SetupBroadcast',
-                                                   'Host',
-                                                   ASetupRec.Broadcast.Host);
+    // CaddyConfigFile
+    ASetupRec.CaddyDir := iniFile.ReadString('Caddy',
+                                             'CaddyDir',
+                                             ASetupRec.CaddyDir);
 
-    ASetupRec.Broadcast.Port := iniFile.ReadInteger('SetupBroadcast',
-                                                    'Port',
-                                                    ASetupRec.Broadcast.Port);
+    ASetupRec.CaddyConfigFile := iniFile.ReadString('Caddy',
+                                                    'ConfigFile',
+                                                    ASetupRec.CaddyConfigFile);
 
-    ASetupRec.Broadcast.Mount := iniFile.ReadString('SetupBroadcast',
-                                                    'Mount',
-                                                    ASetupRec.Broadcast.Mount);
+    ASetupRec.CaddyNowPlayingJsonFile := iniFile.ReadString('Caddy',
+                                                            'NowPlayingJsonFile',
+                                                            ASetupRec.CaddyNowPlayingJsonFile);
 
-    ASetupRec.Broadcast.Username := iniFile.ReadString('SetupBroadcast',
-                                                       'Username',
-                                                       ASetupRec.Broadcast.Username);
+    ASetupRec.CaddyArtworkPath := iniFile.ReadString('Caddy',
+                                                     'Artwork',
+                                                     ASetupRec.CaddyArtworkPath);
 
-    ASetupRec.Broadcast.Password := iniFile.ReadString('SetupBroadcast',
-                                                       'Password',
-                                                       ASetupRec.Broadcast.Password);
+    ASetupRec.CaddyVideoPath := iniFile.ReadString('Caddy',
+                                                   'Video',
+                                                   ASetupRec.CaddyVideoPath);
 
-    ASetupRec.Broadcast.StreamName := iniFile.ReadString('SetupBroadcast',
-                                                         'StreamName',
-                                                         ASetupRec.Broadcast.StreamName);
+    // CaddyArtworkPath is authoritative. Paths\Artwork remains a compatibility
+    // alias so an old installation cannot silently publish to a second folder.
+    ASetupRec.LocalArtworkPath := ASetupRec.CaddyArtworkPath;
+    ASetupRec.LocalArtworkDir := ExtractFileName(ExcludeTrailingPathDelimiter(ASetupRec.CaddyArtworkPath));
 
-    ASetupRec.Broadcast.Description := iniFile.ReadString('SetupBroadcast',
-                                                          'Description',
-                                                          ASetupRec.Broadcast.Description);
+    ASetupRec.CaddyLanAddress := iniFile.ReadString('Caddy',
+                                                    'LanAddress',
+                                                    ASetupRec.CaddyLanAddress);
 
-    ASetupRec.Broadcast.Genre := iniFile.ReadString('SetupBroadcast',
-                                                    'Genre',
-                                                    ASetupRec.Broadcast.Genre);
+    ASetupRec.CaddyMount := iniFile.ReadString('Caddy',
+                                               'Mount',
+                                               ASetupRec.CaddyMount);
 
-    ASetupRec.Broadcast.Url := iniFile.ReadString('SetupBroadcast',
-                                                  'Url',
-                                                  ASetupRec.Broadcast.Url);
+    ASetupRec.CaddyContentTypeURL := iniFile.ReadString('Caddy',
+                                                        'ContentTypeURL',
+                                                        ASetupRec.CaddyContentTypeURL);
 
-    ASetupRec.Broadcast.PublicStream := iniFile.ReadBool('SetupBroadcast',
-                                                         'PublicStream',
-                                                         ASetupRec.Broadcast.PublicStream);
+    ASetupRec.CaddyCommand := iniFile.ReadString('Caddy',
+                                                 'Command',
+                                                 ASetupRec.CaddyCommand);
 
-    ASetupRec.Broadcast.Codec := TRDJBroadcastCodec(iniFile.ReadInteger('SetupBroadcast',
-                                                                        'Codec',
-                                                                        Ord(ASetupRec.Broadcast.Codec)));
+    ASetupRec.CaddyLogFile := iniFile.ReadString('Caddy',
+                                                 'LogFile',
+                                                 ASetupRec.CaddyLogFile); // << FIXED, Not part of the setup GUI.
 
-    ASetupRec.Broadcast.BitrateKbps := iniFile.ReadInteger('SetupBroadcast',
-                                                           'BitrateKbps',
-                                                           ASetupRec.Broadcast.BitrateKbps);
+    // Media server.
+    // New unified section name is MediaServer. For older ini files we still read
+    // the old RdjPro section once, but SaveSetupToIni writes MediaServer only.
+    sectionName := 'MediaServer';
+    if (not iniFile.SectionExists(sectionName)) and
+       iniFile.SectionExists('RdjPro') then
+      sectionName := 'RdjPro';
 
-    ASetupRec.Broadcast.SampleRate := iniFile.ReadInteger('SetupBroadcast',
-                                                          'SampleRate',
-                                                          ASetupRec.Broadcast.SampleRate);
+    ASetupRec.MediaServerEnabled := iniFile.ReadBool(sectionName,
+                                                     'Enabled',
+                                                     False);
 
-    ASetupRec.Broadcast.Channels := iniFile.ReadInteger('SetupBroadcast',
-                                                        'Channels',
-                                                        ASetupRec.Broadcast.Channels);
+    ASetupRec.MsePublicSegmentTargetMs := ClampInteger(iniFile.ReadInteger(sectionName,
+                                                                           'MsePublicFragmentTargetMs',
+                                                                           ASetupRec.MsePublicSegmentTargetMs),
+                                                                           RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS,
+                                                                           RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS);
+    // Camera
+    ASetupRec.CameraName := iniFile.ReadString('Camera',
+                                               'CameraName',
+                                               '');
 
-    ASetupRec.Broadcast.TapPoint := TRDJBroadcastTapPoint(iniFile.ReadInteger('SetupBroadcast',
-                                                          'TapPoint',
-                                                          Ord(ASetupRec.Broadcast.TapPoint)));
-
-    ASetupRec.Broadcast.AutoReconnect := iniFile.ReadBool('SetupBroadcast',
-                                                          'AutoReconnect',
-                                                          ASetupRec.Broadcast.AutoReconnect);
-
-    ASetupRec.Broadcast.BroadcastGainDb := iniFile.ReadFloat('SetupBroadcast',
-                                                             'BroadcastGainDb',
-                                                             ASetupRec.Broadcast.BroadcastGainDb);
-
-    // Icecast server manager
-    ASetupRec.IcecastExePath := iniFile.ReadString('SetupIcecastServer',
-                                                   'ExePath',
-                                                   ASetupRec.IcecastExePath);
-
-    ASetupRec.IcecastConfigPath := iniFile.ReadString('SetupIcecastServer',
-                                                      'ConfigPath',
-                                                      ASetupRec.IcecastConfigPath);
-
-    ASetupRec.IcecastWorkingDir := iniFile.ReadString('SetupIcecastServer',
-                                                      'WorkingDir',
-                                                      ASetupRec.IcecastWorkingDir);
-
-    ASetupRec.IcecastHost := iniFile.ReadString('SetupIcecastServer',
-                                                'Host',
-                                                ASetupRec.IcecastHost);
-
-    ASetupRec.IcecastPort := Word(iniFile.ReadInteger('SetupIcecastServer',
-                                                      'Port',
-                                                      ASetupRec.IcecastPort));
-
-    ASetupRec.IcecastHttpPath := iniFile.ReadString('SetupIcecastServer',
-                                                    'HttpPath',
-                                                    ASetupRec.IcecastHttpPath);
-
-    ASetupRec.IcecastAutoRestart := iniFile.ReadBool('SetupIcecastServer',
-                                                     'AutoRestart',
-                                                     ASetupRec.IcecastAutoRestart);
-
-    ASetupRec.IcecastRestartDelayMs := Cardinal(iniFile.ReadInteger('SetupIcecastServer',
-                                                                    'RestartDelayMs',
-                                                                    Integer(ASetupRec.IcecastRestartDelayMs)));
-
-    //  IcecastCaddyConfigFile
-    ASetupRec.IcecastCaddyDir := iniFile.ReadString('Icecast',
-                                                    'CaddyDir',
-                                                    ASetupRec.IcecastCaddyDir);
-
-    ASetupRec.IcecastCaddyConfigFile := iniFile.ReadString('Icecast',
-                                                           'CaddyConfigFile',
-                                                           ASetupRec.IcecastCaddyConfigFile);
-
-    ASetupRec.IcecastNowPlayingJsonFile := iniFile.ReadString('Icecast',
-                                                              'NowPlayingJsonFile',
-                                                              ASetupRec.IcecastNowPlayingJsonFile);
-
-    ASetupRec.IcecastCaddyCoversPath := iniFile.ReadString('Icecast',
-                                                           'Covers',
-                                                           ASetupRec.IcecastCaddyCoversPath);
-
-    ASetupRec.IcecastCaddyCommand := iniFile.ReadString('Icecast',
-                                                        'CaddyCommand',
-                                                        ASetupRec.IcecastCaddyCoversPath);
-
-    ASetupRec.IcecastCaddyLogFile := iniFile.ReadString('Icecast',
-                                                        'CaddyLogFile',
-                                                        ASetupRec.IcecastCaddyLogFile); // << FIXED, Not part of the setup GUI.
+    ASetupRec.CameraSymbolicLink := iniFile.ReadString('Camera',
+                                                       'CameraSymbolicLink',
+                                                       '');
   finally
 
     iniFile.Free;
@@ -888,10 +784,15 @@ begin
                          'MicDeviceCbItemIndex',
                          ASetupRec.MicDeviceCbItemIndex);
 
+    // Override system sleep mode setting.
+    iniFile.WriteBool('Setup',
+                      'SystemOverrideSleepMode',
+                      ASetupRec.SystemOverrideSleepMode);
+
     // Audio recorder
     iniFile.WriteInteger('SetupAudioRecorder',
-                         'CaptureBufferSize',
-                         ASetupRec.AudioRecorderCaptureBufferSize);
+                         'CaptureBufferMs',
+                         ASetupRec.AudioRecorderCaptureBufferMs);
 
     iniFile.WriteBool('SetupAudioRecorder',
                       'AutoBufferSize',
@@ -960,6 +861,14 @@ begin
                         'Recordings',
                         ASetupRec.AudioRecordingsPath);
 
+    iniFile.WriteString('Dir',
+                        'VideoRecordings',
+                        ASetupRec.VideoRecordingsDir);
+
+    iniFile.WriteString('Paths',
+                        'VideoRecordings',
+                        ASetupRec.VideoRecordingsPath);
+
     // Database dir + path
     iniFile.WriteString('Dir',
                         'Data',
@@ -971,144 +880,75 @@ begin
 
     // Covers dir + path
     iniFile.WriteString('Dir',
-                        'Covers',
-                        ASetupRec.LocalCoversDir);
+                        'Artwork',
+                        ExtractFileName(ExcludeTrailingPathDelimiter(ASetupRec.CaddyArtworkPath)));
 
     iniFile.WriteString('Paths',
-                        'Covers',
-                        ASetupRec.LocalCoversPath);
+                        'Artwork',
+                        ASetupRec.CaddyArtworkPath);
 
-    // Icecast
-    //iniFile.WriteBool('SetupBroadcast',
-    //                  'Enabled',
-    //                  ASetupRec.Broadcast.Enabled);
 
-    iniFile.WriteString('SetupBroadcast',
-                        'Host',
-                        ASetupRec.Broadcast.Host);
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'Port',
-                         ASetupRec.Broadcast.Port);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Mount',
-                        ASetupRec.Broadcast.Mount);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Username',
-                        ASetupRec.Broadcast.Username);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Password',
-                        ASetupRec.Broadcast.Password);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'StreamName',
-                        ASetupRec.Broadcast.StreamName);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Description',
-                        ASetupRec.Broadcast.Description);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Genre',
-                        ASetupRec.Broadcast.Genre);
-
-    iniFile.WriteString('SetupBroadcast',
-                        'Url',
-                        ASetupRec.Broadcast.Url);
-
-    iniFile.WriteBool('SetupBroadcast',
-                      'PublicStream',
-                      ASetupRec.Broadcast.PublicStream);
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'Codec',
-                         Ord(ASetupRec.Broadcast.Codec));
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'BitrateKbps',
-                         ASetupRec.Broadcast.BitrateKbps);
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'SampleRate',
-                         ASetupRec.Broadcast.SampleRate);
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'Channels',
-                         ASetupRec.Broadcast.Channels);
-
-    iniFile.WriteInteger('SetupBroadcast',
-                         'TapPoint',
-                         Ord(ASetupRec.Broadcast.TapPoint));
-
-    iniFile.WriteBool('SetupBroadcast',
-                      'AutoReconnect',
-                      ASetupRec.Broadcast.AutoReconnect);
-
-    iniFile.WriteFloat('SetupBroadcast',
-                       'BroadcastGainDb',
-                       ASetupRec.Broadcast.BroadcastGainDb);
-
-    // Icecast server manager
-    iniFile.WriteString('SetupIcecastServer',
-                        'ExePath',
-                        ASetupRec.IcecastExePath);
-
-    iniFile.WriteString('SetupIcecastServer',
-                        'ConfigPath',
-                        ASetupRec.IcecastConfigPath);
-
-    iniFile.WriteString('SetupIcecastServer',
-                        'WorkingDir',
-                        ASetupRec.IcecastWorkingDir);
-
-    iniFile.WriteString('SetupIcecastServer',
-                        'Host',
-                        ASetupRec.IcecastHost);
-
-    iniFile.WriteInteger('SetupIcecastServer',
-                         'Port',
-                         ASetupRec.IcecastPort);
-
-    iniFile.WriteString('SetupIcecastServer',
-                        'HttpPath',
-                        ASetupRec.IcecastHttpPath);
-
-    iniFile.WriteBool('SetupIcecastServer',
-                      'AutoRestart',
-                      ASetupRec.IcecastAutoRestart);
-
-    iniFile.WriteInteger('SetupIcecastServer',
-                         'RestartDelayMs',
-                         Integer(ASetupRec.IcecastRestartDelayMs));
-
-    // IceCast/Caddy/json
-    iniFile.WriteString('Icecast',
+    // Caddy/json
+    iniFile.WriteString('Caddy',
                         'CaddyDir',
-                        ASetupRec.IcecastCaddyDir);
+                        ASetupRec.CaddyDir);
 
-    iniFile.WriteString('Icecast',
-                        'CaddyConfigFile',
-                        ASetupRec.IcecastCaddyConfigFile);
+    iniFile.WriteString('Caddy',
+                        'ConfigFile',
+                        ASetupRec.CaddyConfigFile);
 
-    iniFile.WriteString('Icecast',
+    iniFile.WriteString('Caddy',
                         'NowPlayingJsonFile',
-                        ASetupRec.IcecastNowPlayingJsonFile);
+                        ASetupRec.CaddyNowPlayingJsonFile);
 
-    iniFile.WriteString('Icecast',
-                        'Covers',
-                        ASetupRec.IcecastCaddyCoversPath);
+    iniFile.WriteString('Caddy',
+                        'Artwork',
+                        ASetupRec.CaddyArtworkPath);
 
-    iniFile.WriteString('Icecast',
-                        'CaddyCommand',
-                        ASetupRec.IcecastCaddyCommand);
+    iniFile.WriteString('Caddy',
+                        'Video',
+                        ASetupRec.CaddyVideoPath);
 
-    iniFile.WriteString('Icecast',
-                        'CaddyLogFile',
-                        ASetupRec.IcecastCaddyLogFile);  // Fixed, not part of the setup GUI.
+    iniFile.WriteString('Caddy',
+                        'LanAddress',
+                        ASetupRec.CaddyLanAddress);
 
+    iniFile.WriteString('Caddy',
+                        'Mount',
+                        ASetupRec.CaddyMount);
+
+    iniFile.WriteString('Caddy',
+                        'ContentTypeURL',
+                        ASetupRec.CaddyContentTypeURL);
+
+    iniFile.WriteString('Caddy',
+                        'Command',
+                        ASetupRec.CaddyCommand);
+
+    iniFile.WriteString('Caddy',
+                        'LogFile',
+                        ASetupRec.CaddyLogFile);  // Fixed, not part of the setup GUI.
+
+    // Media server
+
+    iniFile.WriteBool('MediaServer',
+                      'Enabled',
+                      ASetupRec.MediaServerEnabled);
+
+    iniFile.WriteInteger('MediaServer',
+                         'MsePublicFragmentTargetMs',
+                         ClampInteger(ASetupRec.MsePublicSegmentTargetMs,
+                                      RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS,
+                                      RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS));
+
+    // Camera
+    iniFile.WriteString('Camera',
+                        'CameraName',
+                        ASetupRec.CameraName);
+
+    iniFile.WriteString('Camera',
+                        'CameraSymbolicLink',
+                        ASetupRec.CameraSymbolicLink);
   finally
 
     iniFile.Free;

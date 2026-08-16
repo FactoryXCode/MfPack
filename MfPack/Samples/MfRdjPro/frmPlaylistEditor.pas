@@ -228,8 +228,6 @@ type
                                  AProcessedCount: Integer;
                                  ACancelled: Boolean;
                                  const AErrorMsg: string);
-    procedure StopScanThread();
-    function ScanThreadIsRunning(): Boolean;
     // -------------------------------------------------------------------------
 
     procedure InitLibraryGrid();
@@ -288,8 +286,6 @@ implementation
 {$R *.dfm}
 
 uses
-
-  {Application}
   frmMainMDI,
   frmChannelDeck,
   MfAudioFileBrowserDlg,
@@ -343,7 +339,12 @@ end;
 procedure TfrmPlaylistEditor.FormDestroy(Sender: TObject);
 begin
 
-  StopScanThread();
+  if Assigned(FScanThread) then
+    begin
+
+      FScanThread.Terminate;
+      FScanThread := nil;
+    end;
 
   FreeAndNil(FCurrentPlaylist);
   FreeAndNil(FScanner);
@@ -389,6 +390,8 @@ procedure TfrmPlaylistEditor.ScanThreadFinished(Sender: TObject;
                                                 const AErrorMsg: string);
 begin
 
+  FScanThread := nil;
+
   RefreshLibraryGrid(edtSearch.Text);
 
   if (AErrorMsg <> '') then
@@ -404,30 +407,6 @@ begin
   else
     SetStatus(Format('Scan complete. %d file(s) processed.',
                      [AProcessedCount]));
-end;
-
-
-function TfrmPlaylistEditor.ScanThreadIsRunning(): Boolean;
-begin
-
-  Result := Assigned(FScanThread) and not FScanThread.Finished;
-end;
-
-
-procedure TfrmPlaylistEditor.StopScanThread();
-begin
-
-  if not Assigned(FScanThread) then
-    Exit;
-
-  // Prevent Synchronize/notification code from calling back into a form that
-  // is being destroyed.  Terminate is cooperative, so always join the worker
-  // before releasing the form's database and library objects.
-  FScanThread.OnProgress := nil;
-  FScanThread.OnFinished := nil;
-  FScanThread.Terminate;
-  FScanThread.WaitFor;
-  FreeAndNil(FScanThread);
 end;
 
 // -----------------------------------------------------------------------------
@@ -826,15 +805,12 @@ var
 
 begin
 
-  if ScanThreadIsRunning() then
+  if Assigned(FScanThread) then
     begin
 
       ShowMessage('A scan is already running.');
       Exit;
     end;
-
-  // A completed owned thread remains valid until it is explicitly released.
-  StopScanThread();
 
   directory := '';
 
@@ -990,15 +966,12 @@ var
 
 begin
 
-  if ScanThreadIsRunning() then
+  if Assigned(FScanThread) then
     begin
 
       ShowMessage('A scan is already running.');
       Exit;
     end;
-
-  // Reap a previous completed scan before creating its replacement.
-  StopScanThread();
 
   directory := '';
 

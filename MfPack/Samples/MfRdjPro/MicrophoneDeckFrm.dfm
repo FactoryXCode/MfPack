@@ -4,8 +4,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Microphone'
-  ClientHeight = 988
-  ClientWidth = 305
+  ClientHeight = 987
+  ClientWidth = 306
   Color = clBlack
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 479
@@ -27,8 +27,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 305
-    Height = 576
+    Width = 306
+    Height = 580
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -42,11 +42,27 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     TabOrder = 0
     object Bevel4: TBevel
       Left = 0
-      Top = 509
-      Width = 305
-      Height = 67
+      Top = 511
+      Width = 306
+      Height = 69
       Align = alBottom
       ExplicitTop = 510
+    end
+    object lblBalMaster: TLabel
+      Left = 125
+      Top = 562
+      Width = 55
+      Height = 14
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Balance'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
     end
     object Bevel1: TBevel
       Left = 127
@@ -678,22 +694,22 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
   end
   object pnlMid: TPanel
     Left = 0
-    Top = 613
-    Width = 305
-    Height = 375
+    Top = 617
+    Width = 306
+    Height = 370
     Align = alClient
     BevelOuter = bvNone
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
     DesignSize = (
-      305
-      375)
-    object Label13: TLabel
-      Left = 15
-      Top = 94
+      306
+      370)
+    object Label14: TLabel
+      Left = 17
+      Top = 96
       Width = 75
-      Height = -21
+      Height = 18
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -712,6 +728,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ShowHint = False
       Transparent = False
       Layout = tlCenter
+      ExplicitHeight = 22
     end
     object chkMute: TMPxpButton
       Left = 232
@@ -945,9 +962,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlCompEcho: TPanel
       Left = 0
-      Top = 128
-      Width = 305
-      Height = 247
+      Top = 139
+      Width = 306
+      Height = 231
       Align = alBottom
       BevelOuter = bvNone
       Color = 4865081
@@ -957,8 +974,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       object pnlNoiseGate: TPanel
         Left = 0
         Top = 0
-        Width = 305
-        Height = 247
+        Width = 306
+        Height = 231
         Align = alClient
         Color = 5850948
         ParentBackground = False
@@ -1005,7 +1022,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label25: TLabel
           Left = 10
-          Top = 207
+          Top = 185
           Width = 54
           Height = 14
           Margins.Left = 2
@@ -1023,7 +1040,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label26: TLabel
           Left = 131
-          Top = 207
+          Top = 185
           Width = 41
           Height = 14
           Margins.Left = 2
@@ -1041,7 +1058,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label27: TLabel
           Left = 77
-          Top = 207
+          Top = 185
           Width = 36
           Height = 14
           Margins.Left = 2
@@ -1073,7 +1090,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label18: TLabel
           Left = 195
-          Top = 207
+          Top = 185
           Width = 26
           Height = 14
           Margins.Left = 2
@@ -1105,7 +1122,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label15: TLabel
           Left = 251
-          Top = 207
+          Top = 185
           Width = 24
           Height = 14
           Margins.Left = 2
@@ -1126,7 +1143,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
           Left = 75
           Top = 24
           Width = 38
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1164,7 +1181,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
           Left = 132
           Top = 24
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1202,7 +1219,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
           Left = 17
           Top = 24
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1240,7 +1257,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
           Left = 189
           Top = 24
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1278,7 +1295,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
           Left = 245
           Top = 24
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1315,8 +1332,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       object pnlEcho: TPanel
         Left = 0
         Top = 0
-        Width = 305
-        Height = 247
+        Width = 306
+        Height = 231
         Align = alClient
         Color = 5850948
         ParentBackground = False
@@ -1324,7 +1341,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         TabOrder = 1
         object Label6: TLabel
           Left = 15
-          Top = 201
+          Top = 180
           Width = 17
           Height = 14
           Margins.Left = 2
@@ -1342,7 +1359,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label7: TLabel
           Left = 52
-          Top = 201
+          Top = 180
           Width = 29
           Height = 14
           Margins.Left = 2
@@ -1360,7 +1377,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label8: TLabel
           Left = 93
-          Top = 201
+          Top = 180
           Width = 27
           Height = 28
           Margins.Left = 2
@@ -1379,7 +1396,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label9: TLabel
           Left = 137
-          Top = 201
+          Top = 180
           Width = 29
           Height = 14
           Margins.Left = 2
@@ -1397,7 +1414,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label10: TLabel
           Left = 177
-          Top = 201
+          Top = 180
           Width = 34
           Height = 14
           Margins.Left = 2
@@ -1415,7 +1432,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label11: TLabel
           Left = 221
-          Top = 201
+          Top = 180
           Width = 34
           Height = 28
           Margins.Left = 2
@@ -1434,7 +1451,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label12: TLabel
           Left = 265
-          Top = 201
+          Top = 180
           Width = 29
           Height = 28
           Margins.Left = 2
@@ -1544,9 +1561,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoMix: TMfTrackBar
           Left = 5
-          Top = 20
+          Top = 18
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1580,9 +1597,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoDelay: TMfTrackBar
           Left = 47
-          Top = 20
+          Top = 18
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1618,9 +1635,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoFeedback: TMfTrackBar
           Left = 89
-          Top = 20
+          Top = 18
           Width = 38
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1655,9 +1672,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoTone: TMfTrackBar
           Left = 133
-          Top = 20
+          Top = 18
           Width = 38
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1691,9 +1708,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoSpring: TMfTrackBar
           Left = 175
-          Top = 20
+          Top = 18
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1727,9 +1744,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoWowDepth: TMfTrackBar
           Left = 218
-          Top = 20
+          Top = 18
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1764,9 +1781,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbEchoWowRate: TMfTrackBar
           Left = 261
-          Top = 20
+          Top = 18
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -1804,8 +1821,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       object pnlCompressor: TPanel
         Left = 0
         Top = 0
-        Width = 305
-        Height = 247
+        Width = 306
+        Height = 231
         Align = alClient
         Color = 5850948
         ParentBackground = False
@@ -1878,7 +1895,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label19: TLabel
           Left = 0
-          Top = 201
+          Top = 181
           Width = 54
           Height = 14
           Margins.Left = 2
@@ -1896,7 +1913,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label20: TLabel
           Left = 63
-          Top = 201
+          Top = 181
           Width = 27
           Height = 14
           Margins.Left = 2
@@ -1914,7 +1931,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label21: TLabel
           Left = 111
-          Top = 201
+          Top = 181
           Width = 36
           Height = 14
           Margins.Left = 2
@@ -1933,7 +1950,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label22: TLabel
           Left = 159
-          Top = 201
+          Top = 181
           Width = 41
           Height = 14
           Margins.Left = 2
@@ -1951,7 +1968,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label23: TLabel
           Left = 209
-          Top = 201
+          Top = 181
           Width = 42
           Height = 14
           Margins.Left = 2
@@ -1969,7 +1986,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object Label24: TLabel
           Left = 267
-          Top = 201
+          Top = 181
           Width = 28
           Height = 14
           Margins.Left = 2
@@ -2001,9 +2018,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompKnee: TMfTrackBar
           Left = 261
-          Top = 22
+          Top = 20
           Width = 38
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2038,9 +2055,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompMakeup: TMfTrackBar
           Left = 210
-          Top = 22
+          Top = 20
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2076,9 +2093,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompRelease: TMfTrackBar
           Left = 159
-          Top = 22
+          Top = 20
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2114,9 +2131,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompAttack: TMfTrackBar
           Left = 109
-          Top = 22
+          Top = 20
           Width = 38
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2152,9 +2169,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompRatio: TMfTrackBar
           Left = 58
-          Top = 22
+          Top = 20
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2190,9 +2207,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompThreshold: TMfTrackBar
           Left = 7
-          Top = 22
+          Top = 20
           Width = 39
-          Height = 180
+          Height = 160
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
@@ -2297,8 +2314,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlFXButtons: TPanel
       Left = 0
-      Top = 84
-      Width = 305
+      Top = 95
+      Width = 306
       Height = 44
       Align = alBottom
       BevelOuter = bvNone
@@ -2661,11 +2678,126 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         OnClick = chkNoiseGateClick
       end
     end
+    object chkCrossFade: TMPxpButton
+      Left = 232
+      Top = 56
+      Width = 66
+      Height = 40
+      Alignment = taCenter
+      Caption = 'X Fade'
+      Color = 6899524
+      ColorWhenDown = 10045252
+      ColorWhenUp = 6899524
+      Behavior = bbCheckBox
+      Checked = False
+      GlyphUnchecked.Data = {
+        C6040000424DC60400000000000036040000280000000C0000000C0000000100
+        08000000000090000000230B0000230B00000001000000010000000000000000
+        1900001900000019190019000000190019001919000060606000607E6000956B
+        430000005C002F0000001D00000002000000020002000000130000002F000200
+        2F00000042000000420000005C0000005C0000025C0000026F00001D7800132F
+        7800002F8B001D5393002F5393002F669C0042669C005C789C007893A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5A500A5A5
+        A500A5A5A500A5A5A500A5A5A500A5A5A50095A1A500413C3C00191919000000
+        A50000A5000000A5A500A5000000A500A500A5A50000A5A5A500000000000000
+        00000000000000000010151717151000000000001116181A1A18161100000010
+        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+        1E1C1916100000001116181A1A18161100000000001015171715100000000000
+        00000000000000000000}
+      GlyphChecked.Data = {
+        C6040000424DC60400000000000036040000280000000C0000000C0000000100
+        08000000000090000000230B0000230B00000001000000010000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A600004ABD0094081800841839006B184A006B296B0042297B00524A94006B4A
+        94001839A5001842A500004ABD00315ABD005A6BBD00296BCE005A84D6007B94
+        D6005A94E70084B5EF0094B5EF0094C6F700A5C6F700BDD6F700D6EFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00000000000000
+        00000000000000000010151717151000000000001116181A1A18161100000010
+        16191C1E1E1C191610000015181B1F20201F1B18150000171A1D202121201D1A
+        170000171A1D202121201D1A17000015181B1F20201F1B181500001016191C1E
+        1E1C1916100000001116181A1A18161100000000001015171715100000000000
+        00000000000000000000}
+      ImageIndexUnchecked = 0
+      ImageIndexChecked = 0
+      ShowFocusRect = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clAqua
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      GlyphTransparentColor = clBlack
+      GlyphTransparent = True
+      HotTrackFont.Charset = DEFAULT_CHARSET
+      HotTrackFont.Color = clWindowText
+      HotTrackFont.Height = -18
+      HotTrackFont.Name = 'Segoe UI'
+      HotTrackFont.Style = []
+      Layout = blGlyphTop
+      LightColor = clSkyBlue
+      ParentColor = False
+      ParentFont = False
+      ShadowColor = clAqua
+      SlowDecease = True
+      OnClick = chkCrossFadeClick
+    end
   end
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 305
+    Width = 306
     Height = 37
     Align = alTop
     Color = 4865081
@@ -2692,24 +2824,25 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Layout = tlCenter
     end
     object shpSignalCap: TShape
-      Left = 211
+      Left = 213
       Top = 4
-      Width = 88
+      Width = 87
       Height = 29
       Brush.Color = 5850948
       Pen.Color = 5668864
+      Pen.Width = 3
     end
     object shpSignal: TShape
-      Left = 214
-      Top = 7
-      Width = 83
-      Height = 24
-      Brush.Color = 5668864
+      Left = 217
+      Top = 8
+      Width = 79
+      Height = 21
+      Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblSignal: TLabel
-      Left = 217
-      Top = 9
+      Left = 220
+      Top = 7
       Width = 75
       Height = 19
       Alignment = taCenter
@@ -2721,7 +2854,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
-      Transparent = False
+      Transparent = True
     end
   end
   object chkEchoEnabled: TMPxpButton
@@ -2959,6 +3092,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Interval = 40
     OnTimer = tmrUiTimer
     Left = 202
-    Top = 8
+    Top = 50
   end
 end

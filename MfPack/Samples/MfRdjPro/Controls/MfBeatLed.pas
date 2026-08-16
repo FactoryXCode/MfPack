@@ -458,7 +458,6 @@ var
   TVal: Double;
 
 begin
-
   FLastPosition100ns := APosition100ns;
 
   if not FPulseActive then

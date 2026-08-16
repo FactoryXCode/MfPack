@@ -280,6 +280,7 @@ type
     property ShowHint;
     property SlowDecease: Boolean read FSlowDecease write SetSlowDecease default False;
     property Style: TMPButtonStyle read FStyle write SetStyle default bsNormal;
+    property Tag default 0;
     property Transparent: Boolean read FTransparent write SetTransparent default False;
     property UseHotTrackFont: Boolean read FUseHTFont write FUseHTFont default False;
     property Visible;
@@ -625,14 +626,33 @@ end;
 
 
 procedure TMPxpButton.SetStyle(Value: TMPButtonStyle);
+var
+  ScreenDC: HDC;
+  BitsPerPixel: Integer;
+
 begin
 
-  // Respect old 8bpp limitation but don't silently ignore property updates
+  // Never request Canvas.Handle from a streamed property setter. Doing so can
+  // create the control and its parent MDI child while the DFM is still loading,
+  // which raises EReadError before the MDI parent is active. A screen DC gives
+  // us the same display-depth information without allocating a control handle.
   if (Value = bsModern) and
-     (GetDeviceCaps(Canvas.Handle,
-                    BITSPIXEL) <= 8) and
      (not (csDesigning in ComponentState)) then
-    Value := bsNormal;
+    begin
+      BitsPerPixel := 32;
+      ScreenDC := GetDC(0);
+      if ScreenDC <> 0 then
+        try
+          BitsPerPixel := GetDeviceCaps(ScreenDC,
+                                        BITSPIXEL);
+        finally
+          ReleaseDC(0,
+                    ScreenDC);
+        end;
+
+      if BitsPerPixel <= 8 then
+        Value := bsNormal;
+    end;
 
   if (FStyle = Value) then
     Exit;

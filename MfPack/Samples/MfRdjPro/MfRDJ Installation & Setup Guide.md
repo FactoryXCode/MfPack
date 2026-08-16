@@ -11,20 +11,19 @@ MfRDJ supports two setup modes:
 All components run on one machine:
 
 * MfRDJ
-* Icecast
 * Caddy
 
 **Use this for:**
 
 * Testing
 * Development
-* Private use
+* Private use on your local network.
 
 ---
 
 ## Server Setup (Network / Internet)
 
-Icecast + Caddy run on a **server PC**, accessible by:
+Caddy run on a **server PC**, accessible by:
 
 * Local network (LAN)
 * Internet (public users)
@@ -74,24 +73,6 @@ factoryxradio.asuscomm.com
 
 ---
 
-# Icecast Setup
-
-1. Extract:
-
-```text
-..\MfPack\Samples\MfRdjJ\Binaries\icecast_win64_2.5.0.zip
-```
-
-2. Install Icecast
-
-3. Replace config:
-
-```text
-..\MfPack\Samples\MfRdjJ\Binaries\IceCast_defXML\icecast.xml
-```
-
----
-
 # Caddy Setup (Web + PWA)
 
 1. Extract:
@@ -114,7 +95,6 @@ C:\Caddy
 
 ### Applications:
 
-* `icecast.exe`
 * `caddy.exe`
 
 ### Ports:
@@ -158,14 +138,12 @@ Enable:
 
 ---
 
-# Server PC vs User Device
+#  Server PC vs 📱 User Device
 
-## Server PC
+##  Server PC
 
 Runs:
 
-* MfRDJ
-* Icecast
 * Caddy
 
 Must have:
@@ -191,14 +169,14 @@ Note: No firewall setup needed
 
 ## Install Components
 
-* MfPack
-* RDJ Controls
+* MfPack MfComponents
+* RDJ Pro Controls
 
 ## Add Search Paths
 
 ```text
 ..\MfPack\src
-..\MfPack\Samples\MfRdjJ\Controls
+..\MfPack\Samples\MfRdjPro\Controls
 ..\MfPack\Samples\MfComponents
 ```
 
@@ -210,7 +188,7 @@ Note: No firewall setup needed
 
 ---
 
-# Running MfRDJ
+#  Running MfRdjPro
 
 First run:
 
@@ -278,20 +256,6 @@ Password: your_password
 
 ---
 
-# Icecast Server Manager
-
-Example:
-
-```text
-Host: 127.0.0.1
-Port: 8000
-EXE: C:\Icecast\bin\icecast.exe
-Config: C:\Icecast\icecast.xml
-Working Dir: C:\Icecast
-```
-
----
-
 # Caddy Setup
 
 ```text
@@ -303,7 +267,7 @@ C:\Caddy\nowplaying.json
 Run:
 
 ```text
-caddy.exe run --config "C:\Caddy\Caddyfile"
+ caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile
 ```
 
 ---
@@ -368,9 +332,8 @@ https://yourdomain.com
 
 ## Server PC
 
-* [ ] Icecast running
 * [ ] Caddy running
-* [ ] Firewall open
+* [ ] Firewall allow Caddy and RdjPro
 * [ ] Ports forwarded
 * [ ] Correct host
 

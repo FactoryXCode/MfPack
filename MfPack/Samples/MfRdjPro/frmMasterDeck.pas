@@ -104,7 +104,7 @@ uses
   MfTrackBar,
   MPxpButton,
   MfAudioMixVisualizer,
-  MfIcecastServerManager;
+  RdjAudioMixVisualizer;
 
 const
   MIN_VOLUME = 0.0;
@@ -142,6 +142,12 @@ type
     epPFL: TMfAudioEndPoint;
     epMaster: TMfAudioEndPoint;
     tmrTime: TTimer;
+    Shape2: TShape;
+    Shape1: TShape;
+    Shape3: TShape;
+    Shape4: TShape;
+    Shape5: TShape;
+    Shape6: TShape;
     pnlCaption: TPanel;
     lblCaption: TLabel;
     pnlRecIcecast: TPanel;
@@ -158,11 +164,10 @@ type
     lblAudioRecorder: TLabel;
     Bevel1: TBevel;
     lblFileExt: TLabel;
-    OnRecordingCap: TShape;
     shpRecording: TShape;
     lblRecording: TLabel;
     pnlFXButtons: TPanel;
-    avMixGraph: TMfAudioMixVisualizer;
+    avMixGraph: TRdjAudioMixVisualizer;
 
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -338,10 +343,9 @@ end;
 procedure TMasterDeckFrm.FormCreate(Sender: TObject);
 begin
 
-  // No form caption
-  SetWindowLong(Handle,
-                GWL_STYLE,
-                GetWindowLong(Handle, GWL_STYLE) and not WS_CAPTION or WS_BORDER);
+  // Do not request Handle here. This DFM uses OldCreateOrder, so FormCreate can
+  // run while the form resource is still being streamed and before its MDI
+  // parent is active. Window-style changes are applied safely in FormShow.
 end;
 
 
@@ -357,6 +361,13 @@ end;
 
 procedure TMasterDeckFrm.FormShow(Sender: TObject);
 begin
+
+  // No form caption. FormShow runs after DFM streaming and MDI activation, so
+  // creating/accessing the child window handle is safe here.
+  SetWindowLong(Handle,
+                GWL_STYLE,
+                GetWindowLong(Handle,
+                              GWL_STYLE) and not WS_CAPTION or WS_BORDER);
 
   //Height := 1538;
   //Width := 507;
@@ -1049,7 +1060,7 @@ begin
   if pSetupRec.AudioRecorderAutoBufferSize then
     prBufferDuration := 0
   else
-    prBufferDuration := (REFTIMES_PER_MILLISEC) * pSetupRec.AudioRecorderCaptureBufferSize;
+    prBufferDuration := (REFTIMES_PER_MILLISEC) * pSetupRec.AudioRecorderCaptureBufferMs;
 
   prTargetLatency := pSetupRec.AudioRecorderSystemLatency;
 

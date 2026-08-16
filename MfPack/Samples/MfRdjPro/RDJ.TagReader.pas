@@ -540,10 +540,10 @@ var
 begin
 
   Result := False;
+  LastBlock := False;
 
   if not SameText(ExtractFileExt(AFileName), '.flac') then
     Exit;
-  LastBlock := False;
 
   FS := TFileStream.Create(AFileName,
                            fmOpenRead or fmShareDenyWrite);
