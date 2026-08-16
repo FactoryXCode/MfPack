@@ -146,8 +146,8 @@ type
     procedure SetCallbacks(const ACallbacks: TMfCastChannelCallbacks);
     procedure SetLogger(const ALogger: IMfCastLogger);
     function Connect(const ADevice: TMfCastDevice): HRESULT;
-    function Disconnect: HRESULT;
-    function LaunchReceiver: HRESULT;
+    function Disconnect(): HRESULT;
+    function LaunchReceiver(): HRESULT;
     function LoadMedia(const ARequest: TMfCastLoadRequest): HRESULT;
     function Play(): HRESULT;
     function Pause(): HRESULT;
@@ -705,7 +705,7 @@ end;
 constructor TMfCastChannel.Create(const ATransport: IMfCastTransport);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FTransport := ATransport;
   FState := csIdle;
@@ -1107,7 +1107,9 @@ var
 
 begin
 
-  if InterlockedCompareExchange(FStopInProgress, 1, 0) <> 0 then
+  if (InterlockedCompareExchange(FStopInProgress, 
+                                 1,
+                                 0) <> 0) then
     begin
       Result := S_OK;
       Exit;
@@ -1369,8 +1371,7 @@ begin
 end;
 
 
-function TMfCastChannel.SynchronizeMediaStatus(
-  const ATimeoutMs: Cardinal): HRESULT;
+function TMfCastChannel.SynchronizeMediaStatus(const ATimeoutMs: Cardinal): HRESULT;
 begin
 
   FReceivedMediaStatus := False;
@@ -1704,7 +1705,7 @@ begin
     end
   else
     if (Pos('CLOSE',
-           AJsonPayload) > 0) then
+            AJsonPayload) > 0) then
       begin
         FSessionId := '';
         FTransportId := FSettings.ReceiverId;
@@ -1748,7 +1749,8 @@ begin
       Exit;
     end;
 
-  if Pos('MEDIA_STATUS', AJsonPayload) = 0 then
+  if (Pos('MEDIA_STATUS', 
+          AJsonPayload) = 0) then
     Exit;
 
   if (Pos('"status":[]',
@@ -2042,7 +2044,7 @@ begin
     Result := ReadFrame(msgMessage);
     if (Result = S_FALSE) then
       begin
-        if (GetTickCount() - LastStatusTick) >= 3000 then
+        if ((GetTickCount() - LastStatusTick) >= 3000) then
           begin
             RequestMediaStatus();
             LastStatusTick := GetTickCount();

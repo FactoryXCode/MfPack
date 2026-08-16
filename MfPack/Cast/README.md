@@ -97,4 +97,4 @@ First release date: 02/08/2026
 
 Final release date: 13/08/2026
 
-Copyright Â© FactoryX. All rights reserved.
+Copyright © FactoryX. All rights reserved.

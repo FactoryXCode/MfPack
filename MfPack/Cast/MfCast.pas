@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -113,9 +113,9 @@ type
     constructor Create(const AEnableTranscoding: Boolean = False);
     destructor Destroy(); override;
 
-    function Discover: HRESULT;
-    function StopDiscovery: HRESULT;
-    function RefreshDiscovery: HRESULT;
+    function Discover(): HRESULT;
+    function StopDiscovery(): HRESULT;
+    function RefreshDiscovery(): HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function GetMediaTracks(const ASource: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
@@ -131,6 +131,7 @@ type
 
     function Cast(const ADevice: TMfCastDevice;
                   const ASource: string): HRESULT; overload;
+                  
     function Cast(const ADevice: TMfCastDevice;
                   const ASource: string;
                   const ASubtitle: TMfCastSubtitleAsset;
@@ -203,7 +204,7 @@ begin
 end;
 
 
-procedure TMfCastLogger.Detach;
+procedure TMfCastLogger.Detach();
 begin
 
   FOwner := nil;
@@ -246,13 +247,13 @@ begin
                             [DWORD(Hr)]);
   FMediaFoundationStarted := True;
 
-  Components.Reset;
+  Components.Reset();
   Components.Discovery := TMfCastMdnsDiscovery.Create;
   Components.Channel := TMfCastChannel.Create(TMfCastTcpTransport.Create);
   Components.HttpServer := TMfCastHttpServer.Create;
   Components.MediaInspector := TMfCastMediaInspector.Create;
 
-  Profile.Reset;
+  Profile.Reset();
   Profile.Name := 'Default Chromecast direct-play profile';
   SetLength(Profile.AllowedContentTypes, 5);
   Profile.AllowedContentTypes[0] := 'video/mp4';
@@ -276,7 +277,7 @@ begin
   FLogger := TMfCastLogger.Create(Self);
   FController.SetLogger(FLogger);
 
-  Callbacks.Reset;
+  Callbacks.Reset();
   Callbacks.OnDeviceAdded := ControllerDeviceAdded;
   Callbacks.OnDeviceUpdated := ControllerDeviceUpdated;
   Callbacks.OnDeviceRemoved := ControllerDeviceRemoved;
@@ -301,7 +302,7 @@ begin
 
   if Assigned(FController) then
     begin
-      Callbacks.Reset;
+      Callbacks.Reset();
       FController.SetCallbacks(Callbacks);
       FController.SetLogger(nil);
       FController.StopDiscovery;
@@ -321,24 +322,24 @@ begin
 end;
 
 
-function TMfCast.Discover: HRESULT;
+function TMfCast.Discover(): HRESULT;
 begin
 
   Result := FController.StartDiscovery;
 end;
 
 
-function TMfCast.StopDiscovery: HRESULT;
+function TMfCast.StopDiscovery(): HRESULT;
 begin
 
-  Result := FController.StopDiscovery;
+  Result := FController.StopDiscovery();
 end;
 
 
-function TMfCast.RefreshDiscovery: HRESULT;
+function TMfCast.RefreshDiscovery(): HRESULT;
 begin
 
-  Result := FController.RefreshDiscovery;
+  Result := FController.RefreshDiscovery();
 end;
 
 
@@ -364,8 +365,13 @@ var
 
 begin
 
-  Subtitle.Reset;
-  Result := Cast(ADevice, ASource, Subtitle, cmmAutomatic, csmNone, 0.0);
+  Subtitle.Reset();
+  Result := Cast(ADevice, 
+                 ASource,
+                 Subtitle,
+                 cmmAutomatic,
+                 csmNone,
+                 0.0);
 end;
 
 
@@ -382,8 +388,12 @@ var
 
 begin
 
-  Subtitle.Reset;
-  Result := Load(ASource, Subtitle, cmmAutomatic, csmNone, 0.0);
+  Subtitle.Reset();
+  Result := Load(ASource, 
+                 Subtitle,
+                 cmmAutomatic,
+                 csmNone,
+                 0.0);
 end;
 
 
@@ -529,7 +539,7 @@ end;
 function TMfCast.State(): TMfCastState;
 begin
 
-  Result := FController.GetState;
+  Result := FController.GetState();
 end;
 
 
@@ -562,7 +572,8 @@ procedure TMfCast.ControllerStateChanged(const AOldState: TMfCastState;
 begin
 
   if Assigned(FOnStateChanged) then
-    FOnStateChanged(AOldState, ANewState);
+    FOnStateChanged(AOldState, 
+                    ANewState);
 end;
 
 

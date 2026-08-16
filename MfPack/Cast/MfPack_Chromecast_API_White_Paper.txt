@@ -2,8 +2,8 @@ MfPack Chromecast API
 Independent Delphi Chromecast Framework
 Design Notes
 
-Version: 1.1
-Date: 11 August 2026
+Version: 2.0
+Date: 13 August 2026
 
 
 1. What This Is
@@ -35,7 +35,8 @@ subtitle conversion, media preparation, and optional remuxing/transcoding.
 2. Why Split It Up
 =================
 
-MfPack is intended not only as a multimedia framework but also as a collection of examples from which Delphi developers can learn. Chromecast support itself combines several distinct responsibilities:
+MfPack is intended not only as a multimedia framework but also as a collection of examples from which Delphi developers can learn.
+Chromecast support itself combines several distinct responsibilities:
 
 - Media-track selection
 - Subtitle management
@@ -88,7 +89,7 @@ The sample shows:
 
 without having to understand a complete media-player application.
 
-3.4 Works with Delphi XE7
+3.4 Works with Delphi XE7 and up to and including Delphi 12.
 -------------------------
 
 The public API and core implementation remain compatible with Delphi XE7, the
@@ -428,10 +429,11 @@ This unit handles:
 - Post command completion back to a target window
 - Carry allocated log text safely through the Windows message queue
 
-This unit is not required by the core API. Console applications, services,
-FireMonkey applications, and clients with their own task framework can marshal
-callbacks and commands differently. Platform-neutral choice and track records
-remain in `MfCastTypes.pas`.
+This unit is not required by the core API.
+Console applications, services, FireMonkey applications, and
+clients with their own task framework can marshal callbacks and 
+commands differently.
+Platform-neutral choice and track records remain in `MfCastTypes.pas`.
 
 
 7. Which Way Dependencies Point
@@ -460,8 +462,8 @@ Dependencies flow in this direction:
 boundary. `MfCastMediaInterfaces` is used only where Media Foundation byte
 streams or samples are required.
 
-Applications may call MfCast. MfCast must never call or reference an application
-form.
+Applications may call MfCast.
+MfCast must never call or reference an application form.
 
 
 8. Public API
