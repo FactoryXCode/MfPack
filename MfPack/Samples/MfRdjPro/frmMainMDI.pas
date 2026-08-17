@@ -306,6 +306,7 @@ type
     function ResolveCaddyLogFileName(): string;
     function ReadCaddyActiveListenerCount(): Integer;
     procedure RefreshCaddyListenerCount(const AForceJsonUpdate: Boolean);
+
     procedure WriteNowPlayingStatus(const ADjName,
                                     AShowName,
                                     AArtist,
@@ -448,7 +449,10 @@ implementation
 {$R *.dfm}
 
 uses
+
+  {System}
   System.IniFiles,
+  {Application}
   LWFileBrowserExDlg,
   RDJ.PlaylistDb;
 
@@ -696,17 +700,12 @@ begin
 
   for I := 0 to Screen.FormCount - 1 do
     begin
-
       F := Screen.Forms[I];
 
       M := TMethod(TCustomFormAccess(F).OnDestroy);
 
-      OutputDebugString(PChar(Format(
-        'FORM %s.%s OnDestroy Code=%p Data=%p',
-        [F.ClassName,
-         F.Name,
-         M.Code,
-         M.Data])));
+      OutputDebugString(PChar(Format('FORM %s.%s OnDestroy Code=%p Data=%p',
+                                     [F.ClassName, F.Name, M.Code, M.Data])));
     end;
 end;
 }
@@ -822,13 +821,13 @@ begin
                               @GUID_SYSTEM_BUTTON_SUBGROUP,
                               @GUID_LIDCLOSE_ACTION,
                               DcValue);
-  if Hr <> ERROR_SUCCESS then
+  if (hr <> ERROR_SUCCESS) then
     begin
       LocalFree(HLOCAL(Scheme));
       OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerReadDCValueIndex error=%d',
-                                     [Hr])));
+                                     [hr])));
       WarnLidCloseOverrideFailedOnce(Format('PowerReadDCValueIndex failed: %d',
-                                            [Hr]));
+                                            [hr]));
       Exit;
     end;
 
@@ -837,7 +836,7 @@ begin
                                @GUID_SYSTEM_BUTTON_SUBGROUP,
                                @GUID_LIDCLOSE_ACTION,
                                RDJ_POWER_ACTION_DO_NOTHING);
-  if Hr <> ERROR_SUCCESS then
+  if (hr <> ERROR_SUCCESS) then
     begin
       LocalFree(HLOCAL(Scheme));
       OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerWriteACValueIndex error=%d',
@@ -852,7 +851,7 @@ begin
                                @GUID_SYSTEM_BUTTON_SUBGROUP,
                                @GUID_LIDCLOSE_ACTION,
                                RDJ_POWER_ACTION_DO_NOTHING);
-  if Hr <> ERROR_SUCCESS then
+  if (hr <> ERROR_SUCCESS) then
     begin
       LocalFree(HLOCAL(Scheme));
       OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerWriteDCValueIndex error=%d',
@@ -864,7 +863,7 @@ begin
 
   Hr := PowerSetActiveScheme(0,
                              Scheme);
-  if Hr <> ERROR_SUCCESS then
+  if (hr <> ERROR_SUCCESS) then
     begin
       LocalFree(HLOCAL(Scheme));
       OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerSetActiveScheme error=%d',
@@ -879,11 +878,8 @@ begin
   FOriginalLidActionDc := DcValue;
   FLidPolicyOverrideActive := True;
 
-  OutputDebugString(PChar(Format(
-    'RDJ Pro lid close override active: originalAC=%d originalDC=%d newAction=%d',
-    [AcValue,
-     DcValue,
-     RDJ_POWER_ACTION_DO_NOTHING])));
+  OutputDebugString(PChar(Format('RDJ Pro lid close override active: originalAC=%d originalDC=%d newAction=%d',
+                                 [AcValue, DcValue, RDJ_POWER_ACTION_DO_NOTHING])));
 end;
 
 
@@ -918,7 +914,6 @@ begin
 
   if (FPowerPolicyScheme = nil) then
     begin
-
       FLidPolicyOverrideActive := False;
       Exit;
     end;
@@ -1227,8 +1222,7 @@ begin
     ApplySetupOnce()
   else
     begin
-
-      if MissingFolders <> '' then
+      if (MissingFolders <> '') then
         MessageDlg('One or more folders stored in the setup file are no longer available:' +
                    sLineBreak + sLineBreak +
                    MissingFolders + sLineBreak +
@@ -1251,7 +1245,6 @@ begin
   hr := FMasterOut.Prepare(@wfx);
   if FAILED(hr) then
     begin
-
       ClearAudioEndpointSetup();
 
       MessageDlg('The stored master audio endpoint is no longer valid or cannot be opened.' + sLineBreak +
@@ -1276,7 +1269,6 @@ begin
       hr := FCueOut.Prepare(@wfx);
       if FAILED(hr) then
         begin
-
           // KEEP the stored cue settings.
           // Runtime failure only; no destructive config mutation.
           FreeAndNil(FCueOut);
@@ -1374,7 +1366,7 @@ var
       Exit;
 
     FolderName := ExtractFileDir(Trim(AFileName));
-    if FolderName <> '' then
+    if (FolderName <> '') then
       CheckFolder(ASettingName,
                   FolderName);
   end;
@@ -1488,7 +1480,6 @@ begin
 
   if (Button = mbLeft) then
     begin
-
       ReleaseCapture();
       Perform(WM_SYSCOMMAND,
               SC_DRAGMOVE,
@@ -1738,7 +1729,7 @@ var
       begin
         P := Pos(']',
                  S);
-        if P > 0 then
+        if (P > 0) then
           Exit(Copy(S,
                     2,
                     P - 2));
@@ -1746,7 +1737,7 @@ var
 
     P := Pos(':',
              S);
-    if P > 0 then
+    if (P > 0) then
       S := Copy(S,
                 1,
                 P - 1);
@@ -1766,7 +1757,7 @@ begin
                                fmOpenRead or fmShareDenyNone);
   try
     ReadSize := Stream.Size;
-    if ReadSize > RDJ_CADDY_LOG_TAIL_BYTES then
+    if (ReadSize > RDJ_CADDY_LOG_TAIL_BYTES) then
       ReadSize := RDJ_CADDY_LOG_TAIL_BYTES;
 
     if ReadSize <= 0 then
@@ -1785,6 +1776,7 @@ begin
 
   Lines := TStringList.Create;
   Clients := TStringList.Create;
+
   try
     Lines.Text := Text;
     Clients.Sorted := True;
@@ -1867,7 +1859,7 @@ begin
 
   OldCount := FCaddyListenerCount;
   NewCount := ReadCaddyActiveListenerCount();
-  if NewCount < 0 then
+  if (NewCount < 0) then
     Exit;
 
   FCaddyListenerCount := NewCount;
@@ -1919,8 +1911,8 @@ begin
       if (AValue[i] = '\') and
          (i < Length(AValue)) then
         begin
-
           Inc(i);
+
           case AValue[i] of
             'n':
               Result := Result + sLineBreak;
@@ -1958,7 +1950,6 @@ begin
     if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
                            RDJ_BROADCAST_IDENTITY_DJ_NAME) then
       begin
-
         Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
                                     RDJ_BROADCAST_IDENTITY_DJ_NAME,
                                     '');
@@ -1969,7 +1960,6 @@ begin
     if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
                            RDJ_BROADCAST_IDENTITY_SHOW_NAME) then
       begin
-
         Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
                                     RDJ_BROADCAST_IDENTITY_SHOW_NAME,
                                     '');
@@ -1985,7 +1975,6 @@ begin
 
         if FileExists(FCoverFileName) then
           begin
-
             try
               imgDjShowLogo.Picture.LoadFromFile(FCoverFileName);
             except
@@ -3187,10 +3176,11 @@ begin
     on E: EReadError do
     begin
       FMasterDeck := nil;
-      OutputDebugString(PChar('RDJ Pro could not load the Master Deck form: ' +
-        E.Message));
-      MessageDlg('The Master Deck form could not be loaded.' + sLineBreak +
-        sLineBreak + E.Message, mtError, [mbOK], 0);
+      OutputDebugString(PChar('RDJ Pro could not load the Master Deck form: ' + E.Message));
+      MessageDlg('The Master Deck form could not be loaded.' + sLineBreak + sLineBreak + E.Message,
+                 mtError,
+                 [mbOK],
+                 0);
       Exit;
     end;
   end;
@@ -3225,7 +3215,6 @@ begin
 
   for i := 0 to Count - 1 do
     begin
-
       FChannelDecks[i] := TfrmChannelDeck.Create(Self);
       FChannelDecks[i].ChannelIndex := i;
       FChannelDecks[i].lblCaption.Caption := Format('Channel %d',
@@ -3268,7 +3257,6 @@ begin
 
   for i := 0 to Count - 1 do
     begin
-
       FLoopbackDecks[i] := TfrmLoopbackDeck.Create(Self);
       FLoopbackDecks[i].lblCaption.Caption := Format('Loopback %d',
                                                      [i + 1]);
@@ -3340,7 +3328,6 @@ begin
 
   if not Assigned(FInternalMixer) then
     begin
-
       FillChar(pData^,
                ByteCount,
                0);
@@ -3498,7 +3485,6 @@ begin
 
   if RecPre then
     begin
-
       if not Assigned(FInternalMixRecorderPreFx) then
         FInternalMixRecorderPreFx := TMfInternalMixerRecorder.Create();
 
@@ -3512,7 +3498,6 @@ begin
 
   if RecPost then
     begin
-
       if not Assigned(FInternalMixRecorderPostFx) then
         FInternalMixRecorderPostFx := TMfInternalMixerRecorder.Create();
 

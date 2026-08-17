@@ -210,7 +210,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 1811
     end
     object btnSetup: TMPxpButton
       Left = 105
