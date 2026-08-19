@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FactoryX PWA Check</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { font-family: Arial, sans-serif; background:#02070d; color:#f5fbff; padding:16px; }
+    pre { white-space:pre-wrap; background:#061320; border:1px solid #00e5ff55; padding:12px; border-radius:10px; }
+    button { padding:12px 18px; border-radius:10px; border:0; font-weight:bold; margin:8px 8px 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>FactoryX PWA Check</h1>
+  <p>Open this on your phone: <b>https://factoryxradio.asuscomm.com/pwa-check.html</b></p>
+  <button id="btnRun">Run check</button>
+  <button id="btnInstall">Test install prompt</button>
+  <pre id="out">Waiting...</pre>
+
+<script>
+let deferredInstallPrompt = null;
+let installEventSeen = false;
+
+window.addEventListener("beforeinstallprompt", function(event) {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installEventSeen = true;
+  logLine("beforeinstallprompt fired: YES");
+});
+
+window.addEventListener("appinstalled", function() {
+  logLine("appinstalled fired: YES");
+});
+
+const out = document.getElementById("out");
+
+function line(status, name, value) {
+  return status + " " + name + ": " + value + "\n";
+}
+
+function logLine(text) {
+  out.textContent += "\n" + text;
+}
+
+async function imageSize(url) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.onload = function() {
+      resolve({ ok:true, width:img.naturalWidth, height:img.naturalHeight });
+    };
+    img.onerror = function() {
+      resolve({ ok:false, width:0, height:0 });
+    };
+    img.src = url + "?check=" + Date.now();
+  });
+}
+
+async function runCheck() {
+  let s = "";
+  s += line(location.protocol === "https:" ? "OK" : "BAD", "HTTPS", location.protocol);
+  s += line("serviceWorker" in navigator ? "OK" : "BAD", "ServiceWorker API", ("serviceWorker" in navigator));
+  s += line(window.matchMedia("(display-mode: standalone)").matches ? "OK" : "WARN", "Standalone display mode", window.matchMedia("(display-mode: standalone)").matches);
+  s += line(navigator.serviceWorker && navigator.serviceWorker.controller ? "OK" : "BAD", "Service worker controls this page", !!(navigator.serviceWorker && navigator.serviceWorker.controller));
+
+  try {
+    const reg = await navigator.serviceWorker.getRegistration("/");
+    s += line(reg ? "OK" : "BAD", "SW registration for /", reg ? (reg.scope || "registered") : "none");
+    if (reg) {
+      s += line(reg.active ? "OK" : "BAD", "SW active", !!reg.active);
+      s += line(reg.installing ? "WARN" : "OK", "SW installing", !!reg.installing);
+      s += line(reg.waiting ? "WARN" : "OK", "SW waiting", !!reg.waiting);
+    }
+  } catch(e) {
+    s += line("BAD", "SW registration error", e.message);
+  }
+
+  try {
+    const mf = await fetch("/manifest.json?check=" + Date.now(), { cache:"no-store" });
+    s += line(mf.ok ? "OK" : "BAD", "manifest HTTP", mf.status + " " + mf.headers.get("content-type"));
+    const manifest = await mf.json();
+    s += line(manifest.name ? "OK" : "BAD", "manifest name", manifest.name || "");
+    s += line(manifest.short_name ? "OK" : "BAD", "manifest short_name", manifest.short_name || "");
+    s += line(manifest.start_url ? "OK" : "BAD", "manifest start_url", manifest.start_url || "");
+    s += line(manifest.display ? "OK" : "BAD", "manifest display", manifest.display || "");
+    s += line(manifest.icons && manifest.icons.length ? "OK" : "BAD", "manifest icons count", manifest.icons ? manifest.icons.length : 0);
+  } catch(e) {
+    s += line("BAD", "manifest parse", e.message);
+  }
+
+  try {
+    const sw = await fetch("/sw.js?check=" + Date.now(), { cache:"no-store" });
+    const swText = await sw.text();
+    s += line(sw.ok ? "OK" : "BAD", "sw.js HTTP", sw.status + " " + sw.headers.get("content-type"));
+    s += line(swText.indexOf("fetch") >= 0 ? "OK" : "BAD", "sw.js has fetch handler", swText.indexOf("fetch") >= 0);
+    s += line(swText.indexOf("factoryx-radio") >= 0 ? "OK" : "WARN", "sw.js looks like FactoryX SW", swText.slice(0, 80).replace(/\n/g, " "));
+  } catch(e) {
+    s += line("BAD", "sw.js fetch", e.message);
+  }
+
+  const i192 = await imageSize("/icons/icon-192.png");
+  s += line(i192.ok && i192.width === 192 && i192.height === 192 ? "OK" : "BAD", "icon-192 size", i192.width + "x" + i192.height);
+
+  const i512 = await imageSize("/icons/icon-512.png");
+  s += line(i512.ok && i512.width === 512 && i512.height === 512 ? "OK" : "BAD", "icon-512 size", i512.width + "x" + i512.height);
+
+  s += line(installEventSeen ? "OK" : "WARN", "beforeinstallprompt seen", installEventSeen);
+  s += "\nIf 'Service worker controls this page' is BAD, reload this page once or twice.\n";
+  s += "If all technical checks are OK but beforeinstallprompt is WARN, Chromium is suppressing the prompt.\n";
+
+  out.textContent = s;
+}
+
+document.getElementById("btnRun").addEventListener("click", runCheck);
+document.getElementById("btnInstall").addEventListener("click", async function() {
+  if (!deferredInstallPrompt) {
+    alert("No install prompt available. Run check and look for BAD lines.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").then(function() {
+    setTimeout(runCheck, 800);
+  }).catch(function(e) {
+    out.textContent = "Service worker registration failed: " + e.message;
+  });
+} else {
+  runCheck();
+}
+</script>
+</body>
+</html>

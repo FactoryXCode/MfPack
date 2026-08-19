@@ -299,7 +299,10 @@ type
 
     function BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
     function NormalizeNowPlayingMemoText(AMemo: TMemo): string;
-    procedure ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
+
+    procedure ApplyLoopbackNowPlayingFallback(var AArtist: string;
+                                              var ATitle: string);
+
     procedure PublishSelectedCover();
     procedure LoadBroadcastIdentityFromIni();
     procedure SaveBroadcastIdentityToIni();
@@ -466,6 +469,8 @@ const
   RDJ_BROADCAST_IDENTITY_SECTION = 'BroadcastIdentity';
   RDJ_BROADCAST_IDENTITY_DJ_NAME = 'DjName';
   RDJ_BROADCAST_IDENTITY_SHOW_NAME = 'ShowName';
+  RDJ_BROADCAST_IDENTITY_EVENT_TITLE = 'EventTitle';
+  RDJ_BROADCAST_IDENTITY_ACTIVITY_TITLE = 'ActivityTitle';
   RDJ_BROADCAST_IDENTITY_COVER_FILE = 'CoverFileName';
 
 // TAudioEndpointNotificationClient --------------------------------------------
@@ -1967,6 +1972,24 @@ begin
         mmoShow.Text := FShowName;
       end;
 
+    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
+                           RDJ_BROADCAST_IDENTITY_EVENT_TITLE) then
+      begin
+        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
+                                    RDJ_BROADCAST_IDENTITY_EVENT_TITLE,
+                                    '');
+        mmoEventTitle.Text := DecodeBroadcastIdentityText(Value);
+      end;
+
+    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
+                           RDJ_BROADCAST_IDENTITY_ACTIVITY_TITLE) then
+      begin
+        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
+                                    RDJ_BROADCAST_IDENTITY_ACTIVITY_TITLE,
+                                    '');
+        mmoActivityTitle.Text := DecodeBroadcastIdentityText(Value);
+      end;
+
     FCoverFileName := Trim(IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
                                               RDJ_BROADCAST_IDENTITY_COVER_FILE,
                                               FCoverFileName));
@@ -2019,6 +2042,14 @@ begin
     IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
                         RDJ_BROADCAST_IDENTITY_SHOW_NAME,
                         EncodeBroadcastIdentityText(FShowName));
+    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
+                        RDJ_BROADCAST_IDENTITY_EVENT_TITLE,
+                        EncodeBroadcastIdentityText(
+                          NormalizeNowPlayingMemoText(mmoEventTitle)));
+    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
+                        RDJ_BROADCAST_IDENTITY_ACTIVITY_TITLE,
+                        EncodeBroadcastIdentityText(
+                          NormalizeNowPlayingMemoText(mmoActivityTitle)));
     IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
                         RDJ_BROADCAST_IDENTITY_COVER_FILE,
                         Trim(FCoverFileName));
@@ -2242,7 +2273,9 @@ begin
                                              ListenerCount,
                                              -1,
                                              '',
-                                             AClearEmptyTrackInfo);
+                                             AClearEmptyTrackInfo,
+                                             NormalizeNowPlayingMemoText(mmoEventTitle),
+                                             NormalizeNowPlayingMemoText(mmoActivityTitle));
 
   except
 
@@ -2267,7 +2300,8 @@ begin
 end;
 
 
-procedure TMainMDIFrm.ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
+procedure TMainMDIFrm.ApplyLoopbackNowPlayingFallback(var AArtist: string;
+                                                      var ATitle: string);
 begin
 
   AArtist := Trim(AArtist);
@@ -2280,6 +2314,8 @@ begin
   if not HasActiveLoopbackDeck() then
     Exit;
 
+  // A process-loopback source has no file tags. Publish the operator-entered
+  // live event/activity as legacy artist/title values for older web clients.
   AArtist := NormalizeNowPlayingMemoText(mmoEventTitle);
   ATitle := NormalizeNowPlayingMemoText(mmoActivityTitle);
 end;

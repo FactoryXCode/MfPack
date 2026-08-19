@@ -538,7 +538,7 @@ object frmMediaServer: TfrmMediaServer
         end
       end
       object pnlServerCtrl: TPanel
-        Left = 0
+        Left = -1
         Top = 44
         Width = 845
         Height = 126
@@ -557,7 +557,7 @@ object frmMediaServer: TfrmMediaServer
         object Bevel2: TBevel
           Left = 137
           Top = 3
-          Width = 232
+          Width = 228
           Height = 56
         end
         object chkBroadcast: TMPxpButton
@@ -920,9 +920,9 @@ object frmMediaServer: TfrmMediaServer
         end
         object memLog: TMemo
           Left = 375
-          Top = 2
+          Top = 3
           Width = 464
-          Height = 57
+          Height = 56
           Color = 9216
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 13229826
@@ -944,6 +944,12 @@ object frmMediaServer: TfrmMediaServer
           ParentBackground = False
           ShowCaption = False
           TabOrder = 4
+          object Bevel4: TBevel
+            Left = 3
+            Top = 2
+            Width = 232
+            Height = 55
+          end
           object lblCastDevice: TLabel
             Left = 9
             Top = 10
@@ -959,9 +965,9 @@ object frmMediaServer: TfrmMediaServer
           end
           object lblCastState: TLabel
             Left = 4
-            Top = 38
-            Width = 223
-            Height = 15
+            Top = 35
+            Width = 228
+            Height = 18
             Alignment = taCenter
             AutoSize = False
             Caption = 'Not connected'
@@ -972,18 +978,31 @@ object frmMediaServer: TfrmMediaServer
             Font.Style = [fsBold]
             ParentFont = False
           end
+          object Bevel5: TBevel
+            Left = 234
+            Top = 2
+            Width = 611
+            Height = 55
+          end
           object cmbCastDevices: TComboBox
             Left = 41
             Top = 7
             Width = 190
-            Height = 23
-            Style = csDropDownList
+            Height = 22
+            Style = csOwnerDrawFixed
+            Color = 9216
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
             TabOrder = 0
             OnChange = cmbCastDevicesChange
           end
           object btnCastDiscover: TMPxpButton
-            Left = 237
-            Top = 6
+            Left = 242
+            Top = 9
             Width = 66
             Height = 41
             Margins.Left = 2
@@ -1021,8 +1040,8 @@ object frmMediaServer: TfrmMediaServer
             OnClick = btnCastDiscoverClick
           end
           object btnCastLive: TMPxpButton
-            Left = 311
-            Top = 6
+            Left = 316
+            Top = 8
             Width = 66
             Height = 41
             Margins.Left = 2
@@ -1060,8 +1079,8 @@ object frmMediaServer: TfrmMediaServer
             OnClick = btnCastLiveClick
           end
           object btnCastStop: TMPxpButton
-            Left = 384
-            Top = 6
+            Left = 389
+            Top = 8
             Width = 66
             Height = 41
             Margins.Left = 2
@@ -1099,16 +1118,16 @@ object frmMediaServer: TfrmMediaServer
             OnClick = btnCastStopClick
           end
           object trkCastVolume: TMfTrackBar
-            Left = 504
-            Top = 7
-            Width = 268
+            Left = 517
+            Top = 9
+            Width = 244
             Height = 40
             TabOrder = 4
             Color = 4865081
             ParentColor = False
             Position = 75
-            ThumbWidth = 60
-            ThumbHeight = 50
+            ThumbWidth = 50
+            ThumbHeight = 30
             TransparentColor = clBlack
             ThumbPictureHorz.Data = {
               07544269746D617012010000424D120100000000000076000000280000001300
@@ -1132,8 +1151,8 @@ object frmMediaServer: TfrmMediaServer
             OnChange = trkCastVolumeChange
           end
           object chkCastMuted: TMPxpButton
-            Left = 778
-            Top = 7
+            Left = 763
+            Top = 9
             Width = 67
             Height = 40
             Alignment = taCenter
@@ -1249,7 +1268,7 @@ object frmMediaServer: TfrmMediaServer
           end
           object StaticText1: TStaticText
             Left = 466
-            Top = 20
+            Top = 22
             Width = 45
             Height = 19
             ParentCustomHint = False

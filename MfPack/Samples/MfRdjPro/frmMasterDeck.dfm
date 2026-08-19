@@ -1,5 +1,4 @@
 object MasterDeckFrm: TMasterDeckFrm
-  AlignWithMargins = True
   Left = 0
   Top = 0
   Margins.Left = 0
@@ -10,7 +9,7 @@ object MasterDeckFrm: TMasterDeckFrm
   BorderStyle = bsSingle
   Caption = 'Master'
   ClientHeight = 988
-  ClientWidth = 332
+  ClientWidth = 322
   Color = clNone
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 338
@@ -34,7 +33,7 @@ object MasterDeckFrm: TMasterDeckFrm
   object pnlBottom: TPanel
     Left = 0
     Top = 483
-    Width = 332
+    Width = 322
     Height = 505
     Align = alClient
     BevelOuter = bvNone
@@ -45,10 +44,11 @@ object MasterDeckFrm: TMasterDeckFrm
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 0
+    ExplicitWidth = 332
     object avMixGraph: TRdjAudioMixVisualizer
       Left = 0
       Top = 0
-      Width = 332
+      Width = 322
       Height = 211
       Margins.Left = 0
       Margins.Top = 0
@@ -80,7 +80,7 @@ object MasterDeckFrm: TMasterDeckFrm
     object pnlRecIcecast: TPanel
       Left = 0
       Top = 204
-      Width = 332
+      Width = 322
       Height = 301
       Align = alBottom
       AutoSize = True
@@ -89,10 +89,11 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
+      ExplicitWidth = 332
       object pnlRecorder: TPanel
         Left = 0
         Top = 21
-        Width = 332
+        Width = 322
         Height = 280
         Align = alClient
         AutoSize = True
@@ -101,10 +102,11 @@ object MasterDeckFrm: TMasterDeckFrm
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
+        ExplicitWidth = 332
         object Bevel1: TBevel
           Left = 4
-          Top = 12
-          Width = 324
+          Top = 14
+          Width = 313
           Height = 265
         end
         object lblRecTime: TLabel
@@ -209,7 +211,7 @@ object MasterDeckFrm: TMasterDeckFrm
           Transparent = False
         end
         object btnRecord: TMPxpButton
-          Left = 243
+          Left = 245
           Top = 40
           Width = 66
           Height = 41
@@ -249,7 +251,7 @@ object MasterDeckFrm: TMasterDeckFrm
           OnClick = btnRecordClick
         end
         object chkPostFx: TMPxpButton
-          Left = 165
+          Left = 167
           Top = 40
           Width = 66
           Height = 40
@@ -368,7 +370,7 @@ object MasterDeckFrm: TMasterDeckFrm
           OnClick = chkPostFxClick
         end
         object chkPreFx: TMPxpButton
-          Left = 87
+          Left = 89
           Top = 40
           Width = 66
           Height = 40
@@ -514,7 +516,7 @@ object MasterDeckFrm: TMasterDeckFrm
           Text = 'WAS-capture'
         end
         object btnSelectAudiDevice: TMPxpButton
-          Left = 9
+          Left = 11
           Top = 39
           Width = 66
           Height = 40
@@ -558,7 +560,7 @@ object MasterDeckFrm: TMasterDeckFrm
       object pnlFXButtons: TPanel
         Left = 0
         Top = 0
-        Width = 332
+        Width = 322
         Height = 21
         Align = alTop
         BevelOuter = bvNone
@@ -568,13 +570,14 @@ object MasterDeckFrm: TMasterDeckFrm
         ParentDoubleBuffered = False
         ShowCaption = False
         TabOrder = 1
+        ExplicitWidth = 332
       end
     end
   end
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 332
+    Width = 322
     Height = 446
     Align = alTop
     BevelOuter = bvNone
@@ -583,21 +586,22 @@ object MasterDeckFrm: TMasterDeckFrm
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
+    ExplicitWidth = 332
     object bvlPfl: TBevel
-      Left = 211
-      Top = 11
+      Left = 201
+      Top = 13
       Width = 116
       Height = 430
     end
     object bvlMaster: TBevel
       Left = 3
-      Top = 11
-      Width = 202
+      Top = 13
+      Width = 194
       Height = 430
     end
     object lblTitlePfl: TLabel
-      Left = 223
-      Top = 3
+      Left = 213
+      Top = 5
       Width = 36
       Height = 14
       Hint = 'Pre Fader Listening (PFL)'
@@ -630,7 +634,7 @@ object MasterDeckFrm: TMasterDeckFrm
       Transparent = False
     end
     object lblBalMaster: TLabel
-      Left = 76
+      Left = 72
       Top = 423
       Width = 55
       Height = 14
@@ -646,7 +650,7 @@ object MasterDeckFrm: TMasterDeckFrm
       Transparent = False
     end
     object lblMasterVolL: TLabel
-      Left = 34
+      Left = 30
       Top = 49
       Width = 17
       Height = 13
@@ -660,7 +664,7 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentFont = False
     end
     object lblMasterVolR: TLabel
-      Left = 155
+      Left = 151
       Top = 49
       Width = 17
       Height = 13
@@ -674,8 +678,8 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentFont = False
     end
     object lblPflVol: TLabel
-      Left = 283
-      Top = 49
+      Left = 273
+      Top = 51
       Width = 17
       Height = 13
       Alignment = taCenter
@@ -688,7 +692,7 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentFont = False
     end
     object pmMasterL: TMfPeakMeterMmcs
-      Left = 76
+      Left = 72
       Top = 76
       Width = 13
       Height = 293
@@ -722,7 +726,7 @@ object MasterDeckFrm: TMasterDeckFrm
       PeakHoldDuration = 0.500000000000000000
     end
     object pmMasterR: TMfPeakMeterMmcs
-      Left = 116
+      Left = 112
       Top = 76
       Width = 13
       Height = 293
@@ -756,8 +760,8 @@ object MasterDeckFrm: TMasterDeckFrm
       PeakHoldDuration = 0.500000000000000000
     end
     object pmPflR: TMfPeakMeterMmcs
-      Left = 243
-      Top = 76
+      Left = 233
+      Top = 78
       Width = 14
       Height = 293
       BevelStyle = bvLowered
@@ -791,8 +795,8 @@ object MasterDeckFrm: TMasterDeckFrm
       PeakHoldDuration = 0.500000000000000000
     end
     object pmPflL: TMfPeakMeterMmcs
-      Left = 223
-      Top = 76
+      Left = 213
+      Top = 78
       Width = 14
       Height = 293
       BevelStyle = bvLowered
@@ -826,7 +830,7 @@ object MasterDeckFrm: TMasterDeckFrm
       PeakHoldDuration = 0.500000000000000000
     end
     object Label1: TLabel
-      Left = 25
+      Left = 21
       Top = 417
       Width = 19
       Height = 13
@@ -844,7 +848,7 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 155
+      Left = 151
       Top = 417
       Width = 25
       Height = 13
@@ -862,7 +866,7 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentFont = False
     end
     object Shape2: TShape
-      Left = 23
+      Left = 19
       Top = 119
       Width = 40
       Height = 96
@@ -870,7 +874,7 @@ object MasterDeckFrm: TMasterDeckFrm
       Pen.Style = psClear
     end
     object Shape1: TShape
-      Left = 23
+      Left = 19
       Top = 81
       Width = 40
       Height = 40
@@ -879,7 +883,7 @@ object MasterDeckFrm: TMasterDeckFrm
       Pen.Style = psClear
     end
     object Shape3: TShape
-      Left = 145
+      Left = 141
       Top = 81
       Width = 40
       Height = 40
@@ -888,7 +892,7 @@ object MasterDeckFrm: TMasterDeckFrm
       Pen.Style = psClear
     end
     object Shape4: TShape
-      Left = 145
+      Left = 141
       Top = 119
       Width = 40
       Height = 96
@@ -896,8 +900,8 @@ object MasterDeckFrm: TMasterDeckFrm
       Pen.Style = psClear
     end
     object Shape5: TShape
-      Left = 272
-      Top = 81
+      Left = 262
+      Top = 83
       Width = 40
       Height = 40
       Brush.Color = clRed
@@ -905,15 +909,15 @@ object MasterDeckFrm: TMasterDeckFrm
       Pen.Style = psClear
     end
     object Shape6: TShape
-      Left = 272
-      Top = 119
+      Left = 262
+      Top = 121
       Width = 40
       Height = 96
       Brush.Style = bsHorizontal
       Pen.Style = psClear
     end
     object tbBalance: TMfTrackBar
-      Left = 8
+      Left = 4
       Top = 380
       Width = 189
       Height = 40
@@ -947,7 +951,7 @@ object MasterDeckFrm: TMasterDeckFrm
       OnDblClick = tbBalanceDblClick
     end
     object tbMasterVolL: TMfTrackBar
-      Left = 23
+      Left = 19
       Top = 76
       Width = 40
       Height = 293
@@ -981,7 +985,7 @@ object MasterDeckFrm: TMasterDeckFrm
       OnDblClick = tbMasterVolLDblClick
     end
     object tbMasterVolR: TMfTrackBar
-      Left = 144
+      Left = 140
       Top = 76
       Width = 40
       Height = 293
@@ -1015,8 +1019,8 @@ object MasterDeckFrm: TMasterDeckFrm
       OnDblClick = tbMasterVolRDblClick
     end
     object tbPflVol: TMfTrackBar
-      Left = 272
-      Top = 76
+      Left = 262
+      Top = 78
       Width = 40
       Height = 293
       TabOrder = 3
@@ -1049,7 +1053,7 @@ object MasterDeckFrm: TMasterDeckFrm
       OnDblClick = tbPflVolDblClick
     end
     object chkLockMasterFaders: TMPxpButton
-      Left = 70
+      Left = 66
       Top = 30
       Width = 67
       Height = 40
@@ -1168,8 +1172,8 @@ object MasterDeckFrm: TMasterDeckFrm
       WordWrap = True
     end
     object btnPflMute: TMPxpButton
-      Left = 237
-      Top = 384
+      Left = 227
+      Top = 386
       Width = 67
       Height = 40
       Alignment = taCenter
@@ -1287,13 +1291,14 @@ object MasterDeckFrm: TMasterDeckFrm
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 332
+    Width = 322
     Height = 37
     Align = alTop
     Alignment = taLeftJustify
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
+    ExplicitWidth = 332
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -1354,7 +1359,6 @@ object MasterDeckFrm: TMasterDeckFrm
     DeviceID = '{0.0.0.00000000}.{d7e13618-ca94-4b30-a916-0934986710a9}'
     DeviceState = 'Active'
     MasterScalarVolume = 1.000000000000000000
-    Mute = True
     Left = 244
     Top = 272
   end

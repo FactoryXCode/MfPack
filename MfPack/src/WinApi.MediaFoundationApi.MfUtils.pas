@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -215,10 +215,12 @@ type
   // Converts 100-Nano second units (Hns unit) to time string format.
   function HnsTimeToStr(hns: MFTIME;
                         DelimiterFormat: string;
-                        ShowMilliSeconds: Boolean = True): string; overload; inline;
+                        ShowMilliSeconds: Boolean = True;
+                        FractionalDigits: Integer = 3): string; overload; inline;
 
   function HnsTimeToStr(hns: MFTIME;
-                        ShowMilliSeconds: Boolean = True): string; overload; inline;
+                        ShowMilliSeconds: Boolean = True;
+                        FractionalDigits: Integer = 3): string; overload; inline;
 
   // Converts Milliseconds to a time string format
   function MSecToStr(wMsec: Int64;
@@ -1120,14 +1122,22 @@ end;
 // Converts Hns to a time string format
 function HnsTimeToStr(hns: MFTIME;
                       DelimiterFormat: string;
-                      ShowMilliSeconds: Boolean = True): string; inline;
+                      ShowMilliSeconds: Boolean = True;
+                      FractionalDigits: Integer = 3): string; inline;
 var
   hours,
   mins,
   secs,
-  millisec: Word;
+  millisec,
+  FractionalValue: Word;
 
 begin
+
+ if (FractionalDigits > 3) then
+   FractionalDigits := 3
+ else
+   if (FractionalDigits < 2) then
+     FractionalDigits := 2;
 
 try
   hours := hns div MFTIME(36000000000);
@@ -1145,14 +1155,31 @@ try
     DelimiterFormat := ':';
 
   if ShowMilliSeconds then
-    Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d',
-                     [hours,
-                      DelimiterFormat,
-                      mins,
-                      DelimiterFormat,
-                      secs,
-                      DelimiterFormat,
-                      millisec])
+    begin
+
+      // Two digits represent centiseconds; all other values retain the
+      // historical three-digit millisecond format.
+      if (FractionalDigits = 2) then
+        begin
+
+          FractionalValue := millisec div 10;
+          Result := Format('%2.2d%s%2.2d%s%2.2d,%2.2d',
+                           [hours,
+                            DelimiterFormat,
+                            mins,
+                            DelimiterFormat,
+                            secs,
+                            FractionalValue]);
+        end
+      else // FractionalDigits = 3
+        Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d',
+                         [hours,
+                          DelimiterFormat,
+                          mins,
+                          DelimiterFormat,
+                          secs,
+                          millisec]);
+    end
   else
     Result := Format('%2.2d%s%2.2d%s%2.2d',
                      [hours,
@@ -1162,51 +1189,26 @@ try
                       secs]);
 
 except
-  on exception do Result:= '00:00:00,000';
+  on exception do
+    if ShowMilliSeconds and (FractionalDigits = 2) then
+      Result := '00:00:00,00'
+    else
+      Result := '00:00:00,000';
 end;
 end;
 
 
 
 function HnsTimeToStr(hns: MFTIME;
-                      ShowMilliSeconds: Boolean = True): string; inline;
-var
-  hours,
-  mins,
-  secs,
-  millisec: Word;
+                      ShowMilliSeconds: Boolean = True;
+                      FractionalDigits: Integer = 3): string; inline;
 
 begin
 
-
-try
-  hours := hns div MFTIME(36000000000);
-  hns := hns mod MFTIME(36000000000);
-
-  mins := hns div 600000000;
-  hns := hns mod 600000000;
-
-  secs := hns div 10000000;
-  hns := hns mod 10000000;
-
-  millisec := hns div 10000;
-
-
-  if ShowMilliSeconds then
-    Result := Format('%2.2d:%2.2d:%2.2d,%3.3d',
-                     [hours,
-                      mins,
-                      secs,
-                      millisec])
-  else
-    Result := Format('%2.2d:%2.2d:%2.2d',
-                     [hours,
-                      mins,
-                      secs]);
-
-except
-  on exception do Result:= '00:00:00,000';
-end;
+  Result := HnsTimeToStr(hns,
+                         ':',
+                         ShowMilliSeconds,
+                         FractionalDigits);
 end;
 
 

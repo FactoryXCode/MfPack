@@ -1,6 +1,6 @@
-// FactoryX
+ï»¿// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -65,6 +65,7 @@ uses
 
   {WinApi}
   Winapi.Windows,
+  Winapi.WinSock,
   Winapi.Messages,
   Winapi.ShellAPI,
   Winapi.CommCtrl,
@@ -169,6 +170,8 @@ type
     pnlTop: TPanel;
     lblLocation: TLabel;
     cbxLocations: TComboBox;
+    lblIPv4Address: TLabel;
+    edtIPv4Address: TEdit;
     edtPath: TEdit;
     btnGo: TMPxpButton;
     cbxFileFilter: TFilterComboBox;
@@ -235,6 +238,11 @@ type
     procedure FillNetworkServerFolderList(const AServerName: string);
     function IsNetworkServerPath(const ARemoteName: string): Boolean;
     function IsSelectableNetworkShare(const ARemoteName: string): Boolean;
+    function GetRemoteHostName(const APath: string): string;
+    function GetLocalHostName(): string;
+    function TryResolveIPv4Address(const AHostName: string;
+                                   out AIPv4Address: string): Boolean;
+    procedure UpdateIPv4Address(const APath: string);
     procedure NetworkStationFound(const AStation: string);
 
     procedure AddLocationItem(const APath: string);
@@ -420,6 +428,7 @@ begin
     Exit;
 
   FRootPath := GetDisplayPathFromLocationItem(cbxLocations.Text);
+  UpdateIPv4Address(FRootPath);
 
   if IsNetworkServerPath(FRootPath) then
     begin
@@ -429,6 +438,157 @@ begin
 
   TrySetBrowserDirectory(FRootPath,
                          True);
+end;
+
+
+function TLWFileBrowserExDlg.GetRemoteHostName(const APath: string): string;
+const
+  CRemotePathBufferSize = 32768;
+
+var
+  PathText: string;
+  RemotePath: string;
+  LocalDevice: string;
+  BufferSize: DWORD;
+  P: Integer;
+
+begin
+
+  Result := '';
+  PathText := GetDisplayPathFromLocationItem(APath);
+
+  { Convert a mapped network drive, such as Z:, to its UNC path. }
+  if (Length(PathText) >= 2) and
+     (PathText[2] = ':') and
+     (GetDriveType(PChar(Copy(PathText, 1, 3))) = DRIVE_REMOTE) then
+    begin
+
+      LocalDevice := Copy(PathText,
+                          1,
+                          2);
+      BufferSize := CRemotePathBufferSize;
+      SetLength(RemotePath,
+                BufferSize);
+
+      if (WNetGetConnection(PChar(LocalDevice),
+                            PChar(RemotePath),
+                            BufferSize) <> NO_ERROR) then
+        Exit;
+
+      SetLength(RemotePath,
+                StrLen(PChar(RemotePath)));
+      PathText := RemotePath;
+    end;
+
+  if not IsUncPath(PathText) then
+    Exit;
+
+  Delete(PathText,
+         1,
+         2);
+  P := Pos('\',
+           PathText);
+
+  if (P > 0) then
+    Result := Copy(PathText,
+                   1,
+                   P - 1)
+  else
+    Result := PathText;
+
+  Result := Trim(Result);
+end;
+
+
+function TLWFileBrowserExDlg.GetLocalHostName(): string;
+var
+  ComputerName: array[0..MAX_COMPUTERNAME_LENGTH] of Char;
+  ComputerNameLength: DWORD;
+
+begin
+
+  Result := '';
+  ComputerNameLength := Length(ComputerName);
+
+  if GetComputerName(ComputerName,
+                     ComputerNameLength) then
+    SetString(Result,
+              ComputerName,
+              ComputerNameLength);
+end;
+
+
+function TLWFileBrowserExDlg.TryResolveIPv4Address(const AHostName: string;
+                                                   out AIPv4Address: string): Boolean;
+var
+  WsaData: TWSAData;
+  HostName: AnsiString;
+  HostEntry: PHostEnt;
+  Address: PInAddr;
+
+begin
+
+  Result := False;
+  AIPv4Address := '';
+
+  if (Trim(AHostName) = '') then
+    Exit;
+
+  if (WSAStartup($0202,
+                 WsaData) <> 0) then
+    Exit;
+
+  try
+
+    HostName := AnsiString(AHostName);
+    HostEntry := gethostbyname(PAnsiChar(HostName));
+
+    if not Assigned(HostEntry) or
+       (HostEntry^.h_addrtype <> AF_INET) or
+       not Assigned(HostEntry^.h_addr_list) or
+       not Assigned(HostEntry^.h_addr_list^) then
+      Exit;
+
+    Address := PInAddr(HostEntry^.h_addr_list^);
+    AIPv4Address := string(AnsiString(inet_ntoa(Address^)));
+    Result := AIPv4Address <> '';
+  finally
+
+    WSACleanup();
+  end;
+end;
+
+
+procedure TLWFileBrowserExDlg.UpdateIPv4Address(const APath: string);
+var
+  HostName: string;
+  IPv4Address: string;
+  PathText: string;
+
+begin
+
+  edtIPv4Address.Clear();
+  HostName := GetRemoteHostName(APath);
+
+  { A drive path without a remote host belongs to this computer. }
+  if (HostName = '') then
+    begin
+
+      PathText := GetDisplayPathFromLocationItem(APath);
+
+      if (Length(PathText) >= 2) and
+         (PathText[2] = ':') then
+        HostName := GetLocalHostName();
+    end;
+
+  if (HostName = '') then
+    Exit;
+
+  if TryResolveIPv4Address(HostName,
+                           IPv4Address) then
+    edtIPv4Address.Text := IPv4Address
+  else
+    edtIPv4Address.Text := 'Not found';
 end;
 
 

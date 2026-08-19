@@ -370,7 +370,7 @@ begin
                               GWL_STYLE) and not WS_CAPTION or WS_BORDER);
 
   //Height := 1538;
-  //Width := 507;
+  Width := 328;
 
   // Apply once on first activation.
   ApplyCurrentSetup();

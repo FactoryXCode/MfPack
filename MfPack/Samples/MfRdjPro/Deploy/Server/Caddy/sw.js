@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "factoryx-radio-pwa-v1";
+﻿const CACHE_NAME = "factoryx-radio-pwa-v2";
 const APP_SHELL = [
   "/",
   "/index.html",

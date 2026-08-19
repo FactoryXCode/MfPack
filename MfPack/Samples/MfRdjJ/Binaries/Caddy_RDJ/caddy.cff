@@ -1,0 +1,17 @@
+factoryxradio.asuscomm.com {
+
+    root * C:\Caddy_RDJ
+    file_server
+
+    handle /live* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle /status* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    handle /admin* {
+        respond "Forbidden" 403
+    }
+}

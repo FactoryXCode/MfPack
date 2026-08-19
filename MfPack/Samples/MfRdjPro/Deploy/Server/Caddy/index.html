@@ -1268,8 +1268,8 @@
       const live = info || {};
       const displayDjName = firstText(live.djName, live.dj, DEFAULT_INFO.djName);
       const displayShowName = firstText(live.show, live.showName, live.showTitle, DEFAULT_INFO.showName);
-      const displayTitle = firstText(live.title, DEFAULT_INFO.title);
-      const displayArtist = firstText(live.artist, DEFAULT_INFO.artist);
+      const displayTitle = firstText(live.title, live.activityTitle, DEFAULT_INFO.title);
+      const displayArtist = firstText(live.artist, live.eventTitle, DEFAULT_INFO.artist);
       const displayListeners = firstText(live.displayListeners, live.listeners, live.listenerCount, live.currentListeners, DEFAULT_INFO.displayListeners, DEFAULT_INFO.listeners);
       const displayStation = firstText(live.station, DEFAULT_INFO.station);
       const displayCover = firstText(live.coverUrl, live.artwork, live.albumArt, live.cover, live.image, DEFAULT_INFO.coverUrl);

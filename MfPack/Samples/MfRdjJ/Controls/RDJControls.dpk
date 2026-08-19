@@ -1,6 +1,7 @@
 package RDJControls;
 
 {$R *.res}
+{$R *.otares}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
@@ -13,8 +14,8 @@ package RDJControls;
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
+{$OVERFLOWCHECKS ON}
+{$RANGECHECKS ON}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
 {$STACKFRAMES ON}
@@ -30,8 +31,7 @@ package RDJControls;
 requires
   rtl,
   vcl,
-  vclimg,
-  MfPackX320;
+  vclimg;
 
 contains
   MfTrackBar in 'MfTrackBar.pas',
@@ -39,7 +39,7 @@ contains
   MPxpButtons in 'MPxpButtons.pas',
   MfJogShuttle in 'MfJogShuttle.pas',
   MfBeatLed in 'MfBeatLed.pas',
-  MfLevelProgressBar in 'MfLevelProgressBar.pas',
-  RdjAudioMixVisualizer in 'RdjAudioMixVisualizer.pas';
+  MfLevelProgressBar in 'MfLevelProgressBar.pas';
 
 end.
+

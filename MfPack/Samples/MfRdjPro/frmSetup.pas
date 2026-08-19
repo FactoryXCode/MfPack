@@ -150,25 +150,10 @@ type
     tbAudioBufferDuration: TMfTrackBar;
     Bevel2: TBevel;
     Label1: TLabel;
-    Bevel3: TBevel;
-    Label2: TLabel;
-    Label3: TLabel;
-    tbRecCapBufferSize: TMfTrackBar;
-    lblAudioRecBufSize: TLabel;
-    Label6: TLabel;
-    tbSysLatency: TMfTrackBar;
-    lblSysLatency: TLabel;
-    chkDontOverWrite: TMPxpButton;
-    chkDisableMMCSS: TMPxpButton;
-    chkUsePCMFormat: TMPxpButton;
-    chkEnableStreamSwitchDetection: TMPxpButton;
-    lblAudioFormat: TLabel;
-    cbxOutputFormat: TComboBox;
     Label5: TLabel;
     Bevel5: TBevel;
     edAudioRecordingsDirName: TEdit;
     Label7: TLabel;
-    lblBufferDuration: TLabel;
     lblLoopbackDecks: TLabel;
     cbLoopbackDecks: TComboBox;
     Bevel6: TBevel;
@@ -184,8 +169,6 @@ type
     chkGeneralSettings: TMPxpButton;
     chkBroadcastSettings: TMPxpButton;
     pnlBroadCastSettings: TPanel;
-    Label12: TLabel;
-    Label15: TLabel;
     Bevel7: TBevel;
     lblMicIn: TLabel;
     cbMicIn: TComboBox;
@@ -233,14 +216,33 @@ type
     lblMp4SegmentSize: TLabel;
     Label8: TLabel;
     Bevel8: TBevel;
-    chkOverrideSleepMode: TMPxpButton;
     Bevel11: TBevel;
     lblLocalNetwork: TLabel;
     lblLocalNetworkHint: TLabel;
     cbLocalIPv4: TComboBox;
     btnDiscoverNetwork: TMPxpButton;
-    btnUseLocalIPv4: TMPxpButton;
-    btnRemoveLocalIPv4: TMPxpButton;
+    btnUseLocalIPv4: TMPxpButton;
+    btnRemoveLocalIPv4: TMPxpButton;
+    pnlAudioRecorderSettings: TPanel;
+    Bevel3: TBevel;
+    Label2: TLabel;
+    Label3: TLabel;
+    lblAudioRecBufSize: TLabel;
+    Label6: TLabel;
+    lblSysLatency: TLabel;
+    lblAudioFormat: TLabel;
+    lblBufferDuration: TLabel;
+    tbRecCapBufferSize: TMfTrackBar;
+    tbSysLatency: TMfTrackBar;
+    chkDontOverWrite: TMPxpButton;
+    chkDisableMMCSS: TMPxpButton;
+    chkUsePCMFormat: TMPxpButton;
+    chkEnableStreamSwitchDetection: TMPxpButton;
+    cbxOutputFormat: TComboBox;
+    chkAudioRecorderSettings: TMPxpButton;
+    chkOverrideSleepMode: TMPxpButton;
+    Bevel12: TBevel;
+    Label9: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -260,6 +262,7 @@ type
     procedure btnArtworkDirNameClick(Sender: TObject);
     procedure btnCaddyArtworkPathClick(Sender: TObject);
     procedure cbSelectCameraChange(Sender: TObject);
+    procedure btnRefreshCamerasClick(Sender: TObject);
     procedure chkBroadcastSettingsClick(Sender: TObject);
     procedure btnCaddyVideoPathClick(Sender: TObject);
     procedure btnVideoRecordingsDirNameClick(Sender: TObject);
@@ -267,6 +270,7 @@ type
     procedure btnDiscoverNetworkClick(Sender: TObject);
     procedure btnUseLocalIPv4Click(Sender: TObject);
     procedure btnRemoveLocalIPv4Click(Sender: TObject);
+    procedure chkAudioRecorderSettingsClick(Sender: TObject);
 
   private
 
@@ -1439,7 +1443,45 @@ begin
 
   if not Assigned(Cam) then
     Exit;
+end;
 
+
+procedure TfrmSetup.btnRefreshCamerasClick(Sender: TObject);
+var
+  Cam: TCameraDeviceItem;
+  CurrentSymbolicLink: string;
+
+begin
+
+  CurrentSymbolicLink := '';
+
+  if (cbSelectCamera.ItemIndex >= 0) then
+    begin
+      Cam := TCameraDeviceItem(cbSelectCamera.Items.Objects[cbSelectCamera.ItemIndex]);
+
+      if Assigned(Cam) and (Cam.DeviceProperties.lpSymbolicLink <> nil) then
+        CurrentSymbolicLink := Cam.DeviceProperties.lpSymbolicLink;
+    end;
+
+  btnRefreshCameras.Enabled := False;
+  try
+
+    PopulateVideoCaptureDevices(cbSelectCamera,
+                                CurrentSymbolicLink);
+  finally
+
+    btnRefreshCameras.Enabled := True;
+  end;
+end;
+
+
+procedure TfrmSetup.chkAudioRecorderSettingsClick(Sender: TObject);
+begin
+
+  pnlAudioRecorderSettings.BringToFront;
+  chkAudioRecorderSettings.Checked := True;
+  chkBroadcastSettings.Checked := False;
+  chkGeneralSettings.Checked := False;
 end;
 
 
@@ -1449,6 +1491,7 @@ begin
   pnlBroadCastSettings.BringToFront;
   chkBroadcastSettings.Checked := True;
   chkGeneralSettings.Checked := False;
+  chkAudioRecorderSettings.Checked := False;
 end;
 
 
@@ -1456,8 +1499,9 @@ procedure TfrmSetup.chkGeneralSettingsClick(Sender: TObject);
 begin
 
   pnlGeneralSettings.BringToFront;
-  chkBroadcastSettings.Checked := False;
   chkGeneralSettings.Checked := True;
+  chkBroadcastSettings.Checked := False;
+  chkAudioRecorderSettings.Checked := False;
 end;
 
 
@@ -1482,6 +1526,7 @@ begin
   FreeComboBoxObjects(cbMainOut);
   FreeComboBoxObjects(cbCueOut);
   FreeComboBoxObjects(cbMicIn);
+  FreeComboBoxObjects(cbSelectCamera);
   FreeComboBoxObjects(cbLocalIPv4);
 end;
 
@@ -1502,7 +1547,7 @@ begin
       cb.Items.Objects[i] := nil;
     end;
 
-  cb.Items.Clear;
+  cb.Items.Clear();
 end;
 
 

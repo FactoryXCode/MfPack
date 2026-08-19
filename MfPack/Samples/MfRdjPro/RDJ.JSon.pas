@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
@@ -85,7 +85,9 @@ type
                                          const AListeners: Integer = -1;
                                          const AOnAir: Integer = -1;
                                          const AOnAirLock: string = '';
-                                         const AClearEmptyTrackInfo: Boolean = False); static;
+                                         const AClearEmptyTrackInfo: Boolean = False;
+                                         const AEventTitle: string = '';
+                                         const AActivityTitle: string = ''); static;
 
     class function LoadNowPlayingJson(const AFileName: string): TJSONObject;
 
@@ -108,7 +110,9 @@ class procedure TRDJRadioStatusJson.WriteRadioStatusJson(const AFileName: string
                                                          const AListeners: Integer = -1;
                                                          const AOnAir: Integer = -1;
                                                          const AOnAirLock: string = '';
-                                                         const AClearEmptyTrackInfo: Boolean = False);
+                                                         const AClearEmptyTrackInfo: Boolean = False;
+                                                         const AEventTitle: string = '';
+                                                         const AActivityTitle: string = '');
 var
   Json: TJSONObject;
   JsonValue: TJSONValue;
@@ -233,6 +237,8 @@ begin
      (AShowName = '') and
      (AArtist = '') and
      (ATitle = '') and
+     (AEventTitle = '') and
+     (AActivityTitle = '') and
      (AListeners < 0) then
     Exit;
 
@@ -285,6 +291,16 @@ begin
     SetJsonString('title',
                   ATitle,
                   AClearEmptyTrackInfo);
+
+    // Explicit live-event metadata. Older browser clients continue to use the
+    // artist/title fallback written by TMainMDIFrm.
+    SetJsonString('eventTitle',
+                  AEventTitle,
+                  True);
+
+    SetJsonString('activityTitle',
+                  AActivityTitle,
+                  True);
 
     CoverUrl := BuildBrowserCoverUrl(ACoverUrl);
 

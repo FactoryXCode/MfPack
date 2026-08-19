@@ -65,6 +65,19 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object lblIPv4Address: TLabel
+      Left = 716
+      Top = 7
+      Width = 77
+      Height = 17
+      Caption = 'IPv4 address'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
     object cbxLocations: TComboBox
       Left = 4
       Top = 28
@@ -131,6 +144,26 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Style = bsModern
       OnClick = btnGoClick
     end
+    object edtIPv4Address: TEdit
+      Left = 716
+      Top = 28
+      Width = 214
+      Height = 25
+      Hint = 
+        'IPv4 address of the computer for the selected location. Select t' +
+        'he text to copy it.'
+      Color = 5850948
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ReadOnly = True
+      ShowHint = True
+      TabOrder = 2
+    end
     object cbxFileFilter: TFilterComboBox
       Left = 4
       Top = 76
@@ -187,7 +220,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     end
     object btnOk: TMPxpButton
       Left = 708
-      Top = 33
+      Top = 31
       Width = 107
       Height = 40
       Alignment = taCenter
@@ -315,7 +348,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Left = 0
       Top = 0
       Width = 230
-      Height = 17
+      Height = 21
       Align = alTop
       Alignment = taCenter
       Caption = 'Preview'
@@ -326,18 +359,18 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Font.Style = [fsBold]
       ParentFont = False
       Layout = tlCenter
-      ExplicitWidth = 48
+      ExplicitTop = -4
     end
     object imgPreview: TImage
       Left = 0
-      Top = 17
+      Top = 21
       Width = 230
-      Height = 433
+      Height = 429
       Align = alClient
       Center = True
       Proportional = True
       Stretch = True
-      ExplicitLeft = -2
+      ExplicitTop = 23
     end
   end
 end

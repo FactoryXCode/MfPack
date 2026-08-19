@@ -9,7 +9,7 @@ object frmMasterFxRack: TfrmMasterFxRack
   BorderStyle = bsSingle
   Caption = 'Master FX Rack'
   ClientHeight = 988
-  ClientWidth = 453
+  ClientWidth = 385
   Color = clNone
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 702
@@ -20,6 +20,7 @@ object frmMasterFxRack: TfrmMasterFxRack
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsMDIChild
+  OldCreateOrder = True
   Position = poDefault
   Visible = True
   StyleElements = [seFont, seClient]
@@ -27,17 +28,20 @@ object frmMasterFxRack: TfrmMasterFxRack
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object pnlFlangerEcho: TPanel
     Left = 0
-    Top = 149
-    Width = 453
-    Height = 839
+    Top = 91
+    Width = 385
+    Height = 897
     Align = alClient
     BevelOuter = bvNone
     Color = 5850948
     ParentBackground = False
     TabOrder = 2
+    ExplicitTop = 102
+    ExplicitHeight = 886
     object Label1: TLabel
       Left = 8
       Top = 8
@@ -53,12 +57,13 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblBaseDelayMs: TLabel
-      Left = 14
-      Top = 96
-      Width = 67
+      Left = 19
+      Top = 535
+      Width = 60
       Height = 17
-      Alignment = taRightJustify
-      Caption = 'Delay (ms)'
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Delay'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -67,10 +72,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblBaseDelayValue: TLabel
-      Left = 387
-      Top = 96
-      Width = 53
+      Left = 21
+      Top = 73
+      Width = 62
       Height = 17
+      Alignment = taCenter
       AutoSize = False
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
@@ -81,12 +87,13 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblDepthMs: TLabel
-      Left = 11
-      Top = 158
-      Width = 70
+      Left = 87
+      Top = 535
+      Width = 60
       Height = 17
-      Alignment = taRightJustify
-      Caption = 'Depth (ms)'
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Depth'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -95,10 +102,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblDepthValue: TLabel
-      Left = 387
-      Top = 158
-      Width = 53
+      Left = 91
+      Top = 73
+      Width = 62
       Height = 17
+      Alignment = taCenter
       AutoSize = False
       Caption = '0.0 ms'
       Font.Charset = DEFAULT_CHARSET
@@ -109,12 +117,13 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblRateHz: TLabel
-      Left = 24
-      Top = 221
-      Width = 57
+      Left = 158
+      Top = 535
+      Width = 60
       Height = 17
-      Alignment = taRightJustify
-      Caption = 'Rate (Hz)'
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Rate'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -123,10 +132,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblRateValue: TLabel
-      Left = 387
-      Top = 221
-      Width = 53
+      Left = 154
+      Top = 73
+      Width = 62
       Height = 16
+      Alignment = taCenter
       AutoSize = False
       Caption = '0.00 Hz'
       Font.Charset = DEFAULT_CHARSET
@@ -137,11 +147,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblFeedback: TLabel
-      Left = 24
-      Top = 283
-      Width = 57
+      Left = 230
+      Top = 535
+      Width = 60
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Feedback'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -151,10 +162,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblFeedbackValue: TLabel
-      Left = 387
-      Top = 283
-      Width = 53
+      Left = 226
+      Top = 73
+      Width = 62
       Height = 17
+      Alignment = taCenter
       AutoSize = False
       Caption = '0 %'
       Font.Charset = DEFAULT_CHARSET
@@ -165,11 +177,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblWet: TLabel
-      Left = 56
-      Top = 345
-      Width = 25
+      Left = 301
+      Top = 535
+      Width = 60
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Wet'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -179,10 +192,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblWetValue: TLabel
-      Left = 387
-      Top = 346
-      Width = 53
+      Left = 299
+      Top = 73
+      Width = 62
       Height = 17
+      Alignment = taCenter
       AutoSize = False
       Caption = '0 %'
       Font.Charset = DEFAULT_CHARSET
@@ -193,10 +207,10 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object tbBaseDelayMs: TMfTrackBar
-      Left = 96
-      Top = 93
-      Width = 285
-      Height = 29
+      Left = 34
+      Top = 91
+      Width = 30
+      Height = 438
       TabOrder = 0
       Color = 5850948
       ParentColor = False
@@ -206,31 +220,34 @@ object frmMasterFxRack: TfrmMasterFxRack
       Font.Name = 'Segoe UI'
       Font.Style = []
       Maximum = 8000
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbBaseDelayMsChange
     end
     object tbDepthMs: TMfTrackBar
-      Left = 96
-      Top = 155
-      Width = 285
-      Height = 30
+      Left = 102
+      Top = 91
+      Width = 30
+      Height = 438
       TabOrder = 1
       Color = 5850948
       ParentColor = False
@@ -240,31 +257,34 @@ object frmMasterFxRack: TfrmMasterFxRack
       Font.Name = 'Segoe UI'
       Font.Style = []
       Maximum = 500
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbDepthMsChange
     end
     object tbRateHz: TMfTrackBar
-      Left = 96
-      Top = 218
-      Width = 285
-      Height = 29
+      Left = 171
+      Top = 91
+      Width = 30
+      Height = 438
       TabOrder = 2
       Color = 5850948
       ParentColor = False
@@ -274,31 +294,34 @@ object frmMasterFxRack: TfrmMasterFxRack
       Font.Name = 'Segoe UI'
       Font.Style = []
       Maximum = 2000
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbRateHzChange
     end
     object tbFeedback: TMfTrackBar
-      Left = 96
-      Top = 281
-      Width = 285
-      Height = 29
+      Left = 243
+      Top = 91
+      Width = 30
+      Height = 438
       TabOrder = 3
       Color = 5850948
       ParentColor = False
@@ -309,31 +332,34 @@ object frmMasterFxRack: TfrmMasterFxRack
       Font.Style = []
       Minimum = -98
       Maximum = 98
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbFeedbackChange
     end
     object tbWet: TMfTrackBar
-      Left = 96
-      Top = 343
-      Width = 285
-      Height = 30
+      Left = 315
+      Top = 91
+      Width = 30
+      Height = 438
       TabOrder = 4
       Color = 5850948
       ParentColor = False
@@ -342,33 +368,36 @@ object frmMasterFxRack: TfrmMasterFxRack
       Font.Height = -13
       Font.Name = 'Segoe UI'
       Font.Style = []
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbWetChange
     end
     object chkFlangerEnable: TMPxpButton
-      Left = 368
-      Top = 3
-      Width = 87
-      Height = 53
+      Left = 315
+      Top = 8
+      Width = 64
+      Height = 47
       Alignment = taCenter
-      Caption = 'Flanger/  Echo'
+      Caption = 'Enable'
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
@@ -479,9 +508,9 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkFlangerEnableClick
     end
     object btnPresetEcho: TMPxpButton
-      Left = 367
-      Top = 469
-      Width = 87
+      Left = 212
+      Top = 585
+      Width = 56
       Height = 53
       Alignment = taCenter
       Caption = 'Preset Echo'
@@ -595,9 +624,9 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = btnPresetEchoClick
     end
     object btnPresetFlanger: TMPxpButton
-      Left = 367
-      Top = 405
-      Width = 87
+      Left = 308
+      Top = 584
+      Width = 56
       Height = 54
       Alignment = taCenter
       Caption = 'Preset Flanger'
@@ -713,9 +742,9 @@ object frmMasterFxRack: TfrmMasterFxRack
   end
   object pnlCompressorLimiter: TPanel
     Left = 0
-    Top = 149
-    Width = 453
-    Height = 839
+    Top = 91
+    Width = 385
+    Height = 897
     Align = alClient
     BevelOuter = bvNone
     Color = 5850948
@@ -727,30 +756,33 @@ object frmMasterFxRack: TfrmMasterFxRack
     ParentBackground = False
     ParentFont = False
     TabOrder = 3
+    ExplicitTop = 90
+    ExplicitWidth = 507
     object Bevel4: TBevel
-      Left = 0
-      Top = 413
-      Width = 461
-      Height = 200
+      Left = 3
+      Top = 443
+      Width = 380
+      Height = 195
     end
     object Bevel3: TBevel
-      Left = 0
-      Top = 630
-      Width = 461
-      Height = 131
+      Left = 3
+      Top = 659
+      Width = 380
+      Height = 185
     end
     object Bevel2: TBevel
-      Left = 0
-      Top = 17
-      Width = 461
-      Height = 380
+      Left = 2
+      Top = 19
+      Width = 379
+      Height = 406
     end
     object lblThresholdDb: TLabel
-      Left = 32
-      Top = 87
-      Width = 62
+      Left = 3
+      Top = 402
+      Width = 61
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Threshold'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -760,11 +792,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblRatio: TLabel
-      Left = 62
-      Top = 131
-      Width = 32
+      Left = 65
+      Top = 402
+      Width = 62
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Ratio'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -774,11 +807,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblAttackMs: TLabel
-      Left = 55
-      Top = 221
-      Width = 39
+      Left = 193
+      Top = 402
+      Width = 62
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Attack'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -788,11 +822,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblReleaseMs: TLabel
-      Left = 48
-      Top = 266
-      Width = 46
+      Left = 257
+      Top = 402
+      Width = 62
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Release'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -802,11 +837,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblMakeupDb: TLabel
-      Left = 45
-      Top = 176
-      Width = 49
+      Left = 129
+      Top = 402
+      Width = 62
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Makeup'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -816,8 +852,8 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 12
-      Top = 401
+      Left = 13
+      Top = 428
       Width = 131
       Height = 21
       Alignment = taCenter
@@ -849,7 +885,7 @@ object frmMasterFxRack: TfrmMasterFxRack
     end
     object Label4: TLabel
       Left = 12
-      Top = 617
+      Top = 645
       Width = 173
       Height = 22
       Alignment = taCenter
@@ -864,9 +900,9 @@ object frmMasterFxRack: TfrmMasterFxRack
       Transparent = False
     end
     object lblLimiterCeilingDb: TLabel
-      Left = 51
-      Top = 488
-      Width = 43
+      Left = 3
+      Top = 615
+      Width = 62
       Height = 17
       Alignment = taRightJustify
       Caption = 'Ceiling'
@@ -878,9 +914,9 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblLimiterReleaseMs: TLabel
-      Left = 48
-      Top = 534
-      Width = 46
+      Left = 89
+      Top = 615
+      Width = 62
       Height = 17
       Alignment = taRightJustify
       Caption = 'Release'
@@ -892,9 +928,9 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblLimiterLookaheadMs: TLabel
-      Left = 27
-      Top = 580
-      Width = 67
+      Left = 185
+      Top = 615
+      Width = 77
       Height = 17
       Alignment = taRightJustify
       Caption = 'Lookahead'
@@ -906,8 +942,8 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblTruePeakCeilingDbTP: TLabel
-      Left = 31
-      Top = 719
+      Left = 11
+      Top = 820
       Width = 63
       Height = 17
       Alignment = taRightJustify
@@ -920,8 +956,8 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblTruePeakOversample: TLabel
-      Left = 36
-      Top = 665
+      Left = 96
+      Top = 773
       Width = 73
       Height = 17
       Alignment = taRightJustify
@@ -934,11 +970,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblKneeDb: TLabel
-      Left = 64
-      Top = 311
-      Width = 30
+      Left = 320
+      Top = 402
+      Width = 62
       Height = 17
-      Alignment = taRightJustify
+      Alignment = taCenter
+      AutoSize = False
       Caption = 'Knee'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
@@ -948,10 +985,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblLookaheadValue: TLabel
-      Left = 374
-      Top = 580
+      Left = 212
+      Top = 459
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -961,10 +999,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblThresholdValue: TLabel
-      Left = 370
-      Top = 87
+      Left = 22
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -974,10 +1013,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblRatioValue: TLabel
-      Left = 370
-      Top = 131
+      Left = 81
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -987,10 +1027,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblMakeUpValue: TLabel
-      Left = 370
-      Top = 176
+      Left = 145
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1000,10 +1041,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblAttackValue: TLabel
-      Left = 370
-      Top = 221
+      Left = 210
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1013,10 +1055,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblCompressorReleaseValue: TLabel
-      Left = 370
-      Top = 266
+      Left = 274
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1026,10 +1069,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblKneeValue: TLabel
-      Left = 370
-      Top = 311
+      Left = 338
+      Top = 101
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1039,10 +1083,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblCeilingValue: TLabel
-      Left = 374
-      Top = 488
+      Left = 23
+      Top = 459
       Width = 26
       Height = 17
+      Alignment = taCenter
       Caption = '0 dB'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1052,10 +1097,11 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblLimiterReleaseValue: TLabel
-      Left = 374
-      Top = 534
+      Left = 111
+      Top = 459
       Width = 28
       Height = 17
+      Alignment = taCenter
       Caption = '0 ms'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -1065,8 +1111,8 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object lblTPCeilingValue: TLabel
-      Left = 355
-      Top = 719
+      Left = 27
+      Top = 677
       Width = 26
       Height = 17
       Caption = '0 dB'
@@ -1078,193 +1124,235 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object tbThresholdDb: TMfTrackBar
-      Left = 105
-      Top = 79
-      Width = 262
-      Height = 36
+      Left = 13
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 0
       Color = 5850948
       ParentColor = False
       Minimum = -60
       Maximum = 0
       Position = -18
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbThresholdDbChange
     end
     object tbRatio: TMfTrackBar
-      Left = 105
-      Top = 124
-      Width = 262
-      Height = 36
+      Left = 76
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 1
       Color = 5850948
       ParentColor = False
       Minimum = 10
       Maximum = 500
       Position = 20
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbRatioChange
     end
     object tbAttackMs: TMfTrackBar
-      Left = 103
-      Top = 214
-      Width = 262
-      Height = 36
+      Left = 203
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 2
       Color = 5850948
       ParentColor = False
       Minimum = 1
       Maximum = 500
       Position = 20
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbAttackMsChange
     end
     object tbReleaseMs: TMfTrackBar
-      Left = 105
-      Top = 259
-      Width = 262
-      Height = 36
+      Left = 267
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 3
       Color = 5850948
       ParentColor = False
       Minimum = 1
       Maximum = 5000
       Position = 155
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbReleaseMsChange
     end
     object tbMakeupDb: TMfTrackBar
-      Left = 105
-      Top = 169
-      Width = 262
-      Height = 36
+      Left = 140
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 4
       Color = 5850948
       ParentColor = False
       Maximum = 24
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbMakeupDbChange
     end
     object tbKneeDb: TMfTrackBar
-      Left = 105
-      Top = 305
-      Width = 262
-      Height = 36
+      Left = 331
+      Top = 119
+      Width = 40
+      Height = 280
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 5
       Color = 5850948
       ParentColor = False
       Maximum = 24
       Position = 6
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbKneeDbChange
     end
     object chkAutoMakeup: TMPxpButton
-      Left = 368
-      Top = 337
-      Width = 87
-      Height = 53
+      Left = 238
+      Top = 30
+      Width = 57
+      Height = 56
       Alignment = taCenter
       Caption = 'Auto  Makeup'
       Color = 6899524
@@ -1377,12 +1465,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkAutoMakeupClick
     end
     object chkLimiterEnable: TMPxpButton
-      Left = 368
-      Top = 424
-      Width = 87
-      Height = 53
+      Left = 306
+      Top = 451
+      Width = 56
+      Height = 56
       Alignment = taCenter
-      Caption = 'Limiter'
+      Caption = 'Enable'
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
@@ -1493,13 +1581,13 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkLimiterEnableClick
     end
     object chkCompEnable: TMPxpButton
-      Left = 368
-      Top = 25
-      Width = 87
-      Height = 53
+      Left = 305
+      Top = 30
+      Width = 57
+      Height = 56
       Hint = 'Compressor'
       Alignment = taCenter
-      Caption = 'Compressor'
+      Caption = 'Enable'
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
@@ -1612,101 +1700,122 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkCompEnableClick
     end
     object tbLimiterCeilingDb: TMfTrackBar
-      Left = 105
-      Top = 479
-      Width = 262
-      Height = 36
+      Left = 13
+      Top = 475
+      Width = 40
+      Height = 137
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 9
       Color = 5850948
       ParentColor = False
       Minimum = -24
       Maximum = 0
       Position = -4
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbLimiterCeilingDbChange
     end
     object tbLimiterReleaseMs: TMfTrackBar
       Left = 105
-      Top = 525
-      Width = 262
-      Height = 36
+      Top = 475
+      Width = 40
+      Height = 137
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 10
       Color = 5850948
       ParentColor = False
       Minimum = 1
       Maximum = 5000
       Position = 80
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbLimiterReleaseMsChange
     end
     object tbLimiterLookaheadMs: TMfTrackBar
-      Left = 105
-      Top = 571
-      Width = 262
-      Height = 36
+      Left = 206
+      Top = 475
+      Width = 40
+      Height = 137
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 11
       Color = 5850948
       ParentColor = False
       Maximum = 20
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbLimiterLookaheadMsChange
       OnMouseUp = tbLimiterLookaheadMsMouseUp
     end
     object chkRmsDetector: TMPxpButton
-      Left = 274
-      Top = 635
-      Width = 87
+      Left = 243
+      Top = 666
+      Width = 56
       Height = 54
       Alignment = taCenter
       Caption = 'RMS  Detector'
@@ -1820,12 +1929,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkRmsDetectorClick
     end
     object chkTruePeakGuard: TMPxpButton
-      Left = 367
-      Top = 635
-      Width = 87
+      Left = 305
+      Top = 666
+      Width = 56
       Height = 54
       Alignment = taCenter
-      Caption = 'True Peak Guard'
+      Caption = 'Enable'
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
@@ -1936,40 +2045,47 @@ object frmMasterFxRack: TfrmMasterFxRack
       OnClick = chkTruePeakGuardClick
     end
     object tbTruePeakCeilingDbTP: TMfTrackBar
-      Left = 105
-      Top = 711
-      Width = 262
-      Height = 36
+      Left = 21
+      Top = 697
+      Width = 40
+      Height = 120
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
       TabOrder = 14
       Color = 5850948
       ParentColor = False
       Minimum = -300
       Maximum = 0
       Position = -10
-      ThumbWidth = 50
-      ThumbHeight = 60
+      Orientation = soVertical
+      IncreaseToward = itUp
+      ThumbWidth = 30
+      ThumbHeight = 50
       TransparentColor = clBlack
-      ThumbPictureHorz.Data = {
-        07544269746D617012010000424D120100000000000076000000280000001300
-        00000D00000001000400000000009C000000330B0000330B0000100000001000
-        000000000000959595009B9B9B00A2A2A200B9B9B900C4C4C400FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00055555554445555555000000531425454045452413500000531425454045
-        4524135000005314254540454524135000005314254540454524135000005314
-        2545404545241350000053142545404545241350000053142545404545241350
-        0000531425454045452413500000531425454045452413500000531425454045
-        452413500000531425454045452413500000055555554445555555000000}
+      ThumbPictureVert.Data = {
+        07544269746D61700E010000424D0E0100000000000076000000280000000D00
+        000013000000010004000000000098000000330B0000330B0000100000001000
+        000000000000959595009B9B9B00A2A2A200B9B9B900BFBFBF00C4C4C400C9C9
+        C900CECECE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00044444444444000048888888888840004777777777774000455555555555
+        4000477777777777400045555555555540004777777777774000455555555555
+        4000477777777777500050000000000050005444444444445000555555555555
+        5000544444444444500055555555555550005222222222225000544444444444
+        5000511111111111500053333333333350000555555555550000}
       ShowTicks = True
       DbFloor = -50.000000000000000000
       DbCeil = 6.000000000000000000
       TickColor = clAqua
       TickPlacementH = tphBoth
+      TickPlacementV = tpvBoth
       OnChange = tbTruePeakCeilingDbTPChange
     end
     object cbTruePeakOversample: TComboBox
-      Left = 120
-      Top = 663
-      Width = 45
+      Left = 185
+      Top = 770
+      Width = 49
       Height = 25
       Color = 6899524
       Font.Charset = DEFAULT_CHARSET
@@ -1988,8 +2104,8 @@ object frmMasterFxRack: TfrmMasterFxRack
         '8x')
     end
     object btnSetDefaults: TMPxpButton
-      Left = 347
-      Top = 778
+      Left = 272
+      Top = 850
       Width = 107
       Height = 40
       Hint = 'Set all to default values.'
@@ -2032,14 +2148,17 @@ object frmMasterFxRack: TfrmMasterFxRack
   end
   object pnlEQ: TPanel
     Left = 0
-    Top = 149
-    Width = 453
-    Height = 839
+    Top = 91
+    Width = 385
+    Height = 897
     Align = alClient
     BevelOuter = bvNone
     Color = 5850948
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 149
+    ExplicitWidth = 453
+    ExplicitHeight = 839
     object lblTitle: TLabel
       Left = 11
       Top = 18
@@ -2133,12 +2252,12 @@ object frmMasterFxRack: TfrmMasterFxRack
       ParentFont = False
     end
     object chkEqEnable: TMPxpButton
-      Left = 368
-      Top = 7
-      Width = 87
+      Left = 318
+      Top = 10
+      Width = 56
       Height = 46
       Alignment = taCenter
-      Caption = 'EQ'
+      Caption = 'Enable'
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
@@ -2372,12 +2491,13 @@ object frmMasterFxRack: TfrmMasterFxRack
   object pnlCtrls: TPanel
     Left = 0
     Top = 37
-    Width = 453
-    Height = 112
+    Width = 385
+    Height = 54
     Align = alTop
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 453
     object btnCompressorLimiter: TMPxpButton
       Left = 233
       Top = 6
@@ -2498,12 +2618,13 @@ object frmMasterFxRack: TfrmMasterFxRack
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 453
+    Width = 385
     Height = 37
     Align = alTop
     Color = 4865081
     ParentBackground = False
     TabOrder = 4
+    ExplicitWidth = 453
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -2526,7 +2647,7 @@ object frmMasterFxRack: TfrmMasterFxRack
       Layout = tlCenter
     end
     object btnMinimize: TMPxpButton
-      Left = 385
+      Left = 317
       Top = 1
       Width = 67
       Height = 35
@@ -2577,6 +2698,7 @@ object frmMasterFxRack: TfrmMasterFxRack
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
+      ExplicitLeft = 385
     end
   end
 end

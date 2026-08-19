@@ -67,6 +67,7 @@ uses
   {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  Winapi.ShlObj,
   WinApi.WinApiTypes,
   WinApi.WinError,
   {System}
@@ -245,8 +246,8 @@ type
                                    const ABytes: TBytes);
 
     procedure TryFlushPendingLiveJson();
-    procedure WriteBytesToFile(const AFileName: string;
-                               const ABytes: TBytes);
+    function WriteBytesToFile(const AFileName: string;
+                              const ABytes: TBytes): Boolean;
 
     function WriteBytesToFileAtomicResult(const AFileName: string;
                                           const ABytes: TBytes): Boolean;
@@ -333,6 +334,8 @@ type
     trkCastVolume: TMfTrackBar;
     chkCastMuted: TMPxpButton;
     StaticText1: TStaticText;
+    Bevel4: TBevel;
+    Bevel5: TBevel;
 
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -449,12 +452,14 @@ type
 
     FBroadcastHandoverLockAcquired: Boolean;
     FBroadcastHandoverOwnerId: string;
+    FBroadcastHandoverConnectionLost: Boolean;
     FLastBroadcastHandoverHeartbeatTick: DWORD;
     FLastBroadcastHandoverPollTick: DWORD;
     FLastBroadcastHandoverNotice: string;
     FLastBroadcastHealthCaption: string;
     FLastBroadcastHealthMessage: string;
     FLastBroadcastHealthLogTick: UInt64;
+    FLastFileWriteError: DWORD;
 
     FLastRdjProAudioWfx: WAVEFORMATEX;
     FLastRdjProAudioWfxValid: Boolean;
@@ -577,14 +582,14 @@ type
     procedure CheckBroadcastMseVideoSourceFlush();
     procedure LogBroadcastMseMemoryHeartbeat(const AWhere: string);
     function CurrentBroadcastMseGroupBytes(): Int64;
-    procedure WriteBytesToFile(const AFileName: string;
-                               const ABytes: TBytes);
+    function WriteBytesToFile(const AFileName: string;
+                              const ABytes: TBytes): Boolean;
 
-    procedure WriteBytesToFileAtomic(const AFileName: string;
-                                     const ABytes: TBytes);
+    function WriteBytesToFileAtomic(const AFileName: string;
+                                    const ABytes: TBytes): Boolean;
 
-    procedure WriteUtf8TextToFileAtomic(const AFileName: string;
-                                        const AText: string);
+    function WriteUtf8TextToFileAtomic(const AFileName: string;
+                                       const AText: string): Boolean;
 
     procedure MirrorBytesToServerAtomic(const AFileName: string;
                                         const ABytes: TBytes);
@@ -618,6 +623,8 @@ type
 
     function AcquireBroadcastHandoverLock(out AMessage: string): Boolean;
     procedure ReleaseBroadcastHandoverLock(const APublishHandoverReady: Boolean);
+    procedure SetBroadcastHandoverConnectionLost(const AMessage: string);
+    procedure DisableBroadcastPublishingAfterLockConflict(const AMessage: string);
     procedure UpdateBroadcastHandoverHeartbeat(const AForce: Boolean = False);
     procedure PollBroadcastHandoverStatus();
     procedure MirrorDeleteServerFile(const AFileName: string);
@@ -697,6 +704,203 @@ function RDJBytesToMb(const ABytes: UInt64): UInt64;
 begin
 
   Result := (ABytes + (1024 * 1024 div 2)) div (1024 * 1024);
+end;
+
+
+function RDJEnsureDirectoryExists(const ADirectory: string;
+                                  out AErrorCode: DWORD): Boolean;
+var
+  Dir: string;
+  CreateResult: Integer;
+
+begin
+
+  AErrorCode := ERROR_SUCCESS;
+  Dir := ExcludeTrailingPathDelimiter(Trim(ADirectory));
+
+  if (Dir = '') then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  if DirectoryExists(Dir) then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  CreateResult := SHCreateDirectory(0,
+                                    PChar(Dir));
+  Result := (CreateResult = ERROR_SUCCESS) or
+            (CreateResult = ERROR_ALREADY_EXISTS) or
+            (CreateResult = ERROR_FILE_EXISTS);
+
+  if not Result then
+    AErrorCode := DWORD(CreateResult);
+end;
+
+
+function RDJWriteBytesToFile(const AFileName: string;
+                             const ABytes: TBytes;
+                             const AShareMode: DWORD;
+                             out AErrorCode: DWORD): Boolean;
+var
+  DirectoryName: string;
+  FileHandle: THandle;
+  Offset: Integer;
+  BytesWritten: DWORD;
+  BytesToWrite: DWORD;
+
+begin
+
+  Result := False;
+  AErrorCode := ERROR_SUCCESS;
+
+  if (AFileName = '') or
+     (Length(ABytes) = 0) then
+    Exit;
+
+  DirectoryName := ExtractFilePath(AFileName);
+  if not RDJEnsureDirectoryExists(DirectoryName,
+                                  AErrorCode) then
+    Exit;
+
+  FileHandle := CreateFile(PChar(AFileName),
+                           GENERIC_WRITE,
+                           AShareMode,
+                           nil,
+                           CREATE_ALWAYS,
+                           FILE_ATTRIBUTE_NORMAL,
+                           0);
+
+  if FileHandle = INVALID_HANDLE_VALUE then
+    begin
+      AErrorCode := GetLastError();
+      Exit;
+    end;
+
+  try
+
+    Offset := 0;
+
+    while Offset < Length(ABytes) do
+      begin
+        BytesToWrite := DWORD(Length(ABytes) - Offset);
+        BytesWritten := 0;
+
+        if not WriteFile(FileHandle,
+                         ABytes[Offset],
+                         BytesToWrite,
+                         BytesWritten,
+                         nil) then
+          begin
+            AErrorCode := GetLastError();
+            Exit;
+          end;
+
+        if BytesWritten = 0 then
+          begin
+            AErrorCode := ERROR_WRITE_FAULT;
+            Exit;
+          end;
+
+        Inc(Offset,
+            Integer(BytesWritten));
+      end;
+
+    Result := True;
+  finally
+
+    CloseHandle(FileHandle);
+  end;
+end;
+
+
+function RDJReadUtf8TextFile(const AFileName: string;
+                             out AText: string;
+                             out AErrorCode: DWORD): Boolean;
+const
+  CMaxHandoverTextFileSize = 1024 * 1024;
+
+var
+  FileHandle: THandle;
+  FileSize: DWORD;
+  BytesRead: DWORD;
+  Bytes: TBytes;
+  Utf8: UTF8String;
+
+begin
+
+  Result := False;
+  AText := '';
+  AErrorCode := ERROR_SUCCESS;
+
+  FileHandle := CreateFile(PChar(AFileName),
+                           GENERIC_READ,
+                           FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE,
+                           nil,
+                           OPEN_EXISTING,
+                           FILE_ATTRIBUTE_NORMAL,
+                           0);
+
+  if FileHandle = INVALID_HANDLE_VALUE then
+    begin
+      AErrorCode := GetLastError();
+      Exit;
+    end;
+
+  try
+
+    FileSize := Winapi.Windows.GetFileSize(FileHandle,
+                                          nil);
+
+    if (FileSize = INVALID_FILE_SIZE) and
+       (GetLastError() <> ERROR_SUCCESS) then
+      begin
+        AErrorCode := GetLastError();
+        Exit;
+      end;
+
+    if FileSize > CMaxHandoverTextFileSize then
+      begin
+        AErrorCode := ERROR_FILE_TOO_LARGE;
+        Exit;
+      end;
+
+    if FileSize = 0 then
+      begin
+        Result := True;
+        Exit;
+      end;
+
+    SetLength(Bytes,
+              FileSize);
+    BytesRead := 0;
+
+    if not ReadFile(FileHandle,
+                    Bytes[0],
+                    FileSize,
+                    BytesRead,
+                    nil) then
+      begin
+        AErrorCode := GetLastError();
+        Exit;
+      end;
+
+    SetLength(Utf8,
+              BytesRead);
+    if BytesRead > 0 then
+      Move(Bytes[0],
+           PAnsiChar(Utf8)^,
+           BytesRead);
+
+    AText := string(Utf8);
+    Result := True;
+  finally
+
+    CloseHandle(FileHandle);
+  end;
 end;
 
 
@@ -1421,33 +1625,29 @@ begin
 end;
 
 
-procedure TRdjProMseMirrorThread.WriteBytesToFile(const AFileName: string;
-                                                  const ABytes: TBytes);
+function TRdjProMseMirrorThread.WriteBytesToFile(const AFileName: string;
+                                                 const ABytes: TBytes): Boolean;
 var
-  Stream: TFileStream;
+  ErrorCode: DWORD;
 
 begin
+
+  Result := False;
 
   if (AFileName = '') or
      (Length(ABytes) = 0) then
     Exit;
 
-  ForceDirectories(ExtractFilePath(AFileName));
+  Result := RDJWriteBytesToFile(AFileName,
+                                ABytes,
+                                FILE_SHARE_READ or FILE_SHARE_WRITE,
+                                ErrorCode);
 
-  Stream := TFileStream.Create(AFileName,
-                               fmCreate or fmShareDenyNone);
-  try
-    Stream.WriteBuffer(ABytes[0],
-                       Length(ABytes));
-    // Milestone 9:
-    // Do not FlushFileBuffers() for every mirrored media fragment.
-    // On SMB/UNC shares this is very expensive and the log showed the
-    // mirror queue climbing above 100 pending fragment jobs.  Atomic temp
-    // write + rename is enough for Caddy/MSE visibility; durability after
-    // a power loss is not important for live scratch fragments.
-  finally
-    Stream.Free();
-  end;
+  if not Result then
+    OutputDebugString(PChar(Format('TRdjProMseMirrorThread: write failed: %s err=%d %s',
+                                   [ExtractFileName(AFileName),
+                                    ErrorCode,
+                                    SysErrorMessage(ErrorCode)])));
 end;
 
 
@@ -1465,16 +1665,15 @@ begin
      (Length(ABytes) = 0) then
     Exit;
 
-  ForceDirectories(ExtractFilePath(AFileName));
-
   TmpFileName := AFileName +
                  Format('.tmp_%x_%x_%x',
                         [GetCurrentProcessId(),
                          GetCurrentThreadId(),
                          GetTickCount()]);
 
-  WriteBytesToFile(TmpFileName,
-                   ABytes);
+  if not WriteBytesToFile(TmpFileName,
+                          ABytes) then
+    Exit;
 
   for I := 0 to 20 do
     begin
@@ -1697,6 +1896,7 @@ var
   Job: TRdjProMseMirrorJob;
   Seq: Integer;
   WriteOk: Boolean;
+  ErrorCode: DWORD;
 
 begin
 
@@ -1727,10 +1927,8 @@ begin
                 // live.json, but write patched_frag_NNNNNN.m4s directly.
                 if (Seq > 0) then
                   begin
-                    WriteBytesToFile(Job.FileName,
-                                     Job.Bytes);
-
-                    WriteOk := FileExists(Job.FileName);
+                    WriteOk := WriteBytesToFile(Job.FileName,
+                                                Job.Bytes);
                   end
                 else
                   WriteOk := WriteBytesToFileAtomicResult(Job.FileName,
@@ -1745,9 +1943,15 @@ begin
             mjkCopyFile:
               begin
                 Seq := ExtractPatchedFragmentSeq(Job.FileName);
-                ForceDirectories(ExtractFilePath(Job.FileName));
+                WriteOk := RDJEnsureDirectoryExists(ExtractFilePath(Job.FileName),
+                                                    ErrorCode);
 
-                if FileExists(Job.SourceFileName) then
+                if not WriteOk then
+                  OutputDebugString(PChar(Format('TRdjProMseMirrorThread: mirror directory unavailable: %s err=%d %s',
+                                                 [ExtractFilePath(Job.FileName),
+                                                  ErrorCode,
+                                                  SysErrorMessage(ErrorCode)])))
+                else if FileExists(Job.SourceFileName) then
                   begin
                     WriteOk := CopyFile(PChar(Job.SourceFileName),
                                         PChar(Job.FileName),
@@ -1880,7 +2084,6 @@ begin
         begin
 
           chkBroadcast.Checked := False;
-          chkBroadcast.Down := False;
           UpdateOnAirLamp(False);
           memLog.Lines.Append('Broadcasting stopped.');
         end;
@@ -2650,7 +2853,6 @@ procedure TfrmMediaServer.FormCreate(Sender: TObject);
 begin
 
   chkBroadcast.Checked := False;
-  chkBroadcast.Down := False;
   chkBroadcast.Enabled := True;
 
   btnRdjProRecord.Tag := 0;
@@ -2710,6 +2912,7 @@ begin
   FBroadcastMseMemLastLogTick := 0;
   FBroadcastHandoverLockAcquired := False;
   FBroadcastHandoverOwnerId := '';
+  FBroadcastHandoverConnectionLost := False;
   SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
                                     UNLOCKED_COLOR);
   FLastBroadcastHandoverHeartbeatTick := 0;
@@ -2718,6 +2921,7 @@ begin
   FLastBroadcastHealthCaption := '';
   FLastBroadcastHealthMessage := '';
   FLastBroadcastHealthLogTick := 0;
+  FLastFileWriteError := ERROR_SUCCESS;
   FBroadcastMseRecorderRestartQueued := 0;
   FBroadcastMseRecorderRestartCount := 0;
   FActiveBroadcastVideoMediaType := nil;
@@ -2891,7 +3095,6 @@ begin
 
   chkBroadcast.Enabled := True;
   chkBroadcast.Checked := FBroadcastPublishing;
-  chkBroadcast.Down := chkBroadcast.Checked;
 
   UpdateOnAirLamp(chkBroadcast.Checked);
   UpdateRecordingUi();
@@ -2998,6 +3201,15 @@ var
   NeedAudio: Boolean;
   RecorderActive: Boolean;
 begin
+
+  if FBroadcastPublishing and
+     FBroadcastHandoverConnectionLost then
+    begin
+      SetBroadcastHealth('HEALTH: WARNING',
+                         HEALTH_WARNING_COLOR,
+                         'Broadcast server connection lost; RDJ Pro is retrying.');
+      Exit;
+    end;
 
   if not FBroadcastPublishing then
     begin
@@ -4139,7 +4351,6 @@ begin
                 FCastProducerRequested := False;
                 FPendingCastLive := False;
                 chkBroadcast.Checked := False;
-                chkBroadcast.Down := False;
                 UpdateOnAirLamp(False);
                 ReleaseBroadcastHandoverLock(False);
               end;
@@ -4364,6 +4575,7 @@ end;
 function TfrmMediaServer.ResolveBroadcastMseMirrorDir(): string;
 var
   BaseDir: string;
+  ErrorCode: DWORD;
 
 begin
 
@@ -4393,16 +4605,16 @@ begin
   // Result := IncludeTrailingPathDelimiter(BaseDir + 'mse_debug');
   Result := BaseDir;
 
-  try
-    ForceDirectories(Result);
-    FBroadcastMseMirrorDir := Result;
-  except
-    on E: Exception do
-      begin
-        OutputDebugString(PChar('TfrmMediaServer.MSE mirror disabled: ' + E.Message));
-        Result := '';
-      end;
-  end;
+  if RDJEnsureDirectoryExists(Result,
+                              ErrorCode) then
+    FBroadcastMseMirrorDir := Result
+  else
+    begin
+      OutputDebugString(PChar(Format('TfrmMediaServer.MSE mirror unavailable: err=%d %s',
+                                     [ErrorCode,
+                                      SysErrorMessage(ErrorCode)])));
+      Result := '';
+    end;
 end;
 
 
@@ -4778,45 +4990,38 @@ begin
 end;
 
 
-procedure TfrmMediaServer.WriteBytesToFile(const AFileName: string;
-                                           const ABytes: TBytes);
-var
-  Stream: TFileStream;
-
+function TfrmMediaServer.WriteBytesToFile(const AFileName: string;
+                                          const ABytes: TBytes): Boolean;
 begin
+
+  Result := False;
+  FLastFileWriteError := ERROR_SUCCESS;
 
   if (AFileName = '') or
      (Length(ABytes) = 0) then
     Exit;
 
-  ForceDirectories(ExtractFilePath(AFileName));
-
-  Stream := TFileStream.Create(AFileName,
-                               fmCreate or fmShareDenyWrite);
-  try
-
-    Stream.WriteBuffer(ABytes[0],
-                       Length(ABytes));
-  finally
-
-    Stream.Free();
-  end;
+  Result := RDJWriteBytesToFile(AFileName,
+                                ABytes,
+                                FILE_SHARE_READ,
+                                FLastFileWriteError);
 end;
 
 
-procedure TfrmMediaServer.WriteBytesToFileAtomic(const AFileName: string;
-                                                 const ABytes: TBytes);
+function TfrmMediaServer.WriteBytesToFileAtomic(const AFileName: string;
+                                                const ABytes: TBytes): Boolean;
 var
   TmpFileName: string;
   I: Integer;
 
 begin
 
+  Result := False;
+  FLastFileWriteError := ERROR_SUCCESS;
+
   if (AFileName = '') or
      (Length(ABytes) = 0) then
     Exit;
-
-  ForceDirectories(ExtractFilePath(AFileName));
 
   TmpFileName := AFileName +
                  Format('.tmp_%x_%x_%x',
@@ -4824,8 +5029,9 @@ begin
                          GetCurrentThreadId(),
                          GetTickCount()]);
 
-  WriteBytesToFile(TmpFileName,
-                   ABytes);
+  if not WriteBytesToFile(TmpFileName,
+                          ABytes) then
+    Exit;
 
   // Make the browser see either the previous complete file or the new
   // complete file. Never expose a half-written fragment or live.json.
@@ -4840,26 +5046,32 @@ begin
       if MoveFileEx(PChar(TmpFileName),
                     PChar(AFileName),
                     MOVEFILE_REPLACE_EXISTING) then
-        Exit;
+        begin
+          Result := True;
+          Exit;
+        end;
 
+      FLastFileWriteError := GetLastError();
       Sleep(5);
     end;
 
   OutputDebugString(PChar(Format('TfrmMediaServer.MSE atomic write failed, keeping old file: %s err=%d',
                                  [ExtractFileName(AFileName),
-                                  GetLastError()])));
+                                   FLastFileWriteError])));
 
   DeleteFile(TmpFileName);
 end;
 
 
-procedure TfrmMediaServer.WriteUtf8TextToFileAtomic(const AFileName: string;
-                                                    const AText: string);
+function TfrmMediaServer.WriteUtf8TextToFileAtomic(const AFileName: string;
+                                                   const AText: string): Boolean;
 var
   Bytes: TBytes;
   Utf8: UTF8String;
 
 begin
+
+  Result := False;
 
   Utf8 := UTF8String(AText);
 
@@ -4873,8 +5085,8 @@ begin
        Bytes[0],
        Length(Utf8));
 
-  WriteBytesToFileAtomic(AFileName,
-                         Bytes);
+  Result := WriteBytesToFileAtomic(AFileName,
+                                   Bytes);
 end;
 
 
@@ -5082,24 +5294,18 @@ end;
 
 function TfrmMediaServer.ReadBroadcastHandoverTextFile(const AFileName: string): string;
 var
-  Lines: TStringList;
+  ErrorCode: DWORD;
 
 begin
 
   Result := '';
 
-  if (AFileName = '') or
-     (not FileExists(AFileName)) then
+  if (AFileName = '') then
     Exit;
 
-  Lines := TStringList.Create();
-  try
-    Lines.LoadFromFile(AFileName,
-                       TEncoding.UTF8);
-    Result := Lines.Text;
-  finally
-    Lines.Free();
-  end;
+  RDJReadUtf8TextFile(AFileName,
+                      Result,
+                      ErrorCode);
 end;
 
 
@@ -5226,6 +5432,7 @@ var
   OwnerJson: string;
   OwnerName: string;
   OwnerUpdated: string;
+  ErrorCode: DWORD;
 
 begin
 
@@ -5248,7 +5455,14 @@ begin
       Exit;
     end;
 
-  ForceDirectories(BaseDir);
+  if not RDJEnsureDirectoryExists(BaseDir,
+                                  ErrorCode) then
+    begin
+      SetBroadcastHandoverConnectionLost('Broadcast server is unavailable: ' +
+                                         SysErrorMessage(ErrorCode));
+      AMessage := 'Cannot reach the broadcast server at ' + BaseDir + '.';
+      Exit;
+    end;
 
   if DirectoryExists(LockDir) and
      IsBroadcastHandoverLockStale(LockDir) then
@@ -5259,6 +5473,15 @@ begin
 
   if not CreateDir(LockDir) then
     begin
+      if not DirectoryExists(LockDir) then
+        begin
+          ErrorCode := GetLastError();
+          SetBroadcastHandoverConnectionLost('Broadcast server is unavailable: ' +
+                                             SysErrorMessage(ErrorCode));
+          AMessage := 'Cannot create the broadcast lock at ' + LockDir + '.';
+          Exit;
+        end;
+
       SetBroadcastHandoverLockIndicator(CAP_LOCKED,
                                         LOCKED_COLOR);
 
@@ -5286,6 +5509,7 @@ begin
     end;
 
   FBroadcastHandoverLockAcquired := True;
+  FBroadcastHandoverConnectionLost := False;
   FBroadcastHandoverOwnerId := Format('%s-%d-%d',
                                       [BroadcastHandoverComputerName(),
                                        GetCurrentProcessId(),
@@ -5293,6 +5517,17 @@ begin
   FLastBroadcastHandoverHeartbeatTick := 0;
 
   UpdateBroadcastHandoverHeartbeat(True);
+
+  if FBroadcastHandoverConnectionLost or
+     (not FBroadcastHandoverLockAcquired) then
+    begin
+      DeleteBroadcastHandoverLockDir(LockDir);
+      FBroadcastHandoverLockAcquired := False;
+      FBroadcastHandoverOwnerId := '';
+      AMessage := 'The broadcast server became unavailable while acquiring the broadcast lock.';
+      Exit;
+    end;
+
   AMessage := 'Broadcast lock acquired by ' + BroadcastHandoverOwnerDisplay() + '.';
   Result := True;
 end;
@@ -5301,7 +5536,11 @@ end;
 procedure TfrmMediaServer.ReleaseBroadcastHandoverLock(const APublishHandoverReady: Boolean);
 var
   LockDir: string;
+  OwnerFileName: string;
+  OwnerJson: string;
+  OwnerId: string;
   MessageText: string;
+  OwnsServerLock: Boolean;
 
 begin
 
@@ -5312,29 +5551,101 @@ begin
                                     UNLOCKED_COLOR);
 
   LockDir := BroadcastHandoverLockDir();
+  OwnsServerLock := False;
 
-  if APublishHandoverReady then
+  if (LockDir <> '') and DirectoryExists(LockDir) then
+    begin
+      OwnerFileName := IncludeTrailingPathDelimiter(LockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
+      OwnerJson := ReadBroadcastHandoverTextFile(OwnerFileName);
+      OwnerId := ExtractBroadcastHandoverJsonString(OwnerJson,
+                                                    'ownerId');
+      OwnsServerLock := (OwnerId <> '') and
+                        SameText(OwnerId,
+                                 FBroadcastHandoverOwnerId);
+    end;
+
+  if APublishHandoverReady and OwnsServerLock then
     begin
       MessageText := BroadcastHandoverOwnerDisplay() + ' has finished. The next DJ can take over now.';
       PublishBroadcastHandoverStatus('handover_ready',
                                      MessageText);
     end;
 
-  if LockDir <> '' then
+  if OwnsServerLock then
     DeleteBroadcastHandoverLockDir(LockDir);
+
+  if (not OwnsServerLock) and Assigned(memLog) then
+    memLog.Lines.Append('Broadcast lock was not removed because server ownership could not be verified.');
 
   FBroadcastHandoverLockAcquired := False;
   FBroadcastHandoverOwnerId := '';
+  FBroadcastHandoverConnectionLost := False;
   FLastBroadcastHandoverHeartbeatTick := 0;
+end;
+
+
+procedure TfrmMediaServer.SetBroadcastHandoverConnectionLost(const AMessage: string);
+var
+  WasLost: Boolean;
+
+begin
+
+  WasLost := FBroadcastHandoverConnectionLost;
+  FBroadcastHandoverConnectionLost := True;
+
+  SetBroadcastHandoverLockIndicator('SERVER OFFLINE',
+                                    HEALTH_WARNING_COLOR);
+  SetBroadcastHealth('HEALTH: WARNING',
+                     HEALTH_WARNING_COLOR,
+                     AMessage);
+
+  if (not WasLost) and Assigned(memLog) then
+    memLog.Lines.Append(AMessage + ' RDJ Pro will retry automatically.');
+end;
+
+
+procedure TfrmMediaServer.DisableBroadcastPublishingAfterLockConflict(const AMessage: string);
+begin
+
+  FBroadcastPublishing := False;
+  FBroadcastHandoverLockAcquired := False;
+  FBroadcastHandoverConnectionLost := False;
+  FBroadcastHandoverOwnerId := '';
+  FLastBroadcastHandoverHeartbeatTick := 0;
+
+  StopBroadcastMseMirrorThread();
+
+  chkBroadcast.Checked := False;
+  UpdateOnAirLamp(False);
+  SetBroadcastHandoverLockIndicator(CAP_LOCKED,
+                                    LOCKED_COLOR);
+  SetBroadcastHealth('HEALTH: ERROR',
+                     HEALTH_ERROR_COLOR,
+                     AMessage,
+                     True);
+
+  if Assigned(memLog) then
+    memLog.Lines.Append(AMessage + ' Public publishing has been stopped to protect the active broadcast.');
+
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.RefreshMainButtonStates();
 end;
 
 
 procedure TfrmMediaServer.UpdateBroadcastHandoverHeartbeat(const AForce: Boolean = False);
 var
   Tick: DWORD;
+  BaseDir: string;
   LockDir: string;
   OwnerFileName: string;
+  OwnerJson: string;
+  OwnerId: string;
   Json: string;
+  ErrorCode: DWORD;
+  FirstHeartbeat: Boolean;
+  WasConnectionLost: Boolean;
+  ReacquiredLock: Boolean;
+  ErrorMessage: string;
 
 begin
 
@@ -5342,26 +5653,108 @@ begin
     Exit;
 
   Tick := GetTickCount();
+  FirstHeartbeat := FLastBroadcastHandoverHeartbeatTick = 0;
 
   if (not AForce) and
      (FLastBroadcastHandoverHeartbeatTick <> 0) and
      ((Tick - FLastBroadcastHandoverHeartbeatTick) < RDJ_BROADCAST_HANDOVER_HEARTBEAT_MS) then
     Exit;
 
+  FLastBroadcastHandoverHeartbeatTick := Tick;
+  BaseDir := BroadcastHandoverBaseDir();
   LockDir := BroadcastHandoverLockDir();
-  if LockDir = '' then
+
+  if (BaseDir = '') or (LockDir = '') then
     Exit;
+
+  if not DirectoryExists(BaseDir) then
+    begin
+      SetBroadcastHandoverConnectionLost('Broadcast server path is unavailable: ' + BaseDir);
+      Exit;
+    end;
+
+  WasConnectionLost := FBroadcastHandoverConnectionLost;
+  ReacquiredLock := False;
+
+  if not DirectoryExists(LockDir) then
+    begin
+      if not WasConnectionLost then
+        begin
+          SetBroadcastHandoverConnectionLost('The broadcast lock disappeared from the server.');
+          Exit;
+        end;
+
+      if not CreateDir(LockDir) then
+        begin
+          SetBroadcastHandoverConnectionLost('The broadcast server is reachable, but the broadcast lock cannot be reacquired.');
+          Exit;
+        end;
+
+      ReacquiredLock := True;
+    end
+  else
+    begin
+      OwnerFileName := IncludeTrailingPathDelimiter(LockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
+
+      if FileExists(OwnerFileName) then
+        begin
+          OwnerJson := ReadBroadcastHandoverTextFile(OwnerFileName);
+          OwnerId := ExtractBroadcastHandoverJsonString(OwnerJson,
+                                                        'ownerId');
+
+          if (OwnerId = '') then
+            begin
+              SetBroadcastHandoverConnectionLost('The broadcast lock owner cannot be read from the server.');
+              Exit;
+            end;
+
+          if not SameText(OwnerId,
+                          FBroadcastHandoverOwnerId) then
+            begin
+              DisableBroadcastPublishingAfterLockConflict('Broadcast ownership changed to another RDJ Pro computer.');
+              Exit;
+            end;
+        end
+      else if not FirstHeartbeat then
+        begin
+          SetBroadcastHandoverConnectionLost('The broadcast lock owner file is temporarily unavailable.');
+          Exit;
+        end;
+    end;
+
+  if WasConnectionLost then
+    begin
+      FBroadcastHandoverConnectionLost := False;
+      ResetBroadcastMseDebugDump();
+    end;
 
   OwnerFileName := IncludeTrailingPathDelimiter(LockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
   Json := BuildBroadcastHandoverStatusJson('on_air',
-                                           BroadcastHandoverOwnerDisplay() + ' is on air.');
+                                            BroadcastHandoverOwnerDisplay() + ' is on air.');
 
-  WriteUtf8TextToFileAtomic(OwnerFileName,
-                            Json);
+  if not WriteUtf8TextToFileAtomic(OwnerFileName,
+                                   Json) then
+    begin
+      ErrorCode := FLastFileWriteError;
+      ErrorMessage := 'Cannot update the broadcast lock';
+
+      if ErrorCode <> ERROR_SUCCESS then
+        ErrorMessage := ErrorMessage + ': ' + SysErrorMessage(ErrorCode);
+
+      SetBroadcastHandoverConnectionLost(ErrorMessage);
+      Exit;
+    end;
+
+  if WasConnectionLost and Assigned(memLog) then
+    begin
+      if ReacquiredLock then
+        memLog.Lines.Append('Broadcast server connection restored and the broadcast lock was reacquired.')
+      else
+        memLog.Lines.Append('Broadcast server connection restored; broadcast ownership was verified.');
+    end;
+
   PublishBroadcastHandoverStatus('on_air',
                                  BroadcastHandoverOwnerDisplay() + ' is on air.');
-
-  FLastBroadcastHandoverHeartbeatTick := Tick;
 end;
 
 
@@ -5442,6 +5835,9 @@ var
 
 begin
 
+  if FBroadcastHandoverConnectionLost then
+    Exit;
+
   if (AFileName = '') or
      (Length(ABytes) = 0) then
     Exit;
@@ -5458,6 +5854,9 @@ var
   Worker: TRdjProMseMirrorThread;
 
 begin
+
+  if FBroadcastHandoverConnectionLost then
+    Exit;
 
   if (ASourceFileName = '') or (ADestFileName = '') then
     Exit;
@@ -5476,6 +5875,9 @@ var
   Worker: TRdjProMseMirrorThread;
 
 begin
+
+  if FBroadcastHandoverConnectionLost then
+    Exit;
 
   if (AFileName = '') or (AText = '') then
     Exit;
@@ -5501,6 +5903,9 @@ var
   Worker: TRdjProMseMirrorThread;
 
 begin
+
+  if FBroadcastHandoverConnectionLost then
+    Exit;
 
   if (AFileName = '') then
     Exit;
@@ -6316,7 +6721,6 @@ begin
 
                            tmrTime.Enabled := True;
                            chkBroadcast.Checked := FBroadcastPublishing;
-                           chkBroadcast.Down := FBroadcastPublishing;
                            chkRdjProCamera.Enabled := FRdjProStaticImage and
                                                       (not FRecordingRdjPro);
                            chkRecordVideoOnly.Enabled := False;
@@ -6346,7 +6750,6 @@ begin
                              begin
                                FRdjProBroadcasting := False;
                                chkBroadcast.Checked := False;
-                               chkBroadcast.Down := False;
                                chkRdjProCamera.Enabled := not FRecordingRdjPro;
                                chkRecordVideoOnly.Enabled := not FRecordingRdjPro;
                                chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
@@ -6641,7 +7044,6 @@ begin
           ResetBroadcastMseDebugDump();
           FBroadcastPublishing := True;
           chkBroadcast.Checked := True;
-          chkBroadcast.Down := True;
           UpdateOnAirLamp(True);
           memLog.Lines.Append('Broadcasting started; the active encoder is now feeding browser/Caddy and Cast.');
           UpdateBroadcastHealth();
@@ -6707,7 +7109,6 @@ begin
           FLastBroadcastPublicSegmentTick := GetTickCount64();
           FRdjProBroadcasting := True;
           chkBroadcast.Checked := FBroadcastPublishing;
-          chkBroadcast.Down := FBroadcastPublishing;
           chkRdjProCamera.Enabled := FRdjProStaticImage and
                                      (not FRecordingRdjPro);
           chkRecordVideoOnly.Enabled := False;
@@ -6767,7 +7168,6 @@ begin
   FPendingBroadcastRecording := False;
   FPendingBroadcastFileName := '';
   chkBroadcast.Checked := FBroadcastPublishing;
-  chkBroadcast.Down := FBroadcastPublishing;
   chkRdjProCamera.Enabled := FRdjProStaticImage and
                              (not FRecordingRdjPro);
   chkRecordVideoOnly.Enabled := False;
@@ -6831,12 +7231,15 @@ begin
       FPendingBroadcastFileName := '';
       FActiveBroadcastVideoMediaType := nil;
     end;
+
   chkBroadcast.Checked := False;
-  chkBroadcast.Down := False;
+
   chkRdjProCamera.Enabled := (not FCastProducerRequested) and
                              (not FRecordingRdjPro);
+
   chkRecordVideoOnly.Enabled := (not FCastProducerRequested) and
                                 (not FRecordingRdjPro);
+
   chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
   UpdateOnAirLamp(False);
   UpdateBroadcastHealth();

@@ -2448,35 +2448,35 @@ begin
 
                       FMediaServer.SetBroadcastUiState(False,
                                                        False);
-                      MainMdifrm.chkMediaServer.Down := False;
+                      MainMdifrm.chkMediaServer.Checked := False;
                    end;
 
         bsConnecting: begin
 
                         FMediaServer.SetBroadcastUiState(True,
                                                          False);
-                        MainMdifrm.chkMediaServer.Down := False;
+                        MainMdifrm.chkMediaServer.Checked := False;
                       end;
 
         bsLive: begin
 
                   FMediaServer.SetBroadcastUiState(True,
                                                    True);
-                  MainMdifrm.chkMediaServer.Down := True;
+                  MainMdifrm.chkMediaServer.Checked := True;
                 end;
 
         bsReconnecting: begin
 
                           FMediaServer.SetBroadcastUiState(True,
                                                            False);
-                          MainMdifrm.chkMediaServer.Down := False;
+                          MainMdifrm.chkMediaServer.Checked := False;
                         end;
 
         bsError: begin
 
                    FMediaServer.SetBroadcastUiState(False,
                                                     False);
-                   MainMdifrm.chkMediaServer.Down := False;
+                   MainMdifrm.chkMediaServer.Checked := False;
                  end;
       end;
     end;

@@ -11,10 +11,12 @@ object dlgProcessPicker: TdlgProcessPicker
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object pnlTop: TPanel
     Left = 0
@@ -26,7 +28,6 @@ object dlgProcessPicker: TdlgProcessPicker
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 729
     object lblDuration: TLabel
       Left = 2
       Top = 22
@@ -51,7 +52,7 @@ object dlgProcessPicker: TdlgProcessPicker
       Top = 20
       Width = 289
       Height = 25
-      Color = 5850948
+      Color = 9216
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -13
@@ -460,8 +461,6 @@ object dlgProcessPicker: TdlgProcessPicker
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
-    ExplicitTop = 543
-    ExplicitWidth = 729
     object Label1: TLabel
       Left = 20
       Top = 13
@@ -816,8 +815,6 @@ object dlgProcessPicker: TdlgProcessPicker
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
-    ExplicitWidth = 729
-    ExplicitHeight = 474
     object splAppsChildren: TSplitter
       Left = 1
       Top = 209
@@ -849,7 +846,6 @@ object dlgProcessPicker: TdlgProcessPicker
       Color = 5850948
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 727
       object lblAppsHeader: TLabel
         Left = 0
         Top = 0
@@ -896,7 +892,6 @@ object dlgProcessPicker: TdlgProcessPicker
         ViewStyle = vsReport
         OnDblClick = lvAppsDblClick
         OnSelectItem = lvAppsSelectItem
-        ExplicitWidth = 727
       end
     end
     object pnlChildrenHost: TPanel
@@ -913,8 +908,6 @@ object dlgProcessPicker: TdlgProcessPicker
       Color = 5850948
       ParentBackground = False
       TabOrder = 1
-      ExplicitWidth = 727
-      ExplicitHeight = 258
       object lblChildrenHeader: TLabel
         Left = 0
         Top = 0
@@ -961,8 +954,6 @@ object dlgProcessPicker: TdlgProcessPicker
         ViewStyle = vsReport
         OnDblClick = lvChildrenDblClick
         OnSelectItem = lvChildrenSelectItem
-        ExplicitWidth = 727
-        ExplicitHeight = 231
       end
     end
   end

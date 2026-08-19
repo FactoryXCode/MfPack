@@ -932,8 +932,8 @@
   function applyNowPlaying(data) {
     const live = data || {};
     setText('stationName', firstText(live.station, 'FactoryXradio'));
-    setText('trackTitle', firstText(live.title, live.song, 'Live Broadcast'));
-    setText('trackArtist', firstText(live.artist, live.djName, live.dj, 'Only the best music 24/7'));
+    setText('trackTitle', firstText(live.title, live.activityTitle, live.song, 'Live Broadcast'));
+    setText('trackArtist', firstText(live.artist, live.eventTitle, live.djName, live.dj, 'Only the best music 24/7'));
     setText('showTitle', firstText(live.showName, live.show, live.showTitle, 'FactoryXradio Live'));
     setCover(firstText(live.coverUrl, live.artwork, live.albumArt, live.cover, live.image, '/cover_default.jpg'));
     setImageElement(heroImage, firstText(live.heroImage, '/hero.jpg'), '/hero.jpg');

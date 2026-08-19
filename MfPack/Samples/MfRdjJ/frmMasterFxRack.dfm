@@ -2141,7 +2141,6 @@ object frmMasterFxRack: TfrmMasterFxRack
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {

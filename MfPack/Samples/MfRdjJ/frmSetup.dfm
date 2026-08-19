@@ -121,7 +121,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastHost: TLabel
       Left = 22
-      Top = 37
+      Top = 38
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -141,8 +141,8 @@ object frmSetup: TfrmSetup
       ShowHint = True
     end
     object lblBroadcastPort: TLabel
-      Left = 392
-      Top = 37
+      Left = 395
+      Top = 38
       Width = 54
       Height = 23
       Margins.Left = 2
@@ -163,7 +163,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastMount: TLabel
       Left = 22
-      Top = 69
+      Top = 70
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -184,7 +184,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastPassword: TLabel
       Left = 22
-      Top = 133
+      Top = 134
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -205,7 +205,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastName: TLabel
       Left = 22
-      Top = 180
+      Top = 181
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -226,7 +226,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastDescription: TLabel
       Left = 22
-      Top = 213
+      Top = 214
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -247,7 +247,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastGenre: TLabel
       Left = 22
-      Top = 247
+      Top = 248
       Width = 127
       Height = 22
       Margins.Left = 2
@@ -268,7 +268,7 @@ object frmSetup: TfrmSetup
     end
     object lblBroadcastUrl: TLabel
       Left = 22
-      Top = 281
+      Top = 282
       Width = 127
       Height = 22
       Margins.Left = 2
@@ -288,8 +288,8 @@ object frmSetup: TfrmSetup
       ShowHint = True
     end
     object lblBroadCastUserName: TLabel
-      Left = 25
-      Top = 101
+      Left = 23
+      Top = 102
       Width = 126
       Height = 22
       Margins.Left = 2
@@ -310,7 +310,7 @@ object frmSetup: TfrmSetup
     end
     object Label8: TLabel
       Left = 20
-      Top = 441
+      Top = 442
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -331,7 +331,7 @@ object frmSetup: TfrmSetup
     end
     object Label9: TLabel
       Left = 20
-      Top = 475
+      Top = 476
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -368,7 +368,7 @@ object frmSetup: TfrmSetup
     end
     object Label11: TLabel
       Left = 392
-      Top = 407
+      Top = 408
       Width = 54
       Height = 23
       Margins.Left = 2
@@ -389,7 +389,7 @@ object frmSetup: TfrmSetup
     end
     object Label13: TLabel
       Left = 20
-      Top = 407
+      Top = 408
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -410,7 +410,7 @@ object frmSetup: TfrmSetup
     end
     object Label14: TLabel
       Left = 20
-      Top = 509
+      Top = 510
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -431,7 +431,7 @@ object frmSetup: TfrmSetup
     end
     object Label16: TLabel
       Left = 20
-      Top = 543
+      Top = 544
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -452,7 +452,7 @@ object frmSetup: TfrmSetup
     end
     object Label17: TLabel
       Left = 20
-      Top = 578
+      Top = 579
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -489,7 +489,7 @@ object frmSetup: TfrmSetup
     end
     object lblCaddyPath: TLabel
       Left = 20
-      Top = 705
+      Top = 706
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -510,7 +510,7 @@ object frmSetup: TfrmSetup
     end
     object lblCaddyConfigPath: TLabel
       Left = 20
-      Top = 739
+      Top = 740
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -531,7 +531,7 @@ object frmSetup: TfrmSetup
     end
     object lblCaddyJsonNowPlayingPath: TLabel
       Left = 20
-      Top = 773
+      Top = 775
       Width = 127
       Height = 23
       Hint = 'Caddy'#39's NowPlaying.json path'
@@ -553,7 +553,7 @@ object frmSetup: TfrmSetup
     end
     object lblCaddyCmdLine: TLabel
       Left = 20
-      Top = 844
+      Top = 845
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -574,7 +574,7 @@ object frmSetup: TfrmSetup
     end
     object Label21: TLabel
       Left = 20
-      Top = 809
+      Top = 810
       Width = 127
       Height = 23
       Margins.Left = 2
@@ -1115,7 +1115,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -1616,6 +1615,7 @@ object frmSetup: TfrmSetup
     Height = 928
     Align = alClient
     BevelOuter = bvNone
+    Caption = 'a'
     Color = 5850948
     Padding.Left = 12
     Padding.Top = 12
@@ -2167,7 +2167,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2513,7 +2512,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2711,7 +2709,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2840,7 +2837,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -3223,7 +3219,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {

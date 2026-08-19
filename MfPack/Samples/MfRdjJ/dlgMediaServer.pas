@@ -138,6 +138,7 @@ type
                                   AState: TMfIcecastServerState);
     procedure UpdateIcecastUi();
     procedure UpdateOnAirLamp(const AOnAir: Boolean);
+    procedure SyncBroadcastUiFromEngine();
 
     procedure StartStopPublicRadioServices();
     function StartCaddy(): HRESULT;
@@ -172,6 +173,7 @@ implementation
 uses
   {Application}
   RDJ.Setup,
+  MfIcecastBroadcastEngine,
   frmMainMDI;
 
 
@@ -215,10 +217,19 @@ begin
           Exit;
         end;
 
-      SetBroadcastUiState(False,
+      // Keep the user's request visible while the broadcast engine connects.
+      // The engine state callback will update the On Air indication.
+      SetBroadcastUiState(True,
                           False);
 
-      MainMDIFrm.SetBroadcastEnabled(True);
+      try
+        MainMDIFrm.SetBroadcastEnabled(True);
+        SyncBroadcastUiFromEngine();
+      except
+        SetBroadcastUiState(False,
+                            False);
+        raise;
+      end;
     end
   else
     begin
@@ -260,14 +271,11 @@ begin
   FCaddyStartedByRdj := False;
 
   chkStartStopServer.Checked := False;
-  chkStartStopServer.Down := False;
 
   chkBroadcast.Checked := False;
-  chkBroadcast.Down := False;
   chkBroadcast.Enabled := False;
 
   chkAutoRestart.Checked := True;
-  chkAutoRestart.Down := True;
 
   UpdateOnAirLamp(False);
 end;
@@ -299,7 +307,7 @@ end;
 procedure TfrmMediaServer.FormResize(Sender: TObject);
 begin
 
-  MainMdifrm.chkMediaServer.Down := (chkBroadcast.Tag > 0);
+  MainMdifrm.chkMediaServer.Checked := (chkBroadcast.Tag > 0);
 end;
 
 
@@ -350,16 +358,26 @@ begin
   if IsRemoteServerMode() then
     begin
 
-      lblIcecastServerStatus.Caption := 'Server: Remote mode - not confirmed';
       chkStartStopServer.Enabled := True;
-      chkStartStopServer.Checked := False;
-      chkStartStopServer.Down := False;
 
-      chkBroadcast.Enabled := False;
-      chkBroadcast.Checked := False;
-      chkBroadcast.Down := False;
-
-      UpdateOnAirLamp(False);
+      if Assigned(MainMDIFrm.IceCastEngine) and
+         (MainMDIFrm.IceCastEngine.State in [bsConnecting,
+                                             bsLive,
+                                             bsReconnecting]) then
+        begin
+          lblIcecastServerStatus.Caption := 'Server: Remote server ready';
+          chkStartStopServer.Checked := True;
+          chkStartStopServer.Caption := 'Stop';
+          SyncBroadcastUiFromEngine();
+        end
+      else
+        begin
+          lblIcecastServerStatus.Caption := 'Server: Remote mode - not confirmed';
+          chkStartStopServer.Checked := False;
+          chkStartStopServer.Caption := 'Start';
+          SetBroadcastUiState(False,
+                              False);
+        end;
       Exit;
     end;
 
@@ -409,22 +427,23 @@ begin
         begin
 
           lblIcecastServerStatus.Caption := 'Server: Remote server ready';
+          chkStartStopServer.Caption := 'Stop';
           chkBroadcast.Enabled := True;
         end
       else
         begin
 
-          lblIcecastServerStatus.Caption := 'Server: Remote server not confirmed';
+          lblIcecastServerStatus.Caption := 'Server: Remote server disconnected';
+          chkStartStopServer.Caption := 'Start';
           chkBroadcast.Enabled := False;
           chkBroadcast.Checked := False;
-          chkBroadcast.Down := False;
           UpdateOnAirLamp(False);
         end;
 
       chkStartStopServer.Enabled := True;
 
       if Assigned(MainMDIFrm) then
-        MainMDIFrm.chkMediaServer.Down := chkStartStopServer.Checked;
+        MainMDIFrm.chkMediaServer.Checked := chkStartStopServer.Checked;
 
       Exit;
     end;
@@ -437,13 +456,12 @@ begin
       begin
 
         chkStartStopServer.Checked := False;
-        chkStartStopServer.Down := False;
+        chkStartStopServer.Caption := 'Start';
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        chkBroadcast.Down := False;
 
         MainMDIFrm.SetBroadcastEnabled(False);
-        MainMDIFrm.chkMediaServer.Down := False;
+        MainMDIFrm.chkMediaServer.Checked := False;
 
         UpdateOnAirLamp(False);
       end;
@@ -452,21 +470,20 @@ begin
       begin
 
         lblIcecastServerStatus.Caption := 'Server: Starting';
+        chkStartStopServer.Caption := 'Starting...';
         chkStartStopServer.Enabled := False;
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        chkBroadcast.Down := False;
-        MainMdifrm.chkMediaServer.Down := False;
+        MainMdifrm.chkMediaServer.Checked := False;
       end;
 
     issRunningNotReady:
       begin
 
         chkStartStopServer.Checked := True;
-        chkStartStopServer.Down := True;
+        chkStartStopServer.Caption := 'Stop';
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        chkBroadcast.Down := False;
         UpdateOnAirLamp(False);
       end;
 
@@ -474,20 +491,20 @@ begin
       begin
 
         chkStartStopServer.Checked := True;
-        chkStartStopServer.Down := True;
+        chkStartStopServer.Caption := 'Stop';
         chkBroadcast.Enabled := True;
-        MainMDIFrm.chkMediaServer.Down := True;
+        MainMDIFrm.chkMediaServer.Checked := True;
       end;
 
     issStopping:
       begin
 
         lblIcecastServerStatus.Caption := 'Server: Stopping';
+        chkStartStopServer.Caption := 'Stopping...';
         chkStartStopServer.Enabled := False;
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        chkBroadcast.Down := False;
-        MainMdifrm.chkMediaServer.Down := False;
+        MainMdifrm.chkMediaServer.Checked := False;
       end;
   end;
 
@@ -521,8 +538,33 @@ begin
 end;
 
 
+procedure TfrmMediaServer.SyncBroadcastUiFromEngine();
+begin
+
+  if not Assigned(MainMDIFrm) or
+     not Assigned(MainMDIFrm.IceCastEngine) then
+    begin
+      SetBroadcastUiState(False,
+                          False);
+      Exit;
+    end;
+
+  case MainMDIFrm.IceCastEngine.State of
+    bsConnecting,
+    bsReconnecting: SetBroadcastUiState(True,
+                                        False);
+
+    bsLive: SetBroadcastUiState(True,
+                                True);
+  else
+    SetBroadcastUiState(False,
+                        False);
+  end;
+end;
+
+
 procedure TfrmMediaServer.SetBroadcastUiState(const AChecked,
-                                              AOnAir: Boolean);
+                                               AOnAir: Boolean);
 begin
 
   FUpdatingBroadcastUi := True;
@@ -535,7 +577,6 @@ begin
       chkBroadcast.Enabled := chkBroadcast.Enabled or AChecked or AOnAir;
 
     chkBroadcast.Checked := AChecked;
-    chkBroadcast.Down := AChecked;
 
     UpdateOnAirLamp(AOnAir);
   finally
@@ -554,7 +595,29 @@ begin
   if IsRemoteServerMode() then
     begin
 
-      ConfirmRemoteServerReady();
+      { TMPxpButton toggles Checked before OnClick.  Checked=True therefore
+        means Start was requested; Checked=False means Stop/disconnect. }
+      if chkStartStopServer.Checked then
+        ConfirmRemoteServerReady()
+      else
+        begin
+          if Assigned(MainMDIFrm) then
+            begin
+              MainMDIFrm.SetBroadcastEnabled(False);
+              MainMDIFrm.chkMediaServer.Checked := False;
+            end;
+
+          SetBroadcastUiState(False,
+                              False);
+
+          chkStartStopServer.Checked := False;
+          chkStartStopServer.Caption := 'Start';
+          chkStartStopServer.Enabled := True;
+          lblIcecastServerStatus.Caption := 'Server: Remote server disconnected';
+
+          IcecastLog(Self,
+                     'Remote server mode: disconnected. Remote Icecast and Caddy services remain running.');
+        end;
       Exit;
     end;
 
@@ -903,21 +966,26 @@ begin
 
   chkStartStopServer.Enabled := True;
   chkStartStopServer.Checked := Result;
-  chkStartStopServer.Down := Result;
-  chkBroadcast.Enabled := Result;
-  chkBroadcast.Checked := False;
-  chkBroadcast.Down := False;
 
   if Result then
-    lblIcecastServerStatus.Caption := 'Server: Remote server ready'
+    chkStartStopServer.Caption := 'Stop'
+  else
+    chkStartStopServer.Caption := 'Start';
+
+  if Result then
+    begin
+      lblIcecastServerStatus.Caption := 'Server: Remote server ready';
+      SyncBroadcastUiFromEngine();
+    end
   else
     begin
       lblIcecastServerStatus.Caption := 'Server: Remote server not ready';
-      UpdateOnAirLamp(False);
+      SetBroadcastUiState(False,
+                          False);
     end;
 
   if Assigned(MainMDIFrm) then
-    MainMDIFrm.chkMediaServer.Down := Result;
+    MainMDIFrm.chkMediaServer.Checked := Result;
 end;
 
 

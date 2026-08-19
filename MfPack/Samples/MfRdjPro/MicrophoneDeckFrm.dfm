@@ -702,12 +702,13 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 619
     DesignSize = (
       306
       370)
     object Label14: TLabel
-      Left = 17
-      Top = 96
+      Left = 8
+      Top = 93
       Width = 75
       Height = 18
       Margins.Left = 2
@@ -728,7 +729,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ShowHint = False
       Transparent = False
       Layout = tlCenter
-      ExplicitHeight = 22
     end
     object chkMute: TMPxpButton
       Left = 232
@@ -962,9 +962,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlCompEcho: TPanel
       Left = 0
-      Top = 139
+      Top = 150
       Width = 306
-      Height = 231
+      Height = 220
       Align = alBottom
       BevelOuter = bvNone
       Color = 4865081
@@ -975,12 +975,13 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         Left = 0
         Top = 0
         Width = 306
-        Height = 231
+        Height = 220
         Align = alClient
         Color = 5850948
         ParentBackground = False
         ShowCaption = False
         TabOrder = 2
+        ExplicitHeight = 231
         object lblGateThresholdValue: TLabel
           Left = 25
           Top = 7
@@ -1333,12 +1334,13 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         Left = 0
         Top = 0
         Width = 306
-        Height = 231
+        Height = 220
         Align = alClient
         Color = 5850948
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
+        ExplicitHeight = 231
         object Label6: TLabel
           Left = 15
           Top = 180
@@ -1822,12 +1824,15 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         Left = 0
         Top = 0
         Width = 306
-        Height = 231
+        Height = 220
         Align = alClient
         Color = 5850948
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
+        ExplicitLeft = 7
+        ExplicitTop = 2
+        ExplicitHeight = 231
         object lblCompThresholdValue: TLabel
           Left = 15
           Top = 7
@@ -2018,7 +2023,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         end
         object tbCompKnee: TMfTrackBar
           Left = 261
-          Top = 20
+          Top = 22
           Width = 38
           Height = 160
           Margins.Left = 0
@@ -2314,9 +2319,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlFXButtons: TPanel
       Left = 0
-      Top = 95
+      Top = 108
       Width = 306
-      Height = 44
+      Height = 42
       Align = alBottom
       BevelOuter = bvNone
       Color = 4865081
@@ -2325,6 +2330,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentDoubleBuffered = False
       ShowCaption = False
       TabOrder = 5
+      ExplicitLeft = 49
+      ExplicitTop = 118
       object chkCompressorSettings: TMPxpButton
         Left = 0
         Top = 5

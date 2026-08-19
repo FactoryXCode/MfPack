@@ -159,6 +159,7 @@ type
     procedure SetColorWhenUp(Value: TColor);
     procedure SetColorStyle(Value: TMPxpColorStyle);
     procedure SetDown(Value: Boolean);
+    procedure ReadLegacyDown(Reader: TReader);
     procedure SetCaption(const Value: TCaption);
     procedure SetGlyph(Value: TBitmap);
     procedure SetGroupIndex(Value: Integer);
@@ -201,6 +202,7 @@ type
 
   protected
 
+    procedure DefineProperties(Filer: TFiler); override;
     procedure Paint(); override;
     procedure Notification(AComponent: TComponent;
                            Operation: TOperation); override;
@@ -231,6 +233,9 @@ type
     destructor Destroy(); override;
     procedure Click(); override;
 
+    // Legacy visual state. Read-only; use Checked to change button state.
+    property Down: Boolean read FDown;
+
   published
 
     property Action;
@@ -244,10 +249,8 @@ type
     property ColorWhenDown: TColor read FColorWhenDown write SetColorWhenDown default clNone;
     property ColorWhenUp: TColor read FColorWhenUp write SetColorWhenUp default clNone;
     property ColorStyle: TMPxpColorStyle read FDummyStyle write SetColorStyle default lcsCustom;
-    property Down: Boolean read FDown write SetDown default False;
-
     property Behavior: TMPxpButtonBehavior read FBehavior write SetBehavior default bbAuto;
-    property Checked: Boolean read GetChecked write SetChecked;
+    property Checked: Boolean read GetChecked write SetChecked default False;
 
     property GlyphUnchecked: TBitmap read FGlyphUnchecked write SetGlyphUnchecked;
     property GlyphChecked: TBitmap read FGlyphChecked write SetGlyphChecked;
@@ -280,7 +283,6 @@ type
     property ShowHint;
     property SlowDecease: Boolean read FSlowDecease write SetSlowDecease default False;
     property Style: TMPButtonStyle read FStyle write SetStyle default bsNormal;
-    property Tag default 0;
     property Transparent: Boolean read FTransparent write SetTransparent default False;
     property UseHotTrackFont: Boolean read FUseHTFont write FUseHTFont default False;
     property Visible;
@@ -542,6 +544,26 @@ begin
 end;
 
 
+procedure TMPxpButton.ReadLegacyDown(Reader: TReader);
+begin
+
+  // Backward compatibility for older DFM resources. Down is no longer a
+  // writable published property, but old forms may still contain it.
+  SetChecked(Reader.ReadBoolean);
+end;
+
+
+procedure TMPxpButton.DefineProperties(Filer: TFiler);
+begin
+
+  inherited DefineProperties(Filer);
+  Filer.DefineProperty('Down',
+                       ReadLegacyDown,
+                       nil,
+                       False);
+end;
+
+
 procedure TMPxpButton.SetGlyph(Value: TBitmap);
 begin
 
@@ -626,33 +648,14 @@ end;
 
 
 procedure TMPxpButton.SetStyle(Value: TMPButtonStyle);
-var
-  ScreenDC: HDC;
-  BitsPerPixel: Integer;
-
 begin
 
-  // Never request Canvas.Handle from a streamed property setter. Doing so can
-  // create the control and its parent MDI child while the DFM is still loading,
-  // which raises EReadError before the MDI parent is active. A screen DC gives
-  // us the same display-depth information without allocating a control handle.
+  // Respect old 8bpp limitation but don't silently ignore property updates
   if (Value = bsModern) and
+     (GetDeviceCaps(Canvas.Handle,
+                    BITSPIXEL) <= 8) and
      (not (csDesigning in ComponentState)) then
-    begin
-      BitsPerPixel := 32;
-      ScreenDC := GetDC(0);
-      if ScreenDC <> 0 then
-        try
-          BitsPerPixel := GetDeviceCaps(ScreenDC,
-                                        BITSPIXEL);
-        finally
-          ReleaseDC(0,
-                    ScreenDC);
-        end;
-
-      if BitsPerPixel <= 8 then
-        Value := bsNormal;
-    end;
+    Value := bsNormal;
 
   if (FStyle = Value) then
     Exit;
@@ -766,14 +769,14 @@ end;
 function TMPxpButton.GetChecked(): Boolean;
 begin
 
-  Result := Down;
+  Result := FDown;
 end;
 
 
 procedure TMPxpButton.SetChecked(Value: Boolean);
 begin
 
-  Down := Value;
+  SetDown(Value);
 end;
 
 
@@ -1069,19 +1072,19 @@ begin
   mode := GetEffectiveBehavior;
 
   case mode of
-    bbPushButton: Down := True;
-    bbCheckBox: Down := not Down;
+    bbPushButton: SetDown(True);
+    bbCheckBox: SetDown(not FDown);
     bbRadioButton:
     begin
 
-      if Down then
+      if FDown then
         begin
 
           if FAllowAllUp then
-            Down := False;
+            SetDown(False);
         end
       else
-        Down := True;
+        SetDown(True);
     end;
   end;
 end;
@@ -1102,7 +1105,7 @@ begin
 
   mode := GetEffectiveBehavior();
   if (mode = bbPushButton) then
-    Down := False;
+    SetDown(False);
 end;
 
 

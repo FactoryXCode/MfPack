@@ -2371,7 +2371,8 @@ begin
       hnsPos := Int64(secPos) * HNS_PER_100MS;
       lblBarPositionTime.Caption := Format('%s',
                                            [HnsTimeToStr(hnsPos,
-                                                         True)]);
+                                                         True,
+                                                         2)]);
     end;
 end;
 

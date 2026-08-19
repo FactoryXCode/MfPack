@@ -137,9 +137,11 @@ type
                                    Index: Integer;
                                    Rect: TRect;
                                    State: TOwnerDrawState);
+
     procedure edtPathKeyDown(Sender: TObject;
                              var Key: Word;
                              Shift: TShiftState);
+
     procedure lbFoldersDblClick(Sender: TObject);
     procedure lbFoldersDrawItem(Control: TWinControl;
                                 Index: Integer;

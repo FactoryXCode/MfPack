@@ -453,7 +453,6 @@ object MainMDIFrm: TMainMDIFrm
       Color = 5914932
       ColorWhenDown = 11363625
       ColorWhenUp = 5914932
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
