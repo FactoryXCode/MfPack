@@ -57,7 +57,7 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
     Caption = 'Upstream host/IP:'
   end
   object lblProxyPort: TLabel
-    Left = 318
+    Left = 383
     Top = 146
     Width = 25
     Height = 15
@@ -125,7 +125,7 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
     TextHint = '127.0.0.1'
   end
   object edtProxyPort: TEdit
-    Left = 349
+    Left = 414
     Top = 142
     Width = 80
     Height = 23
@@ -134,8 +134,22 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
       'line.'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 5
+    TabOrder = 6
     TextHint = '8000'
+  end
+  object btnFindProxyHost: TButton
+    Left = 301
+    Top = 141
+    Width = 70
+    Height = 25
+    Hint = 
+      'Discover active devices on private IPv4 LANs and use the selecte' +
+      'd address where Caddy is installed.'
+    Caption = 'Find...'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 5
+    OnClick = btnFindProxyHostClick
   end
   object btnSave: TButton
     Left = 375
@@ -144,7 +158,7 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
     Height = 28
     Caption = 'Save'
     Default = True
-    TabOrder = 6
+    TabOrder = 7
     OnClick = btnSaveClick
   end
   object btnCancel: TButton
@@ -155,6 +169,6 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
     Cancel = True
     Caption = 'Cancel'
     ModalResult = 2
-    TabOrder = 7
+    TabOrder = 8
   end
 end

@@ -95,7 +95,15 @@ Press **Configuration** to edit `caddy.cff` in the configured **Caddy share**. T
 - Log file: the existing `output file ...` directive, when present. Logging is optional.
 - Upstream host/IP and port: every `reverse_proxy ...` target.
 
-Use upstream `127.0.0.1:8000` when Caddy and Icecast/RDJ Pro run on the same server. If the stream server runs on another computer, use its stable LAN hostname or IP and listening port.
+Use upstream `127.0.0.1:8000` when Caddy and Icecast/RDJ Pro run on the same server. 
+If the stream server runs on another computer, use its stable LAN hostname or IP and listening port, 
+click 'Find...' to select the remote computer Caddy is running on.
+
+### Finding an upstream computer on the LAN
+
+Press **Find...** beside **Upstream host/IP** to scan the active wired and Wi-Fi private IPv4 networks of the CaddyAdmin computer. Select a device and press **Use IP** to copy its IPv4 address into the upstream field.
+
+Discovery scans the local `/24` subnet, combines ICMP replies with the Windows ARP neighbor table, and attempts a NetBIOS name lookup. It is intentionally best effort: a firewall may block discovery, modern computers may not publish a NetBIOS name, and devices across a router or VLAN are not scanned. Such a device can still appear as **(name unavailable)** with a usable IPv4 address. Prefer a DHCP reservation or another stable address for a permanent Caddy configuration.
 
 ### Optional application INI update
 

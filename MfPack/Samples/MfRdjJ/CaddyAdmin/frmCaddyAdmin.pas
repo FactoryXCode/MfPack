@@ -7,15 +7,15 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: frmCaddyAdmin.pas
 // Kind: Pascal / Delphi unit
-// Release date: 02-04-2023
+// Release date: 13-08-2026
 // Language: ENU
 //
 // Revision Version: 3.2.0
 // Description: Dialog to edit Caddy settings.
 //
 // Organisation: FactoryX
-// Initiator(s): Tony (maXcomX)
-// Contributor(s): Tony Kalf (maXcomX).
+// Initiator(s): Tony (maXcomX), Carmen (carmenh).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -176,9 +176,11 @@ type
                                out AProcessId: DWORD;
                                out AWin32ExitCode: DWORD;
                                out AServiceExitCode: DWORD): Boolean;
+
     function ServiceStateText(const AState: DWORD): string;
-    function ServiceExitText(const AWin32ExitCode,
-                             AServiceExitCode: DWORD): string;
+    function ServiceExitText(const AWin32ExitCode: DWORD;
+                             const AServiceExitCode: DWORD): string;
+
     procedure RefreshStatus();
 
     procedure WmCaddyAdminRefreshStatus(var AMsg: TMessage); message WM_CADDYADMIN_REFRESH_STATUS;
@@ -602,8 +604,9 @@ begin
     if Reg.OpenKeyReadOnly(KeyName) and Reg.ValueExists(AIdent) then
       Exit(Reg.ReadString(AIdent));
 
-    { Preserve profiles and password hashes created by RDJ Pro CaddyAdmin. }
+    // Preserve profiles and password hashes created by RDJ Pro CaddyAdmin.
     KeyName := LEGACY_REGISTRY_BASE_KEY + '\' + ASection;
+
     if Reg.OpenKeyReadOnly(KeyName) and Reg.ValueExists(AIdent) then
       Result := Reg.ReadString(AIdent);
 
@@ -629,6 +632,7 @@ begin
   try
 
     Reg.RootKey := HKEY_CURRENT_USER;
+
     if Reg.OpenKey(KeyName,
                    True) then
       Reg.WriteString(AIdent,
@@ -648,7 +652,8 @@ var
 begin
 
   Result := ReadRegistryString('Security',
-                               'Hash', '') <> '';
+                               'Hash',
+                               '') <> '';
   if Result then
     Exit;
 
@@ -932,8 +937,8 @@ begin
 end;
 
 
-function TfrmCaddyAdmin.ServiceExitText(const AWin32ExitCode,
-                                        AServiceExitCode: DWORD): string;
+function TfrmCaddyAdmin.ServiceExitText(const AWin32ExitCode: DWORD;
+                                        const AServiceExitCode: DWORD): string;
 var
   ErrorText: string;
 
@@ -941,14 +946,14 @@ begin
 
   Result := '';
 
-  if AWin32ExitCode = NO_ERROR then
+  if (AWin32ExitCode = NO_ERROR) then
     Exit;
 
   ErrorText := Trim(SysErrorMessage(AWin32ExitCode));
   Result := Format('Windows exit code %d',
                    [AWin32ExitCode]);
 
-  if ErrorText <> '' then
+  if (ErrorText <> '') then
     Result := Result + ': ' + ErrorText;
 
   if (AWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR) and
@@ -999,7 +1004,7 @@ begin
         ExitText := ServiceExitText(Win32ExitCode,
                                     ServiceExitCode);
 
-      if ExitText <> '' then
+      if (ExitText <> '') then
         begin
           sbStatus.SimpleText := Format('Status: %s  Exit: %d  PID: %d',
                                         [StateText, Win32ExitCode, ProcessId]);
@@ -1024,6 +1029,7 @@ var
 begin
 
   Root := Trim(FServerCaddyRootEdit.Text);
+
   if (Root = '') then
     Exit('');
 
@@ -1091,6 +1097,7 @@ var
   SearchRec: TSearchRec;
   SourcePath: string;
   DestPath: string;
+
 begin
 
   if not ForceDirectories(ADestRoot) then
@@ -1521,6 +1528,7 @@ begin
     Exit;
 
   BeginOperation('Restarting Caddy service');
+
   try
     RestartCaddyService();
   finally
@@ -1647,9 +1655,11 @@ var
   CaddyRoot: string;
   ConfigFileName: string;
   Dlg: TfrmCaddyConfigEditor;
+
 begin
 
   CaddyRoot := Trim(FCaddyRootEdit.Text);
+
   if (CaddyRoot = '') then
     begin
       AddLog('Caddy share/folder is empty.');
@@ -1658,11 +1668,13 @@ begin
 
   ConfigFileName := IncludeTrailingPathDelimiter(CaddyRoot) + 'caddy.cff';
   Dlg := TfrmCaddyConfigEditor.Create(nil);
+
   try
     if Dlg.Execute(ConfigFileName,
                    Trim(FSetupIniEdit.Text)) then
       begin
         AddLog('Caddy configuration saved: ' + ConfigFileName);
+
         if (Trim(FSetupIniEdit.Text) <> '') then
           AddLog('Application setup INI updated: ' + Trim(FSetupIniEdit.Text));
       end;

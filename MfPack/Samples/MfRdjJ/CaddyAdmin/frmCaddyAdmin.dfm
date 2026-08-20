@@ -3,7 +3,7 @@ object frmCaddyAdmin: TfrmCaddyAdmin
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'Caddy Admin Version 1.0'
+  Caption = 'Caddy Admin Version 1.2'
   ClientHeight = 480
   ClientWidth = 607
   Color = 13158600

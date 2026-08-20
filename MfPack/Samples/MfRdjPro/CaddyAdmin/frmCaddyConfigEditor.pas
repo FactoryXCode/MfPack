@@ -1,21 +1,21 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: frmCaddyConfigEditor.pas
 // Kind: Pascal / Delphi unit
-// Release date: 02-04-2023
+// Release date: 13-08-2026
 // Language: ENU
 //
 // Revision Version: 3.2.0
 // Description: Dialog to edit Caddy Conifiguration file settings.
 //
 // Organisation: FactoryX
-// Initiator(s): Tony (maXcomX)
-// Contributor(s): Tony Kalf (maXcomX).
+// Initiator(s): Tony (maXcomX), Carmen (carmenh).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -94,10 +94,12 @@ type
     edtLogFile: TEdit;
     edtProxyHost: TEdit;
     edtProxyPort: TEdit;
+    btnFindProxyHost: TButton;
     btnSave: TButton;
     btnCancel: TButton;
     Bevel1: TBevel;
     procedure btnSaveClick(Sender: TObject);
+    procedure btnFindProxyHostClick(Sender: TObject);
 
   private
 
@@ -133,6 +135,9 @@ type
 implementation
 
 {$R *.dfm}
+
+uses
+  dlgLanDiscovery;
 
 constructor TfrmCaddyConfigEditor.Create(AOwner: TComponent);
 begin
@@ -567,6 +572,17 @@ begin
                  [mbOK],
                  0);
   end;
+end;
+
+
+procedure TfrmCaddyConfigEditor.btnFindProxyHostClick(Sender: TObject);
+var
+  Address: string;
+begin
+  Address := Trim(edtProxyHost.Text);
+  if TLanDiscoveryDialog.Execute(Self,
+                                 Address) then
+    edtProxyHost.Text := Address;
 end;
 
 end.
