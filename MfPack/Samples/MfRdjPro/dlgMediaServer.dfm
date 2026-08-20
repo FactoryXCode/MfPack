@@ -39,10 +39,12 @@ object frmMediaServer: TfrmMediaServer
     ParentBackground = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
+    ExplicitLeft = -1
+    ExplicitTop = -2
     object shpOnAirCap: TShape
       Left = 167
       Top = 5
-      Width = 95
+      Width = 108
       Height = 28
       Brush.Color = 5850948
       Pen.Color = 5668864
@@ -75,7 +77,7 @@ object frmMediaServer: TfrmMediaServer
     object shpOnAir: TShape
       Left = 171
       Top = 9
-      Width = 87
+      Width = 100
       Height = 20
       Cursor = crDrag
       Brush.Style = bsClear
@@ -83,16 +85,16 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblOnAir: TLabel
-      Left = 174
-      Top = 8
-      Width = 84
-      Height = 20
+      Left = 173
+      Top = 11
+      Width = 98
+      Height = 18
       Alignment = taCenter
       AutoSize = False
       Caption = 'ON AIR'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGreen
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
@@ -100,9 +102,9 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object shpRecordingCap: TShape
-      Left = 369
+      Left = 395
       Top = 5
-      Width = 95
+      Width = 108
       Height = 28
       Brush.Color = 5850948
       Pen.Color = 5668864
@@ -110,26 +112,26 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object shpRecording: TShape
-      Left = 373
+      Left = 399
       Top = 9
-      Width = 87
+      Width = 100
       Height = 20
       Brush.Style = bsClear
       Pen.Color = 5668864
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblRecording: TLabel
-      Left = 373
-      Top = 8
-      Width = 87
-      Height = 20
+      Left = 397
+      Top = 11
+      Width = 99
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = 'REC OFF'
       Color = 4865081
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGreen
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentColor = False
@@ -138,9 +140,9 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object shpBcLocked: TShape
-      Left = 268
+      Left = 281
       Top = 5
-      Width = 95
+      Width = 108
       Height = 28
       Brush.Style = bsClear
       Pen.Color = clLime
@@ -148,9 +150,9 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object shpBcLockedCap: TShape
-      Left = 272
+      Left = 285
       Top = 9
-      Width = 87
+      Width = 100
       Height = 20
       Cursor = crDrag
       Brush.Style = bsClear
@@ -158,17 +160,17 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblLockBC: TLabel
-      Left = 273
-      Top = 8
-      Width = 86
-      Height = 20
+      Left = 286
+      Top = 11
+      Width = 99
+      Height = 17
       Alignment = taCenter
       AutoSize = False
-      Caption = 'UNLOCKED'
+      Caption = 'LOCKED'
       Color = 9557760
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clLime
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentColor = False
@@ -177,9 +179,9 @@ object frmMediaServer: TfrmMediaServer
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblBroadcastHealth: TLabel
-      Left = 470
-      Top = 8
-      Width = 299
+      Left = 509
+      Top = 11
+      Width = 257
       Height = 20
       Alignment = taCenter
       AutoSize = False
@@ -187,7 +189,7 @@ object frmMediaServer: TfrmMediaServer
       Color = 4865081
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 5668864
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentColor = False
@@ -932,6 +934,7 @@ object frmMediaServer: TfrmMediaServer
           ParentFont = False
           ScrollBars = ssVertical
           TabOrder = 3
+          OnChange = memLogChange
         end
         object pnlCast: TPanel
           Left = 0

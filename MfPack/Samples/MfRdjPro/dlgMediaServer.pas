@@ -358,6 +358,7 @@ type
     procedure chkCastMutedClick(Sender: TObject);
     procedure trkCastVolumeChange(Sender: TObject);
     procedure cmbCastDevicesChange(Sender: TObject);
+    procedure memLogChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -4618,6 +4619,16 @@ begin
 end;
 
 
+procedure TfrmMediaServer.memLogChange(Sender: TObject);
+begin
+
+  if Assigned(memLog) and memLog.HandleAllocated then
+    memLog.Perform(WM_VSCROLL,
+                   SB_BOTTOM,
+                   0);
+end;
+
+
 
 procedure TfrmMediaServer.DeleteBroadcastMseFilesByMask(const ADir: string;
                                                         const AMask: string);
@@ -5744,6 +5755,12 @@ begin
       SetBroadcastHandoverConnectionLost(ErrorMessage);
       Exit;
     end;
+
+  // The server is reachable and our ownership heartbeat was written. Restore
+  // the indicator that SetBroadcastHandoverConnectionLost changed to
+  // "SERVER OFFLINE".
+  SetBroadcastHandoverLockIndicator(CAP_LOCKED,
+                                    LOCKED_COLOR);
 
   if WasConnectionLost and Assigned(memLog) then
     begin

@@ -111,8 +111,8 @@ type
     pmLeft: TMfPeakMeterMmcs;
     pmRight: TMfPeakMeterMmcs;
     lblVolumePerc: TLabel;
-    Label2: TLabel;
-    Label1: TLabel;
+    lblBalRight: TLabel;
+    lblBalLeft: TLabel;
     lblVol: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -205,7 +205,7 @@ type
     chkNoiseGate: TMPxpButton;
     chkCrossFade: TMPxpButton;
     lblBalMaster: TLabel;
-    Label14: TLabel;
+    lblMicSettings: TLabel;
 
 
     procedure FormCreate(Sender: TObject);

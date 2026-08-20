@@ -865,57 +865,6 @@ object MasterDeckFrm: TMasterDeckFrm
       Font.Style = []
       ParentFont = False
     end
-    object Shape2: TShape
-      Left = 19
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape1: TShape
-      Left = 19
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape3: TShape
-      Left = 141
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape4: TShape
-      Left = 141
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape5: TShape
-      Left = 262
-      Top = 83
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape6: TShape
-      Left = 262
-      Top = 121
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
     object tbBalance: TMfTrackBar
       Left = 4
       Top = 380
@@ -1301,7 +1250,7 @@ object MasterDeckFrm: TMasterDeckFrm
     ExplicitWidth = 332
     object lblCaption: TLabel
       Left = 8
-      Top = 11
+      Top = 10
       Width = 46
       Height = 16
       Hint = 'Master deck'
@@ -1322,33 +1271,33 @@ object MasterDeckFrm: TMasterDeckFrm
       Layout = tlCenter
     end
     object shpRecordingCap: TShape
-      Left = 238
+      Left = 207
       Top = 4
-      Width = 87
+      Width = 100
       Height = 29
       Brush.Style = bsClear
       Pen.Color = 5668864
       Pen.Width = 3
     end
     object shpRecording: TShape
-      Left = 242
+      Left = 211
       Top = 8
-      Width = 79
+      Width = 92
       Height = 21
       Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblRecording: TLabel
-      Left = 242
-      Top = 8
-      Width = 83
-      Height = 20
+      Left = 211
+      Top = 11
+      Width = 92
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = 'REC OFF'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGreen
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
@@ -1358,7 +1307,8 @@ object MasterDeckFrm: TMasterDeckFrm
   object epPFL: TMfAudioEndPoint
     DeviceID = '{0.0.0.00000000}.{d7e13618-ca94-4b30-a916-0934986710a9}'
     DeviceState = 'Active'
-    MasterScalarVolume = 1.000000000000000000
+    MasterScalarVolume = 0.200000002980232200
+    MasterDbVolume = -24.354431152343750000
     Left = 244
     Top = 272
   end
@@ -1366,8 +1316,7 @@ object MasterDeckFrm: TMasterDeckFrm
     DeviceID = '{0.0.0.00000000}.{ef4f5772-aeac-426a-8d69-a6bcf7153472}'
     DeviceIndex = 1
     DeviceState = 'Active'
-    MasterScalarVolume = 0.300000011920929000
-    MasterDbVolume = -17.823547363281250000
+    MasterDbVolume = -65.250000000000000000
     Left = 98
     Top = 270
   end

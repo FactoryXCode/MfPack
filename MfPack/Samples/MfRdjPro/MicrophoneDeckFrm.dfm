@@ -166,7 +166,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Font.Style = []
       ParentFont = False
     end
-    object Label2: TLabel
+    object lblBalRight: TLabel
       Left = 257
       Top = 557
       Width = 28
@@ -184,7 +184,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Font.Style = []
       ParentFont = False
     end
-    object Label1: TLabel
+    object lblBalLeft: TLabel
       Left = 19
       Top = 557
       Width = 22
@@ -706,9 +706,9 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     DesignSize = (
       306
       370)
-    object Label14: TLabel
+    object lblMicSettings: TLabel
       Left = 8
-      Top = 93
+      Top = 90
       Width = 75
       Height = 18
       Margins.Left = 2
@@ -981,7 +981,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         ParentBackground = False
         ShowCaption = False
         TabOrder = 2
-        ExplicitHeight = 231
         object lblGateThresholdValue: TLabel
           Left = 25
           Top = 7
@@ -1340,7 +1339,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
-        ExplicitHeight = 231
         object Label6: TLabel
           Left = 15
           Top = 180
@@ -1830,9 +1828,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
-        ExplicitLeft = 7
-        ExplicitTop = 2
-        ExplicitHeight = 231
         object lblCompThresholdValue: TLabel
           Left = 15
           Top = 7
@@ -2252,8 +2247,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object btnStart: TMPxpButton
       Left = 5
-      Top = 7
-      Width = 66
+      Top = 6
+      Width = 67
       Height = 40
       Alignment = taCenter
       Caption = 'On'
@@ -2330,8 +2325,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentDoubleBuffered = False
       ShowCaption = False
       TabOrder = 5
-      ExplicitLeft = 49
-      ExplicitTop = 118
       object chkCompressorSettings: TMPxpButton
         Left = 0
         Top = 5
@@ -2688,7 +2681,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     object chkCrossFade: TMPxpButton
       Left = 232
       Top = 56
-      Width = 66
+      Width = 67
       Height = 40
       Alignment = taCenter
       Caption = 'X Fade'
@@ -2810,9 +2803,10 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
+    ExplicitLeft = -8
     object lblCaption: TLabel
       Left = 8
-      Top = 11
+      Top = 10
       Width = 75
       Height = 16
       Margins.Left = 2
@@ -2831,33 +2825,33 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Layout = tlCenter
     end
     object shpSignalCap: TShape
-      Left = 213
+      Left = 196
       Top = 4
-      Width = 87
+      Width = 100
       Height = 29
       Brush.Color = 5850948
       Pen.Color = 5668864
       Pen.Width = 3
     end
     object shpSignal: TShape
-      Left = 217
+      Left = 200
       Top = 8
-      Width = 79
+      Width = 92
       Height = 21
       Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblSignal: TLabel
-      Left = 220
-      Top = 7
-      Width = 75
-      Height = 19
+      Left = 201
+      Top = 11
+      Width = 91
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = 'MIC OFF'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 5668864
-      Font.Height = -15
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
