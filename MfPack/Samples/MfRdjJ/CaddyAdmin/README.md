@@ -139,3 +139,11 @@ CaddyAdmin controls services through the Windows Service Control Manager. The si
 - Use a UNC path such as `\\PCHP001\Caddy_RDJ` for a remote **Caddy share**.
 - Use a local server path such as `C:\Caddy_RDJ` for **Server local path**.
 - Do not start two Caddy services that both bind to ports 80 and 443.
+
+Project: Media Foundation - MFPack - Samples
+Project location: 
+https://github.com/FactoryXCode/MfPack
+https://sourceforge.net/projects/MFPack
+First release date: 02/08/2026
+Final release date: 13/08/2026
+Copyright © FactoryX. All rights reserved.
