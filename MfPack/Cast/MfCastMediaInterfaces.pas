@@ -80,7 +80,11 @@ type
   end;
 
   IMfCastPreviewSink = interface
-    ['{6AD88FE3-0C53-4748-B0AC-DBCAA8A29AC5}']
+    ['{D52C2683-42C5-46BE-866E-2967C92FE04A}']
+    function SetWindow(const AWindow: HWND): HRESULT;
+    function IsEnabled(): Boolean;
+    function ConfigureVideo(const AWidth: UINT32;
+                            const AHeight: UINT32): HRESULT;
     function PresentSample(const ASample: IMFSample;
                            const ASampleTime100ns: Int64;
                            const ASampleDuration100ns: Int64): HRESULT;

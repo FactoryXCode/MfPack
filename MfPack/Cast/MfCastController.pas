@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright Ã‚Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -70,6 +70,7 @@ uses
   WinApi.Windows,
   WinApi.WinError,
   WinApi.WinSock,
+  WinApi.MediaFoundationApi.MfObjects,
   {System}
   System.SysUtils,
   System.Classes,
@@ -204,6 +205,9 @@ type
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+    function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                   const AInitSegment: TBytes;
+                                   out AByteStream: IMFByteStream): HRESULT;
 
     function Play: HRESULT;
     function Pause: HRESULT;
@@ -1016,6 +1020,210 @@ begin
 end;
 
 
+function TMfCastController.CastLiveFragmentedMp4(
+  const ADevice: TMfCastDevice;
+  const AInitSegment: TBytes;
+  out AByteStream: IMFByteStream): HRESULT;
+var
+  HttpSettings: TMfCastHttpSettings;
+  DeviceHost: string;
+  DevicePort: Word;
+  AdvertisedAddress: string;
+  EntryPath: string;
+  Url: string;
+  BytesWritten: ULONG;
+
+begin
+
+  AByteStream := nil;
+
+  Log(cllInfo,
+      Format('Live fragmented MP4 Cast requested: device="%s" address=%s:%d initBytes=%d.',
+             [ADevice.FriendlyName,
+              ADevice.Address,
+              ADevice.Port,
+              Length(AInitSegment)]));
+
+  if (Length(AInitSegment) = 0) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  if FState in [csConnecting,
+                csConnected,
+                csLaunchingReceiver,
+                csPreparingMedia,
+                csBuffering,
+                csPlaying,
+                csPaused,
+                csStopping] then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_BUSY);
+      Exit;
+    end;
+
+  if (not Assigned(FComponents.Channel)) or
+     (not Assigned(FComponents.HttpServer)) or
+     (not Assigned(FComponents.SegmentPublisher)) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if FState in [csError, csStopped] then
+    CleanupCastAttempt();
+
+  FCurrentDevice := ADevice;
+  FCurrentMedia.Reset();
+  FPendingLoadRequest.Reset();
+  FPendingTranscodeRequest.Reset();
+  FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
+  FActiveLoadRequest.Reset();
+  FActiveTranscodeRequest.Reset();
+  FActiveRemuxRequest.Reset();
+  FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
+  FPlaybackTimeOffset100ns := 0;
+  FLastMediaPosition100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FReplacedMediaSessionId := 0;
+  FMediaLoadStartTick := 0;
+  FMediaPlaybackStarted := False;
+  FSeekInProgress := False;
+  FReplacementLoadPending := False;
+  SetState(csPreparingMedia);
+
+  if FComponents.HttpServer.IsRunning() then
+    FComponents.HttpServer.Stop();
+
+  HttpSettings := FSettings.Http;
+  DeviceHost := Trim(ADevice.Address);
+
+  if (DeviceHost = '') then
+    DeviceHost := Trim(ADevice.HostName);
+
+  DevicePort := ADevice.Port;
+  if (DevicePort = 0) then
+    DevicePort := FSettings.Protocol.ControlPort;
+
+  if (Trim(HttpSettings.AdvertisedAddress) = '') and
+     MfCastResolveLocalIPv4ForPeer(DeviceHost,
+                                   DevicePort,
+                                   AdvertisedAddress) then
+    HttpSettings.AdvertisedAddress := AdvertisedAddress;
+
+  Result := FComponents.HttpServer.Configure(HttpSettings);
+  if (Result <> S_OK) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Configure HTTP server',
+                                'The local Chromecast HTTP server could not be configured.');
+      Exit;
+    end;
+
+  Result := FComponents.HttpServer.Start();
+  if (Result <> S_OK) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Start HTTP server',
+                                'The local Chromecast HTTP server could not be started.');
+      Exit;
+    end;
+
+  Log(cllDebug,
+      Format('Local HTTP server started: advertisedAddress=%s port=%d',
+             [HttpSettings.AdvertisedAddress,
+              FComponents.HttpServer.GetListenPort()]));
+
+  Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                            EntryPath);
+  if FAILED(Result) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Publish live stream',
+                                'The live fragmented MP4 resource could not be published.');
+      Exit;
+    end;
+
+  Result := FComponents.SegmentPublisher.GetByteStream(AByteStream);
+  if FAILED(Result) or (not Assigned(AByteStream)) then
+    begin
+      if SUCCEEDED(Result) then
+        Result := E_POINTER;
+      AByteStream := nil;
+      Result := FailCastAttempt(Result,
+                                'Open live stream',
+                                'The live fragmented MP4 byte stream could not be opened.');
+      Exit;
+    end;
+
+  BytesWritten := 0;
+  Result := AByteStream.Write(@AInitSegment[0],
+                              Length(AInitSegment),
+                              BytesWritten);
+  if SUCCEEDED(Result) and (BytesWritten <> ULONG(Length(AInitSegment))) then
+    Result := E_FAIL;
+
+  if SUCCEEDED(Result) then
+    Result := AByteStream.Flush();
+
+  if FAILED(Result) then
+    begin
+      AByteStream := nil;
+      Result := FailCastAttempt(Result,
+                                'Prime live stream',
+                                'The fragmented MP4 initialization segment could not be published.');
+      Exit;
+    end;
+
+  Result := FComponents.HttpServer.BuildUrl(EntryPath,
+                                            Url);
+  if FAILED(Result) then
+    begin
+      AByteStream := nil;
+      Result := FailCastAttempt(Result,
+                                'Build live stream URL',
+                                'The live fragmented MP4 URL could not be created.');
+      Exit;
+    end;
+
+  Log(cllDebug,
+      Format('Live fragmented MP4 published: url="%s" initBytes=%d.',
+             [Url,
+              Length(AInitSegment)]));
+
+  FPendingLoadRequest.ContentId := Url;
+  FPendingLoadRequest.ContentType := 'video/mp4';
+  FPendingLoadRequest.StreamType := cstLive;
+  FPendingLoadRequest.Title := 'Cast live stream';
+  FPendingLoadRequest.StartTime100ns := 0;
+  FPendingLoadRequest.AutoPlay := True;
+
+  Result := ConnectReceiver(ADevice);
+  if (Result <> S_OK) then
+    begin
+      AByteStream := nil;
+      Exit;
+    end;
+
+  Log(cllInfo,
+      'Casting the live fragmented MP4 stream to ' + ADevice.FriendlyName + '.');
+
+  Result := StartPendingMedia();
+  if (Result <> S_OK) then
+    begin
+      AByteStream := nil;
+      Exit;
+    end;
+
+  Log(cllInfo,
+      'Live fragmented MP4 LOAD request accepted.');
+end;
+
+
 function TMfCastController.ExecuteCastFile(const ADevice: TMfCastDevice;
                                            const ASourceName: string;
                                            const ASubtitle: TMfCastSubtitleAsset;
@@ -1148,6 +1356,21 @@ begin
                                 'Choose media mode',
                                 'A suitable Chromecast media route could not be selected.');
       Exit;
+    end;
+
+  // Preview consumes the decoded RGB32 frames produced by the transcoder.
+  // In automatic mode, opting into preview therefore opts into transcoding.
+  // An explicitly requested media route remains authoritative.
+  if (AMediaMode = cmmAutomatic) and
+     FCurrentMedia.HasVideo and
+     Assigned(FComponents.PreviewSink) and
+     FComponents.PreviewSink.IsEnabled() then
+    begin
+      SelectedMediaMode := cmmTranscodeBurnedSubtitles;
+      if FCurrentMedia.HasTimedText and (ASubtitleMode <> csmNone) then
+        SelectedSubtitleMode := csmBurnIntoVideo
+      else
+        SelectedSubtitleMode := csmNone;
     end;
 
   Log(cllInfo,

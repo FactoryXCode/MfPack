@@ -2064,8 +2064,12 @@ begin
         Exit;
       end;
 
+    // A matching MEDIA_STATUS in LOADING/BUFFERING state is the receiver's
+    // acknowledgement of LOAD. Playback cannot become PLAYING until the live
+    // transcoder has produced its first bytes, so waiting for PLAYING here
+    // creates a false timeout and makes the controller cancel that transcoder.
     if FReceivedMediaStatus and
-       (FState in [csPlaying, csPaused, csStopped]) then
+       (FState in [csBuffering, csPlaying, csPaused, csStopped]) then
       begin
         Result := S_OK;
         Exit;

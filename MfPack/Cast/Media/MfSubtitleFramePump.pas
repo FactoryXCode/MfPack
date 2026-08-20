@@ -93,6 +93,13 @@ type
                                            SampleTime: MFTIME;
                                            var Cancel: Boolean) of object;
 
+  TMfSubtitleFramePumpVideoSample = procedure(Sender: TObject;
+                                              const Sample: IMFSample;
+                                              Width: UINT32;
+                                              Height: UINT32;
+                                              SampleTime: MFTIME;
+                                              SampleDuration: MFTIME) of object;
+
   TMfSubtitleAudioState = record
     PendingSample: IMFSample;
     PendingTime: LONGLONG;
@@ -106,6 +113,7 @@ type
   private
     FCompositor: TMfSubtitleCompositor;
     FOnProgress: TMfSubtitleFramePumpProgress;
+    FOnVideoSample: TMfSubtitleFramePumpVideoSample;
     FFramesWritten: Int64;
     FCancelRequested: Boolean;
     FPauseRequested: Boolean;
@@ -208,6 +216,7 @@ type
     property UseSoftwareVideoDecoder: Boolean read FUseSoftwareVideoDecoder write FUseSoftwareVideoDecoder;
     property RealTimePacing: Boolean read FRealTimePacing write FRealTimePacing;
     property OnProgress: TMfSubtitleFramePumpProgress read FOnProgress write FOnProgress;
+    property OnVideoSample: TMfSubtitleFramePumpVideoSample read FOnVideoSample write FOnVideoSample;
   end;
 
 
@@ -1894,6 +1903,14 @@ begin
       Result := sample.SetSampleDuration(sampleDuration);
       if FAILED(Result) then
         Break;
+
+      if Assigned(FOnVideoSample) then
+        FOnVideoSample(Self,
+                       sample,
+                       width,
+                       height,
+                       outputTime,
+                       sampleDuration);
 
       if (FFramesWritten <> lastWriteDebugFrame) and ((FFramesWritten mod 250) = 0) then
         begin

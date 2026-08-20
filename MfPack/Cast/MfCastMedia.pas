@@ -145,6 +145,40 @@ type
 implementation
 
 
+function MfCastCountSourceReaderStreams(
+  const AReader: IMFSourceReader): DWORD;
+const
+  // Protect against media handlers which never report an invalid stream.
+  MAX_SOURCE_READER_STREAMS = 1024;
+var
+  StreamIndex: DWORD;
+  MediaType: IMFMediaType;
+  Status: HRESULT;
+begin
+  Result := 0;
+  if not Assigned(AReader) then
+    Exit;
+
+  StreamIndex := 0;
+  while StreamIndex < MAX_SOURCE_READER_STREAMS do
+    begin
+      MediaType := nil;
+      Status := AReader.GetNativeMediaType(StreamIndex,
+                                           0,
+                                           @MediaType);
+      // Probe the same native media types the inspector consumes below. This
+      // avoids GetStreamSelection, which can block in the Windows MKV source
+      // when called from the cast worker's MTA apartment.
+      if Status <> S_OK then
+        Break;
+
+      Inc(StreamIndex);
+    end;
+
+  Result := StreamIndex;
+end;
+
+
 procedure MfCastAppendTrack(var ATracks: TMfCastTrackInfoArray;
                             const ATrack: TMfCastTrackInfo);
 var
@@ -423,13 +457,29 @@ begin
   // source. The planner needs this information to distinguish remuxing from
   // decoding and re-encoding.
   Reader := nil;
-  if SUCCEEDED(MFCreateSourceReaderFromURL(PWideChar(WideString(SourceName)),
-                                           nil,
-                                           Reader)) then
-    begin
+  try
+    if Assigned(FLogger) then
+      FLogger.Log(cllDebug,
+                  'MediaInspector',
+                  'Opening Media Foundation source reader for "' + SourceName + '".');
+    Result := MFCreateSourceReaderFromURL(PWideChar(WideString(SourceName)),
+                                          nil,
+                                          Reader);
+    if Assigned(FLogger) then
+      FLogger.Log(cllDebug,
+                  'MediaInspector',
+                  Format('Media Foundation source reader returned HRESULT $%.8x.',
+                         [DWORD(Result)]));
+    if SUCCEEDED(Result) then
+      begin
       ActualVideo := False;
       ActualAudio := False;
-      StreamCount := CountSourceReaderStreams(Reader);
+      StreamCount := MfCastCountSourceReaderStreams(Reader);
+      if Assigned(FLogger) then
+        FLogger.Log(cllDebug,
+                    'MediaInspector',
+                    Format('Source reader exposes %d stream(s).',
+                           [StreamCount]));
 
       if (StreamCount > 0) then
       for StreamIndex := 0 to StreamCount - 1 do
@@ -492,13 +542,26 @@ begin
             end;
         end;
 
-      if ActualVideo or ActualAudio then
-        begin
-          AMediaInfo.HasVideo := ActualVideo;
-          AMediaInfo.HasAudio := ActualAudio;
-        end;
-    end;
+        if ActualVideo or ActualAudio then
+          begin
+            AMediaInfo.HasVideo := ActualVideo;
+            AMediaInfo.HasAudio := ActualAudio;
+          end;
+      end;
+  except
+    on E: Exception do
+      if Assigned(FLogger) then
+        FLogger.Log(cllWarning,
+                    'MediaInspector',
+                    'Optional Media Foundation metadata enrichment failed: ' +
+                    E.Message);
+  end;
 
+  MediaType := nil;
+  Reader := nil;
+
+  // Source-reader enrichment is optional. Extension-based inspection above
+  // remains sufficient for choosing the safe transcode route.
   Result := S_OK;
 end;
 

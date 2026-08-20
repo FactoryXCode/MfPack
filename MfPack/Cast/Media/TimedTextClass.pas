@@ -259,6 +259,7 @@ type
                         const ASourceName: WideString;
                         const ALanguageTag: string;
                         const AFriendlyLanguageName: string): HRESULT;
+
     // Open, check and decide what filetype to process
     function OpenTimedTextFile(const sUrl: WideString): HResult;
 

@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -66,11 +66,13 @@ uses
 
   {WinApi}
   WinApi.Windows,
+  WinApi.MediaFoundationApi.MfObjects,
   {System}
   System.SysUtils,
   {Cast}
   MfCastTypes,
-  MfCastInterfaces;
+  MfCastInterfaces,
+  MfCastMediaInterfaces;
 
 type
   TMfCast = class;
@@ -89,6 +91,7 @@ type
   private
     FController: IMfCastController;
     FLogger: IMfCastLogger;
+    FPreviewSink: IMfCastPreviewSink;
     FMediaFoundationStarted: Boolean;
     FOnDeviceAdded: TMfCastDeviceEvent;
     FOnDeviceUpdated: TMfCastDeviceEvent;
@@ -119,10 +122,12 @@ type
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function GetMediaTracks(const ASource: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+    function SetPreviewWindow(const AWindow: HWND): HRESULT;
 
     function Connect(const ADevice: TMfCastDevice): HRESULT;
 
     function Load(const ASource: string): HRESULT; overload;
+
     function Load(const ASource: string;
                   const ASubtitle: TMfCastSubtitleAsset;
                   const AMediaMode: TMfCastMediaMode = cmmAutomatic;
@@ -138,6 +143,10 @@ type
                   const AMediaMode: TMfCastMediaMode = cmmAutomatic;
                   const ASubtitleMode: TMfCastSubtitleMode = csmAutomatic;
                   const AStartSeconds: Double = 0.0): HRESULT; overload;
+
+    function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                   const AInitSegment: TBytes;
+                                   out AByteStream: IMFByteStream): HRESULT;
 
     function Play(): HRESULT;
     function Pause(): HRESULT;
@@ -175,6 +184,7 @@ uses
   MfCastDiscovery,
   MfCastHttpServer,
   MfCastMedia,
+  MfCastWindowPreview,
   MfCastRemux,
   MfCastTranscode,
   MfCastController;
@@ -237,6 +247,7 @@ begin
   inherited Create();
 
   FMediaFoundationStarted := False;
+  FPreviewSink := nil;
 
   // Media inspection and track enumeration also use Media Foundation. Keep
   // transcoding optional, but initialize the platform for every facade.
@@ -271,6 +282,8 @@ begin
       Components.SegmentPublisher := TMfCastSegmentPublisher.Create(Components.HttpServer);
       Components.RemuxPipeline := TMfCastRemuxPipeline.Create();
       Components.TranscodePipeline := TMfCastTranscodePipeline.Create();
+      FPreviewSink := TMfCastWindowPreviewSink.Create();
+      Components.PreviewSink := FPreviewSink;
     end;
 
   FController := TMfCastController.Create(Components);
@@ -310,6 +323,9 @@ begin
       FController := nil;
     end;
 
+  if Assigned(FPreviewSink) then
+    FPreviewSink.SetWindow(0);
+  FPreviewSink := nil;
   FLogger := nil;
 
   if FMediaFoundationStarted then
@@ -355,6 +371,17 @@ function TMfCast.GetMediaTracks(const ASource: string;
 begin
 
   Result := FController.GetMediaTracks(ASource, ATracks);
+end;
+
+
+function TMfCast.SetPreviewWindow(const AWindow: HWND): HRESULT;
+begin
+  if not Assigned(FPreviewSink) then
+    begin
+      Result := E_NOTIMPL;
+      Exit;
+    end;
+  Result := FPreviewSink.SetWindow(AWindow);
 end;
 
 
@@ -440,6 +467,17 @@ begin
                                  AMediaMode,
                                  ASubtitleMode,
                                  StartTime);
+end;
+
+
+function TMfCast.CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                       const AInitSegment: TBytes;
+                                       out AByteStream: IMFByteStream): HRESULT;
+begin
+
+  Result := FController.CastLiveFragmentedMp4(ADevice,
+                                              AInitSegment,
+                                              AByteStream);
 end;
 
 

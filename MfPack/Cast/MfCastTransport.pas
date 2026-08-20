@@ -664,6 +664,14 @@ var
   Addr: TSockAddrIn;
   ResolvedAddress: TInAddr;
   Timeout: Integer;
+  NonBlocking: u_long;
+  ConnectResult: Integer;
+  SocketError: Integer;
+  SocketErrorLength: Integer;
+  SelectResult: LongInt;
+  WriteSet: TFDSet;
+  ErrorSet: TFDSet;
+  SelectTimeout: TTimeVal;
 begin
 
   if IsConnected() then
@@ -704,7 +712,93 @@ begin
   Addr.sin_port := htons(APort);
   Addr.sin_addr := ResolvedAddress;
 
-  if WinApi.WinSock.connect(FSocket, TSockAddr(Addr), SizeOf(Addr)) = SOCKET_ERROR then
+  if FSettings.ConnectTimeoutMs > 0 then
+    begin
+      // SO_RCVTIMEO and SO_SNDTIMEO do not bound connect(). Use a temporary
+      // non-blocking socket so a sleeping or stale mDNS endpoint cannot hold
+      // the caller for the Windows TCP timeout (which can be minutes).
+      NonBlocking := 1;
+      if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+        begin
+          Result := LastSocketError();
+          Disconnect();
+          Exit;
+        end;
+
+      ConnectResult := WinApi.WinSock.connect(FSocket,
+                                              TSockAddr(Addr),
+                                              SizeOf(Addr));
+      if ConnectResult = SOCKET_ERROR then
+        begin
+          SocketError := WSAGetLastError();
+          if (SocketError <> WSAEWOULDBLOCK) and
+             (SocketError <> WSAEINPROGRESS) and
+             (SocketError <> WSAEALREADY) then
+            begin
+              NonBlocking := 0;
+              ioctlsocket(FSocket, FIONBIO, NonBlocking);
+              Result := HRESULT($80070000 or DWORD(SocketError));
+              Disconnect();
+              Exit;
+            end;
+
+          FillChar(WriteSet, SizeOf(WriteSet), 0);
+          FillChar(ErrorSet, SizeOf(ErrorSet), 0);
+          FD_SET(FSocket, WriteSet);
+          FD_SET(FSocket, ErrorSet);
+          SelectTimeout.tv_sec := FSettings.ConnectTimeoutMs div 1000;
+          SelectTimeout.tv_usec := (FSettings.ConnectTimeoutMs mod 1000) * 1000;
+          SelectResult := select(0,
+                                 nil,
+                                 @WriteSet,
+                                 @ErrorSet,
+                                 @SelectTimeout);
+
+          if SelectResult = 0 then
+            SocketError := WSAETIMEDOUT
+          else if SelectResult = SOCKET_ERROR then
+            SocketError := WSAGetLastError()
+          else
+            begin
+              SocketError := 0;
+              SocketErrorLength := SizeOf(SocketError);
+              if getsockopt(FSocket,
+                            SOL_SOCKET,
+                            SO_ERROR,
+                            PAnsiChar(@SocketError),
+                            SocketErrorLength) = SOCKET_ERROR then
+                SocketError := WSAGetLastError();
+            end;
+
+          NonBlocking := 0;
+          if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+            begin
+              Result := LastSocketError();
+              Disconnect();
+              Exit;
+            end;
+
+          if SocketError <> 0 then
+            begin
+              Result := HRESULT($80070000 or DWORD(SocketError));
+              Disconnect();
+              Exit;
+            end;
+        end
+      else
+        begin
+          NonBlocking := 0;
+          if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+            begin
+              Result := LastSocketError();
+              Disconnect();
+              Exit;
+            end;
+        end;
+    end
+  else if WinApi.WinSock.connect(FSocket,
+                                 TSockAddr(Addr),
+                                 SizeOf(Addr)) = SOCKET_ERROR then
     begin
       Result := LastSocketError();
       Disconnect();

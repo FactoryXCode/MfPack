@@ -28,11 +28,19 @@ uses
 type
 
   TSimpleCastPlayerForm = class(TForm)
+    lblState: TLabel;
+    memLog: TMemo;
+    pnlPreview: TPanel;
+    pnlCtrl: TPanel;
+    Bevel2: TBevel;
     lblDevices: TLabel;
+    lblSource: TLabel;
+    lblSeek: TLabel;
+    lblVolume: TLabel;
+    Bevel3: TBevel;
     lstDevices: TListBox;
     btnDiscover: TButton;
     btnRefresh: TButton;
-    lblSource: TLabel;
     edtSource: TEdit;
     btnBrowse: TButton;
     btnCast: TButton;
@@ -41,19 +49,13 @@ type
     btnStop: TButton;
     btnDisconnect: TButton;
     chkEmbeddedSubtitles: TCheckBox;
-    lblSeek: TLabel;
     trkSeek: TTrackBar;
     btnSeek: TButton;
-    lblVolume: TLabel;
     trkVolume: TTrackBar;
     chkMuted: TCheckBox;
-    lblState: TLabel;
-    memLog: TMemo;
+    cbxSubtitleLanguage: TComboBox;
     OpenDialog: TOpenDialog;
     Bevel1: TBevel;
-    cbxSubtitleLanguage: TComboBox;
-    Bevel2: TBevel;
-    Bevel3: TBevel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -140,6 +142,9 @@ begin
   // Enable the optional conversion stack used by MfPlayer X2 so containers
   // such as Matroska can be converted to fragmented MP4 for Chromecast.
   FCast := TMfCast.Create(True);
+  pnlPreview.HandleNeeded();
+  LogResult('Attach preview window',
+            FCast.SetPreviewWindow(pnlPreview.Handle));
 
   FCast.OnDeviceAdded := DeviceChanged;
   FCast.OnDeviceUpdated := DeviceChanged;
@@ -168,6 +173,7 @@ begin
 
   if Assigned(FCast) then
     begin
+      FCast.SetPreviewWindow(0);
       FCast.OnDeviceAdded := nil;
       FCast.OnDeviceUpdated := nil;
       FCast.OnDeviceRemoved := nil;

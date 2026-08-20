@@ -48,6 +48,7 @@ contains
   MfEmbeddedSubtitleReader in 'Media\MfEmbeddedSubtitleReader.pas',
   MfMatroskaSubtitleReader in 'Media\MfMatroskaSubtitleReader.pas',
   MfPCXConstants in 'Media\MfPCXConstants.pas',
+  MfCastWindowPreview in 'Media\MfCastWindowPreview.pas',
   MfSubtitleCompositor in 'Media\MfSubtitleCompositor.pas',
   MfSubtitleFramePump in 'Media\MfSubtitleFramePump.pas',
   TimedTextClass in 'Media\TimedTextClass.pas';

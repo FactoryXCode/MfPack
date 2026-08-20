@@ -143,6 +143,12 @@ type
                            FramesWritten: Int64;
                            SampleTime: MFTIME;
                            var Cancel: Boolean);
+    procedure PumpVideoSample(Sender: TObject;
+                              const Sample: IMFSample;
+                              Width: UINT32;
+                              Height: UINT32;
+                              SampleTime: MFTIME;
+                              SampleDuration: MFTIME);
   protected
     procedure Execute(); override;
 
@@ -295,6 +301,22 @@ begin
 end;
 
 
+procedure TMfCastTranscodeWorker.PumpVideoSample(Sender: TObject;
+                                                  const Sample: IMFSample;
+                                                  Width: UINT32;
+                                                  Height: UINT32;
+                                                  SampleTime: MFTIME;
+                                                  SampleDuration: MFTIME);
+begin
+  if not Assigned(FOwner) or not Assigned(FOwner.FPreviewSink) then
+    Exit;
+  if SUCCEEDED(FOwner.FPreviewSink.ConfigureVideo(Width, Height)) then
+    FOwner.FPreviewSink.PresentSample(Sample,
+                                      SampleTime,
+                                      SampleDuration);
+end;
+
+
 procedure TMfCastTranscodeWorker.Execute();
 var
   HrCom: HRESULT;
@@ -382,6 +404,7 @@ begin
       FPump.UseSoftwareVideoDecoder := True;
       FPump.RealTimePacing := True;
       FPump.OnProgress := PumpProgress;
+      FPump.OnVideoSample := PumpVideoSample;
 
       FPump.SetAudioVolume(InterlockedCompareExchange(FOwner.FAudioVolumePermille,
                                                       0,
@@ -530,6 +553,8 @@ begin
   FRequest := ARequest;
   FPublisher := APublisher;
   FPreviewSink := APreviewSink;
+  if Assigned(FPreviewSink) then
+    FPreviewSink.Flush();
   FByteStream := nil;
   FWorkerResult := S_OK;
   Log(cllInfo,
@@ -630,6 +655,8 @@ begin
      not Assigned(FByteStream) then
     begin
       FPublisher := nil;
+      if Assigned(FPreviewSink) then
+        FPreviewSink.Flush();
       FPreviewSink := nil;
       FRequest.Reset();
       Result := S_OK;
@@ -641,6 +668,8 @@ begin
 
   FByteStream := nil;
   FPublisher := nil;
+  if Assigned(FPreviewSink) then
+    FPreviewSink.Flush();
   FPreviewSink := nil;
   FRequest.Reset();
 

@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -69,6 +69,7 @@ uses
 
   {WinApi}
   WinApi.Windows,
+  WinApi.MediaFoundationApi.MfObjects,
   {System}
   System.Classes,
   System.SysUtils,
@@ -208,20 +209,28 @@ type
     function StopDiscovery: HRESULT;
     function RefreshDiscovery: HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
+
     function GetMediaTracks(const ASourceName: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+
     function Connect(const ADevice: TMfCastDevice): HRESULT;
+
     function LoadFile(const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+
+    function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                   const AInitSegment: TBytes;
+                                   out AByteStream: IMFByteStream): HRESULT;
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;
