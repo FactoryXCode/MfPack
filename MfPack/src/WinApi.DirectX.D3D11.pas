@@ -3337,7 +3337,7 @@ type
                                                         const pUAVInitialCounts: PUINT); stdcall;
 
     procedure OMSetBlendState(pBlendState: ID3D11BlendState;
-                              const BlendFactor: Fixed3FLOATArray;
+                              BlendFactor: PFixed3FLOATArray;
                               SampleMask: UINT); stdcall;
 
     procedure OMSetDepthStencilState(pDepthStencilState: ID3D11DepthStencilState;
