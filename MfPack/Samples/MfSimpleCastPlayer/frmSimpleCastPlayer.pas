@@ -56,6 +56,7 @@ type
     cbxSubtitleLanguage: TComboBox;
     OpenDialog: TOpenDialog;
     Bevel1: TBevel;
+    Bevel4: TBevel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

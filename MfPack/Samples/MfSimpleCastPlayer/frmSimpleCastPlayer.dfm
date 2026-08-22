@@ -44,7 +44,6 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 0
-    ExplicitTop = 612
   end
   object pnlPreview: TPanel
     Left = 0
@@ -57,10 +56,6 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     ParentBackground = False
     TabOrder = 1
     OnResize = PreviewResize
-    ExplicitLeft = 247
-    ExplicitTop = 342
-    ExplicitWidth = 327
-    ExplicitHeight = 182
   end
   object pnlCtrl: TPanel
     Left = 0
@@ -69,15 +64,32 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     Height = 271
     Align = alTop
     TabOrder = 2
+    ExplicitTop = 2
+    object Bevel4: TBevel
+      Left = 1
+      Top = 233
+      Width = 693
+      Height = 37
+      Align = alBottom
+      ExplicitLeft = 4
+      ExplicitTop = 232
+      ExplicitWidth = 689
+    end
+    object Bevel1: TBevel
+      Left = 4
+      Top = 10
+      Width = 302
+      Height = 121
+    end
     object Bevel2: TBevel
       Left = 312
-      Top = 12
+      Top = 10
       Width = 377
-      Height = 155
+      Height = 121
     end
     object lblDevices: TLabel
-      Left = 16
-      Top = 18
+      Left = 12
+      Top = 22
       Width = 114
       Height = 13
       Caption = 'Chromecast devices'
@@ -90,7 +102,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object lblSource: TLabel
       Left = 321
-      Top = 18
+      Top = 22
       Width = 250
       Height = 13
       Caption = 'Local media file or direct HTTP(S) media URL'
@@ -103,7 +115,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object lblSeek: TLabel
       Left = 8
-      Top = 177
+      Top = 145
       Width = 80
       Height = 13
       Caption = 'Position (sec.)'
@@ -116,7 +128,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object lblVolume: TLabel
       Left = 8
-      Top = 236
+      Top = 204
       Width = 42
       Height = 13
       Caption = 'Volume'
@@ -129,39 +141,33 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object Bevel3: TBevel
       Left = 313
-      Top = 120
+      Top = 74
       Width = 375
       Height = 11
       Shape = bsTopLine
     end
-    object Bevel1: TBevel
-      Left = 4
-      Top = 10
-      Width = 302
-      Height = 155
-    end
     object lstDevices: TListBox
-      Left = 16
-      Top = 34
+      Left = 12
+      Top = 44
       Width = 279
-      Height = 86
+      Height = 77
       ItemHeight = 13
       TabOrder = 0
       OnClick = SubtitleSelectionChanged
     end
     object btnDiscover: TButton
-      Left = 16
-      Top = 131
-      Width = 72
+      Left = 157
+      Top = 17
+      Width = 60
       Height = 25
       Caption = 'Discover'
       TabOrder = 1
       OnClick = btnDiscoverClick
     end
     object btnRefresh: TButton
-      Left = 90
-      Top = 131
-      Width = 72
+      Left = 231
+      Top = 17
+      Width = 60
       Height = 25
       Caption = 'Refresh'
       TabOrder = 2
@@ -169,24 +175,24 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object edtSource: TEdit
       Left = 318
-      Top = 41
-      Width = 291
+      Top = 44
+      Width = 299
       Height = 21
       TabOrder = 3
       OnChange = SourceOrDeviceChanged
     end
     object btnBrowse: TButton
-      Left = 611
-      Top = 39
-      Width = 72
+      Left = 623
+      Top = 42
+      Width = 60
       Height = 25
       Caption = 'Browse...'
       TabOrder = 4
       OnClick = btnBrowseClick
     end
     object btnCast: TButton
-      Left = 318
-      Top = 77
+      Left = 6
+      Top = 240
       Width = 72
       Height = 25
       Caption = 'Cast'
@@ -194,8 +200,8 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       OnClick = btnCastClick
     end
     object btnPlay: TButton
-      Left = 391
-      Top = 77
+      Left = 79
+      Top = 240
       Width = 72
       Height = 25
       Caption = 'Play'
@@ -203,8 +209,8 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       OnClick = btnPlayClick
     end
     object btnPause: TButton
-      Left = 464
-      Top = 77
+      Left = 152
+      Top = 240
       Width = 72
       Height = 25
       Caption = 'Pause'
@@ -212,8 +218,8 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       OnClick = btnPauseClick
     end
     object btnStop: TButton
-      Left = 537
-      Top = 77
+      Left = 225
+      Top = 240
       Width = 72
       Height = 25
       Caption = 'Stop'
@@ -221,8 +227,8 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       OnClick = btnStopClick
     end
     object btnDisconnect: TButton
-      Left = 611
-      Top = 77
+      Left = 299
+      Top = 240
       Width = 72
       Height = 25
       Caption = 'Disconnect'
@@ -231,7 +237,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object chkEmbeddedSubtitles: TCheckBox
       Left = 321
-      Top = 135
+      Top = 97
       Width = 98
       Height = 17
       Alignment = taLeftJustify
@@ -243,7 +249,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object trkSeek: TTrackBar
       Left = 0
-      Top = 196
+      Top = 164
       Width = 683
       Height = 29
       Max = 7200
@@ -253,8 +259,8 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object btnSeek: TButton
       Left = 99
-      Top = 171
-      Width = 52
+      Top = 139
+      Width = 60
       Height = 25
       Caption = 'Seek'
       TabOrder = 12
@@ -262,7 +268,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object trkVolume: TTrackBar
       Left = 112
-      Top = 235
+      Top = 203
       Width = 571
       Height = 26
       Max = 100
@@ -273,7 +279,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object chkMuted: TCheckBox
       Left = 59
-      Top = 235
+      Top = 203
       Width = 55
       Height = 17
       Caption = 'Mute'
@@ -288,7 +294,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     end
     object cbxSubtitleLanguage: TComboBox
       Left = 425
-      Top = 133
+      Top = 95
       Width = 258
       Height = 21
       Style = csDropDownList
@@ -301,7 +307,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       'Cast media|*.mp4;*.m4v;*.m4a;*.webm;*.mp3;*.aac;*.mkv;*.avi|All ' +
       'files|*.*'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Left = 168
-    Top = 14
+    Left = 326
+    Top = 304
   end
 end

@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 22/08/2026 Tony                Fixed volume/mute setting.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -675,6 +676,60 @@ begin
   Result := WholeSeconds * 10000000 + Fraction100ns;
   if Negative then
     Result := -Result;
+end;
+
+
+function MfCastExtractJsonSingle(const AJson: string;
+                                 const AName: string;
+                                 const ADefault: Single): Single;
+var
+  ScaledValue: Int64;
+
+begin
+
+  ScaledValue := MfCastExtractJsonTime100ns(AJson,
+                                             AName,
+                                             Round(ADefault * 10000000.0));
+  Result := ScaledValue / 10000000.0;
+end;
+
+
+function MfCastExtractJsonBoolean(const AJson: string;
+                                  const AName: string;
+                                  const ADefault: Boolean): Boolean;
+var
+  Pattern: string;
+  I: Integer;
+
+begin
+
+  Result := ADefault;
+  Pattern := '"' + AName + '"';
+  I := Pos(Pattern,
+           AJson);
+  if (I = 0) then
+    Exit;
+
+  I := PosEx(':',
+             AJson,
+             I + Length(Pattern));
+  if (I = 0) then
+    Exit;
+
+  Inc(I);
+  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, LFEED]) do
+    Inc(I);
+
+  if SameText(Copy(AJson,
+                   I,
+                   4),
+              'true') then
+    Result := True
+  else if SameText(Copy(AJson,
+                        I,
+                        5),
+                   'false') then
+    Result := False;
 end;
 
 
@@ -1441,6 +1496,7 @@ begin
   if ADisconnectTransport and Assigned(FTransport) then
     begin
       FSendLock.Acquire();
+
       try
         FTransport.Disconnect();
       finally
@@ -1658,10 +1714,12 @@ begin
                            '{"type":"PONG"}');
     end
   else
-    if SameText(Namespace, FSettings.NamespaceReceiver) then
+    if SameText(Namespace,
+                FSettings.NamespaceReceiver) then
       Result := ProcessReceiverMessage(Payload)
     else
-      if SameText(Namespace, FSettings.NamespaceMedia) then
+      if SameText(Namespace,
+                  FSettings.NamespaceMedia) then
         Result := ProcessMediaMessage(Payload);
 end;
 
@@ -1708,12 +1766,14 @@ begin
       if (NewTransportId = '') then
         Exit;
 
-      NewSessionId := MfCastExtractJsonString(AJsonPayload, 'sessionId');
+      NewSessionId := MfCastExtractJsonString(AJsonPayload,
+                                              'sessionId');
 
       if (NewSessionId = '') then
         NewSessionId := FSettings.ReceiverApplicationId;
 
-      if (FSessionId <> '') and SameText(FTransportId, NewTransportId) then
+      if (FSessionId <> '') and SameText(FTransportId,
+                                         NewTransportId) then
         Exit;
 
       FSessionId := NewSessionId;
@@ -1734,6 +1794,7 @@ begin
         FSessionId := '';
         FTransportId := FSettings.ReceiverId;
         FMediaSessionId := 0;
+
         if Assigned(FCallbacks.OnReceiverClosed) then
           FCallbacks.OnReceiverClosed();
       end;
@@ -1811,6 +1872,21 @@ begin
   MediaVolumeStatus := MfCastExtractJsonObject(AJsonPayload,
                                                'volume');
 
+  if (MediaVolumeStatus <> '') then
+    begin
+      Status.Volume := MfCastExtractJsonSingle(MediaVolumeStatus,
+                                               'level',
+                                               Status.Volume);
+      if Status.Volume < 0.0 then
+        Status.Volume := 0.0
+      else if Status.Volume > 1.0 then
+        Status.Volume := 1.0;
+
+      Status.Muted := MfCastExtractJsonBoolean(MediaVolumeStatus,
+                                               'muted',
+                                               Status.Muted);
+    end;
+
   if (MediaVolumeStatus <> '') and
      (MediaVolumeStatus <> FLastMediaVolumeStatus) and
      Assigned(FLogger) then
@@ -1879,7 +1955,9 @@ begin
       FLastReportedPlayerState := Status.PlayerState;
       FLastMediaCallbackTick := CurrentTick;
 
-      if (InterlockedCompareExchange(FStopInProgress, 0, 0) = 0) and
+      if (InterlockedCompareExchange(FStopInProgress,
+                                     0,
+                                     0) = 0) and
          Assigned(FCallbacks.OnMediaStatus) and
          ((Status.MediaSessionId <> 0) or (Status.PlayerState <> '')) then
         FCallbacks.OnMediaStatus(Status);
@@ -1944,8 +2022,10 @@ begin
 
   SetLength(AMessage,
             0);
+
   Result := ReadExact(@Header[0],
                       SizeOf(Header));
+
   if (Result <> S_OK) then
     Exit;
 
@@ -1995,6 +2075,7 @@ begin
 
   repeat
     Result := ReadFrame(msgMessage);
+
     if (Result = S_FALSE) then
       begin
         if (GetTickCount() - LastStatusTick) >= 3000 then
@@ -2028,7 +2109,8 @@ begin
 
     if (FSessionId <> '') and
        (FTransportId <> '') and
-       not SameText(FTransportId, FSettings.ReceiverId) then
+       not SameText(FTransportId,
+                    FSettings.ReceiverId) then
       begin
         Result := S_OK;
         Exit;
@@ -2039,12 +2121,11 @@ begin
     FLogger.Log(cllWarning,
                 'Channel',
                 Format('Receiver-ready wait timed out: session="%s" transport="%s" lastNamespace="%s" lastPayload="%s".',
-                       [FSessionId,
-                        FTransportId,
-                        FLastNamespace,
-                        Copy(FLastPayload, 1, 512)]));
+                       [FSessionId, FTransportId, FLastNamespace, Copy(FLastPayload,
+                                                                       1,
+                                                                       512)]));
 
-  Result := HRESULT(DWORD($800705B4));
+  Result := HRESULT(DWORD($800705B4)); //ERROR_TIMEOUT
 end;
 
 
