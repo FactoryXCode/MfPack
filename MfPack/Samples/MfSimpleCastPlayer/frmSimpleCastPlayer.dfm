@@ -56,6 +56,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     Color = clBlack
     ParentBackground = False
     TabOrder = 1
+    OnResize = PreviewResize
     ExplicitLeft = 247
     ExplicitTop = 342
     ExplicitWidth = 327

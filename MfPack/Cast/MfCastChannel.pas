@@ -1478,7 +1478,9 @@ var
   ReadResult: HRESULT;
   HeartbeatResult: HRESULT;
   HeartbeatIntervalMs: Cardinal;
+  HeartbeatTimeoutMs: Cardinal;
   LastHeartbeatTick: Cardinal;
+  LastReceiveTick: Cardinal;
 
 begin
 
@@ -1486,7 +1488,12 @@ begin
   if (HeartbeatIntervalMs = 0) then
     HeartbeatIntervalMs := 5000;
 
+  HeartbeatTimeoutMs := FSettings.HeartbeatTimeoutMs;
+  if (HeartbeatTimeoutMs = 0) then
+    HeartbeatTimeoutMs := 15000;
+
   LastHeartbeatTick := GetTickCount();
+  LastReceiveTick := LastHeartbeatTick;
 
   while not AWorker.IsStopping() do
     begin
@@ -1497,6 +1504,7 @@ begin
 
       if (ReadResult = S_OK) then
         begin
+          LastReceiveTick := GetTickCount();
           ReadResult := ProcessIncomingMessage(MessageData);
 
           if FAILED(ReadResult) then
@@ -1543,7 +1551,23 @@ begin
               Break;
             end;
         end;
+
+      if (GetTickCount() - LastReceiveTick) >= HeartbeatTimeoutMs then
+        begin
+          if Assigned(FLogger) then
+            FLogger.Log(cllWarning,
+                        'Channel',
+                        Format('Receiver heartbeat timed out after %d ms.',
+                               [HeartbeatTimeoutMs]));
+
+          Break;
+        end;
     end;
+
+  // Unexpected transport loss must also stop the publisher and transcoder.
+  // A requested Stop/Disconnect already owns that cleanup path.
+  if (not AWorker.IsStopping()) and Assigned(FCallbacks.OnReceiverClosed) then
+    FCallbacks.OnReceiverClosed();
 end;
 
 

@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright ? FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -301,15 +301,21 @@ begin
                   Result := 'WAV'
                 else
                   if SameText(AExt,
-                              '.avi') then
-                    Result := 'AVI'
+                              '.ogg') or SameText(AExt,
+                                                 '.oga') or SameText(AExt,
+                                                                    '.opus') then
+                    Result := 'Ogg'
                   else
                     if SameText(AExt,
-                                '.ts') or SameText(AExt,
-                                                   '.m2ts') then
-                      Result := 'MPEG-TS'
+                                '.avi') then
+                      Result := 'AVI'
                     else
-                      Result := '';
+                      if SameText(AExt,
+                                  '.ts') or SameText(AExt,
+                                                     '.m2ts') then
+                        Result := 'MPEG-TS'
+                      else
+                        Result := '';
 end;
 
 
@@ -354,15 +360,21 @@ begin
                     Result := 'audio/wav'
                   else
                     if SameText(AExt,
-                                '.avi') then
-                      Result := 'video/x-msvideo'
+                                '.ogg') or SameText(AExt,
+                                                   '.oga') or SameText(AExt,
+                                                                      '.opus') then
+                      Result := 'audio/ogg'
                     else
                       if SameText(AExt,
-                                  '.ts') or SameText(AExt,
-                                                     '.m2ts') then
-                        Result := 'video/mp2t'
+                                  '.avi') then
+                        Result := 'video/x-msvideo'
                       else
-                        Result := 'application/octet-stream';
+                        if SameText(AExt,
+                                    '.ts') or SameText(AExt,
+                                                       '.m2ts') then
+                          Result := 'video/mp2t'
+                        else
+                          Result := 'application/octet-stream';
 end;
 
 
@@ -395,7 +407,11 @@ begin
                      '.aac') or SameText(AExt,
                                          '.flac') or
             SameText(AExt,
-                     '.wav');
+                     '.wav') or SameText(AExt,
+                                         '.ogg') or
+            SameText(AExt,
+                     '.oga') or SameText(AExt,
+                                         '.opus');
 end;
 
 procedure TMfCastMediaInspector.SetLogger(const ALogger: IMfCastLogger);

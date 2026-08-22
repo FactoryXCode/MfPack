@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright ? FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -80,7 +80,7 @@ type
   end;
 
   IMfCastPreviewSink = interface
-    ['{D52C2683-42C5-46BE-866E-2967C92FE04A}']
+    ['{DE22302E-0B96-44C7-A7BF-644A97DAE34A}']
     function SetWindow(const AWindow: HWND): HRESULT;
     function IsEnabled(): Boolean;
     function ConfigureVideo(const AWidth: UINT32;
@@ -88,7 +88,34 @@ type
     function PresentSample(const ASample: IMFSample;
                            const ASampleTime100ns: Int64;
                            const ASampleDuration100ns: Int64): HRESULT;
+    function ConfigureAudio(const AChannels: UINT32;
+                            const ASamplesPerSecond: UINT32;
+                            const ABitsPerSample: UINT32): HRESULT;
+    function PresentAudioSample(const ASample: IMFSample;
+                                const ASampleTime100ns: Int64;
+                                const ASampleDuration100ns: Int64): HRESULT;
+    function PauseAudio(): HRESULT;
+    function ResumeAudio(): HRESULT;
     function Flush(): HRESULT;
+  end;
+
+  // Local Media Session preview for routes that do not pass decoded samples
+  // through the Cast transcoder (direct HTTP/file playback and remuxing).
+  IMfCastDirectPreviewPlayer = interface
+    ['{7BE7043A-B984-40BE-86DE-0346174BAEF2}']
+    function SetWindow(const AWindow: HWND): HRESULT;
+    function IsEnabled(): Boolean;
+    function IsActive(): Boolean;
+    function Open(const ASourceName: string;
+                  const AVolume: Single;
+                  const AMuted: Boolean): HRESULT;
+    function Play(): HRESULT;
+    function Pause(): HRESULT;
+    function Stop(): HRESULT;
+    function Seek(const APosition100ns: Int64): HRESULT;
+    function SetVolume(const AVolume: Single): HRESULT;
+    function SetMuted(const AMuted: Boolean): HRESULT;
+    function UpdateVideo(): HRESULT;
   end;
 
   IMfCastTranscodePipeline = interface

@@ -26,7 +26,7 @@
 // 31/07/2026 Carmen              Added neutral embedded-cue import and corrected WebVTT timing.
 // ----------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX320

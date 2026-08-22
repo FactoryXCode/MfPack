@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright ? FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -519,8 +519,16 @@ end;
 function TMfCastLiveBuffer.WriteAt(const AOffset: UInt64;
                                    ABuffer: Pointer;
                                    const ASize: Cardinal): HRESULT;
+const
+  // Keep the 32-bit sender well below the point where the growing array must
+  // reserve a 64 MB contiguous block. Twelve MB is still roughly 24 seconds
+  // at the default 4 Mbps video rate plus AAC audio.
+  MaxPendingBytes = UInt64(12 * 1024 * 1024);
+
 var
   Required: UInt64;
+  RelativeOffset: UInt64;
+  WaitForReader: Boolean;
 
 begin
 
@@ -530,65 +538,89 @@ begin
       Exit;
     end;
 
-  FLock.Acquire;
-  try
-
-    if FClosed then
-      begin
-        Result := E_ABORT;
-        Exit;
-      end;
-
-    if AOffset < FBaseOffset then
-      begin
-        OutputDebugString(PChar(Format('MfCast live buffer write before base offset=%d base=%d',
-                                       [AOffset, FBaseOffset])));
-        Result := E_FAIL;
-        Exit;
-      end;
-
-    Required := AOffset + ASize;
-    if (Required < AOffset) then
-      begin
-        Result := E_INVALIDARG;
-        Exit;
-      end;
-
+  Result := E_FAIL;
+  repeat
+    WaitForReader := False;
+    FLock.Acquire;
     try
 
-      EnsureCapacity(Required);
-
-      if (ASize > 0) then
-        Move(ABuffer^,
-             FData[NativeInt(AOffset - FBaseOffset)],
-             ASize);
-    except
-      on E: EOutOfMemory do
+      if FClosed then
         begin
-          OutputDebugString(PChar(Format('MfCast live buffer out of memory offset=%d size=%d base=%d length=%d capacity=%d',
-                                         [AOffset, ASize, FBaseOffset, FLength, Length(FData)])));
-          Result := E_OUTOFMEMORY;
+          Result := E_ABORT;
           Exit;
         end;
+
+      if (AOffset < FBaseOffset) then
+        begin
+          OutputDebugString(PChar(Format('MfCast live buffer write before base offset=%d base=%d',
+                                         [AOffset, FBaseOffset])));
+          Result := E_FAIL;
+          Exit;
+        end;
+
+      Required := AOffset + ASize;
+      if (Required < AOffset) then
+        begin
+          Result := E_INVALIDARG;
+          Exit;
+        end;
+
+      // The HTTP client is this live buffer's consumer. Bound the producer's
+      // lead so a slow or vanished receiver cannot consume all process memory.
+      if (Required - FBaseOffset > MaxPendingBytes) and
+         (UInt64(ASize) <= MaxPendingBytes) then
+        WaitForReader := True
+      else
+        begin
+          try
+            EnsureCapacity(Required);
+            RelativeOffset := AOffset - FBaseOffset;
+
+            if (RelativeOffset > UInt64(Length(FData))) or
+               (UInt64(ASize) > UInt64(Length(FData)) - RelativeOffset) then
+              begin
+                OutputDebugString(PChar(Format('MfCast live buffer invalid write offset=%d size=%d base=%d capacity=%d',
+                                               [AOffset, ASize, FBaseOffset, Length(FData)])));
+                Result := E_UNEXPECTED;
+                Exit;
+              end;
+
+            if (ASize > 0) then
+              Move(ABuffer^,
+                   FData[NativeInt(RelativeOffset)],
+                   ASize);
+          except
+            on E: EOutOfMemory do
+              begin
+                OutputDebugString(PChar(Format('MfCast live buffer out of memory offset=%d size=%d base=%d length=%d capacity=%d',
+                                               [AOffset, ASize, FBaseOffset, FLength, Length(FData)])));
+                Result := E_OUTOFMEMORY;
+                Exit;
+              end;
+          end;
+
+          if (Required > FLength) then
+            FLength := Required;
+
+          if (FLength > 0) and
+             ((FLastWriteDebugLength = 0) or
+              (FLength >= FLastWriteDebugLength + 8388608)) then
+            begin
+              FLastWriteDebugLength := FLength;
+              OutputDebugString(PChar(Format('MfCast live buffer bytes=%d',
+                                             [FLength])));
+            end;
+
+          Result := S_OK;
+        end;
+
+    finally
+      FLock.Release;
     end;
 
-    if (Required > FLength) then
-      FLength := Required;
-
-    if (FLength > 0) and
-       ((FLastWriteDebugLength = 0) or
-        (FLength >= FLastWriteDebugLength + 8388608)) then
-      begin
-        FLastWriteDebugLength := FLength;
-        OutputDebugString(PChar(Format('MfCast live buffer bytes=%d',
-                                       [FLength])));
-      end;
-
-    Result := S_OK;
-
-  finally
-    FLock.Release;
-  end;
+    if WaitForReader then
+      Sleep(20);
+  until not WaitForReader;
 end;
 
 
@@ -635,6 +667,7 @@ begin
         Move(FData[NativeInt(AOffset - FBaseOffset)],
              ABuffer^,
              NativeInt(Available));
+
         ABytesRead := Cardinal(Available);
         DiscardBeforeLocked(AOffset + Available);
       end;

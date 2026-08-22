@@ -73,6 +73,7 @@ type
     procedure chkMutedClick(Sender: TObject);
     procedure SourceOrDeviceChanged(Sender: TObject);
     procedure SubtitleSelectionChanged(Sender: TObject);
+    procedure PreviewResize(Sender: TObject);
 
   private
     FCast: TMfCast;
@@ -126,6 +127,13 @@ var
 implementation
 
 {$R *.dfm}
+
+
+procedure TSimpleCastPlayerForm.PreviewResize(Sender: TObject);
+begin
+  if Assigned(FCast) then
+    FCast.UpdatePreviewWindow();
+end;
 
 
 procedure TSimpleCastPlayerForm.FormCreate(Sender: TObject);
@@ -551,15 +559,7 @@ begin
       ASubtitle.TrackId := Choice.TrackId;
       ASubtitle.StreamIndex := Choice.StreamIndex;
       ASubtitle.HasStreamIndex := Choice.HasStreamIndex;
-    end
-  else
-    if chkEmbeddedSubtitles.Checked then
-      begin
-        ASubtitle.Enabled := True;
-        ASubtitle.Embedded := True;
-        ASubtitle.Name := 'Embedded subtitles';
-        ASubtitle.SourceName := Trim(edtSource.Text);
-      end;
+    end;
 end;
 
 

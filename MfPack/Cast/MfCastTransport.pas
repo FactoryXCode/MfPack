@@ -79,100 +79,8 @@ type
     dwUpper: ULONG_PTR;
   end;
 
-  TMfCastTcpTransport = class(TInterfacedObject, IMfCastTransport)
-  private
-    FSettings: TMfCastProtocolSettings;
-    FLogger: IMfCastLogger;
-    FSocket: TSocket;
-    FWSAStarted: Boolean;
-    FCredHandle: TSecHandle;
-    FCtxtHandle: TSecHandle;
-    FHaveCredHandle: Boolean;
-    FHaveCtxtHandle: Boolean;
-    FTlsActive: Boolean;
-    FStreamSizes: record
-      cbHeader: Cardinal;
-      cbTrailer: Cardinal;
-      cbMaximumMessage: Cardinal;
-      cBuffers: Cardinal;
-      cbBlockSize: Cardinal;
-    end;
-    FEncryptedBuffer: TBytes;
-    FPlainBuffer: TBytes;
-
-    function ResolveHost(const AHost: string; out AAddress: TInAddr): HRESULT;
-    function LastSocketError(): HRESULT;
-    function RawSendBuffer(const ABuffer: Pointer;
-                           const ASize: Cardinal): HRESULT;
-    function RawReceiveBuffer(ABuffer: Pointer;
-                              const ABufferSize: Cardinal;
-                              out ABytesRead: Cardinal): HRESULT;
-    function AcquireTlsCredentials(): HRESULT;
-    function DoTlsHandshake(const AHost: string): HRESULT;
-    function DecryptNextRecord(): HRESULT;
-    procedure AppendBytes(var ATarget: TBytes;
-                          const ASource: Pointer;
-                          const ASize: Cardinal);
-    procedure ConsumeBytes(var ATarget: TBytes;
-                           const ACount: Cardinal);
-    procedure ClearTls();
-
-  public
-    constructor Create();
-    destructor Destroy(); override;
-
-    function Configure(const ASettings: TMfCastProtocolSettings): HRESULT;
-    procedure SetLogger(const ALogger: IMfCastLogger);
-    function Connect(const AHost: string;
-                     const APort: Word): HRESULT;
-    function Disconnect(): HRESULT;
-    function SendBuffer(const ABuffer: Pointer;
-                        const ASize: Cardinal): HRESULT;
-    function ReceiveBuffer(ABuffer: Pointer;
-                           const ABufferSize: Cardinal;
-                           out ABytesRead: Cardinal): HRESULT;
-    function IsConnected(): Boolean;
-  end;
-
-implementation
-
-const
-  SECURITY_NATIVE_DREP = $00000010;
-  SECPKG_CRED_OUTBOUND = 2;
-  UNISP_NAME_A = 'Microsoft Unified Security Protocol Provider';
-
-  ISC_REQ_SEQUENCE_DETECT = $00000008;
-  ISC_REQ_REPLAY_DETECT = $00000004;
-  ISC_REQ_CONFIDENTIALITY = $00000010;
-  ISC_REQ_ALLOCATE_MEMORY = $00000100;
-  ISC_REQ_STREAM = $00008000;
-  ISC_REQ_EXTENDED_ERROR = $00004000;
-
-  SEC_E_OK = HRESULT($00000000);
-  SEC_I_CONTINUE_NEEDED = HRESULT($00090312);
-  SEC_E_INCOMPLETE_MESSAGE = HRESULT($80090318);
-  SEC_I_CONTEXT_EXPIRED = HRESULT($00090317);
-  SEC_I_RENEGOTIATE = HRESULT($00090321);
-
-  SECBUFFER_VERSION = 0;
-  SECBUFFER_EMPTY = 0;
-  SECBUFFER_DATA = 1;
-  SECBUFFER_TOKEN = 2;
-  SECBUFFER_EXTRA = 5;
-  SECBUFFER_STREAM_TRAILER = 6;
-  SECBUFFER_STREAM_HEADER = 7;
-
-  SECPKG_ATTR_STREAM_SIZES = 4;
-  SCHANNEL_CRED_VERSION = 4;
-  SCH_CRED_MANUAL_CRED_VALIDATION = $00000008;
-  SCH_CRED_NO_DEFAULT_CREDS = $00000010;
-  SCH_CRED_IGNORE_NO_REVOCATION_CHECK = $00000800;
-  SCH_CRED_IGNORE_REVOCATION_OFFLINE = $00001000;
-
-type
   TSecurityStatus = HRESULT;
   TTimeStamp = Int64;
-
   PSecHandle = ^TSecHandle;
 
   PSecBuffer = ^TSecBuffer;
@@ -216,6 +124,77 @@ type
     cbBlockSize: Cardinal;
   end;
 
+  TStreamSizes = record
+    cbHeader: Cardinal;
+    cbTrailer: Cardinal;
+    cbMaximumMessage: Cardinal;
+    cBuffers: Cardinal;
+    cbBlockSize: Cardinal;
+  end;
+
+  TMfCastTcpTransport = class(TInterfacedObject, IMfCastTransport)
+  private
+    FSettings: TMfCastProtocolSettings;
+    FLogger: IMfCastLogger;
+    FSocket: TSocket;
+    FWSAStarted: Boolean;
+    FCredHandle: TSecHandle;
+    FCtxtHandle: TSecHandle;
+    FHaveCredHandle: Boolean;
+    FHaveCtxtHandle: Boolean;
+    FTlsActive: Boolean;
+    FStreamSizes: TStreamSizes;
+    FEncryptedBuffer: TBytes;
+    FPlainBuffer: TBytes;
+
+    function ResolveHost(const AHost: string;
+                         out AAddress: TInAddr): HRESULT;
+
+    function LastSocketError(): HRESULT;
+    function RawSendBuffer(const ABuffer: Pointer;
+                           const ASize: Cardinal): HRESULT;
+
+    function RawReceiveBuffer(ABuffer: Pointer;
+                              const ABufferSize: Cardinal;
+                              out ABytesRead: Cardinal): HRESULT;
+
+    function AcquireTlsCredentials(): HRESULT;
+
+    function DoTlsHandshake(const AHost: string): HRESULT;
+    function DecryptNextRecord(): HRESULT;
+
+    procedure AppendBytes(var ATarget: TBytes;
+                          const ASource: Pointer;
+                          const ASize: Cardinal);
+
+    procedure ConsumeBytes(var ATarget: TBytes;
+                           const ACount: Cardinal);
+    procedure ClearTls();
+
+  public
+
+    constructor Create();
+    destructor Destroy(); override;
+
+    function Configure(const ASettings: TMfCastProtocolSettings): HRESULT;
+    procedure SetLogger(const ALogger: IMfCastLogger);
+    function Connect(const AHost: string;
+                     const APort: Word): HRESULT;
+
+    function Disconnect(): HRESULT;
+
+    function SendBuffer(const ABuffer: Pointer;
+                        const ASize: Cardinal): HRESULT;
+
+    function ReceiveBuffer(ABuffer: Pointer;
+                           const ABufferSize: Cardinal;
+                           out ABytesRead: Cardinal): HRESULT;
+
+    function IsConnected(): Boolean;
+  end;
+
+
+// Security
 function AcquireCredentialsHandleA(pszPrincipal: PAnsiChar;
                                    pszPackage: PAnsiChar;
                                    fCredentialUse: Cardinal;
@@ -224,7 +203,8 @@ function AcquireCredentialsHandleA(pszPrincipal: PAnsiChar;
                                    pGetKeyFn: Pointer;
                                    pvGetKeyArgument: Pointer;
                                    var phCredential: TSecHandle;
-                                   var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall; external 'secur32.dll' name 'AcquireCredentialsHandleA';
+                                   var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
+
 function InitializeSecurityContextA(phCredential: PSecHandle;
                                     phContext: PSecHandle;
                                     pszTargetName: PAnsiChar;
@@ -236,27 +216,70 @@ function InitializeSecurityContextA(phCredential: PSecHandle;
                                     var phNewContext: TSecHandle;
                                     pOutput: PSecBufferDesc;
                                     var pfContextAttr: Cardinal;
-                                    var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall; external 'secur32.dll' name 'InitializeSecurityContextA';
-function FreeCredentialsHandle(var phCredential: TSecHandle): TSecurityStatus; stdcall; external 'secur32.dll' name 'FreeCredentialsHandle';
-function DeleteSecurityContext(var phContext: TSecHandle): TSecurityStatus; stdcall; external 'secur32.dll' name 'DeleteSecurityContext';
-function FreeContextBuffer(pvContextBuffer: Pointer): TSecurityStatus; stdcall; external 'secur32.dll' name 'FreeContextBuffer';
+                                    var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
+
+function FreeCredentialsHandle(var phCredential: TSecHandle): TSecurityStatus; stdcall;
+function DeleteSecurityContext(var phContext: TSecHandle): TSecurityStatus; stdcall;
+function FreeContextBuffer(pvContextBuffer: Pointer): TSecurityStatus; stdcall;
+
 function QueryContextAttributesA(var phContext: TSecHandle;
                                  ulAttribute: Cardinal;
-                                 pBuffer: Pointer): TSecurityStatus; stdcall; external 'secur32.dll' name 'QueryContextAttributesA';
+                                 pBuffer: Pointer): TSecurityStatus; stdcall;
+
 function EncryptMessage(var phContext: TSecHandle;
                         fQOP: Cardinal;
                         pMessage: PSecBufferDesc;
-                        MessageSeqNo: Cardinal): TSecurityStatus; stdcall; external 'secur32.dll' name 'EncryptMessage';
+                        MessageSeqNo: Cardinal): TSecurityStatus; stdcall;
+
 function DecryptMessage(var phContext: TSecHandle;
                         pMessage: PSecBufferDesc;
                         MessageSeqNo: Cardinal;
-                        var pfQOP: Cardinal): TSecurityStatus; stdcall; external 'secur32.dll' name 'DecryptMessage';
+                        var pfQOP: Cardinal): TSecurityStatus; stdcall;
+
+
+implementation
+
+const
+  Secur32Lib = 'secur32.dll';
+
+  SECURITY_NATIVE_DREP = $00000010;
+  SECPKG_CRED_OUTBOUND = 2;
+  UNISP_NAME_A = 'Microsoft Unified Security Protocol Provider';
+
+  ISC_REQ_SEQUENCE_DETECT = $00000008;
+  ISC_REQ_REPLAY_DETECT = $00000004;
+  ISC_REQ_CONFIDENTIALITY = $00000010;
+  ISC_REQ_ALLOCATE_MEMORY = $00000100;
+  ISC_REQ_STREAM = $00008000;
+  ISC_REQ_EXTENDED_ERROR = $00004000;
+
+  SEC_E_OK = HRESULT($00000000);
+  SEC_I_CONTINUE_NEEDED = HRESULT($00090312);
+  SEC_E_INCOMPLETE_MESSAGE = HRESULT($80090318);
+  SEC_I_CONTEXT_EXPIRED = HRESULT($00090317);
+  SEC_I_RENEGOTIATE = HRESULT($00090321);
+
+  SECBUFFER_VERSION = 0;
+  SECBUFFER_EMPTY = 0;
+  SECBUFFER_DATA = 1;
+  SECBUFFER_TOKEN = 2;
+  SECBUFFER_EXTRA = 5;
+  SECBUFFER_STREAM_TRAILER = 6;
+  SECBUFFER_STREAM_HEADER = 7;
+
+  SECPKG_ATTR_STREAM_SIZES = 4;
+  SCHANNEL_CRED_VERSION = 4;
+  SCH_CRED_MANUAL_CRED_VALIDATION = $00000008;
+  SCH_CRED_NO_DEFAULT_CREDS = $00000010;
+  SCH_CRED_IGNORE_NO_REVOCATION_CHECK = $00000800;
+  SCH_CRED_IGNORE_REVOCATION_OFFLINE = $00001000;
 
 
 constructor TMfCastTcpTransport.Create();
 begin
 
   inherited Create();
+
   FSocket := INVALID_SOCKET;
   FWSAStarted := False;
   FHaveCredHandle := False;
@@ -271,6 +294,7 @@ begin
   Disconnect();
   if FWSAStarted then
     WSACleanup();
+
   inherited Destroy();
 end;
 
@@ -296,6 +320,7 @@ procedure TMfCastTcpTransport.AppendBytes(var ATarget: TBytes;
                                           const ASize: Cardinal);
 var
   OldLength: Integer;
+
 begin
 
   if (ASource = nil) or (ASize = 0) then
@@ -311,20 +336,25 @@ procedure TMfCastTcpTransport.ConsumeBytes(var ATarget: TBytes;
                                            const ACount: Cardinal);
 var
   Remaining: Integer;
+
 begin
 
-  if ACount = 0 then
+  if (ACount = 0) then
     Exit;
 
-  if ACount >= Cardinal(Length(ATarget)) then
+  if (ACount >= Cardinal(Length(ATarget))) then
     begin
       SetLength(ATarget, 0);
       Exit;
     end;
 
   Remaining := Length(ATarget) - Integer(ACount);
-  Move(ATarget[Integer(ACount)], ATarget[0], Remaining);
-  SetLength(ATarget, Remaining);
+  Move(ATarget[Integer(ACount)],
+       ATarget[0],
+       Remaining);
+
+  SetLength(ATarget,
+            Remaining);
 end;
 
 
@@ -334,31 +364,44 @@ begin
   if FHaveCtxtHandle then
     begin
       DeleteSecurityContext(FCtxtHandle);
-      FillChar(FCtxtHandle, SizeOf(FCtxtHandle), 0);
+      FillChar(FCtxtHandle,
+               SizeOf(FCtxtHandle),
+               0);
       FHaveCtxtHandle := False;
     end;
 
   if FHaveCredHandle then
     begin
       FreeCredentialsHandle(FCredHandle);
-      FillChar(FCredHandle, SizeOf(FCredHandle), 0);
+      FillChar(FCredHandle,
+               SizeOf(FCredHandle),
+               0);
       FHaveCredHandle := False;
     end;
 
   FTlsActive := False;
-  SetLength(FEncryptedBuffer, 0);
-  SetLength(FPlainBuffer, 0);
-  FillChar(FStreamSizes, SizeOf(FStreamSizes), 0);
+
+  SetLength(FEncryptedBuffer,
+            0);
+
+  SetLength(FPlainBuffer,
+            0);
+
+  FillChar(FStreamSizes,
+           SizeOf(FStreamSizes),
+           0);
 end;
 
 
 function TMfCastTcpTransport.LastSocketError(): HRESULT;
 var
   ErrorCode: Integer;
+
 begin
 
   ErrorCode := WSAGetLastError();
-  if ErrorCode = 0 then
+
+  if (ErrorCode = 0) then
     Result := E_FAIL
   else
     Result := HRESULT($80070000 or DWORD(ErrorCode));
@@ -366,22 +409,26 @@ end;
 
 
 function TMfCastTcpTransport.ResolveHost(const AHost: string;
-  out AAddress: TInAddr): HRESULT;
+                                         out AAddress: TInAddr): HRESULT;
 var
   HostAnsi: AnsiString;
   HostEntry: PHostEnt;
+
 begin
 
-  FillChar(AAddress, SizeOf(AAddress), 0);
+  FillChar(AAddress,
+           SizeOf(AAddress),
+           0);
+
   HostAnsi := AnsiString(Trim(AHost));
-  if HostAnsi = '' then
+  if (HostAnsi = '') then
     begin
       Result := E_INVALIDARG;
       Exit;
     end;
 
   AAddress.S_addr := inet_addr(PAnsiChar(HostAnsi));
-  if AAddress.S_addr <> u_long(INADDR_NONE) then
+  if (AAddress.S_addr <> u_long(INADDR_NONE)) then
     begin
       Result := S_OK;
       Exit;
@@ -403,14 +450,22 @@ function TMfCastTcpTransport.AcquireTlsCredentials(): HRESULT;
 var
   Cred: TSChannelCred;
   Expiry: TTimeStamp;
+
 begin
 
-  FillChar(FCredHandle, SizeOf(FCredHandle), 0);
-  FillChar(Cred, SizeOf(Cred), 0);
+  FillChar(FCredHandle,
+           SizeOf(FCredHandle),
+           0);
+
+  FillChar(Cred,
+           SizeOf(Cred),
+           0);
+
   Cred.dwVersion := SCHANNEL_CRED_VERSION;
   Cred.dwFlags := SCH_CRED_NO_DEFAULT_CREDS or
                   SCH_CRED_IGNORE_NO_REVOCATION_CHECK or
                   SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+
   if not FSettings.VerifyTlsPeer then
     Cred.dwFlags := Cred.dwFlags or SCH_CRED_MANUAL_CRED_VALIDATION;
 
@@ -431,8 +486,9 @@ function TMfCastTcpTransport.RawSendBuffer(const ABuffer: Pointer;
                                            const ASize: Cardinal): HRESULT;
 var
   TotalSent: Cardinal;
-  Sent: Integer;
+  SentResult: Integer;
   Ptr: PAnsiChar;
+
 begin
 
   if (ABuffer = nil) and (ASize > 0) then
@@ -449,20 +505,28 @@ begin
 
   TotalSent := 0;
   Ptr := PAnsiChar(ABuffer);
-  while TotalSent < ASize do
+
+  while (TotalSent < ASize) do
     begin
-      Sent := send(FSocket, Ptr[TotalSent], ASize - TotalSent, 0);
-      if Sent = SOCKET_ERROR then
+      SentResult := send(FSocket,
+                         Ptr[TotalSent],
+                         ASize - TotalSent,
+                         0);
+
+      if (SentResult = SOCKET_ERROR) then
         begin
           Result := LastSocketError();
           Exit;
         end;
-      if Sent = 0 then
+
+      if (SentResult = 0) then
         begin
           Result := E_FAIL;
           Exit;
         end;
-      Inc(TotalSent, Cardinal(Sent));
+
+      Inc(TotalSent,
+          Cardinal(SentResult));
     end;
 
   Result := S_OK;
@@ -474,6 +538,7 @@ function TMfCastTcpTransport.RawReceiveBuffer(ABuffer: Pointer;
                                               out ABytesRead: Cardinal): HRESULT;
 var
   ReadCount: Integer;
+
 begin
 
   ABytesRead := 0;
@@ -517,6 +582,7 @@ var
   ExtraSize: Cardinal;
   Status: HRESULT;
   HaveContext: Boolean;
+
 begin
 
   Result := AcquireTlsCredentials();
@@ -529,13 +595,17 @@ begin
                 ISC_REQ_EXTENDED_ERROR or
                 ISC_REQ_ALLOCATE_MEMORY or
                 ISC_REQ_STREAM;
+
   TargetName := AnsiString(AHost);
   HaveContext := False;
   Status := SEC_I_CONTINUE_NEEDED;
 
   while Status = SEC_I_CONTINUE_NEEDED do
     begin
-      FillChar(OutBuffers, SizeOf(OutBuffers), 0);
+      FillChar(OutBuffers,
+               SizeOf(OutBuffers),
+               0);
+
       OutBuffers[0].BufferType := SECBUFFER_TOKEN;
       OutDesc.ulVersion := SECBUFFER_VERSION;
       OutDesc.cBuffers := 1;
@@ -545,19 +615,31 @@ begin
         begin
           if Length(FEncryptedBuffer) = 0 then
             begin
-              Result := RawReceiveBuffer(@Temp[0], SizeOf(Temp), BytesRead);
+              Result := RawReceiveBuffer(@Temp[0],
+                                         SizeOf(Temp),
+                                         BytesRead);
               if FAILED(Result) then
                 Exit;
-              if BytesRead = 0 then
+
+              if (BytesRead = 0) then
                 begin
                   Result := E_FAIL;
                   Exit;
                 end;
-              AppendBytes(FEncryptedBuffer, @Temp[0], BytesRead);
+
+              AppendBytes(FEncryptedBuffer,
+                          @Temp[0],
+                          BytesRead);
             end;
 
-          Work := Copy(FEncryptedBuffer, 0, Length(FEncryptedBuffer));
-          FillChar(InBuffers, SizeOf(InBuffers), 0);
+          Work := Copy(FEncryptedBuffer,
+                       0,
+                       Length(FEncryptedBuffer));
+
+          FillChar(InBuffers,
+                   SizeOf(InBuffers),
+                   0);
+
           InBuffers[0].BufferType := SECBUFFER_TOKEN;
           InBuffers[0].cbBuffer := Length(Work);
           InBuffers[0].pvBuffer := @Work[0];
@@ -579,25 +661,35 @@ begin
                                                ContextAttr,
                                                Expiry);
 
-          if Status = SEC_E_INCOMPLETE_MESSAGE then
+          if (Status = SEC_E_INCOMPLETE_MESSAGE) then
             begin
-              Result := RawReceiveBuffer(@Temp[0], SizeOf(Temp), BytesRead);
+              Result := RawReceiveBuffer(@Temp[0],
+                                         SizeOf(Temp),
+                                         BytesRead);
+
               if FAILED(Result) then
                 Exit;
-              if BytesRead = 0 then
+
+              if (BytesRead = 0) then
                 begin
                   Result := E_FAIL;
                   Exit;
                 end;
-              AppendBytes(FEncryptedBuffer, @Temp[0], BytesRead);
+
+              AppendBytes(FEncryptedBuffer,
+                          @Temp[0],
+                          BytesRead);
               Continue;
             end;
 
-          SetLength(FEncryptedBuffer, 0);
+          SetLength(FEncryptedBuffer,
+                    0);
+
           if InBuffers[1].BufferType = SECBUFFER_EXTRA then
             begin
               ExtraSize := InBuffers[1].cbBuffer;
-              if ExtraSize > 0 then
+
+              if (ExtraSize > 0) then
                 AppendBytes(FEncryptedBuffer,
                             Pointer(NativeUInt(InBuffers[1].pvBuffer)),
                             ExtraSize);
@@ -617,6 +709,7 @@ begin
                                                @OutDesc,
                                                ContextAttr,
                                                Expiry);
+
           if (Status = SEC_E_OK) or (Status = SEC_I_CONTINUE_NEEDED) then
             begin
               FHaveCtxtHandle := True;
@@ -628,6 +721,7 @@ begin
         begin
           Result := RawSendBuffer(OutBuffers[0].pvBuffer,
                                   OutBuffers[0].cbBuffer);
+
           FreeContextBuffer(OutBuffers[0].pvBuffer);
           if FAILED(Result) then
             Exit;
@@ -640,7 +734,7 @@ begin
         end;
     end;
 
-  if Status <> SEC_E_OK then
+  if (Status <> SEC_E_OK) then
     begin
       Result := Status;
       Exit;
@@ -658,7 +752,7 @@ end;
 
 
 function TMfCastTcpTransport.Connect(const AHost: string;
-  const APort: Word): HRESULT;
+                                     const APort: Word): HRESULT;
 var
   WsaData: TWSAData;
   Addr: TSockAddrIn;
@@ -672,6 +766,7 @@ var
   WriteSet: TFDSet;
   ErrorSet: TFDSet;
   SelectTimeout: TTimeVal;
+
 begin
 
   if IsConnected() then
@@ -679,7 +774,8 @@ begin
 
   if not FWSAStarted then
     begin
-      if WSAStartup($0202, WsaData) <> 0 then
+      if (WSAStartup($0202,
+                    WsaData) <> 0) then
         begin
           Result := LastSocketError();
           Exit;
@@ -691,34 +787,53 @@ begin
   if FAILED(Result) then
     Exit;
 
-  FSocket := socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if FSocket = INVALID_SOCKET then
+  FSocket := socket(AF_INET,
+                    SOCK_STREAM,
+                    IPPROTO_TCP);
+
+  if (FSocket = INVALID_SOCKET) then
     begin
       Result := LastSocketError();
       Exit;
     end;
 
   Timeout := Integer(FSettings.ReadTimeoutMs);
-  if Timeout > 0 then
-    setsockopt(FSocket, SOL_SOCKET, SO_RCVTIMEO,
-               PAnsiChar(@Timeout), SizeOf(Timeout));
-  Timeout := Integer(FSettings.WriteTimeoutMs);
-  if Timeout > 0 then
-    setsockopt(FSocket, SOL_SOCKET, SO_SNDTIMEO,
-               PAnsiChar(@Timeout), SizeOf(Timeout));
 
-  FillChar(Addr, SizeOf(Addr), 0);
+  if (Timeout > 0) then
+    setsockopt(FSocket,
+               SOL_SOCKET,
+               SO_RCVTIMEO,
+               PAnsiChar(@Timeout),
+               SizeOf(Timeout));
+
+  Timeout := Integer(FSettings.WriteTimeoutMs);
+
+  if (Timeout > 0) then
+    setsockopt(FSocket,
+               SOL_SOCKET,
+               SO_SNDTIMEO,
+               PAnsiChar(@Timeout),
+               SizeOf(Timeout));
+
+  FillChar(Addr,
+           SizeOf(Addr),
+           0);
+
   Addr.sin_family := AF_INET;
   Addr.sin_port := htons(APort);
   Addr.sin_addr := ResolvedAddress;
 
-  if FSettings.ConnectTimeoutMs > 0 then
+  if (FSettings.ConnectTimeoutMs > 0) then
     begin
+
       // SO_RCVTIMEO and SO_SNDTIMEO do not bound connect(). Use a temporary
       // non-blocking socket so a sleeping or stale mDNS endpoint cannot hold
       // the caller for the Windows TCP timeout (which can be minutes).
       NonBlocking := 1;
-      if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+
+      if (ioctlsocket(FSocket,
+                     FIONBIO,
+                     NonBlocking) = SOCKET_ERROR) then
         begin
           Result := LastSocketError();
           Disconnect();
@@ -728,57 +843,78 @@ begin
       ConnectResult := WinApi.WinSock.connect(FSocket,
                                               TSockAddr(Addr),
                                               SizeOf(Addr));
-      if ConnectResult = SOCKET_ERROR then
+      if (ConnectResult = SOCKET_ERROR) then
         begin
           SocketError := WSAGetLastError();
+
           if (SocketError <> WSAEWOULDBLOCK) and
              (SocketError <> WSAEINPROGRESS) and
              (SocketError <> WSAEALREADY) then
             begin
               NonBlocking := 0;
-              ioctlsocket(FSocket, FIONBIO, NonBlocking);
+
+              ioctlsocket(FSocket,
+                          FIONBIO,
+                          NonBlocking);
+
               Result := HRESULT($80070000 or DWORD(SocketError));
               Disconnect();
               Exit;
             end;
 
-          FillChar(WriteSet, SizeOf(WriteSet), 0);
-          FillChar(ErrorSet, SizeOf(ErrorSet), 0);
-          FD_SET(FSocket, WriteSet);
-          FD_SET(FSocket, ErrorSet);
+          FillChar(WriteSet,
+                   SizeOf(WriteSet),
+                   0);
+
+          FillChar(ErrorSet,
+                   SizeOf(ErrorSet),
+                   0);
+
+          FD_SET(FSocket,
+                 WriteSet);
+
+          FD_SET(FSocket,
+                 ErrorSet);
+
           SelectTimeout.tv_sec := FSettings.ConnectTimeoutMs div 1000;
           SelectTimeout.tv_usec := (FSettings.ConnectTimeoutMs mod 1000) * 1000;
+
           SelectResult := select(0,
                                  nil,
                                  @WriteSet,
                                  @ErrorSet,
                                  @SelectTimeout);
 
-          if SelectResult = 0 then
+          if (SelectResult = 0) then
             SocketError := WSAETIMEDOUT
-          else if SelectResult = SOCKET_ERROR then
-            SocketError := WSAGetLastError()
           else
-            begin
-              SocketError := 0;
-              SocketErrorLength := SizeOf(SocketError);
-              if getsockopt(FSocket,
-                            SOL_SOCKET,
-                            SO_ERROR,
-                            PAnsiChar(@SocketError),
-                            SocketErrorLength) = SOCKET_ERROR then
-                SocketError := WSAGetLastError();
+            if (SelectResult = SOCKET_ERROR) then
+              SocketError := WSAGetLastError()
+            else
+              begin
+                SocketError := 0;
+                SocketErrorLength := SizeOf(SocketError);
+
+                if (getsockopt(FSocket,
+                              SOL_SOCKET,
+                              SO_ERROR,
+                              PAnsiChar(@SocketError),
+                              SocketErrorLength) = SOCKET_ERROR) then
+                  SocketError := WSAGetLastError();
             end;
 
           NonBlocking := 0;
-          if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+
+          if (ioctlsocket(FSocket,
+                         FIONBIO,
+                         NonBlocking) = SOCKET_ERROR) then
             begin
               Result := LastSocketError();
               Disconnect();
               Exit;
             end;
 
-          if SocketError <> 0 then
+          if (SocketError <> 0) then
             begin
               Result := HRESULT($80070000 or DWORD(SocketError));
               Disconnect();
@@ -788,7 +924,10 @@ begin
       else
         begin
           NonBlocking := 0;
-          if ioctlsocket(FSocket, FIONBIO, NonBlocking) = SOCKET_ERROR then
+
+          if (ioctlsocket(FSocket,
+                         FIONBIO,
+                         NonBlocking) = SOCKET_ERROR) then
             begin
               Result := LastSocketError();
               Disconnect();
@@ -796,14 +935,15 @@ begin
             end;
         end;
     end
-  else if WinApi.WinSock.connect(FSocket,
-                                 TSockAddr(Addr),
-                                 SizeOf(Addr)) = SOCKET_ERROR then
-    begin
-      Result := LastSocketError();
-      Disconnect();
-      Exit;
-    end;
+  else
+    if (WinApi.WinSock.connect(FSocket,
+                               TSockAddr(Addr),
+                               SizeOf(Addr)) = SOCKET_ERROR) then
+      begin
+        Result := LastSocketError();
+        Disconnect();
+        Exit;
+      end;
 
   Result := DoTlsHandshake(AHost);
   if FAILED(Result) then
@@ -816,9 +956,10 @@ begin
 
   ClearTls();
 
-  if FSocket <> INVALID_SOCKET then
+  if (FSocket <> INVALID_SOCKET) then
     begin
-      shutdown(FSocket, SD_BOTH);
+      shutdown(FSocket,
+               SD_BOTH);
       WinApi.WinSock.closesocket(FSocket);
       FSocket := INVALID_SOCKET;
     end;
@@ -828,7 +969,7 @@ end;
 
 
 function TMfCastTcpTransport.SendBuffer(const ABuffer: Pointer;
-  const ASize: Cardinal): HRESULT;
+                                        const ASize: Cardinal): HRESULT;
 var
   Offset: Cardinal;
   ChunkSize: Cardinal;
@@ -837,6 +978,7 @@ var
   Buffers: array[0..3] of TSecBuffer;
   Desc: TSecBufferDesc;
   PacketSize: Cardinal;
+
 begin
 
   if (ABuffer = nil) and (ASize > 0) then
@@ -847,24 +989,34 @@ begin
 
   if not FTlsActive then
     begin
-      Result := RawSendBuffer(ABuffer, ASize);
+      Result := RawSendBuffer(ABuffer,
+                              ASize);
       Exit;
     end;
 
   Offset := 0;
   PlainPtr := PAnsiChar(ABuffer);
-  while Offset < ASize do
+
+  while (Offset < ASize) do
     begin
       ChunkSize := ASize - Offset;
+
       if (FStreamSizes.cbMaximumMessage > 0) and
          (ChunkSize > FStreamSizes.cbMaximumMessage) then
         ChunkSize := FStreamSizes.cbMaximumMessage;
 
-      SetLength(Packet, FStreamSizes.cbHeader + ChunkSize + FStreamSizes.cbTrailer);
-      if ChunkSize > 0 then
-        Move(PlainPtr[Offset], Packet[FStreamSizes.cbHeader], ChunkSize);
+      SetLength(Packet,
+                FStreamSizes.cbHeader + ChunkSize + FStreamSizes.cbTrailer);
 
-      FillChar(Buffers, SizeOf(Buffers), 0);
+      if (ChunkSize > 0) then
+        Move(PlainPtr[Offset],
+             Packet[FStreamSizes.cbHeader],
+             ChunkSize);
+
+      FillChar(Buffers,
+               SizeOf(Buffers),
+               0);
+
       Buffers[0].BufferType := SECBUFFER_STREAM_HEADER;
       Buffers[0].cbBuffer := FStreamSizes.cbHeader;
       Buffers[0].pvBuffer := @Packet[0];
@@ -880,16 +1032,21 @@ begin
       Desc.cBuffers := 4;
       Desc.pBuffers := @Buffers[0];
 
-      Result := EncryptMessage(FCtxtHandle, 0, @Desc, 0);
+      Result := EncryptMessage(FCtxtHandle,
+                               0,
+                               @Desc,
+                               0);
       if FAILED(Result) then
         Exit;
 
       PacketSize := Buffers[0].cbBuffer + Buffers[1].cbBuffer + Buffers[2].cbBuffer;
-      Result := RawSendBuffer(@Packet[0], PacketSize);
+      Result := RawSendBuffer(@Packet[0],
+                              PacketSize);
       if FAILED(Result) then
         Exit;
 
-      Inc(Offset, ChunkSize);
+      Inc(Offset,
+          ChunkSize);
     end;
 
   Result := S_OK;
@@ -906,6 +1063,7 @@ var
   I: Integer;
   Qop: Cardinal;
   DataCopied: Boolean;
+
 begin
 
   Result := S_OK;
@@ -913,21 +1071,34 @@ begin
 
   while not DataCopied do
     begin
-      if Length(FEncryptedBuffer) = 0 then
+      if (Length(FEncryptedBuffer) = 0) then
         begin
-          Result := RawReceiveBuffer(@Temp[0], SizeOf(Temp), BytesRead);
+          Result := RawReceiveBuffer(@Temp[0],
+                                     SizeOf(Temp),
+                                     BytesRead);
+
           if FAILED(Result) then
             Exit;
-          if BytesRead = 0 then
+
+          if (BytesRead = 0) then
             begin
               Result := E_FAIL;
               Exit;
             end;
-          AppendBytes(FEncryptedBuffer, @Temp[0], BytesRead);
+
+          AppendBytes(FEncryptedBuffer,
+                      @Temp[0],
+                      BytesRead);
         end;
 
-      Work := Copy(FEncryptedBuffer, 0, Length(FEncryptedBuffer));
-      FillChar(Buffers, SizeOf(Buffers), 0);
+      Work := Copy(FEncryptedBuffer,
+                   0,
+                   Length(FEncryptedBuffer));
+
+      FillChar(Buffers,
+               SizeOf(Buffers),
+               0);
+
       Buffers[0].BufferType := SECBUFFER_DATA;
       Buffers[0].cbBuffer := Length(Work);
       Buffers[0].pvBuffer := @Work[0];
@@ -939,29 +1110,39 @@ begin
       Desc.cBuffers := 4;
       Desc.pBuffers := @Buffers[0];
 
-      Result := DecryptMessage(FCtxtHandle, @Desc, 0, Qop);
-      if Result = SEC_E_INCOMPLETE_MESSAGE then
+      Result := DecryptMessage(FCtxtHandle,
+                               @Desc,
+                               0,
+                               Qop);
+
+      if (Result = SEC_E_INCOMPLETE_MESSAGE) then
         begin
           Result := RawReceiveBuffer(@Temp[0], SizeOf(Temp), BytesRead);
+
           if FAILED(Result) then
             Exit;
-          if BytesRead = 0 then
+
+          if (BytesRead = 0) then
             begin
               Result := E_FAIL;
               Exit;
             end;
-          AppendBytes(FEncryptedBuffer, @Temp[0], BytesRead);
+
+          AppendBytes(FEncryptedBuffer,
+                      @Temp[0],
+                      BytesRead);
+
           Continue;
         end;
 
-      if Result = SEC_I_CONTEXT_EXPIRED then
+      if (Result = SEC_I_CONTEXT_EXPIRED) then
         begin
           Disconnect();
           Result := E_UNEXPECTED;
           Exit;
         end;
 
-      if Result = SEC_I_RENEGOTIATE then
+      if (Result = SEC_I_RENEGOTIATE) then
         begin
           Result := E_NOTIMPL;
           Exit;
@@ -970,7 +1151,9 @@ begin
       if FAILED(Result) then
         Exit;
 
-      SetLength(FEncryptedBuffer, 0);
+      SetLength(FEncryptedBuffer,
+                0);
+
       for I := 0 to 3 do
         begin
           if (Buffers[I].BufferType = SECBUFFER_DATA) and
@@ -980,6 +1163,7 @@ begin
               AppendBytes(FPlainBuffer,
                           Buffers[I].pvBuffer,
                           Buffers[I].cbBuffer);
+
               DataCopied := True;
             end;
 
@@ -995,12 +1179,14 @@ end;
 
 
 function TMfCastTcpTransport.ReceiveBuffer(ABuffer: Pointer;
-  const ABufferSize: Cardinal; out ABytesRead: Cardinal): HRESULT;
+                                           const ABufferSize: Cardinal; out ABytesRead: Cardinal): HRESULT;
 var
   ToCopy: Cardinal;
+
 begin
 
   ABytesRead := 0;
+
   if (ABuffer = nil) and (ABufferSize > 0) then
     begin
       Result := E_POINTER;
@@ -1009,25 +1195,32 @@ begin
 
   if not FTlsActive then
     begin
-      Result := RawReceiveBuffer(ABuffer, ABufferSize, ABytesRead);
+      Result := RawReceiveBuffer(ABuffer,
+                                 ABufferSize,
+                                 ABytesRead);
       Exit;
     end;
 
-  if Length(FPlainBuffer) = 0 then
+  if (Length(FPlainBuffer) = 0) then
     begin
       Result := DecryptNextRecord();
+
       if FAILED(Result) then
         Exit;
     end;
 
   ToCopy := ABufferSize;
-  if ToCopy > Cardinal(Length(FPlainBuffer)) then
+  if (ToCopy > Cardinal(Length(FPlainBuffer))) then
     ToCopy := Length(FPlainBuffer);
 
-  if ToCopy > 0 then
+  if (ToCopy > 0) then
     begin
-      Move(FPlainBuffer[0], ABuffer^, ToCopy);
-      ConsumeBytes(FPlainBuffer, ToCopy);
+      Move(FPlainBuffer[0],
+           ABuffer^,
+           ToCopy);
+
+      ConsumeBytes(FPlainBuffer,
+                   ToCopy);
     end;
 
   ABytesRead := ToCopy;
@@ -1038,7 +1231,25 @@ end;
 function TMfCastTcpTransport.IsConnected(): Boolean;
 begin
 
-  Result := FSocket <> INVALID_SOCKET;
+  Result := (FSocket <> INVALID_SOCKET);
 end;
+
+
+// External methods
+//=================
+{$WARN SYMBOL_PLATFORM OFF}
+
+function AcquireCredentialsHandleA; external Secur32Lib name 'AcquireCredentialsHandleA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function InitializeSecurityContextA; external Secur32Lib name 'InitializeSecurityContextA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function FreeCredentialsHandle; external Secur32Lib name 'FreeCredentialsHandle' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function DeleteSecurityContext; external Secur32Lib name 'DeleteSecurityContext' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function FreeContextBuffer; external Secur32Lib name 'FreeContextBuffer' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function QueryContextAttributesA; external Secur32Lib name 'QueryContextAttributesA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+function EncryptMessage; external Secur32Lib name 'EncryptMessage' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function DecryptMessage; external Secur32Lib name 'DecryptMessage' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+{$WARN SYMBOL_PLATFORM ON}
+
 
 end.

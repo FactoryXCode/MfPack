@@ -22,7 +22,7 @@
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX320

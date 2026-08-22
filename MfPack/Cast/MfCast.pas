@@ -25,7 +25,7 @@
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX320
@@ -66,6 +66,8 @@ uses
 
   {WinApi}
   WinApi.Windows,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   {System}
   System.SysUtils,
@@ -92,6 +94,7 @@ type
     FController: IMfCastController;
     FLogger: IMfCastLogger;
     FPreviewSink: IMfCastPreviewSink;
+    FDirectPreviewPlayer: IMfCastDirectPreviewPlayer;
     FMediaFoundationStarted: Boolean;
     FOnDeviceAdded: TMfCastDeviceEvent;
     FOnDeviceUpdated: TMfCastDeviceEvent;
@@ -104,10 +107,13 @@ type
     procedure ControllerDeviceAdded(const ADevice: TMfCastDevice);
     procedure ControllerDeviceUpdated(const ADevice: TMfCastDevice);
     procedure ControllerDeviceRemoved(const ADeviceId: string);
+
     procedure ControllerStateChanged(const AOldState: TMfCastState;
                                      const ANewState: TMfCastState);
+
     procedure ControllerMediaStatus(const AStatus: TMfCastMediaStatus);
     procedure ControllerError(const AError: TMfCastErrorInfo);
+
     procedure DispatchLog(const ALevel: TMfCastLogLevel;
                           const ASource: string;
                           const AMessage: string);
@@ -120,9 +126,14 @@ type
     function StopDiscovery(): HRESULT;
     function RefreshDiscovery(): HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
+
     function GetMediaTracks(const ASource: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+
     function SetPreviewWindow(const AWindow: HWND): HRESULT;
+    function UpdatePreviewWindow(): HRESULT;
+    function SetAudioArtwork(const ASourceName: string): HRESULT;
+    function SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
 
     function Connect(const ADevice: TMfCastDevice): HRESULT;
 
@@ -175,16 +186,14 @@ type
 implementation
 
 uses
-
-  {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfApi,
-  {Cast/Media}
+  {Cast}
   MfCastTransport,
   MfCastChannel,
   MfCastDiscovery,
   MfCastHttpServer,
   MfCastMedia,
   MfCastWindowPreview,
+  MfCastDirectPreviewPlayer,
   MfCastRemux,
   MfCastTranscode,
   MfCastController;
@@ -248,34 +257,44 @@ begin
 
   FMediaFoundationStarted := False;
   FPreviewSink := nil;
+  FDirectPreviewPlayer := nil;
 
   // Media inspection and track enumeration also use Media Foundation. Keep
   // transcoding optional, but initialize the platform for every facade.
   hr := MFStartup(MF_VERSION,
                   0);
+
   if FAILED(Hr) then
     raise EMfCast.CreateFmt('Media Foundation initialization failed (HRESULT $%.8x).',
                             [DWORD(Hr)]);
+
   FMediaFoundationStarted := True;
 
   Components.Reset();
-  Components.Discovery := TMfCastMdnsDiscovery.Create;
+  Components.Discovery := TMfCastMdnsDiscovery.Create();
   Components.Channel := TMfCastChannel.Create(TMfCastTcpTransport.Create);
-  Components.HttpServer := TMfCastHttpServer.Create;
-  Components.MediaInspector := TMfCastMediaInspector.Create;
+  Components.HttpServer := TMfCastHttpServer.Create();
+  Components.MediaInspector := TMfCastMediaInspector.Create();
 
   Profile.Reset();
   Profile.Name := 'Default Chromecast direct-play profile';
-  SetLength(Profile.AllowedContentTypes, 5);
+
+  SetLength(Profile.AllowedContentTypes,
+            8);
   Profile.AllowedContentTypes[0] := 'video/mp4';
   Profile.AllowedContentTypes[1] := 'audio/mp4';
   Profile.AllowedContentTypes[2] := 'video/webm';
   Profile.AllowedContentTypes[3] := 'audio/mpeg';
   Profile.AllowedContentTypes[4] := 'audio/aac';
+  Profile.AllowedContentTypes[5] := 'audio/flac';
+  Profile.AllowedContentTypes[6] := 'audio/wav';
+  Profile.AllowedContentTypes[7] := 'audio/ogg';
   Profile.AllowUnknownFormats := True;
 
   Resolver := TMfCastCapabilityResolver.Create(Profile);
   Components.MediaPlanner := TMfCastMediaPlanner.Create(Resolver);
+  FDirectPreviewPlayer := TMfCastDirectPreviewPlayer.Create();
+  Components.DirectPreviewPlayer := FDirectPreviewPlayer;
 
   if AEnableTranscoding then
     begin
@@ -326,6 +345,9 @@ begin
   if Assigned(FPreviewSink) then
     FPreviewSink.SetWindow(0);
   FPreviewSink := nil;
+  if Assigned(FDirectPreviewPlayer) then
+    FDirectPreviewPlayer.SetWindow(0);
+  FDirectPreviewPlayer := nil;
   FLogger := nil;
 
   if FMediaFoundationStarted then
@@ -341,7 +363,7 @@ end;
 function TMfCast.Discover(): HRESULT;
 begin
 
-  Result := FController.StartDiscovery;
+  Result := FController.StartDiscovery();
 end;
 
 
@@ -375,13 +397,46 @@ end;
 
 
 function TMfCast.SetPreviewWindow(const AWindow: HWND): HRESULT;
+var
+  SinkResult: HRESULT;
+
 begin
-  if not Assigned(FPreviewSink) then
+
+  Result := E_NOTIMPL;
+
+  if Assigned(FDirectPreviewPlayer) then
+    Result := FDirectPreviewPlayer.SetWindow(AWindow);
+
+  if Assigned(FPreviewSink) then
     begin
-      Result := E_NOTIMPL;
-      Exit;
+      SinkResult := FPreviewSink.SetWindow(AWindow);
+      if FAILED(SinkResult) or (Result = E_NOTIMPL) then
+        Result := SinkResult;
     end;
-  Result := FPreviewSink.SetWindow(AWindow);
+end;
+
+
+function TMfCast.UpdatePreviewWindow(): HRESULT;
+begin
+
+  if Assigned(FDirectPreviewPlayer) then
+    Result := FDirectPreviewPlayer.UpdateVideo()
+  else
+    Result := E_NOTIMPL;
+end;
+
+
+function TMfCast.SetAudioArtwork(const ASourceName: string): HRESULT;
+begin
+
+  Result := FController.SetAudioArtwork(ASourceName);
+end;
+
+
+function TMfCast.SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
+begin
+
+  Result := FController.SetSourceResolver(AResolver);
 end;
 
 
@@ -497,6 +552,7 @@ end;
 
 function TMfCast.Stop(): HRESULT;
 begin
+
   Result := FController.Stop();
 end;
 
@@ -643,6 +699,7 @@ begin
                  [MfCastLogLevelToString(ALevel),
                   ASource,
                   AMessage]);
+
   OutputDebugString(PChar(Text));
 
   if Assigned(FOnLog) then

@@ -99,6 +99,7 @@ type
                       cmmDirectFile,
                       cmmDirectWithTextTrack,
                       cmmTranscodeBurnedSubtitles,
+                      cmmTranscodeAudioWithArtwork,
                       cmmRemuxFile);
 
   TMfCastSubtitleMode = (csmAutomatic,
@@ -404,6 +405,8 @@ type
     AudioTrackId: Int64;
     AudioStreamIndex: DWORD;
     HasAudioStreamIndex: Boolean;
+    ArtworkSourceName: string;
+    ArtworkFrameRate: Cardinal;
     Encoding: TMfCastEncodingSettings;
     procedure Reset();
   end;
@@ -783,6 +786,8 @@ begin
   AudioTrackId := 0;
   AudioStreamIndex := 0;
   HasAudioStreamIndex := False;
+  ArtworkSourceName := '';
+  ArtworkFrameRate := 25;
   Encoding.Reset();
 end;
 
@@ -915,6 +920,7 @@ begin
     cmmDirectFile:               Result := 'DirectFile';
     cmmDirectWithTextTrack:      Result := 'DirectWithTextTrack';
     cmmTranscodeBurnedSubtitles: Result := 'TranscodeBurnedSubtitles';
+    cmmTranscodeAudioWithArtwork: Result := 'TranscodeAudioWithArtwork';
     cmmRemuxFile:                Result := 'RemuxFile';
   else
     Result := 'Unknown';

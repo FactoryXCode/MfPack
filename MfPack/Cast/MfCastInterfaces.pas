@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -77,6 +77,31 @@ uses
   MfCastTypes;
 
 type
+
+  // Result returned by an application-provided source resolver. SourceName
+  // must be a local file or a direct HTTP(S) media resource understood by the
+  // normal MfCast media pipeline. The resolver retains ownership until
+  // Release is called after playback stops or the source is replaced.
+  TMfCastResolvedSource = record
+    SourceName: string;
+    Title: string;
+    IsTemporary: Boolean;
+    // Optional resolver hints. They are useful for signed media URLs whose
+    // HTTP server reports application/octet-stream and whose path has no file
+    // extension even though the payload format is known.
+    ContentType: string;
+    ContainerName: string;
+    PreferDirectPlayback: Boolean;
+  end;
+
+  IMfCastSourceResolver = interface
+    ['{AE9ED7A3-8BFC-42A2-8957-4556458288FD}']
+    function CanResolve(const ASourceName: string): Boolean;
+    function Resolve(const ASourceName: string;
+                     out AResolvedSource: TMfCastResolvedSource): HRESULT;
+    function GetLastErrorText(): string;
+    procedure Release(const AResolvedSource: TMfCastResolvedSource);
+  end;
 
   IMfCastLogger = interface
     ['{BCC09A23-67E3-4B0A-A763-9BBE392868FC}']
@@ -200,7 +225,7 @@ type
   end;
 
   IMfCastController = interface
-    ['{595F9777-2220-4D88-A167-FEA2DFD6C46F}']
+    ['{4811231D-42AE-430E-A51A-050F1AB91169}']
     function Configure(const ASettings: TMfCastSettings): HRESULT;
     procedure SetCallbacks(const ACallbacks: TMfCastControllerCallbacks);
     function GetCallbacks(): TMfCastControllerCallbacks;
@@ -212,6 +237,8 @@ type
 
     function GetMediaTracks(const ASourceName: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+    function SetAudioArtwork(const ASourceName: string): HRESULT;
+    function SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
 
     function Connect(const ADevice: TMfCastDevice): HRESULT;
 

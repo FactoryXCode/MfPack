@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -25,7 +25,7 @@
 // 10/08/2026 All                 Extracted reusable Windows UI support.
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfCast.pas, MfCastTypes.pas
 // Related projects: MfPackX320
@@ -67,11 +67,14 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  WinApi.ActiveX,
-  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfObjects,
   {Cast}
   MfCast,
   MfCastTypes;
@@ -93,8 +96,10 @@ type
     FSource: string;
     FSubtitle: TMfCastSubtitleAsset;
     FTargetWindow: HWND;
+
   protected
     procedure Execute(); override;
+
   public
     constructor Create(const ACast: TMfCast;
                        const ADevice: TMfCastDevice;
@@ -174,18 +179,22 @@ var
   LogMessage: TMfCastUiLogMessage;
 
 begin
+
   hr := E_FAIL;
   ComInitialized := False;
+
   try
     try
       HrCom := CoInitializeEx(nil,
                               COINIT_MULTITHREADED);
+
       if SUCCEEDED(HrCom) then
         ComInitialized := True
-      else if HrCom <> RPC_E_CHANGED_MODE then
-        hr := HrCom
       else
-        HrCom := S_OK;
+        if (HrCom <> RPC_E_CHANGED_MODE) then
+          hr := HrCom
+        else
+          HrCom := S_OK;
 
       if SUCCEEDED(HrCom) then
         hr := FCast.Cast(FDevice,
@@ -198,6 +207,7 @@ begin
       on E: Exception do
         begin
           OutputDebugString(PChar('MfCast file worker exception: ' + E.Message));
+
           LogMessage := TMfCastUiLogMessage.Create('Cast worker exception: ' +
                                                    E.Message);
           if not PostMessage(FTargetWindow,
@@ -205,12 +215,14 @@ begin
                              WPARAM(LogMessage),
                              0) then
             LogMessage.Free();
+
           hr := E_FAIL;
         end;
     end;
   finally
     if ComInitialized then
       CoUninitialize();
+
     // Always release the sample UI from its busy state, including when a
     // Media Foundation or Cast implementation raises inside the worker.
     PostMessage(FTargetWindow,
@@ -232,9 +244,11 @@ begin
   FreeOnTerminate := False;
   FCast := ACast;
   FDevice := ADevice;
+
   FInitSegment := Copy(AInitSegment,
                        0,
                        Length(AInitSegment));
+
   FByteStream := nil;
   FTargetWindow := ATargetWindow;
 end;
@@ -242,17 +256,17 @@ end;
 
 procedure TMfCastLiveFmp4Worker.Execute();
 var
-  Hr: HRESULT;
+  hr: HRESULT;
 
 begin
 
-  Hr := FCast.CastLiveFragmentedMp4(FDevice,
+  hr := FCast.CastLiveFragmentedMp4(FDevice,
                                     FInitSegment,
                                     FByteStream);
 
   PostMessage(FTargetWindow,
               WM_MFCAST_FINISHED,
-              WPARAM(Hr),
+              WPARAM(hr),
               0);
 end;
 
@@ -275,18 +289,18 @@ end;
 
 procedure TMfCastSubtitleWorker.Execute();
 var
-  Hr: HRESULT;
+  hr: HRESULT;
 
 begin
 
   if FEnabled then
-    Hr := FCast.SelectSubtitle(FSubtitle)
+    hr := FCast.SelectSubtitle(FSubtitle)
   else
-    Hr := FCast.DisableSubtitles();
+    hr := FCast.DisableSubtitles();
 
   PostMessage(FTargetWindow,
               WM_MFCAST_SUBTITLE_FINISHED,
-              WPARAM(Hr),
+              WPARAM(hr),
               LPARAM(Ord(FEnabled)));
 end;
 

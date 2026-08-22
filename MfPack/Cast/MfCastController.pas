@@ -70,10 +70,13 @@ uses
   WinApi.Windows,
   WinApi.WinError,
   WinApi.WinSock,
-  WinApi.MediaFoundationApi.MfObjects,
   {System}
   System.SysUtils,
   System.Classes,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfObjects,
   {Cast}
   MfCastTypes,
   MfCastInterfaces,
@@ -91,6 +94,7 @@ type
     RemuxPipeline: IMfCastRemuxPipeline;
     TranscodePipeline: IMfCastTranscodePipeline;
     PreviewSink: IMfCastPreviewSink;
+    DirectPreviewPlayer: IMfCastDirectPreviewPlayer;
     procedure Reset();
   end;
 
@@ -123,13 +127,27 @@ type
     FMediaPlaybackStarted: Boolean;
     FSeekInProgress: Boolean;
     FReplacementLoadPending: Boolean;
+    FAudioArtworkSourceName: string;
+    FSourceResolver: IMfCastSourceResolver;
+    FResolvedSource: TMfCastResolvedSource;
+    FHasResolvedSource: Boolean;
+    FLastCastDevice: TMfCastDevice;
+    FLastCastSourceName: string;
+    FLastCastSubtitle: TMfCastSubtitleAsset;
+    FLastCastMediaMode: TMfCastMediaMode;
+    FLastCastSubtitleMode: TMfCastSubtitleMode;
+    FHasLastCastRequest: Boolean;
+    FPreviewVolume: Single;
+    FPreviewMuted: Boolean;
 
     procedure Log(const ALevel: TMfCastLogLevel;
                   const AMessage: string);
 
-    procedure CleanupCastAttempt();
+    procedure CleanupCastAttempt(const AStopReceiver: Boolean = True);
     procedure CleanupMediaForLoad();
+    procedure ReleaseResolvedSource();
     function RecreateControlChannel(): HRESULT;
+
     function ConnectReceiver(const ADevice: TMfCastDevice): HRESULT;
     function ExecuteCastFile(const ADevice: TMfCastDevice;
                              const ASourceName: string;
@@ -186,41 +204,51 @@ type
     procedure SetCallbacks(const ACallbacks: TMfCastControllerCallbacks);
     function GetCallbacks(): TMfCastControllerCallbacks;
     procedure SetLogger(const ALogger: IMfCastLogger);
-    function StartDiscovery: HRESULT;
-    function StopDiscovery: HRESULT;
+
+    function StartDiscovery(): HRESULT;
+    function StopDiscovery(): HRESULT;
     function RefreshDiscovery: HRESULT;
+
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function GetMediaTracks(const ASourceName: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+    function SetAudioArtwork(const ASourceName: string): HRESULT;
+    function SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
 
     function Connect(const ADevice: TMfCastDevice): HRESULT;
+
     function LoadFile(const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+
     function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
                                    const AInitSegment: TBytes;
                                    out AByteStream: IMFByteStream): HRESULT;
 
-    function Play: HRESULT;
-    function Pause: HRESULT;
-    function Stop: HRESULT;
+    function Play(): HRESULT;
+    function Pause(): HRESULT;
+    function Stop(): HRESULT;
     function Seek(const APosition100ns: Int64): HRESULT;
+
     function SelectAudioTrack(const ATrackId: Int64): HRESULT;
     function SelectSubtitleTrack(const ATrackId: Int64): HRESULT;
     function SelectSubtitle(const ASubtitle: TMfCastSubtitleAsset): HRESULT;
     function DisableSubtitles(): HRESULT;
+
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
-    function Disconnect: HRESULT;
-    function GetState: TMfCastState;
+
+    function Disconnect(): HRESULT;
+    function GetState(): TMfCastState;
     function GetHttpRequestCount(): Cardinal;
   end;
 
@@ -228,8 +256,8 @@ type
 implementation
 
 uses
-  WinApi.MediaFoundationApi.MfApi,
-  WinApi.MediaFoundationApi.MfError,
+
+  {Cast}
   MfCastHttpServer,
   MfCastChannel,
   MfCastTransport;
@@ -238,8 +266,14 @@ uses
 function MfCastIsHttpSource(const ASourceName: string): Boolean;
 begin
 
-  Result := SameText(Copy(Trim(ASourceName), 1, 7), 'http://') or
-            SameText(Copy(Trim(ASourceName), 1, 8), 'https://');
+  Result := SameText(Copy(Trim(ASourceName),
+                          1,
+                          7),
+                     'http://') or
+            SameText(Copy(Trim(ASourceName),
+                          1,
+                          8),
+                     'https://');
 end;
 
 
@@ -388,6 +422,7 @@ begin
   RemuxPipeline := nil;
   TranscodePipeline := nil;
   PreviewSink := nil;
+  DirectPreviewPlayer := nil;
 end;
 
 
@@ -423,6 +458,23 @@ begin
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
   FReplacementLoadPending := False;
+  FAudioArtworkSourceName := '';
+  FSourceResolver := nil;
+  FResolvedSource.SourceName := '';
+  FResolvedSource.Title := '';
+  FResolvedSource.IsTemporary := False;
+  FResolvedSource.ContentType := '';
+  FResolvedSource.ContainerName := '';
+  FResolvedSource.PreferDirectPlayback := False;
+  FHasResolvedSource := False;
+  FLastCastDevice.Reset();
+  FLastCastSourceName := '';
+  FLastCastSubtitle.Reset();
+  FLastCastMediaMode := cmmAutomatic;
+  FLastCastSubtitleMode := csmAutomatic;
+  FHasLastCastRequest := False;
+  FPreviewVolume := 1.0;
+  FPreviewMuted := False;
 
   DiscoveryCallbacks.Reset;
   DiscoveryCallbacks.OnStarted := DiscoveryStarted;
@@ -446,15 +498,18 @@ begin
 end;
 
 
-procedure TMfCastController.CleanupCastAttempt();
+procedure TMfCastController.CleanupCastAttempt(const AStopReceiver: Boolean);
 var
   StopResult: HRESULT;
 
 begin
 
+  if Assigned(FComponents.DirectPreviewPlayer) then
+    FComponents.DirectPreviewPlayer.Stop();
+
   // Stop the receiver while both the control channel and media URL are still
   // valid. Keep TLS connected until the HTTP client has also been closed.
-  if Assigned(FComponents.Channel) then
+  if AStopReceiver and Assigned(FComponents.Channel) then
     begin
       StopResult := FComponents.Channel.Stop();
       OutputDebugString(PChar(Format('MfCast receiver STOP hr=%.8x',
@@ -508,14 +563,46 @@ begin
   FReplacementLoadPending := False;
   FCurrentDevice.Reset();
   FCurrentMedia.Reset();
+  ReleaseResolvedSource();
 end;
 
 
-function TMfCastController.FailCastAttempt(
-  const AHResult: HRESULT;
-  const AStage: string;
-  const AMessage: string;
-  const ADetail: string): HRESULT;
+procedure TMfCastController.ReleaseResolvedSource();
+var
+  ResolvedSource: TMfCastResolvedSource;
+
+begin
+
+  if not FHasResolvedSource then
+    Exit;
+
+  ResolvedSource := FResolvedSource;
+  FHasResolvedSource := False;
+  FResolvedSource.SourceName := '';
+  FResolvedSource.Title := '';
+  FResolvedSource.IsTemporary := False;
+  FResolvedSource.ContentType := '';
+  FResolvedSource.ContainerName := '';
+  FResolvedSource.PreferDirectPlayback := False;
+
+  if Assigned(FSourceResolver) then
+    begin
+      try
+        FSourceResolver.Release(ResolvedSource);
+      except
+        on E: Exception do
+          Log(cllWarning,
+              'Source resolver release failed: ' + E.Message);
+      end;
+    end;
+end;
+
+
+function TMfCastController.FailCastAttempt(const AHResult: HRESULT;
+                                           const AStage: string;
+                                           const AMessage: string;
+                                           const ADetail: string): HRESULT;
+
 var
   ErrorHr: HRESULT;
 
@@ -541,6 +628,9 @@ end;
 
 procedure TMfCastController.CleanupMediaForLoad();
 begin
+
+  if Assigned(FComponents.DirectPreviewPlayer) then
+    FComponents.DirectPreviewPlayer.Stop();
 
   // A new receiver LOAD replaces the current media session. Tear down only
   // the media resources here; the Cast control channel and launched receiver
@@ -584,6 +674,7 @@ begin
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
   FCurrentMedia.Reset();
+  ReleaseResolvedSource();
 end;
 
 
@@ -602,10 +693,10 @@ function TMfCastController.Configure(const ASettings: TMfCastSettings): HRESULT;
 begin
 
   if (FState <> csIdle) then
-  begin
-    Result := E_UNEXPECTED;
-    Exit;
-  end;
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
 
   FSettings := ASettings;
 
@@ -811,7 +902,22 @@ begin
   Result := FComponents.Channel.LoadMedia(FPendingLoadRequest);
 
   if (Result = S_OK) then
-    FActiveLoadRequest := FPendingLoadRequest;
+    begin
+      FActiveLoadRequest := FPendingLoadRequest;
+
+      if (not FUsingTranscodedStream) and
+         Assigned(FComponents.DirectPreviewPlayer) and
+         FComponents.DirectPreviewPlayer.IsEnabled() then
+        begin
+          hr := FComponents.DirectPreviewPlayer.Open(FCurrentMedia.SourceName,
+                                                      FPreviewVolume,
+                                                      FPreviewMuted);
+          if FAILED(hr) then
+            Log(cllWarning,
+                Format('Local direct preview could not be opened (HRESULT $%.8x); receiver playback continues.',
+                       [DWORD(hr)]));
+        end;
+    end;
 
   if (Result <> S_OK) then
     Result := FailCastAttempt(Result,
@@ -824,7 +930,7 @@ function TMfCastController.CurrentFilePosition100ns(): Int64;
 begin
 
   Result := FLastMediaPosition100ns;
-  if Result < 0 then
+  if (Result < 0) then
     Result := 0;
 
   // Receiver time starts at zero after a transcoded seek. Normally the media
@@ -1020,10 +1126,9 @@ begin
 end;
 
 
-function TMfCastController.CastLiveFragmentedMp4(
-  const ADevice: TMfCastDevice;
-  const AInitSegment: TBytes;
-  out AByteStream: IMFByteStream): HRESULT;
+function TMfCastController.CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                                 const AInitSegment: TBytes;
+                                                 out AByteStream: IMFByteStream): HRESULT;
 var
   HttpSettings: TMfCastHttpSettings;
   DeviceHost: string;
@@ -1116,6 +1221,7 @@ begin
     HttpSettings.AdvertisedAddress := AdvertisedAddress;
 
   Result := FComponents.HttpServer.Configure(HttpSettings);
+
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
@@ -1125,6 +1231,7 @@ begin
     end;
 
   Result := FComponents.HttpServer.Start();
+
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
@@ -1149,6 +1256,7 @@ begin
     end;
 
   Result := FComponents.SegmentPublisher.GetByteStream(AByteStream);
+
   if FAILED(Result) or (not Assigned(AByteStream)) then
     begin
       if SUCCEEDED(Result) then
@@ -1239,6 +1347,9 @@ var
   DevicePort: Word;
   AdvertisedAddress: string;
   StartTime100ns: Int64;
+  EffectiveSourceName: string;
+  ResolvedSource: TMfCastResolvedSource;
+  ResolveRequired: Boolean;
 
 begin
 
@@ -1263,6 +1374,11 @@ begin
       Result := E_INVALIDARG;
       Exit;
     end;
+
+  EffectiveSourceName := Trim(ASourceName);
+  ResolvedSource.SourceName := '';
+  ResolvedSource.Title := '';
+  ResolvedSource.IsTemporary := False;
 
   if AConnectReceiver and
      (FState in [csConnecting,
@@ -1303,23 +1419,105 @@ begin
   FUsingRemuxedStream := False;
   FPlaybackTimeOffset100ns := 0;
   FCurrentMediaSessionId := 0;
+
   if AConnectReceiver then
     FReplacedMediaSessionId := 0;
+
   FMediaLoadStartTick := 0;
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
+
   if AConnectReceiver then
     FReplacementLoadPending := False;
   SetState(csPreparingMedia);
 
-  Result := FComponents.MediaInspector.Inspect(ASourceName,
-                                               FCurrentMedia);
+  ResolveRequired := False;
+  if Assigned(FSourceResolver) then
+    begin
+      try
+        ResolveRequired := FSourceResolver.CanResolve(EffectiveSourceName);
+      except
+        on E: Exception do
+          begin
+            Result := FailCastAttempt(E_FAIL,
+                                      'Resolve media source',
+                                      'The configured source resolver failed while examining the URL.',
+                                      E.Message);
+            Exit;
+          end;
+      end;
+    end;
+
+  if ResolveRequired then
+    begin
+      Log(cllInfo,
+          Format('Resolving indirect media source: "%s"',
+                 [EffectiveSourceName]));
+      try
+        Result := FSourceResolver.Resolve(EffectiveSourceName,
+                                          ResolvedSource);
+      except
+        on E: Exception do
+          begin
+            Result := FailCastAttempt(E_FAIL,
+                                      'Resolve media source',
+                                      'The indirect media source could not be resolved.',
+                                      E.Message);
+            Exit;
+          end;
+      end;
+
+      if (Result <> S_OK) or (Trim(ResolvedSource.SourceName) = '') then
+        begin
+          if Result = S_OK then
+            Result := E_INVALIDARG;
+          Result := FailCastAttempt(Result,
+                                    'Resolve media source',
+                                    'The indirect media source could not be resolved to playable media.',
+                                    FSourceResolver.GetLastErrorText());
+          Exit;
+        end;
+
+      FResolvedSource := ResolvedSource;
+      FHasResolvedSource := True;
+      EffectiveSourceName := Trim(ResolvedSource.SourceName);
+      Log(cllInfo,
+          Format('Media source resolved to: "%s"',
+                 [EffectiveSourceName]));
+    end;
+
+  Result := FComponents.MediaInspector.Inspect(EffectiveSourceName,
+                                                FCurrentMedia);
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
                                 'Inspect media',
                                 'The media source could not be inspected.');
       Exit;
+    end;
+
+  // Preserve the public cast request independently of the active receiver
+  // session. Receiver-loss cleanup releases temporary resolved files and all
+  // live pipeline state, but Play can use this snapshot to start over.
+  if AConnectReceiver then
+    begin
+      FLastCastDevice := ADevice;
+      FLastCastSourceName := ASourceName;
+      FLastCastSubtitle := ASubtitle;
+      FLastCastMediaMode := AMediaMode;
+      FLastCastSubtitleMode := ASubtitleMode;
+      FHasLastCastRequest := True;
+    end;
+
+  if FHasResolvedSource and (Trim(FResolvedSource.Title) <> '') then
+    FCurrentMedia.Title := FResolvedSource.Title;
+
+  if FHasResolvedSource then
+    begin
+      if Trim(FResolvedSource.ContentType) <> '' then
+        FCurrentMedia.ContentType := Trim(FResolvedSource.ContentType);
+      if Trim(FResolvedSource.ContainerName) <> '' then
+        FCurrentMedia.ContainerName := Trim(FResolvedSource.ContainerName);
     end;
 
   Log(cllDebug,
@@ -1330,10 +1528,20 @@ begin
               BoolToStr(FCurrentMedia.HasAudio, True),
               BoolToStr(FCurrentMedia.IsSeekable, True)]));
 
+  // An embedded-subtitle request must identify a stream. Merely marking an
+  // asset as Embedded (the old sample fallback when enumeration returned no
+  // tracks) does not prove that timed text exists in the media.
   FCurrentMedia.HasTimedText := ASubtitle.Enabled and
-                                (ASubtitle.Embedded or
-                                 (Trim(ASubtitle.SourceName) <> '') or
-                                 (Length(ASubtitle.Data) > 0));
+                                (((ASubtitle.Embedded) and
+                                  ASubtitle.HasStreamIndex) or
+                                 ((not ASubtitle.Embedded) and
+                                  ((Trim(ASubtitle.SourceName) <> '') or
+                                   (Length(ASubtitle.Data) > 0))));
+
+  if ASubtitle.Enabled and (not FCurrentMedia.HasTimedText) and
+     (ASubtitleMode = csmAutomatic) then
+    Log(cllWarning,
+        'Ignoring the subtitle selection because it does not identify an available subtitle track.');
 
   if (ASubtitleMode in [csmExternalTextTrack, csmBurnIntoVideo]) and
      (not FCurrentMedia.HasTimedText) then
@@ -1358,19 +1566,25 @@ begin
       Exit;
     end;
 
-  // Preview consumes the decoded RGB32 frames produced by the transcoder.
-  // In automatic mode, opting into preview therefore opts into transcoding.
-  // An explicitly requested media route remains authoritative.
+  // An audio item with configured artwork becomes one H.264/AAC presentation.
+  // Without artwork, supported audio formats retain their direct-play route.
   if (AMediaMode = cmmAutomatic) and
-     FCurrentMedia.HasVideo and
-     Assigned(FComponents.PreviewSink) and
-     FComponents.PreviewSink.IsEnabled() then
+     FCurrentMedia.HasAudio and
+     (not FCurrentMedia.HasVideo) and
+     (FAudioArtworkSourceName <> '') then
     begin
-      SelectedMediaMode := cmmTranscodeBurnedSubtitles;
-      if FCurrentMedia.HasTimedText and (ASubtitleMode <> csmNone) then
-        SelectedSubtitleMode := csmBurnIntoVideo
-      else
-        SelectedSubtitleMode := csmNone;
+      SelectedMediaMode := cmmTranscodeAudioWithArtwork;
+      SelectedSubtitleMode := csmNone;
+    end;
+
+  if (SelectedMediaMode = cmmTranscodeAudioWithArtwork) and
+     ((not FCurrentMedia.HasAudio) or FCurrentMedia.HasVideo or
+      (FAudioArtworkSourceName = '')) then
+    begin
+      Result := FailCastAttempt(E_INVALIDARG,
+                                'Choose audio artwork route',
+                                'Audio artwork playback requires an audio-only source and a configured picture.');
+      Exit;
     end;
 
   Log(cllInfo,
@@ -1378,7 +1592,8 @@ begin
              [MfCastMediaModeToString(SelectedMediaMode),
               MfCastSubtitleModeToString(SelectedSubtitleMode)]));
 
-  if (SelectedMediaMode = cmmTranscodeBurnedSubtitles) and
+  if (SelectedMediaMode in [cmmTranscodeBurnedSubtitles,
+                            cmmTranscodeAudioWithArtwork]) and
      ((not Assigned(FComponents.TranscodePipeline)) or
       (not Assigned(FComponents.SegmentPublisher))) then
     begin
@@ -1425,7 +1640,7 @@ begin
       Exit;
     end;
 
-  if not MfCastIsHttpSource(ASourceName) then
+  if not MfCastIsHttpSource(EffectiveSourceName) then
     begin
       if FComponents.HttpServer.IsRunning then
         FComponents.HttpServer.Stop();
@@ -1472,16 +1687,17 @@ begin
 
   case SelectedMediaMode of
     cmmDirectFile,
-    cmmDirectWithTextTrack:      Result := PrepareDirectFile(ASourceName,
+    cmmDirectWithTextTrack:      Result := PrepareDirectFile(EffectiveSourceName,
                                                              ASubtitle,
                                                              SelectedSubtitleMode,
                                                              FPendingLoadRequest);
 
-    cmmTranscodeBurnedSubtitles: Result := PrepareTranscodedStream(ASourceName,
-                                                                   ASubtitle,
-                                                                   SelectedSubtitleMode,
-                                                                   FPendingLoadRequest);
-    cmmRemuxFile:                Result := PrepareRemuxedStream(ASourceName,
+    cmmTranscodeBurnedSubtitles,
+    cmmTranscodeAudioWithArtwork: Result := PrepareTranscodedStream(EffectiveSourceName,
+                                                                     ASubtitle,
+                                                                     SelectedSubtitleMode,
+                                                                     FPendingLoadRequest);
+    cmmRemuxFile:                Result := PrepareRemuxedStream(EffectiveSourceName,
                                                                FPendingLoadRequest);
   else
     Result := E_UNEXPECTED;
@@ -1546,12 +1762,71 @@ begin
 
   if not Assigned(FComponents.MediaInspector) then
     begin
-      SetLength(ATracks, 0);
+      SetLength(ATracks,
+                0);
       Result := E_POINTER;
       Exit;
     end;
 
   Result := FComponents.MediaInspector.EnumerateTracks(ASourceName, ATracks);
+end;
+
+
+function TMfCastController.SetAudioArtwork(const ASourceName: string): HRESULT;
+var
+  Extension: string;
+  SourceName: string;
+begin
+  SourceName := Trim(ASourceName);
+  if SourceName = '' then
+    begin
+      FAudioArtworkSourceName := '';
+      Result := S_OK;
+      Exit;
+    end;
+
+  if not FileExists(SourceName) then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+      Exit;
+    end;
+
+  Extension := LowerCase(ExtractFileExt(SourceName));
+  if not ((Extension = '.jpg') or
+          (Extension = '.jpeg') or
+          (Extension = '.png') or
+          (Extension = '.bmp') or
+          (Extension = '.gif')) then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+      Exit;
+    end;
+
+  FAudioArtworkSourceName := SourceName;
+  Result := S_OK;
+end;
+
+
+function TMfCastController.SetSourceResolver(
+  const AResolver: IMfCastSourceResolver): HRESULT;
+begin
+
+  if FState in [csConnecting,
+                csConnected,
+                csLaunchingReceiver,
+                csPreparingMedia,
+                csBuffering,
+                csPlaying,
+                csPaused,
+                csStopping] then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_BUSY);
+      Exit;
+    end;
+
+  ReleaseResolvedSource();
+  FSourceResolver := AResolver;
+  Result := S_OK;
 end;
 
 
@@ -1563,6 +1838,20 @@ var
   RecoveryResult: HRESULT;
 
 begin
+
+  if (FState in [csStopped, csError]) and FHasLastCastRequest then
+    begin
+      Log(cllInfo,
+          'PLAY after cast shutdown or failure; restarting the previous cast from the beginning.');
+      Result := ExecuteCastFile(FLastCastDevice,
+                                FLastCastSourceName,
+                                FLastCastSubtitle,
+                                FLastCastMediaMode,
+                                FLastCastSubtitleMode,
+                                0,
+                                True);
+      Exit;
+    end;
 
   if Assigned(FComponents.Channel) then
     Result := FComponents.Channel.Play()
@@ -1637,6 +1926,11 @@ begin
       if FAILED(RecoveryResult) then
         Result := RecoveryResult;
     end;
+
+  if SUCCEEDED(Result) and (not FUsingTranscodedStream) and
+     Assigned(FComponents.DirectPreviewPlayer) and
+     FComponents.DirectPreviewPlayer.IsActive() then
+    FComponents.DirectPreviewPlayer.Play();
 end;
 
 
@@ -1655,6 +1949,11 @@ begin
   if SUCCEEDED(Result) and FUsingTranscodedStream and
      Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Pause();
+
+  if SUCCEEDED(Result) and (not FUsingTranscodedStream) and
+     Assigned(FComponents.DirectPreviewPlayer) and
+     FComponents.DirectPreviewPlayer.IsActive() then
+    FComponents.DirectPreviewPlayer.Pause();
 end;
 
 
@@ -1671,6 +1970,9 @@ begin
     end;
 
   SetState(csStopping);
+
+  if Assigned(FComponents.DirectPreviewPlayer) then
+    FComponents.DirectPreviewPlayer.Stop();
 
   // Keep the media URL and transcoder alive until the receiver has processed
   // STOP. Aborting the HTTP stream first makes some receivers close the Cast
@@ -1724,6 +2026,7 @@ begin
   FReplacementLoadPending := False;
   FCurrentDevice.Reset();
   FCurrentMedia.Reset();
+  ReleaseResolvedSource();
 
   if MfCastIsConnectionClosed(ReceiverResult) then
     begin
@@ -1905,8 +2208,14 @@ begin
                                     'Seek media',
                                     'The Chromecast receiver rejected the restarted stream.')
         else
-          Log(cllInfo,
-              'Seek replacement media LOAD request accepted.');
+          begin
+            if FUsingRemuxedStream and
+               Assigned(FComponents.DirectPreviewPlayer) and
+               FComponents.DirectPreviewPlayer.IsActive() then
+              FComponents.DirectPreviewPlayer.Seek(SeekPosition100ns);
+            Log(cllInfo,
+                'Seek replacement media LOAD request accepted.');
+          end;
       finally
         FSeekInProgress := False;
       end;
@@ -1923,6 +2232,11 @@ begin
     Result := FComponents.Channel.Seek(ReceiverPosition100ns)
   else
     Result := E_POINTER;
+
+  if SUCCEEDED(Result) and
+     Assigned(FComponents.DirectPreviewPlayer) and
+     FComponents.DirectPreviewPlayer.IsActive() then
+    FComponents.DirectPreviewPlayer.Seek(SeekPosition100ns);
 end;
 
 
@@ -1934,7 +2248,10 @@ var
 
 begin
 
-  if not MfCastDecodeTrackId(ATrackId, Kind, Source, StreamIndex) or
+  if not MfCastDecodeTrackId(ATrackId,
+                             Kind,
+                             Source,
+                             StreamIndex) or
      (Kind <> ctkAudio) or (Source <> ctsMediaFoundation) then
     begin
       Result := E_INVALIDARG;
@@ -2080,6 +2397,12 @@ end;
 function TMfCastController.SetVolume(const AVolume: Single): HRESULT;
 begin
 
+  FPreviewVolume := AVolume;
+  if FPreviewVolume < 0.0 then
+    FPreviewVolume := 0.0
+  else if FPreviewVolume > 1.0 then
+    FPreviewVolume := 1.0;
+
   Log(cllInfo,
       Format('Volume requested: %.0f%%.',
              [AVolume * 100.0]));
@@ -2097,6 +2420,10 @@ begin
     else
       Result := E_POINTER;
 
+  if Assigned(FComponents.DirectPreviewPlayer) and
+     FComponents.DirectPreviewPlayer.IsActive() then
+    FComponents.DirectPreviewPlayer.SetVolume(FPreviewVolume);
+
   Log(cllDebug,
       Format('Volume command completed with HRESULT $%.8x.',
              [DWORD(Result)]));
@@ -2105,6 +2432,8 @@ end;
 
 function TMfCastController.SetMuted(const AMuted: Boolean): HRESULT;
 begin
+
+  FPreviewMuted := AMuted;
 
   if AMuted then
     Log(cllInfo,
@@ -2125,6 +2454,10 @@ begin
       Result := FComponents.Channel.SetMuted(AMuted)
     else
       Result := E_POINTER;
+
+  if Assigned(FComponents.DirectPreviewPlayer) and
+     FComponents.DirectPreviewPlayer.IsActive() then
+    FComponents.DirectPreviewPlayer.SetMuted(FPreviewMuted);
 
   Log(cllDebug,
       Format('Mute command completed with HRESULT $%.8x.',
@@ -2227,6 +2560,9 @@ begin
   if (FState = csStopping) then
     Exit;
 
+  Log(cllWarning,
+      'Receiver control connection closed; stopping the active cast.');
+  CleanupCastAttempt(False);
   SetState(csStopped);
 end;
 
@@ -2282,8 +2618,9 @@ begin
     end;
 
   CallbackStatus := AStatus;
-  if AStatus.MediaSessionId <> 0 then
+  if (AStatus.MediaSessionId <> 0) then
     FCurrentMediaSessionId := AStatus.MediaSessionId;
+
   if (FPlaybackTimeOffset100ns > 0) and
      (CallbackStatus.CurrentTime100ns >= 0) then
     Inc(CallbackStatus.CurrentTime100ns,
@@ -2294,6 +2631,7 @@ begin
 
   if Assigned(FCallbacks.OnMediaStatus) then
     FCallbacks.OnMediaStatus(CallbackStatus);
+
 
   if SameText(AStatus.PlayerState,
               'PLAYING') then
@@ -2322,10 +2660,24 @@ begin
           begin
             if SameText(AStatus.IdleReason,
                         'ERROR') then
-              FailCastAttempt(E_FAIL,
-                              'Media status',
-                              'The Chromecast receiver stopped playback with an error.',
-                              AStatus.IdleReason)
+              begin
+                if FMediaPlaybackStarted then
+                  begin
+                    // Android TV reports IDLE/ERROR while shutting its Cast
+                    // receiver down, before the control socket itself fails.
+                    // Once media has played successfully this is a terminal,
+                    // restartable receiver loss rather than a load failure.
+                    Log(cllWarning,
+                        'The receiver ended an active media session; stopping the cast and preserving it for Play restart.');
+                    CleanupCastAttempt(False);
+                    SetState(csStopped);
+                  end
+                else
+                  FailCastAttempt(E_FAIL,
+                                  'Media status',
+                                  'The Chromecast receiver stopped playback with an error.',
+                                  AStatus.IdleReason);
+              end
             else
               begin
                 CleanupCastAttempt();
@@ -2601,6 +2953,14 @@ begin
   Request.SourceName := ASourceName;
   Request.Title := FCurrentMedia.Title;
   Request.SubtitleMode := ASubtitleMode;
+  if (not FCurrentMedia.HasVideo) and
+     (FAudioArtworkSourceName <> '') then
+    begin
+      Request.ArtworkSourceName := FAudioArtworkSourceName;
+      // A normal cadence lets the H.264 encoder and receiver establish their
+      // startup buffer promptly. The pixels remain identical for every frame.
+      Request.ArtworkFrameRate := 25;
+    end;
 
   if (ASubtitleMode = csmBurnIntoVideo) and ASubtitle.Enabled then
     begin
@@ -2652,9 +3012,8 @@ begin
 end;
 
 
-function TMfCastController.PrepareRemuxedStream(
-  const ASourceName: string;
-  out ALoadRequest: TMfCastLoadRequest): HRESULT;
+function TMfCastController.PrepareRemuxedStream(const ASourceName: string;
+                                                out ALoadRequest: TMfCastLoadRequest): HRESULT;
 var
   Request: TMfCastRemuxRequest;
   EntryPath: string;

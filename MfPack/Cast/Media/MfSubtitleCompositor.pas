@@ -201,6 +201,7 @@ begin
   inherited Create();
 
   FLock := TCriticalSection.Create();
+
   FTimedText := nil;
   SetLength(FEmbeddedTracks, 0);
   FActiveEmbeddedStreamIndex := -1;
@@ -296,7 +297,11 @@ begin
       Exit;
     end;
 
-  rcClient := Rect(0, 0, Width, Height);
+  rcClient := Rect(0,
+                   0,
+                   Width,
+                   Height);
+
   rcVideo := GetSubtitleTargetRect(rcClient);
   videoWidth := rcVideo.Right - rcVideo.Left;
   videoHeight := rcVideo.Bottom - rcVideo.Top;
@@ -375,9 +380,9 @@ begin
                            ANTIALIASED_QUALITY,
                            DEFAULT_PITCH or FF_DONTCARE,
                            'Segoe UI');
+
     if (fontObj = 0) then
       begin
-
         Result := HRESULT_FROM_WIN32(GetLastError());
 
         if SUCCEEDED(Result) then
@@ -400,7 +405,9 @@ begin
     SetBkMode(memDC,
               TRANSPARENT);
     SetTextColor(memDC,
-                 RGB(255, 255, 255));
+                 RGB(255,
+                     255,
+                     255));
 
     rcCalc := Rect(0,
                    0,
@@ -751,10 +758,12 @@ begin
         FPreferredLanguage := FTimedText.PreferredLanguage;
         FTimedTextFileLoaded := True;
         FActiveSubtitleIsEmbedded := EmbeddedTrack.Supported;
+
         if FActiveSubtitleIsEmbedded then
           FActiveEmbeddedStreamIndex := Integer(EmbeddedTrack.StreamIndex)
         else
           FActiveEmbeddedStreamIndex := -1;
+
       finally
         FLock.Release();
       end;
@@ -832,7 +841,6 @@ begin
 
   if (Result = S_FALSE) or FAILED(Result) then
     begin
-
       if IsMatroska and Assigned(PresentationDescriptor) then
         HrFallback := TMfEmbeddedSubtitleReader.EnumeratePresentationTracks(PresentationDescriptor,
                                                                             NewTracks)
@@ -1109,6 +1117,7 @@ begin
   FriendlyName := Track.Name;
   if (FriendlyName = '') then
     FriendlyName := Track.Language;
+
   if (FriendlyName = '') then
     FriendlyName := 'Embedded subtitles';
 

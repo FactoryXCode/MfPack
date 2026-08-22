@@ -149,6 +149,10 @@ type
                               Height: UINT32;
                               SampleTime: MFTIME;
                               SampleDuration: MFTIME);
+    procedure PumpAudioSample(Sender: TObject;
+                              const Sample: IMFSample;
+                              SampleTime: MFTIME;
+                              SampleDuration: MFTIME);
   protected
     procedure Execute(); override;
 
@@ -317,6 +321,22 @@ begin
 end;
 
 
+procedure TMfCastTranscodeWorker.PumpAudioSample(Sender: TObject;
+                                                  const Sample: IMFSample;
+                                                  SampleTime: MFTIME;
+                                                  SampleDuration: MFTIME);
+begin
+  if not Assigned(FOwner) or not Assigned(FOwner.FPreviewSink) then
+    Exit;
+
+  // ConfigureAudioReader deliberately produces 16-bit stereo PCM at 48 kHz.
+  if SUCCEEDED(FOwner.FPreviewSink.ConfigureAudio(2, 48000, 16)) then
+    FOwner.FPreviewSink.PresentAudioSample(Sample,
+                                           SampleTime,
+                                           SampleDuration);
+end;
+
+
 procedure TMfCastTranscodeWorker.Execute();
 var
   HrCom: HRESULT;
@@ -405,6 +425,7 @@ begin
       FPump.RealTimePacing := True;
       FPump.OnProgress := PumpProgress;
       FPump.OnVideoSample := PumpVideoSample;
+      FPump.OnAudioSample := PumpAudioSample;
 
       FPump.SetAudioVolume(InterlockedCompareExchange(FOwner.FAudioVolumePermille,
                                                       0,
@@ -418,18 +439,40 @@ begin
       if (Bitrate = 0) then
         Bitrate := 4000000;
 
-      FOwner.Log(cllInfo,
-                 Format('Starting Media Foundation conversion: source="%s" bitrate=%d start100ns=%d',
-                        [FOwner.FRequest.SourceName,
-                         Bitrate,
-                         FOwner.FRequest.StartTime100ns]));
+      if FOwner.FRequest.ArtworkSourceName <> '' then
+        begin
+          FOwner.Log(cllInfo,
+                     Format('Starting audio artwork conversion: source="%s" artwork="%s" bitrate=%d start100ns=%d',
+                            [FOwner.FRequest.SourceName,
+                             FOwner.FRequest.ArtworkSourceName,
+                             Bitrate,
+                             FOwner.FRequest.StartTime100ns]));
 
-      FOwner.FWorkerResult := FPump.BurnSubtitlesToFile(FOwner.FRequest.SourceName,
-                                                        'mfcast.mp4',
-                                                        Bitrate,
-                                                        FOwner.FByteStream,
-                                                        FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4,
-                                                        FOwner.FRequest.StartTime100ns);
+          FOwner.FWorkerResult := FPump.AudioWithArtworkToFile(
+                                   FOwner.FRequest.SourceName,
+                                   FOwner.FRequest.ArtworkSourceName,
+                                   'mfcast.mp4',
+                                   Bitrate,
+                                   FOwner.FByteStream,
+                                   FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4,
+                                   FOwner.FRequest.StartTime100ns,
+                                   FOwner.FRequest.ArtworkFrameRate);
+        end
+      else
+        begin
+          FOwner.Log(cllInfo,
+                     Format('Starting Media Foundation conversion: source="%s" bitrate=%d start100ns=%d',
+                            [FOwner.FRequest.SourceName,
+                             Bitrate,
+                             FOwner.FRequest.StartTime100ns]));
+
+          FOwner.FWorkerResult := FPump.BurnSubtitlesToFile(FOwner.FRequest.SourceName,
+                                                            'mfcast.mp4',
+                                                            Bitrate,
+                                                            FOwner.FByteStream,
+                                                            FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4,
+                                                            FOwner.FRequest.StartTime100ns);
+        end;
     except
       on E: Exception do
         begin
@@ -589,6 +632,9 @@ begin
   if Assigned(FWorker) then
     TMfCastTranscodeWorker(FWorker).PauseTranscode();
 
+  if Assigned(FPreviewSink) then
+    FPreviewSink.PauseAudio();
+
   if FState in [csPreparingMedia, csBuffering, csPlaying] then
     SetState(csPaused);
   Result := S_OK;
@@ -600,6 +646,9 @@ begin
 
   if Assigned(FWorker) then
     TMfCastTranscodeWorker(FWorker).ResumeTranscode();
+
+  if Assigned(FPreviewSink) then
+    FPreviewSink.ResumeAudio();
 
   if FState = csPaused then
     SetState(csBuffering);
