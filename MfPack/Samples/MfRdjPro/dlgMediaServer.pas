@@ -5447,8 +5447,23 @@ var
 
 begin
 
-  Result := False;
   AMessage := '';
+
+  {$IFDEF DEBUG}
+  // A process stopped by the Delphi debugger does not run FormDestroy and can
+  // therefore leave the shared lock directory behind. Treat the lock as
+  // acquired inside the debug process, but do not publish any shared lock
+  // state. Release builds continue to use the normal handover protection.
+  FBroadcastHandoverLockAcquired := True;
+  FBroadcastHandoverConnectionLost := False;
+  FBroadcastHandoverOwnerId := '';
+  FLastBroadcastHandoverHeartbeatTick := 0;
+  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                    UNLOCKED_COLOR);
+  AMessage := 'Broadcast handover lock bypassed for debug/IDE execution.';
+  Result := True;
+  Exit;
+  {$ENDIF}
 
   if FBroadcastHandoverLockAcquired then
     begin
@@ -5555,6 +5570,17 @@ var
 
 begin
 
+  {$IFDEF DEBUG}
+  // No shared lock or handover status is created in a debug build.
+  FBroadcastHandoverLockAcquired := False;
+  FBroadcastHandoverOwnerId := '';
+  FBroadcastHandoverConnectionLost := False;
+  FLastBroadcastHandoverHeartbeatTick := 0;
+  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                    UNLOCKED_COLOR);
+  Exit;
+  {$ENDIF}
+
   if not FBroadcastHandoverLockAcquired then
     Exit;
 
@@ -5659,6 +5685,12 @@ var
   ErrorMessage: string;
 
 begin
+
+  {$IFDEF DEBUG}
+  // AcquireBroadcastHandoverLock is intentionally process-local in debug
+  // builds, so a heartbeat must not recreate the shared lock directory.
+  Exit;
+  {$ENDIF}
 
   if not FBroadcastHandoverLockAcquired then
     Exit;
