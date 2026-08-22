@@ -198,6 +198,8 @@ server.
 Please read `MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt` for full details
 about using the MfPack Cast API.
 
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCastPlayer.png)
+
 ---
 
 **MFFrameCapture sample**
