@@ -1637,6 +1637,7 @@ const
   // Used by D3D11 and D3D12
 type
   Fixed3FLOATArray = array [0..3] of FLOAT;
+  PFixed3FLOATArray = ^Fixed3FLOATArray;
   Fixed3UINTArray = array [0..3] of UINT;
 
   // End of Additional Prototypes

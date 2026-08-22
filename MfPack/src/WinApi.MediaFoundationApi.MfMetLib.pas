@@ -783,10 +783,9 @@ type
   function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                                     var pDeviceProperties: TDevicePropertiesArray): HResult;
 
-  // Retrieves all native video formats of a device and stores them in TDevicePropertiesArray
+  // Retrieves all native video formats of a device
   function GetCaptureDeviceCaps(pSourceReader: IMFSourceReader;
-                                var pDeviceProperties: TDevicePropertiesArray;
-                                pDeviceIndex: DWord = 0;
+                                var pDeviceProperties: TDeviceProperties;
                                 pStreamIndex: DWord = MF_SOURCE_READER_FIRST_VIDEO_STREAM): HResult;
 
   // Checks if the the formats stored in the TDevicePropertiesArray are
@@ -3346,6 +3345,7 @@ var
   szSymLink: LPWSTR;
   i: Integer;
   j: Integer;
+  iArrayIndex: Integer;
 
 label
   done;
@@ -3395,89 +3395,104 @@ begin
   SetLength(pDeviceProperties,
             iCount);
 
+  iArrayIndex := 0;
   for i := 0 to iCount - 1 do
     begin
       // Try to get the friendly name.
       hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
                                           szName,
                                           uiNameLen);
-      if FAILED(hr) then
-        goto done;
-
-      pDeviceProperties[i].iDeviceIndex := i;
-      pDeviceProperties[i].lpFriendlyName := szName;
-      pDeviceProperties[i].riid := pAttributeSourceType;
-      pDeviceProperties[i].pActivate := ppDevices^;
-
-      // Try to get the SymbolicLink name.
-      if IsEqualGuid(pAttributeSourceType,
-                     MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
-        begin
-          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                              szSymLink,
-                                              uiNameLen);
-        end
-      else
-        begin
-          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK,
-                                              szSymLink,
-                                              uiNameLen);
-        end;
-
       if SUCCEEDED(hr) then
         begin
-          pDeviceProperties[i].lpSymbolicLink := szSymLink;
 
-          // Handle video formats.
+          pDeviceProperties[iArrayIndex].iDeviceIndex := i;
+          pDeviceProperties[iArrayIndex].lpFriendlyName := szName;
+          pDeviceProperties[iArrayIndex].riid := pAttributeSourceType;
+          pDeviceProperties[iArrayIndex].pActivate := ppDevices^;
+
+          // Try to get the SymbolicLink name.
           if IsEqualGuid(pAttributeSourceType,
                          MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
             begin
-              hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
-                                              Pointer(pMediaSource));
-              if SUCCEEDED(hr) then
-                hr := MFCreateSourceReaderFromMediaSource(pMediaSource,
-                                                          ppDevices^,
-                                                          pSourceReader);
-              if SUCCEEDED(hr) then
-                hr := GetCaptureDeviceCaps(pSourceReader,
-                                           pDeviceProperties,
-                                           i,
-                                           MF_SOURCE_READER_FIRST_VIDEO_STREAM);
-              SafeRelease(pSourceReader);
-              SafeRelease(pMediaSource);
-
-
-              //Make device usable at next ActivateObject.
-              if SUCCEEDED(hr) then
-                hr := ppDevices^.ShutdownObject;
+              hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                                  szSymLink,
+                                                  uiNameLen);
             end
-          else  // Handle audio formats
+          else
             begin
-              for j := 0 to Length(pDeviceProperties) - 1 do
-                begin
+              hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK,
+                                                  szSymLink,
+                                                  uiNameLen);
+            end;
 
+          if SUCCEEDED(hr) then
+            begin
+              pDeviceProperties[iArrayIndex].lpSymbolicLink := szSymLink;
+
+              // Handle video formats.
+              if IsEqualGuid(pAttributeSourceType,
+                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+                begin
                   hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
                                                   Pointer(pMediaSource));
                   if SUCCEEDED(hr) then
-                    SetLength(pDeviceProperties[iIndex].aAudioFormats,
-                              1);
-
-                  hr := GetAudioFormat(pDeviceProperties[iIndex].aAudioFormats[0]);
-
+                    hr := MFCreateSourceReaderFromMediaSource(pMediaSource,
+                                                              ppDevices^,
+                                                              pSourceReader);
                   if SUCCEEDED(hr) then
-                    pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
+                    hr := GetCaptureDeviceCaps(pSourceReader,
+                                               pDeviceProperties[iArrayIndex],
+                                               MF_SOURCE_READER_FIRST_VIDEO_STREAM);
 
+                  SafeRelease(pSourceReader);
                   SafeRelease(pMediaSource);
 
-                  //Make device usable at next ActivateObject
-                  hr := ppDevices^.ShutdownObject;
+                  //Make device usable at next ActivateObject.
+                  if SUCCEEDED(hr) then
+                    hr := ppDevices^.ShutdownObject;
+                end
+              else  // Handle audio formats
+                begin
+                  for j := 0 to Length(pDeviceProperties) - 1 do
+                    begin
+
+                      hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
+                                                      Pointer(pMediaSource));
+                      if SUCCEEDED(hr) then
+                        SetLength(pDeviceProperties[iIndex].aAudioFormats,
+                                  1);
+
+                      hr := GetAudioFormat(pDeviceProperties[iIndex].aAudioFormats[0]);
+
+                      if SUCCEEDED(hr) then
+                        pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
+
+                      SafeRelease(pMediaSource);
+
+                      //Make device usable at next ActivateObject
+                      hr := ppDevices^.ShutdownObject;
+                    end;
                 end;
             end;
-        end;
 
+        end;
       szName := nil;
       Inc(ppDevices);
+
+      if SUCCEEDED(hr) then
+        Inc(iArrayIndex);
     end;
+
+  SetLength(pDeviceProperties,
+            iArrayIndex);
+
+  if Length(pDeviceProperties) = 0 then
+    begin
+      hr := MF_E_NOT_FOUND;
+      goto done;
+    end
+  else
+    hr := S_OK;
 
   //kxMaxx: Bugs here: iCount mismatch; lpDisplayName broken (if iCount>=2)
 
@@ -3513,8 +3528,7 @@ end;
 
 //
 function GetCaptureDeviceCaps(pSourceReader: IMFSourceReader;
-                              var pDeviceProperties: TDevicePropertiesArray;
-                              pDeviceIndex: DWord = 0;
+                              var pDeviceProperties: TDeviceProperties;
                               pStreamIndex: DWord = MF_SOURCE_READER_FIRST_VIDEO_STREAM): HResult;
 var
   hr: HResult;
@@ -3523,7 +3537,6 @@ var
   dwCount: DWord;
   dwSupportedCount: DWord;
   dwNativeCount: DWord;
-  i: Integer;
 
 label
   done;
@@ -3544,7 +3557,7 @@ begin
     goto done;
 
   // Set length of the capabillities array
-  SetLength(pDeviceProperties[pDeviceIndex].aVideoFormats,
+  SetLength(pDeviceProperties.aVideoFormats,
             dwCount);
 
 
@@ -3573,80 +3586,105 @@ begin
       // Get the capabillities from current (= index) stream
 
       hr := pMediaType.GetGUID(MF_MT_MAJOR_TYPE,
-                               pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fMajorType);
+                               pDeviceProperties.aVideoFormats[dwIndex].fMajorType);
       if FAILED(hr) then
         Break;
 
       hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                               pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
+                               pDeviceProperties.aVideoFormats[dwIndex].fSubType);
       if FAILED(hr) then
         Break;
 
       hr := MFGetAttributeSize(pMediaType,
                                MF_MT_FRAME_SIZE,
-                               pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iVideoWidth,
-                               pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iVideoHeight);
+                               pDeviceProperties.aVideoFormats[dwIndex].iVideoWidth,
+                               pDeviceProperties.aVideoFormats[dwIndex].iVideoHeight);
       if FAILED(hr) then
         Break;
 
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iBufferWidth := pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iVideoWidth;
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iBufferHeight := pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iVideoHeight;
+      pDeviceProperties.aVideoFormats[dwIndex].iBufferWidth := pDeviceProperties.aVideoFormats[dwIndex].iVideoWidth;
+      pDeviceProperties.aVideoFormats[dwIndex].iBufferHeight := pDeviceProperties.aVideoFormats[dwIndex].iVideoHeight;
 
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_FRAME_RATE,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateDenominator);
+                                pDeviceProperties.aVideoFormats[dwIndex].iFrameRateNumerator,
+                                pDeviceProperties.aVideoFormats[dwIndex].iFrameRateDenominator);
       if FAILED(hr) then
         Break;
 
       // Calculate framerate ( = FrameRateNumerator / iFrameRateDenominator )
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fFrameRate := GetFrameRateFromRatio(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
-                                                                                                 pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateDenominator);
+      pDeviceProperties.aVideoFormats[dwIndex].fFrameRate := GetFrameRateFromRatio(pDeviceProperties.aVideoFormats[dwIndex].iFrameRateNumerator,
+                                                                                                 pDeviceProperties.aVideoFormats[dwIndex].iFrameRateDenominator);
 
+      // Get the minimum frame rate. (This value might not be set.)
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_FRAME_RATE_RANGE_MIN,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iMinFrameRate,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iMinFrameRateDenominator);
+                                pDeviceProperties.aVideoFormats[dwIndex].iMinFrameRate,
+                                pDeviceProperties.aVideoFormats[dwIndex].iMinFrameRateDenominator);
       if FAILED(hr) then
-        Break;
+        begin
+          if hr = MF_E_ATTRIBUTENOTFOUND then
+            begin
+              pDeviceProperties.aVideoFormats[dwIndex].iMinFrameRate := pDeviceProperties.aVideoFormats[dwIndex].iFrameRateNumerator;
+              pDeviceProperties.aVideoFormats[dwIndex].iMinFrameRateDenominator := pDeviceProperties.aVideoFormats[dwIndex].iFrameRateDenominator;
+            end
+          else
+            Break;
+        end;
 
+      // Get the maximum frame rate. (This value might not be set.)
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_FRAME_RATE_RANGE_MAX,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iMaxFrameRate,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iMaxFrameRateDenominator);
+                                pDeviceProperties.aVideoFormats[dwIndex].iMaxFrameRate,
+                                pDeviceProperties.aVideoFormats[dwIndex].iMaxFrameRateDenominator);
       if FAILED(hr) then
-        Break;
+        begin
+          if hr = MF_E_ATTRIBUTENOTFOUND then
+            begin
+              pDeviceProperties.aVideoFormats[dwIndex].iMaxFrameRate := pDeviceProperties.aVideoFormats[dwIndex].iFrameRateNumerator;
+              pDeviceProperties.aVideoFormats[dwIndex].iMaxFrameRateDenominator := pDeviceProperties.aVideoFormats[dwIndex].iFrameRateDenominator;
+            end
+          else
+            Break;
+        end;
 
       // Get the stride to find out if the image is top-down or bottom-up.
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iStride := MFGetAttributeUINT32(pMediaType,
-                                                                                             MF_MT_DEFAULT_STRIDE,
-                                                                                             1);
+      pDeviceProperties.aVideoFormats[dwIndex].iStride := MFGetAttributeUINT32(pMediaType,
+                                                                               MF_MT_DEFAULT_STRIDE,
+                                                                               1);
 
       // Get the pixel aspect ratio. (This value might not be set.)
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_PIXEL_ASPECT_RATIO,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].AspectRatioNumerator,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].AspectRatioDenominator);
+                                pDeviceProperties.aVideoFormats[dwIndex].AspectRatioNumerator,
+                                pDeviceProperties.aVideoFormats[dwIndex].AspectRatioDenominator);
       if FAILED(hr) then
-        Break;
-
+        begin
+          if hr = MF_E_ATTRIBUTENOTFOUND then
+            begin
+              pDeviceProperties.aVideoFormats[dwIndex].AspectRatioNumerator := 1;
+              pDeviceProperties.aVideoFormats[dwIndex].AspectRatioDenominator := 1;
+            end
+          else
+            Break;
+        end;
 
       // On this point we check if the format is supported or not.
       // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
+      pDeviceProperties.aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties.aVideoFormats[dwIndex].fSubType);
 
-      if pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported then
+      if pDeviceProperties.aVideoFormats[dwIndex].bMFSupported then
         Inc(dwSupportedCount);
 
       // We get all native types. Unsupported formats are marked as unsupported.
       // The application should process the needs.
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].FormatsIndex := dwIndex;
+      pDeviceProperties.aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties.aVideoFormats[dwIndex].fSubType);
+      pDeviceProperties.aVideoFormats[dwIndex].FormatsIndex := dwIndex;
 
-      hr := MfCreateMediaType(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType);
+      hr := MfCreateMediaType(pDeviceProperties.aVideoFormats[dwIndex].mfMediaType);
 
       if SUCCEEDED(hr) then
-        pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType := pMediaType
+        pDeviceProperties.aVideoFormats[dwIndex].mfMediaType := pMediaType
       else
         Break;
 
@@ -3659,18 +3697,14 @@ done:
    if SUCCEEDED(hr) then
      begin
        // Store supported output formats only.
-       pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
+       pDeviceProperties.dwSupportedFormats := dwSupportedCount;
        // Store unsupported and supported formats.
-       pDeviceProperties[pDeviceIndex].dwNativeFormats := dwNativeCount;
+       pDeviceProperties.dwNativeFormats := dwNativeCount;
        // the activation object
 
      end
-   else // If a failure occurs, the entire array will be cleared.
-     begin
-       for i := 0 to Length(pDeviceProperties) do
-         pDeviceProperties[i].Reset;
-       pDeviceProperties := nil;
-     end;
+   else // If a failure occurs, the Device gets cleared
+     pDeviceProperties.Reset;
   Result := hr;
 end;
 
