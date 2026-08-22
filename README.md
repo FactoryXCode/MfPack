@@ -172,6 +172,49 @@ Please read the white paper document  MfPack/Cast/MfPack_Chromecast_API_White_Pa
 
 ---
 
+**MfCastPlayer Sample**
+
+This it the extended version of MfSimpleCastPlayer.
+
+**This sample demonstrates:**
+
+- Asynchronous Chromecast discovery;
+- Chromecast device selection;
+- Casting a compatible local media file through the built-in range-capable
+  HTTP server;
+- Casting a directly reachable HTTP/HTTPS media URL;
+- Casting a YouTube URL through an application-provided
+  `IMfCastSourceResolver` implementation;
+- A fast YouTube mode that resolves a combined H.264/AAC stream for direct
+  playback;
+- A best-quality YouTube mode that downloads separate video and audio streams
+  and merges them into an MP4 file;
+- Local video and audio preview through the `TMfCast` facade;
+- Play, pause, stop, seek, volume, mute, and disconnect;
+- Audio-only playback with optional JPG, PNG, BMP, or GIF artwork;
+- Sidecar subtitle files and embedded text-subtitle enumeration, with sidecars
+  preferred when the same language exists in both sources;
+- Exact embedded-track selection and subtitle switching while casting;
+- Heartbeat monitoring and automatic cleanup when the receiver is switched
+  off or stops responding.
+
+The sample enables the optional Media Foundation conversion stack. Compatible
+MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct
+playback. Other containers and codecs, including AVI and MKV when required,
+are remuxed or converted to fragmented MP4 and published by the local HTTP
+server.
+
+YouTube support is deliberately implemented outside the MfPack Cast API in
+`MfYouTubeSourceResolver.pas`. Place the portable x86 `yt-dlp` distribution in
+the persistent `MfCastPlayer\Binaries` directory. FFmpeg is also required for
+the best-quality mode when separate video and audio streams must be merged.
+Neither program needs to be placed beside `MfCastPlayer.exe`.
+
+Please read `MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt` for full details
+about using the MfPack Cast API.
+
+---
+
 **MFFrameCapture sample**
 
 *Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.*
