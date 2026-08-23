@@ -1,1 +1,0 @@
-Copy this entire folder to the C drive of your server or local pc and make it accessible.
