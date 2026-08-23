@@ -1,6 +1,6 @@
 # MfPlayer X2
   
-MfPlayer X2 is an advanced Media Foundation player sample for Delphi.
+MfPlayer X2 is an advanced Media Foundation player sample for Delphi.  
   
 The sample is based on the earlier MfPlayer X project, but replaces the floating  
 subtitle overlay with a real video-frame subtitle pipeline. Subtitle pixels can  
@@ -35,7 +35,7 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
   
 ---
   
-# Features  
+# Features
   
 ## Local playback
   
@@ -114,15 +114,15 @@ are not claimed as supported by this snapshot.
   
 # Requirements
   
-* Windows 10 version 1703 or later.
-* Delphi XE7 or later, including Delphi 12.
-* MfPack 3.2.0 headers and units.
-* Windows SDK: `10.0.26100.4654`.
-* A Media Foundation compatible video and audio decoder for the selected source.
-* An H.264 encoder and AAC encoder for export or transcoded casting.
-* A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.
-* The PC and Cast receiver must be reachable on the same local network.
-* Windows Firewall must permit the temporary local HTTP listener.
+* Windows 10 version 1703 or later.  
+* Delphi XE7 or later, including Delphi 12.  
+* MfPack 3.2.0 headers and units.  
+* Windows SDK: `10.0.26100.4654`.  
+* A Media Foundation compatible video and audio decoder for the selected source.  
+* An H.264 encoder and AAC encoder for export or transcoded casting.  
+* A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.  
+* The PC and Cast receiver must be reachable on the same local network.  
+* Windows Firewall must permit the temporary local HTTP listener.  
   
 ---
   
@@ -170,11 +170,11 @@ is recommended before modifying the core pipeline.
   
 ---
   
-# Project
+Project: MfPack - Samples - MfPlayer X2  
+Project location: http://sourceforge.net/projects/MFPack  
   
-MfPack - Samples - MfPlayer X2
+First release date: 01-02-2022  
+Final release date: 05/05/2026  
   
-* GitHub: <https://github.com/FactoryXCode/MfPack>
-* SourceForge: <https://sourceforge.net/projects/MFPack>
-  
-Copyright (c) FactoryX. All rights reserved.
+Copyright © FactoryX. All rights reserved.  
+

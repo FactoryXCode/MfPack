@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright ï¿½ FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -32,6 +32,7 @@ uses
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   {Cast}
+  MfCast,
   MfCastTypes,
   MfCastInterfaces;
 
@@ -64,13 +65,18 @@ type
     procedure chkAutoRefreshClick(Sender: TObject);
   private
 
-    FController: IMfCastController;
-    FPreviousCallbacks: TMfCastControllerCallbacks;
+    FCast: TMfCast;
+    FPreviousDeviceAdded: TMfCastDeviceEvent;
+    FPreviousDeviceUpdated: TMfCastDeviceEvent;
+    FPreviousDeviceRemoved: TMfCastDeviceRemovedEvent;
+    FPreviousStateChanged: TMfCastStateChangedEvent;
+    FPreviousMediaStatus: TMfCastMediaStatusEvent;
+    FPreviousError: TMfCastErrorEvent;
     FCallbacksInstalled: Boolean;
     FDevices: TMfCastDeviceArray;
     FSelectedDevice: TMfCastDevice;
 
-    procedure SetController(const AValue: IMfCastController);
+    procedure SetCast(const AValue: TMfCast);
     procedure InstallCallbacks();
     procedure RestoreCallbacks();
     procedure ClearDevices();
@@ -100,10 +106,10 @@ type
 
   public
 
-    function Execute(const AController: IMfCastController;
+    function Execute(const ACast: TMfCast;
                      out ADevice: TMfCastDevice): Boolean;
 
-    property Controller: IMfCastController read FController write SetController;
+    property Cast: TMfCast read FCast write SetCast;
     property SelectedDevice: TMfCastDevice read FSelectedDevice;
   end;
 
@@ -115,45 +121,44 @@ implementation
 {$R *.dfm}
 
 
-function TCastDevicesDlg.Execute(const AController: IMfCastController;
+function TCastDevicesDlg.Execute(const ACast: TMfCast;
                                  out ADevice: TMfCastDevice): Boolean;
 begin
 
   ADevice.Reset;
-  Controller := AController;
+  Cast := ACast;
 
   Result := (ShowModal = mrOk);
   if Result then
     ADevice := FSelectedDevice;
 end;
 
-procedure TCastDevicesDlg.SetController(const AValue: IMfCastController);
+procedure TCastDevicesDlg.SetCast(const AValue: TMfCast);
 begin
 
   RestoreCallbacks();
-  FController := AValue;
+  FCast := AValue;
 end;
 
 
 procedure TCastDevicesDlg.InstallCallbacks();
-var
-  Callbacks: TMfCastControllerCallbacks;
-
 begin
 
-  if FCallbacksInstalled or not Assigned(FController) then
+  if FCallbacksInstalled or not Assigned(FCast) then
     Exit;
 
-  FPreviousCallbacks := FController.GetCallbacks;
-  Callbacks := FPreviousCallbacks;
-  Callbacks.OnDeviceAdded := ControllerDeviceAdded;
-  Callbacks.OnDeviceUpdated := ControllerDeviceUpdated;
-  Callbacks.OnDeviceRemoved := ControllerDeviceRemoved;
-  Callbacks.OnStateChanged := ControllerStateChanged;
-  Callbacks.OnMediaStatus := ControllerMediaStatus;
-  Callbacks.OnError := ControllerError;
-
-  FController.SetCallbacks(Callbacks);
+  FPreviousDeviceAdded := FCast.OnDeviceAdded;
+  FPreviousDeviceUpdated := FCast.OnDeviceUpdated;
+  FPreviousDeviceRemoved := FCast.OnDeviceRemoved;
+  FPreviousStateChanged := FCast.OnStateChanged;
+  FPreviousMediaStatus := FCast.OnMediaStatus;
+  FPreviousError := FCast.OnError;
+  FCast.OnDeviceAdded := ControllerDeviceAdded;
+  FCast.OnDeviceUpdated := ControllerDeviceUpdated;
+  FCast.OnDeviceRemoved := ControllerDeviceRemoved;
+  FCast.OnStateChanged := ControllerStateChanged;
+  FCast.OnMediaStatus := ControllerMediaStatus;
+  FCast.OnError := ControllerError;
   FCallbacksInstalled := True;
 end;
 
@@ -161,10 +166,16 @@ end;
 procedure TCastDevicesDlg.RestoreCallbacks();
 begin
 
-  if FCallbacksInstalled and Assigned(FController) then
-    FController.SetCallbacks(FPreviousCallbacks);
+  if FCallbacksInstalled and Assigned(FCast) then
+    begin
+      FCast.OnDeviceAdded := FPreviousDeviceAdded;
+      FCast.OnDeviceUpdated := FPreviousDeviceUpdated;
+      FCast.OnDeviceRemoved := FPreviousDeviceRemoved;
+      FCast.OnStateChanged := FPreviousStateChanged;
+      FCast.OnMediaStatus := FPreviousMediaStatus;
+      FCast.OnError := FPreviousError;
+    end;
 
-  FPreviousCallbacks.Reset;
   FCallbacksInstalled := False;
 end;
 
@@ -176,10 +187,10 @@ begin
   ClearDevices;
   InstallCallbacks;
 
-  btnRefresh.Enabled := Assigned(FController);
+  btnRefresh.Enabled := Assigned(FCast);
   btnCast.Enabled := False;
 
-  if not Assigned(FController) then
+  if not Assigned(FCast) then
     begin
       SetStatus('ChromeCast controller is not initialized.');
       Exit;
@@ -200,8 +211,8 @@ end;
 procedure TCastDevicesDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 
-  if Assigned(FController) then
-    FController.StopDiscovery;
+  if Assigned(FCast) then
+    FCast.StopDiscovery;
 
   RestoreCallbacks;
 end;
@@ -213,11 +224,11 @@ var
 
 begin
 
-  if not Assigned(FController) then
+  if not Assigned(FCast) then
     Exit;
 
   SetStatus('Searching for ChromeCast devices...');
-  hr := FController.RefreshDiscovery;
+  hr := FCast.RefreshDiscovery;
 
   if FAILED(hr) then
     SetStatus('ChromeCast discovery failed. HRESULT $' + IntToHex(DWORD(hr), 8))
@@ -235,14 +246,14 @@ end;
 procedure TCastDevicesDlg.chkAutoRefreshClick(Sender: TObject);
 begin
 
-  if not Assigned(FController) then
+  if not Assigned(FCast) then
     Exit;
 
   if chkAutoRefresh.Checked then
     StartOrRefreshDiscovery
   else
     begin
-      FController.StopDiscovery;
+      FCast.StopDiscovery;
       UpdateDeviceCountStatus;
     end;
 end;
@@ -449,10 +460,10 @@ var
 
 begin
 
- if not Assigned(FController) then
+ if not Assigned(FCast) then
     Exit;
 
-  hr := FController.GetDevices(Devices);
+  hr := FCast.GetDevices(Devices);
   if FAILED(hr) then
     Exit;
 
@@ -492,8 +503,8 @@ var
 
 begin
 
-  if Assigned(FPreviousCallbacks.OnDeviceAdded) then
-    FPreviousCallbacks.OnDeviceAdded(ADevice);
+  if Assigned(FPreviousDeviceAdded) then
+    FPreviousDeviceAdded(ADevice);
 
   if GetCurrentThreadId = MainThreadID then
     AddOrUpdateDevice(ADevice)
@@ -517,8 +528,8 @@ var
 
 begin
 
-  if Assigned(FPreviousCallbacks.OnDeviceUpdated) then
-    FPreviousCallbacks.OnDeviceUpdated(ADevice);
+  if Assigned(FPreviousDeviceUpdated) then
+    FPreviousDeviceUpdated(ADevice);
 
   if GetCurrentThreadId = MainThreadID then
     AddOrUpdateDevice(ADevice)
@@ -542,8 +553,8 @@ var
 
 begin
 
-  if Assigned(FPreviousCallbacks.OnDeviceRemoved) then
-    FPreviousCallbacks.OnDeviceRemoved(ADeviceId);
+  if Assigned(FPreviousDeviceRemoved) then
+    FPreviousDeviceRemoved(ADeviceId);
 
   if (GetCurrentThreadId = MainThreadID) then
     RemoveDevice(ADeviceId)
@@ -565,8 +576,8 @@ procedure TCastDevicesDlg.ControllerStateChanged(const AOldState,
                                                  ANewState: TMfCastState);
 begin
 
-  if Assigned(FPreviousCallbacks.OnStateChanged) then
-    FPreviousCallbacks.OnStateChanged(AOldState, ANewState);
+  if Assigned(FPreviousStateChanged) then
+    FPreviousStateChanged(AOldState, ANewState);
 
   if (GetCurrentThreadId <> MainThreadID) then
     Exit;
@@ -581,8 +592,8 @@ end;
 procedure TCastDevicesDlg.ControllerMediaStatus(const AStatus: TMfCastMediaStatus);
 begin
 
-  if Assigned(FPreviousCallbacks.OnMediaStatus) then
-    FPreviousCallbacks.OnMediaStatus(AStatus);
+  if Assigned(FPreviousMediaStatus) then
+    FPreviousMediaStatus(AStatus);
 end;
 
 
@@ -592,8 +603,8 @@ var
 
 begin
 
-  if Assigned(FPreviousCallbacks.OnError) then
-    FPreviousCallbacks.OnError(AError);
+  if Assigned(FPreviousError) then
+    FPreviousError(AError);
 
   if (GetCurrentThreadId = MainThreadID) then
     begin

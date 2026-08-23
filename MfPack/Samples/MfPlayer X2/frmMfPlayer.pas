@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright © FactoryX, Netherlands/Australia. All rights reserved.
 //
@@ -99,6 +99,7 @@ uses
   LangTags,
   MfPCXConstants,
   dlgMfCastDevices,
+  MfCast,
   MfCastTypes,
   MfCastInterfaces,
   QueueTimer;
@@ -206,10 +207,12 @@ type
     FPendingSubtitleLoadEmbedded: Boolean;
     FPendingSubtitleLoadStreamIndex: DWORD;
     FPendingSubtitleLoadLanguageTag: string;
-    FMfCastController: IMfCastController;
+    FMfCast: TMfCast;
+    FCastWorker: TThread;
     FCastStartPosition100ns: Int64;
     FCastSyncPending: Boolean;
     FCastLocalWasRunning: Boolean;
+    FCastSessionActive: Boolean;
     FCastConnectivityTimer: TTimer;
     FCastBufferingStartedTick: Cardinal;
     FCastConnectivityWarningShown: Boolean;
@@ -238,6 +241,7 @@ type
     procedure RestoreLocalVideoForCasting();
     procedure StartLocalPlaybackForCasting();
     procedure CancelPendingCastSynchronization(const ResumeLocalPlayback: Boolean);
+    procedure StopPlaybackAfterCastEnded();
     procedure SynchronizeLocalPlaybackToCast(const CastPosition100ns: MFTIME);
     procedure SetCastStatusText(const AText: string);
     procedure ClearCastStatusText();
@@ -249,6 +253,13 @@ type
                                  const ANewState: TMfCastState);
     procedure MfCastMediaStatus(const AStatus: TMfCastMediaStatus);
     procedure MfCastError(const AError: TMfCastErrorInfo);
+    procedure ApplyMfCastState(const ANewState: TMfCastState);
+    procedure ApplyMfCastMediaStatus(const AStatus: TMfCastMediaStatus);
+    procedure ApplyMfCastError(const AError: TMfCastErrorInfo);
+    procedure WmMfCastState(var Msg: TMessage); message WM_APP + 450;
+    procedure WmMfCastStatus(var Msg: TMessage); message WM_APP + 451;
+    procedure WmMfCastError(var Msg: TMessage); message WM_APP + 452;
+    procedure WmMfCastFinished(var Msg: TMessage); message WM_APP + 453;
     procedure CastConnectivityTimer(Sender: TObject);
     procedure ResetCastConnectivityWatchdog();
 
@@ -282,14 +293,8 @@ uses
   MfSubtitleFramePump,
   dlgStreamSelect,
   dlgSelectTimedTextLanguages,
-  {ChromeCast}
-  MfCastController,
-  MfCastChannel,
-  MfCastDiscovery,
-  MfCastHttpServer,
-  MfCastMedia,
-  MfCastTranscode,
-  MfCastTransport;
+  {Cast API}
+  MfCastWindowsSupport;
 
 {$R *.dfm}
 
@@ -320,6 +325,39 @@ end;
 
 
 type
+
+  TMfPlayerCastStatusMessage = class
+  public
+    Status: TMfCastMediaStatus;
+  end;
+
+  TMfPlayerCastErrorMessage = class
+  public
+    ErrorInfo: TMfCastErrorInfo;
+  end;
+
+  TMfPlayerCastWorker = class(TThread)
+  private
+    FCast: TMfCast;
+    FDevice: TMfCastDevice;
+    FSource: string;
+    FSubtitle: TMfCastSubtitleAsset;
+    FMediaMode: TMfCastMediaMode;
+    FSubtitleMode: TMfCastSubtitleMode;
+    FStartSeconds: Double;
+    FNotifyHandle: HWND;
+  protected
+    procedure Execute(); override;
+  public
+    constructor Create(const ACast: TMfCast;
+                       const ADevice: TMfCastDevice;
+                       const ASource: string;
+                       const ASubtitle: TMfCastSubtitleAsset;
+                       const AMediaMode: TMfCastMediaMode;
+                       const ASubtitleMode: TMfCastSubtitleMode;
+                       const AStartSeconds: Double;
+                       const ANotifyHandle: HWND);
+  end;
 
   TMfSubtitleLoadKind = (slkEmbedded,
                          slkSidecar);
@@ -394,6 +432,54 @@ type
     property FramesWritten: Int64 read FFramesWritten;
     property ResultCode: HRESULT read FResult;
   end;
+
+
+constructor TMfPlayerCastWorker.Create(const ACast: TMfCast;
+                                       const ADevice: TMfCastDevice;
+                                       const ASource: string;
+                                       const ASubtitle: TMfCastSubtitleAsset;
+                                       const AMediaMode: TMfCastMediaMode;
+                                       const ASubtitleMode: TMfCastSubtitleMode;
+                                       const AStartSeconds: Double;
+                                       const ANotifyHandle: HWND);
+begin
+  inherited Create(True);
+  FreeOnTerminate := False;
+  FCast := ACast;
+  FDevice := ADevice;
+  FSource := ASource;
+  FSubtitle := ASubtitle;
+  FMediaMode := AMediaMode;
+  FSubtitleMode := ASubtitleMode;
+  FStartSeconds := AStartSeconds;
+  FNotifyHandle := ANotifyHandle;
+end;
+
+
+procedure TMfPlayerCastWorker.Execute();
+var
+  hr: HRESULT;
+  hrCom: HRESULT;
+  comInitialized: Boolean;
+begin
+  hr := E_FAIL;
+  comInitialized := False;
+  hrCom := CoInitializeEx(nil, COINIT_MULTITHREADED);
+  if SUCCEEDED(hrCom) then
+    comInitialized := True;
+  try
+    if SUCCEEDED(hrCom) or (hrCom = RPC_E_CHANGED_MODE) then
+      hr := FCast.Cast(FDevice, FSource, FSubtitle, FMediaMode,
+                       FSubtitleMode, FStartSeconds)
+    else
+      hr := hrCom;
+  finally
+    if comInitialized then
+      CoUninitialize();
+    PostMessage(FNotifyHandle, WM_APP + 453, WPARAM(hr), 0);
+  end;
+end;
+
 
 constructor TMfSubtitleLoadThread.Create(const Compositor: TMfSubtitleCompositor;
                                          const Kind: TMfSubtitleLoadKind;
@@ -773,7 +859,7 @@ end;
 function Tfrm_MfPlayer.MfCastIsActive(): Boolean;
 begin
 
-  Result := Assigned(FMfCastController) and (FMfCastController.GetState() in [csConnecting,
+  Result := Assigned(FMfCast) and (FMfCast.State() in [csConnecting,
                                                                               csConnected,
                                                                               csLaunchingReceiver,
                                                                               csPreparingMedia,
@@ -837,6 +923,19 @@ begin
     StartLocalPlaybackForCasting();
 
   FCastLocalWasRunning := False;
+end;
+
+
+procedure Tfrm_MfPlayer.StopPlaybackAfterCastEnded();
+begin
+
+  FCastSessionActive := False;
+  CancelPendingCastSynchronization(False);
+  StopPlaybackNow();
+  ResetInterface();
+  SetCastStatusText('ChromeCast: Stopped');
+  UpdateCastControls();
+  Caption := 'Casting stopped.';
 end;
 
 
@@ -919,8 +1018,6 @@ begin
       stbCastStatus.Visible := (Trim(AText) <> '');
     end;
 
-  if (Trim(AText) <> '') then
-    Caption := AText;
 end;
 
 
@@ -942,8 +1039,8 @@ var
 
 begin
 
-  if Assigned(FMfCastController) then
-    CastState := FMfCastController.GetState()
+  if Assigned(FMfCast) then
+    CastState := FMfCast.State()
   else
     CastState := csIdle;
 
@@ -956,7 +1053,7 @@ begin
                               csPaused,
                               csStopping];
 
-  mnuCastTo.Enabled := Assigned(FMfCastController) and
+  mnuCastTo.Enabled := Assigned(FMfCast) and
                        not CastActive;
 
   if CastActive then
@@ -990,10 +1087,11 @@ end;
 procedure Tfrm_MfPlayer.CompletePlayback();
 begin
 
+  FCastSessionActive := False;
   CancelPendingCastSynchronization(False);
 
   if MfCastIsActive() then
-    FMfCastController.Disconnect();
+    FMfCast.Disconnect();
 
   if Assigned(MfPlayerX) and
      (not (MfPlayerX.State in [Closed, Stopped, Stopping])) then
@@ -1012,11 +1110,11 @@ var
 
 begin
 
-  if (not Assigned(FMfCastController)) or
-     (not (FMfCastController.GetState() in [csBuffering, csPlaying])) then
+  if (not Assigned(FMfCast)) or
+     (not (FMfCast.State() in [csBuffering, csPlaying])) then
     Exit;
 
-  hr := FMfCastController.Pause();
+  hr := FMfCast.Pause();
   if SUCCEEDED(hr) then
     begin
       if Assigned(MfPlayerX) and
@@ -1038,11 +1136,11 @@ var
 
 begin
 
-  if (not Assigned(FMfCastController)) or
-     (FMfCastController.GetState() <> csPaused) then
+  if (not Assigned(FMfCast)) or
+     (FMfCast.State() <> csPaused) then
     Exit;
 
-  hr := FMfCastController.Play();
+  hr := FMfCast.Play();
   if SUCCEEDED(hr) then
     begin
       StartLocalPlaybackForCasting();
@@ -1744,10 +1842,10 @@ begin
 
   SeekPosition100ns := Trunc(fPos);
 
-  if MfCastIsActive() and Assigned(FMfCastController) then
+  if MfCastIsActive() and Assigned(FMfCast) then
     begin
 
-      hr := FMfCastController.Seek(SeekPosition100ns);
+      hr := FMfCast.Seek(SeekPosition100ns / 10000000.0);
       if FAILED(hr) then
         SetCastStatusText('Could not seek ChromeCast. HRESULT $' +
                           IntToHex(DWORD(hr), 8));
@@ -1808,7 +1906,7 @@ var
 
 begin
 
-  if not Assigned(FMfCastController) then
+  if not Assigned(FMfCast) then
     begin
       Caption := 'ChromeCast support is not initialized.';
       Exit;
@@ -1830,7 +1928,7 @@ begin
       Exit;
     end;
 
-  if not CastDevicesDlg.Execute(FMfCastController,
+  if not CastDevicesDlg.Execute(FMfCast,
                                 Device) then
     Exit;
 
@@ -1881,6 +1979,7 @@ begin
 
   FCastStartPosition100ns := CastStartPosition100ns;
   FCastSyncPending := True;
+  FCastSessionActive := True;
 
   CastMediaMode := cmmAutomatic;
   CastSubtitleMode := csmAutomatic;
@@ -1890,38 +1989,32 @@ begin
       CastSubtitleMode := csmBurnIntoVideo;
     end;
 
-  hr := FMfCastController.CastFile(Device,
-                                   sMediaFileName,
-                                   Subtitle,
-                                   CastMediaMode,
-                                   CastSubtitleMode,
-                                   CastStartPosition100ns);
+  FCastWorker := TMfPlayerCastWorker.Create(FMfCast,
+                                            Device,
+                                            sMediaFileName,
+                                            Subtitle,
+                                            CastMediaMode,
+                                            CastSubtitleMode,
+                                            CastStartPosition100ns / 10000000.0,
+                                            Handle);
+  FCastWorker.Start();
 
-  if (hr = S_OK) and
-     (FMfCastController.GetState() <> csError) then
-    begin
-
-      // Keep local playback running while the receiver buffers. LoadMedia waits
-      // for the first PLAYING status and the callback then seeks the local
-      // session to the receiver position. If the receiver takes too long, the
-      // local video remains visible instead of being left paused indefinitely.
-      StartLocalPlaybackForCasting();
-      UpdateCastControls();
-    end
-  else
-    begin
-      if (FMfCastController.GetState() <> csError) then
-        SetCastStatusText(MfCastStartFailureText(Device.FriendlyName,
-                                                 hr));
-
-      CancelPendingCastSynchronization(False);
-      UpdateCastControls();
-    end;
+  // Keep local playback visible while the receiver connects and buffers.
+  StartLocalPlaybackForCasting();
+  UpdateCastControls();
 end;
 
 
 procedure Tfrm_MfPlayer.MfCastStateChanged(const AOldState,
                                            ANewState: TMfCastState);
+begin
+
+  if not bAppIsClosing then
+    PostMessage(Handle, WM_APP + 450, WPARAM(ANewState), 0);
+end;
+
+
+procedure Tfrm_MfPlayer.ApplyMfCastState(const ANewState: TMfCastState);
 begin
 
   UpdateCastControls();
@@ -1930,25 +2023,25 @@ begin
     csIdle,
     csStopped: begin
                  ResetCastConnectivityWatchdog();
-                 CancelPendingCastSynchronization(True);
-                 ClearCastStatusText();
+                 if FCastSessionActive then
+                   StopPlaybackAfterCastEnded()
+                 else
+                   begin
+                     CancelPendingCastSynchronization(False);
+                     ClearCastStatusText();
+                   end;
                end;
 
     csError:   begin
                  ResetCastConnectivityWatchdog();
-                 CancelPendingCastSynchronization(True); // MfCastError supplies the detailed error text.
+                 if FCastSessionActive then
+                   StopPlaybackAfterCastEnded()
+                 else
+                   CancelPendingCastSynchronization(False); // MfCastError supplies the detailed error text.
                end;
 
     csBuffering:
       begin
-        if Assigned(FCastConnectivityTimer) and
-           not FCastConnectivityTimer.Enabled then
-          begin
-            FCastBufferingStartedTick := GetTickCount();
-            FCastConnectivityWarningShown := False;
-            FCastConnectivityTimer.Enabled := True;
-          end;
-
         SetCastStatusText('ChromeCast: ' + MfCastStateToString(ANewState));
       end;
 
@@ -1973,47 +2066,25 @@ end;
 
 
 procedure Tfrm_MfPlayer.CastConnectivityTimer(Sender: TObject);
-const
-  CAST_CONNECTIVITY_WARNING_DELAY_MS = 15000;
-var
-  WarningText: string;
-
 begin
-
-  if not Assigned(FMfCastController) or
-     (FMfCastController.GetState() <> csBuffering) then
-    begin
-      ResetCastConnectivityWatchdog();
-      Exit;
-    end;
-
-  if FCastConnectivityWarningShown or
-     ((GetTickCount() - FCastBufferingStartedTick) <
-       CAST_CONNECTIVITY_WARNING_DELAY_MS) then
-    Exit;
-
-  if FMfCastController.GetHttpRequestCount() <> 0 then
-    begin
-      FCastConnectivityTimer.Enabled := False;
-      Exit;
-    end;
-
-  FCastConnectivityWarningShown := True;
-  FCastConnectivityTimer.Enabled := False;
-  WarningText := 'Chromecast cannot reach MfPlayer''s local media server.' +
-                 sLineBreak + sLineBreak +
-                 'Windows Firewall may be blocking inbound access. Allow ' +
-                 'TMFPlayerX2.exe through the firewall, or set a trusted ' +
-                 'network profile to Private, and then try casting again.';
-  SetCastStatusText('ChromeCast: Local media server is not reachable.');
-  MessageDlg(WarningText,
-             mtWarning,
-             [mbOK],
-             0);
+  ResetCastConnectivityWatchdog();
 end;
 
 
 procedure Tfrm_MfPlayer.MfCastMediaStatus(const AStatus: TMfCastMediaStatus);
+var
+  StatusMessage: TMfPlayerCastStatusMessage;
+begin
+  if bAppIsClosing then
+    Exit;
+  StatusMessage := TMfPlayerCastStatusMessage.Create;
+  StatusMessage.Status := AStatus;
+  if not PostMessage(Handle, WM_APP + 451, WPARAM(StatusMessage), 0) then
+    StatusMessage.Free;
+end;
+
+
+procedure Tfrm_MfPlayer.ApplyMfCastMediaStatus(const AStatus: TMfCastMediaStatus);
 var
   StatusText: string;
 
@@ -2054,11 +2125,27 @@ end;
 
 procedure Tfrm_MfPlayer.MfCastError(const AError: TMfCastErrorInfo);
 var
+  ErrorMessage: TMfPlayerCastErrorMessage;
+begin
+  if bAppIsClosing then
+    Exit;
+  ErrorMessage := TMfPlayerCastErrorMessage.Create;
+  ErrorMessage.ErrorInfo := AError;
+  if not PostMessage(Handle, WM_APP + 452, WPARAM(ErrorMessage), 0) then
+    ErrorMessage.Free;
+end;
+
+
+procedure Tfrm_MfPlayer.ApplyMfCastError(const AError: TMfCastErrorInfo);
+var
   ErrorText: string;
 
 begin
 
-  CancelPendingCastSynchronization(True);
+  if FCastSessionActive then
+    StopPlaybackAfterCastEnded()
+  else
+    CancelPendingCastSynchronization(False);
   ErrorText := 'ChromeCast error';
 
   if (Trim(AError.Stage) <> '') then
@@ -2077,6 +2164,59 @@ begin
 end;
 
 
+procedure Tfrm_MfPlayer.WmMfCastState(var Msg: TMessage);
+begin
+  ApplyMfCastState(TMfCastState(Msg.WParam));
+end;
+
+
+procedure Tfrm_MfPlayer.WmMfCastStatus(var Msg: TMessage);
+var
+  StatusMessage: TMfPlayerCastStatusMessage;
+begin
+  StatusMessage := TMfPlayerCastStatusMessage(Msg.WParam);
+  try
+    ApplyMfCastMediaStatus(StatusMessage.Status);
+  finally
+    StatusMessage.Free;
+  end;
+end;
+
+
+procedure Tfrm_MfPlayer.WmMfCastError(var Msg: TMessage);
+var
+  ErrorMessage: TMfPlayerCastErrorMessage;
+begin
+  ErrorMessage := TMfPlayerCastErrorMessage(Msg.WParam);
+  try
+    ApplyMfCastError(ErrorMessage.ErrorInfo);
+  finally
+    ErrorMessage.Free;
+  end;
+end;
+
+
+procedure Tfrm_MfPlayer.WmMfCastFinished(var Msg: TMessage);
+var
+  hr: HRESULT;
+begin
+  hr := HRESULT(Msg.WParam);
+  if Assigned(FCastWorker) then
+    begin
+      FCastWorker.WaitFor();
+      FreeAndNil(FCastWorker);
+    end;
+
+  if FAILED(hr) and Assigned(FMfCast) and (FMfCast.State() <> csError) then
+    begin
+      SetCastStatusText('Could not start casting. HRESULT $' +
+                        IntToHex(DWORD(hr), 8));
+      CancelPendingCastSynchronization(False);
+    end;
+  UpdateCastControls();
+end;
+
+
 procedure Tfrm_MfPlayer.mnuStopCastingClick(Sender: TObject);
 var
   hr: HRESULT;
@@ -2085,8 +2225,8 @@ begin
 
   hr := S_OK;
 
-  if Assigned(FMfCastController) then
-    hr := FMfCastController.Disconnect();
+  if Assigned(FMfCast) then
+    hr := FMfCast.Disconnect();
 
   if SUCCEEDED(hr) then
     begin
@@ -2283,11 +2423,21 @@ begin
   CanClose := False;
   bAppIsClosing := True;
 
-  if Assigned(FMfCastController) then
+  if Assigned(FMfCast) then
     begin
-      FMfCastController.Disconnect();
-      FMfCastController := nil;
+      FMfCast.OnStateChanged := nil;
+      FMfCast.OnMediaStatus := nil;
+      FMfCast.OnError := nil;
+      FMfCast.Disconnect();
     end;
+
+  if Assigned(FCastWorker) then
+    begin
+      FCastWorker.WaitFor();
+      FreeAndNil(FCastWorker);
+    end;
+
+  FreeAndNil(FMfCast);
 
   QuitMfPlayerSession();
 
@@ -2296,14 +2446,6 @@ end;
 
 
 procedure Tfrm_MfPlayer.FormCreate(Sender: TObject);
-var
-  Components: TMfCastComponents;
-  Settings: TMfCastSettings;
-  DefaultProfile: TMfCastDeviceProfile;
-  CapabilityResolver: IMfCastCapabilityResolver;
-  CastCallbacks: TMfCastControllerCallbacks;
-  hr: HRESULT;
-
 begin
 
   prbProgress.Max := prbProgress.Width;
@@ -2318,9 +2460,12 @@ begin
   FPendingSubtitleLoadEmbedded := False;
   FPendingSubtitleLoadStreamIndex := 0;
   FPendingSubtitleLoadLanguageTag := '';
+  FMfCast := nil;
+  FCastWorker := nil;
   FCastStartPosition100ns := 0;
   FCastSyncPending := False;
   FCastLocalWasRunning := False;
+  FCastSessionActive := False;
   FCastBufferingStartedTick := 0;
   FCastConnectivityWarningShown := False;
   FCastConnectivityTimer := TTimer.Create(Self);
@@ -2330,44 +2475,18 @@ begin
   ps_AspectRatio := AR_16_9;
   mnuStopCasting.Enabled := False;
 
-  Components.Reset();
-  Components.Discovery := TMfCastMdnsDiscovery.Create();
-  Components.Channel := TMfCastChannel.Create(TMfCastTcpTransport.Create());
-  Components.HttpServer := TMfCastHttpServer.Create();
-  Components.MediaInspector := TMfCastMediaInspector.Create();
-
-  DefaultProfile.Reset();
-  DefaultProfile.Name := 'Default ChromeCast';
-  SetLength(DefaultProfile.AllowedContentTypes, 5);
-  DefaultProfile.AllowedContentTypes[0] := 'video/mp4';
-  DefaultProfile.AllowedContentTypes[1] := 'audio/mp4';
-  DefaultProfile.AllowedContentTypes[2] := 'video/webm';
-  DefaultProfile.AllowedContentTypes[3] := 'audio/mpeg';
-  DefaultProfile.AllowedContentTypes[4] := 'audio/aac';
-  DefaultProfile.AllowUnknownFormats := True;
-  CapabilityResolver := TMfCastCapabilityResolver.Create(DefaultProfile);
-  Components.MediaPlanner := TMfCastMediaPlanner.Create(CapabilityResolver);
-  Components.SegmentPublisher := TMfCastSegmentPublisher.Create(Components.HttpServer);
-  Components.TranscodePipeline := TMfCastTranscodePipeline.Create();
-
-  FMfCastController := TMfCastController.Create(Components);
-  Settings := TMfCastSettings.CreateDefault();
-  hr := FMfCastController.Configure(Settings);
-
-  if SUCCEEDED(hr) then
-    begin
-      CastCallbacks.Reset();
-      CastCallbacks.OnStateChanged := MfCastStateChanged;
-      CastCallbacks.OnMediaStatus := MfCastMediaStatus;
-      CastCallbacks.OnError := MfCastError;
-      FMfCastController.SetCallbacks(CastCallbacks);
-    end;
-
-  if FAILED(hr) then
-    begin
-      FMfCastController := nil;
-      Caption := 'ChromeCast setup failed. HRESULT $' + IntToHex(DWORD(hr), 8);
-    end;
+  try
+    FMfCast := TMfCast.Create(True);
+    FMfCast.OnStateChanged := MfCastStateChanged;
+    FMfCast.OnMediaStatus := MfCastMediaStatus;
+    FMfCast.OnError := MfCastError;
+  except
+    on E: Exception do
+      begin
+        FreeAndNil(FMfCast);
+        Caption := 'Cast API setup failed: ' + E.Message;
+      end;
+  end;
 
   UpdateCastControls();
 end;

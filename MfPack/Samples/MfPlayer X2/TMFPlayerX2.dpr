@@ -4,33 +4,25 @@ uses
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},
   dlgStreamSelect in 'dlgStreamSelect.pas' {dlgSelectStreams},
-  TimedTextClass in 'TimedTextClass.pas',
-  MfMatroskaSubtitleReader in 'MfMatroskaSubtitleReader.pas',
-  MfEmbeddedSubtitleReader in 'MfEmbeddedSubtitleReader.pas',
-  LangTags in 'LangTags.pas',
+  TimedTextClass in 'D:\PROJECTS\MfPack\Cast\Media\TimedTextClass.pas',
+  MfMatroskaSubtitleReader in 'D:\PROJECTS\MfPack\Cast\Media\MfMatroskaSubtitleReader.pas',
+  MfEmbeddedSubtitleReader in 'D:\PROJECTS\MfPack\Cast\Media\MfEmbeddedSubtitleReader.pas',
+  LangTags in 'D:\PROJECTS\MfPack\Cast\Media\LangTags.pas',
   MfPlayerClassX in 'MfPlayerClassX.pas',
   MfMediaTimeline in 'MfMediaTimeline.pas',
-  MfSubtitleCompositor in 'MfSubtitleCompositor.pas',
-  MfSubtitleFramePump in 'MfSubtitleFramePump.pas',
+  MfSubtitleCompositor in 'D:\PROJECTS\MfPack\Cast\Media\MfSubtitleCompositor.pas',
+  MfSubtitleFramePump in 'D:\PROJECTS\MfPack\Cast\Media\MfSubtitleFramePump.pas',
   MfSubtitleTransform in 'MfSubtitleTransform.pas',
   MFTimerCallBackClass in 'MFTimerCallBackClass.pas',
-  MfPCXConstants in 'MfPCXConstants.pas',
+  MfPCXConstants in 'D:\PROJECTS\MfPack\Cast\Media\MfPCXConstants.pas',
   dlgSelectTimedTextLanguages in 'dlgSelectTimedTextLanguages.pas' {DlgTimedTextLanguages},
-  MfCastChannel in 'ChromeCast\MfCastChannel.pas',
-  MfCastController in 'ChromeCast\MfCastController.pas',
-  MfCastDiscovery in 'ChromeCast\MfCastDiscovery.pas',
-  MfCastHttpServer in 'ChromeCast\MfCastHttpServer.pas',
-  MfCastInterfaces in 'ChromeCast\MfCastInterfaces.pas',
-  MfCastMedia in 'ChromeCast\MfCastMedia.pas',
-  MfCastTranscode in 'ChromeCast\MfCastTranscode.pas',
-  MfCastTypes in 'ChromeCast\MfCastTypes.pas',
-  dlgMfCastDevices in 'ChromeCast\dlgMfCastDevices.pas' {CastDevicesDlg};
+  dlgMfCastDevices in 'dlgMfCastDevices.pas' {CastDevicesDlg};
 
 {$R *.res}
 
 begin
 
- // Check for memoryleaks (debug mode (F9) only!)
+   // Check for memoryleaks (debug mode (F9) only!)
 {$IFNDEF madExcept}
   {$IFDEF DEBUG}
     {$WARN SYMBOL_PLATFORM OFF}
