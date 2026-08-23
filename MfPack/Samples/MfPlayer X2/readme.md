@@ -1,27 +1,27 @@
 # MfPlayer X2
-
+  
 MfPlayer X2 is an advanced Media Foundation player sample for Delphi.
-
-The sample is based on the earlier MfPlayer X project, but replaces the floating
-subtitle overlay with a real video-frame subtitle pipeline. Subtitle pixels can
-now be composed into the decoded video for local playback, MP4 export, and
-Chromecast streaming.
-
-MfPlayer X2 also demonstrates how Media Foundation playback, timed text,
-custom MFT processing, Source Reader/Sink Writer transcoding, `IMFByteStream`,
-mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together
-inside one Delphi application.
-
+  
+The sample is based on the earlier MfPlayer X project, but replaces the floating  
+subtitle overlay with a real video-frame subtitle pipeline. Subtitle pixels can  
+now be composed into the decoded video for local playback, MP4 export, and  
+Chromecast streaming.  
+  
+MfPlayer X2 also demonstrates how Media Foundation playback, timed text,  
+custom MFT processing, Source Reader/Sink Writer transcoding, `IMFByteStream`,  
+mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together  
+inside one Delphi application.  
+  
 ---
-
+  
 # Main differences from MfPlayer X
-
-The earlier MfPlayer X sample demonstrates `IMFTimer`, language tags, media
-properties, regular expressions, and subtitle formats such as SubRip,
-MicroDVD, and WebVTT.
-
+  
+The earlier MfPlayer X sample demonstrates `IMFTimer`, language tags, media  
+properties, regular expressions, and subtitle formats such as SubRip,  
+MicroDVD, and WebVTT.  
+  
 MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture:
-
+  
 * The floating subtitle form is no longer used for playback.
 * Subtitle text is composed directly into RGB32 video frames.
 * A custom synchronous `IMFTransform` inserts subtitles into the local playback
@@ -32,14 +32,13 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * H.264/AAC MP4 export with burned subtitles is included.
 * Chromecast device discovery, control, HTTP publication, and automatic
   transcoding fallback are integrated.
-
-
+  
 ---
-
-# Features
-
+  
+# Features  
+  
 ## Local playback
-
+  
 * Media Foundation Media Session based audio/video playback.
 * Play, pause, resume, stop, seek, and playback-rate control.
 * Audio-only, video-only, and audio/video source handling.
@@ -49,9 +48,9 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Media properties and language-tag support.
 * Presentation-clock and `IMFTimer` integration.
 * Deterministic Media Session shutdown.
-
+  
 ## Timed text and subtitles
-
+  
 * SubRip (`.srt`) support.
 * MicroDVD (`.sub`) support.
 * WebVTT (`.vtt`) support.
@@ -66,9 +65,9 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Subtitle bitmap caching and reset handling.
 * Subtitle burn-in without modifying the original source file.
 * The same embedded cue model feeds local playback, export, and Chromecast.
-
+  
 ## Export
-
+  
 * Source Reader based video and audio decoding.
 * RGB32 video-frame subtitle composition.
 * Media Foundation H.264 video encoding.
@@ -79,9 +78,9 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Progress reporting.
 * Pause, resume, and cancellation support.
 * Video-only source support.
-
+  
 ## Chromecast
-
+  
 * Chromecast and Google/Android TV discovery through mDNS/DNS-SD.
 * Simple VLC-style device-selection dialog.
 * No normal-user IP address, interface, or port configuration.
@@ -98,23 +97,23 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Transactional cleanup after failed Cast attempts.
 * Offline-TV and repeated-cast protection.
 * Reference-counted live-stream buffers to prevent stale writer access.
-
+  
 ---
-
+  
 ## Embedded subtitle boundaries
-
-The current embedded reader handles textual subtitle streams that the active
-Media Foundation source exposes as `MFMediaType_Subtitle`. Matroska SRT/UTF-8
-and SSA/ASS tracks are imported into `TMfTimedText`. PGS and VobSub tracks are
-detected but not decoded because they contain subtitle images rather than text.
-
-The native Microsoft MP4 source exposes audio and video streams but ignores
-non-audio/video tracks. Embedded MP4 `tx3g`, `wvtt`, and `stpp`, plus AVI text
-variants hidden by the native source, therefore require container adapters and
-are not claimed as supported by this snapshot.
-
+  
+The current embedded reader handles textual subtitle streams that the active  
+Media Foundation source exposes as `MFMediaType_Subtitle`. Matroska SRT/UTF-8  
+and SSA/ASS tracks are imported into `TMfTimedText`. PGS and VobSub tracks are  
+detected but not decoded because they contain subtitle images rather than text.  
+  
+The native Microsoft MP4 source exposes audio and video streams but ignores  
+non-audio/video tracks. Embedded MP4 `tx3g`, `wvtt`, and `stpp`, plus AVI text  
+variants hidden by the native source, therefore require container adapters and  
+are not claimed as supported by this snapshot.  
+  
 # Requirements
-
+  
 * Windows 10 version 1703 or later.
 * Delphi XE7 or later, including Delphi 12.
 * MfPack 3.2.0 headers and units.
@@ -124,29 +123,29 @@ are not claimed as supported by this snapshot.
 * A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.
 * The PC and Cast receiver must be reachable on the same local network.
 * Windows Firewall must permit the temporary local HTTP listener.
-
+  
 ---
-
+  
 # Building the sample
-
+  
 1. Install or configure MfPack.
 2. Make sure the MfPack source (src) directory is present in the Delphi search path.
 3. Open `TMFPlayerX2.dproj`.
 4. Select the Win32 target.
 5. Build and run the project.
-
+  
 The current source is maintained with Delphi XE7 compatibility in mind.
-
+  
 # Documentation
-
+  
 The full design and implementation reference is located at:
-
+  
 ```text
 Docs\MfPlayer_X2_Architecture_and_Chromecast.md
 ```
-
+  
 It contains:
-
+  
 * a detailed MfPlayer X versus MfPlayer X2 comparison;
 * local playback and topology construction;
 * subtitle timing and composition;
@@ -156,26 +155,26 @@ It contains:
 * known limitations;
 * implementation roadmap;
 * detailed test plan.
-
+  
 ---
-
+  
 # Notes
-
+  
 This is not a sample for absolute beginners.
-
-The project combines Media Foundation Media Sessions, Source Readers, Sink
-Writers, custom MFTs, COM lifetime management, asynchronous callbacks, sockets,
-TLS, mDNS, HTTP, and Google Cast protocol messages. A good understanding of
-Media Foundation, Windows multimedia APIs, threading, and interface ownership
-is recommended before modifying the core pipeline.
-
+  
+The project combines Media Foundation Media Sessions, Source Readers, Sink  
+Writers, custom MFTs, COM lifetime management, asynchronous callbacks, sockets,  
+TLS, mDNS, HTTP, and Google Cast protocol messages. A good understanding of  
+Media Foundation, Windows multimedia APIs, threading, and interface ownership  
+is recommended before modifying the core pipeline.  
+  
 ---
-
+  
 # Project
-
+  
 MfPack - Samples - MfPlayer X2
-
+  
 * GitHub: <https://github.com/FactoryXCode/MfPack>
 * SourceForge: <https://sourceforge.net/projects/MFPack>
-
+  
 Copyright (c) FactoryX. All rights reserved.
