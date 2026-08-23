@@ -1,26 +1,22 @@
-# MFCaptureToFile Sample
-Version: 3.2.0
-
-Description:
-  ========================================================================
-      WIN32 APPLICATION : MFCaptureToFile Sample Project Overview
-  ========================================================================
-
-  This sample demonstrates how to capture video from camera to a file.
-
-  Note that this sample requires Windows 10 or later. 
-
-NOTES: 
+# MFCaptureToFile Sample  
+  
+Version: 3.2.0  
+  
+Description:  
+  
+  This sample demonstrates how to capture video from camera to a file.  
+  Note that this sample requires Windows 10 or later.   
+  
+NOTES:  
  - This release is updated for compiler version 17 up to 35.
  - SDK version 10.0.22621.4654 (Win 11)
  - Requires Windows 10 or later.
  - Minimum supported MfPack version: 3.1.5
-
-Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
-
-First release date: 01-02-2022
-Final release date: 05/05/2026
-
-
+  
+Project: Media Foundation - MFPack - Samples  
+Project location: http://sourceforge.net/projects/MFPack  
+  
+First release date: 01-02-2022  
+Final release date: 05/05/2026  
+  
 Copyright © FactoryX. All rights reserved.
