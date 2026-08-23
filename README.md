@@ -27,7 +27,7 @@ Delphi XE2 (recommended Delphi XE7) up to and including Delphi 12
 SDK version: 10.0.26100.4654 (Windows 11).  
   
   
-Note:  
+**Important note:**  
 Some Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) codecs because of financial/license reasons.  
 Those you can buy from Microsoft Store.  
   
@@ -88,8 +88,9 @@ Note: The old MS sample used the deprecated IMFplayer interface.
 An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
-
-*An example about how to create a MfAudioVisualizer control - A visual component that uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU. This sample is part of the Samples/MfComponents package.
+  
+An example about how to create a MfAudioVisualizer control - A visual component that uses WASAPI loopback, Peak/RMS,  
+optional spectrum bars or VU. This sample is part of the Samples/MfComponents package.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
   
@@ -292,7 +293,7 @@ buffersize for better sound to eliminate buffer related gliches.
    - *Able to use MMCSS (Multimedia Class Scheduler service).
    - *Stream switch detection.*
    - *Possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or* 
-     *the soundcard's audio format (including Uncompressed IEEE floating-point audio).
+     *the soundcard's audio format (including Uncompressed IEEE floating-point audio).*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
   
@@ -414,7 +415,7 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 - Settings dialog with persistent storage.
 - Compressor / Limiter DSP with live control from the settings menu.
   
-##Note:  
+**Note:**  
 This is not a sample for absolute beginners. Please read the documents included with this sample.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer4.png)
@@ -435,7 +436,7 @@ This sample also demonstrates how to create and implement a:
 - WasApi effects rack that connects al MFT components to the WasApi renderer.
 - PlayerEngine component, using a WasApi renderer.
   
-##Note:  
+**Note:**  
 This is not a sample for absolute beginners. Please read the documents included with this sample.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer5.png)
@@ -459,7 +460,8 @@ and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC 
 Audio-only recording can be done separately to WAV or FLAC using the  
 dedicated recorder unit.  
   
-*Note: You need good knowledge of Media Foundation, DirectX and GPU processing.*
+**Note:**  
+You need good knowledge of Media Foundation, DirectX and GPU processing.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
   
@@ -473,7 +475,7 @@ effects and how to implement IceCast/Caddy for internet broadcasting.
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.  
 All WASAPI sample code comes together in this sample.  
   
-*Note:*  
+**Note:**  
  You have to know the principles of WASAPI, MFT's and audio manipulation.  
  This sample is large and not suitable for beginners!  
  Before using this sample make sure, you have all needed components installed (see instructions).  
@@ -503,7 +505,7 @@ MfRDJ Pro supports casting to Cromecast devices on your local network using the 
 In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJ Pro turns that mixer into a full live radio/video broadcast system using MfPack,  
 WASAPI, Media Foundation, Caddy, JSON, MfPack Cast V2, and browser MSE playback.   
   
-*Note:*  
+**Note:**  
 You have to know the principles of WASAPI, MFT's, MfPack Cast V2, and audio manipulation.  
 This sample is large and not suitable for beginners!  
 Before using this sample make sure, you have all needed components installed (see instructions).  
