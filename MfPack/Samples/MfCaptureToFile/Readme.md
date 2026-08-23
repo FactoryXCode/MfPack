@@ -3,12 +3,8 @@
 Version: 3.2.0  
   
 Description:  
-  ========================================================================  
-      WIN32 APPLICATION : MFCaptureToFile Sample Project Overview  
-  ========================================================================  
   
   This sample demonstrates how to capture video from camera to a file.  
-
   Note that this sample requires Windows 10 or later.   
   
 NOTES:  
