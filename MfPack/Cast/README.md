@@ -86,15 +86,11 @@ static compile check after changes that may not be reached by the simple sample.
 It requires the matching installed "MfPackXxxx" package but is not intended to
 be installed or referenced by applications. 
 
-Project: MFPack - Cast
-Project location:
+Project: MFPack - Cast  
+Project location:  
 
-https://github.com/FactoryXCode/MfPack
-
-https://sourceforge.net/projects/MFPack
-
-First release date: 02/08/2026
-
-Final release date: 13/08/2026
-
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+First release date: 02/08/2026  
+Final release date: 13/08/2026  
 Copyright © FactoryX. All rights reserved.

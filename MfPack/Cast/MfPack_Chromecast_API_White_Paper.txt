@@ -9,9 +9,10 @@ Date: 13 August 2026
 1. What This Is
 ===============
 
-MfCast is an independent Chromecast subsystem for Delphi. It handles device
-discovery, receiver control, local media serving, media preparation, subtitles,
-track selection, and optional remuxing/transcoding behind a small public API.
+MfCast is an independent Chromecast subsystem for Delphi.
+It handles device discovery, receiver control, local media serving,
+media preparation, subtitles, track selection,
+and optional remuxing/transcoding behind a small public API.
 
 It can be used by:
 
@@ -35,7 +36,8 @@ subtitle conversion, media preparation, and optional remuxing/transcoding.
 2. Why Split It Up
 =================
 
-MfPack is intended not only as a multimedia framework but also as a collection of examples from which Delphi developers can learn.
+MfPack is intended not only as a multimedia framework but also as a collection of
+examples from which Delphi developers can learn.
 Chromecast support itself combines several distinct responsibilities:
 
 - Media-track selection
@@ -328,7 +330,8 @@ This unit handles:
 - Error responses
 - Media status parsing
 
-Keeping protocol construction outside the controller prevents the controller from becoming a collection of JSON string operations.
+Keeping protocol construction outside the controller prevents the controller from becoming a
+collection of JSON string operations.
 
 6.9 MfCastController.pas
 ------------------------
@@ -365,8 +368,8 @@ This unit handles:
 - Build media URLs for the Chromecast
 - Coordinate tracks and metadata
 
-The application describes what it wants to play. MfCast decides how the
-Chromecast receives it.
+The application describes what it wants to play.
+MfCast decides how the Chromecast receives it.
 
 6.11 MfCastHttpServer.pas
 -------------------------
@@ -392,8 +395,9 @@ This server works independently of any player UI.
 6.12 MfCastRemux.pas
 --------------------
 
-Optional compressed-sample remux pipeline. It copies compatible H.264 and AAC
-samples into the generated fragmented MP4 presentation without decoding or
+Optional compressed-sample remux pipeline.
+It copies compatible H.264 and AAC samples into the
+generated fragmented MP4 presentation without decoding or
 re-encoding them.
 
 6.13 MfCastTranscode.pas
@@ -603,7 +607,8 @@ This isolates MKV complexity from the user interface.
 11. Subtitles
 =============
 
-Subtitle handling is one of the strongest reasons for moving Chromecast support into a dedicated subsystem.
+Subtitle handling is one of the strongest reasons for moving
+Chromecast support into a dedicated subsystem.
 
 The caller sees a simple list of subtitle tracks.
 
@@ -620,8 +625,8 @@ A track can look like this:
       ContentType: string;
     end;
 
-A stable ID encodes track kind, source, and source-stream index. Applications
-treat it as opaque; the Cast subsystem decodes it when an exact source
+A stable ID encodes track kind, source, and source-stream index.
+Applications treat it as opaque; the Cast subsystem decodes it when an exact source
 stream must be selected. A caller can then do:
 
     Hr := FCast.SelectSubtitle(Track.TrackId);
@@ -707,9 +712,9 @@ Complex/bitmap path:
         v
      Transcode
 
-The application does not need separate logic for these cases. Bitmap rendering is
-explicitly deferred until real MfPack user demand justifies the additional
-decoder and renderer surface.
+The application does not need separate logic for these cases.
+Bitmap rendering is explicitly deferred until real MfPack user demand
+justifies the additional decoder and renderer surface.
 
 
 12. Audio Tracks
@@ -1057,35 +1062,34 @@ The public facade is shaped like this (overloads abbreviated):
     TMfCast = class
     public
       constructor Create(const AEnableTranscoding: Boolean = False);
-      destructor Destroy; override;
+      destructor Destroy(); override;
 
-      function Discover: HRESULT;
-      function StopDiscovery: HRESULT;
-      function RefreshDiscovery: HRESULT;
+      function Discover(): HRESULT;
+      function StopDiscovery(): HRESULT;
+      function RefreshDiscovery(): HRESULT;
       function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
       function GetMediaTracks(const ASource: string;
-        out ATracks: TMfCastTrackInfoArray): HRESULT;
+                              out ATracks: TMfCastTrackInfoArray): HRESULT;
 
       function Connect(const ADevice: TMfCastDevice): HRESULT;
       function Load(const ASource: string): HRESULT; overload;
       function Cast(const ADevice: TMfCastDevice;
-        const ASource: string): HRESULT; overload;
+                    const ASource: string): HRESULT; overload;
 
-      function Play: HRESULT;
-      function Pause: HRESULT;
-      function Stop: HRESULT;
+      function Play(): HRESULT;
+      function Pause(): HRESULT;
+      function Stop(): HRESULT;
       function Seek(const APositionSeconds: Double): HRESULT;
 
       function SelectSubtitle(const ATrackId: Int64): HRESULT; overload;
-      function SelectSubtitle(
-        const ASubtitle: TMfCastSubtitleAsset): HRESULT; overload;
-      function DisableSubtitles: HRESULT;
+      function SelectSubtitle(const ASubtitle: TMfCastSubtitleAsset): HRESULT; overload;
+      function DisableSubtitles(): HRESULT;
       function SelectAudioTrack(const ATrackId: Int64): HRESULT;
 
       function SetVolume(const AVolume: Single): HRESULT;
       function SetMuted(const AMuted: Boolean): HRESULT;
-      function Disconnect: HRESULT;
-      function State: TMfCastState;
+      function Disconnect(): HRESULT;
+      function State(): TMfCastState;
 
       property OnDeviceAdded: TMfCastDeviceEvent ...;
       property OnDeviceUpdated: TMfCastDeviceEvent ...;
