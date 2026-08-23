@@ -16,8 +16,8 @@ NOTES:
   
 This is how it in global works:  
   
-\*\*1. TCaptureStreamEngine\*\*  
-
+1. TCaptureStreamEngine  
+  
   - Creates a \*\*D3D11\*\* device + immediate context.
   - Sets up Desktop Duplication on output 0.
   - Each frame:
@@ -27,7 +27,7 @@ This is how it in global works:
     - Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
     - Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
   
-\*\*2. TGpuNV12Converter\*\*  
+2. TGpuNV12Converter  
   
   - Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
   - Draws a fullscreen quad:
@@ -35,12 +35,12 @@ This is how it in global works:
       - Pass 2: BGRA → UV (half res).
   - Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
   
-\*\*3. TPreviewRenderer\*\*  
+3. TPreviewRenderer  
   
   - Keeps a DXGI swap chain bound to your panel handle.
   - For each frame, CopyResource the desktop texture into the backbuffer and Present.
   
-\*\*4. Form\*\*  
+4. Form  
   
   - Creates the engine in FormCreate, hardcoded 1920x1080 @ 60fps.
   - Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
