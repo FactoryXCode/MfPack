@@ -19,7 +19,7 @@ we rewrote the code for Media Foundation and did some more...
 What it does:
   
 Uses MDI adding channeldecks, loopbackdecks, a microphonedeck, effectsdeck (mft's) and  
-enddeck (pa \& pfl, recorder (saves to WAV or FLAC) and IceCast/Caddy broadcasting support),  
+enddeck (pfl, recorder (saves to WAV or FLAC) and IceCast/Caddy broadcasting support),  
 playlisteditor and a tag editor (currently mp3 only)  
 It's capable of redirecting audio to every endpoint  
 separately (phone. master or any extra device on your pc) and or IceCast.  
