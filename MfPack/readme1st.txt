@@ -1,12 +1,12 @@
-MfPack X 3.2.0
+MfPack X 4.0.0
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
- - SDK version 10.0.22621.4654
+ - SDK version 10.0.28000.2705
  - Requires Windows 10 or later.
 
 First release date: 04/06/2012
-Final release date: 05/05/2026
+Final release date: 24/08/2026
 
 Copyright © FactoryX. All rights reserved.
 
