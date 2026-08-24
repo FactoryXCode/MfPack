@@ -714,7 +714,9 @@ begin
 
   // DebugHook covers the Delphi IDE debugger; IsDebuggerPresent also covers
   // other attached Windows debuggers and IDE build configurations.
+  {$WARN SYMBOL_PLATFORM OFF}
   Result := (DebugHook <> 0) or IsDebuggerPresent();
+  {$WARN SYMBOL_PLATFORM ON}
 end;
 
 
@@ -5492,7 +5494,7 @@ begin
   if (BaseDir = '') or (LockDir = '') then
     begin
       AMessage := 'Caddy directory is not configured, so RDJ Pro cannot protect the shared broadcast stream.';
-      Exit;
+      Exit(False);
     end;
 
   if not RDJEnsureDirectoryExists(BaseDir,
@@ -5501,7 +5503,7 @@ begin
       SetBroadcastHandoverConnectionLost('Broadcast server is unavailable: ' +
                                          SysErrorMessage(ErrorCode));
       AMessage := 'Cannot reach the broadcast server at ' + BaseDir + '.';
-      Exit;
+      Exit(False);
     end;
 
   if DirectoryExists(LockDir) and
@@ -5519,7 +5521,7 @@ begin
           SetBroadcastHandoverConnectionLost('Broadcast server is unavailable: ' +
                                              SysErrorMessage(ErrorCode));
           AMessage := 'Cannot create the broadcast lock at ' + LockDir + '.';
-          Exit;
+          Exit(False);
         end;
 
       SetBroadcastHandoverLockIndicator(CAP_LOCKED,
@@ -5545,7 +5547,7 @@ begin
         AMessage := AMessage + ' since ' + OwnerUpdated;
 
       AMessage := AMessage + '. Wait for the handover message before taking over.';
-      Exit;
+      Exit(False);
     end;
 
   FBroadcastHandoverLockAcquired := True;
@@ -5566,7 +5568,7 @@ begin
       FBroadcastHandoverLockAcquired := False;
       FBroadcastHandoverOwnerId := '';
       AMessage := 'The broadcast server became unavailable while acquiring the broadcast lock.';
-      Exit;
+      Exit(False);
     end;
 
   AMessage := 'Broadcast lock acquired by ' + BroadcastHandoverOwnerDisplay() + '.';

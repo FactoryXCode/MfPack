@@ -214,7 +214,6 @@ object frmMediaServer: TfrmMediaServer
       ColorWhenDown = 11363625
       ColorWhenUp = 5914932
       Behavior = bbPushButton
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -391,7 +390,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = clRed
           ColorWhenUp = clMaroon
           Behavior = bbCheckBox
-          Checked = False
           ImageIndexUnchecked = 0
           ImageIndexChecked = 0
           TabStop = True
@@ -431,7 +429,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = 10045252
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
-          Checked = False
           GlyphUnchecked.Data = {
             C6040000424DC60400000000000036040000280000000C0000000C0000000100
             08000000000090000000230B0000230B00000001000000010000000000000000
@@ -574,7 +571,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = 10045252
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
-          Checked = False
           GlyphUnchecked.Data = {
             C6040000424DC60400000000000036040000280000000C0000000C0000000100
             08000000000090000000230B0000230B00000001000000010000000000000000
@@ -694,7 +690,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = 10045252
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
-          Checked = False
           GlyphUnchecked.Data = {
             C6040000424DC60400000000000036040000280000000C0000000C0000000100
             08000000000090000000230B0000230B00000001000000010000000000000000
@@ -813,7 +808,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = 10045252
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
-          Checked = False
           GlyphUnchecked.Data = {
             C6040000424DC60400000000000036040000280000000C0000000C0000000100
             08000000000090000000230B0000230B00000001000000010000000000000000
@@ -1019,7 +1013,6 @@ object frmMediaServer: TfrmMediaServer
             ColorWhenDown = 11363625
             ColorWhenUp = 5914932
             Behavior = bbPushButton
-            Checked = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWhite
             Font.Height = -13
@@ -1058,7 +1051,6 @@ object frmMediaServer: TfrmMediaServer
             ColorWhenDown = 11363625
             ColorWhenUp = 5914932
             Behavior = bbPushButton
-            Checked = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWhite
             Font.Height = -13
@@ -1097,7 +1089,6 @@ object frmMediaServer: TfrmMediaServer
             ColorWhenDown = 11363625
             ColorWhenUp = 5914932
             Behavior = bbPushButton
-            Checked = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWhite
             Font.Height = -13
@@ -1164,7 +1155,6 @@ object frmMediaServer: TfrmMediaServer
             ColorWhenDown = 10045252
             ColorWhenUp = 6899524
             Behavior = bbCheckBox
-            Checked = False
             GlyphUnchecked.Data = {
               C6040000424DC60400000000000036040000280000000C0000000C0000000100
               08000000000090000000230B0000230B00000001000000010000000000000000
@@ -1322,7 +1312,6 @@ object frmMediaServer: TfrmMediaServer
           Color = 6899524
           ColorWhenDown = 6899524
           ColorWhenUp = 6899524
-          Down = True
           Behavior = bbCheckBox
           Checked = True
           GlyphUnchecked.Data = {
@@ -1440,7 +1429,6 @@ object frmMediaServer: TfrmMediaServer
           ColorWhenDown = 6899524
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
-          Checked = False
           GlyphUnchecked.Data = {
             C6040000424DC60400000000000036040000280000000C0000000C0000000100
             08000000000090000000230B0000230B00000001000000010000000000000000

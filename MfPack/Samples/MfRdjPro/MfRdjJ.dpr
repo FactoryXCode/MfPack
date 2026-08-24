@@ -1,11 +1,6 @@
 program MfRdjJ;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
