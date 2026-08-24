@@ -192,8 +192,8 @@ This it the extended version of MfSimpleCastPlayer.
 - Heartbeat monitoring and automatic cleanup when the receiver is switched
   off or stops responding.
   
-The sample enables the optional Media Foundation conversion stack. Compatible  
-MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct  
+The sample enables the optional Media Foundation conversion stack.  
+Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct  
 playback. Other containers and codecs, including AVI and MKV when required,  
 are remuxed or converted to fragmented MP4 and published by the local HTTP  
 server.  
