@@ -148,7 +148,8 @@ const
   {$EXTERNALSYM XAUDIO2_MAX_AUDIO_CHANNELS}
   XAUDIO2_MIN_SAMPLE_RATE             = 1000;           // Minimum audio sample rate supported
   {$EXTERNALSYM XAUDIO2_MIN_SAMPLE_RATE}
-  XAUDIO2_MAX_SAMPLE_RATE             = 200000;         // Maximum audio sample rate supported
+{ 10.0.28000.0  }
+  XAUDIO2_MAX_SAMPLE_RATE             = 384000;         // Maximum audio sample rate supported
   {$EXTERNALSYM XAUDIO2_MAX_SAMPLE_RATE}
   XAUDIO2_MAX_VOLUME_LEVEL            = 16777216.0;     // Maximum acceptable volume level (2^24)
   {$EXTERNALSYM XAUDIO2_MAX_VOLUME_LEVEL}

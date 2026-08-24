@@ -1710,6 +1710,80 @@ type
 
   end;
 
+{ 10.0.28000.0  }
+  PISupportActivationFromPackage = ^ISupportActivationFromPackage;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportActivationFromPackage);'}
+  {$EXTERNALSYM ISupportActivationFromPackage}
+  ISupportActivationFromPackage = interface(IUnknown)
+  ['{0a18aae5-5caa-48c5-a9f4-6e46dcd58ad5}']
+  end;
+  IID_ISupportActivationFromPackage = ISupportActivationFromPackage;
+  {$EXTERNALSYM IID_ISupportActivationFromPackage}
+
+  PISupportCoAddComDependencyOnPackage = ^ISupportCoAddComDependencyOnPackage;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportCoAddComDependencyOnPackage);'}
+  {$EXTERNALSYM ISupportCoAddComDependencyOnPackage}
+  ISupportCoAddComDependencyOnPackage = interface(IUnknown)
+  ['{c8059efc-4e98-4fd0-bfc6-44190b80b823}']
+  end;
+  IID_ISupportCoAddComDependencyOnPackage = ISupportCoAddComDependencyOnPackage;
+  {$EXTERNALSYM IID_ISupportCoAddComDependencyOnPackage}
+
+  PISupportServerMustBeEqualOrGreaterPrivilegeActivation = ^ISupportServerMustBeEqualOrGreaterPrivilegeActivation;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportServerMustBeEqualOrGreaterPrivilegeActivation);'}
+  {$EXTERNALSYM ISupportServerMustBeEqualOrGreaterPrivilegeActivation}
+  ISupportServerMustBeEqualOrGreaterPrivilegeActivation = interface(IUnknown)
+  ['{5bdb3ee2-46bc-4313-b5fb-801c360ba5f9}']
+  end;
+  IID_ISupportServerMustBeEqualOrGreaterPrivilegeActivation = ISupportServerMustBeEqualOrGreaterPrivilegeActivation;
+  {$EXTERNALSYM IID_ISupportServerMustBeEqualOrGreaterPrivilegeActivation}
+
+  PISupportDoNotElevateServerActivation = ^ISupportDoNotElevateServerActivation;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportDoNotElevateServerActivation);'}
+  {$EXTERNALSYM ISupportDoNotElevateServerActivation}
+  ISupportDoNotElevateServerActivation = interface(IUnknown)
+  ['{40aefe22-3ff6-43dc-8108-c8c402d57b5c}']
+  end;
+  IID_ISupportDoNotElevateServerActivation = ISupportDoNotElevateServerActivation;
+  {$EXTERNALSYM IID_ISupportDoNotElevateServerActivation}
+
+  PISupportActivateAsActivatorPackaged = ^ISupportActivateAsActivatorPackaged;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportActivateAsActivatorPackaged);'}
+  {$EXTERNALSYM ISupportActivateAsActivatorPackaged}
+  ISupportActivateAsActivatorPackaged = interface(IUnknown)
+  ['{765d1df2-f0af-4ef8-aa50-84789ca330ed}']
+  end;
+  IID_ISupportActivateAsActivatorPackaged = ISupportActivateAsActivatorPackaged;
+  {$EXTERNALSYM IID_ISupportActivateAsActivatorPackaged}
+
+  PISupportPackagedComRegistrationVisibility = ^ISupportPackagedComRegistrationVisibility;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportPackagedComRegistrationVisibility);'}
+  {$EXTERNALSYM ISupportPackagedComRegistrationVisibility}
+  ISupportPackagedComRegistrationVisibility = interface(IUnknown)
+  ['{8dc3444e-c7ee-449a-9fb8-b9173988d66a}']
+  end;
+  IID_ISupportPackagedComRegistrationVisibility = ISupportPackagedComRegistrationVisibility;
+  {$EXTERNALSYM IID_ISupportPackagedComRegistrationVisibility}
+
+  PISupportPackagedComElevationEnabledClasses = ^ISupportPackagedComElevationEnabledClasses;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISupportPackagedComElevationEnabledClasses);'}
+  {$EXTERNALSYM ISupportPackagedComElevationEnabledClasses}
+  ISupportPackagedComElevationEnabledClasses = interface(IUnknown)
+  ['{b4219019-f712-4d4f-ade7-f468276af0b8}']
+  end;
+  IID_ISupportPackagedComElevationEnabledClasses = ISupportPackagedComElevationEnabledClasses;
+  {$EXTERNALSYM IID_ISupportPackagedComElevationEnabledClasses}
+
+  PIPackagedComSyntaxSupport = ^IPackagedComSyntaxSupport;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPackagedComSyntaxSupport);'}
+  {$EXTERNALSYM IPackagedComSyntaxSupport}
+  IPackagedComSyntaxSupport = interface(IUnknown)
+  ['{8f146474-b228-48fb-a58c-105ebb273abc}']
+    function GetSupportedVersion(out supportedVersion: UINT32): HResult; stdcall;
+  end;
+  IID_IPackagedComSyntaxSupport = IPackagedComSyntaxSupport;
+  {$EXTERNALSYM IID_IPackagedComSyntaxSupport}
+
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes

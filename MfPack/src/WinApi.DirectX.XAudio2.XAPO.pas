@@ -177,7 +177,8 @@ const
   // supported framerate range
   XAPO_MIN_FRAMERATE                  = 1000;
   {$EXTERNALSYM XAPO_MIN_FRAMERATE}
-  XAPO_MAX_FRAMERATE                  = 200000;
+{ 10.0.28000.0  }
+  XAPO_MAX_FRAMERATE                  = 384000;
   {$EXTERNALSYM XAPO_MAX_FRAMERATE}
 
   // unicode string length, including terminator, used with XAPO_REGISTRATION_PROPERTIES

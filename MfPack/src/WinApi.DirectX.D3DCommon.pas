@@ -681,6 +681,12 @@ const
   D3D_SHADER_FEATURE_SAMPLER_FEEDBACK                                               = $200000;
   {$EXTERNALSYM D3D_SHADER_FEATURE_SAMPLER_FEEDBACK}
 
+  { 10.0.28000.0  }
+  D3D_OPT_SHADER_FEATURE_USES_DERIVATIVES                                           = $0000010000000000;
+  {$EXTERNALSYM D3D_OPT_SHADER_FEATURE_USES_DERIVATIVES}
+  D3D_OPT_SHADER_FEATURE_REQUIRES_GROUP                                             = $0000020000000000;
+  {$EXTERNALSYM D3D_OPT_SHADER_FEATURE_REQUIRES_GROUP}
+
 // Additional internal shader feature flags are listed in dxbcutils.h (not relevant/useful for public to see)
 // When adding entries here, make sure they don't conflict with what's there.
 

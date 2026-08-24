@@ -1759,6 +1759,10 @@ type
   PIWICBitmapFlipRotator = ^IWICBitmapFlipRotator;
   IWICBitmapFlipRotator = interface;
 
+{ 10.0.28000.0  }
+  PIWICBitmapToneMapper = ^IWICBitmapToneMapper;
+  IWICBitmapToneMapper = interface;
+
   PIWICBitmapLock = ^IWICBitmapLock;
   IWICBitmapLock = interface;
 
@@ -1819,6 +1823,10 @@ type
   PIWICDisplayAdaptationControl2 = ^IWICDisplayAdaptationControl2;
   IWICDisplayAdaptationControl2 = interface;
 
+{ 10.0.28000.0  }
+  PIWICD3DTextureSource = ^IWICD3DTextureSource;
+  IWICD3DTextureSource = interface;
+
   PIWICProgressCallback = ^IWICProgressCallback;
   IWICProgressCallback = interface;
 
@@ -1851,6 +1859,10 @@ type
 
   PIWICImagingFactory2 = ^IWICImagingFactory2;
   IWICImagingFactory2 = interface;
+
+{ 10.0.28000.0  }
+  PIWICImagingFactory3 = ^IWICImagingFactory3;
+  IWICImagingFactory3 = interface;
 
 
   D2D1_PIXEL_FORMAT = ^DWORD;
@@ -2111,6 +2123,26 @@ type
   end;
   IID_IWICBitmapFlipRotator = IWICBitmapFlipRotator;
   {$EXTERNALSYM IID_IWICBitmapFlipRotator}
+
+{ 10.0.28000.0  }
+  // Interface IWICBitmapToneMapper
+  // ===============================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICBitmapToneMapper);'}
+  {$EXTERNALSYM IWICBitmapToneMapper}
+  IWICBitmapToneMapper = interface(IWICBitmapSource)
+  ['{44728ded-1edf-4fe9-b50b-c89a264c9439}']
+    function InitializeForHdrTarget(pISource: IWICBitmapSource;
+                                    const guidDstFormat: WICPixelFormatGUID;
+                                    fLuminanceInNits: FLOAT;
+                                    fWhiteLevelInNits: FLOAT;
+                                    mode: WICBitmapToneMappingMode): HResult; stdcall;
+
+    function InitializeForSdrTarget(pISource: IWICBitmapSource;
+                                    const guidDstFormat: WICPixelFormatGUID;
+                                    mode: WICBitmapToneMappingMode): HResult; stdcall;
+  end;
+  IID_IWICBitmapToneMapper = IWICBitmapToneMapper;
+  {$EXTERNALSYM IID_IWICBitmapToneMapper}
 
 
 
@@ -2642,6 +2674,36 @@ type
   IID_IWICDisplayAdaptationControl2 = IWICDisplayAdaptationControl2;
   {$EXTERNALSYM IID_IWICDisplayAdaptationControl2}
 
+{ 10.0.28000.0  }
+  // Interface IWICD3DTextureSource
+  // ===============================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICD3DTextureSource);'}
+  {$EXTERNALSYM IWICD3DTextureSource}
+  IWICD3DTextureSource = interface(IUnknown)
+  ['{caf65cc4-8ebe-4718-a21f-8dbf40bb7e25}']
+    function GetTexture(pD3DDevice: IUnknown;
+                        pID3DTextureOptions: IPropertyBag2;
+                        const riid: REFIID;
+                        out ppTexture: Pointer): HResult; stdcall;
+
+    function GetTransformedTexture(prc: PWICRect;
+                                   uiWidth: UINT;
+                                   uiHeight: UINT;
+                                   pguidDstFormat: PWICPixelFormatGUID;
+                                   dstTransform: WICBitmapTransformOptions;
+                                   pD3DDevice: IUnknown;
+                                   pID3DTextureOptions: IPropertyBag2;
+                                   const riid: REFIID;
+                                   out ppTexture: Pointer): HResult; stdcall;
+
+    function DoesSupportD3DDeviceType(const riid: REFIID;
+                                      out pfIsSupported: BOOL): HResult; stdcall;
+
+    function GetD3DTextureOptions(out ppID3DTextureOptions: IPropertyBag2): HResult; stdcall;
+  end;
+  IID_IWICD3DTextureSource = IWICD3DTextureSource;
+  {$EXTERNALSYM IID_IWICD3DTextureSource}
+
 
 
   // Interface IWICProgressCallback
@@ -2979,6 +3041,18 @@ type
   end;
   IID_IWICImagingFactory2 = IWICImagingFactory2;
   {$EXTERNALSYM IID_IWICImagingFactory2}
+
+{ 10.0.28000.0  }
+  // Interface IWICImagingFactory3
+  // =============================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICImagingFactory3);'}
+  {$EXTERNALSYM IWICImagingFactory3}
+  IWICImagingFactory3 = interface(IWICImagingFactory2)
+  ['{489b3d8b-624a-4258-b678-7eece70f299d}']
+    function CreateBitmapToneMapper(out ppToneMapper: IWICBitmapToneMapper): HResult; stdcall;
+  end;
+  IID_IWICImagingFactory3 = IWICImagingFactory3;
+  {$EXTERNALSYM IID_IWICImagingFactory3}
 
 
 

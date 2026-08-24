@@ -214,6 +214,25 @@ const
                 pid: 9);
   {$EXTERNALSYM PKEY_AudioEndpoint_Default_VolumeInDb}
 
+{ 10.0.28000.0  }
+  PKEY_AudioEndpoint_Max_VolumeInDb: PROPERTYKEY = (
+                fmtid: (D1:$1da5d803; D2:$d492; D3:$4edd;
+                D4: ($8c, $23, $e0, $c0, $ff, $ee, $7f, $0e));
+                pid: 10);
+  {$EXTERNALSYM PKEY_AudioEndpoint_Max_VolumeInDb}
+
+  PKEY_AudioEndpoint_Min_VolumeInDb: PROPERTYKEY = (
+                fmtid: (D1:$1da5d803; D2:$d492; D3:$4edd;
+                D4: ($8c, $23, $e0, $c0, $ff, $ee, $7f, $0e));
+                pid: 11);
+  {$EXTERNALSYM PKEY_AudioEndpoint_Min_VolumeInDb}
+
+  PKEY_AudioEndpoint_StableId: PROPERTYKEY = (
+                fmtid: (D1:$1da5d803; D2:$d492; D3:$4edd;
+                D4: ($8c, $23, $e0, $c0, $ff, $ee, $7f, $0e));
+                pid: 12);
+  {$EXTERNALSYM PKEY_AudioEndpoint_StableId}
+
 
 // Defined in WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey if OS >= Vista
 //  PKEY_Device_FriendlyName: PROPERTYKEY = (

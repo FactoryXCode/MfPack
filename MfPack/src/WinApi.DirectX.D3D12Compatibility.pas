@@ -236,6 +236,17 @@ type
   IID_DirectMLPyTorchCreatorID = DirectMLPyTorchCreatorID;
   {$EXTERNALSYM IID_DirectMLPyTorchCreatorID}
 
+  { 10.0.28000.0  }
+  // Interface DirectMLWebNNCreatorID
+  // =================================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(DirectMLWebNNCreatorID);'}
+  {$EXTERNALSYM DirectMLWebNNCreatorID}
+  DirectMLWebNNCreatorID = Interface(IUnknown)
+    ['{FDF01A76-1E11-450F-902B-74F04EA08094}']
+  end;
+  IID_DirectMLWebNNCreatorID = DirectMLWebNNCreatorID;
+  {$EXTERNALSYM IID_DirectMLWebNNCreatorID}
+
 
   // Additional Prototypes for ALL interfaces
 

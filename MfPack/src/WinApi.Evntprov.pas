@@ -216,6 +216,11 @@ const
     events out of timestamp order may lead to event ordering issues during
     trace processing. }
 
+{ 10.0.28000.0  }
+  EVENT_DATA_DESCRIPTOR_TYPE_RESERVED1          = 4;
+  {$EXTERNALSYM EVENT_DATA_DESCRIPTOR_TYPE_RESERVED1}
+    { Reserved. }
+
 
   // EVENT_WRITE_FLAG values for the Flag parameter of EventWriteEx and EtwWriteEx.
 
@@ -500,6 +505,9 @@ type
     binary and extract the decoding resources. }
     EventProviderSetReserved1,       {
     Not used. }
+{ 10.0.28000.0  }
+    EventProviderSetReserved2,       {
+    Reserved. }
     EventProviderSetTraits,          {
     Provides the ETW runtime with additional information about the
     provider, potentially including the provider name and a group GUID.
