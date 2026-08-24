@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 // 31/07/2026 Carmen              Added neutral embedded-cue import and corrected WebVTT timing.
 // ----------------------------------------------------------------------------
 //

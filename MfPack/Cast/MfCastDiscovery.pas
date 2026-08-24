@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Unit for _googlecast._tcp.local discovery.
 //
 // Company: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.

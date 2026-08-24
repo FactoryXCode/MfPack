@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 //
 // Description: Windows Imaging Component (WIC) API.
 //              This module contains the public data structures and API definitions
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -32,11 +32,11 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

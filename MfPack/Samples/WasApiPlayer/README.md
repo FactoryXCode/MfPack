@@ -1,6 +1,6 @@
 # WASAPI Player samples
   
-Version: 3.2.0
+Version: 4.0.0
   
 Description:  
 These samples demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.  
@@ -21,7 +21,7 @@ custom MFT for bass and treble control.
 NOTES:
   
 * This release is updated for compiler version 17 up to 34.
-* SDK version 10.0.22621.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 10 or later.
 * Minimum supported MfPack version: 3.1.9
   

@@ -1,7 +1,6 @@
 program MfSimpleCapture;
 
 uses
-  
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF }

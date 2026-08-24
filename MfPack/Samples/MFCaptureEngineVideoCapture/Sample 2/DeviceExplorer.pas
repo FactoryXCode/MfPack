@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 //
 // Description:
 //   This unit contains the DeviceExplorer class to discover video devices like webcams etc.
@@ -23,16 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX320/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -88,12 +88,7 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.MfCaptureEngine,
   WinApi.MediaFoundationApi.MfMetLib,
-  WinAPI.MediaFoundationApi.MfUtils,
-  {$IFDEF SAVE_DEBUG_REPORT}
-  WinApi.MediaFoundationApi.MfMediaTypeDebug,
-  {$ENDIF}
-  {Application}
-  Utils;
+  WinAPI.MediaFoundationApi.MfUtils;
 
 type
 

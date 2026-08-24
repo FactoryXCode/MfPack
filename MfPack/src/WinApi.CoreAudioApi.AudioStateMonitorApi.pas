@@ -10,7 +10,7 @@
 // Release date: 28-09-2021
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Provides methods that allow desktop apps and games to determine
 //              the time their audio streams' sound levels are modified by the system.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -32,11 +32,11 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

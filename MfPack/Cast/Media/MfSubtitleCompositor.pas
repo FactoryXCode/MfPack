@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: MfPlayer X2 subtitle compositor. This unit owns timed-text lookup by media time.
 //              The RGB32 blend method is the pipeline hook where X2 will draw into
 //              decoded video frames before preview/stream output.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 // 02/08/2026 Carmen              Cache subtitle overlays to remove per-frame GDI allocation.
 // 01/08/2026 Carmen              Added selectable MKV tracks and thread-safe timed-text swaps.
 // 31/07/2026 Carmen              Added sidecar-first embedded subtitle fallback.

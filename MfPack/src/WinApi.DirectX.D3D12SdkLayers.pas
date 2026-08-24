@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: This header is used by Direct3D 12 Graphics.
 //              See: https://learn.microsoft.com/en-us/windows/win32/api/_direct3d12/
 //
@@ -22,18 +22,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

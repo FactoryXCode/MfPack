@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Stateless Google Cast V2 protobuf-envelope encoding and decoding.
 //              Socket ownership, receiver state, and command policy deliberately
 //              remain outside this unit.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 // 10/08/2026 Carmen              Initial protocol separation.
 //------------------------------------------------------------------------------
 //

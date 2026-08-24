@@ -1,6 +1,6 @@
 # MfCaptureVideoFromGPU
   
-Version: 3.2.0  
+Version: 4.0.0  
   
 Description:  
 Demonstrates how to capture from screen using your videocard GPU.  
@@ -8,7 +8,7 @@ Demonstrates how to capture from screen using your videocard GPU.
 NOTES:  
   
 * This release is updated for compiler version 28.0 up to 36.0.
-* SDK version: 10.0.26100.4654 (Win 11)
+* SDK version: 10.0.28000.2705 (Win 11)
 * Requires Windows 10 or later.
 * Minimum supported MfPack version: 3.1.8
   

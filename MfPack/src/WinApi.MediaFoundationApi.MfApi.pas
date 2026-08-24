@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,11 +46,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -1890,6 +1890,51 @@ const
 // The bits used map of an encoded video frame.
   MFSampleExtension_VideoEncodeBitsUsedMap  : TGUID = '{6894263d-e6e2-4bcc-849d-8570365f5114}';
 
+  { 10.0.28000.0  }
+// MFSampleExtension_VideoEncodeSatdMap {ADF61D96-C2D3-4B57-A138-DDE4D351EAA9}
+// Type: IMFMediaBuffer
+  MFSampleExtension_VideoEncodeSatdMap : TGUID = '{ADF61D96-C2D3-4B57-A138-DDE4D351EAA9}';
+  {$EXTERNALSYM MFSampleExtension_VideoEncodeSatdMap}
+
+type
+  PeAVEncVideoQPMapElementDataType = ^eAVEncVideoQPMapElementDataType;
+  eAVEncVideoQPMapElementDataType = UINT32;
+  {$EXTERNALSYM eAVEncVideoQPMapElementDataType}
+const
+  CODEC_API_QP_MAP_INT8   = eAVEncVideoQPMapElementDataType($00000000);
+  {$EXTERNALSYM CODEC_API_QP_MAP_INT8}
+  CODEC_API_QP_MAP_INT16  = eAVEncVideoQPMapElementDataType($00000001);
+  {$EXTERNALSYM CODEC_API_QP_MAP_INT16}
+  CODEC_API_QP_MAP_INT32  = eAVEncVideoQPMapElementDataType($00000002);
+  {$EXTERNALSYM CODEC_API_QP_MAP_INT32}
+  CODEC_API_QP_MAP_UINT8  = eAVEncVideoQPMapElementDataType($80000000);
+  {$EXTERNALSYM CODEC_API_QP_MAP_UINT8}
+  CODEC_API_QP_MAP_UINT16 = eAVEncVideoQPMapElementDataType($80000001);
+  {$EXTERNALSYM CODEC_API_QP_MAP_UINT16}
+  CODEC_API_QP_MAP_UINT32 = eAVEncVideoQPMapElementDataType($80000002);
+  {$EXTERNALSYM CODEC_API_QP_MAP_UINT32}
+
+type
+  PInputQPSettings = ^InputQPSettings;
+  InputQPSettings = record
+    minBlockSize: UINT32;
+    maxBlockSize: UINT32;
+    stepsBlockSize: UINT32;
+    dataType: eAVEncVideoQPMapElementDataType;
+    minValue: INT16;
+    maxValue: INT16;
+    step: UINT16;
+  end;
+  {$EXTERNALSYM InputQPSettings}
+
+const
+  MFSampleExtension_VideoEncodeInputDeltaQPMap : TGUID = '{DAB419C3-BF21-4B46-8692-9A7BF0A71769}';
+  {$EXTERNALSYM MFSampleExtension_VideoEncodeInputDeltaQPMap}
+  MFSampleExtension_VideoEncodeInputAbsoluteQPMap : TGUID = '{432A6E9A-F1ED-456E-8DC3-6F8985649EB9}';
+  {$EXTERNALSYM MFSampleExtension_VideoEncodeInputAbsoluteQPMap}
+  MFSampleExtension_VideoEncodeD3D12ReconstructedPicture : TGUID = '{3E8A1B7F-5C92-4D6E-B834-F0A729E65C48}';
+  {$EXTERNALSYM MFSampleExtension_VideoEncodeD3D12ReconstructedPicture}
+
 
 const
 
@@ -2892,6 +2937,19 @@ const
                                D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_I420}
 
+  { 10.0.28000.0  }
+  MFVideoFormat_I422: TGUID = (D1: Ord('I') or (Ord('4') shl 8) or (Ord('2') shl 16) or (Ord('2') shl 24);
+                               D2: $0000;
+                               D3: $0010;
+                               D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_I422}
+
+  MFVideoFormat_I444: TGUID = (D1: Ord('I') or (Ord('4') shl 8) or (Ord('4') shl 16) or (Ord('4') shl 24);
+                               D2: $0000;
+                               D3: $0010;
+                               D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_I444}
+
   MFVideoFormat_IYUV: TGUID = (D1: Ord('I') or (Ord('Y') shl 8) or (Ord('U') shl 16) or (Ord('V') shl 24);
                                D2: $0000;
                                D3: $0010;
@@ -3192,6 +3250,20 @@ const
 
 {endif NTDDI_VERSION >= NTDDI_WIN10_FE }
 
+  { 10.0.28000.0  }
+  // The SDK no longer guards MFVideoFormat_Theora by NTDDI_WIN10_FE.
+  MFVideoFormat_Theora : TGUID = (D1: Ord('t') or (Ord('h') shl 8) or (Ord('e') shl 16) or (Ord('o') shl 24);
+                                 D2: $0000;
+                                 D3: $0010;
+                                 D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_Theora}
+
+  MFVideoFormat_APV : TGUID = (D1: Ord('A') or (Ord('P') shl 8) or (Ord('V') shl 16) or (Ord(' ') shl 24);
+                              D2: $0000;
+                              D3: $0010;
+                              D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_APV}
+
 
 
   //
@@ -3468,6 +3540,10 @@ const
   MFAudioFormat_DTS_UHDY        :  TGUID = '{9B9CCA00-91B9-4CCC-883A-8F787AC3CC86}';
   {$EXTERNALSYM MFAudioFormat_DTS_UHDY}
   // {9B9CCA00-91B9-4CCC-883A-8F787AC3CC86}
+
+  { 10.0.28000.0  }
+  MFAudioFormat_IAMF            : TGUID = '{78A8EBA0-F446-4851-A55D-5372280E6B0B}';
+  {$EXTERNALSYM MFAudioFormat_IAMF}
 
 
 

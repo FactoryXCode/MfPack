@@ -572,7 +572,7 @@ Errors should include both the hexadecimal HRESULT and the operation stage.
 - Windows 10 version 1703 or later, or Windows 11.
 - Delphi with the MfPack units configured; current source headers target
   compiler versions 23 through 35.
-- Windows SDK 10.0.26100.4654.
+- Windows SDK 10.0.28000.2705.
 - Media Foundation decoders for the source format.
 - H.264 and AAC encoders for export and transcoded Cast playback.
 - Receiver and PC on a mutually reachable local network.

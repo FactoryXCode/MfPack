@@ -1,13 +1,17 @@
 # Latency measuring tool for Windows
 
+&#x20;
+
 Version: 3.2.0
 
-Description:
-This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.
-NOTE: You have to build a RELEASE version of your code including this code to get useful results.
+&#x20;
+
+Description:  
+This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.  
+NOTE: You have to build a RELEASE version of your code including this code to get useful results.  
 Running the code in the debugger will NOT give accurate results.
 
-
+&#x20;
 
 Usage:
 
@@ -19,7 +23,7 @@ Usage:
 6. Call Stop() immediately after the code been measured.
 7. Call FreeAndNil() when not needed anymore.
 
-
+&#x20;
 
 NOTES:
 
@@ -31,12 +35,19 @@ NOTES:
 
 
 Project: Media Foundation - MFPack - Tools
-Project location: http://sourceforge.net/projects/MFPack
 
-First release date: 29/05/2024
-Final release date: 05/051/2026
+&#x20;
+Project location: https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack
 
+&#x20;
 
+First release date: 02/09/2024  
+Final release date: 05/05/2026
+
+&#x20;
 
 Copyright © FactoryX. All rights reserved.
+
+
 

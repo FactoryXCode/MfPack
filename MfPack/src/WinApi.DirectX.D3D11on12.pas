@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: D3D11On12 is a mapping layer, which maps graphics commands from D3D11 to D3D12.
 //              D3D11On12 is not an implementation of the D3D11 API,
 //              but is instead an implementation of the D3D11 usermode DDI (device driver interface).
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

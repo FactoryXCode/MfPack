@@ -1,4 +1,4 @@
-1program CaptureVideoFromGPU;
+program CaptureVideoFromGPU;
 
 uses
   Vcl.Forms,

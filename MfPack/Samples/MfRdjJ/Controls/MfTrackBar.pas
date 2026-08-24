@@ -10,7 +10,7 @@
 // Release date: 24-01-2019
 // Language: ENU
 //
-// Version: 3.2.0
+// Version: 4.0.0
 // Description: Single visual component: Trackbar.
 //
 // Company: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 11/04/2026 All                 BauHaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
 //          Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

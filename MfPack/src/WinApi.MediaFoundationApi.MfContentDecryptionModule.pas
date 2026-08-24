@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Definitions for kernel mode code OPM communication.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Minimum supported OS: Windows 10, version 2004 (10.0; Build 19041)
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -331,6 +331,14 @@ const
   // should implement IMFGetService and support this service GUID.
   //
   MF_CONTENTDECRYPTIONMODULE_SERVICE: TGUID = '{15320C45-FF80-484A-9DCB-0DF894E69A13}';
+
+  { 10.0.28000.0  }
+  MF_ENCRYPTEDMEDIAEXTENSIONS_ACTIVATE: TGUID = '{2DF7B51E-797B-4D06-BE71-D14A52CF8421}';
+  {$EXTERNALSYM MF_ENCRYPTEDMEDIAEXTENSIONS_ACTIVATE}
+  MF_ENCRYPTEDMEDIAEXTENSIONS_ACTIVATABLE_CLASS_ID: TGUID = '{77631A31-E5E7-4785-BF17-20F57B224802}';
+  {$EXTERNALSYM MF_ENCRYPTEDMEDIAEXTENSIONS_ACTIVATABLE_CLASS_ID}
+  MF_ENCRYPTEDMEDIAEXTENSIONS_INITIALIZATION_DATA: TGUID = '{3E73735C-E6C0-481D-8260-EE5DB1343B5F}';
+  {$EXTERNALSYM MF_ENCRYPTEDMEDIAEXTENSIONS_INITIALIZATION_DATA}
 
 
   /// <summary>

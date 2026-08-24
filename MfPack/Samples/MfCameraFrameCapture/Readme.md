@@ -1,6 +1,6 @@
 # MfCameraFrameCapture
   
-Version: 3.2.0  
+Version: 4.0.0  
   
 Description:  
   
@@ -10,7 +10,7 @@ capture device such as a webcam or camera using the Source Reader.
 NOTES:  
   
 * This release is updated for compiler version 17 up to 35.
-* SDK version 10.0.22621.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 8 or later.
 * Minimum supported MfPack version: 3.1.5
   

@@ -10,7 +10,7 @@
 // Release date: 24-10-2020
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: This module contains the multimedia class scheduler APIs and any public data
 //              structures needed to call these APIs.
 //              This header is part of the System Services API.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please take notice of ANSI or Unicode versions of the included function.
@@ -32,11 +32,11 @@
 //          For more information, see https://docs.microsoft.com/en-us/windows/win32/intl/conventions-for-function-prototypes.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

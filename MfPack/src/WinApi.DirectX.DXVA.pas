@@ -10,7 +10,7 @@
 // Release date: 02-10-2015
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: DirectX Video Acceleration (DXVA 2.0) header file.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -348,6 +348,22 @@ const
                                              D3: $48ef;
                                              D4: ($b9, $f9, $ed, $cb, $82, $71, $3f, $65));
   {$EXTERNALSYM DXVA_ModeJPEG_VLD_444}
+
+  { 10.0.28000.0  }
+  DXVA_ModeAPV_VLD_422_10  : TGUID = '{226A709D-AE12-44C5-BA21-164FEEB7F9B6}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_422_10}
+  DXVA_ModeAPV_VLD_422_12  : TGUID = '{F6F152AD-94E5-4BFA-9227-676CDDEFF42B}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_422_12}
+  DXVA_ModeAPV_VLD_444_10  : TGUID = '{6A4A8D7D-7610-469F-855F-39F13051C013}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_444_10}
+  DXVA_ModeAPV_VLD_444_12  : TGUID = '{F1039A1C-E208-45C1-952C-040841B67667}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_444_12}
+  DXVA_ModeAPV_VLD_4444_10 : TGUID = '{C83799B9-9655-4B95-8008-56A322CE5D81}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_4444_10}
+  DXVA_ModeAPV_VLD_4444_12 : TGUID = '{6A763EE3-4D05-47FE-A429-723474B69D7C}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_4444_12}
+  DXVA_ModeAPV_VLD_400_10  : TGUID = '{37148862-6BD6-4618-8293-777B686B0824}';
+  {$EXTERNALSYM DXVA_ModeAPV_VLD_400_10}
 
   DXVA_NoEncrypt                          : TGUID = (D1 : $1b81beD0; D2 : $a0c7; D3 : $11d3; D4:($b9, $84, $00, $c0, $4f, $2e, $73, $c5));
   {$EXTERNALSYM DXVA_NoEncrypt}
@@ -2041,6 +2057,94 @@ type
   {$EXTERNALSYM LPDXVA_HuffmanTable_MJPEG}
 
   //#endif // _DIRECTX_MJPEG_VA_
+
+  { 10.0.28000.0  }
+  // APV (Advanced Professional Video) DXVA structures from RFC 9924.
+  PDXVA_PicEntry_APV = ^_DXVA_PicEntry_APV;
+  _DXVA_PicEntry_APV = packed record
+    // Bits 0..6 contain Index7Bits; bit 7 contains ReservedFlag.
+    bPicEntry: UCHAR;
+  end;
+  {$EXTERNALSYM _DXVA_PicEntry_APV}
+  DXVA_PicEntry_APV = _DXVA_PicEntry_APV;
+  {$EXTERNALSYM DXVA_PicEntry_APV}
+  LPDXVA_PicEntry_APV = ^DXVA_PicEntry_APV;
+  {$EXTERNALSYM LPDXVA_PicEntry_APV}
+
+  // Microsoft declares these structures under #pragma pack(push, DXVA_APV, 16).
+  {$ALIGN 16}
+
+  PDXVA_PicParams_APV = ^_DXVA_PicParams_APV;
+  _DXVA_PicParams_APV = record
+    pbu_reserved_zero_8bits: UCHAR;
+    reserved_zero_32bits: UINT;
+    frame_width: UINT32;
+    frame_height: UINT32;
+    chroma_format_idc: UCHAR;
+    bit_depth_minus8: UCHAR;
+    frame_info_reserved_zero_32bits: UINT32;
+    frame_header_reserved_zero_8bits: UCHAR;
+    use_q_matrix: UCHAR;
+    q_reserved_zero_8bits: UCHAR;
+    tile_width_in_mbs: UINT32;
+    tile_height_in_mbs: UINT32;
+    tile_size_present_in_fh_flag: UCHAR;
+    tileinfo_reserved_zero_8bits: UCHAR;
+    tile_reserved_16bits: UINT16;
+    statusReportFeedbackNumber: UINT32;
+    CurrPic: DXVA_PicEntry_APV;
+  end;
+  {$EXTERNALSYM _DXVA_PicParams_APV}
+  DXVA_PicParams_APV = _DXVA_PicParams_APV;
+  {$EXTERNALSYM DXVA_PicParams_APV}
+  LPDXVA_PicParams_APV = ^DXVA_PicParams_APV;
+  {$EXTERNALSYM LPDXVA_PicParams_APV}
+
+const
+  DXVA_APV_MAX_COMPONENTS = 4;
+  {$EXTERNALSYM DXVA_APV_MAX_COMPONENTS}
+  DXVA_APV_QM_DIMENSION = 8;
+  {$EXTERNALSYM DXVA_APV_QM_DIMENSION}
+
+type
+  PDXVA_Qmatrix_APV = ^_DXVA_Qmatrix_APV;
+  _DXVA_Qmatrix_APV = record
+    NumComponents: UCHAR;
+    qmatrix_reserved_zero_32bits: UINT;
+    QMatrix: array[0..DXVA_APV_MAX_COMPONENTS - 1,
+                   0..DXVA_APV_QM_DIMENSION - 1,
+                   0..DXVA_APV_QM_DIMENSION - 1] of UCHAR;
+    qmatrix_reserved_zero_64bits: UINT64;
+  end;
+  {$EXTERNALSYM _DXVA_Qmatrix_APV}
+  DXVA_Qmatrix_APV = _DXVA_Qmatrix_APV;
+  {$EXTERNALSYM DXVA_Qmatrix_APV}
+  LPDXVA_Qmatrix_APV = ^DXVA_Qmatrix_APV;
+  {$EXTERNALSYM LPDXVA_Qmatrix_APV}
+
+  PDXVA_Tile_APV = ^_DXVA_Tile_APV;
+  _DXVA_Tile_APV = record
+    tile_data_offset: UINT;
+    tile_total_size: UINT;
+    tile_data_reserved_zero_32bits: UINT;
+    tile_index: USHORT;
+    tile_header_reserved_zero_32bits: UINT32;
+    tile_header_size: USHORT;
+    tile_component_data_size: array[0..DXVA_APV_MAX_COMPONENTS - 1] of UINT;
+    tile_component_qp: array[0..DXVA_APV_MAX_COMPONENTS - 1] of UCHAR;
+    tile_component_qp_zero_32bits: UINT;
+  end;
+  {$EXTERNALSYM _DXVA_Tile_APV}
+  DXVA_Tile_APV = _DXVA_Tile_APV;
+  {$EXTERNALSYM DXVA_Tile_APV}
+  LPDXVA_Tile_APV = ^DXVA_Tile_APV;
+  {$EXTERNALSYM LPDXVA_Tile_APV}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8}
+  {$ENDIF}
 
 //
 // Other forms of pictures are constructed in the obvious way

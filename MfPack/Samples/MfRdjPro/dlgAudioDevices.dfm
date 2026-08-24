@@ -28,8 +28,6 @@ object AudioDevicesDlg: TAudioDevicesDlg
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 932
-    ExplicitHeight = 266
     object Bevel1: TBevel
       Left = 0
       Top = 0
@@ -69,8 +67,6 @@ object AudioDevicesDlg: TAudioDevicesDlg
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect]
       ParentColor = True
       TabOrder = 0
-      ExplicitWidth = 932
-      ExplicitHeight = 241
     end
   end
   object pnlButtons: TPanel
@@ -83,8 +79,6 @@ object AudioDevicesDlg: TAudioDevicesDlg
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
-    ExplicitTop = 266
-    ExplicitWidth = 932
     object btnRefresh: TMPxpButton
       Left = 8
       Top = 9

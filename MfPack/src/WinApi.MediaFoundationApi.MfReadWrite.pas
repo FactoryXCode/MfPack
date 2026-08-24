@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -30,11 +30,11 @@
 //                   IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -167,6 +167,9 @@ const
   {$EXTERNALSYM MF_READWRITE_DISABLE_CONVERTERS}
   MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS               : TGUID = '{a634a91c-822b-41b9-a494-4de4643612b0}';  // UINT(BOOL)
   {$EXTERNALSYM MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS}
+  { 10.0.28000.0  }
+  MF_READWRITE_USE_ONLY_HARDWARE_TRANSFORMS             : TGUID = '{f9074427-bf8b-4f69-bbaf-524969056fb6}';  // UINT(BOOL)
+  {$EXTERNALSYM MF_READWRITE_USE_ONLY_HARDWARE_TRANSFORMS}
 
 // #if (WINVER >= _WIN32_WINNT_WIN8)
   MF_READWRITE_MMCSS_CLASS                              : TGUID = '{39384300-d0eb-40b1-87a0-3318871b5a53}';

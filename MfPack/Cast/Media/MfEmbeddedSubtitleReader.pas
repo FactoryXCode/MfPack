@@ -10,7 +10,7 @@
 // Release date: 31-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Container-neutral reader for textual subtitle streams exposed
 //              by a Media Foundation source. The reader imports cues into the
 //              existing TMfTimedText model used by local playback and Cast.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 // 02/08/2026 Carmen              Added direct Matroska text-track fallback.
 // 01/08/2026 Carmen              Added exact embedded-track selection and end-of-stream safety.
 // 01/08/2026 Carmen              Robust stream classification and explicit Source Reader type selection.

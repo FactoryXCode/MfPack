@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Optional Windows-message bridge and command workers for Cast
 //              applications that marshal asynchronous results to a window.
 //

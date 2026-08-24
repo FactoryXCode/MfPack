@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: The enhanced video renderer (EVR) is a component that displays video on the user's
 //              monitor.
 //              Two versions of the EVR exist:
@@ -29,7 +29,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -38,11 +38,11 @@
 //         IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

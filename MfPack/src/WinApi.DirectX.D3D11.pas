@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Microsoft DirectX D3D11 used by Media Foundation.
 //              You can use Direct3D 11 graphics to create 3-D graphics for games,
 //              scientific and desktop apps.
@@ -23,17 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -1062,6 +1062,22 @@ const
   {$EXTERNALSYM D3D11_DECODER_PROFILE_JPEG_VLD_422}
   D3D11_DECODER_PROFILE_JPEG_VLD_444    : TGUID = '{4cd00e17-89ba-48ef-b9f9-edcb82713f65}';
   {$EXTERNALSYM D3D11_DECODER_PROFILE_JPEG_VLD_444}
+
+  { 10.0.28000.0  }
+  D3D11_DECODER_PROFILE_APV_VLD_422_10  : TGUID = '{226A709D-AE12-44C5-BA21-164FEEB7F9B6}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_422_10}
+  D3D11_DECODER_PROFILE_APV_VLD_422_12  : TGUID = '{F6F152AD-94E5-4BFA-9227-676CDDEFF42B}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_422_12}
+  D3D11_DECODER_PROFILE_APV_VLD_444_10  : TGUID = '{6A4A8D7D-7610-469F-855F-39F13051C013}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_444_10}
+  D3D11_DECODER_PROFILE_APV_VLD_444_12  : TGUID = '{F1039A1C-E208-45C1-952C-040841B67667}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_444_12}
+  D3D11_DECODER_PROFILE_APV_VLD_4444_10 : TGUID = '{C83799B9-9655-4B95-8008-56A322CE5D81}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_4444_10}
+  D3D11_DECODER_PROFILE_APV_VLD_4444_12 : TGUID = '{6A763EE3-4D05-47FE-A429-723474B69D7C}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_4444_12}
+  D3D11_DECODER_PROFILE_APV_VLD_400_10  : TGUID = '{37148862-6BD6-4618-8293-777B686B0824}';
+  {$EXTERNALSYM D3D11_DECODER_PROFILE_APV_VLD_400_10}
   // ==
 
   // AuthenticatedChannel

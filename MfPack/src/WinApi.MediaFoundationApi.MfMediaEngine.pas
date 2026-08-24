@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -26,17 +26,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -733,12 +733,9 @@ type
   //   bottom: FLOAT;
   // end;
 
-{$IFNDEF MFVideoNormalizedRect}
-  PMFVideoNormalizedRect = PRectF;
-  MFVideoNormalizedRect = TRectF;
-  {$EXTERNALSYM MFVideoNormalizedRect}
-{$DEFINE MFVideoNormalizedRect}
-{$ENDIF}
+  { 10.0.28000.0  }
+  // MFVideoNormalizedRect moved from mfmediaengine.h to mfidl.h.
+  // MfPack provides the shared declaration through WinApi.WinApiTypes.
 
 
   //+-----------------------------------------------------------------------------
@@ -1069,6 +1066,18 @@ type
   end;
   IID_IMFMediaEngineAudioEndpointId = IMFMediaEngineAudioEndpointId;
   {$EXTERNALSYM IID_IMFMediaEngineAudioEndpointId}
+
+  { 10.0.28000.0  }
+  // Applies or clears an effect on the Media Engine video renderer.
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEngineVideoRendererEffect);'}
+  {$EXTERNALSYM IMFMediaEngineVideoRendererEffect}
+  IMFMediaEngineVideoRendererEffect = interface(IUnknown)
+  ['{6BDF1188-6EC8-44FF-8CCC-BFCA0D12AFA3}']
+    function SetEffect(pEffect: IUnknown): HResult; stdcall;
+    function ClearEffect: HResult; stdcall;
+  end;
+  IID_IMFMediaEngineVideoRendererEffect = IMFMediaEngineVideoRendererEffect;
+  {$EXTERNALSYM IID_IMFMediaEngineVideoRendererEffect}
 
 
   PMfMediaEngineExtensionType = ^MfMediaEngineExtensionType;

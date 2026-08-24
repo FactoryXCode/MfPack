@@ -1,6 +1,6 @@
 # LoopbackCapture Sample 2
   
-Version: 3.2.0  
+Version: 4.0.0  
   
 Description:  
 Demonstrates how to capture system audio either from a specific process tree or for all process except a  
@@ -38,7 +38,7 @@ NOTES:
 * When capturing from high latency sources, like Internet, use a low buffersize \~10 milliseconds or lower.
 * If you are not sure which thread to be used, keep the defaults as it is in this sample.
 * This release is updated for compiler version 17 up to 34.
-* SDK version 10.0.22621.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 10 build 20348 or later.
 * Minimum supported MfPack version: 3.1.6
   

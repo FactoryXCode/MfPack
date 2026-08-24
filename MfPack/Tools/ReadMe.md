@@ -1,42 +1,52 @@
-# Latency measuring tool for Windows
+# HResult Lookup Tools (WinApi.Dbg.WinHResultTools.pas)
 
-Version: 3.2.0
+&#x20; 
 
-Description:
-This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.
-NOTE: You have to build a RELEASE version of your code including this code to get useful results.
-Running the code in the debugger will NOT give accurate results.
+Version 3.1.9
 
+&#x20; 
 
+The application can be used to determine HResult or Error codes returned by the Windows OS,  
+featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and  
+the "System.SysUtils.SysErrorMessage" function.  
+A tool to create a new or translate a new HRESULT using Severety, Facility and Error code is also provided.  
 
-Usage:
+You can use procedure RunFxErrLookUpTool in this unit to use the HResult Lookup Tools Application,  
+located at ../MfPack/Tools.  
 
-1. Add .."/MfPack/Tools/Latency" to your application search path.
-2. Add "MfPack.LatencyTool" in the uses clause.
-3. Create the class in your application.
-4. Call Initialize within the method where measurement is needed.
-5. Call Start() just before the code to be measured.
-6. Call Stop() immediately after the code been measured.
-7. Call FreeAndNil() when not needed anymore.
+&#x20; 
 
+The Windows System Error Code Lookup Tool can be downloaded at:  
+https://learn.microsoft.com/en-us/windows/win32/debug/system-error-code-lookup-tool.  
+When you need a version > 6.4.5, that is allready present, copy this tool  
+to ..\\MfPack\\Tools\\MicrosoftErrorLookupTool and adjust the WIN\_ERROR\_LOOKUP\_TOOL constant in  
+the WinApi.Dbg.WinHResultTools.pas unit.  
 
+To build the tools application, you have to add ..\\MfPack\\src\\dbg to your project's Searchpath.  
 
-NOTES:
+&#x20; 
 
-* This release is updated for compiler version 17 up to 35.
-* SDK version 10.0.26100.4654 (Win 11)
-* Requires Windows 10 22H2 or later.
-* Minimum supported MfPack version: 3.1.8
+NOTES:  
 
+* This release is updated for compiler version 17 up to 34.
+* SDK version 10.0.22621.4654 (Win 11)
+* Requires Windows 10 build 20348 or later.
+* Minimum supported MfPack version: 3.1.5
 
+&#x20; 
 
-Project: Media Foundation - MFPack - Tools
-Project location: http://sourceforge.net/projects/MFPack
+Project: Media Foundation - MFPack - Samples
 
-First release date: 29/05/2024
-Final release date: 05/05/2026
+&#x20; 
+Project location: https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
 
+&#x20; 
 
+First release date: 09/07/2023  
+Final release date: 05/05/2026  
 
-(c)  FactoryX. All rights reserved.
+&#x20; 
+
+Copyright © FactoryX. All rights reserved.
 

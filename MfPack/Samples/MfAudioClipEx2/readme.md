@@ -1,11 +1,11 @@
 # AudioClipEx2
   
-Version: 3.2.0
+Version: 4.0.0
   
 NOTES:
   
 * This release is updated for compiler version 28 up to 36.
-* SDK version 10.0.22621.4654
+* SDK version 10.0.28000.2705
 * Requires Windows 8 or later.
 * Minimum supported MfPack version: 3.1.5
   

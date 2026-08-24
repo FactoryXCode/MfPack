@@ -45,7 +45,6 @@ object CastPlayerForm: TCastPlayerForm
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 0
-    ExplicitWidth = 695
   end
   object pnlPreview: TPanel
     Left = 0
@@ -57,9 +56,6 @@ object CastPlayerForm: TCastPlayerForm
     Color = clBlack
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 271
-    ExplicitWidth = 695
-    ExplicitHeight = 329
   end
   object pnlCtrl: TPanel
     Left = 0
@@ -71,7 +67,7 @@ object CastPlayerForm: TCastPlayerForm
     ExplicitTop = 2
     object Bevel2: TBevel
       Left = 4
-      Top = 16
+      Top = 17
       Width = 298
       Height = 119
     end
@@ -79,14 +75,14 @@ object CastPlayerForm: TCastPlayerForm
       Left = 308
       Top = 17
       Width = 381
-      Height = 118
+      Height = 119
     end
     object lblDevices: TLabel
       Left = 16
       Top = 30
-      Width = 114
+      Width = 44
       Height = 13
-      Caption = 'Chromecast devices'
+      Caption = 'Devices'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -148,9 +144,9 @@ object CastPlayerForm: TCastPlayerForm
       ParentFont = False
     end
     object Label1: TLabel
-      Left = 318
+      Left = 317
       Top = 9
-      Width = 61
+      Width = 58
       Height = 13
       Alignment = taCenter
       AutoSize = False
@@ -172,6 +168,22 @@ object CastPlayerForm: TCastPlayerForm
       ExplicitLeft = 0
       ExplicitTop = 247
     end
+    object Label2: TLabel
+      Left = 11
+      Top = 9
+      Width = 82
+      Height = 13
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Chromecast'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = False
+    end
     object cbxDevices: TComboBox
       Left = 16
       Top = 49
@@ -182,7 +194,7 @@ object CastPlayerForm: TCastPlayerForm
       OnChange = SourceOrDeviceChanged
     end
     object btnDiscover: TButton
-      Left = 136
+      Left = 151
       Top = 23
       Width = 72
       Height = 25
@@ -197,7 +209,7 @@ object CastPlayerForm: TCastPlayerForm
       OnClick = btnDiscoverClick
     end
     object btnRefresh: TButton
-      Left = 208
+      Left = 223
       Top = 23
       Width = 72
       Height = 25
@@ -220,7 +232,7 @@ object CastPlayerForm: TCastPlayerForm
       OnChange = SourceOrDeviceChanged
     end
     object btnBrowse: TButton
-      Left = 196
+      Left = 223
       Top = 75
       Width = 72
       Height = 25
@@ -434,6 +446,6 @@ object CastPlayerForm: TCastPlayerForm
     Filter = 'Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif|All files|*.*'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 314
-    Top = 354
+    Top = 352
   end
 end

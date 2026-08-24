@@ -1,6 +1,6 @@
 # LoopbackCapture Sample 3
   
-Version: 3.2.0  
+Version: 4.0.0  
   
 Description:  
   
@@ -23,7 +23,7 @@ NOTES:
 This is caused by the fact Windows 11 has an internal process to "smooth" audio output (you can disable this feature in the Windows Audio settings).
 * To get as less latency as possible, you might alter your computer energymode to "Best Performance" in your PC settings.
 * This release is updated for compiler version 17 up to 34.
-* SDK version 10.0.22621.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 10 version 22H2 or later.
 * Minimum supported MfPack version: 3.1.8
   

@@ -24,7 +24,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 //
 // Description: 3-band EQ (Low / Mid / High) MFT.
 //
@@ -36,7 +36,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 10 (2H20) or later.
@@ -48,10 +48,10 @@
 //
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 // Related objects: -
-// Related projects: MfPackX320/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

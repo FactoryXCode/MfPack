@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 //
 // Description: Media Session preview used for routes which do not supply decoded samples
 //              to TMfCastWindowPreviewSink. The EVR owns video rendering and

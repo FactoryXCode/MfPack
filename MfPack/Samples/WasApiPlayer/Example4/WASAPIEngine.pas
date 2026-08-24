@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: The main engine that acts as Chief In Command in this sample.
 //
 // Company: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX320/Samples/WasApiPlayer/Example4
+// Related projects: MfPackX400/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -1999,7 +1999,7 @@ begin
   if FAILED(hr) then
     begin
 
-      // Don’t leave partially initialized state.
+      // Don�t leave partially initialized state.
       FNotifyClient := nil;
       FDeviceEnumerator := nil;
       Exit;

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Windows Driver Model/Connection and Streaming Architecture (WDM-CSA)
 // ions.
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -1102,7 +1102,9 @@ type
   PKSEVENT_PINCAPS_CHANGENOTIFICATIONS = ^KSEVENT_PINCAPS_CHANGENOTIFICATIONS;
   KSEVENT_PINCAPS_CHANGENOTIFICATIONS = (
     KSEVENT_PINCAPS_FORMATCHANGE,
-    KSEVENT_PINCAPS_JACKINFOCHANGE);
+    KSEVENT_PINCAPS_JACKINFOCHANGE,
+    { 10.0.28000.0  }
+    KSEVENT_PINCAPS_INVALIDATECLIENTS);
   {$EXTERNALSYM KSEVENT_PINCAPS_CHANGENOTIFICATIONS}
 
 const

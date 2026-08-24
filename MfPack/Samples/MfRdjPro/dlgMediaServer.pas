@@ -10,7 +10,7 @@
 // Release date: 02-04-2023
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 3.3.0
 // Description: Media server dialog GUI - camera preview and MP4 recorder unit.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -452,6 +452,7 @@ type
     FActiveBroadcastVideoMediaType: IMFMediaType;
 
     FBroadcastHandoverLockAcquired: Boolean;
+    FBroadcastHandoverLockBypassed: Boolean;
     FBroadcastHandoverOwnerId: string;
     FBroadcastHandoverConnectionLost: Boolean;
     FLastBroadcastHandoverHeartbeatTick: DWORD;
@@ -705,6 +706,15 @@ function RDJBytesToMb(const ABytes: UInt64): UInt64;
 begin
 
   Result := (ABytes + (1024 * 1024 div 2)) div (1024 * 1024);
+end;
+
+
+function RDJIsRunningUnderDebugger(): Boolean;
+begin
+
+  // DebugHook covers the Delphi IDE debugger; IsDebuggerPresent also covers
+  // other attached Windows debuggers and IDE build configurations.
+  Result := (DebugHook <> 0) or IsDebuggerPresent();
 end;
 
 
@@ -2912,6 +2922,9 @@ begin
   FBroadcastMseSessionStartedUtc := TTimeZone.Local.ToUniversalTime(Now);
   FBroadcastMseMemLastLogTick := 0;
   FBroadcastHandoverLockAcquired := False;
+  // Capture debugger state for the entire form lifetime. This remains true
+  // even if the debugger is detached before broadcasting starts.
+  FBroadcastHandoverLockBypassed := RDJIsRunningUnderDebugger();
   FBroadcastHandoverOwnerId := '';
   FBroadcastHandoverConnectionLost := False;
   SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
@@ -5449,21 +5462,22 @@ begin
 
   AMessage := '';
 
-  {$IFDEF DEBUG}
-  // A process stopped by the Delphi debugger does not run FormDestroy and can
-  // therefore leave the shared lock directory behind. Treat the lock as
-  // acquired inside the debug process, but do not publish any shared lock
-  // state. Release builds continue to use the normal handover protection.
-  FBroadcastHandoverLockAcquired := True;
-  FBroadcastHandoverConnectionLost := False;
-  FBroadcastHandoverOwnerId := '';
-  FLastBroadcastHandoverHeartbeatTick := 0;
-  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
-                                    UNLOCKED_COLOR);
-  AMessage := 'Broadcast handover lock bypassed for debug/IDE execution.';
-  Result := True;
-  Exit;
-  {$ENDIF}
+  if FBroadcastHandoverLockBypassed or RDJIsRunningUnderDebugger() then
+    begin
+      // A process stopped by the IDE cannot run FormDestroy. Keep the bypass
+      // for this process lifetime so detaching the debugger cannot make a
+      // later heartbeat create the shared lock unexpectedly.
+      FBroadcastHandoverLockAcquired := True;
+      FBroadcastHandoverLockBypassed := True;
+      FBroadcastHandoverConnectionLost := False;
+      FBroadcastHandoverOwnerId := '';
+      FLastBroadcastHandoverHeartbeatTick := 0;
+      SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                        UNLOCKED_COLOR);
+      AMessage := 'Broadcast handover lock bypassed for debugger execution.';
+      Result := True;
+      Exit;
+    end;
 
   if FBroadcastHandoverLockAcquired then
     begin
@@ -5535,6 +5549,7 @@ begin
     end;
 
   FBroadcastHandoverLockAcquired := True;
+  FBroadcastHandoverLockBypassed := False;
   FBroadcastHandoverConnectionLost := False;
   FBroadcastHandoverOwnerId := Format('%s-%d-%d',
                                       [BroadcastHandoverComputerName(),
@@ -5570,16 +5585,17 @@ var
 
 begin
 
-  {$IFDEF DEBUG}
-  // No shared lock or handover status is created in a debug build.
-  FBroadcastHandoverLockAcquired := False;
-  FBroadcastHandoverOwnerId := '';
-  FBroadcastHandoverConnectionLost := False;
-  FLastBroadcastHandoverHeartbeatTick := 0;
-  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
-                                    UNLOCKED_COLOR);
-  Exit;
-  {$ENDIF}
+  if FBroadcastHandoverLockBypassed then
+    begin
+      // No shared lock or handover status was created for this debug session.
+      FBroadcastHandoverLockAcquired := False;
+      FBroadcastHandoverOwnerId := '';
+      FBroadcastHandoverConnectionLost := False;
+      FLastBroadcastHandoverHeartbeatTick := 0;
+      SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                        UNLOCKED_COLOR);
+      Exit;
+    end;
 
   if not FBroadcastHandoverLockAcquired then
     Exit;
@@ -5615,6 +5631,7 @@ begin
     memLog.Lines.Append('Broadcast lock was not removed because server ownership could not be verified.');
 
   FBroadcastHandoverLockAcquired := False;
+  FBroadcastHandoverLockBypassed := False;
   FBroadcastHandoverOwnerId := '';
   FBroadcastHandoverConnectionLost := False;
   FLastBroadcastHandoverHeartbeatTick := 0;
@@ -5686,11 +5703,9 @@ var
 
 begin
 
-  {$IFDEF DEBUG}
-  // AcquireBroadcastHandoverLock is intentionally process-local in debug
-  // builds, so a heartbeat must not recreate the shared lock directory.
-  Exit;
-  {$ENDIF}
+  // Preserve the process-lifetime bypass even if the IDE debugger is detached.
+  if FBroadcastHandoverLockBypassed then
+    Exit;
 
   if not FBroadcastHandoverLockAcquired then
     Exit;

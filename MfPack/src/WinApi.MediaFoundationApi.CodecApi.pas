@@ -10,7 +10,7 @@
 // Release date: 17-10-2015
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: CodecAPI Definitions.
 //
 // Organisation: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //          Maybe we need the Macro's later (see the original headerfile.)
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -1949,6 +1949,37 @@ const
                                                               D3: $44bd;
                                                               D4: ($9a, $9e, $93, $b0, $36, $34, $c3, $6e));
 
+  { 10.0.28000.0  }
+  CODECAPI_AVEncVideoSatdMapBlockSize              : TGUID = (D1: $596f1106;
+                                                              D2: $8ce0;
+                                                              D3: $4302;
+                                                              D4: ($af, $79, $c4, $ec, $67, $aa, $dc, $6d));
+  {$EXTERNALSYM CODECAPI_AVEncVideoSatdMapBlockSize}
+
+  CODECAPI_AVEncVideoInputDeltaQPBlockSettings     : TGUID = (D1: $5a4787dc;
+                                                              D2: $0648;
+                                                              D3: $47aa;
+                                                              D4: ($b9, $45, $55, $2b, $fa, $d2, $a6, $d8));
+  {$EXTERNALSYM CODECAPI_AVEncVideoInputDeltaQPBlockSettings}
+
+  CODECAPI_AVEncVideoInputAbsoluteQPBlockSettings  : TGUID = (D1: $ef95a145;
+                                                              D2: $4f91;
+                                                              D3: $4dea;
+                                                              D4: ($81, $73, $ac, $ff, $11, $43, $42, $10));
+  {$EXTERNALSYM CODECAPI_AVEncVideoInputAbsoluteQPBlockSettings}
+
+  CODECAPI_AVEncVideoD3D12ReconstructedPictureOutputMode : TGUID = (D1: $4a7b2e8f;
+                                                                    D2: $1d93;
+                                                                    D3: $4c6a;
+                                                                    D4: ($b5, $48, $91, $e2, $f8, $c5, $a7, $d3));
+  {$EXTERNALSYM CODECAPI_AVEncVideoD3D12ReconstructedPictureOutputMode}
+
+  CODECAPI_AVEncAV1EncoderOperatingMode            : TGUID = (D1: $8f2e1f91;
+                                                              D2: $5b4c;
+                                                              D3: $4e1a;
+                                                              D4: ($9c, $3d, $2f, $6a, $8b, $1d, $4e, $7c));
+  {$EXTERNALSYM CODECAPI_AVEncAV1EncoderOperatingMode}
+
 // end of static definitions }
 
 
@@ -3278,6 +3309,50 @@ const
   // Zero value is used to disable the bits used map reporting.
   AVEncVideoOutputBitsUsedMapBlockSize :  TGUID = '{6C2CD11A-CA3B-44BD-9A9E-93B03634C36E}';
 
+  { 10.0.28000.0  }
+  // AVEncVideoSatdMapBlockSize (VT_UI4)
+  // Zero disables SATD map reporting; other values are powers of two such as 16 or 32.
+  AVEncVideoSatdMapBlockSize : TGUID = '{596F1106-8CE0-4302-AF79-C4EC67AADC6D}';
+  {$EXTERNALSYM AVEncVideoSatdMapBlockSize}
+
+  // AVEncVideoInputDeltaQPBlockSettings (VT_BLOB)
+  AVEncVideoInputDeltaQPBlockSettings : TGUID = '{5A4787DC-0648-47AA-B945-552BFAD2A6D8}';
+  {$EXTERNALSYM AVEncVideoInputDeltaQPBlockSettings}
+
+  // AVEncVideoInputAbsoluteQPBlockSettings (VT_BLOB)
+  AVEncVideoInputAbsoluteQPBlockSettings : TGUID = '{EF95A145-4F91-4DEA-8173-ACFF11434210}';
+  {$EXTERNALSYM AVEncVideoInputAbsoluteQPBlockSettings}
+
+type
+  PeAVEncVideoD3D12ReconstructedPictureOutputMode = ^eAVEncVideoD3D12ReconstructedPictureOutputMode;
+  eAVEncVideoD3D12ReconstructedPictureOutputMode = UINT32;
+  {$EXTERNALSYM eAVEncVideoD3D12ReconstructedPictureOutputMode}
+const
+  eAVEncVideoEncodeD3D12ReconstructedPictureMode_None = eAVEncVideoD3D12ReconstructedPictureOutputMode(0);
+  {$EXTERNALSYM eAVEncVideoEncodeD3D12ReconstructedPictureMode_None}
+  eAVEncVideoEncodeD3D12ReconstructedPictureMode_Copy = eAVEncVideoD3D12ReconstructedPictureOutputMode(1);
+  {$EXTERNALSYM eAVEncVideoEncodeD3D12ReconstructedPictureMode_Copy}
+  eAVEncVideoEncodeD3D12ReconstructedPictureMode_Shared = eAVEncVideoD3D12ReconstructedPictureOutputMode(2);
+  {$EXTERNALSYM eAVEncVideoEncodeD3D12ReconstructedPictureMode_Shared}
+
+  AVEncVideoD3D12ReconstructedPictureOutputMode : TGUID = '{4A7B2E8F-1D93-4C6A-B548-91E2F8C5A7D3}';
+  {$EXTERNALSYM AVEncVideoD3D12ReconstructedPictureOutputMode}
+
+type
+  PeAV1EncoderOperatingMode = ^eAV1EncoderOperatingMode;
+  eAV1EncoderOperatingMode = UINT32;
+  {$EXTERNALSYM eAV1EncoderOperatingMode}
+const
+  eAV1EncoderOperatingMode_Auto = eAV1EncoderOperatingMode(0);
+  {$EXTERNALSYM eAV1EncoderOperatingMode_Auto}
+  eAV1EncoderOperatingMode_Reference = eAV1EncoderOperatingMode(1);
+  {$EXTERNALSYM eAV1EncoderOperatingMode_Reference}
+  eAV1EncoderOperatingMode_Optimized = eAV1EncoderOperatingMode(2);
+  {$EXTERNALSYM eAV1EncoderOperatingMode_Optimized}
+
+  AVEncAV1EncoderOperatingMode : TGUID = '{8F2E1F91-5B4C-4E1A-9C3D-2F6A8B1D4E7C}';
+  {$EXTERNALSYM AVEncAV1EncoderOperatingMode}
+
   // AVScenarioInfo (UINT32)
   AVScenarioInfo :  TGUID = '{b28a6e64-3ff9-446a-8a4b-0d7a53413236}';
   {$EXTERNALSYM AVScenarioInfo}
@@ -4538,6 +4613,9 @@ const
   {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE11}
   eAVDecDDOperationalMode_PORTABLE14 = eAVDecDDOperationalMode(7);    // Dialnorm enabled, dialogue at -14dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
   {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE14}
+  { 10.0.28000.0  }
+  eAVDecDDOperationalMode_PORTABLE16 = eAVDecDDOperationalMode(8);    // Dialnorm enabled, dialogue at -16dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
+  {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE16}
 
 
 type

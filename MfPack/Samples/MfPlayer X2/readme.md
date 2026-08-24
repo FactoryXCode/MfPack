@@ -117,7 +117,7 @@ are not claimed as supported by this snapshot.
 * Windows 10 version 1703 or later.  
 * Delphi XE7 or later, including Delphi 12.  
 * MfPack 3.2.0 headers and units.  
-* Windows SDK: `10.0.26100.4654`.  
+* Windows SDK: `10.0.28000.2705`.  
 * A Media Foundation compatible video and audio decoder for the selected source.  
 * An H.264 encoder and AAC encoder for export or transcoded casting.  
 * A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.  

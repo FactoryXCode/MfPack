@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Dialog example to select sidecar and embedded subtitle tracks.
 //
 // Company: FactoryX
@@ -23,18 +23,18 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 01/08/2026 All                 Added exact MKV embedded subtitle track selection.
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: Bitmap PGS/VobSub tracks are displayed as unsupported and cannot
 //               be selected by the current text compositor.
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 //==============================================================================
 unit dlgSelectTimedTextLanguages;

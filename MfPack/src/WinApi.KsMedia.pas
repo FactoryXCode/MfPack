@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: WDM-CSA Multimedia Definitions.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -2420,6 +2420,15 @@ type
   PKSMIDILOOPED_EVENT = ^KSMIDILOOPED_EVENT;
   {$EXTERNALSYM PKSMIDILOOPED_EVENT}
 
+  { 10.0.28000.0  }
+  KSMIDILOOPED_EVENT2 = record
+    WriteEvent: THandle;
+    ReadEvent: THandle;
+  end;
+  {$EXTERNALSYM KSMIDILOOPED_EVENT2}
+  PKSMIDILOOPED_EVENT2 = ^KSMIDILOOPED_EVENT2;
+  {$EXTERNALSYM PKSMIDILOOPED_EVENT2}
+
 
   KSMIDILOOPED_BUFFER_PROPERTY = record
     _Property: KSPROPERTY;
@@ -4704,6 +4713,20 @@ type
   );
   {$EXTERNALSYM KSEVENT_DYNAMICFORMATCHANGE}
 
+const
+  { 10.0.28000.0  }
+  KSATTRIBUTEID_VIDEOFORMAT_DX12 : TGUID = '{FC9D87B5-0B02-438E-89B0-E241FCE889AD}';
+  {$EXTERNALSYM KSATTRIBUTEID_VIDEOFORMAT_DX12}
+
+type
+  PVIDEOFORMAT_DX12 = ^VIDEOFORMAT_DX12;
+  VIDEOFORMAT_DX12 = record
+    Header: KSATTRIBUTE;
+    resourceLayout: ULONG; // D3D12_TEXTURE_LAYOUT
+    resourceFlags: ULONG;  // D3D12_RESOURCE_FLAGS
+    customLayout: TGUID;
+  end;
+  {$EXTERNALSYM VIDEOFORMAT_DX12}
 
 
   //===========================================================================

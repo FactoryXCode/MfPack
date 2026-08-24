@@ -15,16 +15,18 @@
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
 - The complete Windows Media (WinMM) API.
+  
+# MfPack API's and Samples
+  
 - MfPack Cast V2 API.
-- Media Foundation samples.
+- Media Foundation, WASAP and  XAudio2 samples.
+  
   
 # <u>Latest release:</u> 
   
-# MfPack 
-  
-Version 3.2.0  
-Delphi XE2 (recommended Delphi XE7) up to and including Delphi 12  
-SDK version: 10.0.26100.4654 (Windows 11).  
+# MfPack  Version 4.0.0  
+Delphi XE2 (recommended Delphi XE7) up to and including Delphi 13.1  
+SDK version: 10.0.28000.2705 (Windows 11).  
   
   
 **Important note:**  

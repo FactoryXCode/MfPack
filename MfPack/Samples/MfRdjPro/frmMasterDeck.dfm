@@ -44,7 +44,6 @@ object MasterDeckFrm: TMasterDeckFrm
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitWidth = 332
     object avMixGraph: TRdjAudioMixVisualizer
       Left = 0
       Top = 0
@@ -89,7 +88,6 @@ object MasterDeckFrm: TMasterDeckFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitWidth = 332
       object pnlRecorder: TPanel
         Left = 0
         Top = 21
@@ -102,7 +100,6 @@ object MasterDeckFrm: TMasterDeckFrm
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
-        ExplicitWidth = 332
         object Bevel1: TBevel
           Left = 4
           Top = 14
@@ -570,7 +567,6 @@ object MasterDeckFrm: TMasterDeckFrm
         ParentDoubleBuffered = False
         ShowCaption = False
         TabOrder = 1
-        ExplicitWidth = 332
       end
     end
   end
@@ -586,7 +582,6 @@ object MasterDeckFrm: TMasterDeckFrm
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitWidth = 332
     object bvlPfl: TBevel
       Left = 201
       Top = 13
@@ -1247,7 +1242,6 @@ object MasterDeckFrm: TMasterDeckFrm
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 332
     object lblCaption: TLabel
       Left = 8
       Top = 10

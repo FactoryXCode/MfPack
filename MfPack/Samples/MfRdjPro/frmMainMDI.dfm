@@ -66,6 +66,7 @@ object MainMDIFrm: TMainMDIFrm
       Top = 0
       Width = 1062
       Height = 41
+      Hint = 'Local time.'
       Align = alClient
       Alignment = taCenter
       AutoSize = False
@@ -76,6 +77,8 @@ object MainMDIFrm: TMainMDIFrm
       Font.Name = 'Terminal'
       Font.Style = [fsBold]
       ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
       Transparent = True
       Layout = tlCenter
       OnMouseDown = pnlCaptionMouseDown
@@ -131,10 +134,10 @@ object MainMDIFrm: TMainMDIFrm
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblAppTitle: TLabel
-      Left = -2
+      Left = 0
       Top = 0
       Width = 105
-      Height = 17
+      Height = 35
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
@@ -216,6 +219,7 @@ object MainMDIFrm: TMainMDIFrm
       Top = 0
       Width = 111
       Height = 41
+      Hint = 'Show the setup dialog.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -246,7 +250,9 @@ object MainMDIFrm: TMainMDIFrm
       LightColor = 12348265
       ParentColor = False
       ParentFont = False
+      ParentShowHint = False
       ShadowColor = clSkyBlue
+      ShowHint = True
       Style = bsModern
       Transparent = True
       OnClick = btnSetupClick
@@ -256,6 +262,7 @@ object MainMDIFrm: TMainMDIFrm
       Top = 0
       Width = 111
       Height = 41
+      Hint = 'Show the Playlist Editor.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -286,7 +293,9 @@ object MainMDIFrm: TMainMDIFrm
       LightColor = 12348265
       ParentColor = False
       ParentFont = False
+      ParentShowHint = False
       ShadowColor = clSkyBlue
+      ShowHint = True
       Style = bsModern
       Transparent = True
       OnClick = btnPlaylistClick
@@ -402,6 +411,7 @@ object MainMDIFrm: TMainMDIFrm
       Top = 0
       Width = 112
       Height = 41
+      Hint = 'Show/Hide the effects rack.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -432,7 +442,9 @@ object MainMDIFrm: TMainMDIFrm
       LightColor = 12348265
       ParentColor = False
       ParentFont = False
+      ParentShowHint = False
       ShadowColor = clSkyBlue
+      ShowHint = True
       Style = bsModern
       Transparent = True
       OnClick = btnEffectsClick
@@ -576,6 +588,7 @@ object MainMDIFrm: TMainMDIFrm
       Top = 0
       Width = 111
       Height = 41
+      Hint = 'Show/Hide the Media Server window.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -686,7 +699,9 @@ object MainMDIFrm: TMainMDIFrm
       LightColor = 12348265
       ParentColor = False
       ParentFont = False
+      ParentShowHint = False
       ShadowColor = clSkyBlue
+      ShowHint = True
       Style = bsModern
       Transparent = True
       OnClick = chkMediaServerClick
@@ -867,7 +882,7 @@ object MainMDIFrm: TMainMDIFrm
       end
       object Label4: TLabel
         Left = 1020
-        Top = 41
+        Top = 43
         Width = 46
         Height = 19
         Hint = 'DoubleClick to select an image.'

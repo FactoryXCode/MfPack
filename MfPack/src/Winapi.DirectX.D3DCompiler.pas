@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: D3D Compilation Types and APIs.
 //              This header is used by HLSL. For more information, see:
 //              https://learn.microsoft.com/en-us/windows/win32/api/_direct3dhlsl/
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 13/08/2025 All                 Ozzy Osbourne release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11 and this file are outdated!
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

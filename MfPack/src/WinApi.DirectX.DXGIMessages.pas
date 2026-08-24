@@ -10,7 +10,7 @@
 // Release date: 27-02-2020
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: DXGI Debug Message Enumeration.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -683,6 +683,20 @@ const
   DXGI_MSG_IDXGIFactory_CreateSwapChain_MultipleSwapchainRefToSurface_DeferredDtr = DXGI_Message_Id(297);
   DXGI_MSG_IDXGIFactory_MakeWindowAssociation_NoOpBehavior = DXGI_Message_Id(298);
   {$EXTERNALSYM DXGI_MSG_IDXGIFactory_MakeWindowAssociation_NoOpBehavior}
+
+  { 10.0.28000.0  }
+  DXGI_MSG_IDXGIFactory8_CreateSwapChain_InvalidColorSpaceFlag = DXGI_Message_Id(299);
+  {$EXTERNALSYM DXGI_MSG_IDXGIFactory8_CreateSwapChain_InvalidColorSpaceFlag}
+  DXGI_MSG_IDXGIFactory8_CreateSwapChain_InvalidColorSpace = DXGI_Message_Id(300);
+  {$EXTERNALSYM DXGI_MSG_IDXGIFactory8_CreateSwapChain_InvalidColorSpace}
+  DXGI_MSG_IDXGISwapChain5_ResizeBuffers2_InvalidColorSpace = DXGI_Message_Id(301);
+  {$EXTERNALSYM DXGI_MSG_IDXGISwapChain5_ResizeBuffers2_InvalidColorSpace}
+  DXGI_MSG_IDXGISwapChain5_SetColorSpace1_Unsupported = DXGI_Message_Id(302);
+  {$EXTERNALSYM DXGI_MSG_IDXGISwapChain5_SetColorSpace1_Unsupported}
+  DXGI_MSG_IDXGIAdapter5_GetSingleAdapterHybridMode_Unsupported = DXGI_Message_Id(303);
+  {$EXTERNALSYM DXGI_MSG_IDXGIAdapter5_GetSingleAdapterHybridMode_Unsupported}
+  DXGI_MSG_IDXGIAdapter5_SetSingleAdapterHybridMode_Unsupported = DXGI_Message_Id(304);
+  {$EXTERNALSYM DXGI_MSG_IDXGIAdapter5_SetSingleAdapterHybridMode_Unsupported}
 
   {$EXTERNALSYM DXGI_MSG_Phone_IDXGIFactory_CreateSwapChain_NotForegroundWindow}
   DXGI_MSG_Phone_IDXGIFactory_CreateSwapChain_NotForegroundWindow = DXGI_Message_Id(1000);

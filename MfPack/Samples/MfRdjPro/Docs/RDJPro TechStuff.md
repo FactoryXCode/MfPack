@@ -1,6 +1,6 @@
 # RDJPro Technical Handout
 
-Version: 3.2.0
+Version: 4.0.0
 
 RDJPro is the extended MfRdj sample application. It combines MfPack, Microsoft Media Foundation, Core Audio, WASAPI, VCL, Caddy, and browser Media Source Extensions into one live audio/video DJ and broadcast application.
 

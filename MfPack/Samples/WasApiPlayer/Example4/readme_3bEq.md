@@ -1,6 +1,8 @@
 # High/Mid/Low EQ (v4): Mid Notch + Shelf Bandwidth
 
-This update adds two *professional* controls often found on mixers/engineer EQs:
+&#x20; 
+
+This update adds two *professional* controls often found on mixers/engineer EQs:  
 
 1. **Mid Mode**
 * **Peaking (bell)**: boost/cut around center frequency
@@ -11,15 +13,15 @@ This update adds two *professional* controls often found on mixers/engineer EQs:
 * Low/High shelves now expose RBJ shelf parameter **S** (slope)
 * Lower S = gentler transition, higher S = steeper
 
+&#x20; 
 
-
-Defaults:
+Defaults:  
 
 * Low shelf: 100 Hz, S=1.0
 * Mid: 1000 Hz, Q=1.0, Mode=Peaking
 * High shelf: 10 kHz, S=1.0
 
-
+&#x20; 
 
 Ranges (clamped inside the MFT):
 

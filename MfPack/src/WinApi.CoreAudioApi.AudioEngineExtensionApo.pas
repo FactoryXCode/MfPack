@@ -10,7 +10,7 @@
 // Release date: 29-06-2022
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: This header is used by Audio Devices DDI Reference. For more information, see:
 //              Audio Devices DDI Reference (https://docs.microsoft.com/en-us/windows/win32/api/_audio/)
 //
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -35,11 +35,11 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

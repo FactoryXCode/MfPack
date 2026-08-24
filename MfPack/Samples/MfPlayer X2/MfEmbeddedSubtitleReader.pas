@@ -10,7 +10,7 @@
 // Release date: 31-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Container-neutral reader for textual subtitle streams exposed
 //              by a Media Foundation source. The reader imports cues into the
 //              existing TMfTimedText model used by local playback and Cast.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 // 02/08/2026 Carmen              Added direct Matroska text-track fallback.
 // 01/08/2026 Carmen              Added exact embedded-track selection and end-of-stream safety.
 // 01/08/2026 Carmen              Robust stream classification and explicit Source Reader type selection.
@@ -33,14 +33,14 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: TMfTimedText, TMfSubtitleCompositor
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 //
 // Known Issues: Bitmap subtitle streams (PGS/VobSub) are detected but are not
 //               decoded. The native Microsoft MP4 source ignores non-audio/
 //               video tracks, so MP4 timed-text requires a container adapter.
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 //==============================================================================
 unit MfEmbeddedSubtitleReader;

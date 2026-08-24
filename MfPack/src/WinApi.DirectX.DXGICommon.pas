@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Microsoft DirectX Graphics Infrastructure API
 //
 //
@@ -22,18 +22,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -157,6 +157,9 @@ const
   {$EXTERNALSYM DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_LEFT_P2020}
   DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_TOPLEFT_P2020   = DXGI_COLOR_SPACE_TYPE(24);
   {$EXTERNALSYM DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_TOPLEFT_P2020}
+  { 10.0.28000.0  }
+  DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P2020          = DXGI_COLOR_SPACE_TYPE(25);
+  {$EXTERNALSYM DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P2020}
   //DXGI_COLOR_SPACE_CUSTOM               = FORCEDWORD);
 
 

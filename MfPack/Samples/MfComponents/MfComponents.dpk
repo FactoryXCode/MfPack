@@ -32,7 +32,7 @@ requires
   rtl,
   vcl,
   DesignIDE,
-  MfPackX320;
+  MfPackX400;
 
 contains
   QueueTimer in 'QueueTimer.pas',

@@ -29,7 +29,7 @@ package MfCastCompile;
 requires
   rtl,
   vcl,
-  MfPackX320;
+  MfPackX400;
 
 contains
   MfCast in 'MfCast.pas',

@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: ChromeCast GUI dialog.
 //
 //==============================================================================
