@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 4.0.0
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
-// Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// Compiler version: 23 up to 36
+// SDK version: 10.0.28000.2705
 // Todo: -
 // =============================================================================
 // Source: -
@@ -376,8 +376,8 @@ const
 // {$DEFINE MFPACK_VERSION_317_UP} // RammStein release, Milestone update 22.
 // {$DEFINE MFPACK_VERSION_318_UP} // Ozzy Osbourne release, Milestone update 23.
 // {$DEFINE MFPACK_VERSION_319_UP} // Sineead O'Connor release, Milestone update 24.
-{$DEFINE MFPACK_VERSION_320_UP}    // Bauhaus release, Milestone update 25.
-
+// {$DEFINE MFPACK_VERSION_320_UP}    // Bauhaus release, Milestone update 25.
+{$DEFINE MFPACK_VERSION_400_UP}    // Moby release, Milestone update 26.
 // WARNINGS
 // enable/disable compiler warnings.
 // Set in your IDE environment or here in case MfPack only should be affected.
