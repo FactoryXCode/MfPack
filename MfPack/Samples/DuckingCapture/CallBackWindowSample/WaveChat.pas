@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -74,7 +74,8 @@ uses
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMeApi,
   {Application}
-  ChatTransport;
+  ChatTransport,
+  WaveOutputRoute;
 
 // const WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE = $0010  declared in MMeApi
 
@@ -87,6 +88,8 @@ type
     _waveHeader2: WAVEHDR;
     _waveBuffer1: array of Word;
     _waveBuffer2: array of Word;
+    _waveOutput: CWaveOutputRoute;
+    _stopping: Boolean;
 
   public
     constructor Create(AppWindow: HWND); override;
@@ -172,6 +175,7 @@ begin
              SizeOf(_waveHeader1));
   ZeroMemory(@_waveHeader2,
              SizeOf(_waveHeader2));
+  _waveOutput := CWaveOutputRoute.Create;
 end;
 
 //
@@ -212,6 +216,7 @@ var
 begin
   if _waveHandle <> 0 then
     begin
+      _stopping := True;
       mmr := waveInStop(_waveHandle);
       if mmr <> MMSYSERR_NOERROR then
         MessageBox(0,
@@ -259,10 +264,13 @@ begin
 
       _waveHandle := 0;
     end;
+  if Assigned(_waveOutput) then
+    _waveOutput.Shutdown;
 end;
 
 destructor CWaveChat.Destroy();
 begin
+  _waveOutput.Free;
   inherited Destroy;
 end;
 
@@ -273,9 +281,10 @@ function CWaveChat.StartChat(const HideFromVolumeMixer: Boolean): Boolean;
 var
   mmr: MMRESULT;
   waveFormat: WAVEFORMATEX;
+  bufferBytes: Cardinal;
 
 begin
-
+  _stopping := False;
   waveFormat.cbSize := 0;
   waveFormat.nSamplesPerSec := 44100;
   waveFormat.nChannels := 2;
@@ -301,11 +310,26 @@ begin
       Exit;
     end;
 
+  // 20 ms blocks keep the capture-to-speaker latency low.
+  bufferBytes := waveFormat.nAvgBytesPerSec div 50;
+  bufferBytes := bufferBytes - (bufferBytes mod waveFormat.nBlockAlign);
+  if not _waveOutput.Initialize(waveFormat, bufferBytes) then
+    begin
+      MessageBox(_AppWindow,
+                 'Failed to open the default wave output endpoint',
+                 'Error',
+                 MB_OK);
+      waveInClose(_waveHandle);
+      _waveHandle := 0;
+      Result := False;
+      Exit;
+    end;
+
   ZeroMemory(@_waveHeader1,
              SizeOf(_waveHeader1));
 
   SetLength(_waveBuffer1,
-            waveFormat.nAvgBytesPerSec);
+            bufferBytes div SizeOf(Word));
 
   if Not Assigned(_waveBuffer1) then
     begin
@@ -317,7 +341,7 @@ begin
       Exit;
     end;
 
-  _waveHeader1.dwBufferLength := waveFormat.nAvgBytesPerSec;
+  _waveHeader1.dwBufferLength := bufferBytes;
   _waveHeader1.lpData := Pointer(_waveBuffer1);
 
 
@@ -351,7 +375,7 @@ begin
              SizeOf(_waveHeader2));
 
   SetLength (_waveBuffer2,
-             waveFormat.nAvgBytesPerSec);
+             bufferBytes div SizeOf(Word));
 
   if Not Assigned(_waveBuffer2) then
     begin
@@ -363,7 +387,7 @@ begin
       Exit;
     end;
 
-  _waveHeader2.dwBufferLength := waveFormat.nAvgBytesPerSec;
+  _waveHeader2.dwBufferLength := bufferBytes;
   _waveHeader2.lpData := PAnsiChar(_waveBuffer2);
 
   mmr := waveInPrepareHeader(_waveHandle,
@@ -417,6 +441,8 @@ begin
   if _waveHandle <> 0 then
     begin
 
+      _stopping := True;
+
      mmr := waveInStop(_waveHandle);
       if mmr <> MMSYSERR_NOERROR then
         MessageBox(0,
@@ -462,6 +488,8 @@ begin
 
       _waveHandle := 0;
     end;
+  if Assigned(_waveOutput) then
+    _waveOutput.Shutdown;
 end;
 
 
@@ -514,8 +542,13 @@ begin
                     hwaveHandle := HWAVEIN(message.WParam);
                     waveHeader := LPWAVEHDR(message.LParam);
 
-                    if _waveHandle <> 0 then
+                    if (_waveHandle <> 0) and not _stopping then
                       begin
+                        if Assigned(_waveOutput) then
+                          if waveHeader = @_waveHeader1 then
+                            _waveOutput.Submit(0, waveHeader.lpData, waveHeader.dwBytesRecorded)
+                          else if waveHeader = @_waveHeader2 then
+                            _waveOutput.Submit(1, waveHeader.lpData, waveHeader.dwBytesRecorded);
                         mmr := waveInAddBuffer(hwaveHandle,
                                                waveHeader,
                                                SizeOf(WAVEHDR));
@@ -546,3 +579,4 @@ begin
 end;
 
 end.
+

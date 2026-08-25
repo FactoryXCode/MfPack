@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -82,7 +82,8 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   {Application}
-  ChatTransport;
+  ChatTransport,
+  WasapiInputRoute;
 
 type
   PWasapiChat = ^CWasapiChat;
@@ -94,6 +95,7 @@ type
     _ChatThread: THandle;
     _ShutdownEvent: THandle;
     _AudioSamplesReadyEvent: THandle;
+    _InputRoute: CWasapiInputRoute;
 
   public
 
@@ -208,6 +210,7 @@ end;
 constructor CWasapiChat.Create(AppWindow: HWND);
 begin
   _AppWindow := AppWindow;
+  _InputRoute := CWasapiInputRoute.Create(AppWindow);
   //hwndWasApiChat := AllocateHWnd(MessageHandler);  // Not thread safe, you could use a unit as published here:
                                                    // https://stackoverflow.com/questions/8820294/how-can-i-make-allocatehwnd-threadsafe
 end;
@@ -309,6 +312,8 @@ end;
 //
 procedure CWasapiChat.Shutdown();
 begin
+  if Assigned(_InputRoute) then
+    _InputRoute.Stop;
   if _ChatThread <> 0 then
     begin
       SetEvent(_ShutdownEvent);
@@ -339,6 +344,7 @@ end;
 
 destructor CWasapiChat.Destroy();
 begin
+  _InputRoute.Free;
   inherited Destroy;
 end;
 
@@ -360,6 +366,18 @@ begin
   Result := True;
   hThreadId := 0;
   PData := Nil;
+
+  // Capture mode now routes the microphone to the default speaker endpoint.
+  if _Flow = eCapture then
+    begin
+      Result := _InputRoute.Start(HideFromVolumeMixer);
+      if not Result then
+        MessageBox(_AppWindow,
+                   'Unable to route the capture endpoint to the default audio output.',
+                   'WASAPI Transport Start Failure',
+                   MB_OK);
+      Exit;
+    end;
 
   hr := _ChatEndpoint.Activate(IID_IAudioClient,
                                CLSCTX_INPROC_SERVER,
@@ -417,7 +435,7 @@ begin
                                 mixFormat,
                                 @chatGuid);
 
-  CoTaskMemFree(@mixFormat);
+  CoTaskMemFree(mixFormat);
   mixFormat := Nil;
 
   if FAILED(hr) then
@@ -544,6 +562,11 @@ end;
 //
 procedure CWasapiChat.StopChat();
 begin
+  if _Flow = eCapture then
+    begin
+      _InputRoute.Stop;
+      Exit;
+    end;
   //
   //  Tell the chat thread to shut down, wait for the thread to complete then clean up all the stuff we
   //  allocated in StartChat().
@@ -576,3 +599,4 @@ begin
 end;
 
 end.
+

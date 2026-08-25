@@ -17,8 +17,9 @@
 //              ================================================================
 //
 //              This sample implements a simple "Chat" that demonstrates to the "ducking"
-//              feature in Windows 7 and higher. It simply captures samples from the sound card and
-//              discards them.
+//              feature in Windows 7 and higher. It simply routes the default
+//              communications capture endpoint to the default console playback endpoint,
+//              with automatic format conversion.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -71,6 +72,7 @@ unit IddDialogChat;
 interface
 
 uses
+
   {Winapi}
   Winapi.Windows,
   Winapi.Messages,
