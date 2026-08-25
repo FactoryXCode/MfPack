@@ -11,7 +11,8 @@
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
 - XAudio2 API (XBox game development, successor of DirectSound).
-- Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
+- Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI,  
+  DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
 - The complete Windows Media (WinMM) API.
@@ -19,7 +20,7 @@
 # MfPack API's and Samples
   
 - MfPack Cast V2 API.
-- Media Foundation, WASAP and  XAudio2 samples.
+- Media Foundation, WASAPI and XAudio2 samples.
   
   
 # <u>Latest release:</u> 
@@ -30,15 +31,16 @@ SDK version: 10.0.28000.2705 (Windows 11).
   
   
 **Important note:**  
-The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) codecs because of financial/license reasons.  
-Those you can buy from Microsoft Store or download elsewhere. 
+The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) codecs.  
+Those you can buy from Microsoft Store or download elsewhere.
   
   
 # Samples
   
 **MfVideoThumbNails sample**
   
-*This sample app needs the D2D1 Api. If your Delphi version doesn't have the latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
+*This sample app needs the D2D1 Api. If your Delphi version doesn't have the  
+latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
   
@@ -46,7 +48,8 @@ Those you can buy from Microsoft Store or download elsewhere.
   
 **MediaEngine Player 2 & IMFTimedText sample**
   
-*MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using the IMFTimedTextNotify interface.*
+*MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using  
+the IMFTimedTextNotify interface.*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
   
@@ -87,12 +90,14 @@ Note: The old MS sample used the deprecated IMFplayer interface.
   
 **MfPeakMeter, MfPeakMeterEx MfPeakMeterMmcs component samples**
   
-An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.  
+An example about how to create a MfPeakMeter control. This sample is part of the  
+Samples/MfComponents package.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
   
-An example about how to create a MfAudioVisualizer control - A visual component that uses WASAPI loopback, Peak/RMS,  
-optional spectrum bars or VU. This sample is part of the Samples/MfComponents package.  
+An example about how to create a MfAudioVisualizer control - A visual component that  
+uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU.  
+This sample is part of the Samples/MfComponents package.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
   
@@ -100,12 +105,14 @@ optional spectrum bars or VU. This sample is part of the Samples/MfComponents pa
   
 **AudioClip, AudioClipEx and AudioClipEx2 samples**
   
-Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file. This sample application reads audio data from a  
-media file and writes the uncompressed audio to a WAVE file.  
-The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract  
-uncompressed audiodata from a media file.  
+Demonstrates using the IMFSourceReader API to extract uncompressed media data from  
+a media file. This sample application reads audio data from a media file and writes  
+the uncompressed audio to a WAVE file.  
+The AudioClipEx sample demonstrates using the IMFSourceReader and 
+IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.  
   
-The AudioClipEx2 sample demonstrates using the IMFSourceReader, IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a  
+The AudioClipEx2 sample demonstrates using the IMFSourceReader,  
+IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a  
 media file and write the audio to a wav. It also uses threads for better responsiveness.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
@@ -114,7 +121,7 @@ media file and write the audio to a wav. It also uses threads for better respons
 
 **MfPlayer**
   
-Player samples, based on the CPlayer sample.    
+Player samples, based on the original Microsoft CPlayer sample.  
 There are 4 samples in 4 project degrees.  
   
 - *MfPlayer I : The basic player sample.*
@@ -169,7 +176,8 @@ discards them.
 The sample enables the optional Media Foundation conversion stack. Compatible  
 MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. Containers such  
 as MKV are converted to fragmented MP4 and published by the local HTTP server.  
-Please read the white paper document  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API.  
+Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for  
+full details using the MfPack Cast API.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCastPlayer.png)
   
@@ -257,25 +265,32 @@ with the quality that is supported by your soundcard.
   
 **LoopBackCapture Sample 2**
   
-This sample demonstrates how to capture system audio either from a specific process tree or for all process except  
-a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.  
-The new data structure makes  it possible to restrict captured audio data to that rendered by a specific  
-process and any of its child processes. Windows 10 has always supported capturing all audio that is played on  
-an audio endpoint (referred to as "system" loopback capture), which captures all audio from all apps that  
-are playing sounds on the chosen audio endpoint.  
+This sample demonstrates how to capture system audio either from a  
+specific process tree or for all process except  
+a process tree and the use of ActivateAudioInterfaceAsync Win32 API  
+with a new initialization structure.  
+The new data structure makes it possible to restrict captured  
+audio data to that rendered by a specific process and any of its child processes.  
+Windows 10 has always supported capturing all audio that is played on  
+an audio endpoint (referred to as "system" loopback capture),  
+which captures all audio from all apps that are playing sounds on  
+the chosen audio endpoint.  
   
-With the new structure, only audio from the specified process, and its children, will be captured. Audio rendered by  
-other processes will not be captured. A flag is also provided to reverse the behavior, capturing all system  
-audio *except* those from the the specified process (and its children). Furthermore, the capture is not tied to a  
-specific audio endpoint, eliminating the need to create a separate IAudioClient to capture from each physical  
+With the new structure, only audio from the specified process,  
+and its children, will be captured. Audio rendered by other processes will not be captured.  
+A flag is also provided to reverse the behavior, capturing all system  
+audio *except* those from the the specified process (and its children).  
+Furthermore, the capture is not tied to a specific audio endpoint,  
+eliminating the need to create a separate IAudioClient to capture from each physical  
 audio endpoint.  
   
-If the processes whose audio will be captured does not have any audio rendering streams, then the capturing  
-process receives silence.  
+If the processes whose audio will be captured does not have any audio rendering streams,  
+then the capturing process receives silence.  
   
-It also demonstrates how to get a process by using the tlhelp32 API, to list a snapshot of running processes and be able to pick one.  
-The application is provided with a dialog to select a running process from the process tree you want to pick and has  
-a button to get the current PID of your application.  
+It also demonstrates how to get a process by using the tlhelp32 API,  
+to list a snapshot of running processes and be able to pick one.  
+The application is provided with a dialog to select a running process from  
+the process tree you want to pick and has a button to get the current PID of your application.  
   
 The application is using MMCSS and runs the rendering part in a separate thread.  
   
@@ -344,10 +359,10 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
   
 This sample demonstrates a Media Foundation–based streaming audio player built on top of XAudio2.  
   
-Audio files (WAV, MP3, FLAC, AAC, etc.) are decoded on-the-fly using the Media Foundation Source Reader and rendered
-through XAudio2 using a multi-buffer* *streaming model.  
-Playback control (Play, Pause, Stop, Replay, Seek) is fully thread-safe and handled by a dedicated worker thread, 
-avoiding UI blocking and audio glitches.  
+Audio files (WAV, MP3, FLAC, AAC, etc.) are decoded on-the-fly using the  
+Media Foundation Source Reader and rendered through XAudio2 using a multi-buffer* *streaming model.  
+Playback control (Play, Pause, Stop, Replay, Seek) is fully thread-safe and  
+handled by a dedicated worker thread, avoiding UI blocking and audio glitches.  
   
 *The sample also shows how to:*
   
@@ -358,7 +373,8 @@ avoiding UI blocking and audio glitches.
 ⦁	*Track real-time audio levels using the MfPeakMeter component.*
   
 Unlike earlier samples, this version does not load the entire audio file into memory.  
-It uses Media Foundation streaming decode + multiple XAudio2 buffers, making it suitable for large audio files (e.g. FLAC > 100 MB).  
+It uses Media Foundation streaming decode + multiple XAudio2 buffers,  
+making it suitable for large audio files (e.g. FLAC > 100 MB).  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
   
@@ -366,11 +382,14 @@ It uses Media Foundation streaming decode + multiple XAudio2 buffers, making it 
   
 **WASAPI Player Sample 1**
   
-This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.  
-using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.  
+This sample demonstrates how to use the IAudioClient to render different  
+audio formats like WAV, FLAC, MP3 etc.  
+using the IMFSourceReader to decode the format suitable for playing in  
+WASAPI's IAudioClient and renderer.  
   
 The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.  
-It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.  
+It shows you the basics of using the IAudioClient, iAudioRenderer,  
+IAudioClock and IAudioStreamVolume interfaces.  
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
@@ -427,7 +446,8 @@ This is not a sample for absolute beginners. Please read the documents included 
 **WASAPI Player Sample 5**
   
 This is a non-visual components application sample using WASAPI.  
-The sample shows you how to build a real-time audio playback engine for Windows using Delphi style components.  
+The sample shows you how to build a real-time audio playback engine for  
+Windows using Delphi style components.  
   
 ## Features  
 This sample also demonstrates how to create and implement a:
@@ -439,7 +459,8 @@ This sample also demonstrates how to create and implement a:
 - PlayerEngine component, using a WasApi renderer.
   
 **Note:**  
-This is not a sample for absolute beginners. Please read the documents included with this sample.  
+This is not a sample for absolute beginners.  
+Please read the documents included with this sample.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer5.png)
   
@@ -455,7 +476,8 @@ This sample demonstrates how to capture from screen using your videocard GPU.
   
 **MfCaptureVideoFromGPU Sample 2**
   
-This sample demonstrates how to capture a selected monitor (screen) connected with the graphics card GPU using DXGI Desktop Duplication,  
+This sample demonstrates how to capture a selected monitor (screen)  
+connected with the graphics card GPU using DXGI Desktop Duplication,  
 optionally captures system audio via WASAPI loopback, shows a live preview,  
 and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC audio).  
   
@@ -490,22 +512,24 @@ MfRDJPro is the extended version of MfRDJ.
   
 Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,  
 MfRDJ Pro adds a complete live broadcast layer around the mixer.  
-MfRDJ Pro still provides the familiar RDJ functions: channel decks, loopback decks, microphone input,  
-effects, PFL/cue monitoring, playlist editing, tag editing, and local recording.  
+MfRDJ Pro still provides the familiar RDJ functions: channel decks,  
+loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing,  
+tag editing, and local recording.  
+  
 The Pro version expands this into an audio/video streaming application.  
 It can combine the live program audio with camera video or a static video source,  
 encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.  
 The main technical difference is the broadcast pipeline.  
 MfRDJ Pro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4.  
-MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, writes a rolling live.json manifest,  
-and serves the result through Caddy.  
+MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments,  
+writes a rolling live.json manifest, and serves the result through Caddy.  
 Modern browsers can then play the stream using Media Source Extensions without needing Icecast for the video path.  
-MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and listener counts to JSON files for the web interface.  
-It includes safeguards for long-running broadcasts, such as bounded queues, fragment cleanup, Caddy mirroring,  
-sleep prevention options, and clean shutdown handling.  
-MfRDJ Pro supports casting to Cromecast devices on your local network using the integrated MfPack Cast V2 protocols.  
-In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJ Pro turns that mixer into a full live radio/video broadcast system using MfPack,  
-WASAPI, Media Foundation, Caddy, JSON, MfPack Cast V2, and browser MSE playback.   
+MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and  
+listener counts to JSON files for the web interface.  
+It includes safeguards for long-running broadcasts, such as bounded queues,  
+fragment cleanup, Caddy mirroring, sleep prevention options, and clean shutdown handling.  
+MfRDJ Pro supports casting to Cromecast devices on your local network using the  
+MfPack Cast V2 protocols.  
   
 **Note:**  
 You have to know the principles of WASAPI, MFT's, MfPack Cast V2, and audio manipulation.  
