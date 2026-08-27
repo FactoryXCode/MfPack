@@ -3,17 +3,17 @@
 Version: 4.0.0  
   
 Description:  
-  ========================================================================
-      WIN32 APPLICATION : Ducking Capture Sample Project Overview
-  ========================================================================
-  
-  This sample implements a simple "Chat" that demonstrates the Windows audio  
-  ducking feature. In capture mode, audio from the default communications  
-  capture endpoint is routed to the default playback endpoint.  
-  Select Capture in the application to hear the routed input.  
-  Use headphones while testing to avoid microphone feedback.  
+  ========================================================================  
+      WIN32 APPLICATION : Ducking Capture Sample Project Overview  
+  ========================================================================  
     
-  Note that this sample requires Windows 7 or later.  
+This sample implements a simple "Chat" that demonstrates the Windows audio  
+ducking feature. In capture mode, audio from the default communications  
+capture endpoint is routed to the default playback endpoint.  
+Select Capture in the application to hear the routed input.  
+Use headphones while testing to avoid microphone feedback.  
+  
+Note that this sample requires Windows 7 or later.  
   
 NOTES:  
  - There are 2 versions of the sample. One that uses the function callback and   
@@ -28,7 +28,10 @@ NOTES:
  - Minimum supported MfPack version: 3.1.2
   
 Project: Media Foundation - MFPack - Samples  
-Project location: http://sourceforge.net/projects/MFPack  
+  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
   
 First release date: 05-07-2020  
 Final release date: 24/08/2026  

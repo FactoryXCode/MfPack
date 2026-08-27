@@ -1,9 +1,10 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
+  BorderStyle = bsSingle
   Caption = 'MfSimpleWebCamStreamer'
   ClientHeight = 330
-  ClientWidth = 620
+  ClientWidth = 616
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,36 +18,36 @@ object frmMain: TfrmMain
   PixelsPerInch = 96
   TextHeight = 13
   object lblCamera: TLabel
-    Left = 16
-    Top = 20
-    Width = 74
+    Left = 3
+    Top = 18
+    Width = 90
     Height = 13
     Alignment = taRightJustify
     AutoSize = False
     Caption = 'Camera:'
   end
   object lblMicrophone: TLabel
-    Left = 16
-    Top = 45
-    Width = 74
+    Left = 3
+    Top = 46
+    Width = 90
     Height = 13
     Alignment = taRightJustify
     AutoSize = False
     Caption = 'Microphone:'
   end
   object lblOutput: TLabel
-    Left = 16
-    Top = 71
-    Width = 74
+    Left = 3
+    Top = 73
+    Width = 90
     Height = 13
     Alignment = taRightJustify
     AutoSize = False
-    Caption = 'Output:'
+    Caption = 'Output folder:'
   end
   object lblHttpPort: TLabel
-    Left = 16
-    Top = 98
-    Width = 74
+    Left = 3
+    Top = 101
+    Width = 90
     Height = 13
     Alignment = taRightJustify
     AutoSize = False
@@ -62,7 +63,7 @@ object frmMain: TfrmMain
   end
   object cbMicrophone: TComboBox
     Left = 96
-    Top = 42
+    Top = 43
     Width = 500
     Height = 21
     Style = csDropDownList
@@ -70,67 +71,79 @@ object frmMain: TfrmMain
   end
   object edOutput: TEdit
     Left = 96
-    Top = 68
-    Width = 500
+    Top = 70
+    Width = 408
     Height = 21
     TabOrder = 2
   end
+  object btnBrowseOutput: TButton
+    Left = 510
+    Top = 68
+    Width = 86
+    Height = 25
+    Caption = 'Select folder...'
+    TabOrder = 3
+    OnClick = btnBrowseOutputClick
+  end
   object edHttpPort: TEdit
     Left = 96
-    Top = 95
+    Top = 98
     Width = 64
     Height = 21
-    TabOrder = 3
+    TabOrder = 4
     Text = '8080'
   end
   object btnStart: TButton
-    Left = 17
-    Top = 138
-    Width = 120
+    Left = 4
+    Top = 150
+    Width = 100
     Height = 30
     Caption = 'Start'
-    TabOrder = 4
+    TabOrder = 5
     OnClick = btnStartClick
   end
   object btnStop: TButton
-    Left = 143
-    Top = 138
-    Width = 120
+    Left = 108
+    Top = 150
+    Width = 100
     Height = 30
     Caption = 'Stop'
-    TabOrder = 5
+    TabOrder = 6
     OnClick = btnStopClick
   end
   object memStatus: TMemo
-    Left = 16
-    Top = 180
-    Width = 580
+    Left = 0
+    Top = 185
+    Width = 616
     Height = 145
+    Align = alBottom
     ReadOnly = True
     ScrollBars = ssVertical
-    TabOrder = 8
+    TabOrder = 9
+    ExplicitTop = 186
+    ExplicitWidth = 609
   end
   object btnPauseHttp: TButton
-    Left = 271
-    Top = 138
-    Width = 104
+    Left = 260
+    Top = 150
+    Width = 100
     Height = 30
     Caption = 'Pause HTTP'
-    TabOrder = 6
+    TabOrder = 7
     OnClick = btnPauseHttpClick
   end
   object btnResumeHttp: TButton
-    Left = 383
-    Top = 138
-    Width = 104
+    Left = 364
+    Top = 150
+    Width = 100
     Height = 30
     Caption = 'Resume HTTP'
-    TabOrder = 7
+    TabOrder = 8
     OnClick = btnResumeHttpClick
   end
   object tmrStatus: TTimer
     OnTimer = tmrStatusTimer
-    Left = 576
-    Top = 120
+    Left = 514
+    Top = 116
   end
 end

@@ -152,11 +152,26 @@ to the volume control in the volume mixer.
   
 **Ducking Capture Sample**
   
-This sample implements a simple "Chat" that demonstrates to the "ducking"    
-feature in Windows 7 and later. It simply captures samples from the sound card and   
-discards them.  
+This sample implements a simple "Chat" that demonstrates the Windows audio  
+ducking feature. In capture mode, audio from the default communications  
+capture endpoint is routed to the default playback endpoint.  
+Select Capture in the application to hear the routed input.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
+  
+---
+  
+**MfSimpleWebCamStreamer**
+
+This sample implements a compact VCL example for capturing a webcam
+and microphone with Microsoft Media Foundation, encoding the result as H.264
+and AAC, and publishing the live stream directly to a web browser through
+fragmented MP4 and Media Source Extensions (MSE).
+The sample is intentionally small. It demonstrates the complete path from
+Media Foundation capture to a browser-playable live stream without requiring
+another external media server.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleWebCamStreamer.png)
   
 ---
   

@@ -123,7 +123,7 @@ type
   public
 
     constructor Create(const AInner: IMFByteStream);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
     {IInterface}
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
@@ -191,8 +191,8 @@ type
 
 implementation
 
-
 {$POINTERMATH ON}
+
 
 const
   BOX_FTYP = $66747970;
@@ -216,7 +216,6 @@ end;
 
 function ReadU64BE(const P: PByte): UInt64; overload;
 begin
-
   Result := (UInt64(ReadU32BE(P)) shl 32) or
              UInt64(ReadU32BE(P + 4));
 end;
@@ -229,12 +228,12 @@ var
 
 begin
 
-  if Length(ASource) = 0 then
+  if (Length(ASource) = 0) then
     Exit;
 
   OldLength := Length(ADest);
   System.SetLength(ADest,
-            OldLength + Length(ASource));
+                   OldLength + Length(ASource));
 
   Move(ASource[0],
        ADest[OldLength],
@@ -304,7 +303,7 @@ begin
   System.SetLength(Result,
                    ACount);
 
-  if ACount > 0 then
+  if (ACount > 0) then
     Move(AData[AOffset],
          Result[0],
          ACount);
@@ -320,7 +319,7 @@ var
 
 begin
 
-  if ACount <= 0 then
+  if (ACount <= 0) then
     Exit;
 
   OldLength := Length(ADest);
@@ -371,7 +370,7 @@ begin
   Result := nil;
   ATrackId := 0;
 
-  if Length(ABoxData) < 16 then
+  if (Length(ABoxData) < 16) then
     Exit;
 
   Flags := ReadU32BE(ABoxData,
@@ -401,13 +400,13 @@ begin
 
   Cursor := 16;
 
-  if ((Flags and $000001) <> 0) then
+  if (Flags and $000001) <> 0 then
     Inc(Cursor,
         8);
 
   Remaining := Length(ABoxData) - Cursor;
 
-  if (Remaining > 0) then
+  if Remaining > 0 then
     AppendRaw(Result,
               ABoxData,
               Cursor,
@@ -436,15 +435,15 @@ begin
 
   Cursor := 16;
 
-  if ((Flags and $000001) <> 0) then
+  if (Flags and $000001) <> 0 then
     Inc(Cursor,
         8);
 
-  if ((Flags and $000002) <> 0) then
+  if (Flags and $000002) <> 0 then
     Inc(Cursor,
         4);
 
-  if ((Flags and $000008) <> 0) then
+  if (Flags and $000008) <> 0 then
     begin
       if (Cursor + 4 <= Length(ABoxData)) then
         Result := ReadU32BE(ABoxData,
@@ -488,9 +487,9 @@ begin
 
   for I := 0 to SampleCount - 1 do
     begin
-      if ((Flags and $000100) <> 0) then
+      if (Flags and $000100) <> 0 then
         begin
-          if (Cursor + 4 > Length(ABoxData)) then
+          if Cursor + 4 > Length(ABoxData) then
             Break;
 
           SampleDuration := ReadU32BE(ABoxData,
@@ -505,15 +504,15 @@ begin
       Inc(Result,
           SampleDuration);
 
-      if ((Flags and $000200) <> 0) then
+      if (Flags and $000200) <> 0 then
         Inc(Cursor,
             4);
 
-      if ((Flags and $000400) <> 0) then
+      if (Flags and $000400) <> 0 then
         Inc(Cursor,
             4);
 
-      if ((Flags and $000800) <> 0) then
+      if (Flags and $000800) <> 0 then
         Inc(Cursor,
             4);
     end;
@@ -599,7 +598,7 @@ begin
 
   MdatOffset := Integer(MoofSize);
 
-  if (MdatOffset + 8) > Length(AFragment) then
+  if MdatOffset + 8 > Length(AFragment) then
     Exit;
 
   MdatSize := ReadU32BE(AFragment,
@@ -620,6 +619,7 @@ begin
   TrafDataOffsets := TList<DWORD>.Create();
   TrafTrackIds := TList<DWORD>.Create();
   TrafDurations := TList<UInt64>.Create();
+
   try
     PatchedMoof := nil;
 
@@ -630,7 +630,7 @@ begin
 
     Cursor := 8;
 
-    while Cursor + 8 <= Integer(MoofSize) do
+    while (Cursor + 8 <= Integer(MoofSize)) do
       begin
         BoxSize := ReadU32BE(RawMoof,
                              Cursor);
@@ -642,7 +642,7 @@ begin
            (Cursor + Integer(BoxSize) > Integer(MoofSize)) then
           Exit;
 
-        if (BoxType <> $74726166) then // traf
+        if BoxType <> $74726166 then // traf
           begin
             AppendRaw(PatchedMoof,
                       RawMoof,
@@ -683,7 +683,7 @@ begin
                (SubCursor + Integer(SubBoxSize) > SubEnd) then
               Exit;
 
-            if (SubBoxType = $74666864) then // tfhd
+            if SubBoxType = $74666864 then // tfhd
               begin
                 DefaultDuration := GetTfhdDefaultSampleDuration(
                   CopyBytes(RawMoof,
@@ -702,6 +702,7 @@ begin
                 if FTrackDecodeTimes.TryGetValue(TrackId,
                                                  BaseDecodeTime) then
                   begin
+                    // ---
                   end
                 else
                   BaseDecodeTime := 0;
@@ -710,7 +711,7 @@ begin
                             MakeTfdtBox(BaseDecodeTime));
               end
             else
-              if SubBoxType = $7472756E then // trun
+              if (SubBoxType = $7472756E) then // trun
                 begin
                   NewBox := CopyBytes(RawMoof,
                                       SubCursor,
@@ -720,15 +721,14 @@ begin
                       GetTrunDuration(NewBox,
                                       DefaultDuration));
 
-                  if (Length(NewBox) >= 20) and
-                     ((ReadU32BE(NewBox,
-                                 8) and $000001) <> 0) then
-                    OldTrunDataOffset := ReadU32BE(NewBox,
-                                                   16);
+                  if (Length(NewBox) >= 20) and ((ReadU32BE(NewBox,
+                                                            8) and $000001) <> 0) then
+                  OldTrunDataOffset := ReadU32BE(NewBox,
+                                                 16);
 
                   if PatchTrunDataOffset(NewBox,
                                          0) then
-                    FixOffset := Length(NewTraf) + 16;
+                  FixOffset := Length(NewTraf) + 16;
 
                   AppendBytes(NewTraf,
                               NewBox);
@@ -876,8 +876,7 @@ begin
       BoxType := ReadU32BE(AFragment,
                            Cursor + 4);
 
-      if (BoxSize < 8) or
-         (Cursor + Integer(BoxSize) > Integer(MoofSize)) then
+      if (BoxSize < 8) or (Cursor + Integer(BoxSize) > Integer(MoofSize)) then
         Exit;
 
       if (BoxType = $74726166) then // traf
@@ -910,7 +909,7 @@ begin
 
                   if (Version = 1) then
                     begin
-                      if SubBoxSize < 20 then
+                      if (SubBoxSize < 20) then
                         Exit;
 
                       DecodeTime := ReadU64BE(AFragment,
@@ -933,7 +932,7 @@ begin
                   else
                     DecodeTime := 0;
 
-                  if Version = 1 then
+                  if (Version = 1) then
                     WriteU64BE(AFragment,
                                SubCursor + 12,
                                DecodeTime)
@@ -970,7 +969,7 @@ begin
 
   Inc(FNextSequence);
 
-  while (FFragments.Count >= SIMPLE_FMP4_MAX_FRAGMENTS) do
+  while FFragments.Count >= SIMPLE_FMP4_MAX_FRAGMENTS do
     begin
       OldItem := FFragments.Dequeue();
       OldItem.Data := nil;
@@ -1009,7 +1008,7 @@ begin
 end;
 
 
-destructor TSimpleFmp4ByteStream.Destroy;
+destructor TSimpleFmp4ByteStream.Destroy();
 begin
 
   FInner := nil;
@@ -1034,8 +1033,7 @@ function TSimpleFmp4ByteStream.QueryInterface(const IID: TGUID;
 begin
 
   // Answer for interfaces implemented by this wrapper first.
-  if GetInterface(IID,
-                  Obj) then
+  if GetInterface(IID, Obj) then
     Exit(S_OK);
 
   // Forward optional/private interfaces to the real MFCreateFile byte stream.
@@ -1058,11 +1056,10 @@ end;
 
 function TSimpleFmp4ByteStream._Release: Integer;
 begin
-
   Result := InterlockedDecrement(FRefCount);
 
-  if (Result = 0) then
-    Destroy();
+  if Result = 0 then
+    Destroy;
 end;
 
 
@@ -1131,15 +1128,11 @@ begin
 
             QueueFragment(PatchedFragment);
 
-            OutputDebugString(PChar(
-              Format('MfSimpleWebCamStreamer: MSE fragment %d raw=%d patched=%d',
-                     [FFragmentCount,
-                      Length(Fragment),
-                      Length(PatchedFragment)])));
+            OutputDebugString(PChar(Format('MfSimpleWebCamStreamer: MSE fragment %d raw=%d patched=%d',
+                                           [FFragmentCount, Length(Fragment), Length(PatchedFragment)])));
           end
         else
-          OutputDebugString(
-            'MfSimpleWebCamStreamer: MSE fragment patch failed');
+          OutputDebugString('MfSimpleWebCamStreamer: MSE fragment patch failed');
 
         FPendingMoof := nil;
       end;
@@ -1184,7 +1177,7 @@ begin
          FParserBuffer[OldSize],
          ACount);
 
-    while (FParserBufferSize >= 8) do
+    while FParserBufferSize >= 8 do
       begin
         BoxSize32 := ReadU32BE(@FParserBuffer[0]);
         BoxType := ReadU32BE(@FParserBuffer[4]);
@@ -1212,31 +1205,31 @@ begin
             Exit;
           end;
 
-        if (UInt64(FParserBufferSize) < BoxSize64) then
-          Break;
+      if (UInt64(FParserBufferSize) < BoxSize64) then
+        Break;
 
-        System.SetLength(BoxData,
-                         Integer(BoxSize64));
+      System.SetLength(BoxData,
+                Integer(BoxSize64));
 
-        Move(FParserBuffer[0],
-             BoxData[0],
-             Integer(BoxSize64));
+      Move(FParserBuffer[0],
+           BoxData[0],
+           Integer(BoxSize64));
 
-        ProcessBox(BoxType,
-                   BoxData);
+      ProcessBox(BoxType,
+                 BoxData);
 
-        Remaining := FParserBufferSize - Integer(BoxSize64);
+      Remaining := FParserBufferSize - Integer(BoxSize64);
 
-        if (Remaining > 0) then
-          Move(FParserBuffer[Integer(BoxSize64)],
-               FParserBuffer[0],
-               Remaining);
+      if Remaining > 0 then
+        Move(FParserBuffer[Integer(BoxSize64)],
+             FParserBuffer[0],
+             Remaining);
 
-        FParserBufferSize := Remaining;
+      FParserBufferSize := Remaining;
 
-        System.SetLength(FParserBuffer,
-                         FParserBufferSize);
-      end;
+      System.SetLength(FParserBuffer,
+                FParserBufferSize);
+    end;
 
   finally
     FLock.Leave;
@@ -1283,7 +1276,7 @@ begin
     begin
       FNullLength := qwLength;
 
-      if (FNullPosition > FNullLength) then
+      if FNullPosition > FNullLength then
         FNullPosition := FNullLength;
 
       Exit(S_OK);
@@ -1419,12 +1412,14 @@ begin
                        cb);
 
           FLock.Enter;
+
           try
             Inc(FNullPosition,
                 cb);
 
             if (FNullPosition > FNullLength) then
               FNullLength := FNullPosition;
+
           finally
             FLock.Leave;
           end;
@@ -1465,14 +1460,16 @@ begin
   if FNullOutput then
     begin
       FLock.Enter;
+
       try
         Inc(FNullPosition,
             cb);
 
-        if (FNullPosition > FNullLength) then
+        if FNullPosition > FNullLength then
           FNullLength := FNullPosition;
 
         FAsyncWriteSizes.Enqueue(cb);
+
       finally
         FLock.Leave;
       end;
@@ -1513,12 +1510,12 @@ begin
 
   if FNullOutput then
     begin
-
       FLock.Enter;
 
       try
         if FAsyncWriteSizes.Count > 0 then
           pcbWritten := FAsyncWriteSizes.Dequeue();
+
       finally
         FLock.Leave;
       end;
@@ -1572,7 +1569,7 @@ begin
 end;
 
 
-function TSimpleFmp4ByteStream.Flush(): HRESULT;
+function TSimpleFmp4ByteStream.Flush: HRESULT;
 begin
 
   if FNullOutput then
@@ -1585,16 +1582,16 @@ begin
 end;
 
 
-function TSimpleFmp4ByteStream.Close(): HRESULT;
+function TSimpleFmp4ByteStream.Close: HRESULT;
 begin
 
   if FNullOutput then
     begin
-
       FLock.Enter;
 
       try
         FAsyncWriteSizes.Clear();
+
       finally
         FLock.Leave;
       end;
@@ -1611,12 +1608,12 @@ end;
 
 function TSimpleFmp4ByteStream.GetInitSegment(out ASegment: TBytes): Boolean;
 begin
-
   ASegment := nil;
 
   FLock.Enter;
+
   try
-    Result := Length(FInitSegment) > 0;
+    Result := (Length(FInitSegment) > 0);
 
     if Result then
       ASegment := Copy(FInitSegment,
@@ -1626,7 +1623,6 @@ begin
     FLock.Leave;
   end;
 end;
-
 
 function TSimpleFmp4ByteStream.GetFragment(const ASequence: UInt64;
                                             out AFragment: TBytes): Boolean;
@@ -1639,7 +1635,6 @@ begin
   AFragment := nil;
 
   FLock.Enter();
-
   try
     Items := FFragments.ToArray();
     Result := False;
@@ -1711,6 +1706,7 @@ begin
         if not Result then
           AFragment := nil;
       end;
+
   finally
     FLock.Leave;
   end;

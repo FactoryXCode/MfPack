@@ -81,8 +81,7 @@ uses
   SimpleFmp4ByteStream;
 
 type
-  TSimpleCaptureKind = (ckVideo,
-                        ckAudio);
+  TSimpleCaptureKind = (ckVideo, ckAudio);
 
   TSimpleDeviceList = class
   private
@@ -91,17 +90,15 @@ type
     FSourceType: TGUID;
 
   public
-
     constructor Create(const ASourceType: TGUID);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
-    procedure Clear();
-    function Enumerate(): HRESULT;
+    procedure Clear;
+    function Enumerate: HRESULT;
     function GetActivate(const AIndex: UINT32;
                          out AActivate: IMFActivate): HRESULT;
     function GetFriendlyName(const AIndex: UINT32;
                              out AName: string): HRESULT;
-
     property Count: UINT32 read FCount;
   end;
 
@@ -114,7 +111,6 @@ type
     FKind: TSimpleCaptureKind;
 
   public
-
     constructor Create(AOwner: TSimpleAvCapture;
                        const AKind: TSimpleCaptureKind);
 
@@ -219,7 +215,6 @@ type
     property AudioSamples: UInt64 read FAudioSamples;
   end;
 
-
 implementation
 
 const
@@ -234,13 +229,12 @@ const
   SIMPLE_FRAGMENT_DURATION_MS = 1000;
   SIMPLE_FRAGMENT_DURATION_100NS = SIMPLE_FRAGMENT_DURATION_MS * 10000;
 
-
 { TSimpleDeviceList }
 
 constructor TSimpleDeviceList.Create(const ASourceType: TGUID);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FDevices := nil;
   FCount := 0;
@@ -248,7 +242,7 @@ begin
 end;
 
 
-destructor TSimpleDeviceList.Destroy;
+destructor TSimpleDeviceList.Destroy();
 begin
 
   Clear();
@@ -286,7 +280,8 @@ begin
 
   Clear();
 
-  Result := MFCreateAttributes(Attributes, 1);
+  Result := MFCreateAttributes(Attributes,
+                               1);
   if SUCCEEDED(Result) then
     Result := Attributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                                  FSourceType);
@@ -303,7 +298,6 @@ end;
 function TSimpleDeviceList.GetActivate(const AIndex: UINT32;
                                        out AActivate: IMFActivate): HRESULT;
 begin
-
   AActivate := nil;
 
   if AIndex >= FCount then
@@ -341,10 +335,10 @@ begin
               Length);
 
   if SUCCEEDED(Result) then
-    begin
-      AName := Name;
-      CoTaskMemFree(Name);
-    end;
+  begin
+    AName := Name;
+    CoTaskMemFree(Name);
+  end;
 end;
 
 
@@ -353,8 +347,10 @@ end;
 constructor TSimpleSourceReaderCallback.Create(AOwner: TSimpleAvCapture;
                                                 const AKind: TSimpleCaptureKind);
 begin
+
   inherited Create;
-  FOwner := AOwner;
+
+ FOwner := AOwner;
   FKind := AKind;
 end;
 
@@ -392,18 +388,19 @@ begin
   Result := S_OK;
 end;
 
+
 { TSimpleAvCapture }
 
 constructor TSimpleAvCapture.Create;
 begin
 
-  inherited Create();
+  inherited Create;
 
   FVideoActivate := nil;
   FAudioActivate := nil;
 
 
-  FLock := TCriticalSection.Create;
+  FLock := TCriticalSection.Create();
 
   FVideoStreamIndex := DWORD(-1);
   FAudioStreamIndex := DWORD(-1);
@@ -416,7 +413,7 @@ begin
 end;
 
 
-destructor TSimpleAvCapture.Destroy();
+destructor TSimpleAvCapture.Destroy;
 begin
 
   Stop();
@@ -426,7 +423,7 @@ begin
 
   FreeAndNil(FLock);
 
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 
@@ -453,7 +450,8 @@ begin
                                      Pointer(Source));
 
   if SUCCEEDED(Result) then
-    Result := MFCreateAttributes(Attributes, 2);
+    Result := MFCreateAttributes(Attributes,
+                                 2);
 
   if SUCCEEDED(Result) then
     Result := Attributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
@@ -514,7 +512,6 @@ begin
     Interlace := MFVideoInterlace_Progressive;
 
   Result := MFCreateMediaType(TypeToSet);
-
   if SUCCEEDED(Result) then
     Result := TypeToSet.SetGUID(MF_MT_MAJOR_TYPE,
                                 MFMediaType_Video);
@@ -638,7 +635,7 @@ begin
                                           Value64);
       if SUCCEEDED(Result) then
         Result := VideoOutputType.SetUINT64(MF_MT_FRAME_SIZE,
-                                          Value64);
+                                            Value64);
     end;
 
   if SUCCEEDED(Result) then
@@ -657,7 +654,7 @@ begin
         Value64 := (UINT64(1) shl 32) or 1;
 
       Result := VideoOutputType.SetUINT64(MF_MT_PIXEL_ASPECT_RATIO,
-                                          Value64);
+                                        Value64);
     end;
 
   if SUCCEEDED(Result) then
@@ -667,7 +664,7 @@ begin
         Value32 := MFVideoInterlace_Progressive;
 
       Result := VideoOutputType.SetUINT32(MF_MT_INTERLACE_MODE,
-                                        Value32);
+                                          Value32);
     end;
 
   if SUCCEEDED(Result) then
@@ -807,8 +804,8 @@ procedure TSimpleAvCapture.HandleSample(const AKind: TSimpleCaptureKind;
                                         const ATimestamp: LONGLONG;
                                         ASample: IMFSample);
 var
+  hr: HRESULT;
   SampleTime: LONGLONG;
-  HR: HRESULT;
 
 begin
 
@@ -825,17 +822,16 @@ begin
     Exit;
 
   if ((AFlags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
-    begin
-      SetError(MF_E_TRANSFORM_STREAM_CHANGE);
-      Exit;
-    end;
+  begin
+    SetError(MF_E_TRANSFORM_STREAM_CHANGE);
+    Exit;
+  end;
 
-  hr := S_OK;
+  HR := S_OK;
 
   if Assigned(ASample) then
     begin
       FLock.Enter;
-
       try
         case AKind of
           ckVideo:
@@ -865,17 +861,18 @@ begin
                 FAudioFirstTimeSet := True;
               end;
 
-            SampleTime := ATimestamp - FAudioFirstTime;
-            HR := ASample.SetSampleTime(SampleTime);
+              SampleTime := ATimestamp - FAudioFirstTime;
+              hr := ASample.SetSampleTime(SampleTime);
 
-            if SUCCEEDED(HR) then
-              hr := FWriter.WriteSample(FAudioStreamIndex,
-                                        ASample);
+              if SUCCEEDED(hr) then
+                HR := FWriter.WriteSample(FAudioStreamIndex,
+                                          ASample);
 
-            if SUCCEEDED(hr) then
-              Inc(FAudioSamples);
+              if SUCCEEDED(hr) then
+                Inc(FAudioSamples);
           end;
       end;
+
     finally
       FLock.Leave;
     end;
@@ -950,7 +947,7 @@ begin
   else
     begin
       SetError(Result);
-      Stop();
+      Stop;
     end;
 end;
 
@@ -981,8 +978,8 @@ end;
 
 
 function TSimpleAvCapture.GetFragmentWindow(out AFirstSequence: UInt64;
-                                            out ALastSequence: UInt64;
-                                            out ACount: Integer): Boolean;
+                                             out ALastSequence: UInt64;
+                                             out ACount: Integer): Boolean;
 begin
 
   AFirstSequence := 0;
@@ -1041,6 +1038,7 @@ procedure TSimpleAvCapture.ResetArchiveTimeline;
 begin
 
   FLock.Enter;
+
   try
     if Assigned(FObserver) then
       FObserver.ResetArchiveTimeline;
@@ -1055,7 +1053,6 @@ var
   hr: HRESULT;
 
 begin
-
   Result := S_OK;
 
   if (FState = csStopped) then
@@ -1075,7 +1072,7 @@ begin
 
   try
     if Assigned(FWriter) then
-      HR := FWriter.Finalize;
+      hr := FWriter.Finalize;
   finally
     FLock.Leave;
   end;
@@ -1116,7 +1113,7 @@ begin
   FAudioStreamIndex := DWORD(-1);
 
   FState := csStopped;
-  Result := HR;
+  Result := hr;
 end;
 
 end.

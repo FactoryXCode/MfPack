@@ -192,6 +192,7 @@ end;
 
 constructor TSimpleHttpServer.Create();
 begin
+
   inherited Create();
 
   FSocket := INVALID_SOCKET;
@@ -252,7 +253,7 @@ begin
                     SOCK_STREAM,
                     IPPROTO_TCP);
 
-  if (FSocket = INVALID_SOCKET) then
+  if FSocket = INVALID_SOCKET then
     Exit;
 
   Reuse := 1;
@@ -273,16 +274,16 @@ begin
   AddrIn^.sin_port := htons(FPort);
   AddrIn^.sin_addr.S_addr := htonl(INADDR_ANY);
 
-  if (bind(FSocket,
+  if bind(FSocket,
           Addr,
-          SizeOf(Addr)) = SOCKET_ERROR) then
+          SizeOf(Addr)) = SOCKET_ERROR then
     begin
       CloseListenSocket();
       Exit;
     end;
 
-  if (listen(FSocket,
-            SOMAXCONN) = SOCKET_ERROR) then
+  if listen(FSocket,
+            SOMAXCONN) = SOCKET_ERROR then
     begin
       CloseListenSocket();
       Exit;
@@ -303,6 +304,7 @@ begin
   try
     Socket := FSocket;
     FSocket := INVALID_SOCKET;
+
   finally
     FLock.Leave();
   end;
@@ -433,7 +435,8 @@ begin
                     PAnsiChar(Header)^,
                     Length(Header));
 
-  if Result and (Length(ABody) > 0) then
+  if Result and
+     (Length(ABody) > 0) then
     Result := SendAll(ASocket,
                       ABody[0],
                       Length(ABody));
@@ -472,7 +475,8 @@ begin
                          Body);
 end;
 
-// This is the GUI you see in your browser.
+
+// The MSE GUI
 function TSimpleHttpServer.BuildMsePlayerPage(): string;
 begin
 
@@ -481,7 +485,7 @@ begin
     '<html>'#13#10 +
     '<head>'#13#10 +
     '  <meta charset="utf-8">'#13#10 +
-    '  <title>MfSimpleWebCamStreamer - MSE test</title>'#13#10 +
+    '  <title>MfSimpleWebCamStreamer</title>'#13#10 +
     '  <style>'#13#10 +
     '    body { font-family: Segoe UI, Arial, sans-serif; margin: 24px; }'#13#10 +
     '    video { width: 800px; max-width: 100%; background: #000; }'#13#10 +
@@ -1012,7 +1016,7 @@ begin
                         SizeOf(Buffer),
                         0);
 
-  if BytesReceived <= 0 then
+  if (BytesReceived <= 0) then
     Exit;
 
   SetString(Request,
@@ -1032,7 +1036,7 @@ begin
   Space1 := Pos(' ',
                 string(FirstLine));
 
-  if Space1 <= 0 then
+  if (Space1 <= 0) then
     begin
       SendTextResponse(ASocket,
                        '400 Bad Request',
@@ -1068,8 +1072,7 @@ begin
     begin
       Data := nil;
 
-      if Assigned(FOnGetInit) and
-         FOnGetInit(Data) and
+      if Assigned(FOnGetInit) and FOnGetInit(Data) and
          (Length(Data) > 0) then
         SendResponse(ASocket,
                      '200 OK',
@@ -1186,6 +1189,7 @@ begin
 
       try
         HandleClient(ClientSocket);
+
       finally
         shutdown(ClientSocket,
                  SD_BOTH);

@@ -1,26 +1,40 @@
 # Ducking Media Player
-  
-Version: 4.0.0  
-  
+
+&#x20; 
+
+Version: 4.0.0
+
+&#x20; 
+
 Description:  
 This sample implements a simple media player that responds to  
 the "ducking" feature in Windows 7 and later.  
 It also implements a volume control which tracks to the volume control in  
 the volume mixer.  
-  
-NOTES:
-  
+
+&#x20; 
+
+NOTES:  
+
 * This release is updated for compiler version 17 up to 35.
 * SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 7 or later.
 * Minimum supported MfPack version: 3.1.2
-  
+
+&#x20; 
+
 Project: Media Foundation - MFPack - Samples  
+
+&#x20; 
 Project location: https://github.com/FactoryXCode/MfPack  
 https://sourceforge.net/projects/MFPack  
-  
+
+&#x20; 
+
 First release date: 05-07-2020  
 Final release date: 05/05/2026  
-  
+
+&#x20; 
+
 Copyright © FactoryX. All rights reserved.
 

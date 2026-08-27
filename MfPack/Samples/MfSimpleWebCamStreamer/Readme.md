@@ -6,36 +6,36 @@ Version 4.0.0
 
 &#x20;
 
-`MfSimpleWebCamStreamer` is a compact Delphi VCL example for capturing a webcam  
-and microphone with Microsoft Media Foundation, encoding the result as H.264  
-and AAC, and publishing the live stream directly to a web browser through  
-fragmented MP4 and Media Source Extensions (MSE).  
+`MfSimpleWebCamStreamer` is a compact Delphi VCL example for capturing a webcam
+and microphone with Microsoft Media Foundation, encoding the result as H.264
+and AAC, and publishing the live stream directly to a web browser through
+fragmented MP4 and Media Source Extensions (MSE).
 
-The sample is intentionally small. It demonstrates the complete path from  
-Media Foundation capture to a browser-playable live stream without requiring  
-IIS, Caddy, Icecast, FFmpeg, or another external media server.  
+The sample is intentionally small. It demonstrates the complete path from
+Media Foundation capture to a browser-playable live stream without requiring
+IIS, Caddy, Icecast, FFmpeg, or another external media server.
 
-It also records the same encoded stream to rolling fragmented MP4 files without  
-starting a second H.264 or AAC encoder.  
+It also records the same encoded stream to rolling fragmented MP4 files without
+starting a second H.264 or AAC encoder.
 
 &#x20;
 
-## Requirements
+## Requirements  
 
 * Windows 10 or later;
-* Delphi compiler version 23 through 35;
-* MfPack 4.0.0 or later;
-* A Media Foundation compatible webcam;
-* A Media Foundation compatible microphone;
-* A browser with Media Source Extensions and H.264/AAC MP4 support;
-* Network access between the browser and the sender PC for remote playback.
+* Delphi compiler version 23 through 35;  
+* MfPack 4.0.0 or later;  
+* A Media Foundation compatible webcam;  
+* A Media Foundation compatible microphone;  
+* A browser with Media Source Extensions and H.264/AAC MP4 support;  
+* Network access between the browser and the sender PC for remote playback.  
 
-The sample uses the Windows Media Foundation Source Reader, Sink Writer and
-fragmented MP4 media sink together with a small custom `IMFByteStream`.
+The sample uses the Windows Media Foundation Source Reader, Sink Writer and  
+fragmented MP4 media sink together with a small custom `IMFByteStream`.  
 
 &#x20;
 
-## What the sample demonstrates
+## What the sample demonstrates  
 
 * Webcam enumeration and selection;
 * Microphone enumeration and selection;
@@ -61,7 +61,7 @@ fragmented MP4 media sink together with a small custom `IMFByteStream`.
 
 &#x20;
 
-## Quick start
+## Quick start  
 
 1. Start `MfSimpleWebCamStreamer`.
 2. Select the webcam.
@@ -78,11 +78,11 @@ fragmented MP4 media sink together with a small custom `IMFByteStream`.
 &#x20;
 
 The recording starts automatically after the fragmented MP4 initialization  
-segment becomes available.
+segment becomes available.  
 
 &#x20;
 
-## Controls
+## Controls  
 
 |Control|Purpose|
 |-|-|
@@ -98,16 +98,16 @@ segment becomes available.
 &#x20;
 
 The HTTP pause controls exist specifically to test browser retry and recovery.  
-They do not stop Media Foundation capture or encoding.
+They do not stop Media Foundation capture or encoding.  
 
-&#x20;
+&#x20; 
 
-## Capture and encoding architecture
+## Capture and encoding architecture  
 
 The live path is deliberately based on a single video encoder and a single  
-audio encoder:
+audio encoder:  
 
-&#x20;
+&#x20; 
 
 ```text
 Webcam ──> async IMFSourceReader ──> NV12 ──> H.264 ──┐
@@ -120,27 +120,27 @@ Microphone -> async IMFSourceReader -> PCM -> AAC ───┤
                                           custom IMFByteStream
 ```
 
-&#x20;
+&#x20; 
 
 The video and audio Source Readers run asynchronously. Media samples are passed  
-to one Sink Writer backed by `MFCreateFMPEG4MediaSink`.
+to one Sink Writer backed by `MFCreateFMPEG4MediaSink`.  
 
 Using one encoder pair is important. An earlier rolling-recording experiment  
 used a second H.264/AAC Sink Writer. Although logically separate, encoder  
 competition and archive `Finalize/Create` operations could briefly disturb the  
-live stream. The current design avoids that entirely.
+live stream. The current design avoids that entirely.  
 
-&#x20;
+&#x20; 
 
-## Fragmented MP4 byte stream
+## Fragmented MP4 byte stream  
 
-The fragmented MP4 media sink writes to `TSimpleFmp4ByteStream`.
+The fragmented MP4 media sink writes to `TSimpleFmp4ByteStream`.  
 
 For live streaming, the byte stream operates as a writable and seekable  
 null-output stream. It emulates the positioning behavior expected by Media  
-Foundation but does not create one continuously growing hidden MP4 file.
+Foundation but does not create one continuously growing hidden MP4 file.  
 
-The byte stream observes the generated MP4 boxes and extracts:
+The byte stream observes the generated MP4 boxes and extracts:  
 
 &#x20;
 
@@ -151,26 +151,26 @@ moof
 mdat
 ```
 
-&#x20;
+&#x20; 
 
-`ftyp + moov` becomes the MSE initialization segment.
+`ftyp + moov` becomes the MSE initialization segment.  
 
-Each `moof + mdat` pair becomes one live media fragment.
+Each `moof + mdat` pair becomes one live media fragment.  
 
-Only a bounded window of recent browser fragments is retained in memory.
+Only a bounded window of recent browser fragments is retained in memory.  
 
-&#x20;
+&#x20;  
 
-## Browser-compatible MSE fragment patching
+## Browser-compatible MSE fragment patching  
 
-
+&#x20; 
 
 Raw fragmented MP4 output produced by Media Foundation is suitable for its own  
 continuous byte stream, but individual fragments are not automatically  
-self-contained for arbitrary browser delivery.
+self-contained for arbitrary browser delivery.  
 
 Before a fragment is published to MSE, the sample patches its movie fragment  
-metadata:
+metadata:  
 
 1. `tfhd.base\\\_data\\\_offset` is removed;
 2. `default-base-is-moof` is enabled;
@@ -179,14 +179,14 @@ metadata:
 5. track decode times are advanced monotonically;
 6. the original `mdat` payload is left unchanged.
 
-&#x20;
+&#x20; 
 
-The resulting fragment is independent of the byte position at which Media  
-Foundation originally generated it.
+The resulting fragment is independent of the byte position at which Media   
+Foundation originally generated it.  
 
-The browser MIME type is:
+The browser MIME type is:  
 
-&#x20;
+&#x20;  
 
 ```text
 video/mp4; codecs="avc1.42C01F, mp4a.40.2"
