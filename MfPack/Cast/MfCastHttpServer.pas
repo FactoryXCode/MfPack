@@ -1903,6 +1903,10 @@ begin
                       SpacePos - 1);
 
   OutputDebugString(PChar('MfCast HTTP request: ' + FirstLine));
+  if Assigned(FLogger) then
+    FLogger.Log(cllDebug,
+                'HttpServer',
+                'Request: ' + FirstLine + '.');
   InterlockedIncrement(FRequestCount);
 
   SpacePos := Pos(' ',
@@ -2038,6 +2042,10 @@ begin
                      Header);
 
       OutputDebugString(PChar('MfCast HTTP live chunked start: ' + TargetPath));
+      if Assigned(FLogger) then
+        FLogger.Log(cllDebug,
+                    'HttpServer',
+                    'Serving live chunked content: ' + TargetPath + '.');
 
       ChunkOffset := 0;
 
@@ -2051,6 +2059,12 @@ begin
 
               OutputDebugString(PChar(Format('MfCast HTTP live wait ended hr=%.8x offset=%d',
                                              [DWORD(Hr), ChunkOffset])));
+              if Assigned(FLogger) then
+                FLogger.Log(cllWarning,
+                            'HttpServer',
+                            Format('Live stream wait ended: HRESULT $%.8x offset=%d.',
+                                   [DWORD(Hr),
+                                    ChunkOffset]));
               Exit;
             end;
 
@@ -2082,6 +2096,12 @@ begin
             begin
               OutputDebugString(PChar(Format('MfCast HTTP live send failed offset=%d error=%d',
                                              [ChunkOffset, WSAGetLastError()])));
+              if Assigned(FLogger) then
+                FLogger.Log(cllWarning,
+                            'HttpServer',
+                            Format('Live stream send failed: offset=%d socketError=%d.',
+                                   [ChunkOffset,
+                                    WSAGetLastError()]));
               Exit;
             end;
 

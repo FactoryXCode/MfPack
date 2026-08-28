@@ -96,6 +96,7 @@ type
     FPreviewSink: IMfCastPreviewSink;
     FDirectPreviewPlayer: IMfCastDirectPreviewPlayer;
     FMediaFoundationStarted: Boolean;
+    FLoggingEnabled: Integer;
     FOnDeviceAdded: TMfCastDeviceEvent;
     FOnDeviceUpdated: TMfCastDeviceEvent;
     FOnDeviceRemoved: TMfCastDeviceRemovedEvent;
@@ -117,6 +118,9 @@ type
     procedure DispatchLog(const ALevel: TMfCastLogLevel;
                           const ASource: string;
                           const AMessage: string);
+    function GetLoggingEnabled(): Boolean;
+
+    procedure SetLoggingEnabled(const AValue: Boolean);
   public
 
     constructor Create(const AEnableTranscoding: Boolean = False);
@@ -180,6 +184,7 @@ type
     property OnMediaStatus: TMfCastMediaStatusEvent read FOnMediaStatus write FOnMediaStatus;
     property OnError: TMfCastErrorEvent read FOnError write FOnError;
     property OnLog: TMfCastLogEvent read FOnLog write FOnLog;
+    property LoggingEnabled: Boolean read GetLoggingEnabled write SetLoggingEnabled;
   end;
 
 
@@ -256,6 +261,7 @@ begin
   inherited Create();
 
   FMediaFoundationStarted := False;
+  FLoggingEnabled := 1;
   FPreviewSink := nil;
   FDirectPreviewPlayer := nil;
 
@@ -264,9 +270,9 @@ begin
   hr := MFStartup(MF_VERSION,
                   0);
 
-  if FAILED(Hr) then
+  if FAILED(hr) then
     raise EMfCast.CreateFmt('Media Foundation initialization failed (HRESULT $%.8x).',
-                            [DWORD(Hr)]);
+                            [DWORD(hr)]);
 
   FMediaFoundationStarted := True;
 
@@ -695,6 +701,9 @@ var
 
 begin
 
+  if not GetLoggingEnabled() then
+    Exit;
+
   Text := Format('[MfCast][%s][%s] %s',
                  [MfCastLogLevelToString(ALevel),
                   ASource,
@@ -707,6 +716,25 @@ begin
            ALevel,
            ASource,
            AMessage);
+end;
+
+
+function TMfCast.GetLoggingEnabled(): Boolean;
+begin
+
+  Result := InterlockedCompareExchange(FLoggingEnabled,
+                                       0,
+                                       0) <> 0;
+end;
+
+
+procedure TMfCast.SetLoggingEnabled(const AValue: Boolean);
+begin
+
+  if AValue then
+    InterlockedExchange(FLoggingEnabled, 1)
+  else
+    InterlockedExchange(FLoggingEnabled, 0);
 end;
 
 end.

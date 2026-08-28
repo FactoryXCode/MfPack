@@ -91,6 +91,7 @@ type
 
   public
     constructor Create(const AOwner: TMfCastChannel);
+
     function IsStopping(): Boolean;
   end;
 
@@ -594,8 +595,8 @@ end;
 
 
 function MfCastExtractJsonTime100ns(const AJson: string;
-                                     const AName: string;
-                                     const ADefault: Int64): Int64;
+                                    const AName: string;
+                                    const ADefault: Int64): Int64;
 var
   Pattern: string;
   I: Integer;
@@ -882,7 +883,8 @@ function TMfCastChannel.Disconnect(): HRESULT;
 begin
 
   StopWorker(True);
-  InterlockedExchange(FStopInProgress, 0);
+  InterlockedExchange(FStopInProgress,
+                      0);
 
   FSessionId := '';
   FTransportId := '';
@@ -939,6 +941,7 @@ function TMfCastChannel.LoadMedia(const ARequest: TMfCastLoadRequest): HRESULT;
 var
   Payload: string;
   RequestId: Cardinal;
+  LoadTimeoutMs: Cardinal;
   WaitResult: HRESULT;
   I: Integer;
   Track: TMfCastTrackInfo;
@@ -946,7 +949,8 @@ var
 
 begin
 
-  InterlockedExchange(FStopInProgress, 0);
+  InterlockedExchange(FStopInProgress,
+                      0);
 
   if (Trim(ARequest.ContentId) = '') then
     begin
@@ -1010,7 +1014,7 @@ begin
       Payload := Payload + ']';
     end;
 
-  if Length(ARequest.Tracks) > 0 then
+  if (Length(ARequest.Tracks) > 0) then
     Payload := Payload +
                ',"textTrackStyle":{' +
                '"foregroundColor":"#FFFFFFFF",' +
@@ -1052,6 +1056,18 @@ begin
   Payload := Payload + '}';
 
   OutputDebugString(PChar('MfCast LOAD JSON: ' + Payload));
+  if Assigned(FLogger) then
+    begin
+      FLogger.Log(cllDebug,
+                  'Channel',
+                  'Sending media LOAD: ' + Payload + '.');
+
+      FLogger.Log(cllDebug,
+                  'Channel',
+                  Format('Media LOAD destination: session="%s" transport="%s".',
+                         [FSessionId,
+                          FTransportId]));
+    end;
 
   // LOAD creates a new media session. Do not attach an ID learned from the
   // receiver's previous media item to the status request that follows.
@@ -1068,7 +1084,16 @@ begin
   if SUCCEEDED(Result) then
     begin
       SetState(csBuffering);
-      WaitResult := WaitForMediaStatus(10000);
+
+      // First-generation Chromecast hardware can take substantially longer
+      // than newer receivers to open a live/chunked presentation and create
+      // its first media session. Reuse the receiver-launch timeout here rather
+      // than failing the LOAD after a fixed ten seconds.
+      LoadTimeoutMs := FSettings.ReceiverLaunchTimeoutMs;
+      if (LoadTimeoutMs < 10000) then
+        LoadTimeoutMs := 10000;
+
+      WaitResult := WaitForMediaStatus(LoadTimeoutMs);
       StartWorker();
 
       if (WaitResult = S_OK) then
@@ -1080,8 +1105,13 @@ begin
             if Assigned(FLogger) then
               FLogger.Log(cllWarning,
                           'Channel',
-                          Format('Media LOAD was not acknowledged for contentId="%s".',
-                                 [ARequest.ContentId]));
+                          Format('Media LOAD was not acknowledged within %d ms for contentId="%s"; session="%s" transport="%s" lastNamespace="%s" lastPayload="%s".',
+                                 [LoadTimeoutMs,
+                                  ARequest.ContentId,
+                                  FSessionId,
+                                  FTransportId,
+                                  FLastNamespace,
+                                  Copy(FLastPayload, 1, 512)]));
           end
         else
           Result := WaitResult;
@@ -1176,16 +1206,20 @@ begin
       Exit;
     end;
 
-  RequestId := NextRequestId();
-  Payload := '{"type":"STOP","requestId":' + IntToStr(RequestId);
-
+  // There is no media endpoint to stop when LOAD never created a session.
+  // Older receivers answer a session-less media STOP with
+  // INVALID_MEDIA_SESSION_ID, which obscures the original load failure.
+  MediaStopResult := S_FALSE;
   if (FMediaSessionId <> 0) then
-    Payload := Payload + ',"mediaSessionId":' + IntToStr(FMediaSessionId);
-  Payload := Payload + '}';
+    begin
+      RequestId := NextRequestId();
+      Payload := '{"type":"STOP","requestId":' + IntToStr(RequestId) +
+                 ',"mediaSessionId":' + IntToStr(FMediaSessionId) + '}';
 
-  MediaStopResult := SendJson(FTransportId,
-                              FSettings.NamespaceMedia,
-                              Payload);
+      MediaStopResult := SendJson(FTransportId,
+                                  FSettings.NamespaceMedia,
+                                  Payload);
+    end;
 
   ReceiverStopResult := S_FALSE;
   if (FSessionId <> '') then
@@ -1705,6 +1739,13 @@ begin
   FLastNamespace := Namespace;
   FLastPayload := Payload;
 
+  if Assigned(FLogger) then
+    FLogger.Log(cllTrace,
+                'Channel',
+                Format('Received namespace="%s" payload="%s".',
+                       [Namespace,
+                        Copy(Payload, 1, 1024)]));
+
   if SameText(Namespace, FSettings.NamespaceHeartbeat) then
     begin
       if (Pos('PING',
@@ -1726,6 +1767,7 @@ end;
 
 function TMfCastChannel.ProcessReceiverMessage(const AJsonPayload: string): HRESULT;
 var
+  NewApplicationId: string;
   NewSessionId: string;
   NewTransportId: string;
   VolumeStatus: string;
@@ -1761,8 +1803,27 @@ begin
             end;
         end;
 
+      // GET_STATUS can race LAUNCH and report the idle Backdrop application
+      // before the requested receiver has started. Do not treat another
+      // application's transport as receiver-ready or LOAD will be sent to the
+      // old app and silently ignored.
+      NewApplicationId := MfCastExtractJsonString(AJsonPayload,
+                                                   'appId');
+      if (FSettings.ReceiverApplicationId <> '') and
+         not SameText(NewApplicationId,
+                      FSettings.ReceiverApplicationId) then
+        begin
+          if (NewApplicationId <> '') and Assigned(FLogger) then
+            FLogger.Log(cllTrace,
+                        'Channel',
+                        Format('Ignoring receiver status for appId="%s" while waiting for appId="%s".',
+                               [NewApplicationId,
+                                FSettings.ReceiverApplicationId]));
+          Exit;
+        end;
+
       NewTransportId := MfCastExtractJsonString(AJsonPayload,
-                                                'transportId');
+                                                 'transportId');
       if (NewTransportId = '') then
         Exit;
 
@@ -1983,7 +2044,7 @@ begin
   TotalRead := 0;
   Ptr := PAnsiChar(ABuffer);
 
-  while TotalRead < ASize do
+  while (TotalRead < ASize) do
     begin
       Result := FTransport.ReceiveBuffer(@Ptr[TotalRead],
                                          ASize - TotalRead,
@@ -2151,7 +2212,15 @@ begin
       begin
         if ((GetTickCount() - LastStatusTick) >= 3000) then
           begin
-            RequestMediaStatus();
+            // A Cast V2 media session does not exist until LOAD has been
+            // accepted. Some older Default Media Receiver versions reject a
+            // pre-session GET_STATUS with INVALID_MEDIA_SESSION_ID. That
+            // response is about the diagnostic poll, not the pending LOAD,
+            // but it used to be reported as a LOAD failure. Wait for the
+            // receiver's LOAD response until a session ID has been assigned.
+            if (FPendingLoadContentId = '') or
+               (FMediaSessionId <> 0) then
+              RequestMediaStatus();
             LastStatusTick := GetTickCount();
           end;
         Continue;

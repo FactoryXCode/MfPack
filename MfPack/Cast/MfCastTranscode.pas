@@ -138,6 +138,7 @@ type
   private
     FOwner: TMfCastTranscodePipeline;
     FPump: TMfSubtitleFramePump;
+    FLoggedFirstProgress: Boolean;
     function WriteSubtitleTempFile(out AFileName: WideString): HRESULT;
     procedure PumpProgress(Sender: TObject;
                            FramesWritten: Int64;
@@ -177,6 +178,7 @@ begin
   Priority := tpLower;
   FOwner := AOwner;
   FPump := nil;
+  FLoggedFirstProgress := False;
 end;
 
 
@@ -302,6 +304,15 @@ procedure TMfCastTranscodeWorker.PumpProgress(Sender: TObject;
 begin
 
   Cancel := Terminated;
+  if (not FLoggedFirstProgress) and (FramesWritten > 0) then
+    begin
+      FLoggedFirstProgress := True;
+      if Assigned(FOwner) then
+        FOwner.Log(cllDebug,
+                   Format('First encoded output produced: frames=%d sampleTime100ns=%d.',
+                          [FramesWritten,
+                           SampleTime]));
+    end;
 end;
 
 

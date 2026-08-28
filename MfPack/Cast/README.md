@@ -26,6 +26,11 @@ marshal UI changes to the main thread. MfSimpleCastPlayer uses PostMessage
 for this purpose. Connect, receiver launch, and initial media load can wait on  
 network timeouts, so the sample invokes the facade's Cast method from a worker  
 thread.  
+
+Diagnostic logging is enabled by default. Set `TMfCast.LoggingEnabled` to
+`False` to suppress the `OnLog` callback and the facade's standard debugger
+messages. Logging can be enabled or disabled while Cast workers are active;
+`OnError` remains independent and is not suppressed.
   
 **MfCastWindowsSupport.pas** contains the optional **WM_MFCAST_*** message bridge and  
 reusable Cast/subtitle worker threads.  

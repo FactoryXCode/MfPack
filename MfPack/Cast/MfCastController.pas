@@ -95,6 +95,7 @@ type
     TranscodePipeline: IMfCastTranscodePipeline;
     PreviewSink: IMfCastPreviewSink;
     DirectPreviewPlayer: IMfCastDirectPreviewPlayer;
+
     procedure Reset();
   end;
 
@@ -316,13 +317,17 @@ var
 begin
 
   Result := False;
-  FillChar(AAddress, SizeOf(AAddress), 0);
+
+  FillChar(AAddress,
+           SizeOf(AAddress),
+           0);
+
   HostAnsi := AnsiString(Trim(AHost));
   if (HostAnsi = '') then
     Exit;
 
   AAddress.S_addr := inet_addr(PAnsiChar(HostAnsi));
-  if AAddress.S_addr <> u_long(INADDR_NONE) then
+  if (AAddress.S_addr <> u_long(INADDR_NONE)) then
     begin
       Result := True;
       Exit;
@@ -364,8 +369,9 @@ begin
     Exit;
 
   try
-    Sock := socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if Sock = INVALID_SOCKET then
+    Sock := socket(AF_INET,
+                   SOCK_DGRAM, IPPROTO_UDP);
+    if (Sock = INVALID_SOCKET) then
       Exit;
 
     Port := APeerPort;
@@ -835,6 +841,8 @@ end;
 function TMfCastController.StartPendingMedia(): HRESULT;
 var
   hr: HRESULT;
+  HttpRequestsBefore: Cardinal;
+  HttpRequestsAfter: Cardinal;
 
 begin
 
@@ -898,8 +906,10 @@ begin
 
   FMediaLoadStartTick := GetTickCount();
   FMediaPlaybackStarted := False;
+  HttpRequestsBefore := GetHttpRequestCount();
 
   Result := FComponents.Channel.LoadMedia(FPendingLoadRequest);
+  HttpRequestsAfter := GetHttpRequestCount();
 
   if (Result = S_OK) then
     begin
@@ -920,9 +930,24 @@ begin
     end;
 
   if (Result <> S_OK) then
-    Result := FailCastAttempt(Result,
-                              'Load media',
-                              'The Chromecast receiver rejected the media load request.');
+    begin
+      if Result = HRESULT(DWORD($800705B4)) then
+        begin
+          if HttpRequestsAfter = HttpRequestsBefore then
+            Result := FailCastAttempt(Result,
+                                      'Load media',
+                                      'The Chromecast did not acknowledge LOAD and made no request to the local media URL.')
+          else
+            Result := FailCastAttempt(Result,
+                                      'Load media',
+                                      Format('The Chromecast did not acknowledge LOAD after making %d local HTTP request(s).',
+                                             [HttpRequestsAfter - HttpRequestsBefore]));
+        end
+      else
+        Result := FailCastAttempt(Result,
+                                  'Load media',
+                                  'The Chromecast receiver rejected the media load request.');
+    end;
 end;
 
 
@@ -2213,6 +2238,7 @@ begin
                Assigned(FComponents.DirectPreviewPlayer) and
                FComponents.DirectPreviewPlayer.IsActive() then
               FComponents.DirectPreviewPlayer.Seek(SeekPosition100ns);
+
             Log(cllInfo,
                 'Seek replacement media LOAD request accepted.');
           end;
@@ -3004,7 +3030,11 @@ begin
 
   ALoadRequest.ContentId := Url;
   ALoadRequest.ContentType := 'video/mp4';
-  ALoadRequest.StreamType := cstBuffered;
+  // SegmentPublisher exposes an incomplete fragmented-MP4 resource over a
+  // chunked HTTP response. Advertise the same LIVE contract used by
+  // CastLiveFragmentedMp4; BUFFERED describes a finite, range-addressable
+  // resource and can make the Default Media Receiver defer or ignore LOAD.
+  ALoadRequest.StreamType := cstLive;
   ALoadRequest.Title := FCurrentMedia.Title;
   ALoadRequest.AutoPlay := True;
 
