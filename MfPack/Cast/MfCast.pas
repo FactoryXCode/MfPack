@@ -732,9 +732,11 @@ procedure TMfCast.SetLoggingEnabled(const AValue: Boolean);
 begin
 
   if AValue then
-    InterlockedExchange(FLoggingEnabled, 1)
+    InterlockedExchange(FLoggingEnabled,
+                        1)
   else
-    InterlockedExchange(FLoggingEnabled, 0);
+    InterlockedExchange(FLoggingEnabled,
+                        0);
 end;
 
 end.

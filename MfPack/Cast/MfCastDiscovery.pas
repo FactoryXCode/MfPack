@@ -608,9 +608,10 @@ begin
 
   FRunning := True;
   Log(cllDebug,
-      Format('Starting mDNS discovery: service="%s" responseWindow=%d ms interface="%s".',
+      Format('Starting mDNS discovery: service="%s" responseWindow=%d ms queryTimeout=%d ms interface="%s".',
              [FProtocol.DiscoveryServiceName,
               FSettings.ResponseWindowMs,
+              FSettings.QueryTimeoutMs,
               FSettings.LocalInterfaceAddress]));
   if Assigned(FCallbacks.OnStarted) then
     FCallbacks.OnStarted();
@@ -967,6 +968,15 @@ begin
   if (WindowMs = 0) then
     WindowMs := 1500;
 
+  // ResponseWindowMs was historically the only value used here, leaving the
+  // configured QueryTimeoutMs ineffective. Chromecast sticks usually answer
+  // inside that short window, while Android TV receivers commonly defer their
+  // reply until later in the mDNS query cycle. Keep listening for the complete
+  // configured query timeout so the initial Discover is as complete as a
+  // subsequent Refresh.
+  if (FSettings.QueryTimeoutMs > WindowMs) then
+    WindowMs := FSettings.QueryTimeoutMs;
+
   StartTick := GetTickCount();
   NextQueryMs := 500;
   PacketCount := 0;
@@ -975,12 +985,19 @@ begin
   repeat
 
     ElapsedMs := GetTickCount() - StartTick;
-    if (NextQueryMs <= 1000) and (ElapsedMs >= NextQueryMs) then
+    if (NextQueryMs < WindowMs) and (ElapsedMs >= NextQueryMs) then
       begin
         Result := SendQuery();
         if FAILED(Result) then
           Exit;
-        Inc(NextQueryMs, 500);
+
+        // Query immediately above, once after 500 ms, then once more at
+        // 1500 ms. The late retry covers slow Android TV responders without
+        // flooding the multicast network throughout the response window.
+        if (NextQueryMs < 1500) then
+          NextQueryMs := 1500
+        else
+          NextQueryMs := WindowMs;
       end;
 
     FromLen := SizeOf(FromAddr);
@@ -1056,8 +1073,10 @@ begin
   until ((GetTickCount() - StartTick) >= WindowMs);
 
   Log(cllDebug,
-      Format('mDNS response window finished: packets=%d accepted=%d.',
-             [PacketCount, AcceptedCount]));
+      Format('mDNS response window finished after %d ms: packets=%d accepted=%d.',
+             [WindowMs,
+              PacketCount,
+              AcceptedCount]));
   Result := S_OK;
 end;
 
