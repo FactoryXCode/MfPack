@@ -23,10 +23,11 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 29/08/2026 Carmen              Corrected MFTEnum2 optional media-type pointer parameters.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
-// 
+//
 //          When reading the original headers (.h) you may see "STDAPI", a macro.
 //          "STDAPI" means it uses the "stdcall" calling convention and it returns always a
 //          HRESULT,
@@ -2553,8 +2554,8 @@ const
 
   function MFTEnum2(guidCategory: TGUID; // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
                     Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
-                    const pInputType: MFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match. This parameter can be Nil. If Nil, all input types are matched.
-                    const pOutputType: MFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match. This parameter can be Nil. If Nil, all input types are matched.
+                    const pInputType: PMFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match. This parameter can be Nil. If Nil, all input types are matched.
+                    const pOutputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match. This parameter can be Nil. If Nil, all output types are matched.
                     pAttributes: IMFAttributes; // A pointer to an IMFAttributes interface that enables access to the standard attribute store.
                     out pppMFTActivate: PIMFActivateArray;  // Receives a pointer to an array of IMFActivate interface pointers.
                                                             // Each pointer represents an activation object for an MFT that matches the search criteria.
