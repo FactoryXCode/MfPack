@@ -1,0 +1,49 @@
+program MfCustomMFTAsync;
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
+  {System}
+  System.SysUtils,
+  {Vcl}
+  Vcl.Forms,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  {Application}
+  Form.Main in 'Form.Main.pas' {frmMain},
+  AsyncVideoEngine in 'AsyncVideoEngine.pas',
+  MfGrayscaleMFT in 'MfGrayscaleMFT.pas';
+
+var
+  Hr: HRESULT;
+
+begin
+
+  Hr := CoInitializeEx(nil,
+                       COINIT_APARTMENTTHREADED);
+  if FAILED(Hr) then
+    raise Exception.CreateFmt('CoInitializeEx failed (HRESULT 0x%.8x).',
+                              [Cardinal(Hr)]);
+  try
+    Hr := MFStartup(MF_VERSION,
+                    MFSTARTUP_FULL);
+
+    if FAILED(Hr) then
+      raise Exception.CreateFmt('MFStartup failed (HRESULT 0x%.8x).',
+                                [Cardinal(Hr)]);
+    try
+      Application.Initialize;
+      Application.MainFormOnTaskbar := True;
+      Application.CreateForm(TfrmMain, frmMain);
+      Application.Run;
+
+    finally
+      MFShutdown();
+    end;
+  finally
+    CoUninitialize();
+  end;
+end.
+

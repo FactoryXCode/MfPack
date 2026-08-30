@@ -8,7 +8,7 @@
 
 // FactoryX
 //
-// Copyright ©2003 - 2019 by FactoryX, Netherlands/Australia
+// Copyright ï¿½2003 - 2019 by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
@@ -1774,7 +1774,7 @@ begin
     memDetails.Lines.Add('');
     memDetails.Lines.Add('Note');
     memDetails.Lines.Add('  These are registration types. Runtime available types can differ');
-    memDetails.Lines.Add('  Use Activate and inspect, or run the HEVC capability probe.');
+    memDetails.Lines.Add('  Use Activate and inspect, or probe the selected category.');
 
   finally
     memDetails.Lines.EndUpdate;
