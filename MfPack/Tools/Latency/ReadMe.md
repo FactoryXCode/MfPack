@@ -2,7 +2,7 @@
 
 &#x20;
 
-Version: 3.2.0
+Version: 4.0.0
 
 &#x20;
 
@@ -28,7 +28,7 @@ Usage:
 NOTES:
 
 * This release is updated for compiler version 17 up to 35.
-* SDK version 10.0.26100.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Windows 11)
 * Requires Windows 10 22H2 or later.
 * Minimum supported MfPack version: 3.1.8
 
