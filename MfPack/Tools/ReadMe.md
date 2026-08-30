@@ -2,7 +2,7 @@
 
 &#x20; 
 
-Version 3.1.9
+Version 4.0.0
 
 &#x20; 
 
@@ -29,7 +29,7 @@ To build the tools application, you have to add ..\\MfPack\\src\\dbg to your pro
 NOTES:  
 
 * This release is updated for compiler version 17 up to 34.
-* SDK version 10.0.22621.4654 (Win 11)
+* SDK version 10.0.28000.2705 (Windows 11)
 * Requires Windows 10 build 20348 or later.
 * Minimum supported MfPack version: 3.1.5
 
