@@ -1,5 +1,5 @@
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: WinApi - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -26,7 +26,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
