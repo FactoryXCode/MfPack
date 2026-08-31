@@ -23,6 +23,15 @@ object frmMain: TfrmMain
     Height = 64
     Align = alTop
     TabOrder = 0
+    object lblSummary: TLabel
+      Left = 205
+      Top = 25
+      Width = 301
+      Height = 13
+      Caption = 
+        'The source frame is generated locally; no video file is required' +
+        '.'
+    end
     object btnProcess: TButton
       Left = 16
       Top = 16
@@ -32,13 +41,6 @@ object frmMain: TfrmMain
       Default = True
       TabOrder = 0
       OnClick = btnProcessClick
-    end
-    object lblSummary: TLabel
-      Left = 205
-      Top = 25
-      Width = 343
-      Height = 13
-      Caption = 'The source frame is generated locally; no video file is required.'
     end
   end
   object pnlSource: TPanel

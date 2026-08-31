@@ -30,8 +30,6 @@ object frmMain: TfrmMain
     Height = 72
     Align = alTop
     TabOrder = 0
-    ExplicitTop = 2
-    ExplicitWidth = 1250
     object lblCategory: TLabel
       Left = 12
       Top = 12
@@ -109,7 +107,6 @@ object frmMain: TfrmMain
     Height = 40
     Align = alBottom
     TabOrder = 3
-    ExplicitWidth = 1250
     DesignSize = (
       1185
       40)
@@ -129,7 +126,6 @@ object frmMain: TfrmMain
       Caption = 'Copy details'
       TabOrder = 0
       OnClick = btnCopyDetailsClick
-      ExplicitLeft = 1118
     end
   end
   object lvTransforms: TListView
@@ -187,8 +183,5 @@ object frmMain: TfrmMain
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 2
-    WordWrap = False
-    ExplicitLeft = 834
-    ExplicitWidth = 312
   end
 end

@@ -580,14 +580,6 @@ begin
   if not Assigned(AActivate) then
     Exit;
 
-  HardwareUrl := ReadAllocatedString(AActivate,
-                                     MFT_ENUM_HARDWARE_URL_Attribute);
-  // A hardware symbolic link identifies the driver device. Without one,
-  // retain every activation object because CLSID alone is not sufficient to
-  // prove that two activation objects represent the same device instance.
-  if (HardwareUrl = '') then
-    Exit;
-
   FillChar(ClassId,
            SizeOf(ClassId),
            0);
@@ -595,7 +587,15 @@ begin
   if FAILED(AActivate.GetGUID(MFT_TRANSFORM_CLSID_Attribute,
                               ClassId)) then
     Exit;
-  Result := GUIDToString(ClassId) + '|' + HardwareUrl;
+
+  Result := GUIDToString(ClassId);
+  HardwareUrl := ReadAllocatedString(AActivate,
+                                     MFT_ENUM_HARDWARE_URL_Attribute);
+  // Preserve genuinely distinct hardware registrations that share a CLSID.
+  // Software MFTs and drivers without a symbolic link use their CLSID as the
+  // stable identity.
+  if (HardwareUrl <> '') then
+    Result := Result + '|' + HardwareUrl;
 end;
 
 
@@ -657,6 +657,8 @@ var
   Count: UINT32;
   I: Integer;
   Hr: HResult;
+  Seen: TStringList;
+  Identity: string;
 
 begin
 
@@ -677,13 +679,30 @@ begin
       Exit;
     end;
 
+  Result := 0;
+  Seen := TStringList.Create();
+
   try
+    Seen.CaseSensitive := False;
+    Seen.Sorted := True;
+    Seen.Duplicates := dupIgnore;
+
     for I := 0 to Integer(Count) - 1 do
-      AddTransform(Activates^[I],
-                   '',
-                   '');
+      begin
+        Identity := ActivationIdentity(Activates^[I]);
+        if (Identity <> '') and (Seen.IndexOf(Identity) >= 0) then
+          Continue;
+        if (Identity <> '') then
+          Seen.Add(Identity);
+
+        AddTransform(Activates^[I],
+                     '',
+                     '');
+        Inc(Result);
+      end;
 
   finally
+    Seen.Free;
     if Assigned(Activates) then
       begin
         for I := 0 to Integer(Count) - 1 do
@@ -691,7 +710,6 @@ begin
         CoTaskMemFree(Activates);
       end;
   end;
-  Result := Count;
 end;
 
 

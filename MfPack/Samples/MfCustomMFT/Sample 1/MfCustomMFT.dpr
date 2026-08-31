@@ -1,13 +1,18 @@
 program MfCustomMFT;
 
 uses
-
-  System.SysUtils,
+  {WinApi}
   WinApi.Windows,
   WinApi.ComBaseApi,
+  {ActiveX}
   WinApi.ActiveX.ObjBase,
+  {System}
+  System.SysUtils,
+  {Vcl}
   Vcl.Forms,
+  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
+  {Application}
   Form.Main in 'Form.Main.pas' {frmMain},
   MfGrayscaleMFT in 'MfGrayscaleMFT.pas';
 
@@ -15,12 +20,14 @@ var
   Hr: HResult;
 
 begin
-  Hr := CoInitializeEx(nil, COINIT_APARTMENTTHREADED);
+  Hr := CoInitializeEx(nil,
+                       COINIT_APARTMENTTHREADED);
   if FAILED(Hr) then
     raise Exception.CreateFmt('CoInitializeEx failed (HRESULT 0x%.8x).',
                               [Cardinal(Hr)]);
   try
-    Hr := MFStartup(MF_VERSION, MFSTARTUP_FULL);
+    Hr := MFStartup(MF_VERSION,
+                    MFSTARTUP_FULL);
     if FAILED(Hr) then
       raise Exception.CreateFmt('MFStartup failed (HRESULT 0x%.8x).',
                                 [Cardinal(Hr)]);
@@ -29,10 +36,11 @@ begin
       Application.MainFormOnTaskbar := True;
       Application.CreateForm(TfrmMain, frmMain);
       Application.Run;
+
     finally
-      MFShutdown;
+      MFShutdown();
     end;
   finally
-    CoUninitialize;
+    CoUninitialize();
   end;
 end.

@@ -23,6 +23,8 @@ Transforms (MFTs) installed on a Windows system.
 - Shutting down the activated object after inspection;
 - Probing every transform in the selected category and scope;
 - Reporting DXGI adapters for which a hardware video query returns zero MFTs;
+- Collapsing duplicate activation objects returned by ordinary `MFTEnumEx`
+  enumeration;
 - Separating raw activation-object counts from unique hardware transforms;
 - Applying generic activation, stream, and runtime-type inspection to every
   MFT category;
@@ -79,6 +81,12 @@ The explorer shows the raw activation count, then collapses objects with the
 same adapter, transform CLSID, and hardware symbolic link. Capability counts  
 use the unique result; duplicate activation objects must not be interpreted as  
 additional hardware engines or concurrent-session capacity.  
+
+The ordinary system-wide `MFTEnumEx` path is deduplicated as well. Its identity
+is the transform CLSID plus the hardware registration URL when one is present;
+the CLSID alone identifies software transforms and registrations without such
+a URL. Adapter-specific entries remain available through `Hardware MFTs`
+scope.  
   
 MfPack's `MFTEnum2` declaration uses `PMFT_REGISTER_TYPE_INFO` for its optional  
 input and output filters. This matches the Windows SDK and allows `nil` to mean  
