@@ -554,6 +554,30 @@ Before using this sample make sure, you have all needed components installed (se
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJPro_Interface_s.png)
   
 ---
+**MfMftExplorer sample**
+
+This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
+Windows system and their properties. 
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMftExplorer.png)
+  
+---
+***Educational samples***
+  
+**MfCustomMFT samples**  
+Small, beginner-oriented examples that introduce custom Media Foundation  
+Transforms one step at a time.  
+The project has 6 samples where each sample is lifted from the previous one.  
+At sample 6 a programmer should be able to build a simple registered MFT and  
+how to use it in Media Foundation.  
+  
+![Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
+  
+  
+![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
+Sample 1
+  
+---
   
 ***Tools***
   
