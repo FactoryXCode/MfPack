@@ -210,7 +210,7 @@ This it the extended version of MfSimpleCastPlayer.
   playback;
 - A best-quality YouTube mode that downloads separate video and audio streams
   and merges them into an MP4 file;
-- Local video and audio preview through the `TMfCast` facade;
+- Local video and audio preview through the `TMfCast` main interface;
 - Audio-only playback with optional JPG, PNG, BMP, or GIF artwork;
 - Heartbeat monitoring and automatic cleanup when the receiver is switched
   off or stops responding.

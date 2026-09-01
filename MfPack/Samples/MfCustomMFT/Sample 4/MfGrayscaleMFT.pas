@@ -116,15 +116,15 @@ type
                             out pcOutputStreams: DWORD): HResult; stdcall;
 
     function GetStreamIDs(dwInputIDArraySize: DWORD;
-                          pdwInputIDs: WinApi.WinApiTypes.PDWORD;
+                          pdwInputIDs: {WinApi.WinApiTypes.}PDWORD;
                           dwOutputIDArraySize: DWORD;
-                          pdwOutputIDs: WinApi.WinApiTypes.PDWORD): HResult; stdcall;
+                          pdwOutputIDs: {WinApi.WinApiTypes.}PDWORD): HResult; stdcall;
 
     function GetInputStreamInfo(const dwInputStreamID: DWORD;
                                 out pStreamInfo: MFT_INPUT_STREAM_INFO): HResult; stdcall;
 
     function GetOutputStreamInfo(const dwOutputStreamID: DWORD;
-      out pStreamInfo: MFT_OUTPUT_STREAM_INFO): HResult; stdcall;
+                                 out pStreamInfo: MFT_OUTPUT_STREAM_INFO): HResult; stdcall;
 
     function GetAttributes(out pAttributes: IMFAttributes): HResult; stdcall;
 
@@ -135,8 +135,9 @@ type
                                        out pAttributes: IMFAttributes): HResult; stdcall;
 
     function DeleteInputStream(dwStreamID: DWORD): HResult; stdcall;
+
     function AddInputStreams(cStreams: DWORD;
-                             adwStreamIDs: WinApi.WinApiTypes.PDWORD): HResult; stdcall;
+                             adwStreamIDs: {WinApi.WinApiTypes.}PDWORD): HResult; stdcall;
 
     function GetInputAvailableType(const dwInputStreamID: DWORD;
                                    dwTypeIndex: DWORD;
@@ -405,9 +406,9 @@ end;
 
 
 function TMfGrayscaleMFT.GetStreamIDs(dwInputIDArraySize: DWORD;
-                                      pdwInputIDs: WinApi.WinApiTypes.PDWORD;
+                                      pdwInputIDs: {WinApi.WinApiTypes.}PDWORD;
                                       dwOutputIDArraySize: DWORD;
-                                      pdwOutputIDs: WinApi.WinApiTypes.PDWORD): HResult;
+                                      pdwOutputIDs: {WinApi.WinApiTypes.}PDWORD): HResult;
 begin
 
   // E_NOTIMPL means that both streams use the default identifier zero.
@@ -498,7 +499,7 @@ begin
 end;
 
 function TMfGrayscaleMFT.AddInputStreams(cStreams: DWORD;
-                                         adwStreamIDs: WinApi.WinApiTypes.PDWORD): HResult;
+                                         adwStreamIDs: {WinApi.WinApiTypes.}PDWORD): HResult;
 begin
 
   Result := E_NOTIMPL;

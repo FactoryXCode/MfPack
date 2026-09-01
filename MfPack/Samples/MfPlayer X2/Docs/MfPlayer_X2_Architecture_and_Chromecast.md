@@ -38,7 +38,7 @@ The application has five cooperating layers:
 2. Media Foundation Media Session playback.
 3. Timed-text discovery, loading, timing, and RGB32 composition.
 4. Source Reader and Sink Writer export/transcoding.
-5. The reusable `TMfCast` facade for discovery, control, publication, route
+5. The reusable `TMfCast` main interface for discovery, control, publication, route
    selection, remuxing, and transcoding.
   
 ---
@@ -50,7 +50,7 @@ The application has five cooperating layers:
 | Unit | Responsibility |
 |---|---|
 | `frmMfPlayer.pas` | Main form, player controls, subtitle selection, export, Cast integration, GUI diagnostics |
-| `MfPlayerClassX.pas` | Media Session player, topology construction, stream selection, playback state, subtitle facade |
+| `MfPlayerClassX.pas` | Media Session player, topology construction, stream selection, playback state, subtitle interface |
 | `MfMediaTimeline.pas` | Stable subtitle timing from sample timestamps, frame rate, or presentation clock |
 | `MFTimerCallBackClass.pas` | Media Foundation timer callback support |
 | `MfPCXConstants.pas` | Application messages and shared constants |
@@ -76,7 +76,7 @@ API therefore use the same cue model, compositor, readers, and frame pump.
   
 | Unit | Responsibility |
 |---|---|
-| `MfPack/Cast/MfCast.pas` | Public `TMfCast` facade used by applications |
+| `MfPack/Cast/MfCast.pas` | Public `TMfCast` main interface used by applications |
 | `MfPack/Cast/MfCastTypes.pas` | Public records, settings, states, modes, and callbacks |
 | `MfPack/Cast/MfCastInterfaces.pas` | Interfaces between Cast components |
 | `MfPack/Cast/MfCastDiscovery.pas` | IPv4 mDNS/DNS-SD discovery of `_googlecast._tcp.local` |
@@ -300,10 +300,10 @@ even though HLS-oriented settings and enum values still exist.
   
 ## 6. Chromecast Architecture
   
-### 6.1 Public facade and ownership
+### 6.1 Public `TMfCast` main interface and ownership
   
 MfPlayer X2 creates one `TMfCast` instance with transcoding enabled.  
-The form uses only the facade's public operations: discovery, device enumeration,  
+The form uses only the main interface's public operations: discovery, device enumeration,  
 `Cast`, play, pause, seek, disconnect, and state queries. It does not construct  
 or retain a channel, controller, HTTP server, publisher, remuxer, or transcoder.  
   
@@ -313,7 +313,7 @@ window messages and apply all GUI changes on the main thread.
   
 `dlgMfCastDevices.pas` receives the shared `TMfCast` instance, refreshes  
 discovery, obtains a device snapshot through `GetDevices`, and returns the  
-selected `TMfCastDevice`. The dialog does not own or replace the facade.  
+selected `TMfCastDevice`. The dialog does not own or replace the `TMfCast` main interface.  
   
 ### 6.2 Discovery and control channel
   
@@ -422,7 +422,7 @@ already contacted the server.
   
 ## 7. Cast State and Synchronization
   
-The facade exposes the controller state machine:
+The `TMfCast` main interface exposes the controller state machine:
   
 ```text
 Idle -> Preparing media -> Connecting -> Launching receiver
@@ -655,7 +655,7 @@ is active. The compositor decides how it becomes pixels. The playback MFT,
 file exporter, and Cast transcoder decide where those pixels go.  
   
 The reusable Cast subsystem follows the same separation: `TMfCast` is the  
-application facade, while discovery, transport, protocol, HTTP publication,  
+application main interface, while discovery, transport, protocol, HTTP publication,  
 media planning, remuxing, transcoding, and controller orchestration remain  
 internal components. MfPlayer X2 adds only application policy, device UI,  
 local-preview synchronization, and VCL-safe event handling.  

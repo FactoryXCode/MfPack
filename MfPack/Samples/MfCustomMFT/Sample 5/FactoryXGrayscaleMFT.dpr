@@ -1,18 +1,80 @@
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: RegisteredGrayscaleMFT.pas
+// Kind: Pascal Unit
+// Release date: 13-08-2026
+// Language: ENU
+//
+// Version: 4.0.0
+// Description: A minimal synchronous Media Foundation Transform that has to be
+//              registered as 32bit COM DLL, Media Foundation Video Effect.
+//
+// Company: FactoryX
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 or later.
+//          Please read the documentation.
+//
+// Related objects: -
+// Related projects: MfPackX400
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.28000.2705
+//
+// Todo: -
+//
+// =============================================================================
+// Source: Microsoft Learn.
+//
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
 library FactoryXGrayscaleMFT;
 
 uses
-
+  {WinApi}
   WinApi.Windows,
   WinApi.WinError,
-
+  {System}
   System.SysUtils,
   System.Win.ComServ,
-
+  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
-
-  MfRegisterApiFix in 'MfRegisterApiFix.pas',
+  {Dll}
   RegisteredGrayscaleMFT in 'RegisteredGrayscaleMFT.pas';
+
 
 function SetRegistryString(const AKeyName: UnicodeString;
                            const AValueName: UnicodeString;
@@ -70,12 +132,13 @@ begin
   ClassKey := 'Software\Classes\CLSID\' + ClsidText;
   ServerKey := ClassKey + '\InprocServer32';
 
-  if GetModuleFileNameW(HInstance,
+  if (GetModuleFileNameW(HInstance,
                         ModuleName,
-                        Length(ModuleName)) = 0 then
+                        Length(ModuleName)) = 0) then
     Exit(HRESULT_FROM_WIN32(GetLastError));
 
-  Result := SetRegistryString(ClassKey, '',
+  Result := SetRegistryString(ClassKey,
+                              '',
                               FACTORYX_GRAYSCALE_MFT_NAME);
   if SUCCEEDED(Result) then
     Result := SetRegistryString(ServerKey,
@@ -90,13 +153,14 @@ begin
     begin
       RegDeleteKeyW(HKEY_LOCAL_MACHINE,
                     PWideChar(ServerKey));
+
       RegDeleteKeyW(HKEY_LOCAL_MACHINE,
                     PWideChar(ClassKey));
     end;
 end;
 
 
-function UnregisterComObject: HRESULT;
+function UnregisterComObject(): HRESULT;
 var
   ClassKey: UnicodeString;
   ServerKey: UnicodeString;
@@ -111,7 +175,8 @@ begin
                              PWideChar(ServerKey));
 
   if (ErrorCode = ERROR_SUCCESS) or (ErrorCode = ERROR_FILE_NOT_FOUND) then
-    ErrorCode := RegDeleteKeyW(HKEY_LOCAL_MACHINE, PWideChar(ClassKey));
+    ErrorCode := RegDeleteKeyW(HKEY_LOCAL_MACHINE,
+                               PWideChar(ClassKey));
 
   if (ErrorCode = ERROR_FILE_NOT_FOUND) then
     ErrorCode := ERROR_SUCCESS;
@@ -138,17 +203,17 @@ begin
   OutputType := InputType;
   FriendlyName := FACTORYX_GRAYSCALE_MFT_NAME;
 
-  Result := MFTRegisterFixed(CLSID_FactoryXGrayscaleMFT,
-                             MFT_CATEGORY_VIDEO_EFFECT,
-                             PWideChar(FriendlyName),
-                             UINT32(MFT_ENUM_FLAG_SYNCMFT),
-                             1,
-                             @InputType,
-                             1,
-                             @OutputType,
-                             nil);
+  Result := MFTRegister(CLSID_FactoryXGrayscaleMFT,
+                        MFT_CATEGORY_VIDEO_EFFECT,
+                        PWideChar(FriendlyName),
+                        UINT32(MFT_ENUM_FLAG_SYNCMFT),
+                        1,
+                        @InputType,
+                        1,
+                        @OutputType,
+                        nil);
   if FAILED(Result) then
-    UnregisterComObject;
+    UnregisterComObject();
 end;
 
 

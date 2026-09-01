@@ -1,11 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// A deliberately small synchronous Media Foundation Transform.
-// It accepts RGB32 video, converts every pixel to grayscale in place, and
-// returns the same IMFSample from ProcessOutput.
-// FactoryX
-//
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -119,9 +114,9 @@ type
                             out pcOutputStreams: DWORD): HResult; stdcall;
 
     function GetStreamIDs(dwInputIDArraySize: DWORD;
-                          pdwInputIDs: WinApi.WinApiTypes.PDWORD;
+                          pdwInputIDs: {WinApi.WinApiTypes.}PDWORD;
                           dwOutputIDArraySize: DWORD;
-                          pdwOutputIDs: WinApi.WinApiTypes.PDWORD): HResult; stdcall;
+                          pdwOutputIDs: {WinApi.WinApiTypes.}PDWORD): HResult; stdcall;
 
     function GetInputStreamInfo(const dwInputStreamID: DWORD;
                                 out pStreamInfo: MFT_INPUT_STREAM_INFO): HResult; stdcall;
@@ -140,7 +135,7 @@ type
     function DeleteInputStream(dwStreamID: DWORD): HResult; stdcall;
 
     function AddInputStreams(cStreams: DWORD;
-                             adwStreamIDs: WinApi.WinApiTypes.PDWORD): HResult; stdcall;
+                             adwStreamIDs: {WinApi.WinApiTypes.}PDWORD): HResult; stdcall;
 
     function GetInputAvailableType(const dwInputStreamID: DWORD;
                                    dwTypeIndex: DWORD;
@@ -406,9 +401,9 @@ end;
 
 
 function TMfGrayscaleMFT.GetStreamIDs(dwInputIDArraySize: DWORD;
-                                      pdwInputIDs: WinApi.WinApiTypes.PDWORD;
+                                      pdwInputIDs: {WinApi.WinApiTypes.}PDWORD;
                                       dwOutputIDArraySize: DWORD;
-                                      pdwOutputIDs: WinApi.WinApiTypes.PDWORD): HResult;
+                                      pdwOutputIDs: {WinApi.WinApiTypes.}PDWORD): HResult;
 begin
 
   // E_NOTIMPL means that both streams use the default identifier zero.
@@ -498,7 +493,7 @@ end;
 
 
 function TMfGrayscaleMFT.AddInputStreams(cStreams: DWORD;
-                                         adwStreamIDs: WinApi.WinApiTypes.PDWORD): HResult;
+                                         adwStreamIDs: {WinApi.WinApiTypes.}PDWORD): HResult;
 begin
 
   Result := E_NOTIMPL;

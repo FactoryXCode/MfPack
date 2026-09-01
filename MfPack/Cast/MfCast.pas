@@ -11,7 +11,7 @@
 // Language: ENU
 //
 // Revision Version: 4.0.0
-// Description: Public facade for Cast discovery, connection, media loading,
+// Description: Public `TMfCast` interface for Cast discovery, connection, media loading,
 //              and playback control.
 //
 // Company: FactoryX
@@ -86,9 +86,9 @@ type
 
   EMfCast = class(Exception);
 
-  // Public facade for discovery and direct playback. Callbacks are delivered
+  // Public main interface for discovery and direct playback. Callbacks are delivered
   // by worker threads; VCL clients must marshal control updates to the main
-  // thread (the MfSimpleCastPlayer sample demonstrates this with PostMessage).
+  // thread (for instance: The MfSimpleCastPlayer sample demonstrates this with PostMessage).
   TMfCast = class
   private
     FController: IMfCastController;
@@ -222,7 +222,7 @@ type
 constructor TMfCastLogger.Create(const AOwner: TMfCast);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FOwner := AOwner;
 end;

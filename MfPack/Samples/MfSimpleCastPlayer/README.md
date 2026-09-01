@@ -3,7 +3,7 @@
 Version 3.2.0
   
 `MfSimpleCastPlayer` is a compact Delphi VCL example for the public  
-`TMfCast` facade. It demonstrates the complete path from discovering a Google  
+`TMfCast` main interface. It demonstrates the complete path from discovering a Google  
 Cast receiver to inspecting, preparing, serving, controlling, and previewing  
 media.  
   
@@ -93,7 +93,7 @@ before retrying the cast.
   
 ## Media sources and routing
   
-The sample constructs the facade with:
+The sample constructs the `TMfCast` main interface with:
   
 ```pascal
 FCast := TMfCast.Create(True);
@@ -115,8 +115,8 @@ MfCast inspects the source and chooses a route automatically:
 ### Preview and direct playback
   
 `MfSimpleCastPlayer` attaches its black preview panel with  
-`SetPreviewWindow`. The facade selects the preview implementation that matches  
-the chosen media route:  
+`SetPreviewWindow`. The `TMfCast` main interface selects the preview implementation that  
+matches the chosen media route:  
   
 - Direct and remux routes use an independent Media Foundation Media Session,
   the EVR, and the local audio renderer.
@@ -175,7 +175,7 @@ tracks.
 Text subtitles such as SRT, WebVTT, and supported embedded UTF-8 text can be  
 used. Bitmap subtitle formats such as PGS and VobSub are not currently rendered.  
   
-The facade also exposes `GetMediaTracks`, `SelectAudioTrack`,  
+The main interface also exposes `GetMediaTracks`, `SelectAudioTrack`,  
 `SelectSubtitle`, and `DisableSubtitles`. The simple sample intentionally omits  
 a separate audio-track selector so applications can provide a UI appropriate  
 to their own media library.  
@@ -202,7 +202,7 @@ When the TV is switched off or the receiver stops responding, MfCast:
 1. Detects the closed connection or heartbeat timeout;
 2. Stops the transcode or remux worker;
 3. Releases published media and temporary state;
-4. Changes the facade state to `Stopped` or `Error`;
+4. Changes the `TMfCast` main interface state to `Stopped` or `Error`;
 5. Retains a snapshot of the last public cast request.
   
 Selecting **Play** in `Stopped` or `Error` state reconnects and starts that  
@@ -306,16 +306,17 @@ considerably easier to interpret.
   
 ## Related documentation
   
-- `MfPack\Cast\README.md` — Cast facade and architecture overview;  
-- `MfPack\Cast\MfPack_Chromecast_API_White_Paper.txt` — detailed API design and   
+- `MfPack\Cast\README.md` Cast `TMfCast` main interface and architecture overview;  
+- `MfPack\Cast\MfPack_Chromecast_API_White_Paper.txt` detailed API design and   
   protocol notes;  
-- `MfPack\Cast\Media\README.md` — media conversion support;  
-- `MfPack\Samples\MfCastPlayer` — extended sample with application-provided  
+- `MfPack\Cast\Media\README.md` media conversion support;  
+- `MfPack\Samples\MfCastPlayer` extended sample with application-provided  
   webpage/YouTube resolution.
   
-Project: Media Foundation — MfPack Samples  
+Project: Media Foundation MfPack Samples  
 Project location: <https://github.com/FactoryXCode/MfPack>  
 SourceForge: <https://sourceforge.net/projects/MfPack>  
   
 First release date: 02/08/2026  
+Final release date: 31/08/2026  
 Copyright © FactoryX. All rights reserved.

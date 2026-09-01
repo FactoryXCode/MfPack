@@ -9,7 +9,7 @@ Requires Windows 10 or later.
 Minimum supported MfPack version: 3.2.0  
   
   
-This Delphi XE7-compatible VCL sample demonstrates the public `TMfCast` facade.  
+This Delphi XE7 and higher compatible VCL sample demonstrates the public `TMfCast` main interface.  
 
 **It demonstrates:**
   
@@ -69,8 +69,8 @@ the combo while an MKV transcode is active restarts the published stream at the
 current source position with the newly selected track; clearing the checkbox  
 does the same without a subtitle compositor. Bitmap subtitles remain deferred.  
   
-The shared facade also exposes `GetMediaTracks` and `SelectAudioTrack`. Audio  
-selection uses stable track IDs and restarts an active transcode at its current  
+The shared `TMfCast` main interface also exposes `GetMediaTracks` and `SelectAudioTrack`.
+Audio selection uses stable track IDs and restarts an active transcode at its current  
 source position. Audio controls are intentionally not added here: this sample  
 keeps one simple compact playback workflow, while API consumers can build the track UI  
 appropriate to their application.  
@@ -82,7 +82,7 @@ through `OutputDebugString`, to Delphi's Event Log while debugging. Diagnostics
 include the inspected content/container, selected media route, local HTTP server,  
 control connection, receiver launch, LOAD request, and structured error detail.  
   
-An MKV selects the conversion route. The facade starts Media Foundation on the  
+An MKV selects the conversion route. The main interface starts Media Foundation on the  
 creating thread and owns its lifetime because both inspection and conversion use  
 the platform. `TMfCast.Create(False)` disables the conversion components while  
 retaining discovery, direct playback, and media-track inspection.  
