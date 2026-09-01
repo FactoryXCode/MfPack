@@ -24,6 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 // 29/08/2026 Carmen              Corrected MFTEnum2 optional media-type pointer parameters.
+// 01/09/2026 Tony                Fixed MFTRegister passed by value issue.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -2458,13 +2459,13 @@ const
 
 
   function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
-                       const guidCategory: TGUID; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
+                       guidCategory: TGUID; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
-                       cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
-                       pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
-                       cOutputTypes: UINT32; // Number of elements in the pOutputTypes array.
-                       pOutputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
+                       const cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
+                       const pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
+                       const cOutputTypes: UINT32; // Number of elements in the pOutputTypes array.
+                       const pOutputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
                        pAttributes: IMFAttributes): HRESULT; stdcall; // Pointer to the IMFAttributes interface of an attribute store that contains additional registry information. This parameter can be Nil.
   {$EXTERNALSYM MFTRegister}
 
