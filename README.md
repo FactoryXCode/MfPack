@@ -571,7 +571,7 @@ The project has 6 samples where each sample is lifted from the previous one.
 At sample 6 a programmer should be able to build a simple registered MFT and  
 how to use it in Media Foundation.  
   
-![Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
+[Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
   
   
 ![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
