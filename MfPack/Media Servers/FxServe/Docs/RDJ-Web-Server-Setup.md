@@ -1,18 +1,18 @@
 # RDJ Web Server Setup
   
-RDJ and RDJ Pro can use either **Caddy** or **FxServe** for internet streaming.
+Apps like the RDJ or RDJ Pro samples, can use either **Caddy** or **FxServe** for internet streaming.
 Only one of them can run at a time because both use ports 80 and 443.  
   
 ## Which server should I use?
   
 ### Use FxServe when
   
-- The server is mainly used for RDJ or RDJ Pro.
+- The server is mainly used for RDJ or RDJ Pro or likewise apps.
 - You want a small web server with a simple setup.
-- You only need the your radio website and live stream.
+- You only need your radio website and live stream.
 - You want to use less memory and disk space.
 
-FxServe is the normal choice for a new RDJ installation.
+FxServe is the normal choice for a new RDJ or other media streaming installation.
 
 ### Use 3th party servers like Caddy when
 
@@ -21,7 +21,7 @@ FxServe is the normal choice for a new RDJ installation.
 - You need more routing or proxy options.
 - You often change the web-server configuration.
 
-3th party servers like Caddy have more features, but they offer much more, than needed for a basic RDJ stream.
+3th party servers like Caddy have more features, but they offer much more, than needed for a basic media stream.
 
 ## RDJ with FxServe
 
@@ -74,7 +74,7 @@ no certificate script or separate binding utility to run. Public TCP port 80
 must remain forwarded to FxServe so its in-memory ACME HTTP-01 response can be
 validated during initial issue and later renewals.
 
-## RDJ Pro with Caddy
+## RDJ Pro or similar apps with Caddy
 
 1. Copy the Caddy files and radio website to:
 
@@ -138,7 +138,7 @@ network.
 ## Changing between FxServe and Caddy
 
 Each server has its own administration tool because their settings differ.
-Stop Caddy with CaddyAdmin before starting FxServe with FxServe Admin. To return
+Stop Caddy with CaddyAdmin before starting FxServe with FxServeAdmin. To return
 to Caddy, stop FxServe first and then start Caddy with CaddyAdmin. Only one can
 own ports 80 and 443 at a time.
 
