@@ -19,7 +19,8 @@
   
 # MfPack API's and Samples
   
-- MfPack Cast V2 API.
+- MfPack Cast V2.0 API.
+- MfPack FxServe V1.1 API.
 - Media Foundation, WASAPI and XAudio2 samples.
   
   
@@ -595,13 +596,13 @@ disabled by default. When WAN HTTPS is enabled, FxServe obtains, installs,
 renews, validates, and binds its certificate itself.  
 MfPack includes a Zip file that contains the necessary files that needs to be  
 copied to your server of local machine that should run the service,  
-typically a remote server in your network. No installation app is needed.
-FxServe has an FxServeAdmin app , to install, configure and control FxServe as  
-a Windows service.  
+typically a remote server in your network. No installation app is needed.  
+FxServe has an FxServeAdmin app, to install, configure and control FxServe as  
+a Windows service.
   
 **Caddy**
   
-Caddy is a 3th party proxy server with much more features then FxServe. Use this  
+Caddy is a 3th party proxy server with much more features than FxServe. Use this  
 app as a service, just like FxServe for LAN/WAN streaming.  
 The Caddy version in MfPack is packed in a zip file together with the needed files to run on a server or   
 local PC. The Caddy version also has a CaddyAdmin app, to install,  
