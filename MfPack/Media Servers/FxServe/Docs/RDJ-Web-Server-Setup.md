@@ -1,4 +1,4 @@
-# RDJ Web Server Setup
+# Web Server Setup
   
 Apps like the RDJ or RDJ Pro samples, can use either **Caddy** or **FxServe** for internet streaming.
 Only one of them can run at a time because both use ports 80 and 443.  
