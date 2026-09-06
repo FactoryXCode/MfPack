@@ -1,0 +1,54 @@
+MfRdjJ
+  
+Version: 4.0.0
+  
+Description:  
+Requires Windows 10 with latest updates or later.
+  
+NOTES:
+  
+This release is updated for compiler version 34 (Delphi 12).  
+The minimum version for your compiler is Delphi XE7.  
+SDK version 10.0.28000.2705 (Win 11)  
+Minimum supported MfPack version: 3.1.9  
+  
+A dj mixer app based on MfPack/Media foundation/core audio/WasApi.  
+The original code was a DirectSound application written about 25 years ago, so,  
+we rewrote the code for Media Foundation and did some more...  
+  
+What it does:
+  
+Uses MDI adding channeldecks, loopbackdecks, a microphonedeck, effectsdeck (mft's) and  
+enddeck (pfl, recorder (saves to WAV or FLAC) and IceCast web broadcasting support),  
+playlisteditor and a tag editor (currently mp3 only)  
+It's capable of redirecting audio to every endpoint  
+separately (phone. master or any extra device on your pc) and or IceCast.  
+
+## Web server choice
+
+RDJ can use **FxServe** or **Caddy** for its browser page, artwork, metadata, and
+secure Icecast proxy. FxServe is the smaller option made for RDJ. Caddy is useful
+when the server also hosts other websites or needs more proxy features.
+
+For setup paths, router settings, and switching instructions, see
+[RDJ Web Server Setup](../../FxServe/RDJ-Web-Server-Setup.md).
+  
+The aim of this sample project is: Combine all kinds of MfPack (coreAudio WASAPI ) challenges in a single project.  
+Now, the example has become pretty large for a sample but usefull for audio knights..  
+We tested it, and it works without issues on Delphi XE7 up to 12.2.  
+  
+NOTES:  
+- The code is not suitable for starters and knowledge of audio manipulation/ algo's is also required.
+- Before opening the project, install the MfRdjJ controls (MfPack\\Samples\\MfRdjJ\\Controls\\RDJControls.dpk)
+and MfPack MfComponents (MfPack\\Samples\\MfComponents\\MfComponents.dpk)
+  
+Project: MFPack - Samples - MfRdjJ  
+
+Project location: https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 05-02-2026  
+Final release date: 22/06/2026  
+  
+Copyright  FactoryX. All rights reserved.
+

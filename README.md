@@ -537,17 +537,17 @@ encode the result with Microsoft Media Foundation, and publish it as a browser-p
 The main technical difference is the broadcast pipeline.  
 MfRDJ Pro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4.  
 MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments,  
-writes a rolling live.json manifest, and serves the result through Caddy.  
-Modern browsers can then play the stream using Media Source Extensions without needing Icecast for the video path.  
+writes a rolling live.json manifest, and serves the result through FxServe or an alternative proxy server like Caddy.  
+Modern browsers can then play the stream using Media Source Extensions.  
 MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and  
 listener counts to JSON files for the web interface.  
 It includes safeguards for long-running broadcasts, such as bounded queues,  
-fragment cleanup, Caddy mirroring, sleep prevention options, and clean shutdown handling.  
+fragment cleanup, FxServe mirroring, sleep prevention options, and clean shutdown handling.  
 MfRDJ Pro supports casting to Cromecast devices on your local network using the  
 MfPack Cast V2 protocols.  
   
 **Note:**  
-You have to know the principles of WASAPI, MFT's, MfPack Cast V2, and audio manipulation.  
+You have to know the principles of WASAPI, MFT's, MfPack Cast V2, FxServe and audio manipulation.  
 This sample is large and not suitable for beginners!  
 Before using this sample make sure, you have all needed components installed (see instructions).  
   
@@ -578,6 +578,36 @@ how to use it in Media Foundation.
 Sample 1
   
 ---
+  
+***Media Servers***
+
+**FxServe**
+  
+FxServe is a light weight reverse proxy HTTP/HTTPS server for MfRdj,  
+RDJ Pro or other apps that stream audio/video on LAN/WAN.  
+It serves web and local network players and generated media files and forwards the  
+small set of live endpoints, in the same way 3th party servers as Caddy do.  
+  
+FxServe can run interactively as a console application or as a native Windows  
+service. Its LAN listener remains on port 8080. An optional HTTP.sys front end  
+adds HTTPS on port 443 and redirects port 80 to HTTPS for WAN use. WAN mode is  
+disabled by default. When WAN HTTPS is enabled, FxServe obtains, installs,  
+renews, validates, and binds its certificate itself.  
+MfPack includes a Zip file that contains the necessary files that needs to be  
+copied to your server of local machine that should run the service,  
+typically a remote server in your network. No installation app is needed.
+FxServe has an FxServeAdmin app , to install, configure and control FxServe as  
+a Windows service.  
+  
+**Caddy**
+  
+Caddy is a 3th party proxy server with much more features then FxServe. Use this  
+app as a service, just like FxServe for LAN/WAN streaming.  
+The Caddy version in MfPack is packed in a zip file together with the needed files to run on a server or   
+local PC. The Caddy version also has a CaddyAdmin app, to install,  
+configure and control Caddy as a Windows service.  
+  
+  
   
 ***Tools***
   

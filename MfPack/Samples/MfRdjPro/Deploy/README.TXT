@@ -1,1 +1,0 @@
-Unpack Caddy_Deploy.zip to a drive on your server or local pc and make it accessible.

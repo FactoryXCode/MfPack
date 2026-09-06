@@ -1,0 +1,105 @@
+﻿object LanDiscoveryDialog: TLanDiscoveryDialog
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Find LAN device'
+  ClientHeight = 360
+  ClientWidth = 520
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  PixelsPerInch = 96
+  TextHeight = 15
+  object lblStatus: TLabel
+    Left = 12
+    Top = 12
+    Width = 163
+    Height = 15
+    Caption = 'Searching the local network...'
+  end
+  object pbDiscovery: TProgressBar
+    Left = 12
+    Top = 34
+    Width = 496
+    Height = 17
+    TabOrder = 0
+  end
+  object lvDevices: TListView
+    Left = 12
+    Top = 61
+    Width = 496
+    Height = 244
+    Columns = <
+      item
+        Caption = 'Computer/device name'
+        Width = 190
+      end
+      item
+        Caption = 'Alias(es)'
+        Width = 155
+      end
+      item
+        Caption = 'IPv4 address'
+        Width = 120
+      end>
+    HideSelection = False
+    ReadOnly = True
+    RowSelect = True
+    TabOrder = 1
+    ViewStyle = vsReport
+    OnDblClick = lvDevicesDblClick
+    OnSelectItem = lvDevicesSelectItem
+  end
+  object btnRefresh: TButton
+    Left = 12
+    Top = 317
+    Width = 90
+    Height = 30
+    Caption = 'Refresh'
+    TabOrder = 2
+    OnClick = btnRefreshClick
+  end
+  object btnSaveList: TButton
+    Left = 109
+    Top = 317
+    Width = 90
+    Height = 30
+    Caption = 'Save list...'
+    Enabled = False
+    TabOrder = 3
+    OnClick = btnSaveListClick
+  end
+  object btnUseIP: TButton
+    Left = 337
+    Top = 317
+    Width = 82
+    Height = 30
+    Caption = 'Use IP'
+    Default = True
+    Enabled = False
+    TabOrder = 4
+    OnClick = btnUseIPClick
+  end
+  object btnCancel: TButton
+    Left = 426
+    Top = 317
+    Width = 82
+    Height = 30
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 5
+  end
+  object tmrDiscovery: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = tmrDiscoveryTimer
+    Left = 136
+    Top = 317
+  end
+end
