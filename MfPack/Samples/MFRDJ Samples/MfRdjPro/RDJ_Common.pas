@@ -500,11 +500,13 @@ begin
 end;
 
 
+{$WARN SYMBOL_PLATFORM OFF}
 function BrowseFile(const AOwner: HWND;
                     const AFilter: PWideChar;
                     const AReturnDirOnly: Boolean;
                     out APath: TFileName): Boolean;
 var
+  FileDialog: TFileOpenDialog;
   Ofn: OPENFILENAMEW;
   FileBuf: array[0..MAX_PATH - 1] of WideChar;
 
@@ -513,6 +515,31 @@ const
 
 begin
   APath := '';
+
+  if AReturnDirOnly then
+    begin
+      FileDialog := TFileOpenDialog.Create(nil);
+
+      try
+        FileDialog.Options := FileDialog.Options + [fdoPickFolders,
+                                                    fdoPathMustExist,
+                                                    fdoForceFileSystem];
+
+        if (AFilter = nil) or (AFilter^ = #0) then
+          FileDialog.Title := 'Select directory'
+        else
+          FileDialog.Title := string(AFilter);
+
+        Result := FileDialog.Execute(AOwner);
+        if Result then
+          APath := ExcludeTrailingPathDelimiter(FileDialog.FileName);
+
+      finally
+        FileDialog.Free;
+      end;
+
+      Exit;
+    end;
 
   ZeroMemory(@Ofn, SizeOf(Ofn));
   ZeroMemory(@FileBuf, SizeOf(FileBuf));
@@ -535,14 +562,9 @@ begin
   Result := GetOpenFileNameW(Ofn);
 
   if Result then
-    begin
-
-      if AReturnDirOnly then
-        APath := ExtractFileDir(string(Ofn.lpstrFile))
-      else
-        APath := string(Ofn.lpstrFile);
-    end;
+    APath := string(Ofn.lpstrFile);
 end;
+{$WARN SYMBOL_PLATFORM ON}
 
 // Use this to free objects from TCombo, to prevent memory leaks.
 procedure FreeComboObjects(ACombo: TComboBox);

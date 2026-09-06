@@ -34,10 +34,18 @@ object frmSetup: TfrmSetup
     ParentBackground = False
     ShowCaption = False
     TabOrder = 3
-    ExplicitTop = 43
     DesignSize = (
       687
       718)
+    object Bevel9: TBevel
+      Left = 9
+      Top = 16
+      Width = 670
+      Height = 281
+      ParentCustomHint = False
+      ParentShowHint = False
+      ShowHint = False
+    end
     object Bevel8: TBevel
       Left = 8
       Top = 316
@@ -56,23 +64,14 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = False
     end
-    object Bevel9: TBevel
-      Left = 9
-      Top = 16
-      Width = 670
-      Height = 281
-      ParentCustomHint = False
-      ParentShowHint = False
-      ShowHint = False
-    end
     object Label18: TLabel
       Left = 18
       Top = 7
-      Width = 163
+      Width = 201
       Height = 17
       Alignment = taCenter
       AutoSize = False
-      Caption = 'Caddy / json settings'
+      Caption = 'ProxyServer / json settings'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
       Font.Height = -13
@@ -148,7 +147,7 @@ object frmSetup: TfrmSetup
     object lblCaddyCmdLine: TLabel
       Left = 20
       Top = 244
-      Width = 127
+      Width = 128
       Height = 23
       Margins.Left = 2
       Margins.Top = 2
@@ -156,7 +155,7 @@ object frmSetup: TfrmSetup
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Caddy Command:'
+      Caption = 'Server Command:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -342,7 +341,7 @@ object frmSetup: TfrmSetup
     end
     object edtCaddyPath: TEdit
       Left = 153
-      Top = 36
+      Top = 34
       Width = 474
       Height = 26
       Hint = 'Leave empty if Icecast/Caddy is on a server.'
@@ -365,11 +364,11 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
-      Text = 'C:\Caddy'
+      TextHint = 'C:\ProxyServer'
     end
     object edtCaddyConfigPath: TEdit
       Left = 155
-      Top = 66
+      Top = 64
       Width = 474
       Height = 26
       Hint = 'Leave empty if Icecast/Caddy is o'
@@ -392,14 +391,14 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
-      Text = 'C:\Caddy\caddy.cff'
+      TextHint = 'C:\ProxyServer\ProxyServer.cff'
     end
     object edtCaddyJsonNowPlayingPath: TEdit
       Left = 155
-      Top = 98
+      Top = 96
       Width = 474
       Height = 26
-      Hint = 'Caddy nowplaying.json path (Path on Server or local)'
+      Hint = 'nowplaying.json path (Path on Server or local)'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -419,16 +418,16 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
-      Text = 'C:\Caddy\nowplaying.json'
+      TextHint = 'C:\ProxyServer\nowplaying.json'
     end
     object edtCaddyCmdLine: TEdit
       Left = 155
-      Top = 242
-      Width = 516
+      Top = 241
+      Width = 474
       Height = 26
       Hint = 
-        'Caddy commandline.'#13#10'Leave empty if Caddy is starting as a servic' +
-        'e.'
+        'Caddy commandline.'#13#10'Leave empty if the server is starting as a s' +
+        'ervice.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -448,7 +447,7 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
-      Text = 'caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile'
+      TextHint = 'FxServe.exe --install --config "C:\FxServe\FxServe.ini'
     end
     object btnGetCaddyPath: TMPxpButton
       Left = 631
@@ -465,7 +464,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -502,7 +500,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -539,7 +536,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -562,7 +558,7 @@ object frmSetup: TfrmSetup
       OnClick = btnGetCaddyJsonPathClick
     end
     object edtCaddyArtworkPath: TEdit
-      Left = 155
+      Left = 153
       Top = 130
       Width = 474
       Height = 26
@@ -586,7 +582,7 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
-      Text = 'C:\Caddy\Artwork'
+      TextHint = 'C:\ProxyServer\Artwork'
     end
     object btnCaddyArtworkPath: TMPxpButton
       Left = 631
@@ -603,7 +599,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -653,7 +648,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -701,7 +695,7 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 11
-      Text = 'C:\Caddy\Video'
+      TextHint = 'C:\ProxyServer\Video'
     end
     object btnCaddyVideoPath: TMPxpButton
       Left = 633
@@ -718,7 +712,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -742,7 +735,7 @@ object frmSetup: TfrmSetup
     end
     object edtCaddyContentTypeURL: TEdit
       Left = 155
-      Top = 194
+      Top = 193
       Width = 474
       Height = 26
       Hint = 'Content default = video/mp4'
@@ -765,7 +758,7 @@ object frmSetup: TfrmSetup
       ParentShowHint = False
       ShowHint = True
       TabOrder = 13
-      Text = 'video/mp4'
+      TextHint = 'video/mp4'
     end
     object tbMp4SegmentSize: TMfTrackBar
       Left = 154
@@ -832,7 +825,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -870,7 +862,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -908,7 +899,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -941,7 +931,7 @@ object frmSetup: TfrmSetup
     Color = 5850948
     ParentBackground = False
     TabOrder = 4
-    ExplicitHeight = 686
+    ExplicitTop = 43
     object Bevel3: TBevel
       Left = 12
       Top = 22
@@ -1102,7 +1092,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -1219,7 +1208,6 @@ object frmSetup: TfrmSetup
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
       Behavior = bbCheckBox
-      Checked = False
       GlyphUnchecked.Data = {
         C6040000424DC60400000000000036040000280000000C0000000C0000000100
         08000000000090000000230B0000230B00000001000000010000000000000000
@@ -1336,7 +1324,6 @@ object frmSetup: TfrmSetup
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
       Behavior = bbCheckBox
-      Checked = False
       GlyphUnchecked.Data = {
         C6040000424DC60400000000000036040000280000000C0000000C0000000100
         08000000000090000000230B0000230B00000001000000010000000000000000
@@ -1450,7 +1437,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -1771,10 +1757,10 @@ object frmSetup: TfrmSetup
     end
     object Label7: TLabel
       Left = 63
-      Top = 505
+      Top = 506
       Width = 128
       Height = 23
-      Hint = 'The sub-directory where recordings are stored.'
+      Hint = 'The sub-directory where audio recordings are stored.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -1880,10 +1866,10 @@ object frmSetup: TfrmSetup
     end
     object Label19: TLabel
       Left = 63
-      Top = 565
+      Top = 566
       Width = 128
       Height = 23
-      Hint = 'The sub-directory where recordings are stored.'
+      Hint = 'The sub-directory where the music database is stored.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -1902,17 +1888,17 @@ object frmSetup: TfrmSetup
     end
     object Label20: TLabel
       Left = 63
-      Top = 595
+      Top = 596
       Width = 128
       Height = 23
-      Hint = 'The sub-directory where recordings are stored.'
+      Hint = 'The sub-directory where artworks are stored.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
       Alignment = taRightJustify
       AutoSize = False
-      Caption = 'Caddy Artwork:'
+      Caption = 'Artwork:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -1924,10 +1910,10 @@ object frmSetup: TfrmSetup
     end
     object Label23: TLabel
       Left = 63
-      Top = 535
+      Top = 536
       Width = 128
       Height = 23
-      Hint = 'The sub-directory where recordings are stored.'
+      Hint = 'The sub-directory where video recordings are stored.'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -2087,7 +2073,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2215,7 +2200,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2365,7 +2349,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2402,7 +2385,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2467,7 +2449,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2532,7 +2513,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2565,7 +2545,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2688,7 +2667,6 @@ object frmSetup: TfrmSetup
     Padding.Bottom = 8
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 727
     object btnOk: TMPxpButton
       Left = 445
       Top = 7
@@ -2704,7 +2682,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2741,7 +2718,6 @@ object frmSetup: TfrmSetup
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -2789,7 +2765,6 @@ object frmSetup: TfrmSetup
       Color = 6899524
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
-      Down = True
       Behavior = bbCheckBox
       Checked = True
       GlyphUnchecked.Data = {
@@ -2907,7 +2882,6 @@ object frmSetup: TfrmSetup
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
       Behavior = bbCheckBox
-      Checked = False
       GlyphUnchecked.Data = {
         C6040000424DC60400000000000036040000280000000C0000000C0000000100
         08000000000090000000230B0000230B00000001000000010000000000000000
@@ -3023,7 +2997,6 @@ object frmSetup: TfrmSetup
       ColorWhenDown = 10045252
       ColorWhenUp = 6899524
       Behavior = bbCheckBox
-      Checked = False
       GlyphUnchecked.Data = {
         C6040000424DC60400000000000036040000280000000C0000000C0000000100
         08000000000090000000230B0000230B00000001000000010000000000000000

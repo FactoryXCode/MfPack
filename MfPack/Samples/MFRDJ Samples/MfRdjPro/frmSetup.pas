@@ -929,18 +929,32 @@ end;
 
 
 procedure TfrmSetup.btnCaddyVideoPathClick(Sender: TObject);
+var
+  Path: string;
+
 begin
 
-  edtCaddyVideoPath.Text := PickPath(True,
-                                     'Video Directory'#0'*.mp4'#0#0);
+  Path := PickPath(True,
+                   'Video Directory'#0'*.mp4'#0#0);
+  if (Path <> '') then
+    edtCaddyVideoPath.Text := Path;
 end;
 
 
 procedure TfrmSetup.btnAudioRecordingsDirNameClick(Sender: TObject);
+var
+  Path: string;
+
 begin
 
-  edAudioRecordingsDirName.Text :=  ExtractFileName(ExtractFileDir(PickPath(False,
-                                                                   'Audio Recordings Directory'#0'*.*'#0#0)));
+  Path := PickPath(True,
+                   'Audio Recordings Directory'#0'*.*'#0#0);
+  if (Path <> '') then
+    begin
+      Path := ExcludeTrailingPathDelimiter(Path);
+      edAudioRecordingsDirName.Text := ExtractFileName(Path);
+      edAudioRecordingsDirName.Hint := Path;
+    end;
 end;
 
 
@@ -958,10 +972,19 @@ end;
 
 
 procedure TfrmSetup.btnDataBaseDirNameClick(Sender: TObject);
+var
+  Path: string;
+
 begin
 
-  edDataBaseDirName.Text :=  ExtractFileName(ExtractFileDir(PickPath(False,
-                                                                     'Database Directory'#0'RDJLibrary.db'#0#0)));
+  Path := PickPath(True,
+                   'Database Directory'#0'RDJLibrary.db'#0#0);
+  if (Path <> '') then
+    begin
+      Path := ExcludeTrailingPathDelimiter(Path);
+      edDataBaseDirName.Text := ExtractFileName(Path);
+      edDataBaseDirName.Hint := Path;
+    end;
 end;
 
 
@@ -1001,7 +1024,7 @@ procedure TfrmSetup.btnGetCaddyConfigPathClick(Sender: TObject);
 begin
 
   edtCaddyConfigPath.Text := PickPath(False,
-                                      'Caddy Config File'#0'caddy.cff'#0#0);
+                                      'Proxy Server Config File'#0'caddy.cff'#0#0);
 end;
 
 
@@ -1009,15 +1032,20 @@ procedure TfrmSetup.btnGetCaddyJsonPathClick(Sender: TObject);
 begin
 
   edtCaddyJsonNowPlayingPath.Text := PickPath(False,
-                                              'Caddy Json NowPlaying File'#0'nowplaying.json'#0#0);
+                                              'Proxy Server Json NowPlaying File'#0'nowplaying.json'#0#0);
 end;
 
 
 procedure TfrmSetup.btnGetCaddyPathClick(Sender: TObject);
+var
+  Path: string;
+
 begin
 
-  edtCaddyPath.Text := PickPath(True,
-                                'Caddy Root Directory'#0'Caddy.exe'#0#0);
+  Path := PickPath(True,
+                   'Proxy Server Root Directory'#0'Caddy.exe'#0#0);
+  if (Path <> '') then
+    edtCaddyPath.Text := Path;
 end;
 
 
@@ -1423,10 +1451,19 @@ end;
 
 
 procedure TfrmSetup.btnVideoRecordingsDirNameClick(Sender: TObject);
+var
+  Path: string;
+
 begin
 
-  edVideoRecordingsDirName.Text :=  ExtractFileName(ExtractFileDir(PickPath(False,
-                                                                   'Video Recordings Directory'#0'*.*'#0#0)));
+  Path := PickPath(True,
+                   'Video Recordings Directory'#0'*.*'#0#0);
+  if (Path <> '') then
+    begin
+      Path := ExcludeTrailingPathDelimiter(Path);
+      edVideoRecordingsDirName.Text := ExtractFileName(Path);
+      edVideoRecordingsDirName.Hint := Path;
+    end;
 end;
 
 
