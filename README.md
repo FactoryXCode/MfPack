@@ -21,13 +21,13 @@
   
 - MfPack Cast V2.0 API.
 - MfPack FxServe V1.1 API.
-- Media Foundation, WASAPI and XAudio2 samples.
+- Media Foundation, WASAPI, XAudio2 and streaming samples.
   
   
 # <u>Latest release:</u> 
   
 # MfPack  Version 4.0.0  
-Delphi XE2 (recommended Delphi XE7) up to and including Delphi 13.1  
+Delphi XE2 (minimum recommended version: Delphi XE7) up to and including Delphi 13.1  
 SDK version: 10.0.28000.2705 (Windows 11).  
   
   
@@ -41,7 +41,7 @@ Those you can buy from Microsoft Store or download elsewhere.
 **MfVideoThumbNails sample**
   
 *This sample app needs the D2D1 Api. If your Delphi version doesn't have the  
-latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
+D2D1 API, May 2019 update or later, use the D2D1 MfPack version.*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
   
@@ -97,7 +97,7 @@ Samples/MfComponents package.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
   
 An example about how to create a MfAudioVisualizer control - A visual component that  
-uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU.  
+uses  loopback, Peak/RMS, optional spectrum bars or VU.  
 This sample is part of the Samples/MfComponents package.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
@@ -164,16 +164,26 @@ Select Capture in the application to hear the routed input.
 ---
   
 **MfSimpleWebCamStreamer**
-
-This sample implements a compact VCL example for capturing a webcam
-and microphone with Microsoft Media Foundation, encoding the result as H.264
-and AAC, and publishing the live stream directly to a web browser through
-fragmented MP4 and Media Source Extensions (MSE).
-The sample is intentionally small. It demonstrates the complete path from
-Media Foundation capture to a browser-playable live stream without requiring
-another external media server.
+  
+This sample demonstrates how to capture from a webcam and  
+microphone with Microsoft Media Foundation, encoding the result as H.264  
+and AAC, and publishing the live stream directly to a web browser through  
+fragmented MP4 and Media Source Extensions (MSE).  
+It demonstrates the complete path from Media Foundation capture to a  
+browser-playable live stream without requiring another external  
+media server on a local network.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleWebCamStreamer.png)
+  
+---
+  
+**MfWebCamStreamer**
+  
+This sample is the extended version of MfSimpleWebCamStreamer, that uses FxServe to  
+stream over the internet. Within the browser or installable PWA,  
+users can watch the video and are able to take snapshots or record the camera stream. 
+Note: The PWA operates like an app, that can be installed via the Install button in the browser.  
+There is no need to get the PWA from any "Store".
   
 ---
   
@@ -181,18 +191,18 @@ another external media server.
   
 **This sample demonstrates:**
   
-- Asynchronous Chromecast discovery;
-- Device selection;
-- Casting a compatible local file through the built-in range-capable HTTP server;
-- Casting a directly reachable HTTP/HTTPS media URL;
-- Play, pause, stop, seek, volume, mute, and disconnect;
-- Sidecar (Subtitle files) and embedded text-subtitle enumeration, with sidecars preferred when
-  the same language exists in both sources;
-- Exact embedded-track selection and subtitle switching while casting;
+- Asynchronous Chromecast discovery.
+- Device selection.
+- Casting a compatible local file through the built-in range-capable HTTP server.
+- Casting a directly reachable HTTP/HTTPS media URL.
+- Play, pause, stop, seek, volume, mute, and disconnect.
+- External subtitle files and embedded text-subtitle enumeration. External subtitle  
+  files are preferred when the same language exists in both sources.
+- Exact embedded-track selection and subtitle switching while casting.
   
 The sample enables the optional Media Foundation conversion stack. Compatible  
 MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. Containers such  
-as MKV are converted to fragmented MP4 and published by the local HTTP server.  
+as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
 Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for  
 full details using the MfPack Cast API.  
   
@@ -273,7 +283,7 @@ Demonstrates how to use the SinkWriter to create a video from one or more image 
   
 **LoopBackCapture Sample 1**
   
-This sample shows, how to capture sound from your soundcard using WASAPI and save this capture  
+This sample shows, how to capture sound from your soundcard using  and save this capture  
 with the quality that is supported by your soundcard.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
@@ -318,7 +328,7 @@ The application is using MMCSS and runs the rendering part in a separate thread.
 **Threaded Loopback Capture Sample**
   
 Demonstrates how to capture sound from a rendering or capture device (one of the soundcard's endpoints)  
-using WASAPI in combination with mmio to write wav-files.  
+using  in combination with mmio to write wav-files.  
 This sample lets you to choose between different latency's and  
 buffersize for better sound to eliminate buffer related gliches.  
   
@@ -397,12 +407,12 @@ making it suitable for large audio files (e.g. FLAC > 100 MB).
   
 ---
   
-**WASAPI Player Sample 1**
+** Player Sample 1**
   
 This sample demonstrates how to use the IAudioClient to render different  
 audio formats like WAV, FLAC, MP3 etc.  
 using the IMFSourceReader to decode the format suitable for playing in  
-WASAPI's IAudioClient and renderer.  
+'s IAudioClient and renderer.  
   
 The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.  
 It shows you the basics of using the IAudioClient, iAudioRenderer,  
@@ -410,34 +420,34 @@ IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player1.png)
   
 ---
   
-**WASAPI Player Sample 2**
+** Player Sample 2**
   
 This sample is based on Sample 1, but includes full threaded code,  
 using threadsafe events and also uses a custom MFT for bass and treble control.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player2.png)
   
 ---
   
-**WASAPI Player Sample 3**
+** Player Sample 3**
   
 This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with  
 a 3 band High, Mid(Peaking or Notch) and Low EQ MFT and a spectrum analizer.  
 It also stores and read back settings for the MFT.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player3.png)
   
 ---
   
-**WASAPI Player Sample 4**
+** Player Sample 4**
   
 This sample demonstrates a **real-time audio playback engine on Windows** using:
   
-- **WASAPI** (event-driven, shared mode)
+- **** (event-driven, shared mode)
 - **Media Foundation SourceReader**
 - A custom **3-band EQ** implemented as an **IMFTransform (MFT)**
 - A **Compressor / Limiter DSP**
@@ -456,13 +466,13 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 **Note:**  
 This is not a sample for absolute beginners. Please read the documents included with this sample.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer4.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player4.png)
   
 ---
   
-**WASAPI Player Sample 5**
+** Player Sample 5**
   
-This is a non-visual components application sample using WASAPI.  
+This is a non-visual components application sample using .  
 The sample shows you how to build a real-time audio playback engine for  
 Windows using Delphi style components.  
   
@@ -472,8 +482,8 @@ This sample also demonstrates how to create and implement a:
 - Compressor/Limiter component using a MFT.
 - Parametric Equalizer component using a MFT.
 - Flanger/Echo component using a MFT.
-- WasApi effects rack that connects al MFT components to the WasApi renderer.
-- PlayerEngine component, using a WasApi renderer.
+- WASAPI effects rack that connects al MFT components to the WASAPI renderer.
+- PlayerEngine component, using a WASAPI renderer.
   
 **Note:**  
 This is not a sample for absolute beginners.  
