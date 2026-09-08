@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "serverName": "YourRemoteServeName",
+  "publicHostName": "yourradio.yourhost.com",
+  "lanUrl": "http://YourRemoteServeName:8080/",
+  "publicUrl": "https://yourradio.yourhost.com/"
+}
