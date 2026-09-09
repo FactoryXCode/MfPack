@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright © by FactoryX. All rights reserved.
+// Copyright (c) by FactoryX. All rights reserved.
 //
 // Project: MFPack - XAudio2
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Version control unit for XAudio2
 //              Requires Windows 8, XAudio2.8 or later
 //
@@ -20,6 +20,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
+// 10/09/2026 All                 Correct XAudio2 2.9 DLL selection for Win64
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 // Remarks: Delphi specific include file, to determine which DLL's are needed to load.
@@ -97,31 +98,41 @@ const
 {$IFDEF _WIN32_WINNT_WIN10}
   XAUDIO2_DLL_A                      = 'xaudio2_9.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_9.dll';
+  XAUDIO2D_DLL_A                     = 'xaudio2_9d.dll';
+  XAUDIO2D_DLL_W                     = 'xaudio2_9d.dll';
   X3DAUDIO_DLL                       = 'x3daudio1_0.dll';
 {$ENDIF}
 
 {$IFDEF _WIN64_WINNT_WIN10}
-  XAUDIO2_DLL_A                      = 'xaudio2_9d.dll';
-  XAUDIO2_DLL_W                      = 'xaudio2_9d.dll';
+  XAUDIO2_DLL_A                      = 'xaudio2_9.dll';
+  XAUDIO2_DLL_W                      = 'xaudio2_9.dll';
+  XAUDIO2D_DLL_A                     = 'xaudio2_9d.dll';
+  XAUDIO2D_DLL_W                     = 'xaudio2_9d.dll';
   X3DAUDIO_DLL                       = 'x3daudio1_0.dll';
 {$ENDIF}
 
 {$IFDEF _WIN32_WINNT_WIN8}  //Windows 8 32bit
   XAUDIO2_DLL_A                      = 'xaudio2_8.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_8.dll';
+  XAUDIO2D_DLL_A                     = 'xaudio2_8.dll';
+  XAUDIO2D_DLL_W                     = 'xaudio2_8.dll';
   X3DAUDIO_DLL                       = 'x3daudio.dll';
 {$ENDIF}
 
 {$IFDEF _WIN64_WINNT_WIN8}  //Windows 8 64bit
   XAUDIO2_DLL_A                      = 'xaudio2_8.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_8.dll';
+  XAUDIO2D_DLL_A                     = 'xaudio2_8.dll';
+  XAUDIO2D_DLL_W                     = 'xaudio2_8.dll';
   X3DAUDIO_DLL                       = 'x3daudio.dll';
 {$ENDIF}
 
 {$IFDEF UNICODE}
   XAUDIO2_DLL                        = XAUDIO2_DLL_W;
+  XAUDIO2D_DLL                       = XAUDIO2D_DLL_W;
 {$ELSE}
   XAUDIO2_DLL                        = XAUDIO2_DLL_A;
+  XAUDIO2D_DLL                       = XAUDIO2D_DLL_A;
 {$ENDIF}
 
 // XAPOFx
