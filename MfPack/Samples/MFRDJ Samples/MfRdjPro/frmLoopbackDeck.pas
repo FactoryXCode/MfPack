@@ -773,7 +773,7 @@ begin
     end
   else
     if Assigned(MainMDIFrm) then
-      MainMDIFrm.ClearNowPlaying();
+      MainMDIFrm.RefreshNowPlayingSource();
 end;
 
 
@@ -794,6 +794,9 @@ begin
                                   [hr]);
       lblStatus.Hint := lblStatus.Caption;
     end;
+
+  if SUCCEEDED(hr) and Assigned(MainMDIFrm) then
+    MainMDIFrm.RefreshNowPlayingSource();
 
   if not FClosing then
     begin

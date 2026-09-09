@@ -347,6 +347,7 @@ type
                              const APlayAfterLoad: Boolean = False): HRESULT;
 
     procedure StopPlaylistMode();
+    procedure RepublishBroadcastNowPlaying();
 
     procedure SyncToDeck(AMasterDeck: TfrmChannelDeck);
     procedure ApplyExternalCrossFadeDelta(const ADelta: Integer);
@@ -1961,6 +1962,18 @@ begin
                                   Title);
       FLastSentNowPlaying := SongText;
     end;
+end;
+
+
+procedure TfrmChannelDeck.RepublishBroadcastNowPlaying();
+begin
+
+  if not Assigned(FDeckEngine) or
+     (FDeckEngine.DeviceState <> dsPlay) then
+    Exit;
+
+  FLastSentNowPlaying := '';
+  NotifyBroadcastNowPlaying();
 end;
 
 

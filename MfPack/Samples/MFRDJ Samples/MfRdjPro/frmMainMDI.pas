@@ -419,6 +419,7 @@ type
     procedure UpdateNowPlaying(const AArtist,
                                ATitle: string);
     procedure ClearNowPlaying();
+    procedure RefreshNowPlayingSource();
     function HasActiveLoopbackDeck(): Boolean;
     function CanGoOnAir(): Boolean;
     procedure RefreshMainButtonStates();
@@ -2301,21 +2302,19 @@ end;
 
 
 procedure TMainMDIFrm.ApplyLoopbackNowPlayingFallback(var AArtist: string;
-                                                      var ATitle: string);
+                                                       var ATitle: string);
 begin
 
   AArtist := Trim(AArtist);
   ATitle := Trim(ATitle);
 
-  if (AArtist <> '') or
-     (ATitle <> '') then
-    Exit;
-
   if not HasActiveLoopbackDeck() then
     Exit;
 
-  // A process-loopback source has no file tags. Publish the operator-entered
-  // live event/activity as legacy artist/title values for older web clients.
+  // Loopback is the live programme source. A channel or playlist may still be
+  // playing locally, but its file tags must not replace the operator-entered
+  // event/activity metadata while loopback capture is active. Publish those
+  // values as legacy artist/title fields for older web clients as well.
   AArtist := NormalizeNowPlayingMemoText(mmoEventTitle);
   ATitle := NormalizeNowPlayingMemoText(mmoActivityTitle);
 end;
@@ -2353,6 +2352,26 @@ begin
 end;
 
 
+procedure TMainMDIFrm.RefreshNowPlayingSource();
+var
+  I: Integer;
+
+begin
+
+  ClearNowPlaying();
+
+  if HasActiveLoopbackDeck() then
+    Exit;
+
+  // When the last loopback source stops, immediately restore metadata from a
+  // channel that is still playing. Resetting each channel's suppression value
+  // ensures an unchanged track is published again.
+  for I := 0 to High(FChannelDecks) do
+    if Assigned(FChannelDecks[I]) then
+      FChannelDecks[I].RepublishBroadcastNowPlaying();
+end;
+
+
 procedure TMainMDIFrm.UpdateNowPlaying(const AArtist,
                                        ATitle: string);
 var
@@ -2370,21 +2389,27 @@ begin
                                   Title);
 
   if (Artist = '') and
-     (Title = '') then
+     (Title = '') and
+     not HasActiveLoopbackDeck() then
     Exit;
 
   FDjName := Trim(mmoDjName.Text);
   FShowName := Trim(mmoShow.Text);
   FNowPlayingArtist := Artist;
   FNowPlayingTitle := Title;
-  FNowPlayingFromChannelDeck := (Trim(AArtist) <> '') or
-                                (Trim(ATitle) <> '');
+  FNowPlayingFromChannelDeck := not HasActiveLoopbackDeck() and
+                                ((Trim(AArtist) <> '') or
+                                 (Trim(ATitle) <> ''));
 
   WriteNowPlayingStatus(FDjName,
                         FShowName,
                         FNowPlayingArtist,
                         FNowPlayingTitle,
-                        BuildCoverJsonUrl(True));
+                        BuildCoverJsonUrl(True),
+                        FCaddyListenerCount,
+                        HasActiveLoopbackDeck() and
+                        (FNowPlayingArtist = '') and
+                        (FNowPlayingTitle = ''));
 end;
 
 function TMainMDIFrm.CanGoOnAir(): Boolean;

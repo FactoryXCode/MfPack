@@ -36,7 +36,7 @@ compatibility. The same fields accept FxServe paths. See
 | Set DJ and Showtitle | Publishes the entered names, event information, and selected logo. |
 | Logo | Shows the current broadcast image. Double-click it to choose another image. |
 
-When a normal audio track is playing, its artist and title are shown to listeners. During loopback capture, **Event** and **Title** are used when the captured programme has no song information.
+When a normal audio track is playing, its artist and title are shown to listeners. While any loopback deck is capturing, the operator-entered **Event** and **Title** always take priority. Artist/title metadata from a playlist or channel deck cannot overwrite the loopback programme information; normal track metadata resumes after loopback capture stops.
 
 ## Setup
 
