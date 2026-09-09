@@ -22,12 +22,17 @@ renews, validates, and binds its certificate itself.
 - Explicit `403 Forbidden` responses for `/admin` and `/admin.xsl`.
 - URL decoding and protection against paths escaping the web root.
 - Console and file logging.
+- Daily log rotation with configurable retention; the default keeps 14 calendar
+  days and has no size-based boundary.
+- Graceful Ctrl+C shutdown.
 - Native Windows service start, stop, and shutdown handling.
 - HTTP.sys TLS termination with an SNI certificate binding.
 - Built-in ACME v2 certificate issue and renewal using an in-memory HTTP-01
   challenge.
 - Host-name validation and HTTP-to-HTTPS permanent redirects.
 - HTTP.sys-to-localhost forwarding, including byte ranges used by fMP4/MSE.
+- Optional per-client request-rate, burst, and concurrent-request limits at the
+  public HTTP.sys edge, with HTTP `429` and `Retry-After` responses.
   
 ## Build
   
@@ -107,9 +112,7 @@ FxServe accepts the following case-insensitive parameters:
 With no mode parameter, FxServe runs interactively. It first looks for an INI
 file with the same path and base name as the executable. If that file does not
 exist, it looks for `FxServe.ini` in the current directory. An explicit
-`--config` or `-c` parameter overrides both defaults.  
-  
-Note: Parameters should be typed like "path + exename" + "space" + "--parameter" Example: "C:\FxServe\FxServe.exe --install"
+`--config` or `-c` parameter overrides both defaults.
   
 Install the service with an absolute configuration path:
   
@@ -152,6 +155,14 @@ NoStoreRoutes=/stream,/video,/nowplaying.json
 
 [Logging]
 File=FxServe.log
+RetentionDays=14
+
+[Protection]
+Enabled=False
+RequestsPerMinute=300
+Burst=60
+MaxConcurrentPerAddress=12
+BlockSeconds=60
 
 [Wan]
 Enabled=False
@@ -166,6 +177,21 @@ RedirectHttp=True
 Keep port 8080 private when FxServe operates on a WAN. Forward public router
 ports 80 and 443 to the same ports on the FxServe server; HTTP.sys then forwards
 accepted requests internally to `127.0.0.1:8080`.
+
+`[Protection]` is disabled by default. When enabled, `RequestsPerMinute` is the
+sustained allowance for each client IP address and `Burst` is the maximum number
+of immediately available requests. `MaxConcurrentPerAddress` limits requests
+that one address may have in progress at once. Exhausting the rate allowance
+blocks that address for `BlockSeconds`; excess requests receive `429 Too Many
+Requests` and a `Retry-After` header. A valid in-memory ACME HTTP-01 challenge is
+exempt so certificate renewal cannot be locked out.
+
+In WAN mode the limits run in the HTTP.sys front end, where the original IPv4 or
+IPv6 peer is still known. The localhost proxy hop is not counted a second time.
+With WAN mode disabled, the same protection applies directly to the LAN listener.
+Several viewers behind one NAT gateway share one public IP, so increase the
+allowances if that is common for your audience. The existing `MaxConnections`
+setting also caps the total number of active WAN requests, regardless of source.
   
 For `MfWebCamStreamer`, requests to `/WebCam/live.json` carrying a `viewer`
 query value update an in-memory presence registry. `/WebCam/viewers.json`
@@ -250,6 +276,4 @@ their own administration tools.
 
 ## Next milestones
 
-1. Add repeatable protocol and concurrency tests.
-2. Add configuration reload and rotating access logs.
-3. Add optional request throttling and WAN abuse protection.
+1. Add configuration reload.

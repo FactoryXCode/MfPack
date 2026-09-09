@@ -73,6 +73,7 @@ uses
   System.Generics.Collections,
   FxServe.Config,
   FxServe.Logging,
+  FxServe.Protection,
   FxServe.Viewers;
 
 type
@@ -121,6 +122,7 @@ type
     FRunning: Boolean;
     FActiveConnections: Integer;
     FWSAStarted: Boolean;
+    FProtection: TFxServeRequestProtection;
 
     procedure AcceptClients;
     procedure HandleClient(ASocket: TSocket;
@@ -142,7 +144,9 @@ type
     procedure SendError(ASocket: TSocket;
                         AStatus: Integer;
                         const AReason: string;
-                        const AMessage: string);
+                        const AMessage: string;
+                        const AExtraHeaderName: string = '';
+                        const AExtraHeaderValue: string = '');
 
     procedure SendViewerSnapshot(ASocket: TSocket;
                                  const AMethod: string);
@@ -625,6 +629,12 @@ begin
 
   FConfig := AConfig;
   FLogger := ALogger;
+  if FConfig.ProtectionEnabled and not FConfig.WanEnabled then
+    FProtection := TFxServeRequestProtection.Create(
+      FConfig.ProtectionRequestsPerMinute,
+      FConfig.ProtectionBurst,
+      FConfig.ProtectionMaxConcurrentPerAddress,
+      FConfig.ProtectionBlockSeconds);
   FListenSocket := INVALID_SOCKET;
   FClients := TList<TSocket>.Create;
   FClientsLock := TCriticalSection.Create;
@@ -636,6 +646,7 @@ begin
 
   Stop();
 
+  FProtection.Free;
   FClientsLock.Free;
   FClients.Free;
 
@@ -967,21 +978,29 @@ end;
 procedure TFxServeServer.SendError(ASocket: TSocket;
                                    AStatus: Integer;
                                    const AReason: string;
-                                   const AMessage: string);
+                                   const AMessage: string;
+                                   const AExtraHeaderName: string;
+                                   const AExtraHeaderValue: string);
 var
   Body: UTF8String;
   Header: UTF8String;
+  ExtraHeader: string;
 
 begin
 
   Body := UTF8String(AMessage + #13#10);
 
+  ExtraHeader := '';
+  if AExtraHeaderName <> '' then
+    ExtraHeader := AExtraHeaderName + ': ' + AExtraHeaderValue + #13#10;
+
   Header := UTF8String(Format('HTTP/1.1 %d %s'#13#10 +
     'Content-Type: text/plain; charset=utf-8'#13#10 +
     'Content-Length: %d'#13#10 +
     'Cache-Control: no-store'#13#10 +
+    '%s' +
     'Connection: close'#13#10#13#10,
-    [AStatus, AReason, Length(Body)]));
+    [AStatus, AReason, Length(Body), ExtraHeader]));
 
   SendText(ASocket,
            Header);
@@ -1024,6 +1043,8 @@ var
   P1: Integer;
   P2: Integer;
   QueryPos: Integer;
+  RetryAfterSeconds: Integer;
+  ProtectionResult: TFxServeProtectionResult;
 
 begin
 
@@ -1100,59 +1121,81 @@ begin
   else
     Path := Target;
 
-  FLogger.Info(Format('%s %s %s',
-                      [APeerAddress, MethodName, Path]));
-
-  if SameText(Path, '/WebCam/live.json') then
-    TouchWebCamViewer(Target, APeerAddress);
-
-  if IsBlockedPath(Path) then
+  if Assigned(FProtection) then
     begin
+      ProtectionResult := FProtection.TryBeginRequest(APeerAddress,
+                                                       RetryAfterSeconds);
+      if ProtectionResult <> prAllowed then
+        begin
+          FLogger.Info(Format('Request limited peer=%s', [APeerAddress]));
+          SendError(ASocket,
+                    429,
+                    'Too Many Requests',
+                    'Too many requests. Try again later.',
+                    'Retry-After',
+                    IntToStr(RetryAfterSeconds));
+          Exit;
+        end;
+    end;
+
+  try
+    FLogger.Info(Format('%s %s %s',
+                        [APeerAddress, MethodName, Path]));
+
+    if SameText(Path, '/WebCam/live.json') then
+      TouchWebCamViewer(Target, APeerAddress);
+
+    if IsBlockedPath(Path) then
+      begin
       SendError(ASocket,
                 403,
                 HttpReason(403),
                 'Forbidden.');
-      Exit;
-    end;
+        Exit;
+      end;
 
-  if (MethodName <> 'GET') and
-     (MethodName <> 'HEAD') and
-     (MethodName <> 'OPTIONS') then
-    begin
+    if (MethodName <> 'GET') and
+       (MethodName <> 'HEAD') and
+       (MethodName <> 'OPTIONS') then
+      begin
       SendError(ASocket,
                 405,
                 HttpReason(405),
                 'Method not allowed.');
-      Exit;
-    end;
+        Exit;
+      end;
 
-  if (MethodName = 'OPTIONS') then
-    begin
+    if (MethodName = 'OPTIONS') then
+      begin
       SendText(ASocket,
                'HTTP/1.1 204 No Content'#13#10 +
                'Access-Control-Allow-Origin: *'#13#10 +
                'Access-Control-Allow-Methods: GET, HEAD, OPTIONS'#13#10 +
                'Access-Control-Allow-Headers: Content-Type, Accept-Encoding, Range'#13#10 +
                'Content-Length: 0'#13#10'Connection: close'#13#10#13#10);
-      Exit;
-    end;
+        Exit;
+      end;
 
-  if SameText(Path, '/WebCam/viewers.json') then
-    begin
+    if SameText(Path, '/WebCam/viewers.json') then
+      begin
       SendViewerSnapshot(ASocket, MethodName);
-      Exit;
-    end;
+        Exit;
+      end;
 
-  if FConfig.IsProxyRoute(Path) then
-    ProxyRequest(ASocket,
-                 MethodName,
-                 Target,
-                 Header)
-  else
-    ServeStatic(ASocket,
-                MethodName,
-                Path,
-                Header);
+    if FConfig.IsProxyRoute(Path) then
+      ProxyRequest(ASocket,
+                   MethodName,
+                   Target,
+                   Header)
+    else
+      ServeStatic(ASocket,
+                  MethodName,
+                  Path,
+                  Header);
+  finally
+    if Assigned(FProtection) then
+      FProtection.EndRequest(APeerAddress);
+  end;
 end;
 
 

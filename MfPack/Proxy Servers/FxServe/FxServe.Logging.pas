@@ -67,6 +67,7 @@ uses
   {System}
   System.SysUtils,
   System.Classes,
+  System.IOUtils,
   System.SyncObjs;
 
 type
@@ -74,11 +75,24 @@ type
   TFxServeLogger = class
   private
     FFileName: string;
+    FRetentionDays: Integer;
+    FCurrentLogDay: TDateTime;
+    FLastPruneDay: TDateTime;
     FLock: TCriticalSection;
+
+    function ArchiveFileName(const ADay: TDateTime): string;
+    function FileModifiedDay(const AFileName: string;
+                             const ADefault: TDateTime): TDateTime;
+    procedure AppendFile(const ASourceFileName: string;
+                         const ADestinationFileName: string);
+    procedure RotateActiveLog(const ADay: TDateTime);
+    procedure PruneArchives(const AToday: TDateTime);
+    procedure PrepareLogFile(const AToday: TDateTime);
 
   public
 
-    constructor Create(const AFileName: string);
+    constructor Create(const AFileName: string;
+                       const ARetentionDays: Integer = 14);
     destructor Destroy(); override;
 
     procedure Write(const ALevel: string;
@@ -92,12 +106,19 @@ type
 implementation
 
 
-constructor TFxServeLogger.Create(const AFileName: string);
+constructor TFxServeLogger.Create(const AFileName: string;
+                                  const ARetentionDays: Integer);
 begin
 
   inherited Create;
 
   FFileName := AFileName;
+  FRetentionDays := ARetentionDays;
+  if FRetentionDays < 1 then
+    FRetentionDays := 1;
+
+  FCurrentLogDay := 0;
+  FLastPruneDay := 0;
   FLock := TCriticalSection.Create();
 end;
 
@@ -111,6 +132,199 @@ begin
 end;
 
 
+function TFxServeLogger.ArchiveFileName(const ADay: TDateTime): string;
+begin
+
+  Result := ChangeFileExt(FFileName,
+                          '') + '-' +
+            FormatDateTime('yyyy-mm-dd',
+                           ADay) +
+            ExtractFileExt(FFileName);
+end;
+
+
+function TFxServeLogger.FileModifiedDay(const AFileName: string;
+                                        const ADefault: TDateTime): TDateTime;
+begin
+
+  Result := Trunc(ADefault);
+
+  if FileExists(AFileName) then
+    Result := Trunc(TFile.GetLastWriteTime(AFileName));
+end;
+
+
+procedure TFxServeLogger.AppendFile(const ASourceFileName: string;
+                                    const ADestinationFileName: string);
+var
+  SourceStream: TFileStream;
+  DestinationStream: TFileStream;
+
+begin
+
+  SourceStream := TFileStream.Create(ASourceFileName,
+                                     fmOpenRead or fmShareDenyNone);
+  try
+    if FileExists(ADestinationFileName) then
+      DestinationStream := TFileStream.Create(ADestinationFileName,
+                                               fmOpenReadWrite or fmShareDenyNone)
+    else
+      DestinationStream := TFileStream.Create(ADestinationFileName,
+                                               fmCreate or fmShareDenyNone);
+    try
+      DestinationStream.Seek(0,
+                             soEnd);
+      DestinationStream.CopyFrom(SourceStream,
+                                 0);
+    finally
+      DestinationStream.Free;
+    end;
+  finally
+    SourceStream.Free;
+  end;
+
+  if not DeleteFile(ASourceFileName) then
+    RaiseLastOSError();
+end;
+
+
+procedure TFxServeLogger.RotateActiveLog(const ADay: TDateTime);
+var
+  ArchiveName: string;
+
+begin
+
+  if (FFileName = '') or not FileExists(FFileName) then
+    Exit;
+
+  ArchiveName := ArchiveFileName(ADay);
+
+  if FileExists(ArchiveName) then
+    AppendFile(FFileName,
+               ArchiveName)
+  else
+    if not RenameFile(FFileName,
+                      ArchiveName) then
+      RaiseLastOSError();
+end;
+
+
+procedure TFxServeLogger.PruneArchives(const AToday: TDateTime);
+var
+  SearchRec: TSearchRec;
+  DirectoryName: string;
+  FileStem: string;
+  FileExtension: string;
+  Prefix: string;
+  CandidateStem: string;
+  DateText: string;
+  ArchiveDay: TDateTime;
+  CutoffDay: TDateTime;
+  YearValue: Word;
+  MonthValue: Word;
+  DayValue: Word;
+  ValidDate: Boolean;
+
+begin
+
+  if FFileName = '' then
+    Exit;
+
+  DirectoryName := IncludeTrailingPathDelimiter(ExtractFileDir(FFileName));
+  FileStem := ChangeFileExt(ExtractFileName(FFileName),
+                            '');
+  FileExtension := ExtractFileExt(FFileName);
+  Prefix := FileStem + '-';
+  CutoffDay := Trunc(AToday) - (FRetentionDays - 1);
+
+  if FindFirst(DirectoryName + Prefix + '*' + FileExtension,
+               faAnyFile,
+               SearchRec) <> 0 then
+    Exit;
+
+  try
+    repeat
+      if (SearchRec.Attr and faDirectory) <> 0 then
+        Continue;
+
+      CandidateStem := ChangeFileExt(SearchRec.Name,
+                                     '');
+
+      if (Length(CandidateStem) <> Length(Prefix) + 10) or
+         (Copy(CandidateStem,
+               1,
+               Length(Prefix)) <> Prefix) then
+        Continue;
+
+      DateText := Copy(CandidateStem,
+                       Length(Prefix) + 1,
+                       10);
+
+      if (DateText[5] <> '-') or (DateText[8] <> '-') then
+        Continue;
+
+      YearValue := Word(StrToIntDef(Copy(DateText,
+                                         1,
+                                         4),
+                                    0));
+      MonthValue := Word(StrToIntDef(Copy(DateText,
+                                          6,
+                                          2),
+                                     0));
+      DayValue := Word(StrToIntDef(Copy(DateText,
+                                        9,
+                                        2),
+                                   0));
+
+      ArchiveDay := 0;
+      ValidDate := True;
+      try
+        ArchiveDay := EncodeDate(YearValue,
+                                 MonthValue,
+                                 DayValue);
+      except
+        ValidDate := False;
+      end;
+
+      if ValidDate and (ArchiveDay < CutoffDay) then
+        DeleteFile(DirectoryName + SearchRec.Name);
+    until FindNext(SearchRec) <> 0;
+  finally
+    FindClose(SearchRec);
+  end;
+end;
+
+
+procedure TFxServeLogger.PrepareLogFile(const AToday: TDateTime);
+var
+  TodayValue: TDateTime;
+
+begin
+
+  TodayValue := Trunc(AToday);
+
+  if FCurrentLogDay = 0 then
+    begin
+      if FileExists(FFileName) then
+        FCurrentLogDay := FileModifiedDay(FFileName,
+                                          TodayValue)
+      else
+        FCurrentLogDay := TodayValue;
+    end;
+
+  if FileExists(FFileName) and (FCurrentLogDay <> TodayValue) then
+    RotateActiveLog(FCurrentLogDay);
+
+  FCurrentLogDay := TodayValue;
+
+  if FLastPruneDay <> TodayValue then
+    begin
+      PruneArchives(TodayValue);
+      FLastPruneDay := TodayValue;
+    end;
+end;
+
+
 procedure TFxServeLogger.Write(const ALevel: string;
                                const AMessage: string);
 var
@@ -118,11 +332,13 @@ var
   ConsoleLine: string;
   Stream: TFileStream;
   Dir: string;
+  EntryTime: TDateTime;
 
 begin
 
+  EntryTime := Now;
   Line := UTF8String(FormatDateTime('yyyy-mm-dd"T"hh:nn:ss.zzz',
-                                    Now) + ' [' + ALevel + '] ' + AMessage + sLineBreak);
+                                    EntryTime) + ' [' + ALevel + '] ' + AMessage + sLineBreak);
 
   FLock.Acquire;
 
@@ -153,6 +369,13 @@ begin
 
       if (Dir <> '') and not DirectoryExists(Dir) then
         ForceDirectories(Dir);
+
+      try
+        PrepareLogFile(EntryTime);
+      except
+        on E: Exception do
+          OutputDebugString(PChar('FxServe log rotation error: ' + E.Message));
+      end;
 
       if FileExists(FFileName) then
         Stream := TFileStream.Create(FFileName,

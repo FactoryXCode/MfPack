@@ -87,6 +87,12 @@ type
     FCorsEnabled: Boolean;
     FNoStoreRoutes: TStringList;
     FLogFileName: string;
+    FLogRetentionDays: Integer;
+    FProtectionEnabled: Boolean;
+    FProtectionRequestsPerMinute: Integer;
+    FProtectionBurst: Integer;
+    FProtectionMaxConcurrentPerAddress: Integer;
+    FProtectionBlockSeconds: Integer;
     FConfigFileName: string;
     FWanEnabled: Boolean;
     FWanHostName: string;
@@ -123,6 +129,12 @@ type
     property ProxyPort: Word read FProxyPort;
     property CorsEnabled: Boolean read FCorsEnabled;
     property LogFileName: string read FLogFileName;
+    property LogRetentionDays: Integer read FLogRetentionDays;
+    property ProtectionEnabled: Boolean read FProtectionEnabled;
+    property ProtectionRequestsPerMinute: Integer read FProtectionRequestsPerMinute;
+    property ProtectionBurst: Integer read FProtectionBurst;
+    property ProtectionMaxConcurrentPerAddress: Integer read FProtectionMaxConcurrentPerAddress;
+    property ProtectionBlockSeconds: Integer read FProtectionBlockSeconds;
     property ConfigFileName: string read FConfigFileName;
     property WanEnabled: Boolean read FWanEnabled;
     property WanHostName: string read FWanHostName;
@@ -433,6 +445,45 @@ begin
       else
         FLogFileName := ExpandFileName(FLogFileName);
     end;
+
+    FLogRetentionDays := Ini.ReadInteger('Logging',
+                                         'RetentionDays',
+                                         14);
+
+    if (FLogRetentionDays < 1) or (FLogRetentionDays > 3660) then
+      raise Exception.Create('Logging RetentionDays must be between 1 and 3660.');
+
+    FProtectionEnabled := ReadIniBoolean(Ini,
+                                         'Protection',
+                                         'Enabled',
+                                         False);
+
+    FProtectionRequestsPerMinute := Ini.ReadInteger('Protection',
+                                                     'RequestsPerMinute',
+                                                     300);
+    if (FProtectionRequestsPerMinute < 1) or
+       (FProtectionRequestsPerMinute > 100000) then
+      raise Exception.Create('Protection RequestsPerMinute must be between 1 and 100000.');
+
+    FProtectionBurst := Ini.ReadInteger('Protection',
+                                         'Burst',
+                                         60);
+    if (FProtectionBurst < 1) or (FProtectionBurst > 100000) then
+      raise Exception.Create('Protection Burst must be between 1 and 100000.');
+
+    FProtectionMaxConcurrentPerAddress := Ini.ReadInteger('Protection',
+                                                           'MaxConcurrentPerAddress',
+                                                           12);
+    if (FProtectionMaxConcurrentPerAddress < 1) or
+       (FProtectionMaxConcurrentPerAddress > 10000) then
+      raise Exception.Create('Protection MaxConcurrentPerAddress must be between 1 and 10000.');
+
+    FProtectionBlockSeconds := Ini.ReadInteger('Protection',
+                                                'BlockSeconds',
+                                                60);
+    if (FProtectionBlockSeconds < 1) or
+       (FProtectionBlockSeconds > 86400) then
+      raise Exception.Create('Protection BlockSeconds must be between 1 and 86400.');
 
   finally
     Ini.Free;

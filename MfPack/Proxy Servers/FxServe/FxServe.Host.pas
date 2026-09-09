@@ -115,7 +115,8 @@ begin
 
   try
     FConfig.LoadFromFile(AConfigFileName);
-    FLogger := TFxServeLogger.Create(FConfig.LogFileName);
+    FLogger := TFxServeLogger.Create(FConfig.LogFileName,
+                                     FConfig.LogRetentionDays);
 
     try
       FServer := TFxServeServer.Create(FConfig, FLogger);

@@ -229,7 +229,8 @@ FxServe reads `FxServe.ini`. A normal setup contains these sections:
 | `[Wan]` | Public host name, HTTP/HTTPS ports, and redirect setting. |
 | `[Proxy]` | Optional upstream server and public proxy routes. |
 | `[Headers]` | CORS and no-cache routes. |
-| `[Logging]` | Log file path. |
+| `[Logging]` | Log file path and daily retention period. |
+| `[Protection]` | Optional per-address request rate, burst, concurrency, and cooldown limits. |
 
 The INI contains ordinary server and public-listener configuration only. It
 does not contain ACME account information, certificate thumbprints, private-key
@@ -267,7 +268,25 @@ NoStoreRoutes=/stream,/video,/nowplaying.json
 
 [Logging]
 File=C:\FxServe\FxServe.log
+RetentionDays=14
+
+[Protection]
+Enabled=False
+RequestsPerMinute=300
+Burst=60
+MaxConcurrentPerAddress=12
+BlockSeconds=60
 ```
+
+Request protection is opt-in. When enabled, a token bucket is maintained for
+each IPv4 or IPv6 peer at the public HTTP.sys listener. The bucket refills at
+`RequestsPerMinute` and holds at most `Burst` requests. The concurrent limit
+prevents one address from occupying too many request workers. A rate violation
+starts the configured cooldown and returns HTTP `429` with `Retry-After`.
+Active ACME HTTP-01 validation responses bypass this limiter. The internal
+HTTP.sys-to-LAN proxy request is never charged again. If WAN mode is disabled,
+the same limiter protects direct requests to the LAN listener. Independently,
+`[Server] MaxConnections` caps the total number of active WAN request workers.
 
 ## HTTPS certificates
 

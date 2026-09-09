@@ -73,6 +73,7 @@ uses
   {FxServe}
   FxServe.Config,
   FxServe.Logging,
+  FxServe.Protection,
   FxServe.HttpApi,
   FxServe.Certificate,
   FxServe.Viewers;
@@ -103,6 +104,7 @@ type
     FSecure: Boolean;
 
   protected
+
     procedure Execute(); override;
 
   public
@@ -130,6 +132,7 @@ type
     FHttpInitialized: Boolean;
     FActiveRequests: Integer;
     FIdleEvent: TEvent;
+    FProtection: TFxServeRequestProtection;
 
     procedure AcceptRequests();
 
@@ -172,7 +175,19 @@ const
   WAN_HEADER_BUFFER_SIZE = 65536;
   WAN_IO_BUFFER_SIZE = 65536;
   WAN_MAX_UPSTREAM_HEADER = 65536;
+  FX_AF_INET6 = 23;
 
+type
+  TFxSockAddrIn6 = packed record
+    sin6_family: u_short;
+    sin6_port: u_short;
+    sin6_flowinfo: u_long;
+    sin6_addr: array[0..15] of Byte;
+    sin6_scope_id: u_long;
+  end;
+  PFxSockAddrIn6 = ^TFxSockAddrIn6;
+
+const
   REQUEST_HEADER_NAMES: array[0..40] of string = ('Cache-Control',
                                                   'Connection',
                                                   'Date',
@@ -217,15 +232,36 @@ const
 
 function RequestPeerAddress(ARequest: PHttpRequest): string;
 var
-  Address: PSockAddrIn;
+  Address4: PSockAddrIn;
+  Address6: PFxSockAddrIn6;
+  I: Integer;
+  GroupValue: Word;
 begin
-  Result := 'unknown';
-  if (ARequest = nil) or (ARequest^.Address.pRemoteAddress = nil) or
-     (ARequest^.Address.pRemoteAddress^.sa_family <> AF_INET) then
+  Result := '';
+  if (ARequest = nil) or (ARequest^.Address.pRemoteAddress = nil) then
     Exit;
 
-  Address := PSockAddrIn(ARequest^.Address.pRemoteAddress);
-  Result := string(AnsiString(inet_ntoa(Address^.sin_addr)));
+  if ARequest^.Address.pRemoteAddress^.sa_family = AF_INET then
+    begin
+      Address4 := PSockAddrIn(ARequest^.Address.pRemoteAddress);
+      Result := string(AnsiString(inet_ntoa(Address4^.sin_addr)));
+      Exit;
+    end;
+
+  if ARequest^.Address.pRemoteAddress^.sa_family = FX_AF_INET6 then
+    begin
+      Address6 := PFxSockAddrIn6(ARequest^.Address.pRemoteAddress);
+      for I := 0 to 7 do
+        begin
+          if I > 0 then
+            Result := Result + ':';
+          GroupValue := (Word(Address6^.sin6_addr[I * 2]) shl 8) or
+                        Word(Address6^.sin6_addr[I * 2 + 1]);
+          Result := Result + LowerCase(IntToHex(GroupValue, 1));
+        end;
+      if Address6^.sin6_scope_id <> 0 then
+        Result := Result + '%' + IntToStr(Address6^.sin6_scope_id);
+    end;
 end;
 
 
@@ -644,6 +680,12 @@ begin
   FConfig := AConfig;
   FLogger := ALogger;
   FChallengeSource := AChallengeSource;
+  if FConfig.ProtectionEnabled then
+    FProtection := TFxServeRequestProtection.Create(
+      FConfig.ProtectionRequestsPerMinute,
+      FConfig.ProtectionBurst,
+      FConfig.ProtectionMaxConcurrentPerAddress,
+      FConfig.ProtectionBlockSeconds);
   FRequestQueue := 0;
   FIdleEvent := TEvent.Create(nil,
                               True,
@@ -656,6 +698,7 @@ destructor TFxServeWanServer.Destroy;
 begin
 
   Stop();
+  FProtection.Free;
   FIdleEvent.Free;
 
   inherited Destroy();
@@ -865,6 +908,23 @@ begin
     PeerAddress := RequestPeerAddress(Request);
     Secure := (Request^.pSslInfo <> nil);
 
+    if InterlockedCompareExchange(FActiveRequests,
+                                  0,
+                                  0) >= FConfig.MaxConnections then
+      begin
+        FLogger.Info(Format('WAN global request limit reached peer=%s',
+                            [PeerAddress]));
+        SendSimple(Request^.RequestId,
+                   503,
+                   'Service Unavailable',
+                   'Too many active requests.',
+                   'Retry-After',
+                   '1');
+        SetLength(Buffer,
+                  WAN_HEADER_BUFFER_SIZE);
+        Continue;
+      end;
+
     RequestStarted();
 
     try
@@ -904,42 +964,23 @@ var
   Path: string;
   Location: string;
   ChallengeResponse: string;
+  RetryAfterSeconds: Integer;
+  ProtectionResult: TFxServeProtectionResult;
+  ProtectionReason: string;
 
 begin
 
   HostName := HostWithoutPort(HeaderValue(AHeaders,
                               'Host'));
 
-  FLogger.Info(Format('WAN %s %s host=%s secure=%s',
-                      [AMethod, ATarget, HostName, BoolToStr(ASecure, True)]));
+  FLogger.Info(Format('WAN %s %s peer=%s host=%s secure=%s',
+                      [AMethod, ATarget, APeerAddress, HostName,
+                       BoolToStr(ASecure, True)]));
 
-  if (FConfig.WanHostName <> '') and
-     not SameText(HostName,
-                  FConfig.WanHostName) then
-    begin
-      SendSimple(ARequestId,
-                 404,
-                 'Not Found',
-                 'Not found.');
-      Exit;
-    end;
-
-  if (AMethod <> 'GET') and
-     (AMethod <> 'HEAD') and
-     (AMethod <> 'OPTIONS') then
-    begin
-      SendSimple(ARequestId,
-                 405,
-                 'Method Not Allowed',
-                 'Method not allowed.');
-      Exit;
-    end;
-
-  Path := RequestPath(ATarget);
-  if SameText(Path, '/WebCam/live.json') then
-    TouchWebCamViewer(ATarget, APeerAddress);
-
-  if not ASecure and
+  if (AMethod = 'GET') and
+     not ASecure and
+     ((FConfig.WanHostName = '') or
+      SameText(HostName, FConfig.WanHostName)) and
      Assigned(FChallengeSource) and
      FChallengeSource.TryGetAcmeChallenge(ATarget,
                                           ChallengeResponse) then
@@ -953,15 +994,65 @@ begin
       Exit;
     end;
 
+  if Assigned(FProtection) then
+    begin
+      ProtectionResult := FProtection.TryBeginRequest(APeerAddress,
+                                                       RetryAfterSeconds);
+      if ProtectionResult <> prAllowed then
+        begin
+          if ProtectionResult = prRateLimited then
+            ProtectionReason := 'rate'
+          else
+            ProtectionReason := 'concurrency';
+
+          FLogger.Info(Format('WAN request limited peer=%s reason=%s',
+                              [APeerAddress, ProtectionReason]));
+          SendSimple(ARequestId,
+                     429,
+                     'Too Many Requests',
+                     'Too many requests. Try again later.',
+                     'Retry-After',
+                     IntToStr(RetryAfterSeconds));
+          Exit;
+        end;
+    end;
+
+  try
+    if (FConfig.WanHostName <> '') and
+       not SameText(HostName,
+                    FConfig.WanHostName) then
+      begin
+        SendSimple(ARequestId,
+                   404,
+                   'Not Found',
+                   'Not found.');
+        Exit;
+      end;
+
+    if (AMethod <> 'GET') and
+       (AMethod <> 'HEAD') and
+       (AMethod <> 'OPTIONS') then
+      begin
+        SendSimple(ARequestId,
+                   405,
+                   'Method Not Allowed',
+                   'Method not allowed.');
+        Exit;
+      end;
+
+    Path := RequestPath(ATarget);
+    if SameText(Path, '/WebCam/live.json') then
+      TouchWebCamViewer(ATarget, APeerAddress);
+
   // ACME HTTP-01 validators always enter on plain HTTP port 80. Everything
   // except an active in-memory challenge is redirected normally.
-  if not ASecure and
-     FConfig.WanRedirectHttp and
-     FConfig.WanHttpsEnabled and
-     (Pos('/.well-known/acme-challenge/',
-          LowerCase(ATarget)) <> 1) then
-    begin
-      Location := 'https://' + FConfig.WanHostName;
+    if not ASecure and
+       FConfig.WanRedirectHttp and
+       FConfig.WanHttpsEnabled and
+       (Pos('/.well-known/acme-challenge/',
+            LowerCase(ATarget)) <> 1) then
+      begin
+        Location := 'https://' + FConfig.WanHostName;
 
       if (FConfig.WanHttpsPort <> 443) then
         Location := Location + ':' + IntToStr(FConfig.WanHttpsPort);
@@ -974,17 +1065,21 @@ begin
                  '',
                  'Location',
                  Location);
-      Exit;
-    end;
+        Exit;
+      end;
 
-  if not ProxyToLan(ARequestId,
-                    AMethod,
-                    ATarget,
-                    AHeaders) then
-    SendSimple(ARequestId,
-               502,
-               'Bad Gateway',
-               'FxServe LAN listener is unavailable.');
+    if not ProxyToLan(ARequestId,
+                      AMethod,
+                      ATarget,
+                      AHeaders) then
+      SendSimple(ARequestId,
+                 502,
+                 'Bad Gateway',
+                 'FxServe LAN listener is unavailable.');
+  finally
+    if Assigned(FProtection) then
+      FProtection.EndRequest(APeerAddress);
+  end;
 end;
 
 

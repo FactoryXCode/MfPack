@@ -73,6 +73,7 @@ uses
   FxServe.Config in 'FxServe.Config.pas',
   FxServe.Bootstrap in 'FxServe.Bootstrap.pas',
   FxServe.Logging in 'FxServe.Logging.pas',
+  FxServe.Protection in 'FxServe.Protection.pas',
   FxServe.HttpApi in 'FxServe.HttpApi.pas',
   FxServe.Certificate in 'FxServe.Certificate.pas',
   FxServe.Viewers in 'FxServe.Viewers.pas',
