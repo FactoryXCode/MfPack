@@ -931,7 +931,6 @@ object frmSetup: TfrmSetup
     Color = 5850948
     ParentBackground = False
     TabOrder = 4
-    ExplicitTop = 43
     object Bevel3: TBevel
       Left = 12
       Top = 22
@@ -1626,7 +1625,7 @@ object frmSetup: TfrmSetup
     TabOrder = 0
     ExplicitTop = 43
     object Bevel7: TBevel
-      Left = 8
+      Left = 7
       Top = 401
       Width = 669
       Height = 66
@@ -1636,7 +1635,7 @@ object frmSetup: TfrmSetup
     end
     object Bevel6: TBevel
       Left = 35
-      Top = 213
+      Top = 221
       Width = 520
       Height = 46
     end
@@ -1651,16 +1650,16 @@ object frmSetup: TfrmSetup
     end
     object Bevel2: TBevel
       Left = 8
-      Top = 197
+      Top = 205
       Width = 669
-      Height = 175
+      Height = 158
       ParentCustomHint = False
       ParentShowHint = False
       ShowHint = False
     end
     object lblAudioBufSize: TLabel
       Left = 14
-      Top = 283
+      Top = 291
       Width = 154
       Height = 22
       Hint = ' in milliseconds. Default is 60 ms'
@@ -1678,14 +1677,13 @@ object frmSetup: TfrmSetup
     end
     object Label4: TLabel
       Left = 18
-      Top = 327
+      Top = 335
       Width = 642
-      Height = 35
+      Height = 22
       AutoSize = False
       Caption = 
-        'Enlarge the audio buffersize, if you hear small disruptions or d' +
-        'istortions in the audio stream. Default value for the audiobuffe' +
-        'r is ~60 milliseconds.'
+        'Enlarge the audio buffersize, if you hear distortions in the aud' +
+        'io stream. '
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clMoneyGreen
       Font.Height = -13
@@ -1696,7 +1694,7 @@ object frmSetup: TfrmSetup
     end
     object lblChannels: TLabel
       Left = 47
-      Top = 228
+      Top = 236
       Width = 121
       Height = 19
       Alignment = taRightJustify
@@ -1711,7 +1709,7 @@ object frmSetup: TfrmSetup
     end
     object lblBuffSize: TLabel
       Left = 509
-      Top = 283
+      Top = 291
       Width = 107
       Height = 16
       AutoSize = False
@@ -1725,7 +1723,7 @@ object frmSetup: TfrmSetup
     end
     object Label1: TLabel
       Left = 20
-      Top = 189
+      Top = 197
       Width = 75
       Height = 17
       Alignment = taCenter
@@ -1779,7 +1777,7 @@ object frmSetup: TfrmSetup
     end
     object lblLoopbackDecks: TLabel
       Left = 289
-      Top = 228
+      Top = 236
       Width = 121
       Height = 19
       Alignment = taRightJustify
@@ -1808,18 +1806,32 @@ object frmSetup: TfrmSetup
       Height = 63
     end
     object lblMainOut: TLabel
-      Left = 34
-      Top = 39
-      Width = 135
+      Left = 17
+      Top = 40
+      Width = 160
       Height = 16
+      Alignment = taRightJustify
       Caption = 'Main output (MASTER):'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblCueOut: TLabel
-      Left = 41
+      Left = 20
       Top = 124
-      Width = 128
+      Width = 157
       Height = 16
+      Alignment = taRightJustify
       Caption = 'Cue output (PHONES):'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblHint: TLabel
       Left = 18
@@ -1855,14 +1867,21 @@ object frmSetup: TfrmSetup
       Transparent = False
     end
     object lblMicIn: TLabel
-      Left = 34
+      Left = 40
       Top = 434
-      Width = 190
+      Width = 128
       Height = 16
       Alignment = taRightJustify
+      AutoSize = False
       BiDiMode = bdLeftToRight
-      Caption = 'Microphone input (MICROPHONE)'
+      Caption = 'Microphone:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
       ParentBiDiMode = False
+      ParentFont = False
     end
     object Label19: TLabel
       Left = 63
@@ -1957,7 +1976,7 @@ object frmSetup: TfrmSetup
     end
     object cbChannels: TComboBox
       Left = 179
-      Top = 226
+      Top = 234
       Width = 80
       Height = 22
       Style = csOwnerDrawFixed
@@ -1972,9 +1991,10 @@ object frmSetup: TfrmSetup
     end
     object tbAudioBufferDuration: TMfTrackBar
       Left = 179
-      Top = 275
+      Top = 283
       Width = 312
       Height = 34
+      Hint = 'The default value for the audiobuffer is ~60 milliseconds.'
       TabOrder = 1
       Color = 5850948
       ParentColor = False
@@ -2032,7 +2052,7 @@ object frmSetup: TfrmSetup
     end
     object cbLoopbackDecks: TComboBox
       Left = 421
-      Top = 226
+      Top = 234
       Width = 80
       Height = 22
       Style = csOwnerDrawFixed
@@ -2057,7 +2077,7 @@ object frmSetup: TfrmSetup
     object cbCueOut: TComboBox
       Left = 180
       Top = 121
-      Width = 477
+      Width = 480
       Height = 22
       Style = csOwnerDrawFixed
       Color = 9216
@@ -2180,9 +2200,9 @@ object frmSetup: TfrmSetup
       OnClick = chkPflClick
     end
     object cbMicIn: TComboBox
-      Left = 230
+      Left = 180
       Top = 431
-      Width = 439
+      Width = 480
       Height = 22
       Style = csOwnerDrawFixed
       BiDiMode = bdLeftToRight
@@ -2667,6 +2687,7 @@ object frmSetup: TfrmSetup
     Padding.Bottom = 8
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 761
     object btnOk: TMPxpButton
       Left = 445
       Top = 7
@@ -2755,6 +2776,7 @@ object frmSetup: TfrmSetup
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
+    ExplicitTop = 2
     object chkGeneralSettings: TMPxpButton
       Left = 4
       Top = 4
