@@ -22,7 +22,6 @@ renews, validates, and binds its certificate itself.
 - Explicit `403 Forbidden` responses for `/admin` and `/admin.xsl`.
 - URL decoding and protection against paths escaping the web root.
 - Console and file logging.
-- Graceful Ctrl+C shutdown.
 - Native Windows service start, stop, and shutdown handling.
 - HTTP.sys TLS termination with an SNI certificate binding.
 - Built-in ACME v2 certificate issue and renewal using an in-memory HTTP-01
@@ -108,7 +107,9 @@ FxServe accepts the following case-insensitive parameters:
 With no mode parameter, FxServe runs interactively. It first looks for an INI
 file with the same path and base name as the executable. If that file does not
 exist, it looks for `FxServe.ini` in the current directory. An explicit
-`--config` or `-c` parameter overrides both defaults.
+`--config` or `-c` parameter overrides both defaults.  
+  
+Note: Parameters should be typed like "path + exename" + "space" + "--parameter" Example: "C:\FxServe\FxServe.exe --install"
   
 Install the service with an absolute configuration path:
   
