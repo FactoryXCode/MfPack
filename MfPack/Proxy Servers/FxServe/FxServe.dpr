@@ -219,7 +219,10 @@ begin
     Writeln('Press Ctrl+C to stop.');
 
     while not StopRequested do
-      Sleep(100);
+      begin
+        Host.CheckForConfigurationChanges();
+        Sleep(100);
+      end;
 
     Host.Stop();
   finally

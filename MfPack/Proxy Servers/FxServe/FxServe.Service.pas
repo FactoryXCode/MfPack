@@ -188,8 +188,9 @@ begin
                           NO_ERROR,
                           0);
 
-      WaitForSingleObject(GStopEvent,
-                          INFINITE);
+      while WaitForSingleObject(GStopEvent,
+                                500) = WAIT_TIMEOUT do
+        Host.CheckForConfigurationChanges();
 
       ReportServiceStatus(SERVICE_STOP_PENDING,
                           NO_ERROR,

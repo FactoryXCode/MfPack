@@ -288,6 +288,20 @@ HTTP.sys-to-LAN proxy request is never charged again. If WAN mode is disabled,
 the same limiter protects direct requests to the LAN listener. Independently,
 `[Server] MaxConnections` caps the total number of active WAN request workers.
 
+### Live configuration reload
+
+Console and service operation both monitor the selected INI file. A changed file
+must remain stable for one second before FxServe reads it, preventing an editor's
+intermediate write from being treated as a complete configuration. The new file
+is fully parsed and validated before the running listeners are stopped.
+
+Valid changes restart the LAN listener and optional HTTP.sys/TLS front end in
+the existing process, thereby applying all configuration sections consistently.
+Invalid files leave the active runtime untouched. If a validated configuration
+cannot acquire its requested resources, FxServe records the failure and attempts
+to restore the previous runtime. A reload creates a short connection interruption;
+streaming clients reconnect through their normal retry behavior.
+
 ## HTTPS certificates
 
 FxServe contains its own ACME v2 client and manages the Let's Encrypt

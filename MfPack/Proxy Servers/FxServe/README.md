@@ -33,6 +33,7 @@ renews, validates, and binds its certificate itself.
 - HTTP.sys-to-localhost forwarding, including byte ranges used by fMP4/MSE.
 - Optional per-client request-rate, burst, and concurrent-request limits at the
   public HTTP.sys edge, with HTTP `429` and `Retry-After` responses.
+- Automatic validated configuration reload in console and Windows-service mode.
   
 ## Build
   
@@ -192,6 +193,20 @@ With WAN mode disabled, the same protection applies directly to the LAN listener
 Several viewers behind one NAT gateway share one public IP, so increase the
 allowances if that is common for your audience. The existing `MaxConnections`
 setting also caps the total number of active WAN requests, regardless of source.
+
+### Configuration reload
+
+FxServe watches the selected `FxServe.ini` while it runs. After the file has
+remained unchanged for one second, FxServe loads and validates the entire new
+configuration. Invalid settings are logged and ignored; the current listeners
+and configuration remain active.
+
+A valid change restarts the LAN and, when enabled, WAN listeners inside the same
+FxServe process. This applies every setting, including addresses, ports, routes,
+logging, protection, and WAN/TLS options. Existing requests are closed during
+the restart, so clients may see a brief interruption and reconnect normally. If
+the new listener configuration cannot start—for example because a new port is
+already occupied—FxServe attempts to restore the previous configuration.
   
 For `MfWebCamStreamer`, requests to `/WebCam/live.json` carrying a `viewer`
 query value update an in-memory presence registry. `/WebCam/viewers.json`
@@ -273,7 +288,3 @@ their own administration tools.
   RDJ Pro signal paths, HTTPS renewal, security, limits, and MfPack scope.
 - [Remote server deployment guide](Deploy/YourRemoteServer/README-Deploy.md) covers server
   installation, updates, health checks, and rollback.
-
-## Next milestones
-
-1. Add configuration reload.
