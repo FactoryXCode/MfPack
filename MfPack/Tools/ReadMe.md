@@ -35,7 +35,7 @@ NOTES:
 
 &#x20; 
 
-Project: Media Foundation - MFPack - Samples
+Project: Media Foundation - MFPack - Tools
 
 &#x20; 
 Project location: https://github.com/FactoryXCode/MfPack  
