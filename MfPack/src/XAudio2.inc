@@ -136,8 +136,8 @@ const
 {$ENDIF}
 
 // XAPOFx
-  XAPOFxLib = 'Windows.Media.Audio.dll';   // See:
-                                           // Note: This dll is not the one XAPOFx uses.
+XAPOFxLib                            = 'XAPOFX1_5.dll';
+
 
 
 //<eof>

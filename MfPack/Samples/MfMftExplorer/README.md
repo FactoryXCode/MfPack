@@ -9,18 +9,16 @@ Transforms (MFTs) installed on a Windows system.
 ## What the sample demonstrates
   
 - Selecting an MFT category such as video decoders or audio encoders;
-- Sselecting an enumeration scope such as software, hardware, or all MFTs;
+- Selecting an enumeration scope such as software, hardware, or all MFTs;
 - Calling `MFTEnumEx` without input/output filters;
 - Reading the friendly name and CLSID from each `IMFActivate`;
 - Detecting a hardware registration URL;
 - Associating hardware video MFTs with their DXGI adapter;
 - Reading the input and output types advertised during registration;
-- Releasing every returned `IMFActivate` before freeing the array.
 - Activating a selected MFT only when requested;
 - Unlocking asynchronous MFTs before inspecting their streams;
 - Reading stream limits, counts, IDs, flags, and buffer requirements;
 - Enumerating runtime input and output media types;
-- Shutting down the activated object after inspection;
 - Probing every transform in the selected category and scope;
 - Reporting DXGI adapters for which a hardware video query returns zero MFTs;
 - Collapsing duplicate activation objects returned by ordinary `MFTEnumEx`
@@ -45,7 +43,7 @@ MFTEnumEx
     +-- returned array  -> CoTaskMemFree
 ```
   
-`CoTaskMemFree` frees only the array storage. It does not replace releasing the  
+Note: `CoTaskMemFree` frees only the array storage. It does not release the  
 COM interfaces stored in that array.  
   
 ## Identifying the hardware adapter
@@ -53,8 +51,9 @@ COM interfaces stored in that array.
 When `Hardware MFTs` and a video category are selected, the sample enumerates  
 the installed DXGI adapters and calls `MFTEnum2` once for each physical  
 adapter. The adapter LUID is supplied through an `IMFAttributes` store using  
-`MFT_ENUM_ADAPTER_LUID`. The LUID is stored with `SetBlob`; using `SetUINT64`  
-has the same eight-byte payload but the wrong Media Foundation attribute type.  
+`MFT_ENUM_ADAPTER_LUID`. The LUID is stored with `SetBlob`.  
+Note: Using `SetUINT64` has the same eight-byte payload but the wrong  
+Media Foundation attribute type.  
   
 Audio and other non-video categories are not DXGI-adapter resources. They use  
 the system-wide `MFTEnumEx` path even when the hardware scope is selected.  
@@ -94,7 +93,7 @@ that all registered media types should be considered.
   
 ## Registration types versus runtime types  
   
-The input and output types shown in this milestone come from the  
+The input and output types shown in this version come from the  
 `MFT_INPUT_TYPES_Attributes` and `MFT_OUTPUT_TYPES_Attributes` registration  
 blobs. They describe what the MFT advertised when it was registered.  
   
