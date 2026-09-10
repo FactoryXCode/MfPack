@@ -1,0 +1,22 @@
+Needed 3th party binaries for MfCastPlayer:
+
+Download yt-dlp from: https://github.com/yt-dlp/yt-dlp
+Download ffMpeg from: https://ffmpeg.org/download.html
+
+Install:
+
+unpack yt-dlp_win_x86.zip.
+Copy yt-dlp_x86.exe to: ..\MfCastPlayer\Binaries
+Copy folder _internal and subfolders to: ..\MfCastPlayer\Binaries
+
+unpack ffMpeg.zip
+Copy ffMpeg.exe to: ..\MfCastPlayer\Binaries
+
+Folder structure:
+
+MfCastPlayer
+|
+|__Binaries
+     |
+     |_ _internal
+
