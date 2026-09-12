@@ -159,7 +159,7 @@ type
     function DuplicateOutput1(pDevice: IUnknown;
                               Flags: UINT;
                               SupportedFormatsCount: UINT;
-                              pSupportedFormats: DXGI_FORMAT;
+                              pSupportedFormats: PDXGI_FORMAT;
                               out ppOutputDuplication: IDXGIOutputDuplication): HResult; stdcall;
 
   end;
