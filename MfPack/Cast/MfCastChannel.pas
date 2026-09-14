@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright ? FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastChannel.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: TLS, protobuf framing, receiver launch, heartbeat, media loading,
 //              playback commands, and status messages.
 //
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1739,7 +1739,16 @@ begin
   FLastNamespace := Namespace;
   FLastPayload := Payload;
 
-  if Assigned(FLogger) then
+  // A Chromecast can publish MEDIA_STATUS almost ten times per second while
+  // playing a live stream.  Copying each (often 1 KB) payload to both the
+  // debugger and an application's log handler can stall the receive/UI
+  // threads enough to disturb real-time desktop capture.  Process every
+  // status below, but rely on the existing state/volume logs and throttled
+  // OnMediaStatus callback instead of tracing every periodic payload.
+  if Assigned(FLogger) and
+     not (SameText(Namespace,
+                   FSettings.NamespaceMedia) and
+          (Pos('MEDIA_STATUS', Payload) > 0)) then
     FLogger.Log(cllTrace,
                 'Channel',
                 Format('Received namespace="%s" payload="%s".',
@@ -1871,10 +1880,31 @@ var
   MediaVolumeStatus: string;
   CurrentTick: Cardinal;
   NotifyCallback: Boolean;
+  DetailedErrorCode: Int64;
 
 begin
 
   Result := S_OK;
+  if SameText(MfCastExtractJsonString(AJsonPayload, 'type'), 'ERROR') then
+    begin
+      DetailedErrorCode := MfCastExtractJsonInt64(AJsonPayload,
+                                                  'detailedErrorCode',
+                                                  0);
+      Error.Reset();
+      Error.HResult := E_FAIL;
+      if DetailedErrorCode = 103 then
+        Error.Stage := 'Media network'
+      else
+        Error.Stage := 'Media error';
+      Error.MessageText := Format('Chromecast media error %d.',
+                                  [DetailedErrorCode]);
+      Error.Detail := AJsonPayload;
+
+      if Assigned(FCallbacks.OnError) then
+        FCallbacks.OnError(Error);
+      Exit;
+    end;
+
   if (Pos('LOAD_FAILED',
           AJsonPayload) > 0) or
      (Pos('LOAD_CANCELLED',

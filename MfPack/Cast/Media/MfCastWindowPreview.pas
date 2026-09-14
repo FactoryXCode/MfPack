@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastWindowPreview.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Window-backed RGB32 preview sink for the Cast transcoder.
 //
 // Company: FactoryX
@@ -27,17 +27,16 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -92,10 +91,13 @@ type
     FAudioSamplesPerSecond: UINT32;
     FAudioBitsPerSample: UINT32;
     FQueuedAudio: TList<Pointer>;
+    FPendingAudio: TBytes;
 
     procedure ClearWindow(const AWindow: HWND);
     procedure ReleaseCompletedAudioLocked();
     procedure CloseAudioLocked();
+    function QueueAudioBufferLocked(const AData: Pointer;
+                                    const ALength: Cardinal): HRESULT;
 
   public
 
@@ -144,6 +146,7 @@ begin
   FAudioSamplesPerSecond := 0;
   FAudioBitsPerSample := 0;
   FQueuedAudio := TList<Pointer>.Create();
+  FPendingAudio := nil;
 end;
 
 
@@ -239,6 +242,7 @@ begin
       Dispose(WaveBuffer);
     end;
   FQueuedAudio.Clear();
+  FPendingAudio := nil;
 
   if (FWaveOut <> 0) then
     waveOutClose(FWaveOut);
@@ -247,6 +251,70 @@ begin
   FAudioChannels := 0;
   FAudioSamplesPerSecond := 0;
   FAudioBitsPerSample := 0;
+end;
+
+
+function TMfCastWindowPreviewSink.QueueAudioBufferLocked(const AData: Pointer;
+                                                         const ALength: Cardinal): HRESULT;
+var
+  WaveBuffer: PMfCastWaveBuffer;
+  MmResult: UINT;
+begin
+
+  Result := S_OK;
+  if (FWaveOut = 0) or (AData = nil) or (ALength = 0) then
+    Exit;
+
+  WaveBuffer := nil;
+
+  try
+    New(WaveBuffer);
+    WaveBuffer^.Data := nil;
+    FillChar(WaveBuffer^.Header,
+             SizeOf(WAVEHDR),
+             0);
+    SetLength(WaveBuffer^.Data,
+              ALength);
+    Move(AData^,
+         WaveBuffer^.Data[0],
+         ALength);
+  except
+    on E: EOutOfMemory do
+      begin
+        if Assigned(WaveBuffer) then
+          Dispose(WaveBuffer);
+        Result := E_OUTOFMEMORY;
+        Exit;
+      end;
+  end;
+
+  WaveBuffer^.Header.lpData := PAnsiChar(@WaveBuffer^.Data[0]);
+  WaveBuffer^.Header.dwBufferLength := ALength;
+
+  MmResult := waveOutPrepareHeader(FWaveOut,
+                                   @WaveBuffer^.Header,
+                                   SizeOf(WAVEHDR));
+  if (MmResult <> 0) then
+    begin
+      Dispose(WaveBuffer);
+      Result := E_FAIL;
+      Exit;
+    end;
+
+  MmResult := waveOutWrite(FWaveOut,
+                           @WaveBuffer^.Header,
+                           SizeOf(WAVEHDR));
+  if (MmResult <> 0) then
+    begin
+      waveOutUnprepareHeader(FWaveOut,
+                             @WaveBuffer^.Header,
+                             SizeOf(WAVEHDR));
+      Dispose(WaveBuffer);
+      Result := E_FAIL;
+      Exit;
+    end;
+
+  FQueuedAudio.Add(WaveBuffer);
 end;
 
 
@@ -399,8 +467,9 @@ var
   Data: PByte;
   MaxLength: DWORD;
   CurrentLength: DWORD;
-  WaveBuffer: PMfCastWaveBuffer;
-  MmResult: UINT;
+  PreviousLength: Integer;
+  RemainingLength: Integer;
+  TargetLength: Cardinal;
 
 begin
 
@@ -438,60 +507,45 @@ begin
       if (CurrentLength = 0) then
         Exit;
 
-      WaveBuffer := nil;
-
       try
-        New(WaveBuffer);
-        WaveBuffer^.Data := nil;
-
-        FillChar(WaveBuffer^.Header,
-                 SizeOf(WAVEHDR),
-                 0);
-
-        SetLength(WaveBuffer^.Data,
-                  CurrentLength);
-
+        PreviousLength := Length(FPendingAudio);
+        SetLength(FPendingAudio,
+                  PreviousLength + Integer(CurrentLength));
         Move(Data^,
-             WaveBuffer^.Data[0],
+             FPendingAudio[PreviousLength],
              CurrentLength);
-
       except
         on E: EOutOfMemory do
           begin
-            if Assigned(WaveBuffer) then
-              Dispose(WaveBuffer);
             Result := E_OUTOFMEMORY;
             Exit;
           end;
       end;
 
-      WaveBuffer^.Header.lpData := PAnsiChar(@WaveBuffer^.Data[0]);
-      WaveBuffer^.Header.dwBufferLength := CurrentLength;
+      // Decoder output can arrive in buffers as short as 10 ms. Submitting each
+      // one as a separate WaveOut header makes playback sensitive to scheduler
+      // jitter. Coalesce them into stable 100 ms device buffers.
+      TargetLength := (FAudioSamplesPerSecond * FAudioChannels *
+                       (FAudioBitsPerSample div 8)) div 10;
+      if TargetLength = 0 then
+        TargetLength := CurrentLength;
 
-      MmResult := waveOutPrepareHeader(FWaveOut,
-                                       @WaveBuffer^.Header,
-                                       SizeOf(WAVEHDR));
-      if (MmResult <> 0) then
+      while Cardinal(Length(FPendingAudio)) >= TargetLength do
         begin
-          Dispose(WaveBuffer);
-          Result := E_FAIL;
-          Exit;
+          Result := QueueAudioBufferLocked(@FPendingAudio[0],
+                                           TargetLength);
+          if FAILED(Result) then
+            Exit;
+
+          RemainingLength := Length(FPendingAudio) - Integer(TargetLength);
+          if RemainingLength > 0 then
+            Move(FPendingAudio[TargetLength],
+                 FPendingAudio[0],
+                 RemainingLength);
+          SetLength(FPendingAudio,
+                    RemainingLength);
         end;
 
-      MmResult := waveOutWrite(FWaveOut,
-                               @WaveBuffer^.Header,
-                               SizeOf(WAVEHDR));
-      if (MmResult <> 0) then
-        begin
-          waveOutUnprepareHeader(FWaveOut,
-                                 @WaveBuffer^.Header,
-                                 SizeOf(WAVEHDR));
-          Dispose(WaveBuffer);
-          Result := E_FAIL;
-          Exit;
-        end;
-
-      FQueuedAudio.Add(WaveBuffer);
       Result := S_OK;
     finally
       Buffer.Unlock();

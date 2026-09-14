@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastProtocol.pas
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Stateless Google Cast V2 protobuf-envelope encoding and decoding.
 //              Socket ownership, receiver state, and command policy deliberately
 //              remain outside this unit.
@@ -27,14 +27,14 @@
 // 10/08/2026 Carmen              Initial protocol separation.
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfCastChannel.pas
 // Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

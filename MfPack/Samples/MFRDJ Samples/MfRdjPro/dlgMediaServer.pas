@@ -2651,19 +2651,6 @@ begin
     lblCastState.Caption := StatusText;
     FCastMediaSessionReady := StatusMessage.Status.MediaSessionId <> 0;
 
-    if FCastMediaSessionReady then
-      begin
-        FCastUpdatingVolume := True;
-        try
-          trkCastVolume.Position := EnsureRange(Round(StatusMessage.Status.Volume * 100.0),
-                                                trkCastVolume.Minimum,
-                                                trkCastVolume.Maximum);
-          chkCastMuted.Checked := StatusMessage.Status.Muted;
-        finally
-          FCastUpdatingVolume := False;
-        end;
-      end;
-
     UpdateCastControls();
   finally
     StatusMessage.Free();

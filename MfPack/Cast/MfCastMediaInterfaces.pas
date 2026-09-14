@@ -2,7 +2,7 @@
 //
 // Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastMediaInterfaces.pas
@@ -10,7 +10,7 @@
 // Release date: 13-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Optional Media Foundation-specific publishing, preview, remux
 //              and transcode interfaces for MfCast.
 //
@@ -25,20 +25,19 @@
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -73,6 +72,7 @@ type
   IMfCastSegmentPublisher = interface
     ['{696081C4-E77F-4F7D-A756-F84A16F45B56}']
     function BeginPresentation(const AContentType: string;
+                               const AInitialBufferBytes: UInt64;
                                out AEntryPath: string): HRESULT;
     function GetByteStream(out AByteStream: IMFByteStream): HRESULT;
     function CompletePresentation(): HRESULT;
@@ -108,7 +108,9 @@ type
     function IsActive(): Boolean;
     function Open(const ASourceName: string;
                   const AVolume: Single;
-                  const AMuted: Boolean): HRESULT;
+                  const AMuted: Boolean;
+                  const AAudioStreamIndex: DWORD;
+                  const AHasAudioStreamIndex: Boolean): HRESULT;
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;
@@ -141,6 +143,17 @@ type
                    const APublisher: IMfCastSegmentPublisher): HRESULT;
     function Pause(): HRESULT;
     function Resume(): HRESULT;
+    function Stop(): HRESULT;
+    function GetState(): TMfCastState;
+  end;
+
+  IMfCastCapturePipeline = interface
+    ['{2EA5D66D-CE95-447B-80A5-D402A2BE520B}']
+    procedure SetLogger(const ALogger: IMfCastLogger);
+    function Start(const ASettings: TMfCastCaptureSettings;
+                   const AVideoSubtype: TGUID;
+                   const APublisher: IMfCastSegmentPublisher;
+                   const APreviewSink: IMfCastPreviewSink): HRESULT;
     function Stop(): HRESULT;
     function GetState(): TMfCastState;
   end;

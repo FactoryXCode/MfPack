@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCast.pas
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Public `TMfCast` interface for Cast discovery, connection, media loading,
 //              and playback control.
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -74,7 +74,9 @@ uses
   {Cast}
   MfCastTypes,
   MfCastInterfaces,
-  MfCastMediaInterfaces;
+  MfCastMediaInterfaces,
+  MfCastCaptureCapabilities,
+  MfCastDesktopCapture;
 
 type
   TMfCast = class;
@@ -162,6 +164,16 @@ type
     function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
                                    const AInitSegment: TBytes;
                                    out AByteStream: IMFByteStream): HRESULT;
+
+    // Resolve the immutable video codec before a V2.1 capture session starts.
+    function GetCaptureCapabilities(
+      const ADevice: TMfCastDevice;
+      const APreference: TMfCastVideoCodecPreference;
+      out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+
+    function CastDesktop(const ADevice: TMfCastDevice;
+                         const ASettings: TMfCastCaptureSettings;
+                         out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
 
     function Play(): HRESULT;
     function Pause(): HRESULT;
@@ -280,6 +292,7 @@ begin
   Components.Discovery := TMfCastMdnsDiscovery.Create();
   Components.Channel := TMfCastChannel.Create(TMfCastTcpTransport.Create);
   Components.HttpServer := TMfCastHttpServer.Create();
+  Components.DesktopHttpServer := TMfCastHttpServer.Create();
   Components.MediaInspector := TMfCastMediaInspector.Create();
 
   Profile.Reset();
@@ -305,8 +318,11 @@ begin
   if AEnableTranscoding then
     begin
       Components.SegmentPublisher := TMfCastSegmentPublisher.Create(Components.HttpServer);
+      Components.DesktopPublisher := TMfCastSegmentPublisher.Create(Components.DesktopHttpServer,
+                                                                     'desktop.mp4');
       Components.RemuxPipeline := TMfCastRemuxPipeline.Create();
       Components.TranscodePipeline := TMfCastTranscodePipeline.Create();
+      Components.CapturePipeline := TMfCastDesktopCapturePipeline.Create();
       FPreviewSink := TMfCastWindowPreviewSink.Create();
       Components.PreviewSink := FPreviewSink;
     end;
@@ -539,6 +555,34 @@ begin
   Result := FController.CastLiveFragmentedMp4(ADevice,
                                               AInitSegment,
                                               AByteStream);
+end;
+
+
+function TMfCast.GetCaptureCapabilities(
+  const ADevice: TMfCastDevice;
+  const APreference: TMfCastVideoCodecPreference;
+  out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+begin
+
+  Result := MfCastGetCaptureCapabilities(ADevice,
+                                         APreference,
+                                         ACapabilities);
+end;
+
+
+function TMfCast.CastDesktop(
+  const ADevice: TMfCastDevice;
+  const ASettings: TMfCastCaptureSettings;
+  out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+begin
+  Result := MfCastGetCaptureCapabilities(ADevice,
+                                         ASettings.CodecPreference,
+                                         ACapabilities);
+  if FAILED(Result) then
+    Exit;
+  Result := FController.CastDesktop(ADevice,
+                                    ASettings,
+                                    ACapabilities.SelectedVideoSubtype);
 end;
 
 

@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright Ã‚Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastController.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.2
 // Description: GUI-independent orchestration of discovery, preparation,
 //              HTTP publishing, connection, receiver launch, load, playback, and shutdown.
 //
@@ -22,13 +22,15 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 24/08/2026 All                 Moby release SDK 10.0.28000.2705 (Windows 11)
+// 13/09/2026 All                 Protect generated-stream seek replacement
+//                                from terminal events for the old stream.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -88,11 +90,16 @@ type
     Discovery: IMfCastDiscovery;
     Channel: IMfCastChannel;
     HttpServer: IMfCastHttpServer;
+    DesktopHttpServer: IMfCastHttpServer;
     MediaInspector: IMfCastMediaInspector;
     MediaPlanner: IMfCastMediaPlanner;
     SegmentPublisher: IMfCastSegmentPublisher;
+    // Desktop capture owns a different live presentation from file remuxing
+    // and transcoding. Never reuse SegmentPublisher for DXGI capture.
+    DesktopPublisher: IMfCastSegmentPublisher;
     RemuxPipeline: IMfCastRemuxPipeline;
     TranscodePipeline: IMfCastTranscodePipeline;
+    CapturePipeline: IMfCastCapturePipeline;
     PreviewSink: IMfCastPreviewSink;
     DirectPreviewPlayer: IMfCastDirectPreviewPlayer;
 
@@ -128,7 +135,11 @@ type
     FMediaPlaybackStarted: Boolean;
     FSeekInProgress: Boolean;
     FReplacementLoadPending: Boolean;
+    FNetworkRecoveryInProgress: Integer;
     FAudioArtworkSourceName: string;
+    FQueuedAudioTrackId: Int64;
+    FQueuedAudioStreamIndex: DWORD;
+    FHasQueuedAudioTrack: Boolean;
     FSourceResolver: IMfCastSourceResolver;
     FResolvedSource: TMfCastResolvedSource;
     FHasResolvedSource: Boolean;
@@ -235,6 +246,10 @@ type
                                    const AInitSegment: TBytes;
                                    out AByteStream: IMFByteStream): HRESULT;
 
+    function CastDesktop(const ADevice: TMfCastDevice;
+                         const ASettings: TMfCastCaptureSettings;
+                         const AVideoSubtype: TGUID): HRESULT;
+
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;
@@ -262,6 +277,52 @@ uses
   MfCastHttpServer,
   MfCastChannel,
   MfCastTransport;
+
+type
+
+  TMfCastNetworkRecoveryThread = class(TThread)
+  private
+    FController: TMfCastController;
+    FControllerReference: IMfCastController;
+    FPosition100ns: Int64;
+  protected
+    procedure Execute(); override;
+  public
+    constructor Create(const AController: TMfCastController;
+                       const APosition100ns: Int64);
+  end;
+
+
+constructor TMfCastNetworkRecoveryThread.Create(
+  const AController: TMfCastController;
+  const APosition100ns: Int64);
+begin
+  inherited Create(True);
+  FreeOnTerminate := True;
+  FController := AController;
+  FControllerReference := AController;
+  FPosition100ns := APosition100ns;
+end;
+
+
+procedure TMfCastNetworkRecoveryThread.Execute();
+var
+  Hr: HRESULT;
+begin
+  try
+    Hr := FController.Seek(FPosition100ns);
+    if FAILED(Hr) then
+      FController.Log(cllError,
+                      Format('Automatic media-network recovery failed: HRESULT $%.8x.',
+                             [DWORD(Hr)]))
+    else
+      FController.Log(cllInfo,
+                      'Automatic media-network recovery LOAD was accepted.');
+  finally
+    InterlockedExchange(FController.FNetworkRecoveryInProgress, 0);
+    FControllerReference := nil;
+  end;
+end;
 
 
 function MfCastIsHttpSource(const ASourceName: string): Boolean;
@@ -422,11 +483,14 @@ begin
   Discovery := nil;
   Channel := nil;
   HttpServer := nil;
+  DesktopHttpServer := nil;
   MediaInspector := nil;
   MediaPlanner := nil;
   SegmentPublisher := nil;
+  DesktopPublisher := nil;
   RemuxPipeline := nil;
   TranscodePipeline := nil;
+  CapturePipeline := nil;
   PreviewSink := nil;
   DirectPreviewPlayer := nil;
 end;
@@ -464,7 +528,11 @@ begin
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
   FReplacementLoadPending := False;
+  FNetworkRecoveryInProgress := 0;
   FAudioArtworkSourceName := '';
+  FQueuedAudioTrackId := 0;
+  FQueuedAudioStreamIndex := 0;
+  FHasQueuedAudioTrack := False;
   FSourceResolver := nil;
   FResolvedSource.SourceName := '';
   FResolvedSource.Title := '';
@@ -527,11 +595,17 @@ begin
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
+  if Assigned(FComponents.DesktopPublisher) then
+    FComponents.DesktopPublisher.AbortPresentation(E_ABORT);
+
   if Assigned(FComponents.RemuxPipeline) then
     FComponents.RemuxPipeline.Stop();
 
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Stop();
+
+  if Assigned(FComponents.CapturePipeline) then
+    FComponents.CapturePipeline.Stop();
 
   if Assigned(FComponents.HttpServer) and
      (FCurrentSubtitlePublishedPath <> '') then
@@ -543,6 +617,9 @@ begin
 
   if Assigned(FComponents.HttpServer) then
     FComponents.HttpServer.Stop();
+
+  if Assigned(FComponents.DesktopHttpServer) then
+    FComponents.DesktopHttpServer.Stop();
 
   if Assigned(FComponents.Channel) then
     FComponents.Channel.Disconnect();
@@ -644,11 +721,17 @@ begin
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
+  if Assigned(FComponents.DesktopPublisher) then
+    FComponents.DesktopPublisher.AbortPresentation(E_ABORT);
+
   if Assigned(FComponents.RemuxPipeline) then
     FComponents.RemuxPipeline.Stop();
 
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Stop();
+
+  if Assigned(FComponents.CapturePipeline) then
+    FComponents.CapturePipeline.Stop();
 
   if Assigned(FComponents.HttpServer) and
      (FCurrentSubtitlePublishedPath <> '') then
@@ -660,6 +743,9 @@ begin
 
   if Assigned(FComponents.HttpServer) then
     FComponents.HttpServer.Stop();
+
+  if Assigned(FComponents.DesktopHttpServer) then
+    FComponents.DesktopHttpServer.Stop();
 
   FCurrentPublishedPath := '';
   FCurrentSubtitlePublishedPath := '';
@@ -728,6 +814,13 @@ begin
         Exit;
     end;
 
+  if Assigned(FComponents.DesktopHttpServer) then
+    begin
+      Result := FComponents.DesktopHttpServer.Configure(ASettings.Http);
+      if FAILED(Result) then
+        Exit;
+    end;
+
   if Assigned(FComponents.TranscodePipeline) then
     begin
       Result := FComponents.TranscodePipeline.Configure(ASettings.Encoding);
@@ -767,6 +860,9 @@ begin
   if Assigned(FComponents.HttpServer) then
     FComponents.HttpServer.SetLogger(ALogger);
 
+  if Assigned(FComponents.DesktopHttpServer) then
+    FComponents.DesktopHttpServer.SetLogger(ALogger);
+
   if Assigned(FComponents.MediaInspector) then
     FComponents.MediaInspector.SetLogger(ALogger);
 
@@ -778,6 +874,9 @@ begin
 
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.SetLogger(ALogger);
+
+  if Assigned(FComponents.CapturePipeline) then
+    FComponents.CapturePipeline.SetLogger(ALogger);
 end;
 
 
@@ -843,6 +942,8 @@ var
   hr: HRESULT;
   HttpRequestsBefore: Cardinal;
   HttpRequestsAfter: Cardinal;
+  PreviewAudioStreamIndex: DWORD;
+  PreviewHasAudioStreamIndex: Boolean;
 
 begin
 
@@ -885,8 +986,8 @@ begin
         end;
 
       hr := FComponents.TranscodePipeline.Start(FPendingTranscodeRequest,
-                                                FComponents.SegmentPublisher,
-                                                FComponents.PreviewSink);
+                                                 FComponents.SegmentPublisher,
+                                                 nil);
       if (hr <> S_OK) then
         begin
           Result := FailCastAttempt(hr,
@@ -915,13 +1016,23 @@ begin
     begin
       FActiveLoadRequest := FPendingLoadRequest;
 
-      if (not FUsingTranscodedStream) and
+      if (Trim(FCurrentMedia.SourceName) <> '') and
          Assigned(FComponents.DirectPreviewPlayer) and
          FComponents.DirectPreviewPlayer.IsEnabled() then
         begin
+          PreviewAudioStreamIndex := 0;
+          PreviewHasAudioStreamIndex := False;
+          if FUsingTranscodedStream then
+            begin
+              PreviewAudioStreamIndex := FActiveTranscodeRequest.AudioStreamIndex;
+              PreviewHasAudioStreamIndex := FActiveTranscodeRequest.HasAudioStreamIndex;
+            end;
+
           hr := FComponents.DirectPreviewPlayer.Open(FCurrentMedia.SourceName,
                                                       FPreviewVolume,
-                                                      FPreviewMuted);
+                                                      FPreviewMuted,
+                                                      PreviewAudioStreamIndex,
+                                                      PreviewHasAudioStreamIndex);
           if FAILED(hr) then
             Log(cllWarning,
                 Format('Local direct preview could not be opened (HRESULT $%.8x); receiver playback continues.',
@@ -982,7 +1093,12 @@ begin
   SetState(csConnecting);
 
   Log(cllInfo,
-      'Connecting to Chromecast control channel.');
+      Format('Connecting to Chromecast control channel: device="%s" model="%s" address=%s:%d capabilities=%d.',
+             [ADevice.FriendlyName,
+              ADevice.ModelName,
+              ADevice.Address,
+              ADevice.Port,
+              ADevice.RawCapabilities]));
 
   Result := FComponents.Channel.Connect(ADevice);
   if (Result <> S_OK) then
@@ -1271,6 +1387,7 @@ begin
               FComponents.HttpServer.GetListenPort()]));
 
   Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                            0,
                                                             EntryPath);
   if FAILED(Result) then
     begin
@@ -1354,6 +1471,109 @@ begin
 
   Log(cllInfo,
       'Live fragmented MP4 LOAD request accepted.');
+end;
+
+
+function TMfCastController.CastDesktop(
+  const ADevice: TMfCastDevice;
+  const ASettings: TMfCastCaptureSettings;
+  const AVideoSubtype: TGUID): HRESULT;
+var
+  HttpSettings: TMfCastHttpSettings;
+  DeviceHost: string;
+  DevicePort: Word;
+  AdvertisedAddress: string;
+  EntryPath: string;
+  Url: string;
+
+begin
+  if FState in [csConnecting, csConnected, csLaunchingReceiver,
+                csPreparingMedia, csBuffering, csPlaying, csPaused,
+                csStopping] then Exit(HRESULT_FROM_WIN32(ERROR_BUSY));
+  if (not Assigned(FComponents.Channel)) or
+     (not Assigned(FComponents.DesktopHttpServer)) or
+     (not Assigned(FComponents.DesktopPublisher)) or
+     (not Assigned(FComponents.CapturePipeline)) then Exit(E_POINTER);
+
+  if FState in [csError, csStopped] then CleanupCastAttempt();
+  FCurrentDevice := ADevice;
+  FCurrentMedia.Reset();
+  FPendingLoadRequest.Reset();
+  FPendingTranscodeRequest.Reset();
+  FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
+  FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
+  FCurrentMediaSessionId := 0;
+  FMediaLoadStartTick := 0;
+  FMediaPlaybackStarted := False;
+  SetState(csPreparingMedia);
+
+  if FComponents.DesktopHttpServer.IsRunning() then
+    FComponents.DesktopHttpServer.Stop();
+  HttpSettings := FSettings.Http;
+  DeviceHost := Trim(ADevice.Address);
+  if DeviceHost = '' then DeviceHost := Trim(ADevice.HostName);
+  DevicePort := ADevice.Port;
+  if DevicePort = 0 then DevicePort := FSettings.Protocol.ControlPort;
+  if (Trim(HttpSettings.AdvertisedAddress) = '') and
+     MfCastResolveLocalIPv4ForPeer(DeviceHost, DevicePort,
+                                   AdvertisedAddress) then
+    HttpSettings.AdvertisedAddress := AdvertisedAddress;
+
+  Result := FComponents.DesktopHttpServer.Configure(HttpSettings);
+  if FAILED(Result) then Exit(FailCastAttempt(Result,
+    'Configure capture HTTP server',
+    'The local capture HTTP server could not be configured.'));
+  Result := FComponents.DesktopHttpServer.Start();
+  if FAILED(Result) then Exit(FailCastAttempt(Result,
+    'Start capture HTTP server',
+    'The local capture HTTP server could not be started.'));
+  Result := FComponents.DesktopPublisher.BeginPresentation('video/mp4', 0, EntryPath);
+  if FAILED(Result) then Exit(FailCastAttempt(Result,
+    'Publish desktop capture',
+    'The desktop capture resource could not be published.'));
+  Result := FComponents.DesktopHttpServer.BuildUrl(EntryPath, Url);
+  if FAILED(Result) then Exit(FailCastAttempt(Result,
+    'Build capture URL', 'The desktop capture URL could not be created.'));
+
+  FPendingLoadRequest.ContentId := Url;
+  FPendingLoadRequest.ContentType := 'video/mp4';
+  FPendingLoadRequest.StreamType := cstLive;
+  FPendingLoadRequest.Title := 'Desktop capture';
+  FPendingLoadRequest.AutoPlay := True;
+
+  Result := ConnectReceiver(ADevice);
+  if FAILED(Result) then
+    begin
+      CleanupCastAttempt(False);
+      Exit;
+    end;
+
+  // Do not acquire the desktop, audio endpoint, and hardware encoder until the
+  // selected receiver has accepted its control connection. Besides avoiding
+  // needless capture work, this keeps receiver failures separate from local
+  // DXGI/WASAPI failures in the diagnostic log.
+  Result := FComponents.CapturePipeline.Start(ASettings, AVideoSubtype,
+                                              FComponents.DesktopPublisher,
+                                              FComponents.PreviewSink);
+  if FAILED(Result) then
+    begin
+      Result := FailCastAttempt(Result,
+        'Start desktop capture',
+        'DXGI desktop capture or the hardware encoder could not be started.');
+      CleanupCastAttempt();
+      Exit;
+    end;
+
+  Result := StartPendingMedia();
+  if FAILED(Result) then
+    begin
+      CleanupCastAttempt();
+      Exit;
+    end;
+  Log(cllInfo, Format('Desktop capture LOAD accepted: url="%s".', [Url]));
 end;
 
 
@@ -1618,7 +1838,8 @@ begin
               MfCastSubtitleModeToString(SelectedSubtitleMode)]));
 
   if (SelectedMediaMode in [cmmTranscodeBurnedSubtitles,
-                            cmmTranscodeAudioWithArtwork]) and
+                             cmmTranscodeAudioWithArtwork,
+                             cmmTranscodeAudioOnly]) and
      ((not Assigned(FComponents.TranscodePipeline)) or
       (not Assigned(FComponents.SegmentPublisher))) then
     begin
@@ -1718,7 +1939,8 @@ begin
                                                              FPendingLoadRequest);
 
     cmmTranscodeBurnedSubtitles,
-    cmmTranscodeAudioWithArtwork: Result := PrepareTranscodedStream(EffectiveSourceName,
+    cmmTranscodeAudioWithArtwork,
+    cmmTranscodeAudioOnly:        Result := PrepareTranscodedStream(EffectiveSourceName,
                                                                      ASubtitle,
                                                                      SelectedSubtitleMode,
                                                                      FPendingLoadRequest);
@@ -1952,7 +2174,7 @@ begin
         Result := RecoveryResult;
     end;
 
-  if SUCCEEDED(Result) and (not FUsingTranscodedStream) and
+  if SUCCEEDED(Result) and
      Assigned(FComponents.DirectPreviewPlayer) and
      FComponents.DirectPreviewPlayer.IsActive() then
     FComponents.DirectPreviewPlayer.Play();
@@ -1975,7 +2197,7 @@ begin
      Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Pause();
 
-  if SUCCEEDED(Result) and (not FUsingTranscodedStream) and
+  if SUCCEEDED(Result) and
      Assigned(FComponents.DirectPreviewPlayer) and
      FComponents.DirectPreviewPlayer.IsActive() then
     FComponents.DirectPreviewPlayer.Pause();
@@ -2010,11 +2232,17 @@ begin
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
+  if Assigned(FComponents.DesktopPublisher) then
+    FComponents.DesktopPublisher.AbortPresentation(E_ABORT);
+
   if Assigned(FComponents.RemuxPipeline) then
     FComponents.RemuxPipeline.Stop();
 
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Stop();
+
+  if Assigned(FComponents.CapturePipeline) then
+    FComponents.CapturePipeline.Stop();
 
   if Assigned(FComponents.HttpServer) and
      (FCurrentSubtitlePublishedPath <> '') then
@@ -2026,6 +2254,9 @@ begin
 
   if Assigned(FComponents.HttpServer) then
     FComponents.HttpServer.Stop();
+
+  if Assigned(FComponents.DesktopHttpServer) then
+    FComponents.DesktopHttpServer.Stop();
 
   if Assigned(FComponents.Channel) then
     FComponents.Channel.Disconnect();
@@ -2083,6 +2314,7 @@ var
   ReloadRequest: TMfCastLoadRequest;
   ReceiverPosition100ns: Int64;
   SeekPosition100ns: Int64;
+  SeekUsesRemux: Boolean;
 
 begin
 
@@ -2117,12 +2349,21 @@ begin
 
       FSeekInProgress := True;
       FReplacementLoadPending := True;
+      FReplacedMediaSessionId := FCurrentMediaSessionId;
+
+      // Preserve the complete restart transaction before stopping the old
+      // publisher. Its expected network error is delivered asynchronously and
+      // must never be able to erase the request that the seek will restart.
+      SeekUsesRemux := FUsingRemuxedStream;
+      ReloadRequest := FActiveLoadRequest;
+      RestartRequest := FActiveTranscodeRequest;
+      RemuxRestartRequest := FActiveRemuxRequest;
       try
         FMediaLoadStartTick := 0;
         FMediaPlaybackStarted := False;
         SetState(csPreparingMedia);
 
-        if FUsingRemuxedStream then
+        if SeekUsesRemux then
           Result := FComponents.RemuxPipeline.Stop()
         else
           Result := FComponents.TranscodePipeline.Stop();
@@ -2137,6 +2378,7 @@ begin
 
         FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
         Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                                  0,
                                                                   EntryPath);
         if FAILED(Result) then
           begin
@@ -2160,24 +2402,21 @@ begin
         // The HTTP server intentionally strips the query string for lookup.
         Url := Url + '?seek=' + IntToStr(SeekPosition100ns) + '&request=' + IntToStr(GetTickCount());
 
-        ReloadRequest := FActiveLoadRequest;
         ReloadRequest.ContentId := Url;
         ReloadRequest.StartTime100ns := 0;
 
-        if FUsingRemuxedStream then
+        if SeekUsesRemux then
           begin
-            RemuxRestartRequest := FActiveRemuxRequest;
             RemuxRestartRequest.StartTime100ns := SeekPosition100ns;
             Result := FComponents.RemuxPipeline.Start(RemuxRestartRequest,
                                                       FComponents.SegmentPublisher);
           end
         else
           begin
-            RestartRequest := FActiveTranscodeRequest;
             RestartRequest.StartTime100ns := SeekPosition100ns;
             Result := FComponents.TranscodePipeline.Start(RestartRequest,
-                                                          FComponents.SegmentPublisher,
-                                                          FComponents.PreviewSink);
+                                                           FComponents.SegmentPublisher,
+                                                           nil);
           end;
         if FAILED(Result) then
           begin
@@ -2187,7 +2426,7 @@ begin
             Exit;
           end;
 
-        if FUsingRemuxedStream then
+        if SeekUsesRemux then
           FActiveRemuxRequest := RemuxRestartRequest
         else
           FActiveTranscodeRequest := RestartRequest;
@@ -2234,8 +2473,7 @@ begin
                                     'The Chromecast receiver rejected the restarted stream.')
         else
           begin
-            if FUsingRemuxedStream and
-               Assigned(FComponents.DirectPreviewPlayer) and
+            if Assigned(FComponents.DirectPreviewPlayer) and
                FComponents.DirectPreviewPlayer.IsActive() then
               FComponents.DirectPreviewPlayer.Seek(SeekPosition100ns);
 
@@ -2286,7 +2524,18 @@ begin
 
   if not FUsingTranscodedStream then
     begin
-      Result := HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+      if FState in [csIdle, csDiscovering, csStopped, csError] then
+        begin
+          FQueuedAudioTrackId := ATrackId;
+          FQueuedAudioStreamIndex := StreamIndex;
+          FHasQueuedAudioTrack := True;
+          Log(cllInfo,
+              Format('Audio track queued for the next transcode: trackId=%d stream=%d.',
+                     [ATrackId, StreamIndex]));
+          Result := S_OK;
+        end
+      else
+        Result := HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
       Exit;
     end;
 
@@ -2586,6 +2835,13 @@ begin
   if (FState = csStopping) then
     Exit;
 
+  if InterlockedCompareExchange(FNetworkRecoveryInProgress, 0, 0) <> 0 then
+    begin
+      Log(cllDebug,
+          'Ignoring receiver-close callback while media-network recovery is active.');
+      Exit;
+    end;
+
   Log(cllWarning,
       'Receiver control connection closed; stopping the active cast.');
   CleanupCastAttempt(False);
@@ -2608,6 +2864,15 @@ begin
   // a second time.
   if (FState = csStopping) then
     Exit;
+
+  if (InterlockedCompareExchange(FNetworkRecoveryInProgress, 0, 0) <> 0) and
+     SameText(AStatus.PlayerState, 'IDLE') and
+     SameText(AStatus.IdleReason, 'ERROR') then
+    begin
+      Log(cllDebug,
+          'Ignoring terminal media status while media-network recovery is active.');
+      Exit;
+    end;
 
   // While the old transcoder and publisher are being replaced, status still
   // belongs to the old media session and must not alter the seek transaction.
@@ -2714,6 +2979,9 @@ end;
 
 
 procedure TMfCastController.ChannelError(const AError: TMfCastErrorInfo);
+var
+  RecoveryPosition100ns: Int64;
+  RecoveryThread: TMfCastNetworkRecoveryThread;
 begin
 
   if (FState = csStopping) then
@@ -2721,6 +2989,42 @@ begin
       Log(cllDebug,
           Format('Ignoring control-channel error during Stop: HRESULT $%.8x.',
                  [DWORD(AError.HResult)]));
+      Exit;
+    end;
+
+  // Stopping a generated stream as part of seek deliberately closes its HTTP
+  // response. Chromecast reports that old response as media-network error 103.
+  // Before the replacement LOAD begins, this belongs to the discarded stream
+  // and must not tear down the seek transaction.
+  if FSeekInProgress and (FMediaLoadStartTick = 0) and
+     SameText(AError.Stage, 'Media network') then
+    begin
+      Log(cllDebug,
+          Format('Ignoring media-network error for the stream being replaced by seek: HRESULT $%.8x.',
+                 [DWORD(AError.HResult)]));
+      Exit;
+    end;
+
+  if SameText(AError.Stage, 'Media network') and
+     FMediaPlaybackStarted and
+     (FUsingTranscodedStream or FUsingRemuxedStream) then
+    begin
+      if InterlockedCompareExchange(FNetworkRecoveryInProgress, 1, 0) = 0 then
+        begin
+          RecoveryPosition100ns := CurrentFilePosition100ns();
+          Log(cllWarning,
+              Format('Chromecast interrupted the generated media download; restarting at %.3f seconds.',
+                     [RecoveryPosition100ns / 10000000.0]));
+          try
+            RecoveryThread := TMfCastNetworkRecoveryThread.Create(
+                                Self,
+                                RecoveryPosition100ns);
+            RecoveryThread.Start();
+          except
+            InterlockedExchange(FNetworkRecoveryInProgress, 0);
+            raise;
+          end;
+        end;
       Exit;
     end;
 
@@ -2979,6 +3283,13 @@ begin
   Request.SourceName := ASourceName;
   Request.Title := FCurrentMedia.Title;
   Request.SubtitleMode := ASubtitleMode;
+  if FHasQueuedAudioTrack then
+    begin
+      Request.AudioTrackId := FQueuedAudioTrackId;
+      Request.AudioStreamIndex := FQueuedAudioStreamIndex;
+      Request.HasAudioStreamIndex := True;
+      FHasQueuedAudioTrack := False;
+    end;
   if (not FCurrentMedia.HasVideo) and
      (FAudioArtworkSourceName <> '') then
     begin
@@ -3008,8 +3319,17 @@ begin
   Request.Encoding := FSettings.Encoding;
   Request.Encoding.OutputMode := comFragmentedMp4;
 
-  Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
-                                                           EntryPath);
+  Request.AudioOnly := MfCastDeviceIsAudioOnly(FCurrentDevice) and
+                       FCurrentMedia.HasVideo;
+
+  if Request.AudioOnly then
+    Result := FComponents.SegmentPublisher.BeginPresentation('audio/aac',
+                                                              0,
+                                                              EntryPath)
+  else
+    Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                            2 * 1024 * 1024,
+                                                            EntryPath);
   if FAILED(Result) then
     Exit;
 
@@ -3029,7 +3349,10 @@ begin
   FHasPendingTranscode := True;
 
   ALoadRequest.ContentId := Url;
-  ALoadRequest.ContentType := 'video/mp4';
+  if Request.AudioOnly then
+    ALoadRequest.ContentType := 'audio/aac'
+  else
+    ALoadRequest.ContentType := 'video/mp4';
   // SegmentPublisher exposes an incomplete fragmented-MP4 resource over a
   // chunked HTTP response. Advertise the same LIVE contract used by
   // CastLiveFragmentedMp4; BUFFERED describes a finite, range-addressable
@@ -3066,6 +3389,7 @@ begin
   Request.Title := FCurrentMedia.Title;
 
   Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                            0,
                                                             EntryPath);
   if FAILED(Result) then
     Exit;

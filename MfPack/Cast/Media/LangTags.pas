@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX. All rights reserved.
+// Copyright (c) FactoryX. All rights reserved.
 //
-// Project: Media Foundation - MFPack
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: LangTags.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Language tag definitions file.
 //
 // Intiator(s): Tony (maXcomX), Peter Larson (ozships).
@@ -25,7 +25,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -96,6 +96,7 @@ type
                YOUTUBE   = $3,    // YouTube
                SAMI      = $4,    // SAMI/SMI
                WEBVTT    = $5,    // Web vtt HTML5
+               VOBSUB    = $6,    // DVD bitmap subtitles (.idx + .sub)
                UNKNOWN   = $7FFFFFFF);  // Unknown format
 
 
@@ -514,11 +515,14 @@ var
   sMediafile,
   sPath,
   sMatch,
-  sSidecarName: string;
+  sSidecarName,
+  sSuffix: string;
   ar: TArray<string>;
   I: Integer;
   ActiveIndex: Integer;
   DefaultIndex: Integer;
+  IdxLines: TStringList;
+  K: Integer;
 
 begin
 try
@@ -534,9 +538,14 @@ try
   for I := Length(ar) - 1 downto 0 do
     begin
       sSidecarName := ChangeFileExt(ar[I], '');
-      if not (SameText(sSidecarName,
-                       sMediafile) or
-              StartsText(sMediafile + '[', sSidecarName)) then
+      if not (SameText(TimedTextExt, '.idx') or
+              SameText(sSidecarName,
+                        sMediafile) or
+              StartsText(sMediafile + '[', sSidecarName) or
+              StartsText(sMediafile + ' ', sSidecarName) or
+              StartsText(sMediafile + '.', sSidecarName) or
+              StartsText(sMediafile + '-', sSidecarName) or
+              StartsText(sMediafile + '_', sSidecarName)) then
         Delete(ar, I, 1);
     end;
 
@@ -550,9 +559,33 @@ try
 
       Result[I].sFile := sPath + ar[I];
       Result[I].bActiveFile := False;
-      Result[I].sTTxtType := GetTimedTextType(ar[I]);
+      Result[I].sTTxtType := GetTimedTextType(sPath + ar[I]);
 
-      if IsMatch('[a-z][a-z]_[A-Z][A-Z]', ar[I]) then
+      if Result[I].sTTxtType = VOBSUB then
+        begin
+          IdxLines := TStringList.Create();
+          try
+            IdxLines.LoadFromFile(sPath + ar[I]);
+            for K := 0 to IdxLines.Count - 1 do
+              if StartsText('id:', Trim(IdxLines[K])) then
+                begin
+                  sMatch := Trim(Copy(Trim(IdxLines[K]), 4, MaxInt));
+                  if Pos(',', sMatch) > 0 then
+                    sMatch := Copy(sMatch, 1, Pos(',', sMatch) - 1);
+                  Result[I].sLanguageTag := AnsiLowerCase(Trim(sMatch));
+                  Break;
+                end;
+          finally
+            IdxLines.Free();
+          end;
+        end;
+
+      if Result[I].sLanguageTag <> '' then
+        begin
+          if (ActiveIndex < 0) and SameText(sPrefLang, Result[I].sLanguageTag) then
+            ActiveIndex := I;
+        end
+      else if IsMatch('[a-z][a-z]_[A-Z][A-Z]', ar[I]) then
         begin
           sMatch := GetMatch('\[\K[a-z][a-z]',
                              ar[I],
@@ -564,7 +597,19 @@ try
         end
       else
         begin
-          Result[I].sLanguageTag := GetUserDefaultLanguageTag(1, False);
+          sSidecarName := ChangeFileExt(ar[I], '');
+          sSuffix := Copy(sSidecarName,
+                          Length(sMediafile) + 1,
+                          MaxInt);
+          while (Length(sSuffix) > 0) and
+                CharInSet(sSuffix[1], [' ', '.', '-', '_', '[']) do
+            Delete(sSuffix, 1, 1);
+          if (Length(sSuffix) >= 2) and
+             CharInSet(sSuffix[1], ['A'..'Z', 'a'..'z']) and
+             CharInSet(sSuffix[2], ['A'..'Z', 'a'..'z']) then
+            Result[I].sLanguageTag := AnsiLowerCase(Copy(sSuffix, 1, 2))
+          else
+            Result[I].sLanguageTag := GetUserDefaultLanguageTag(1, False);
           if (DefaultIndex < 0) then
             DefaultIndex := I;
         end;
@@ -631,15 +676,61 @@ end;
 function TLanguageTags.GetTimedTextType(sUrl: string): TTXT_TYPE;
 var
   sExt: string;
+  Stream: TFileStream;
+  Bytes: TBytes;
+  Header: string;
+  BytesRead: Integer;
+  BaseName: string;
+  Dash: Integer;
 
 begin
   sExt := ExtractFileExt(sUrl);
 
-  if (AnsiCompareText(sExt, EXTSUBRIP) = 0) then
+  if (AnsiCompareText(sExt, '.idx') = 0) then
+    begin
+      BaseName := ChangeFileExt(sUrl, '');
+      if FileExists(BaseName + '.sub') then
+        Result := VOBSUB
+      else
+        begin
+          Dash := LastDelimiter('-', BaseName);
+          if (Dash > LastDelimiter('\/', BaseName)) and
+             FileExists(Copy(BaseName, 1, Dash - 1) + '.sub') then
+            Result := VOBSUB
+          else
+            Result := UNKNOWN;
+        end;
+    end
+  else if (AnsiCompareText(sExt, EXTSUBRIP) = 0) then
     Result := SUBRIB
   else
     if (AnsiCompareText(sExt, EXTMICRODVD) = 0) then
-      Result := MICRODVD
+      begin
+        // .sub is shared by text MicroDVD and binary VobSub. Sniff the
+        // contents so a SubRip file with a misleading .sub extension works,
+        // while bitmap VobSub is not handed to a text parser.
+        if not FileExists(sUrl) then
+          Result := MICRODVD
+        else
+          begin
+            Result := UNKNOWN;
+            Stream := TFileStream.Create(sUrl, fmOpenRead or fmShareDenyNone);
+            try
+              SetLength(Bytes, 4096);
+              BytesRead := Stream.Read(Bytes[0], Length(Bytes));
+              SetLength(Bytes, BytesRead);
+              Header := TEncoding.ASCII.GetString(Bytes);
+
+              if Pos('-->', Header) > 0 then
+                Result := SUBRIB
+              else
+                if TRegEx.IsMatch(Header, '^\s*\{\d+\}\{\d+\}') then
+                  Result := MICRODVD;
+            finally
+              Stream.Free;
+            end;
+          end;
+      end
     else
       if (AnsiCompareText(sExt, EXTYOUTUBE) = 0) then
         Result := YOUTUBE

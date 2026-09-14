@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastWindowsSupport.pas
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Optional Windows-message bridge and command workers for Cast
 //              applications that marshal asynchronous results to a window.
 //
@@ -28,11 +28,11 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfCast.pas, MfCastTypes.pas
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -87,6 +87,7 @@ const
   WM_MFCAST_FINISHED = WM_APP + 105;
   WM_MFCAST_LOG = WM_APP + 106;
   WM_MFCAST_SUBTITLE_FINISHED = WM_APP + 107;
+  WM_MFCAST_AUDIO_TRACK_FINISHED = WM_APP + 108;
 
 type
   TMfCastFileWorker = class(TThread)
@@ -141,6 +142,19 @@ type
     constructor Create(const ACast: TMfCast;
                        const ASubtitle: TMfCastSubtitleAsset;
                        const AEnabled: Boolean;
+                       const ATargetWindow: HWND);
+  end;
+
+  TMfCastAudioTrackWorker = class(TThread)
+  private
+    FCast: TMfCast;
+    FTrackId: Int64;
+    FTargetWindow: HWND;
+  protected
+    procedure Execute(); override;
+  public
+    constructor Create(const ACast: TMfCast;
+                       const ATrackId: Int64;
                        const ATargetWindow: HWND);
   end;
 
@@ -230,6 +244,7 @@ begin
                 WPARAM(hr),
                 0);
   end;
+
 end;
 
 
@@ -302,6 +317,33 @@ begin
               WM_MFCAST_SUBTITLE_FINISHED,
               WPARAM(hr),
               LPARAM(Ord(FEnabled)));
+end;
+
+
+constructor TMfCastAudioTrackWorker.Create(const ACast: TMfCast;
+                                           const ATrackId: Int64;
+                                           const ATargetWindow: HWND);
+begin
+
+  inherited Create(True);
+  FreeOnTerminate := False;
+  FCast := ACast;
+  FTrackId := ATrackId;
+  FTargetWindow := ATargetWindow;
+end;
+
+
+procedure TMfCastAudioTrackWorker.Execute();
+var
+  hr: HRESULT;
+
+begin
+
+  hr := FCast.SelectAudioTrack(FTrackId);
+  PostMessage(FTargetWindow,
+              WM_MFCAST_AUDIO_TRACK_FINISHED,
+              WPARAM(hr),
+              0);
 end;
 
 

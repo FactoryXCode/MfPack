@@ -1,8 +1,8 @@
 // FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Casts
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastDirectPreviewPlayer.pas
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 //
 // Description: Media Session preview used for routes which do not supply decoded samples
 //              to TMfCastWindowPreviewSink. The EVR owns video rendering and
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 10/08/2026 All                 Extracted reusable Windows UI support.
+// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfCast.pas
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -122,6 +122,9 @@ type
     function SessionEvent(const AAsyncResult: IMFAsyncResult): HRESULT;
     function StartAt(const APosition100ns: Int64;
                      const ASeek: Boolean): HRESULT;
+    function ConfigureAudioSelection(const APresentation: IMFPresentationDescriptor;
+                                     const AAudioStreamIndex: DWORD;
+                                     const AHasAudioStreamIndex: Boolean): HRESULT;
     procedure AcquireRendererServices();
     procedure ApplyAudioSettings();
 
@@ -136,7 +139,9 @@ type
 
     function Open(const ASourceName: string;
                   const AVolume: Single;
-                  const AMuted: Boolean): HRESULT;
+                  const AMuted: Boolean;
+                  const AAudioStreamIndex: DWORD;
+                  const AHasAudioStreamIndex: Boolean): HRESULT;
 
     function Play(): HRESULT;
     function Pause(): HRESULT;
@@ -239,9 +244,74 @@ begin
 end;
 
 
+function TMfCastDirectPreviewPlayer.ConfigureAudioSelection(
+  const APresentation: IMFPresentationDescriptor;
+  const AAudioStreamIndex: DWORD;
+  const AHasAudioStreamIndex: Boolean): HRESULT;
+var
+  Count: DWORD;
+  I: DWORD;
+  Selected: BOOL;
+  StreamDescriptor: IMFStreamDescriptor;
+  Handler: IMFMediaTypeHandler;
+  MajorType: TGUID;
+  Found: Boolean;
+begin
+
+  Result := S_OK;
+  if not AHasAudioStreamIndex then
+    Exit;
+  if not Assigned(APresentation) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := APresentation.GetStreamDescriptorCount(Count);
+  if FAILED(Result) then
+    Exit;
+
+  Found := False;
+  for I := 0 to Count - 1 do
+    begin
+      StreamDescriptor := nil;
+      Handler := nil;
+      Selected := False;
+      Result := APresentation.GetStreamDescriptorByIndex(I,
+                                                         Selected,
+                                                         StreamDescriptor);
+      if FAILED(Result) then
+        Exit;
+      Result := StreamDescriptor.GetMediaTypeHandler(Handler);
+      if FAILED(Result) then
+        Exit;
+      Result := Handler.GetMajorType(MajorType);
+      if FAILED(Result) then
+        Exit;
+
+      if IsEqualGUID(MajorType, MFMediaType_Audio) then
+        if I = AAudioStreamIndex then
+          begin
+            Result := APresentation.SelectStream(I);
+            Found := SUCCEEDED(Result);
+          end
+        else
+          Result := APresentation.DeselectStream(I);
+
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  if not Found then
+    Result := MF_E_INVALIDSTREAMNUMBER;
+end;
+
+
 function TMfCastDirectPreviewPlayer.Open(const ASourceName: string;
                                          const AVolume: Single;
-                                         const AMuted: Boolean): HRESULT;
+                                         const AMuted: Boolean;
+                                         const AAudioStreamIndex: DWORD;
+                                         const AHasAudioStreamIndex: Boolean): HRESULT;
 var
   Presentation: IMFPresentationDescriptor;
   Topology: IMFTopology;
@@ -296,10 +366,31 @@ begin
       Exit;
     end;
 
+  Result := ConfigureAudioSelection(Presentation,
+                                    AAudioStreamIndex,
+                                    AHasAudioStreamIndex);
+  if FAILED(Result) then
+    begin
+      Stop();
+      Exit;
+    end;
+
   Result := CreatePlaybackTopology(FSource,
                                    Presentation,
                                    FVideoWindow,
                                    Topology);
+  if FAILED(Result) then
+    begin
+      Stop();
+      Exit;
+    end;
+
+  // MfMetLib's general topology helper selects every source stream while it
+  // walks the descriptor. Restore the requested audio selection so unused
+  // tracks cannot accumulate data behind topology branches that do not exist.
+  Result := ConfigureAudioSelection(Presentation,
+                                    AAudioStreamIndex,
+                                    AHasAudioStreamIndex);
   if FAILED(Result) then
     begin
       Stop();

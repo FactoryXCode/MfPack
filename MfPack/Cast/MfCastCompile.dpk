@@ -34,8 +34,10 @@ requires
 contains
   MfCast in 'MfCast.pas',
   MfCastChannel in 'MfCastChannel.pas',
+  MfCastCaptureCapabilities in 'MfCastCaptureCapabilities.pas',
   MfCastController in 'MfCastController.pas',
   MfCastDiscovery in 'MfCastDiscovery.pas',
+  MfCastDesktopCapture in 'MfCastDesktopCapture.pas',
   MfCastHttpServer in 'MfCastHttpServer.pas',
   MfCastInterfaces in 'MfCastInterfaces.pas',
   MfCastMedia in 'MfCastMedia.pas',
@@ -48,6 +50,7 @@ contains
   MfCastWindowsSupport in 'MfCastWindowsSupport.pas',
   LangTags in 'Media\LangTags.pas',
   MfEmbeddedSubtitleReader in 'Media\MfEmbeddedSubtitleReader.pas',
+  MfVobSubReader in 'Media\MfVobSubReader.pas',
   MfMatroskaSubtitleReader in 'Media\MfMatroskaSubtitleReader.pas',
   MfPCXConstants in 'Media\MfPCXConstants.pas',
   MfCastWindowPreview in 'Media\MfCastWindowPreview.pas',

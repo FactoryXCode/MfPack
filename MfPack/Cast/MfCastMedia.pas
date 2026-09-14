@@ -2,7 +2,7 @@
 //
 // Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastMedia.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.2
 // Description: Media inspection, per-device capability profiles, and automatic
 //              route selection between direct playback, external subtitles, and transcoding.
 //
@@ -22,23 +22,23 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
+// 13/09/2026 All                 Report audio decoder availability per track.
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -220,6 +220,85 @@ begin
   finally
     PropVariantClear(Value);
   end;
+end;
+
+
+function MfCastCanDecodeAudioStream(const ASourceName: string;
+                                    const AStreamIndex: DWORD): Boolean;
+var
+  CurrentType: IMFMediaType;
+  Reader: IMFSourceReader;
+  RequestedType: IMFMediaType;
+  Channels: UINT32;
+  SamplesPerSecond: UINT32;
+
+begin
+
+  Result := False;
+  Reader := nil;
+  RequestedType := nil;
+  CurrentType := nil;
+
+  // Use a fresh reader for every probe. A source reader which has rejected one
+  // compressed stream can retain a pending media-type transition and produce
+  // misleading results for the next stream in some Matroska handlers.
+  if FAILED(MFCreateSourceReaderFromURL(PWideChar(WideString(ASourceName)),
+                                        nil,
+                                        Reader)) then
+    Exit;
+  if FAILED(Reader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+                                      False)) then
+    Exit;
+  if FAILED(Reader.SetStreamSelection(AStreamIndex,
+                                      True)) then
+    Exit;
+
+  if FAILED(MFCreateMediaType(RequestedType)) then
+    Exit;
+  if FAILED(RequestedType.SetGUID(MF_MT_MAJOR_TYPE,
+                                  MFMediaType_Audio)) then
+    Exit;
+  if FAILED(RequestedType.SetGUID(MF_MT_SUBTYPE,
+                                  MFAudioFormat_PCM)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                    16)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                    48000)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                    2)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK,
+                                    $00000003)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                                    4)) then
+    Exit;
+  if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                    192000)) then
+    Exit;
+
+  // SetCurrentMediaType asks Media Foundation to resolve and instantiate the
+  // decoder. It succeeds for a compatible registered third-party MFT as well
+  // as for an in-box decoder.
+  if FAILED(Reader.SetCurrentMediaType(AStreamIndex,
+                                       0,
+                                       RequestedType)) then
+    Exit;
+  if FAILED(Reader.GetCurrentMediaType(AStreamIndex,
+                                       @CurrentType)) then
+    Exit;
+  if FAILED(CurrentType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                  Channels)) or (Channels = 0) then
+    Exit;
+  if FAILED(CurrentType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                  SamplesPerSecond)) or
+     (SamplesPerSecond = 0) then
+    Exit;
+
+  Result := True;
 end;
 
 
@@ -709,6 +788,8 @@ begin
               begin
                 Track.Kind := ctkAudio;
                 Track.TrackType := 'AUDIO';
+                Track.Supported := MfCastCanDecodeAudioStream(ASourceName,
+                                                              StreamIndex);
                 if (Track.Name = '') then
                   Track.Name := Format('Audio track %d',
                                        [StreamIndex + 1]);
@@ -775,6 +856,22 @@ begin
 
   ASelectedMediaMode := ARequestedMediaMode;
   ASelectedSubtitleMode := ARequestedSubtitleMode;
+
+  // Cast Audio receivers need a presentation without a video track. Decode
+  // the selected source audio and publish it as an AAC elementary stream.
+  if MfCastDeviceIsAudioOnly(ADevice) and AMediaInfo.HasVideo then
+    begin
+      if not AMediaInfo.HasAudio then
+        begin
+          Result := MF_E_INVALIDMEDIATYPE;
+          Exit;
+        end;
+
+      ASelectedMediaMode := cmmTranscodeAudioOnly;
+      ASelectedSubtitleMode := csmNone;
+      Result := S_OK;
+      Exit;
+    end;
 
   if (ARequestedMediaMode <> cmmAutomatic) then
     begin

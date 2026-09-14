@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfSubtitleFramePump.pas
@@ -10,35 +10,48 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
-// Description: MfPlayer X2 frame pump. Reads decoded RGB32 video frames, burns subtitles into
+// Revision Version: 4.0.5
+// Description: Frame pump. Reads decoded RGB32 video frames, burns subtitles into
 //              the frames, and writes the result to a new video stream.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 24/08/2026 All                 Moby release SDK 10.0.28000.2705 (Windows 11)
+// 13/09/2026 All                 Renegotiate decoded audio channel count when
+//                                the Source Reader changes its output type.
+// 13/09/2026 All                 Request the complete stereo PCM layout used by
+//                                MfPlayer X2 and retain only channels 0 and 1
+//                                if a decoder still returns multichannel PCM.
+// 13/09/2026 All                 Normalize decoder-owned multichannel audio into
+//                                a new stereo MF sample instead of compacting
+//                                the decoder buffer in place.
+// 13/09/2026 All                 Do not replace an explicitly selected audio
+//                                stream when its decoder is unavailable.
+// 13/09/2026 All                 Configure the H.264 encoder GOP through
+//                                ICodecAPI for one-second live MP4 fragments.
+// 13/09/2026 All                 Use a receiver-safe live H.264 configuration:
+//                                Main profile, CBR and no reordered B pictures.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -70,6 +83,7 @@ uses
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   {ActiveX}
+  WinApi.ActiveX.OaIdl,
   WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.PropIdl,
   {System}
@@ -83,6 +97,8 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.MfTransform,
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.CodecApi,
+  WinApi.MediaFoundationApi.ICodecApi,
   WinApi.MediaFoundationApi.WmCodecDsp,
   {Windows Imaging Component}
   WinApi.WIC.WinCodec,
@@ -126,6 +142,7 @@ type
     FCancelRequested: Boolean;
     FPauseRequested: Boolean;
     FUseSoftwareVideoDecoder: Boolean;
+    FUseHardwareVideoEncoder: Boolean;
     FRealTimePacing: Boolean;
     FLoggedConverterGeometry: Boolean;
     FReader: IMFSourceReader;
@@ -134,6 +151,11 @@ type
     FAudioVolumePermille: Integer;
     FAudioMuted: Integer;
     FAudioInputStreamIndex: DWORD;
+    FAudioStreamExplicitlySelected: Boolean;
+    FAudioInputChannels: UINT32;
+    FAudioOutputSampleRate: UINT32;
+    FVideoEncoderCodecApi: ICodecAPI;
+    FVideoKeyFrameSpacing: UINT32;
 
     function CreateReader(const InputFileName: WideString;
                           out Reader: IMFSourceReader): HRESULT;
@@ -153,6 +175,11 @@ type
                                Width: UINT32;
                                Height: UINT32;
                                out OutputSample: IMFSample): HRESULT;
+
+    function NormalizeRgb32Sample(InputSample: IMFSample;
+                                  Width: UINT32;
+                                  Height: UINT32;
+                                  out OutputSample: IMFSample): HRESULT;
 
     function CreateWriter(const OutputFileName: WideString;
                           Width: UINT32;
@@ -179,6 +206,8 @@ type
                                     out SampleDuration: LONGLONG): HRESULT;
 
     function ApplyAudioGain(Sample: IMFSample): HRESULT;
+    function NormalizeAudioSample(var Sample: IMFSample): HRESULT;
+    function ForceVideoKeyFrame(): HRESULT;
 
     function WriteAudioSamples(AudioReader: IMFSourceReader;
                                Writer: IMFSinkWriter;
@@ -240,8 +269,16 @@ type
                                     StartTime100ns: MFTIME = 0;
                                     ArtworkFrameRate: UINT32 = 25): HRESULT;
 
+    function AudioOnlyToFile(const InputFileName: WideString;
+                             const OutputFileName: WideString;
+                             const OutputByteStream: IMFByteStream = nil;
+                             UseFragmentedMp4: Boolean = False;
+                             StartTime100ns: MFTIME = 0): HRESULT;
+
     property FramesWritten: Int64 read FFramesWritten;
+    property AudioOutputSampleRate: UINT32 read FAudioOutputSampleRate;
     property UseSoftwareVideoDecoder: Boolean read FUseSoftwareVideoDecoder write FUseSoftwareVideoDecoder;
+    property UseHardwareVideoEncoder: Boolean read FUseHardwareVideoEncoder write FUseHardwareVideoEncoder;
     property RealTimePacing: Boolean read FRealTimePacing write FRealTimePacing;
     property OnProgress: TMfSubtitleFramePumpProgress read FOnProgress write FOnProgress;
     property OnVideoSample: TMfSubtitleFramePumpVideoSample read FOnVideoSample write FOnVideoSample;
@@ -250,6 +287,12 @@ type
 
 
 implementation
+
+const
+  // Keep enough decoded audio queued to bridge normal scheduler and encoder
+  // jitter. Timestamps are unchanged, so this is queue headroom rather than an
+  // A/V offset.
+  PreviewAudioLead100ns = 2500000;
 
 type
 
@@ -307,7 +350,7 @@ begin
 
         OutputDebugString(PChar('Export: cancel helper before reader Flush'));
 
-        hr := FReader.Flush(MF_SOURCE_READER_FIRST_VIDEO_STREAM);
+        hr := FReader.Flush(FStreamIndex);
 
         OutputDebugString(PChar(Format('Export: cancel helper after reader Flush hr=%.8x',
                                        [DWORD(hr)])));
@@ -336,6 +379,7 @@ begin
   FCancelRequested := False;
   FPauseRequested := False;
   FUseSoftwareVideoDecoder := False;
+  FUseHardwareVideoEncoder := True;
   FRealTimePacing := False;
   FLoggedConverterGeometry := False;
   FReader := nil;
@@ -344,6 +388,11 @@ begin
   FAudioVolumePermille := 1000;
   FAudioMuted := 0;
   FAudioInputStreamIndex := MF_SOURCE_READER_FIRST_AUDIO_STREAM;
+  FAudioStreamExplicitlySelected := False;
+  FAudioInputChannels := 2;
+  FAudioOutputSampleRate := 48000;
+  FVideoEncoderCodecApi := nil;
+  FVideoKeyFrameSpacing := 0;
 end;
 
 
@@ -683,6 +732,115 @@ begin
 end;
 
 
+function TMfSubtitleFramePump.NormalizeRgb32Sample(InputSample: IMFSample;
+                                                    Width: UINT32;
+                                                    Height: UINT32;
+                                                    out OutputSample: IMFSample): HRESULT;
+var
+  sourceBuffer: IMFMediaBuffer;
+  targetBuffer: IMFMediaBuffer;
+  sourceData: PByte;
+  targetData: PByte;
+  sourceMaxLength: DWORD;
+  sourceLength: DWORD;
+  targetMaxLength: DWORD;
+  targetLength: DWORD;
+  sourceStride: DWORD;
+  row: UINT32;
+
+begin
+
+  OutputSample := nil;
+  sourceBuffer := nil;
+  targetBuffer := nil;
+  sourceData := nil;
+  targetData := nil;
+
+  if (not Assigned(InputSample)) or (Width = 0) or (Height = 0) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  Result := InputSample.ConvertToContiguousBuffer(@sourceBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  sourceLength := 0;
+  Result := sourceBuffer.GetCurrentLength(sourceLength);
+  if FAILED(Result) then
+    Exit;
+
+  targetLength := Width * Height * 4;
+  if sourceLength < targetLength then
+    begin
+      Result := MF_E_BUFFERTOOSMALL;
+      Exit;
+    end;
+
+  // Source Reader decoders are allowed to return padded IMF2DBuffer samples.
+  // The H.264 Sink Writer is much stricter: it expects a normal, tightly
+  // packed RGB32 memory buffer matching the input media type exactly.
+  if (sourceLength mod Height) = 0 then
+    sourceStride := sourceLength div Height
+  else
+    sourceStride := Width * 4;
+
+  if sourceStride < (Width * 4) then
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
+
+  Result := MFCreateSample(OutputSample);
+  if FAILED(Result) then
+    Exit;
+
+  Result := InputSample.CopyAllItems(OutputSample);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMemoryBuffer(targetLength,
+                                 targetBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := OutputSample.AddBuffer(targetBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  sourceMaxLength := 0;
+  targetMaxLength := 0;
+  Result := sourceBuffer.Lock(sourceData,
+                              @sourceMaxLength,
+                              @sourceLength);
+  if FAILED(Result) then
+    Exit;
+  try
+    Result := targetBuffer.Lock(targetData,
+                                @targetMaxLength,
+                                nil);
+    if FAILED(Result) then
+      Exit;
+    try
+      for row := 0 to Height - 1 do
+        CopyMemory(PByte(NativeInt(targetData) + NativeInt(row * Width * 4)),
+                   PByte(NativeInt(sourceData) + NativeInt(row * sourceStride)),
+                   Width * 4);
+
+      Result := targetBuffer.SetCurrentLength(targetLength);
+    finally
+      targetBuffer.Unlock();
+    end;
+  finally
+    sourceBuffer.Unlock();
+  end;
+
+  if FAILED(Result) then
+    OutputSample := nil;
+end;
+
+
 function TMfSubtitleFramePump.CreateWriter(const OutputFileName: WideString;
                                            Width: UINT32;
                                            Height: UINT32;
@@ -698,6 +856,9 @@ var
   outputType: IMFMediaType;
   inputType: IMFMediaType;
   KeyFrameSpacing: UINT32;
+  CodecApi: ICodecAPI;
+  CodecValue: VARIANT;
+  CodecHr: HRESULT;
 
 begin
 
@@ -706,6 +867,9 @@ begin
   attribs := nil;
   outputType := nil;
   inputType := nil;
+  KeyFrameSpacing := 1;
+  FVideoEncoderCodecApi := nil;
+  FVideoKeyFrameSpacing := 0;
 
   Result := MFCreateAttributes(attribs,
                                2);
@@ -713,9 +877,12 @@ begin
     Exit;
 
   Result := attribs.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
-                              UINT32(False));
+                              UINT32(FUseHardwareVideoEncoder));
   if FAILED(Result) then
     Exit;
+
+  OutputDebugString(PChar(Format('Export: hardware video encoder transforms=%s',
+                                 [BoolToStr(FUseHardwareVideoEncoder)])));
 
   Result := attribs.SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING,
                               UINT32(True));
@@ -735,6 +902,11 @@ begin
       // one-second fragments for a steady live HTTP stream.
       Result := attribs.SetUINT64(MF_MPEG4SINK_MIN_FRAGMENT_DURATION,
                                   UInt64(10000000));
+      if FAILED(Result) then
+        Exit;
+
+      Result := attribs.SetUINT32(MF_LOW_LATENCY,
+                                  UINT32(True));
       if FAILED(Result) then
         Exit;
     end;
@@ -757,6 +929,13 @@ begin
 
   Result := outputType.SetGUID(MF_MT_SUBTYPE,
                                MFVideoFormat_H264);
+  if FAILED(Result) then
+    Exit;
+
+  // Keep the generated stream inside the common Chromecast decoder envelope.
+  // In particular, do not leave profile selection to a GPU-driver default.
+  Result := outputType.SetUINT32(MF_MT_MPEG2_PROFILE,
+                                 eAVEncH264VProfile_Main);
   if FAILED(Result) then
     Exit;
 
@@ -854,6 +1033,105 @@ begin
   Result := Writer.SetInputMediaType(StreamIndex,
                                      inputType,
                                      nil);
+  if FAILED(Result) then
+    Exit;
+
+  if UseFragmentedMp4 then
+    begin
+      // MF_MT_MAX_KEYFRAME_SPACING is only a media-type hint. Some H.264 MFTs
+      // accept it but retain their default multi-second GOP, so the MP4 sink
+      // cannot close one-second fragments and releases data in large bursts.
+      // Configure the selected encoder itself before BeginWriting instead.
+      CodecApi := nil;
+      CodecHr := Writer.GetServiceForStream(StreamIndex,
+                                            GUID_NULL,
+                                            ICodecAPI,
+                                            Pointer(CodecApi));
+      if SUCCEEDED(CodecHr) and Assigned(CodecApi) then
+        begin
+          // A live fragmented stream must be decodable in presentation order.
+          // Some hardware encoders otherwise insert B pictures whose references
+          // cross a fragment boundary; affected Cast receivers then display a
+          // damaged/held picture until the next IDR frame.
+          FillChar(CodecValue,
+                   SizeOf(CodecValue),
+                   0);
+          CodecValue.vt := VT_UI4;
+          CodecValue.ulVal := 0;
+          CodecHr := CodecApi.SetValue(@CODECAPI_AVEncMPVDefaultBPictureCount,
+                                       @CodecValue);
+          OutputDebugString(PChar(Format(
+            'Export: live H.264 B-picture count=0 hr=%.8x',
+            [DWORD(CodecHr)])));
+
+          // The value zero is eAVEncCommonRateControlMode_CBR. MfPack's current
+          // CodecApi translation exposes the property GUID but not this enum.
+          // Treat these codec settings as advisory so an older driver that does
+          // not expose one of them remains usable.
+          FillChar(CodecValue,
+                   SizeOf(CodecValue),
+                   0);
+          CodecValue.vt := VT_UI4;
+          CodecValue.ulVal := 0;
+          CodecHr := CodecApi.SetValue(@CODECAPI_AVEncCommonRateControlMode,
+                                       @CodecValue);
+          OutputDebugString(PChar(Format(
+            'Export: live H.264 rate control=CBR hr=%.8x',
+            [DWORD(CodecHr)])));
+
+          FillChar(CodecValue,
+                   SizeOf(CodecValue),
+                   0);
+          CodecValue.vt := VT_UI4;
+          CodecValue.ulVal := Bitrate;
+          CodecHr := CodecApi.SetValue(@CODECAPI_AVEncCommonMeanBitRate,
+                                       @CodecValue);
+          OutputDebugString(PChar(Format(
+            'Export: live H.264 mean bitrate=%d hr=%.8x',
+            [Bitrate, DWORD(CodecHr)])));
+
+          FillChar(CodecValue,
+                   SizeOf(CodecValue),
+                   0);
+          CodecValue.vt := VT_UI4;
+          CodecValue.ulVal := KeyFrameSpacing;
+          CodecHr := CodecApi.SetValue(@CODECAPI_AVEncMPVGOPSize,
+                                       @CodecValue);
+
+          if SUCCEEDED(CodecHr) then
+            begin
+              FVideoEncoderCodecApi := CodecApi;
+              FVideoKeyFrameSpacing := KeyFrameSpacing;
+            end;
+        end;
+
+      OutputDebugString(PChar(Format(
+        'Export: live H.264 GOP configuration frames=%d hr=%.8x',
+        [KeyFrameSpacing, DWORD(CodecHr)])));
+    end;
+
+  Result := S_OK;
+end;
+
+
+function TMfSubtitleFramePump.ForceVideoKeyFrame(): HRESULT;
+var
+  CodecValue: VARIANT;
+begin
+
+  if not Assigned(FVideoEncoderCodecApi) then
+    begin
+      Result := S_FALSE;
+      Exit;
+    end;
+
+  FillChar(CodecValue,
+           SizeOf(CodecValue),
+           0);
+  CodecValue.vt := VT_UI4;
+  CodecValue.ulVal := 1;
+  Result := FVideoEncoderCodecApi.SetValue(@CODECAPI_AVEncVideoForceKeyFrame,
+                                           @CodecValue);
 end;
 
 
@@ -863,6 +1141,103 @@ function TMfSubtitleFramePump.ConfigureAudioReader(const InputFileName: WideStri
                                                    out HasAudio: Boolean): HRESULT;
 var
   partialType: IMFMediaType;
+  probeReader: IMFSourceReader;
+  nativeType: IMFMediaType;
+  majorType: TGUID;
+  selectedStreamIndex: DWORD;
+  streamIndex: DWORD;
+  hr: HRESULT;
+
+  function TryConfigureAudioStream(const AStreamIndex: DWORD): Boolean;
+  var
+    candidateReader: IMFSourceReader;
+    currentType: IMFMediaType;
+    normalizedType: IMFMediaType;
+    channels: UINT32;
+    samplesPerSecond: UINT32;
+    bitsPerSample: UINT32;
+  begin
+
+    Result := False;
+    AudioMediaType := nil;
+    candidateReader := nil;
+    currentType := nil;
+    normalizedType := nil;
+    channels := 0;
+    samplesPerSecond := 0;
+    bitsPerSample := 0;
+
+    // Do not reuse a reader after a decoder rejected another stream. Some MKV
+    // handlers retain that stream's pending media-type transition, which can
+    // make a fallback AC3 stream deliver multichannel samples under the stale
+    // stereo contract (audible as very slow, low-pitched playback).
+    if FAILED(MFCreateSourceReaderFromURL(PWideChar(InputFileName),
+                                          nil,
+                                          candidateReader)) then
+      Exit;
+    if FAILED(candidateReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+                                                 False)) then
+      Exit;
+    if FAILED(candidateReader.SetStreamSelection(AStreamIndex,
+                                                 True)) then
+      Exit;
+    if FAILED(candidateReader.SetCurrentMediaType(AStreamIndex,
+                                                  0,
+                                                  partialType)) then
+      Exit;
+    if FAILED(candidateReader.GetCurrentMediaType(AStreamIndex,
+                                                  @currentType)) then
+      Exit;
+    if FAILED(currentType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                    channels)) or (channels = 0) then
+      Exit;
+    if FAILED(currentType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                    samplesPerSecond)) or
+       (samplesPerSecond = 0) then
+      Exit;
+    if FAILED(currentType.GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                    bitsPerSample)) or
+       (bitsPerSample <> 16) then
+      Exit;
+
+    // Samples are explicitly normalized to stereo before reaching either the
+    // preview sink or sink writer. Describe that normalized buffer accurately.
+    if FAILED(MFCreateMediaType(normalizedType)) then
+      Exit;
+    if FAILED(normalizedType.SetGUID(MF_MT_MAJOR_TYPE,
+                                     MFMediaType_Audio)) then
+      Exit;
+    if FAILED(normalizedType.SetGUID(MF_MT_SUBTYPE,
+                                     MFAudioFormat_PCM)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                       16)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                       samplesPerSecond)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                       2)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                                       4)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                       samplesPerSecond * 4)) then
+      Exit;
+    if FAILED(normalizedType.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                                       UINT32(True))) then
+      Exit;
+
+    AudioReader := candidateReader;
+    AudioMediaType := normalizedType;
+    FAudioInputStreamIndex := AStreamIndex;
+    FAudioInputChannels := channels;
+    FAudioOutputSampleRate := samplesPerSecond;
+    OutputDebugString(PChar(Format('Export: normalized audio stream=%d inputChannels=%d outputChannels=2 rate=%d bits=16',
+                                   [AStreamIndex, channels, samplesPerSecond])));
+    Result := True;
+  end;
 
 begin
 
@@ -870,26 +1245,15 @@ begin
   AudioMediaType := nil;
   HasAudio := False;
   partialType := nil;
+  probeReader := nil;
+  nativeType := nil;
+  selectedStreamIndex := FAudioInputStreamIndex;
 
   Result := MFCreateSourceReaderFromURL(PWideChar(InputFileName),
                                         nil,
-                                        AudioReader);
+                                        probeReader);
   if FAILED(Result) then
     Exit;
-
-  Result := AudioReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
-                                           False);
-  if FAILED(Result) then
-    Exit;
-
-  Result := AudioReader.SetStreamSelection(FAudioInputStreamIndex,
-                                           True);
-  if FAILED(Result) then
-    begin
-      Result := S_OK;
-      AudioReader := nil;
-      Exit;
-    end;
 
   Result := MFCreateMediaType(partialType);
   if FAILED(Result) then
@@ -910,6 +1274,9 @@ begin
   if FAILED(Result) then
     Exit;
 
+  // Match MfPlayer X2's complete decoded-audio request. Supplying only PCM and
+  // the bit depth leaves the channel layout open, allowing an AC-3 decoder to
+  // switch to its native 5.1 layout on the first sample.
   Result := partialType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
                                   48000);
   if FAILED(Result) then
@@ -917,6 +1284,11 @@ begin
 
   Result := partialType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
                                   2);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK,
+                                  $00000003); // Front left | front right.
   if FAILED(Result) then
     Exit;
 
@@ -930,20 +1302,60 @@ begin
   if FAILED(Result) then
     Exit;
 
-  Result := AudioReader.SetCurrentMediaType(FAudioInputStreamIndex,
-                                            0,
-                                            partialType);
-  if FAILED(Result) then
+  if TryConfigureAudioStream(selectedStreamIndex) then
     begin
+      HasAudio := True;
       Result := S_OK;
-      AudioReader := nil;
       Exit;
     end;
 
-  Result := AudioReader.GetCurrentMediaType(FAudioInputStreamIndex,
-                                            @AudioMediaType);
-  if SUCCEEDED(Result) then
-    HasAudio := True;
+  // An explicit language/track choice is authoritative. In particular, never
+  // replace a selected DTS track with the first decodable track in another
+  // language merely because no compatible DTS decoder is installed.
+  if FAudioStreamExplicitlySelected then
+    begin
+      OutputDebugString(PChar(Format('Export: explicitly selected audio stream %d cannot be decoded',
+                                     [selectedStreamIndex])));
+      Result := MF_E_TOPO_CODEC_NOT_FOUND;
+      Exit;
+    end;
+
+  // A selected track can be valid in the container while no Media Foundation
+  // decoder is installed for its codec (DTS is a common Windows 11 example).
+  // An audio-only Cast receiver is still useful in that situation, so try the
+  // remaining audio tracks in container order rather than producing silence.
+  OutputDebugString(PChar(Format('Export: selected audio stream %d cannot be decoded; searching for a fallback',
+                                 [selectedStreamIndex])));
+  streamIndex := 0;
+  while streamIndex < 256 do
+    begin
+      nativeType := nil;
+      hr := probeReader.GetNativeMediaType(streamIndex,
+                                           0,
+                                           @nativeType);
+      if hr = MF_E_INVALIDSTREAMNUMBER then
+        Break;
+
+      if SUCCEEDED(hr) and Assigned(nativeType) and
+         SUCCEEDED(nativeType.GetGUID(MF_MT_MAJOR_TYPE,
+                                      majorType)) and
+         IsEqualGUID(majorType,
+                     MFMediaType_Audio) and
+         (streamIndex <> selectedStreamIndex) and
+         TryConfigureAudioStream(streamIndex) then
+        begin
+          OutputDebugString(PChar(Format('Export: using decodable fallback audio stream %d instead of %d',
+                                         [streamIndex, selectedStreamIndex])));
+          HasAudio := True;
+          Result := S_OK;
+          Exit;
+        end;
+
+      Inc(streamIndex);
+    end;
+
+  Result := S_OK;
+  AudioReader := nil;
 end;
 
 
@@ -1170,6 +1582,124 @@ begin
 end;
 
 
+function TMfSubtitleFramePump.NormalizeAudioSample(var Sample: IMFSample): HRESULT;
+var
+  SourceBuffer: IMFMediaBuffer;
+  TargetBuffer: IMFMediaBuffer;
+  OutputSample: IMFSample;
+  SourceData: PByte;
+  TargetData: PByte;
+  SourceMaxLength: DWORD;
+  TargetMaxLength: DWORD;
+  SourceLength: DWORD;
+  TargetLength: DWORD;
+  FrameCount: DWORD;
+  FrameIndex: DWORD;
+  SourceFrame: PSmallInt;
+  TargetFrame: PSmallInt;
+
+begin
+
+  if not Assigned(Sample) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if FAudioInputChannels = 2 then
+    begin
+      Result := S_OK;
+      Exit;
+    end;
+
+  SourceBuffer := nil;
+  TargetBuffer := nil;
+  OutputSample := nil;
+  SourceData := nil;
+  TargetData := nil;
+
+  Result := Sample.ConvertToContiguousBuffer(@SourceBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  SourceLength := 0;
+  Result := SourceBuffer.GetCurrentLength(SourceLength);
+  if FAILED(Result) then
+    Exit;
+
+  if (FAudioInputChannels = 0) or
+     (SourceLength mod (FAudioInputChannels * SizeOf(SmallInt)) <> 0) then
+    begin
+      Result := MF_E_INVALIDMEDIATYPE;
+      Exit;
+    end;
+
+  FrameCount := SourceLength div (FAudioInputChannels * SizeOf(SmallInt));
+  TargetLength := FrameCount * 2 * SizeOf(SmallInt);
+
+  Result := MFCreateSample(OutputSample);
+  if FAILED(Result) then
+    Exit;
+
+  // Preserve timestamps, duration, discontinuity markers and other sample
+  // attributes while replacing the decoder-owned multichannel storage.
+  Result := Sample.CopyAllItems(OutputSample);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMemoryBuffer(TargetLength,
+                                 TargetBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := OutputSample.AddBuffer(TargetBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  SourceMaxLength := 0;
+  TargetMaxLength := 0;
+  Result := SourceBuffer.Lock(SourceData,
+                              @SourceMaxLength,
+                              @SourceLength);
+  if FAILED(Result) then
+    Exit;
+  try
+    Result := TargetBuffer.Lock(TargetData,
+                                @TargetMaxLength,
+                                nil);
+    if FAILED(Result) then
+      Exit;
+    try
+      for FrameIndex := 0 to FrameCount - 1 do
+        begin
+          SourceFrame := PSmallInt(NativeInt(SourceData) +
+                                   NativeInt(FrameIndex * FAudioInputChannels *
+                                             SizeOf(SmallInt)));
+          TargetFrame := PSmallInt(NativeInt(TargetData) +
+                                   NativeInt(FrameIndex * 2 * SizeOf(SmallInt)));
+
+          // WAVEFORMATEXTENSIBLE mask $3F orders the first pair as front-left
+          // and front-right. Discard centre, LFE and surround channels.
+          TargetFrame^ := SourceFrame^;
+          if FAudioInputChannels > 1 then
+            PSmallInt(NativeInt(TargetFrame) + SizeOf(SmallInt))^ :=
+              PSmallInt(NativeInt(SourceFrame) + SizeOf(SmallInt))^
+          else
+            PSmallInt(NativeInt(TargetFrame) + SizeOf(SmallInt))^ := SourceFrame^;
+        end;
+    finally
+      TargetBuffer.Unlock();
+    end;
+  finally
+    SourceBuffer.Unlock();
+  end;
+
+  Result := TargetBuffer.SetCurrentLength(TargetLength);
+  if SUCCEEDED(Result) then
+    Sample := OutputSample;
+end;
+
+
 procedure TMfSubtitleFramePump.Cancel();
 begin
 
@@ -1231,6 +1761,7 @@ procedure TMfSubtitleFramePump.SelectAudioStream(const AStreamIndex: DWORD);
 begin
 
   FAudioInputStreamIndex := AStreamIndex;
+  FAudioStreamExplicitlySelected := True;
 end;
 
 
@@ -1299,10 +1830,14 @@ function TMfSubtitleFramePump.WriteAudioSamples(AudioReader: IMFSourceReader;
                                                 StopTime: LONGLONG): HRESULT;
 var
   sample: IMFSample;
+  currentAudioType: IMFMediaType;
   actualStreamIndex: DWORD;
   flags: DWORD;
   sampleTime: LONGLONG;
   sampleDuration: LONGLONG;
+  currentChannels: UINT32;
+  currentSampleRate: UINT32;
+  currentBitsPerSample: UINT32;
   writeRetryCount: Integer;
 
 begin
@@ -1323,7 +1858,9 @@ begin
 
       if Assigned(sample) then
         begin
-          Result := GetAudioSampleDuration(sample,
+          Result := NormalizeAudioSample(sample);
+          if SUCCEEDED(Result) then
+            Result := GetAudioSampleDuration(sample,
                                            AudioState,
                                            sampleDuration);
           if FAILED(Result) then
@@ -1389,12 +1926,60 @@ begin
         end;
 
       if ((flags and MF_SOURCE_READERF_ERROR) <> 0) or
-         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) or
-         ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) then
         begin
 
+          OutputDebugString(PChar(Format('Export: audio reader fatal flags=%.8x stream=%d',
+                                         [flags, FAudioInputStreamIndex])));
           Result := E_FAIL;
           Break;
+        end;
+
+      // Some compressed-audio decoders initially accept our stereo PCM request
+      // but report their native multichannel PCM layout on the first sample.
+      // Refresh the actual layout before normalizing the buffer. Continuing to
+      // interpret six-channel PCM as stereo produces a three-frame cadence
+      // (16 kHz at 48 kHz) and calculates an audio duration three times too long.
+      if ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+        begin
+          currentAudioType := nil;
+          currentChannels := 0;
+          currentSampleRate := 0;
+          currentBitsPerSample := 0;
+
+          Result := AudioReader.GetCurrentMediaType(FAudioInputStreamIndex,
+                                                    @currentAudioType);
+          if SUCCEEDED(Result) then
+            Result := currentAudioType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                                 currentChannels);
+          if SUCCEEDED(Result) then
+            Result := currentAudioType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                                 currentSampleRate);
+          if SUCCEEDED(Result) then
+            Result := currentAudioType.GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                                 currentBitsPerSample);
+          if FAILED(Result) then
+            Break;
+
+          if (currentChannels = 0) or
+             (currentSampleRate = 0) or
+             (currentBitsPerSample <> 16) or
+             ((FAudioOutputSampleRate <> 0) and
+              (currentSampleRate <> FAudioOutputSampleRate)) then
+            begin
+              Result := MF_E_INVALIDMEDIATYPE;
+              Break;
+            end;
+
+          FAudioInputChannels := currentChannels;
+          FAudioOutputSampleRate := currentSampleRate;
+          AudioState.BytesPerSecond := currentSampleRate * 2 * SizeOf(SmallInt);
+
+          OutputDebugString(PChar(Format('Export: audio reader changed output type stream=%d inputChannels=%d outputChannels=2 rate=%d bits=%d',
+                                         [FAudioInputStreamIndex,
+                                          currentChannels,
+                                          currentSampleRate,
+                                          currentBitsPerSample])));
         end;
 
       if not Assigned(sample) then
@@ -1408,7 +1993,9 @@ begin
           Break;
         end;
 
-      Result := GetAudioSampleDuration(sample,
+      Result := NormalizeAudioSample(sample);
+      if SUCCEEDED(Result) then
+        Result := GetAudioSampleDuration(sample,
                                        AudioState,
                                        sampleDuration);
       if FAILED(Result) then
@@ -1863,7 +2450,6 @@ begin
   audioType := nil;
   sample := nil;
   videoStreamIndex := 0;
-  audioStreamIndex := 0;
   hasAudio := False;
   audioState.PendingSample := nil;
   audioState.PendingTime := 0;
@@ -1936,7 +2522,7 @@ begin
     Exit;
 
   FWriter := writer;
-  FStreamIndex := videoStreamIndex;
+  FStreamIndex := MF_SOURCE_READER_FIRST_AUDIO_STREAM;
   Result := AddAudioStream(writer,
                            audioType,
                            audioStreamIndex);
@@ -2044,6 +2630,227 @@ begin
 end;
 
 
+function TMfSubtitleFramePump.AudioOnlyToFile(const InputFileName: WideString;
+                                              const OutputFileName: WideString;
+                                              const OutputByteStream: IMFByteStream;
+                                              UseFragmentedMp4: Boolean;
+                                              StartTime100ns: MFTIME): HRESULT;
+const
+  StartupLeadMs = 1000;
+  PumpInterval100ns = 1000000;
+var
+  writer: IMFSinkWriter;
+  audioReader: IMFSourceReader;
+  audioType: IMFMediaType;
+  audioOutputType: IMFMediaType;
+  mediaSink: IMFMediaSink;
+  attributes: IMFAttributes;
+  audioStreamIndex: DWORD;
+  hasAudio: Boolean;
+  audioState: TMfSubtitleAudioState;
+  exportStartTick: DWORD;
+  targetTime: MFTIME;
+  paceTargetMs: Int64;
+  paceElapsedMs: Int64;
+  paceSleepMs: Int64;
+  samplesPerSecond: UINT32;
+begin
+
+  FFramesWritten := 0;
+  FCancelRequested := False;
+  FPauseRequested := False;
+  FReader := nil;
+  FWriter := nil;
+  FStreamIndex := 0;
+  writer := nil;
+  audioReader := nil;
+  audioType := nil;
+  audioOutputType := nil;
+  mediaSink := nil;
+  attributes := nil;
+  hasAudio := False;
+  audioState.PendingSample := nil;
+  audioState.PendingTime := 0;
+  audioState.OutputTime := 0;
+  audioState.BytesPerSecond := 0;
+  audioState.Pending := False;
+  audioState.Done := False;
+
+  if (InputFileName = '') or (not Assigned(OutputByteStream)) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  if StartTime100ns < 0 then
+    StartTime100ns := 0;
+
+  Result := ConfigureAudioReader(InputFileName,
+                                 audioReader,
+                                 audioType,
+                                 hasAudio);
+  if FAILED(Result) then
+    Exit;
+  if not hasAudio then
+    begin
+      Result := MF_E_INVALIDMEDIATYPE;
+      Exit;
+    end;
+
+  if StartTime100ns > 0 then
+    begin
+      Result := SetReaderPosition(audioReader,
+                                  StartTime100ns);
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  samplesPerSecond := FAudioOutputSampleRate;
+  if samplesPerSecond = 0 then
+    samplesPerSecond := 48000;
+
+  Result := MFCreateMediaType(audioOutputType);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetGUID(MF_MT_MAJOR_TYPE,
+                                    MFMediaType_Audio);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetGUID(MF_MT_SUBTYPE,
+                                    MFAudioFormat_AAC);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                      16);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                      samplesPerSecond);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                      2);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                      $29);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AAC_PAYLOAD_TYPE,
+                                      0);
+  if FAILED(Result) then
+    Exit;
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                      24000);
+  if FAILED(Result) then
+    Exit;
+
+  // The generic fragmented-MP4 sink rejects an audio-only presentation on
+  // some Windows versions. Use the dedicated ADTS sink for a genuine AAC
+  // elementary stream, which Cast Audio receivers accept directly.
+  Result := MFCreateADTSMediaSink(OutputByteStream,
+                                  audioOutputType,
+                                  @mediaSink);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateAttributes(attributes,
+                               2);
+  if FAILED(Result) then
+    Exit;
+  Result := attributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
+                                 UINT32(False));
+  if FAILED(Result) then
+    Exit;
+  Result := attributes.SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING,
+                                 UINT32(True));
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateSinkWriterFromMediaSink(mediaSink,
+                                            attributes,
+                                            writer);
+  if FAILED(Result) then
+    Exit;
+
+  audioStreamIndex := 0;
+  Result := writer.SetInputMediaType(audioStreamIndex,
+                                     audioType,
+                                     nil);
+  if FAILED(Result) then
+    Exit;
+  Result := audioType.GetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                audioState.BytesPerSecond);
+  if FAILED(Result) then
+    Exit;
+
+  FReader := audioReader;
+  FWriter := writer;
+  FStreamIndex := MF_SOURCE_READER_FIRST_AUDIO_STREAM;
+  Result := writer.BeginWriting();
+  if FAILED(Result) then
+    Exit;
+
+  exportStartTick := GetTickCount();
+  targetTime := PumpInterval100ns;
+  while SUCCEEDED(Result) and (not audioState.Done) do
+    begin
+      if WaitIfPaused(exportStartTick,
+                      audioState.OutputTime) or
+         CancelRequested(audioState.OutputTime) then
+        begin
+          Result := E_ABORT;
+          Break;
+        end;
+
+      Result := WriteAudioSamples(audioReader,
+                                  writer,
+                                  audioStreamIndex,
+                                  audioState,
+                                  targetTime);
+      if FAILED(Result) then
+        Break;
+
+      Inc(FFramesWritten);
+      Inc(targetTime,
+          PumpInterval100ns);
+
+      if FRealTimePacing then
+        begin
+          paceTargetMs := (audioState.OutputTime div 10000) - StartupLeadMs;
+          if paceTargetMs < 0 then
+            paceTargetMs := 0;
+          paceElapsedMs := DWORD(GetTickCount() - exportStartTick);
+          while (paceElapsedMs < paceTargetMs) and (not FCancelRequested) do
+            begin
+              paceSleepMs := paceTargetMs - paceElapsedMs;
+              if paceSleepMs > 25 then
+                paceSleepMs := 25;
+              Sleep(DWORD(paceSleepMs));
+              paceElapsedMs := DWORD(GetTickCount() - exportStartTick);
+            end;
+        end;
+    end;
+
+  if Assigned(writer) and SUCCEEDED(Result) and (FFramesWritten > 0) then
+    Result := writer.Finalize();
+
+  audioState.PendingSample := nil;
+  audioType := nil;
+  audioOutputType := nil;
+  audioReader := nil;
+  writer := nil;
+  if Assigned(mediaSink) then
+    mediaSink.Shutdown();
+  mediaSink := nil;
+  FWriter := nil;
+  FReader := nil;
+
+  OutputDebugString(PChar(Format('Export: audio-only done hr=%.8x audioSec=%.3f',
+                                 [DWORD(Result), audioState.OutputTime / 10000000.0])));
+end;
+
+
 function TMfSubtitleFramePump.BurnSubtitlesToFile(const InputFileName: WideString;
                                                   const OutputFileName: WideString;
                                                   Bitrate: UINT32;
@@ -2083,6 +2890,7 @@ var
   paceTargetMs: Int64;
   paceElapsedMs: Int64;
   paceSleepMs: Int64;
+  paceLeadMs: Int64;
   subtitleTime: MFTIME;
   useSourceSubtitleTime: Boolean;
   useNativeNv12: Boolean;
@@ -2121,6 +2929,10 @@ begin
   audioState.Done := False;
   lastReadDebugFrame := -1;
   lastWriteDebugFrame := -1;
+  if UseFragmentedMp4 then
+    paceLeadMs := 5000
+  else
+    paceLeadMs := 0;
 
   if (InputFileName = '') or
      ((OutputFileName = '') and (not Assigned(OutputByteStream))) then
@@ -2203,7 +3015,7 @@ begin
     Exit;
 
   FWriter := writer;
-  FStreamIndex := streamIndex;
+  FStreamIndex := MF_SOURCE_READER_FIRST_VIDEO_STREAM;
 
   audioHr := ConfigureAudioReader(InputFileName,
                                   audioReader,
@@ -2386,6 +3198,22 @@ begin
           sample := rgbSample;
         end;
 
+      if not useNativeNv12 then
+        begin
+          rgbSample := nil;
+          Result := NormalizeRgb32Sample(sample,
+                                         width,
+                                         height,
+                                         rgbSample);
+          if (FFramesWritten = 0) then
+            OutputDebugString(PChar(Format('Export: first RGB32 normalization hr=%.8x sample=%d',
+                                           [DWORD(Result), Ord(Assigned(rgbSample))])));
+          if FAILED(Result) then
+            Break;
+
+          sample := rgbSample;
+        end;
+
       // AVI files often have sparse, repeated, or otherwise unreliable frame
       // timestamps. Generate a stable CFR export timeline from the configured
       // frame rate so audio/video muxing and subtitle timing stay coherent.
@@ -2399,13 +3227,15 @@ begin
       if FRealTimePacing then
         while not CancelRequested(outputTime) do
           begin
-            // Keep the decoded preview video on the same wall clock as its
-            // local PCM monitor. Cast buffering is handled by the fragmented
-            // MP4 cadence rather than by running the preview ahead of audio.
-            paceTargetMs := outputTime div 10000;
+            // A live Cast receiver needs several seconds of encoded video in
+            // reserve. Pacing exactly at the presentation clock left only
+            // 50-100 ms of production headroom and repeatedly starved video
+            // while the separately buffered AAC stream continued normally.
+            paceTargetMs := (outputTime div 10000) - paceLeadMs;
             paceElapsedMs := Int64(DWORD(GetTickCount() - exportStartTick));
 
-            if (paceElapsedMs + 5 >= paceTargetMs) then
+            if (paceTargetMs <= 0) or
+               (paceElapsedMs + 5 >= paceTargetMs) then
               Break;
 
             paceSleepMs := paceTargetMs - paceElapsedMs;
@@ -2468,6 +3298,16 @@ begin
 
       writeRetryCount := 0;
 
+      if (FVideoKeyFrameSpacing > 0) and
+         ((FFramesWritten mod FVideoKeyFrameSpacing) = 0) then
+        begin
+          audioHr := ForceVideoKeyFrame();
+          if FAILED(audioHr) then
+            OutputDebugString(PChar(Format(
+              'Export: force H.264 keyframe failed frame=%d hr=%.8x',
+              [FFramesWritten, DWORD(audioHr)])));
+        end;
+
       repeat
         Result := writer.WriteSample(streamIndex,
                                      sample);
@@ -2491,7 +3331,8 @@ begin
                                        writer,
                                        audioStreamIndex,
                                        audioState,
-                                       outputTime + sampleDuration);
+                                       outputTime + sampleDuration +
+                                       PreviewAudioLead100ns);
           if FAILED(audioHr) then
             begin
               Result := audioHr;

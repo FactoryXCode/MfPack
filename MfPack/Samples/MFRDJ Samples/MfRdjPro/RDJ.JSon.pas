@@ -121,6 +121,27 @@ var
   TmpFileName: string;
   Setup: TRDJSetup;
   CoverUrl: string;
+  JsonBytes: TBytes;
+
+  function SanitizeJsonText(const AValue: string): string;
+  var
+    I: Integer;
+  begin
+
+    // Delphi XE7's System.JSON writer does not escape every C0 control
+    // character. Raw CR/LF copied from a loopback window title therefore makes
+    // JSON.parse() reject the complete status document in web browsers. These
+    // status fields are displayed as one line, so normalize controls to spaces.
+    SetLength(Result,
+              Length(AValue));
+    for I := 1 to Length(AValue) do
+      if Ord(AValue[I]) < 32 then
+        Result[I] := ' '
+      else
+        Result[I] := AValue[I];
+
+    Result := Trim(Result);
+  end;
 
   procedure SetJsonInteger(const AName: string;
                            const AValue: Integer);
@@ -144,15 +165,18 @@ var
   procedure SetJsonString(const AName: string;
                           const AValue: string;
                           const AAllowEmpty: Boolean = False);
+  var
+    SafeValue: string;
   begin
 
-    if (AValue = '') and
+    SafeValue := SanitizeJsonText(AValue);
+    if (SafeValue = '') and
        (not AAllowEmpty) then
       Exit;
 
     Json.RemovePair(AName).Free;
     Json.AddPair(AName,
-                 AValue);
+                 SafeValue);
   end;
 
 
@@ -326,10 +350,10 @@ begin
                                    Now));
 
 
-    TFile.WriteAllText(TmpFileName,
-                       //Json.Format(2),
-                       Json.ToString,
-                       TEncoding.UTF8);
+    // GetBytes returns the UTF-8 payload without TEncoding.UTF8's preamble.
+    JsonBytes := TEncoding.UTF8.GetBytes(Json.ToString);
+    TFile.WriteAllBytes(TmpFileName,
+                        JsonBytes);
 
     PublishJsonFile(TmpFileName,
                     JsonFileName);

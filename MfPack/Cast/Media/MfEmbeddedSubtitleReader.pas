@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfEmbeddedSubtitleReader.pas
@@ -10,7 +10,7 @@
 // Release date: 31-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Container-neutral reader for textual subtitle streams exposed
 //              by a Media Foundation source. The reader imports cues into the
 //              existing TMfTimedText model used by local playback and Cast.
@@ -33,20 +33,19 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: TMfTimedText, TMfSubtitleCompositor
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 //
 // Known Issues: Bitmap subtitle streams (PGS/VobSub) are detected but are not
 //               decoded. The native Microsoft MP4 source ignores non-audio/
 //               video tracks, so MP4 timed-text requires a container adapter.
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE

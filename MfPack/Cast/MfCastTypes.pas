@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastTypes.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Shared enums, device information, media information,
 //              load requests, status records, codec profiles, and all configurable settings.
 //
@@ -25,21 +25,19 @@
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Source: -
 //==============================================================================
 //
 // LICENSE
@@ -100,7 +98,8 @@ type
                       cmmDirectWithTextTrack,
                       cmmTranscodeBurnedSubtitles,
                       cmmTranscodeAudioWithArtwork,
-                      cmmRemuxFile);
+                      cmmRemuxFile,
+                      cmmTranscodeAudioOnly);
 
   TMfCastSubtitleMode = (csmAutomatic,
                          csmNone,
@@ -125,6 +124,19 @@ type
                        cstLive,
                        cstNone);
 
+  // V2.1 real-time capture settings. The selected codec is resolved before
+  // capture starts and remains fixed until that capture session is stopped.
+  TMfCastCaptureSourceKind = (ccskDesktop,
+                              ccskWindow);
+
+  TMfCastVideoCodecPreference = (cvcpAutomatic,
+                                  cvcpH264,
+                                  cvcpHEVC);
+
+  TMfCastVideoCodec = (cvcNone,
+                       cvcH264,
+                       cvcHEVC);
+
   TMfCastTxtEntry = record
     Name: string;
     Value: string;
@@ -144,6 +156,7 @@ type
     RawCapabilities: Cardinal;
     TxtEntries: TMfCastTxtEntryArray;
     LastSeenUtc: TDateTime;
+
     procedure Reset();
   end;
 
@@ -161,6 +174,7 @@ type
     SourceName: string;
     AspectRatio: Single;
     Data: TBytes;
+
     procedure Reset();
   end;
 
@@ -175,6 +189,7 @@ type
     TrackId: Int64;
     StreamIndex: DWORD;
     HasStreamIndex: Boolean;
+
     procedure Reset();
   end;
 
@@ -185,6 +200,8 @@ type
     Kind: TMfCastTrackKind;
     Source: TMfCastTrackSource;
     StreamIndex: DWORD;
+    // For audio tracks, True means Media Foundation can instantiate the
+    // complete decoder path required by the Cast transcoder.
     Supported: Boolean;
     Selected: Boolean;
     TrackType: string;
@@ -193,6 +210,7 @@ type
     Name: string;
     Language: string;
     SubType: string;
+
     procedure Reset();
   end;
 
@@ -222,6 +240,7 @@ type
     AudioBitrate: Cardinal;
     AudioSampleRate: Cardinal;
     AudioChannels: Cardinal;
+
     procedure Reset();
   end;
 
@@ -236,6 +255,7 @@ type
     MaxFrameRateDenominator: Cardinal;
     MaxVideoBitrate: Cardinal;
     AllowUnknownFormats: Boolean;
+
     procedure Reset();
   end;
 
@@ -248,6 +268,7 @@ type
     AutoPlay: Boolean;
     Tracks: TMfCastTrackInfoArray;
     ActiveTrackIds: TMfCastInt64Array;
+
     procedure Reset();
   end;
 
@@ -259,6 +280,7 @@ type
     Duration100ns: Int64;
     Volume: Single;
     Muted: Boolean;
+
     procedure Reset();
   end;
 
@@ -267,6 +289,7 @@ type
     Stage: string;
     MessageText: string;
     Detail: string;
+
     procedure Reset();
   end;
 
@@ -274,9 +297,12 @@ type
   TMfCastDeviceEvent = procedure(const ADevice: TMfCastDevice) of object;
   TMfCastDeviceRemovedEvent = procedure(const ADeviceId: string) of object;
   TMfCastErrorEvent = procedure(const AError: TMfCastErrorInfo) of object;
+
   TMfCastStateChangedEvent = procedure(const AOldState: TMfCastState;
                                        const ANewState: TMfCastState) of object;
+
   TMfCastMediaStatusEvent = procedure(const AStatus: TMfCastMediaStatus) of object;
+
   TMfCastReceiverReadyEvent = procedure(const ASessionId: string;
                                         const ATransportId: string) of object;
 
@@ -287,6 +313,7 @@ type
     OnDeviceUpdated: TMfCastDeviceEvent;
     OnDeviceRemoved: TMfCastDeviceRemovedEvent;
     OnError: TMfCastErrorEvent;
+
     procedure Reset();
   end;
 
@@ -295,6 +322,7 @@ type
     OnReceiverClosed: TMfCastSimpleEvent;
     OnMediaStatus: TMfCastMediaStatusEvent;
     OnError: TMfCastErrorEvent;
+
     procedure Reset();
   end;
 
@@ -305,6 +333,7 @@ type
     OnStateChanged: TMfCastStateChangedEvent;
     OnMediaStatus: TMfCastMediaStatusEvent;
     OnError: TMfCastErrorEvent;
+
     procedure Reset();
   end;
 
@@ -327,6 +356,7 @@ type
     HeartbeatTimeoutMs: Cardinal;
     VerifyTlsPeer: Boolean;
     TlsServerName: string;
+
     procedure Reset();
   end;
 
@@ -338,6 +368,7 @@ type
     DeviceExpiryMs: Cardinal;
     IncludeIPv4: Boolean;
     IncludeIPv6: Boolean;
+
     procedure Reset();
   end;
 
@@ -355,6 +386,7 @@ type
     ReadTimeoutMs: Cardinal;
     WriteTimeoutMs: Cardinal;
     IdleTimeoutMs: Cardinal;
+
     procedure Reset();
   end;
 
@@ -376,6 +408,7 @@ type
     UseHardwareTransforms: Boolean;
     LowLatency: Boolean;
     EnableLocalPreview: Boolean;
+
     procedure Reset();
   end;
 
@@ -386,7 +419,8 @@ type
     Encoding: TMfCastEncodingSettings;
     PreferredMediaMode: TMfCastMediaMode;
     PreferredSubtitleMode: TMfCastSubtitleMode;
-    class function CreateDefault: TMfCastSettings; static;
+
+    class function CreateDefault(): TMfCastSettings; static;
   end;
 
   TMfCastTranscodeRequest = record
@@ -405,9 +439,40 @@ type
     AudioTrackId: Int64;
     AudioStreamIndex: DWORD;
     HasAudioStreamIndex: Boolean;
+    AudioOnly: Boolean;
     ArtworkSourceName: string;
     ArtworkFrameRate: Cardinal;
     Encoding: TMfCastEncodingSettings;
+
+    procedure Reset();
+  end;
+
+  TMfCastCaptureSettings = record
+    SourceKind: TMfCastCaptureSourceKind;
+    SourceWindow: HWND;
+    OutputIndex: Cardinal;
+    IncludeCursor: Boolean;
+    CaptureSystemAudio: Boolean;
+    CodecPreference: TMfCastVideoCodecPreference;
+    Width: Cardinal;
+    Height: Cardinal;
+    FrameRateNumerator: Cardinal;
+    FrameRateDenominator: Cardinal;
+    VideoBitrate: Cardinal;
+    AudioBitrate: Cardinal;
+
+    procedure Reset();
+  end;
+
+  TMfCastCaptureCapabilities = record
+    HardwareH264EncoderAvailable: Boolean;
+    HardwareHEVCEncoderAvailable: Boolean;
+    ReceiverSupportsH264: Boolean;
+    ReceiverSupportsHEVC: Boolean;
+    SelectedCodec: TMfCastVideoCodec;
+    SelectedVideoSubtype: TGUID;
+    SelectionReason: string;
+
     procedure Reset();
   end;
 
@@ -419,6 +484,7 @@ type
     HasVideoStreamIndex: Boolean;
     AudioStreamIndex: DWORD;
     HasAudioStreamIndex: Boolean;
+
     procedure Reset();
   end;
 
@@ -427,13 +493,17 @@ type
   function MfCastMediaModeToString(const AMode: TMfCastMediaMode): string;
   function MfCastSubtitleModeToString(const AMode: TMfCastSubtitleMode): string;
   function MfCastStreamTypeToString(const AStreamType: TMfCastStreamType): string;
+  function MfCastDeviceIsAudioOnly(const ADevice: TMfCastDevice): Boolean;
+
   function MfCastMakeTrackId(const AKind: TMfCastTrackKind;
                              const ASource: TMfCastTrackSource;
                              const AStreamIndex: DWORD): Int64;
+
   function MfCastDecodeTrackId(const ATrackId: Int64;
                                out AKind: TMfCastTrackKind;
                                out ASource: TMfCastTrackSource;
                                out AStreamIndex: DWORD): Boolean;
+
   function MfCastStablePathIndex(const AFileName: string): DWORD;
 
 implementation
@@ -441,10 +511,8 @@ implementation
 const
   // Standard subtype GUIDs kept local so the public settings types do not
   // require the Media Foundation declaration units.
-  MFCAST_DEFAULT_VIDEO_SUBTYPE_H264: TGUID =
-    '{34363248-0000-0010-8000-00AA00389B71}';
-  MFCAST_DEFAULT_AUDIO_SUBTYPE_AAC: TGUID =
-    '{00001610-0000-0010-8000-00AA00389B71}';
+  MFCAST_DEFAULT_VIDEO_SUBTYPE_H264: TGUID = '{34363248-0000-0010-8000-00AA00389B71}';
+  MFCAST_DEFAULT_AUDIO_SUBTYPE_AAC: TGUID =  '{00001610-0000-0010-8000-00AA00389B71}';
 
 
 procedure TMfCastTxtEntry.Reset();
@@ -698,7 +766,7 @@ begin
 end;
 
 
-class function TMfCastSettings.CreateDefault: TMfCastSettings;
+class function TMfCastSettings.CreateDefault(): TMfCastSettings;
 begin
 
   Result.Protocol.Reset();
@@ -786,9 +854,44 @@ begin
   AudioTrackId := 0;
   AudioStreamIndex := 0;
   HasAudioStreamIndex := False;
+  AudioOnly := False;
   ArtworkSourceName := '';
   ArtworkFrameRate := 25;
   Encoding.Reset();
+end;
+
+
+procedure TMfCastCaptureSettings.Reset();
+begin
+
+  SourceKind := ccskDesktop;
+  SourceWindow := 0;
+  OutputIndex := 0;
+  IncludeCursor := True;
+  CaptureSystemAudio := True;
+  CodecPreference := cvcpAutomatic;
+  Width := 1920;
+  Height := 1080;
+  FrameRateNumerator := 30;
+  FrameRateDenominator := 1;
+  // Desktop capture is a live, latency-sensitive stream. Keep enough network
+  // headroom for receivers on variable Wi-Fi; file transcoding has its own
+  // independent bitrate settings.
+  VideoBitrate := 4000000;
+  AudioBitrate := 192000;
+end;
+
+
+procedure TMfCastCaptureCapabilities.Reset();
+begin
+
+  HardwareH264EncoderAvailable := False;
+  HardwareHEVCEncoderAvailable := False;
+  ReceiverSupportsH264 := True;
+  ReceiverSupportsHEVC := False;
+  SelectedCodec := cvcNone;
+  SelectedVideoSubtype := GUID_NULL;
+  SelectionReason := '';
 end;
 
 
@@ -845,6 +948,7 @@ begin
 
   KindValue := Integer((ATrackId shr 56) and $FF) - 1;
   SourceValue := Integer((ATrackId shr 48) and $FF) - 1;
+
   Result := (KindValue >= Ord(Low(TMfCastTrackKind))) and
             (KindValue <= Ord(High(TMfCastTrackKind))) and
             (SourceValue >= Ord(Low(TMfCastTrackSource))) and
@@ -916,15 +1020,27 @@ function MfCastMediaModeToString(const AMode: TMfCastMediaMode): string;
 begin
 
   case AMode of
-    cmmAutomatic:                Result := 'Automatic';
-    cmmDirectFile:               Result := 'DirectFile';
-    cmmDirectWithTextTrack:      Result := 'DirectWithTextTrack';
-    cmmTranscodeBurnedSubtitles: Result := 'TranscodeBurnedSubtitles';
+    cmmAutomatic:                 Result := 'Automatic';
+    cmmDirectFile:                Result := 'DirectFile';
+    cmmDirectWithTextTrack:       Result := 'DirectWithTextTrack';
+    cmmTranscodeBurnedSubtitles:  Result := 'TranscodeBurnedSubtitles';
     cmmTranscodeAudioWithArtwork: Result := 'TranscodeAudioWithArtwork';
-    cmmRemuxFile:                Result := 'RemuxFile';
+    cmmRemuxFile:                 Result := 'RemuxFile';
+    cmmTranscodeAudioOnly:        Result := 'TranscodeAudioOnly';
   else
     Result := 'Unknown';
   end;
+end;
+
+
+function MfCastDeviceIsAudioOnly(const ADevice: TMfCastDevice): Boolean;
+const
+  MFCAST_CAPABILITY_VIDEO_OUT = Cardinal(1) shl 0;
+begin
+
+  // Zero means unknown because some older/incomplete DNS-SD replies omit ca.
+  Result := (ADevice.RawCapabilities <> 0) and
+            ((ADevice.RawCapabilities and MFCAST_CAPABILITY_VIDEO_OUT) = 0);
 end;
 
 
@@ -947,8 +1063,8 @@ begin
 
   case AStreamType of
     cstBuffered: Result := 'BUFFERED';
-    cstLive: Result := 'LIVE';
-    cstNone: Result := 'NONE';
+    cstLive:     Result := 'LIVE';
+    cstNone:     Result := 'NONE';
   else
     Result := 'BUFFERED';
   end;

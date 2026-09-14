@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: (c) FactoryX. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfMatroskaSubtitleReader.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Minimal read-only Matroska/EBML adapter for embedded textual
 //              subtitle tracks. This unit is used only when the Windows Media
 //              Foundation Matroska source does not expose caption streams.
@@ -28,11 +28,11 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //

@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Brazil. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Brazil. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: TimedTextClass.pas
@@ -10,12 +10,12 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 // -----------------------------------------------------------------------------
@@ -29,11 +29,11 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -440,7 +440,8 @@ var
 
     // Prefer the currently active timed-text file.
     for J := 0 to High(FLanguageTags.TimedTxtPropsArray) do
-      if FLanguageTags.TimedTxtPropsArray[J].bActiveFile then
+      if FLanguageTags.TimedTxtPropsArray[J].bActiveFile and
+         (FLanguageTags.TimedTxtPropsArray[J].sTTxtType <> UNKNOWN) then
         begin
           Result := J;
           Exit;
@@ -448,7 +449,8 @@ var
 
     // Otherwise select a file matching the preferred language.
     for J := 0 to High(FLanguageTags.TimedTxtPropsArray) do
-      if IsMatch(PreferredLanguage + '_[A-Z][A-Z]',
+      if (FLanguageTags.TimedTxtPropsArray[J].sTTxtType <> UNKNOWN) and
+         IsMatch(PreferredLanguage + '_[A-Z][A-Z]',
                  FLanguageTags.TimedTxtPropsArray[J].sFile) then
         begin
           Result := J;
@@ -457,7 +459,12 @@ var
 
     // Fall back to the first available timed-text file.
     if (Length(FLanguageTags.TimedTxtPropsArray) > 0) then
-      Result := 0;
+      for J := 0 to High(FLanguageTags.TimedTxtPropsArray) do
+        if FLanguageTags.TimedTxtPropsArray[J].sTTxtType <> UNKNOWN then
+          begin
+            Result := J;
+            Exit;
+          end;
   end;
 
   function LoadTimedTextExt(const TimedTextExt: string;
@@ -490,16 +497,16 @@ var
 
     AFileFound := True;
 
-    if (AnsiCompareText(TimedTextExt,
-                        EXTSUBRIP) = 0) then
+    // Select the parser from the detected contents, not only from the file
+    // extension. In the wild, SubRip text is frequently stored as .sub,
+    // an extension also used by MicroDVD text and binary VobSub.
+    if FLanguageTags.TimedTxtPropsArray[Index].sTTxtType = SUBRIB then
       Result := ReadSubRipFile(LPCWSTR(FLanguageTags.TimedTxtPropsArray[Index].sFile))
     else
-      if (AnsiCompareText(TimedTextExt,
-                          EXTWEBVTT) = 0) then
+      if FLanguageTags.TimedTxtPropsArray[Index].sTTxtType = WEBVTT then
         Result := ReadWEBVTTFile(LPCWSTR(FLanguageTags.TimedTxtPropsArray[Index].sFile))
       else
-        if (AnsiCompareText(TimedTextExt,
-                            EXTMICRODVD) = 0) then
+        if FLanguageTags.TimedTxtPropsArray[Index].sTTxtType = MICRODVD then
           Result := ReadMicroDvdFile(LPCWSTR(FLanguageTags.TimedTxtPropsArray[Index].sFile))
         else
           begin

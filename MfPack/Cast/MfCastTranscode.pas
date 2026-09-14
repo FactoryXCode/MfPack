@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastTranscode.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.2
 // Description: The adapter point for the existing subtitle burn-in/export
 //              pipeline and local preview.
 //
@@ -22,23 +22,24 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 24/08/2026 All                 Moby release SDK 10.0.28000.2705 (Windows 11)
+// 12/09/2026 All                 Prevent duplicate/re-entrant waits on a
+//                                transcode worker during shutdown.
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -139,6 +140,9 @@ type
     FOwner: TMfCastTranscodePipeline;
     FPump: TMfSubtitleFramePump;
     FLoggedFirstProgress: Boolean;
+    FProgressStartTick: DWORD;
+    FLastProgressLogTick: DWORD;
+    FProgressStartSampleTime: MFTIME;
     function WriteSubtitleTempFile(out AFileName: WideString): HRESULT;
     procedure PumpProgress(Sender: TObject;
                            FramesWritten: Int64;
@@ -175,10 +179,16 @@ begin
   inherited Create(True);
 
   FreeOnTerminate := False;
-  Priority := tpLower;
+  // This worker feeds a live receiver. A background priority lets ordinary UI
+  // and playback work starve H.264 production, which the receiver experiences
+  // as a low-frame-rate picture even while buffered audio remains continuous.
+  Priority := tpNormal;
   FOwner := AOwner;
   FPump := nil;
   FLoggedFirstProgress := False;
+  FProgressStartTick := 0;
+  FLastProgressLogTick := 0;
+  FProgressStartSampleTime := 0;
 end;
 
 
@@ -301,17 +311,48 @@ procedure TMfCastTranscodeWorker.PumpProgress(Sender: TObject;
                                               FramesWritten: Int64;
                                               SampleTime: MFTIME;
                                               var Cancel: Boolean);
+var
+  CurrentTick: DWORD;
+  WallElapsedMs: DWORD;
+  MediaElapsedMs: Int64;
+  ProductionPercent: Double;
 begin
 
   Cancel := Terminated;
   if (not FLoggedFirstProgress) and (FramesWritten > 0) then
     begin
       FLoggedFirstProgress := True;
+      FProgressStartTick := GetTickCount();
+      FLastProgressLogTick := FProgressStartTick;
+      FProgressStartSampleTime := SampleTime;
       if Assigned(FOwner) then
         FOwner.Log(cllDebug,
                    Format('First encoded output produced: frames=%d sampleTime100ns=%d.',
                           [FramesWritten,
                            SampleTime]));
+    end;
+
+  if FLoggedFirstProgress and Assigned(FOwner) then
+    begin
+      CurrentTick := GetTickCount();
+      if (CurrentTick - FLastProgressLogTick >= 5000) then
+        begin
+          FLastProgressLogTick := CurrentTick;
+          WallElapsedMs := CurrentTick - FProgressStartTick;
+          MediaElapsedMs := (SampleTime - FProgressStartSampleTime) div 10000;
+          if WallElapsedMs > 0 then
+            ProductionPercent := (MediaElapsedMs * 100.0) / WallElapsedMs
+          else
+            ProductionPercent := 0.0;
+
+          FOwner.Log(cllDebug,
+                     Format('Video production: frames=%d mediaMs=%d wallMs=%d rate=%.1f%% leadMs=%d.',
+                            [FramesWritten,
+                             MediaElapsedMs,
+                             WallElapsedMs,
+                             ProductionPercent,
+                             MediaElapsedMs - Int64(WallElapsedMs)]));
+        end;
     end;
 end;
 
@@ -336,12 +377,21 @@ procedure TMfCastTranscodeWorker.PumpAudioSample(Sender: TObject;
                                                   const Sample: IMFSample;
                                                   SampleTime: MFTIME;
                                                   SampleDuration: MFTIME);
+var
+  SampleRate: UINT32;
 begin
   if not Assigned(FOwner) or not Assigned(FOwner.FPreviewSink) then
     Exit;
 
-  // ConfigureAudioReader deliberately produces 16-bit stereo PCM at 48 kHz.
-  if SUCCEEDED(FOwner.FPreviewSink.ConfigureAudio(2, 48000, 16)) then
+  SampleRate := 48000;
+  if Sender is TMfSubtitleFramePump then
+    SampleRate := TMfSubtitleFramePump(Sender).AudioOutputSampleRate;
+  if SampleRate = 0 then
+    SampleRate := 48000;
+
+  // The pump explicitly normalizes decoded PCM to stereo while preserving the
+  // source sample rate. Preview and AAC encoding therefore share one contract.
+  if SUCCEEDED(FOwner.FPreviewSink.ConfigureAudio(2, SampleRate, 16)) then
     FOwner.FPreviewSink.PresentAudioSample(Sample,
                                            SampleTime,
                                            SampleDuration);
@@ -433,10 +483,20 @@ begin
         FPump.SelectAudioStream(FOwner.FRequest.AudioStreamIndex);
 
       FPump.UseSoftwareVideoDecoder := True;
+      // File conversion used the Microsoft software H.264 encoder before the
+      // DXGI capture path was introduced. Reusing the desktop-capture hardware
+      // flag here made GPU-driver-specific output affect ordinary MKV casting;
+      // affected Cast decoders rendered only intermittent reference pictures.
+      // Keep hardware encoding in TMfCastDesktopCapture, but preserve the
+      // stable software encoder for the independent file transcode pipeline.
+      FPump.UseHardwareVideoEncoder := False;
       FPump.RealTimePacing := True;
       FPump.OnProgress := PumpProgress;
-      FPump.OnVideoSample := PumpVideoSample;
-      FPump.OnAudioSample := PumpAudioSample;
+      if Assigned(FOwner.FPreviewSink) then
+        begin
+          FPump.OnVideoSample := PumpVideoSample;
+          FPump.OnAudioSample := PumpAudioSample;
+        end;
 
       FPump.SetAudioVolume(InterlockedCompareExchange(FOwner.FAudioVolumePermille,
                                                       0,
@@ -450,7 +510,21 @@ begin
       if (Bitrate = 0) then
         Bitrate := 4000000;
 
-      if FOwner.FRequest.ArtworkSourceName <> '' then
+      if FOwner.FRequest.AudioOnly then
+        begin
+          FOwner.Log(cllInfo,
+                     Format('Starting audio-only Media Foundation conversion: source="%s" start100ns=%d',
+                            [FOwner.FRequest.SourceName,
+                             FOwner.FRequest.StartTime100ns]));
+
+          FOwner.FWorkerResult := FPump.AudioOnlyToFile(
+                                   FOwner.FRequest.SourceName,
+                                   'mfcast.m4a',
+                                   FOwner.FByteStream,
+                                   FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4,
+                                   FOwner.FRequest.StartTime100ns);
+        end
+      else if FOwner.FRequest.ArtworkSourceName <> '' then
         begin
           FOwner.Log(cllInfo,
                      Format('Starting audio artwork conversion: source="%s" artwork="%s" bitrate=%d start100ns=%d',
@@ -781,19 +855,32 @@ end;
 
 
 function TMfCastTranscodePipeline.StopWorkers(): HRESULT;
+var
+  Worker: TMfCastTranscodeWorker;
+
 begin
 
-  if Assigned(FWorker) then
+  // Take exclusive ownership before cancellation closes the live byte stream.
+  // Closing it can make another shutdown path re-enter this method. Leaving
+  // FWorker published until after WaitFor allowed both callers to wait on and
+  // free the same TThread, producing ERROR_INVALID_HANDLE in TThread.WaitFor.
+  Worker := TMfCastTranscodeWorker(FWorker);
+  FWorker := nil;
+
+  if Assigned(Worker) then
     begin
-      TMfCastTranscodeWorker(FWorker).CancelTranscode();
+      Worker.CancelTranscode();
 
       // A worker can be waiting inside the publishing byte stream. Abort the
       // presentation before waiting so that operation returns immediately.
       if Assigned(FPublisher) then
         FPublisher.AbortPresentation(E_ABORT);
 
-      FWorker.WaitFor();
-      FreeAndNil(FWorker);
+      try
+        Worker.WaitFor();
+      finally
+        Worker.Free();
+      end;
     end;
 
   if Assigned(FPublisher) and (FState <> csError) then

@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastHttpServer.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: This unit handles direct files, byte ranges, WebVTT resources,
 //              and later fragmented output.
 //
@@ -28,17 +28,16 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
 // Source: -
-//
 //==============================================================================
 //
 // LICENSE
@@ -225,11 +224,13 @@ type
   private
     FBuffer: IMfCastLiveBuffer;
     FContentType: string;
+    FInitialBufferBytes: UInt64;
 
   public
 
     constructor Create(const ABuffer: IMfCastLiveBuffer;
-                       const AContentType: string);
+                       const AContentType: string;
+                       const AInitialBufferBytes: UInt64);
 
     function GetContentType(): string;
     function GetLength(out ALength: UInt64): HRESULT;
@@ -341,6 +342,7 @@ type
   private
     FServer: IMfCastHttpServer;
     FLogger: IMfCastLogger;
+    FResourceName: string;
     FEntryPath: string;
     FBuffer: IMfCastLiveBuffer;
     FContent: IMfCastHttpContent;
@@ -348,11 +350,13 @@ type
 
   public
 
-    constructor Create(const AServer: IMfCastHttpServer);
+    constructor Create(const AServer: IMfCastHttpServer;
+                       const AResourceName: string = '');
     destructor Destroy(); override;
 
     procedure SetLogger(const ALogger: IMfCastLogger);
     function BeginPresentation(const AContentType: string;
+                               const AInitialBufferBytes: UInt64;
                                out AEntryPath: string): HRESULT;
     function GetByteStream(out AByteStream: IMFByteStream): HRESULT;
     function CompletePresentation: HRESULT;
@@ -470,7 +474,10 @@ end;
 
 procedure TMfCastLiveBuffer.DiscardBeforeLocked(const AOffset: UInt64);
 const
-  PruneGranularity = UInt64(8 * 1024 * 1024);
+  // Chromecast occasionally reopens a live URL without a Range header. Keep
+  // the complete opening section long enough for that retry; pruning at 8 MB
+  // made the retry inescapably fail while a healthy transcode was still live.
+  PruneGranularity = UInt64(16 * 1024 * 1024);
 
 var
   NewBaseOffset: UInt64;
@@ -520,10 +527,10 @@ function TMfCastLiveBuffer.WriteAt(const AOffset: UInt64;
                                    ABuffer: Pointer;
                                    const ASize: Cardinal): HRESULT;
 const
-  // Keep the 32-bit sender well below the point where the growing array must
-  // reserve a 64 MB contiguous block. Twelve MB is still roughly 24 seconds
-  // at the default 4 Mbps video rate plus AAC audio.
-  MaxPendingBytes = UInt64(12 * 1024 * 1024);
+  // Keep enough bounded headroom for the receiver to reconnect and replay the
+  // retained opening bytes. The backing array grows to at most 32 MB here,
+  // which remains practical for the 32-bit sender.
+  MaxPendingBytes = UInt64(24 * 1024 * 1024);
 
 var
   Required: UInt64;
@@ -620,6 +627,7 @@ begin
 
     if WaitForReader then
       Sleep(20);
+
   until not WaitForReader;
 end;
 
@@ -1083,13 +1091,15 @@ end;
 
 
 constructor TMfCastLiveStreamContent.Create(const ABuffer: IMfCastLiveBuffer;
-                                            const AContentType: string);
+                                             const AContentType: string;
+                                             const AInitialBufferBytes: UInt64);
 begin
 
   inherited Create();
 
   FBuffer := ABuffer;
   FContentType := AContentType;
+  FInitialBufferBytes := AInitialBufferBytes;
 end;
 
 
@@ -1147,11 +1157,23 @@ end;
 
 function TMfCastLiveStreamContent.WaitForData(const AOffset: UInt64;
                                               const ATimeoutMs: Cardinal): HRESULT;
+var
+  WaitOffset: UInt64;
 begin
 
   if Assigned(FBuffer) then
-    Result := FBuffer.WaitForData(AOffset,
+    begin
+      WaitOffset := AOffset;
+
+      // File transcodes are deliberately withheld until a small startup reserve
+      // exists. After offset zero has been released, all later waits retain the
+      // normal low-latency growing-stream behaviour.
+      if (AOffset = 0) and (FInitialBufferBytes > 0) then
+        WaitOffset := FInitialBufferBytes - 1;
+
+      Result := FBuffer.WaitForData(WaitOffset,
                                   ATimeoutMs)
+    end
   else
     Result := E_POINTER;
 end;
@@ -1868,6 +1890,13 @@ var
   IsHead: Boolean;
   IsPartial: Boolean;
   RangeHeader: string;
+  StreamStatsTick: Cardinal;
+  StreamStatsOffset: UInt64;
+  StreamStatsNow: Cardinal;
+  StreamStatsElapsedMs: Cardinal;
+  StreamProducedLength: UInt64;
+  StreamLeadBytes: UInt64;
+  StreamDeliveredMbps: Double;
 
 begin
 
@@ -1988,6 +2017,14 @@ begin
       Exit;
     end;
 
+  if Assigned(FLogger) then
+    FLogger.Log(cllDebug,
+                'HttpServer',
+                Format('Resolved resource: path=%s length=%d complete=%s.',
+                       [TargetPath,
+                        TotalLength,
+                        BoolToStr(Content.IsComplete(), True)]));
+
   StartOffset := 0;
 
   if (TotalLength = 0) then
@@ -2048,6 +2085,8 @@ begin
                     'Serving live chunked content: ' + TargetPath + '.');
 
       ChunkOffset := 0;
+      StreamStatsTick := GetTickCount();
+      StreamStatsOffset := 0;
 
       while True do
         begin
@@ -2110,6 +2149,40 @@ begin
 
           Inc(ChunkOffset,
               ChunkRead);
+
+          // The desktop server is a distinct instance and resource. Report
+          // its actual socket delivery rate and the amount of encoded data
+          // waiting behind the HTTP reader every 30 seconds.
+          if SameText(TargetPath, '/mfcast/desktop.mp4') then
+            begin
+              StreamStatsNow := GetTickCount();
+              StreamStatsElapsedMs := StreamStatsNow - StreamStatsTick;
+              if StreamStatsElapsedMs >= 30000 then
+                begin
+                  StreamProducedLength := ChunkOffset;
+                  Content.GetLength(StreamProducedLength);
+                  if StreamProducedLength > ChunkOffset then
+                    StreamLeadBytes := StreamProducedLength - ChunkOffset
+                  else
+                    StreamLeadBytes := 0;
+
+                  StreamDeliveredMbps :=
+                    ((ChunkOffset - StreamStatsOffset) * 8.0) /
+                    (StreamStatsElapsedMs * 1000.0);
+
+                  if Assigned(FLogger) then
+                    FLogger.Log(cllDebug,
+                                'DesktopStream',
+                                Format('HTTP delivery: %.2f Mbps, sent=%d bytes, produced=%d bytes, senderLead=%d KiB.',
+                                       [StreamDeliveredMbps,
+                                        ChunkOffset,
+                                        StreamProducedLength,
+                                        StreamLeadBytes div 1024]));
+
+                  StreamStatsTick := StreamStatsNow;
+                  StreamStatsOffset := ChunkOffset;
+                end;
+            end;
         end;
 
       MfCastSendText(AClient,
@@ -2395,12 +2468,14 @@ begin
 end;
 
 
-constructor TMfCastSegmentPublisher.Create(const AServer: IMfCastHttpServer);
+constructor TMfCastSegmentPublisher.Create(const AServer: IMfCastHttpServer;
+                                            const AResourceName: string);
 begin
 
   inherited Create();
 
   FServer := AServer;
+  FResourceName := Trim(AResourceName);
 end;
 
 
@@ -2430,7 +2505,10 @@ end;
 
 
 function TMfCastSegmentPublisher.BeginPresentation(const AContentType: string;
-                                                   out AEntryPath: string): HRESULT;
+                                                    const AInitialBufferBytes: UInt64;
+                                                    out AEntryPath: string): HRESULT;
+var
+  ResourceName: string;
 begin
 
   AEntryPath := '';
@@ -2455,9 +2533,21 @@ begin
   FBuffer := TMfCastLiveBuffer.Create();
 
   FContent := TMfCastLiveStreamContent.Create(FBuffer,
-                                              AContentType);
+                                              AContentType,
+                                              AInitialBufferBytes);
 
-  Result := FServer.Publish('stream.mp4',
+  if AInitialBufferBytes > 0 then
+    OutputDebugString(PChar(Format('MfCast live startup buffer bytes=%d',
+                                   [AInitialBufferBytes])));
+
+  if FResourceName <> '' then
+    ResourceName := FResourceName
+  else if Pos('audio/aac', LowerCase(AContentType)) = 1 then
+    ResourceName := 'stream.aac'
+  else
+    ResourceName := 'stream.mp4';
+
+  Result := FServer.Publish(ResourceName,
                             FContent,
                             FEntryPath);
   if FAILED(Result) then

@@ -1,8 +1,8 @@
 ﻿// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
-// Project: Media Foundation - MFPack - Samples
+// Project: Media Foundation - MFPack - Cast
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfCastInterfaces.pas
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.0.1
 // Description: Media Foundation-neutral interfaces for discovery, TLS
 //              transport, Cast channel, HTTP serving, media inspection,
 //              capability resolution, planning and the controller.
@@ -29,18 +29,16 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX400
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Source: -
 //==============================================================================
 //
 // LICENSE
@@ -258,6 +256,9 @@ type
     function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
                                    const AInitSegment: TBytes;
                                    out AByteStream: IMFByteStream): HRESULT;
+    function CastDesktop(const ADevice: TMfCastDevice;
+                         const ASettings: TMfCastCaptureSettings;
+                         const AVideoSubtype: TGUID): HRESULT;
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;
