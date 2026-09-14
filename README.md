@@ -19,7 +19,7 @@
   
 # MfPack API's and Samples
   
-- MfPack Cast V2.0 API.
+- MfPack Cast V2.1 API.
 - MfPack FxServe V1.1 API.
 - Media Foundation, WASAPI, XAudio2 and streaming samples.
   
@@ -238,6 +238,18 @@ about using the MfPack Cast API.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCastPlayer.png)
   
+---
+
+**MfCastPlayer Sample II**
+  
+This is the alternative version of MfCastPlayer.  
+  
+**This sample demonstrates the following differences of MfCastPlayer:**  
+  
+The sample uses DXGI desktop duplication to make it possible casting from for example browser or other player content.  
+It avoids installing 3th party apps viewing web content like YouTube.  
+There is some trade off: The quality of origin is downgraded to the monitor resolution it play's on.
+
 ---
   
 **MFFrameCapture sample**
