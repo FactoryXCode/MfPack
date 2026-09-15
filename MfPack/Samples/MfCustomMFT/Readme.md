@@ -55,3 +55,13 @@ Session playback topology. No transform implementation is linked into the
 client.
 
 See [Sample 6/README.md](Sample%206/README.md) for the walkthrough.
+
+## Sample 7 - FFmpeg DTS audio decoder MFT
+
+Implements a reusable synchronous Media Foundation audio decoder backed by a
+minimal dynamically linked FFmpeg runtime. It includes Win32/Win64 COM/MFT
+projects, a stable C bridge, reproducible third-party source provenance, tests,
+and an installer layout.
+
+See [Sample 7/README.md](Sample%207/README.md) for the implementation and
+packaging contract.

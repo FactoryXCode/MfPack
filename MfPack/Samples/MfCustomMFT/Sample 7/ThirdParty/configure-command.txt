@@ -1,0 +1,10 @@
+FFmpeg 9.0.1 was built twice from ffmpeg-9.0.1.tar.xz with w64devkit 2.9.0.
+The architecture-specific --prefix and --arch/--cpu values were:
+
+Win64:
+./configure --prefix=<stage-win64> --target-os=mingw32 --arch=x86_64 --enable-shared --disable-static --disable-programs --disable-doc --disable-network --disable-autodetect --disable-everything --enable-avcodec --enable-avutil --enable-swresample --disable-avformat --disable-avdevice --disable-avfilter --disable-swscale --enable-decoder=dca --enable-parser=dca --disable-x86asm --ln_s=cp
+
+Win32:
+./configure --prefix=<stage-win32> --target-os=mingw32 --arch=x86 --cpu=i686 --enable-shared --disable-static --disable-programs --disable-doc --disable-network --disable-autodetect --disable-everything --enable-avcodec --enable-avutil --enable-swresample --disable-avformat --disable-avdevice --disable-avfilter --disable-swscale --enable-decoder=dca --enable-parser=dca --disable-x86asm --ln_s=cp
+
+Both configure summaries reported: License: LGPL version 2.1 or later.

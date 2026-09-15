@@ -193,7 +193,7 @@ There is no need to get the PWA from any "Store".
   
 - Asynchronous Chromecast discovery.
 - Device selection.
-- Casting a compatible local file through the built-in range-capable HTTP server.
+- Casting a compatible local file through a built-in HTTP server.
 - Casting a directly reachable HTTP/HTTPS media URL.
 - Play, pause, stop, seek, volume, mute, and disconnect.
 - External subtitle files and embedded text-subtitle enumeration. External subtitle  

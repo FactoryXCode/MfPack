@@ -1,0 +1,4 @@
+No changes were made to the FFmpeg 9.0.1 source tree.
+
+MfPackDtsBridge.c is a separate work that dynamically links to the shared
+FFmpeg libraries; it is not patched into FFmpeg.
