@@ -268,6 +268,7 @@ const
 
   SECPKG_ATTR_STREAM_SIZES = 4;
   SCHANNEL_CRED_VERSION = 4;
+  SP_PROT_TLS1_2_CLIENT = $00000800;
   SCH_CRED_MANUAL_CRED_VALIDATION = $00000008;
   SCH_CRED_NO_DEFAULT_CREDS = $00000010;
   SCH_CRED_IGNORE_NO_REVOCATION_CHECK = $00000800;
@@ -461,6 +462,9 @@ begin
            0);
 
   Cred.dwVersion := SCHANNEL_CRED_VERSION;
+  // Some Cast receivers reset the connection when offered TLS 1.3. The Cast
+  // control channel works with TLS 1.2 on those receivers.
+  Cred.grbitEnabledProtocols := SP_PROT_TLS1_2_CLIENT;
   Cred.dwFlags := SCH_CRED_NO_DEFAULT_CREDS or
                   SCH_CRED_IGNORE_NO_REVOCATION_CHECK or
                   SCH_CRED_IGNORE_REVOCATION_OFFLINE;

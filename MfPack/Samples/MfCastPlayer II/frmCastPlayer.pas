@@ -175,6 +175,7 @@ type
 
   private
     FCast: TMfCast;
+    FPreviewSubtitleTimer: TTimer;
     FDevices: TMfCastDeviceArray;
     FWorker: TThread;
     FSubtitleWorker: TMfCastSubtitleWorker;
@@ -196,6 +197,7 @@ type
     procedure CastStateChanged(const AOldState: TMfCastState;
                                const ANewState: TMfCastState);
     procedure CastMediaStatus(const AStatus: TMfCastMediaStatus);
+    procedure PreviewSubtitleTimer(Sender: TObject);
 
     procedure CastError(const AError: TMfCastErrorInfo);
 
@@ -401,11 +403,16 @@ begin
   // Enable the optional conversion stack used by MfPlayer X2 so containers
   // such as Matroska can be converted to fragmented MP4 for Chromecast.
   FCast := TMfCast.Create(True);
+  FPreviewSubtitleTimer := TTimer.Create(Self);
+  FPreviewSubtitleTimer.Enabled := False;
+  FPreviewSubtitleTimer.Interval := 100;
+  FPreviewSubtitleTimer.OnTimer := PreviewSubtitleTimer;
+  FPreviewSubtitleTimer.Enabled := True;
   cbxCaptureCodec.ItemIndex := 0;
   chkCaptureAudio.Checked := True;
   pnlPreview.HandleNeeded();
   LogResult('Attach preview window',
-            FCast.SetPreviewWindow(pnlPreview.Handle));
+             FCast.SetPreviewWindow(pnlPreview.Handle));
 
   FCast.OnDeviceAdded := DeviceChanged;
   FCast.OnDeviceUpdated := DeviceChanged;
@@ -425,6 +432,13 @@ begin
 end;
 
 
+procedure TCastPlayerForm.PreviewSubtitleTimer(Sender: TObject);
+begin
+  if not FClosing and Assigned(FCast) then
+    FCast.UpdatePreviewSubtitles();
+end;
+
+
 procedure TCastPlayerForm.FormDestroy(Sender: TObject);
 var
   message: TMsg;
@@ -432,6 +446,7 @@ var
 begin
 
   FClosing := True;
+  FPreviewSubtitleTimer.Enabled := False;
   UnregisterGlobalHotKeys();
 
   if Assigned(FCast) then

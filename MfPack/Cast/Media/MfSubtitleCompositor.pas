@@ -176,6 +176,10 @@ type
     function TryGetSubtitleTextAtTime(MediaTimeMs: Int64;
                                       out SubtitleText: string;
                                       out Track: TSubTitleTrack): Boolean;
+    function TryGetVobSubFrameAtTime(MediaTimeMs: Int64;
+                                    out Frame: TMfVobSubFrame;
+                                    out CanvasWidth: Integer;
+                                    out CanvasHeight: Integer): Boolean;
 
     function CompositeRgb32(VideoBuffer: Pointer;
                             BufferSize: UINT32;
@@ -772,6 +776,7 @@ var
   NewTimedText: TMfTimedText;
   NewVobSub: TMfVobSubReader;
   EmbeddedTrack: TMfEmbeddedSubtitleTrackInfo;
+  I: Integer;
 
 begin
 
@@ -839,6 +844,15 @@ begin
               FEmbeddedTracks,
               NewTimedText,
               EmbeddedTrack);
+      if hr = S_FALSE then
+        for I := Low(FEmbeddedTracks) to High(FEmbeddedTracks) do
+          if FEmbeddedTracks[I].Supported and
+             (FEmbeddedTracks[I].Format = esfVobSub) then
+            begin
+              // The selected bitmap track is activated after the file opens.
+              hr := S_OK;
+              Break;
+            end;
     end;
 
   if (hr = S_OK) then
@@ -1042,6 +1056,7 @@ var
   Track: TMfEmbeddedSubtitleTrackInfo;
   NewTimedText: TMfTimedText;
   OldTimedText: TMfTimedText;
+  NewVobSub: TMfVobSubReader;
 
 begin
 
@@ -1055,6 +1070,34 @@ begin
   if not Track.Supported then
     begin
       Result := MF_E_INVALIDMEDIATYPE;
+      Exit;
+    end;
+
+  if (Track.Source = essMatroska) and (Track.Format = esfVobSub) then
+    begin
+      NewVobSub := TMfVobSubReader.Create();
+      try
+        Result := NewVobSub.OpenEmbedded(FMediaFileName,
+                                         Track.StreamIndex);
+        if Result <> S_OK then
+          Exit;
+        FLock.Acquire();
+        try
+          ReleaseTimedText();
+          FVobSub := NewVobSub;
+          NewVobSub := nil;
+          ResetEmbeddedWindowState();
+          FPreferredLanguage := Track.Language;
+          FTimedTextFileLoaded := True;
+          FActiveSubtitleIsEmbedded := True;
+          FActiveEmbeddedStreamIndex := Integer(StreamIndex);
+          ResetOverlayCache();
+        finally
+          FLock.Release();
+        end;
+      finally
+        NewVobSub.Free();
+      end;
       Exit;
     end;
 
@@ -1480,6 +1523,29 @@ begin
                                            Track);
     if Result then
       SubtitleText := BuildPlainText(Track);
+  finally
+    FLock.Release();
+  end;
+end;
+
+
+function TMfSubtitleCompositor.TryGetVobSubFrameAtTime(
+  MediaTimeMs: Int64;
+  out Frame: TMfVobSubFrame;
+  out CanvasWidth: Integer;
+  out CanvasHeight: Integer): Boolean;
+begin
+  Frame.Reset();
+  CanvasWidth := 0;
+  CanvasHeight := 0;
+  FLock.Acquire();
+  try
+    Result := Assigned(FVobSub) and FVobSub.TryGetFrame(MediaTimeMs, Frame);
+    if Result then
+      begin
+        CanvasWidth := FVobSub.CanvasWidth;
+        CanvasHeight := FVobSub.CanvasHeight;
+      end;
   finally
     FLock.Release();
   end;

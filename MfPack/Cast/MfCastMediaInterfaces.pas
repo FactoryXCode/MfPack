@@ -118,6 +118,8 @@ type
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
     function UpdateVideo(): HRESULT;
+    function ConfigureSubtitles(const ARequest: TMfCastTranscodeRequest): HRESULT;
+    function UpdateSubtitles(): HRESULT;
   end;
 
   IMfCastTranscodePipeline = interface

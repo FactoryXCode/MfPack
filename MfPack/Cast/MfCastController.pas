@@ -1036,7 +1036,15 @@ begin
           if FAILED(hr) then
             Log(cllWarning,
                 Format('Local direct preview could not be opened (HRESULT $%.8x); receiver playback continues.',
-                       [DWORD(hr)]));
+                       [DWORD(hr)]))
+          else if FUsingTranscodedStream then
+            begin
+              hr := FComponents.DirectPreviewPlayer.ConfigureSubtitles(FActiveTranscodeRequest);
+              if FAILED(hr) then
+                Log(cllWarning,
+                    Format('Local EVR subtitle overlay could not be prepared (HRESULT $%.8x).',
+                           [DWORD(hr)]));
+            end;
         end;
     end;
 

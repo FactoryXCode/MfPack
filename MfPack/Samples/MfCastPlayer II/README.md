@@ -20,8 +20,8 @@ This Delphi XE7-compatible VCL sample demonstrates the public `TMfCast` interfac
 - Real-time DXGI desktop capture with optional WASAPI system-audio loopback;
 - Automatic H.264/HEVC hardware-encoder selection;
 - Play, pause, stop, seek, volume, mute and disconnect;
-- External subtitle files, like srt and embedded text-subtitle enumeration, with sidecars preferred when
-  the same language exists in both sources;
+- Text subtitle sidecars and embedded Matroska text or VobSub bitmap tracks,
+  with sidecars preferred when the same language exists in both sources;
 - Exact embedded-track selection and subtitle switching while casting;
   
 Please read the white paper document  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API  
@@ -34,9 +34,11 @@ Project Manager.
   
 **Brief workflow**  
 The sample enables the optional Media Foundation conversion stack. Compatible  
-MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. Containers such  
-as MKV are converted to fragmented MP4 and published by the local HTTP server.  
-The size of the fragmented mp4's are about 4 mb, for smooth streaming on average slow wifi networks.  
+MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. A compatible  
+H.264/AAC MKV can be remuxed to fragmented MP4 without re-encoding; an MKV with  
+incompatible codecs or selected subtitles that must be burned uses transcoding.  
+Generated fragmented MP4 is published piece by piece by the local HTTP server  
+while conversion continues.  
 The Chromecast device and the PC must be able to reach each other on the local network;  
 Windows Firewall may prompt when the server starts.  
   
@@ -53,11 +55,23 @@ install a YouTube-specific resolver. A browser or other application can still
 be captured as ordinary desktop pixels and system audio.
   
 `Use subtitles` enables the selected item in the subtitle combo. Sidecars are  
-listed before embedded text tracks and win a duplicate-language match. 
+listed before embedded tracks and win a duplicate-language match. Embedded  
+Matroska `S_TEXT/UTF8` cues and `S_VOBSUB` bitmap tracks are selectable by exact  
+track ID. Selected subtitles are composed into the cast video and shown in the  
+EVR preview. Embedded PGS tracks are detected but cannot be decoded.  
+
+For a file test in RAD Studio XE7, start the sample with Run/F9, select the  
+receiver, open the media file, enable subtitles and choose a track, select an  
+audio stream, then call Cast. `test5.mkv` from the Matroska test suite has  
+embedded UTF-8 text subtitles. The separately downloaded  
+`largeres_vobsub.mkv` has embedded VobSub bitmap tracks; its English track is  
+Matroska track 8, with a cue near 40 seconds. That file was verified with video,  
+audio, and English subtitles on both an Android TV and the EVR preview.  
   
-The shared facade also exposes `GetMediaTracks` and `SelectAudioTrack`. 
-Audio selection uses stable track IDs and restarts an active transcode at its current  
-source position. Audio controls are not added.
+The shared facade also exposes `GetMediaTracks` and `SelectAudioTrack`.  
+The audio-stream combo selects a source stream before casting. Audio selection  
+uses stable track IDs and restarts an active transcode at its current source  
+position.  
   
 ## Diagnostics  
   

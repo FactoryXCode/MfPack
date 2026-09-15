@@ -138,6 +138,7 @@ type
 
     function SetPreviewWindow(const AWindow: HWND): HRESULT;
     function UpdatePreviewWindow(): HRESULT;
+    function UpdatePreviewSubtitles(): HRESULT;
     function SetAudioArtwork(const ASourceName: string): HRESULT;
     function SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
 
@@ -445,6 +446,14 @@ begin
     Result := FDirectPreviewPlayer.UpdateVideo()
   else
     Result := E_NOTIMPL;
+end;
+
+function TMfCast.UpdatePreviewSubtitles(): HRESULT;
+begin
+  if Assigned(FDirectPreviewPlayer) then
+    Result := FDirectPreviewPlayer.UpdateSubtitles()
+  else
+    Result := S_FALSE;
 end;
 
 

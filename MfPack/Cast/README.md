@@ -1,4 +1,4 @@
-## MfPack Cast V2
+## MfPack Cast V2.1
   
 Version: 4.0.0
   
@@ -7,13 +7,13 @@ Version: 4.0.0
 - This release is updated for compiler version 17 up to 35.
 - SDK version: 10.0.28000.2705 (Win 11)
 - Requires Windows 10 or later.
-- Minimum supported MfPack version: 3.2.0
+- Minimum supported MfPack version: 4.0.0
   
 ---
   
 ***MfCast.pas*** is the application-facing facade (TMfCast class).  
-The other units contain device discovery, Cast V2 TLS/channel handling, controller logic, media planning, and  
-the local range-capable HTTP server.  
+The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
+a local HTTP server.  
   
 The facade supports compatible local media and direct HTTP/HTTPS media URLs.  
 Construction with TMfCast.Create(True) additionally enables Media Foundation  
@@ -52,9 +52,6 @@ uses receiver **SET_VOLUME** when device volume is adjustable, or media-session
 These routes control only MfCast playback and cannot override a Chromecast/Google TV system mute set by its physical remote.  
 Buffered receiver audio may make a PCM change audible a few seconds after the command.  
   
-Note: Chromecast/ Google Cast V2 does not support volume or mute. So, this way we can  
-alter volume (stream volume and mute) that works for Chromecast/ Google Cast V2.  
-  
 **GetMediaTracks** returns stable Int64 track IDs together with the source stream index, kind,  
 source, language, name, and selection state.  
 For an active transcode, **SelectAudioTrack** restarts at the current source position using the chosen Media Foundation audio stream.  
@@ -68,9 +65,16 @@ burned subtitles continue to use **cmmTranscodeBurnedSubtitles**. Remuxed stream
 retain the generated-stream restart behavior for seeking, while volume remains  
 receiver-controlled because there is no decoded PCM gain stage.  
   
-**TMfCastSubtitleAsset.SourceName** identifies a selected sidecar subtitle file.  
-For embedded text, **TrackId**, **StreamIndex**, and **HasStreamIndex** provide exact  
-selection even when language metadata is absent or duplicated. **SelectSubtitle**  
+**TMfCastSubtitleAsset.SourceName** identifies the selected sidecar file or, for  
+an embedded track, the media file.  
+For embedded Matroska text and VobSub bitmap tracks, **TrackId**, **StreamIndex**,  
+and **HasStreamIndex** provide exact selection even when language metadata is  
+absent or duplicated. Text tracks and selected `.idx`/`.sub` sidecars or embedded  
+`S_VOBSUB` tracks can be burned into transcoded video. The selected subtitles  
+are also drawn in the local EVR preview. Embedded PGS tracks are identified but  
+are not decoded.  
+  
+**SelectSubtitle**  
 and **DisableSubtitles** switch the active transcoded presentation at its current  
 source position.  
   
@@ -99,6 +103,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 13/08/2026  
+Final release date: 15/09/2026  
   
 Copyright © FactoryX. All rights reserved.

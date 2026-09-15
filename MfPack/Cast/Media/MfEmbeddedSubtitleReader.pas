@@ -1859,7 +1859,8 @@ begin
   BestScore := Low(Integer);
 
   for I := Low(Tracks) to High(Tracks) do
-    if Tracks[I].Supported then
+    if Tracks[I].Supported and
+       (Tracks[I].Format in [esfSrt, esfSsaAss, esfGenericText]) then
       begin
         Score := TrackScore(Tracks[I],
                             PreferredLanguage);
@@ -1979,7 +1980,8 @@ begin
       BestScore := Low(Integer);
 
       for I := Low(Tracks) to High(Tracks) do
-        if (not Tried[I]) and Tracks[I].Supported then
+        if (not Tried[I]) and Tracks[I].Supported and
+           (Tracks[I].Format in [esfSrt, esfSsaAss, esfGenericText]) then
           begin
             Score := TrackScore(Tracks[I], PreferredLanguage);
             if (Score > BestScore) then

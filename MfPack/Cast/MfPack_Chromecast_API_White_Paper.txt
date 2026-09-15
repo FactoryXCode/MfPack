@@ -2,8 +2,8 @@ MfPack Chromecast API
 Independent Delphi Chromecast Framework
 Design Notes
 
-Version: 2.0
-Date: 13 August 2026
+Version: 4.0.0 (Cast V2.1)
+Date: 15 September 2026
 
 
 1. What This Is
@@ -91,11 +91,12 @@ The sample shows:
 
 without having to understand a complete media-player application.
 
-3.4 Works with Delphi XE7 and up to and including Delphi 12.
+3.4 Works with supported Delphi compilers 17 through 35.
 -------------------------
 
-The public API and core implementation remain compatible with Delphi XE7, the
-oldest Delphi version supported by MfPack.
+The public API and core implementation remain compatible with Delphi XE7
+(compiler version 28), while the current Cast V2.1 release targets the supported
+MfPack compiler range of 17 through 35.
 
 Newer Delphi language features are used only behind compatibility helpers.
 
@@ -103,6 +104,10 @@ Newer Delphi language features are used only behind compatibility helpers.
 --------------------------
 
 Chromecast networking and media-serving operations must not block the VCL main thread.
+Discovery runs asynchronously, but `Cast`, receiver launch, initial media load,
+and desktop-capture startup can wait on network or encoder setup. VCL clients
+must invoke these blocking calls from a worker thread and marshal callbacks to
+the main thread.
 
 The GUI remains responsive during:
 
@@ -196,6 +201,8 @@ The units are organized like this:
 
     Cast\
         MfCast.pas
+        MfCastCaptureCapabilities.pas
+        MfCastDesktopCapture.pas
         MfCastTypes.pas
         MfCastInterfaces.pas
         MfCastMediaInterfaces.pas
@@ -212,8 +219,11 @@ The units are organized like this:
         Media\
             LangTags.pas
             MfEmbeddedSubtitleReader.pas
+            MfVobSubReader.pas
             MfMatroskaSubtitleReader.pas
             MfPCXConstants.pas
+            MfCastWindowPreview.pas
+            MfCastDirectPreviewPlayer.pas
             MfSubtitleCompositor.pas
             MfSubtitleFramePump.pas
             TimedTextClass.pas
@@ -408,7 +418,8 @@ Optional full media-conversion layer.
 This unit handles:
 
 - Transcoding unsupported codecs
-- Burn-in of unsupported bitmap/complex subtitles where necessary
+- Composition of supported text subtitles, selected VobSub sidecars, and
+  embedded Matroska VobSub bitmap tracks
 - Track selection before output
 - Lifecycle and cleanup of conversion processes/objects
 
@@ -417,9 +428,14 @@ Ordinary Chromecast control does not require transcoding.
 6.14 Cast/Media units
 ---------------------
 
-Subtitle parsing, embedded Matroska text-track reading, timed-text storage,
-subtitle composition, and frame pumping used by media inspection and burned
-subtitle transcoding.
+Subtitle parsing, embedded Matroska text and bitmap-track reading, timed-text
+storage, subtitle composition, and frame pumping used by media inspection and
+burned-subtitle transcoding. `MfVobSubReader` decodes selected `.idx`/`.sub`
+sidecars and embedded `S_VOBSUB` tracks. The Matroska reader preserves binary
+VobSub packets, including zlib-compressed packets, for that decoder. Embedded
+PGS tracks are detected but not decoded. `MfCastDirectPreviewPlayer` serves
+the EVR direct/remux preview and displays selected text or VobSub subtitles;
+`MfCastWindowPreview` receives decoded transcode samples.
 
 6.15 MfCastWindowsSupport.pas
 ------------------------------
@@ -438,6 +454,21 @@ Console applications, services, FireMonkey applications, and
 clients with their own task framework can marshal callbacks and 
 commands differently.
 Platform-neutral choice and track records remain in `MfCastTypes.pas`.
+
+6.16 MfCastCaptureCapabilities.pas
+-----------------------------------
+
+Checks the receiver profile and local hardware encoders. It chooses H.264 or
+HEVC according to `TMfCastVideoCodecPreference` and reports the selected codec
+and reason before a desktop-capture session starts.
+
+6.17 MfCastDesktopCapture.pas
+------------------------------
+
+Captures DXGI desktop frames and optional WASAPI system audio, encodes the
+selected fixed video codec with a local hardware encoder, and publishes live
+fragmented MP4 for the receiver. The sample starts this pipeline from a worker
+thread because startup can wait on device and encoder setup.
 
 
 7. Which Way Dependencies Point
@@ -486,6 +517,8 @@ Typical creation:
     FCast.OnMediaStatus := CastMediaStatus;
     FCast.OnError := CastError;
 
+    FCast.LoggingEnabled := False;  // Optional: suppress diagnostic OnLog output.
+
 Discovery:
 
     Hr := FCast.Discover;
@@ -514,6 +547,29 @@ connect-and-load sequence as a convenience function.
 Seeking:
 
     Hr := FCast.Seek(360.0);
+
+Preview:
+
+    Hr := FCast.SetPreviewWindow(PreviewPanel.Handle);
+    Hr := FCast.UpdatePreviewWindow;  // After the panel changes size.
+
+Direct and remux routes use a separate Media Foundation Media Session with EVR
+for local preview. The preview displays selected text or VobSub subtitles.
+A transcode route previews the decoded samples from its pipeline.
+
+Desktop capture (with conversion enabled):
+
+    Settings.Reset;
+    Settings.CaptureSystemAudio := True;
+    Settings.CodecPreference := cvcpAutomatic;
+    Hr := FCast.GetCaptureCapabilities(Device, Settings.CodecPreference, Capabilities);
+    if Succeeded(Hr) then
+      Hr := FCast.CastDesktop(Device, Settings, Capabilities);
+
+`GetCaptureCapabilities` resolves a receiver-supported local hardware H.264 or
+HEVC encoder before startup. The chosen codec remains fixed for that capture
+session. `CastDesktop` can wait during setup and belongs on a worker thread in
+a VCL client.
 
 Volume:
 
@@ -614,15 +670,19 @@ The caller sees a simple list of subtitle tracks.
 
 A track can look like this:
 
-    TMfCastTrack = record
-      Id: Int64;
-      TrackType: TMfCastTrackType;
-      TrackSource: TMfCastTrackSource;
-      StreamIndex: Cardinal;
+    TMfCastTrackInfo = record
+      TrackId: Int64;
+      Kind: TMfCastTrackKind;
+      Source: TMfCastTrackSource;
+      StreamIndex: DWORD;
+      Supported: Boolean;
+      Selected: Boolean;
+      TrackType: string;
+      ContentId: string;
+      ContentType: string;
       Name: string;
       Language: string;
-      Source: string;
-      ContentType: string;
+      SubType: string;
     end;
 
 A stable ID encodes track kind, source, and source-stream index.
@@ -686,6 +746,10 @@ Example:
 An application only needs to populate its subtitle control from the track list
 and call `SelectSubtitle`.
 
+For a receiver text-track route, selected MKV text cues are exported as WebVTT.
+When the route burns subtitles into video, the same timed cues are rendered in
+the transcode and local EVR preview.
+
 11.3 Complex Subtitle Types
 ---------------------------
 
@@ -700,21 +764,21 @@ Text path:
         v
       WebVTT
 
-Complex/bitmap path:
+Supported VobSub bitmap path:
 
-    PGS
-    VobSub
-    complex ASS rendering
+    .idx + .sub sidecar, or selected embedded MKV S_VOBSUB track
         |
         v
-      Burn-in
+    MfVobSubReader + subtitle compositor
         |
         v
-     Transcode
+    Burned-subtitle transcode and local EVR preview
 
-The application does not need separate logic for these cases.
-Bitmap rendering is explicitly deferred until real MfPack user demand
-justifies the additional decoder and renderer surface.
+Embedded Matroska VobSub packets are read as binary data. The decoder inflates
+zlib-compressed packets before rendering the bitmap. Embedded PGS tracks are
+identified but not decoded.
+Complex ASS rendering is also not implemented as a full styled renderer;
+supported text can use the ordinary cue path.
 
 
 12. Audio Tracks
@@ -860,17 +924,19 @@ Example:
 
     OnLog(Sender, Level, Text);
 
-Suggested levels:
+`TMfCastLogLevel` values are:
 
-    mlDebug
-    mlInfo
-    mlWarning
-    mlError
+    cllTrace
+    cllDebug
+    cllInfo
+    cllWarning
+    cllError
 
 An application may display these in a debug window, log them to a file, or ignore
 them.
 
-Low-level protocol logging is optional.
+Logging is enabled by default. Set `TMfCast.LoggingEnabled` to `False` to
+suppress `OnLog` and standard debugger messages; `OnError` remains independent.
 
 
 19. Cleanup
@@ -954,7 +1020,7 @@ The subsystem is kept verifiable at two levels:
 - `MfCastCompile.dpk` is a non-installed, compile-validation runtime package
   whose `contains` list covers every Cast unit, including `Cast/Media`.
 
-The package requires the matching installed `MfPackX320` package. It is built to
+The package requires the matching installed `MfPackX400` package. It is built to
 find static unit, interface, and dependency errors; applications are not meant
 to install or depend on its BPL. Generated validation artifacts are directed to
 `Cast/build/<Platform>/<Config>`.
@@ -982,6 +1048,8 @@ Behavior to verify includes:
 - Compatible H.264/AAC MKV media uses the remux route without video encoding
 - Incompatible MKV codecs use the transcode route
 - Embedded subtitle tracks are listed correctly
+- Embedded VobSub tracks can be selected and rendered on both receiver and
+  EVR preview
 - External subtitles work
 - Subtitle language switching works
 - Subtitle timing remains correct
@@ -1071,10 +1139,25 @@ The public facade is shaped like this (overloads abbreviated):
       function GetMediaTracks(const ASource: string;
                               out ATracks: TMfCastTrackInfoArray): HRESULT;
 
+      function SetPreviewWindow(const AWindow: HWND): HRESULT;
+      function UpdatePreviewWindow(): HRESULT;
+      function SetAudioArtwork(const ASourceName: string): HRESULT;
+      function SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
+
       function Connect(const ADevice: TMfCastDevice): HRESULT;
       function Load(const ASource: string): HRESULT; overload;
       function Cast(const ADevice: TMfCastDevice;
-                    const ASource: string): HRESULT; overload;
+                     const ASource: string): HRESULT; overload;
+
+      function CastLiveFragmentedMp4(const ADevice: TMfCastDevice;
+                                     const AInitSegment: TBytes;
+                                     out AByteStream: IMFByteStream): HRESULT;
+      function GetCaptureCapabilities(const ADevice: TMfCastDevice;
+                                      const APreference: TMfCastVideoCodecPreference;
+                                      out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+      function CastDesktop(const ADevice: TMfCastDevice;
+                           const ASettings: TMfCastCaptureSettings;
+                           out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
 
       function Play(): HRESULT;
       function Pause(): HRESULT;
@@ -1098,6 +1181,7 @@ The public facade is shaped like this (overloads abbreviated):
       property OnMediaStatus: TMfCastMediaStatusEvent ...;
       property OnError: TMfCastErrorEvent ...;
       property OnLog: TMfCastLogEvent ...;
+      property LoggingEnabled: Boolean ...;
     end;
 
 The full `Load` and `Cast` overloads additionally accept subtitle assets, media

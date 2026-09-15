@@ -95,6 +95,7 @@ type
     Supported: Boolean;
     DefaultDurationNs: UInt64;
     TrackTimestampScale: Double;
+    CodecPrivate: string;
 
     procedure Reset();
   end;
@@ -105,6 +106,7 @@ type
     StartMs: Int64;
     StopMs: Int64;
     Text: string;
+    Packet: TBytes;
   end;
 
   TMfMatroskaSubtitleCueArray = array of TMfMatroskaSubtitleCue;
@@ -159,6 +161,7 @@ const
   EBML_ID_LANGUAGE             = UInt64($22B59C);
   EBML_ID_LANGUAGE_BCP47       = UInt64($22B59D);
   EBML_ID_CODEC_ID             = UInt64($86);
+  EBML_ID_CODEC_PRIVATE        = UInt64($63A2);
 
   // Cluster elements.
   EBML_ID_CLUSTER_TIMESTAMP    = UInt64($E7);
@@ -204,6 +207,7 @@ type
     FFileSize: Int64;
     FSegmentStart: Int64;
     FSegmentEnd: Int64;
+    FTruncatedSegment: Boolean;
     FTimestampScaleNs: UInt64;
     FTracks: TMfMatroskaSubtitleTrackArray;
     FCancelEvent: THandle;
@@ -373,6 +377,7 @@ begin
   Supported := False;
   DefaultDurationNs := 0;
   TrackTimestampScale := 1.0;
+  CodecPrivate := '';
 end;
 
 
@@ -387,6 +392,7 @@ begin
   FFileSize := FStream.Size;
   FSegmentStart := 0;
   FSegmentEnd := FFileSize;
+  FTruncatedSegment := False;
   FTimestampScaleNs := MATROSKA_DEFAULT_TS_SCALE_NS;
   FCancelEvent := CancelEvent;
   SetLength(FTracks, 0);
@@ -522,9 +528,16 @@ begin
 
       if (EndPosition > UInt64(ParentEnd)) or
          (EndPosition > UInt64(FFileSize)) then
-        Exit;
-
-      Header.DataEnd := Int64(EndPosition);
+        begin
+          // Test clips are sometimes cut from a much larger MKV without
+          // rewriting the Segment length. Its available prefix is readable.
+          if Header.ElementId <> EBML_ID_SEGMENT then
+            Exit;
+          FTruncatedSegment := True;
+          Header.DataEnd := FFileSize;
+        end
+      else
+        Header.DataEnd := Int64(EndPosition);
     end;
 
   Result := Header.DataEnd >= Header.DataStart;
@@ -664,6 +677,8 @@ function TMfMatroskaParser.ReadString(const Size: UInt64;
 var
   Data: TBytes;
   DataLength: Integer;
+  CharacterCount: Integer;
+  WrittenCount: Integer;
 
 begin
 
@@ -684,17 +699,39 @@ begin
   SetLength(Data,
             DataLength);
 
-  try
+  if DataLength = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
 
-    if (Length(Data) > 0) then
-      Value := TEncoding.UTF8.GetString(Data)
-    else
+  // Matroska metadata in older files can contain malformed UTF-8. Windows
+  // substitutes invalid sequences when MB_ERR_INVALID_CHARS is not requested,
+  // so parsing does not raise a first-chance EEncodingError in the debugger.
+  CharacterCount := MultiByteToWideChar(CP_UTF8,
+                                        0,
+                                        PAnsiChar(@Data[0]),
+                                        DataLength,
+                                        nil,
+                                        0);
+  if CharacterCount <= 0 then
+    Exit;
+
+  SetLength(Value,
+            CharacterCount);
+  WrittenCount := MultiByteToWideChar(CP_UTF8,
+                                      0,
+                                      PAnsiChar(@Data[0]),
+                                      DataLength,
+                                      PWideChar(Value),
+                                      CharacterCount);
+  if WrittenCount <> CharacterCount then
+    begin
       Value := '';
+      Exit;
+    end;
 
-    Result := True;
-  except
-    Value := '';
-  end;
+  Result := True;
 end;
 
 
@@ -886,7 +923,12 @@ begin
                       else
                         if (Header.ElementId = EBML_ID_CODEC_ID) then
                           ReadString(Header.DataSize,
-                                     Track.CodecId);
+                                     Track.CodecId)
+                        else
+                          if (Header.ElementId = EBML_ID_CODEC_PRIVATE) and
+                             (Header.DataSize <= MATROSKA_MAX_STRING_SIZE) then
+                            ReadString(Header.DataSize,
+                                       Track.CodecPrivate);
 
       if not SkipTo(Header.DataEnd) then
         begin
@@ -905,7 +947,9 @@ begin
   Track.Language := NormalizeLanguageCode(Track.Language);
 
   Track.Format := ClassifyCodecId(Track.CodecId);
-  Track.Supported := Track.Format in [msfSrt, msfSsaAss];
+  Track.Supported := (Track.Format in [msfSrt, msfSsaAss]) or
+                     ((Track.Format = msfVobSub) and
+                      (Track.CodecPrivate <> ''));
   IsSubtitle := (TrackType = MATROSKA_TRACK_TYPE_SUBTITLE);
 end;
 
@@ -1470,16 +1514,30 @@ begin
       if Cancelled() then
         Exit;
 
-      Text := DecodeText(FrameStorage[I]);
       StopMs := 0;
 
       if (PerFrameDurationMs > 0) then
         StopMs := StartMs + PerFrameDurationMs;
 
-      AppendCue(TrackData[TrackIndex].Cues,
-                StartMs,
-                StopMs,
-                Text);
+      if Track.Format = msfVobSub then
+        begin
+          if Length(FrameStorage[I]) > 0 then
+            begin
+              SetLength(TrackData[TrackIndex].Cues,
+                        Length(TrackData[TrackIndex].Cues) + 1);
+              TrackData[TrackIndex].Cues[High(TrackData[TrackIndex].Cues)].StartMs := StartMs;
+              TrackData[TrackIndex].Cues[High(TrackData[TrackIndex].Cues)].StopMs := StopMs;
+              TrackData[TrackIndex].Cues[High(TrackData[TrackIndex].Cues)].Packet := FrameStorage[I];
+            end;
+        end
+      else
+        begin
+          Text := DecodeText(FrameStorage[I]);
+          AppendCue(TrackData[TrackIndex].Cues,
+                    StartMs,
+                    StopMs,
+                    Text);
+        end;
 
       if (PerFrameDurationMs > 0) then
         Inc(StartMs,
@@ -1798,6 +1856,8 @@ begin
       if not ReadElementHeader(FSegmentEnd,
                                Header) then
         begin
+          if FTruncatedSegment then
+            Break;
           Result := E_FAIL;
           Exit;
         end;
@@ -1812,6 +1872,8 @@ begin
                                  ClusterTimestamp,
                                  TrackData) then
             begin
+              if FTruncatedSegment and not Cancelled() then
+                Break;
               if Cancelled() then
                 Result := E_ABORT
               else

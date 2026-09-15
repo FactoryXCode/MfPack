@@ -25,6 +25,7 @@ type
     StopMs: Int64;
     FilePosition: Int64;
     NextFilePosition: Int64;
+    PacketIndex: Integer;
   end;
 
   TMfVobSubCueArray = array of TMfVobSubCue;
@@ -41,6 +42,7 @@ type
     FCachedFrame: TMfVobSubFrame;
     FSubData: TBytes;
     FSubStream: TFileStream;
+    FEmbeddedPackets: array of TBytes;
 
     function FindSubFile(const AIndexFileName: string): string;
     function ReadPacket(const ACue: TMfVobSubCue;
@@ -57,6 +59,8 @@ type
     constructor Create();
     destructor Destroy(); override;
     function Open(const AIndexFileName: string): HRESULT;
+    function OpenEmbedded(const AMediaFileName: WideString;
+                          const ATrackNumber: UInt64): HRESULT;
     function TryGetFrame(const AMediaTimeMs: Int64;
                          out AFrame: TMfVobSubFrame): Boolean;
 
@@ -67,6 +71,45 @@ type
   end;
 
 implementation
+
+uses
+  MfMatroskaSubtitleReader,
+  System.ZLib;
+
+
+function InflateEmbeddedPacket(const AData: TBytes): TBytes;
+var
+  InputStream: TBytesStream;
+  Inflater: TDecompressionStream;
+  OutputStream: TMemoryStream;
+begin
+  Result := AData;
+  if (Length(AData) < 4) or (AData[0] <> $78) or
+     not (AData[1] in [$01, $5E, $9C, $DA]) then
+    Exit;
+  InputStream := TBytesStream.Create(AData);
+  OutputStream := TMemoryStream.Create();
+  Inflater := nil;
+  try
+    try
+      Inflater := TDecompressionStream.Create(InputStream);
+      OutputStream.CopyFrom(Inflater, 0);
+      if (OutputStream.Size >= 4) and
+         (OutputStream.Size <= 1024 * 1024) then
+        begin
+          SetLength(Result, Integer(OutputStream.Size));
+          OutputStream.Position := 0;
+          OutputStream.ReadBuffer(Result[0], Length(Result));
+        end;
+    except
+      Result := AData;
+    end;
+  finally
+    Inflater.Free();
+    OutputStream.Free();
+    InputStream.Free();
+  end;
+end;
 
 function ReadBe16(const AData: TBytes; const AOffset: Integer): Integer;
 begin
@@ -114,6 +157,7 @@ begin
   for I := 0 to 15 do
     FPalette[I] := 0;
   SetLength(FCues, 0);
+  SetLength(FEmbeddedPackets, 0);
   SetLength(FSubData, 0);
   FSubStream := nil;
   FCachedFrame.Reset();
@@ -221,6 +265,7 @@ begin
   FSubFileName := '';
   FLanguage := '';
   SetLength(FCues, 0);
+  SetLength(FEmbeddedPackets, 0);
   SetLength(FSubData, 0);
   FreeAndNil(FSubStream);
   FCachedFrame.Reset();
@@ -288,6 +333,7 @@ begin
             Cue.FilePosition := StrToInt64Def('$' +
               Trim(Copy(Value, P + Length('filepos:'), MaxInt)), -1);
             Cue.NextFilePosition := -1;
+            Cue.PacketIndex := -1;
             if Cue.FilePosition < 0 then
               Continue;
             NewIndex := Length(FCues);
@@ -341,6 +387,90 @@ begin
 end;
 
 
+function TMfVobSubReader.OpenEmbedded(const AMediaFileName: WideString;
+                                      const ATrackNumber: UInt64): HRESULT;
+var
+  Track: TMfMatroskaSubtitleTrack;
+  MatroskaCues: TMfMatroskaSubtitleCueArray;
+  Lines: TStringList;
+  Line: string;
+  Value: string;
+  PaletteParts: TArray<string>;
+  I: Integer;
+  P: Integer;
+  Count: Integer;
+begin
+  FIndexFileName := '';
+  FSubFileName := '';
+  FLanguage := '';
+  SetLength(FCues, 0);
+  SetLength(FEmbeddedPackets, 0);
+  SetLength(FSubData, 0);
+  FreeAndNil(FSubStream);
+  FCachedFrame.Reset();
+
+  Result := TMfMatroskaSubtitleReader.ReadTrack(AMediaFileName,
+                                                 ATrackNumber,
+                                                 Track,
+                                                 MatroskaCues);
+  if Result <> S_OK then
+    Exit;
+  if (Track.Format <> msfVobSub) or (Track.CodecPrivate = '') then
+    Exit(E_INVALIDARG);
+
+  FLanguage := Track.Language;
+  Lines := TStringList.Create();
+  try
+    Lines.Text := Track.CodecPrivate;
+    for I := 0 to Lines.Count - 1 do
+      begin
+        Line := Trim(Lines[I]);
+        if StartsText('size:', Line) then
+          begin
+            Value := Trim(Copy(Line, 6, MaxInt));
+            P := Pos('x', LowerCase(Value));
+            if P > 0 then
+              begin
+                FCanvasWidth := StrToIntDef(Trim(Copy(Value, 1, P - 1)), 720);
+                FCanvasHeight := StrToIntDef(Trim(Copy(Value, P + 1, MaxInt)), 576);
+              end;
+          end
+        else if StartsText('palette:', Line) then
+          begin
+            PaletteParts := Trim(Copy(Line, 9, MaxInt)).Split([',']);
+            for P := 0 to 15 do
+              if P < Length(PaletteParts) then
+                FPalette[P] := Cardinal(StrToIntDef('$' + Trim(PaletteParts[P]), 0));
+          end;
+      end;
+  finally
+    Lines.Free();
+  end;
+
+  Count := 0;
+  SetLength(FCues, Length(MatroskaCues));
+  SetLength(FEmbeddedPackets, Length(MatroskaCues));
+  for I := Low(MatroskaCues) to High(MatroskaCues) do
+    if Length(MatroskaCues[I].Packet) >= 4 then
+      begin
+        FCues[Count].StartMs := MatroskaCues[I].StartMs;
+        FCues[Count].StopMs := MatroskaCues[I].StopMs;
+        FCues[Count].FilePosition := -1;
+        FCues[Count].NextFilePosition := -1;
+        FCues[Count].PacketIndex := Count;
+        FEmbeddedPackets[Count] := InflateEmbeddedPacket(MatroskaCues[I].Packet);
+        Inc(Count);
+      end;
+  SetLength(FCues, Count);
+  SetLength(FEmbeddedPackets, Count);
+  if Count = 0 then
+    Exit(S_FALSE);
+
+  FIndexFileName := string(AMediaFileName);
+  Result := S_OK;
+end;
+
+
 function TMfVobSubReader.ReadPacket(const ACue: TMfVobSubCue;
                                     out APacket: TBytes): HRESULT;
 var
@@ -354,6 +484,16 @@ var
   PacketSize: Integer;
 begin
   SetLength(APacket, 0);
+  if (ACue.PacketIndex >= 0) and
+     (ACue.PacketIndex < Length(FEmbeddedPackets)) then
+    begin
+      APacket := FEmbeddedPackets[ACue.PacketIndex];
+      if Length(APacket) >= 4 then
+        Result := S_OK
+      else
+        Result := E_FAIL;
+      Exit;
+    end;
   if Length(FSubData) > 0 then
     SubSize := Length(FSubData)
   else if Assigned(FSubStream) then

@@ -29,8 +29,8 @@ never claim support and then silently select a different audio stream.
   
 ## Registration and packaging
   
-The installer registers both COM servers and both MFT registry views. A future  
-application-local deployment can use `MFTRegisterLocal` with the same class  
+The installer registers both COM servers and both MFT registry views.  
+In sample 8 application-local deployment can use `MFTRegisterLocal` with the same class  
 factory without changing the decoder.  
   
 The FFmpeg build uses shared libraries without GPL or non-free components.  

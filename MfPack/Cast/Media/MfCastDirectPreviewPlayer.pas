@@ -72,6 +72,8 @@ uses
   WinApi.WinApiTypes,
   {System}
   System.SysUtils,
+  System.Types,
+  Vcl.Graphics,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropVarUtil,
@@ -83,8 +85,37 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.Evr,
+  WinApi.MediaFoundationApi.Evr9,
   {Cast}
-  MfCastMediaInterfaces;
+  MfCastMediaInterfaces,
+  MfCastTypes,
+  MfSubtitleCompositor,
+  MfVobSubReader,
+  TimedTextClass;
+
+type
+  TMfCastVideoAlphaBitmapParams = record
+    dwFlags: DWORD;
+    clrSrcKey: COLORREF;
+    rcSrc: TRect;
+    nrcDest: TRectF;
+    fAlpha: Single;
+    dwFilterMode: DWORD;
+  end;
+
+  TMfCastVideoAlphaBitmap = record
+    GetBitmapFromDC: BOOL;
+    Source: Pointer;
+    params: TMfCastVideoAlphaBitmapParams;
+  end;
+
+  IMfCastVideoMixerBitmap = interface(IUnknown)
+    ['{814C7B20-0FDB-4eec-AF8F-F957C8F69EDC}']
+    function SetAlphaBitmap(var ABitmap: TMfCastVideoAlphaBitmap): HRESULT; stdcall;
+    function ClearAlphaBitmap(): HRESULT; stdcall;
+    function UpdateAlphaBitmapParameters(var AParams: TMfCastVideoAlphaBitmapParams): HRESULT; stdcall;
+    function GetAlphaBitmapParameters(out AParams: TMfCastVideoAlphaBitmapParams): HRESULT; stdcall;
+  end;
 
 type
   TMfCastDirectPreviewPlayer = class;
@@ -110,6 +141,11 @@ type
     FSource: IMFMediaSource;
     FVideoDisplay: IMFVideoDisplayControl;
     FAudioVolume: IMFSimpleAudioVolume;
+    FVideoMixerBitmap: IMfCastVideoMixerBitmap;
+    FSubtitleCompositor: TMfSubtitleCompositor;
+    FSubtitleBitmap: TBitmap;
+    FSubtitleBitmapText: string;
+    FSubtitleBitmapVisible: Boolean;
     FCallback: IMFAsyncCallback;
     FCallbackObject: TMfCastDirectPreviewCallback;
     FVideoWindow: HWND;
@@ -127,6 +163,11 @@ type
                                      const AHasAudioStreamIndex: Boolean): HRESULT;
     procedure AcquireRendererServices();
     procedure ApplyAudioSettings();
+    procedure ClearSubtitleBitmap();
+    function RenderSubtitleBitmap(const AText: string): HRESULT;
+    function RenderVobSubBitmap(const AFrame: TMfVobSubFrame;
+                                const ACanvasWidth: Integer;
+                                const ACanvasHeight: Integer): HRESULT;
 
   public
 
@@ -150,6 +191,8 @@ type
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
     function UpdateVideo(): HRESULT;
+    function ConfigureSubtitles(const ARequest: TMfCastTranscodeRequest): HRESULT;
+    function UpdateSubtitles(): HRESULT;
   end;
 
 
@@ -202,6 +245,8 @@ begin
   FMuted := False;
   FClosing := False;
   FTopologyReady := False;
+  FSubtitleCompositor := TMfSubtitleCompositor.Create();
+  FSubtitleBitmap := TBitmap.Create();
 end;
 
 
@@ -209,6 +254,8 @@ destructor TMfCastDirectPreviewPlayer.Destroy();
 begin
 
   Stop();
+  FSubtitleBitmap.Free();
+  FSubtitleCompositor.Free();
 
   inherited Destroy();
 end;
@@ -479,12 +526,19 @@ procedure TMfCastDirectPreviewPlayer.AcquireRendererServices();
 begin
 
   FVideoDisplay := nil;
+  FVideoMixerBitmap := nil;
 
   if Assigned(FSession) then
     MFGetService(FSession,
                  MR_VIDEO_RENDER_SERVICE,
                  IID_IMFVideoDisplayControl,
-                 Pointer(FVideoDisplay));
+                  Pointer(FVideoDisplay));
+
+  if Assigned(FSession) then
+    MFGetService(FSession,
+                 MR_VIDEO_MIXER_SERVICE,
+                 IMfCastVideoMixerBitmap,
+                 Pointer(FVideoMixerBitmap));
 
   FAudioVolume := nil;
 
@@ -574,6 +628,9 @@ begin
     FCallbackObject.Detach();
 
   FVideoDisplay := nil;
+  ClearSubtitleBitmap();
+  FVideoMixerBitmap := nil;
+  FSubtitleCompositor.Close();
   FAudioVolume := nil;
 
   if Assigned(FSession) then
@@ -636,6 +693,289 @@ begin
     Result := FAudioVolume.SetMute(FMuted)
   else
     Result := S_FALSE;
+end;
+
+
+function TMfCastDirectPreviewPlayer.ConfigureSubtitles(
+  const ARequest: TMfCastTranscodeRequest): HRESULT;
+var
+  SourceName: WideString;
+begin
+  ClearSubtitleBitmap();
+  FSubtitleCompositor.Close();
+  Result := S_OK;
+
+  if ARequest.SubtitleMode <> csmBurnIntoVideo then
+    Exit;
+
+  SourceName := ARequest.SubtitleSourceName;
+  if SourceName = '' then
+    SourceName := ARequest.SourceName;
+  if SourceName = '' then
+    Exit(E_INVALIDARG);
+
+  Result := FSubtitleCompositor.OpenTimedTextFile(SourceName,
+                                                   ARequest.SubtitleLanguage);
+  if SUCCEEDED(Result) and ARequest.HasSubtitleStreamIndex then
+    Result := FSubtitleCompositor.SelectEmbeddedSubtitleTrack(
+                ARequest.SubtitleStreamIndex);
+  if FAILED(Result) then
+    FSubtitleCompositor.Close();
+end;
+
+
+procedure TMfCastDirectPreviewPlayer.ClearSubtitleBitmap();
+begin
+  if FSubtitleBitmapVisible and Assigned(FVideoMixerBitmap) then
+    FVideoMixerBitmap.ClearAlphaBitmap();
+  FSubtitleBitmapVisible := False;
+  FSubtitleBitmapText := '';
+end;
+
+
+function TMfCastDirectPreviewPlayer.RenderSubtitleBitmap(
+  const AText: string): HRESULT;
+const
+  TRANSPARENT_COLOR = TColor($010101);
+var
+  ClientRect: TRect;
+  TextRect: TRect;
+  DrawRect: TRect;
+  BitmapParams: TMfCastVideoAlphaBitmap;
+  FontSize: Integer;
+  TextHeight: Integer;
+  MarginX: Integer;
+  MarginBottom: Integer;
+  Dx: Integer;
+  Dy: Integer;
+  WideText: WideString;
+  TextFlags: UINT;
+begin
+  if not Assigned(FVideoMixerBitmap) or (FVideoWindow = 0) then
+    Exit(S_FALSE);
+  if not GetClientRect(FVideoWindow, ClientRect) then
+    Exit(HRESULT_FROM_WIN32(GetLastError()));
+  if (ClientRect.Right <= 0) or (ClientRect.Bottom <= 0) then
+    Exit(E_INVALIDARG);
+
+  FSubtitleBitmap.PixelFormat := pf24bit;
+  FSubtitleBitmap.SetSize(ClientRect.Right, ClientRect.Bottom);
+  FSubtitleBitmap.Canvas.Brush.Style := bsSolid;
+  FSubtitleBitmap.Canvas.Brush.Color := TRANSPARENT_COLOR;
+  FSubtitleBitmap.Canvas.FillRect(ClientRect);
+
+  FontSize := ClientRect.Bottom div 18;
+  if FontSize < 16 then FontSize := 16;
+  if FontSize > 34 then FontSize := 34;
+  FSubtitleBitmap.Canvas.Font.Name := 'Segoe UI';
+  FSubtitleBitmap.Canvas.Font.Size := FontSize;
+  FSubtitleBitmap.Canvas.Font.Style := [fsBold];
+  FSubtitleBitmap.Canvas.Font.Quality := fqAntialiased;
+  FSubtitleBitmap.Canvas.Brush.Style := bsClear;
+  SetBkMode(FSubtitleBitmap.Canvas.Handle, TRANSPARENT);
+
+  MarginX := ClientRect.Right div 10;
+  if MarginX < 24 then MarginX := 24;
+  MarginBottom := ClientRect.Bottom div 20;
+  TextRect := Rect(MarginX, 0, ClientRect.Right - MarginX,
+                   ClientRect.Bottom);
+  if TextRect.Left >= TextRect.Right then TextRect := ClientRect;
+  DrawRect := TextRect;
+  WideText := WideString(AText);
+  TextFlags := DT_CENTER or DT_WORDBREAK or DT_NOPREFIX;
+  DrawTextW(FSubtitleBitmap.Canvas.Handle, PWideChar(WideText),
+            Length(WideText), DrawRect, TextFlags or DT_CALCRECT);
+  TextHeight := DrawRect.Bottom - DrawRect.Top;
+  DrawRect.Left := TextRect.Left;
+  DrawRect.Right := TextRect.Right;
+  DrawRect.Bottom := ClientRect.Bottom - MarginBottom;
+  DrawRect.Top := DrawRect.Bottom - TextHeight;
+  if DrawRect.Top < 0 then DrawRect.Top := 0;
+
+  FSubtitleBitmap.Canvas.Font.Color := clBlack;
+  for Dx := -2 to 2 do
+    for Dy := -2 to 2 do
+      if (Dx <> 0) or (Dy <> 0) then
+        begin
+          TextRect := DrawRect;
+          OffsetRect(TextRect, Dx, Dy);
+          DrawTextW(FSubtitleBitmap.Canvas.Handle, PWideChar(WideText),
+                    Length(WideText), TextRect, TextFlags);
+        end;
+  FSubtitleBitmap.Canvas.Font.Color := clWhite;
+  DrawTextW(FSubtitleBitmap.Canvas.Handle, PWideChar(WideText),
+            Length(WideText), DrawRect, TextFlags);
+
+  ZeroMemory(@BitmapParams, SizeOf(BitmapParams));
+  BitmapParams.GetBitmapFromDC := True;
+  BitmapParams.Source := Pointer(FSubtitleBitmap.Canvas.Handle);
+  BitmapParams.params.dwFlags := MFVideoAlphaBitmap_SrcColorKey or
+                                 MFVideoAlphaBitmap_SrcRect or
+                                 MFVideoAlphaBitmap_DestRect or
+                                 MFVideoAlphaBitmap_Alpha;
+  BitmapParams.params.clrSrcKey := ColorToRGB(TRANSPARENT_COLOR);
+  BitmapParams.params.rcSrc := ClientRect;
+  BitmapParams.params.nrcDest := RectF(0, 0, 1, 1);
+  BitmapParams.params.fAlpha := 1.0;
+  Result := FVideoMixerBitmap.SetAlphaBitmap(BitmapParams);
+  if SUCCEEDED(Result) then
+    begin
+      FSubtitleBitmapText := AText;
+      FSubtitleBitmapVisible := True;
+    end;
+end;
+
+
+function TMfCastDirectPreviewPlayer.RenderVobSubBitmap(
+  const AFrame: TMfVobSubFrame;
+  const ACanvasWidth: Integer;
+  const ACanvasHeight: Integer): HRESULT;
+const
+  TRANSPARENT_COLOR = TColor($010101);
+var
+  ClientRect: TRect;
+  BitmapParams: TMfCastVideoAlphaBitmap;
+  TargetLeft: Integer;
+  TargetTop: Integer;
+  TargetWidth: Integer;
+  TargetHeight: Integer;
+  X: Integer;
+  Y: Integer;
+  SourceX: Integer;
+  SourceY: Integer;
+  SourceOffset: Integer;
+  Alpha: Integer;
+  Row: PByte;
+  Pixel: PByte;
+begin
+  if not Assigned(FVideoMixerBitmap) or (FVideoWindow = 0) then
+    Exit(S_FALSE);
+  if not GetClientRect(FVideoWindow, ClientRect) then
+    Exit(HRESULT_FROM_WIN32(GetLastError()));
+  if (ClientRect.Right <= 0) or (ClientRect.Bottom <= 0) or
+     (ACanvasWidth <= 0) or (ACanvasHeight <= 0) or
+     (AFrame.Width <= 0) or (AFrame.Height <= 0) or
+     (Length(AFrame.Pixels) < AFrame.Width * AFrame.Height * 4) then
+    Exit(E_INVALIDARG);
+
+  FSubtitleBitmap.PixelFormat := pf24bit;
+  FSubtitleBitmap.SetSize(ClientRect.Right, ClientRect.Bottom);
+  FSubtitleBitmap.Canvas.Brush.Color := TRANSPARENT_COLOR;
+  FSubtitleBitmap.Canvas.FillRect(ClientRect);
+
+  TargetLeft := Integer((Int64(AFrame.Left) * ClientRect.Right) div ACanvasWidth);
+  TargetTop := Integer((Int64(AFrame.Top) * ClientRect.Bottom) div ACanvasHeight);
+  TargetWidth := Integer((Int64(AFrame.Width) * ClientRect.Right + ACanvasWidth div 2) div ACanvasWidth);
+  TargetHeight := Integer((Int64(AFrame.Height) * ClientRect.Bottom + ACanvasHeight div 2) div ACanvasHeight);
+  if TargetWidth < 1 then TargetWidth := 1;
+  if TargetHeight < 1 then TargetHeight := 1;
+  if TargetLeft < 0 then TargetLeft := 0;
+  if TargetTop < 0 then TargetTop := 0;
+  if TargetLeft + TargetWidth > ClientRect.Right then
+    TargetWidth := ClientRect.Right - TargetLeft;
+  if TargetTop + TargetHeight > ClientRect.Bottom then
+    TargetHeight := ClientRect.Bottom - TargetTop;
+  if (TargetWidth <= 0) or (TargetHeight <= 0) then
+    Exit(S_FALSE);
+
+  for Y := 0 to TargetHeight - 1 do
+    begin
+      SourceY := Integer((Int64(Y) * AFrame.Height) div TargetHeight);
+      Row := FSubtitleBitmap.ScanLine[TargetTop + Y];
+      for X := 0 to TargetWidth - 1 do
+        begin
+          SourceX := Integer((Int64(X) * AFrame.Width) div TargetWidth);
+          SourceOffset := (SourceY * AFrame.Width + SourceX) * 4;
+          Alpha := AFrame.Pixels[SourceOffset + 3];
+          if Alpha = 0 then
+            Continue;
+          Pixel := PByte(NativeInt(Row) + NativeInt(TargetLeft + X) * 3);
+          Pixel^ := Byte(Integer(AFrame.Pixels[SourceOffset]) +
+                         ((255 - Alpha + 127) div 255));
+          PByte(NativeInt(Pixel) + 1)^ := Byte(Integer(AFrame.Pixels[SourceOffset + 1]) +
+                                              ((255 - Alpha + 127) div 255));
+          PByte(NativeInt(Pixel) + 2)^ := Byte(Integer(AFrame.Pixels[SourceOffset + 2]) +
+                                              ((255 - Alpha + 127) div 255));
+        end;
+    end;
+
+  ZeroMemory(@BitmapParams, SizeOf(BitmapParams));
+  BitmapParams.GetBitmapFromDC := True;
+  BitmapParams.Source := Pointer(FSubtitleBitmap.Canvas.Handle);
+  BitmapParams.params.dwFlags := MFVideoAlphaBitmap_SrcColorKey or
+                                 MFVideoAlphaBitmap_SrcRect or
+                                 MFVideoAlphaBitmap_DestRect or
+                                 MFVideoAlphaBitmap_Alpha;
+  BitmapParams.params.clrSrcKey := ColorToRGB(TRANSPARENT_COLOR);
+  BitmapParams.params.rcSrc := ClientRect;
+  BitmapParams.params.nrcDest := RectF(0, 0, 1, 1);
+  BitmapParams.params.fAlpha := 1.0;
+  Result := FVideoMixerBitmap.SetAlphaBitmap(BitmapParams);
+  if SUCCEEDED(Result) then
+    begin
+      FSubtitleBitmapText := '#VOBSUB:' + IntToStr(AFrame.CueIndex);
+      FSubtitleBitmapVisible := True;
+    end;
+end;
+
+
+function TMfCastDirectPreviewPlayer.UpdateSubtitles(): HRESULT;
+var
+  Clock: IMFClock;
+  PresentationClock: IMFPresentationClock;
+  MediaTime: MFTIME;
+  TextValue: string;
+  Track: TSubTitleTrack;
+  VobFrame: TMfVobSubFrame;
+  VobCanvasWidth: Integer;
+  VobCanvasHeight: Integer;
+begin
+  Result := S_FALSE;
+  if FClosing or not Assigned(FSession) or
+     not Assigned(FVideoMixerBitmap) then
+    Exit;
+  if not FSubtitleCompositor.HasSubtitleSources() then
+    begin
+      ClearSubtitleBitmap();
+      Exit;
+    end;
+  Result := FSession.GetClock(Clock);
+  if FAILED(Result) then Exit;
+  Result := Clock.QueryInterface(IID_IMFPresentationClock,
+                                 PresentationClock);
+  if FAILED(Result) then Exit;
+  Result := PresentationClock.GetTime(MediaTime);
+  if FAILED(Result) then Exit;
+
+  if FSubtitleCompositor.TryGetVobSubFrameAtTime(MediaTime div 10000,
+                                                 VobFrame,
+                                                 VobCanvasWidth,
+                                                 VobCanvasHeight) then
+    begin
+      TextValue := '#VOBSUB:' + IntToStr(VobFrame.CueIndex);
+      if FSubtitleBitmapVisible and SameStr(FSubtitleBitmapText, TextValue) then
+        Exit(S_OK);
+      Result := RenderVobSubBitmap(VobFrame,
+                                   VobCanvasWidth,
+                                   VobCanvasHeight);
+      Exit;
+    end;
+
+  if not FSubtitleCompositor.TryGetSubtitleTextAtTime(MediaTime div 10000,
+                                                      TextValue, Track) then
+    begin
+      ClearSubtitleBitmap();
+      Exit(S_OK);
+    end;
+  TextValue := Trim(TextValue);
+  if TextValue = '' then
+    begin
+      ClearSubtitleBitmap();
+      Exit(S_OK);
+    end;
+  if FSubtitleBitmapVisible and SameStr(FSubtitleBitmapText, TextValue) then
+    Exit(S_OK);
+  Result := RenderSubtitleBitmap(TextValue);
 end;
 
 
