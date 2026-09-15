@@ -94,6 +94,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 14/09/2026  
+Final release date: 15/09/2026  
   
 Copyright © FactoryX. All rights reserved.
