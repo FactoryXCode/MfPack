@@ -4,18 +4,18 @@ Version: 4.0.0
   
 **NOTES:**
   
-- This release is updated for compiler version 17 up to 35.
+- This release is updated for compiler version 17 up to 34.
 - SDK version: 10.0.28000.2705 (Win 11)
 - Requires Windows 10 or later.
 - Minimum supported MfPack version: 4.0.0
   
 ---
   
-***MfCast.pas*** is the application-facing facade (TMfCast class).  
+***MfCast.pas*** is the API main interface (TMfCast class).  
 The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
 a local HTTP server.  
   
-The facade supports compatible local media and direct HTTP/HTTPS media URLs.  
+The main interface supports compatible local media and direct HTTP/HTTPS media URLs.  
 Construction with TMfCast.Create(True) additionally enables Media Foundation  
 lifetime management, the segment publisher, and the transcode/subtitle-  
 compositor pipeline. Construction with False keeps conversion disabled for  
@@ -24,11 +24,11 @@ direct-control applications.
 Callbacks originate on the subsystem's worker threads. A VCL application must  
 marshal UI changes to the main thread. MfSimpleCastPlayer uses PostMessage  
 for this purpose. Connect, receiver launch, and initial media load can wait on  
-network timeouts, so the sample invokes the facade's Cast method from a worker  
+network timeouts, so the sample invokes the main interface Cast method from a worker  
 thread.  
 
 Diagnostic logging is enabled by default. Set `TMfCast.LoggingEnabled` to
-`False` to suppress the `OnLog` callback and the facade's standard debugger
+`False` to suppress the `OnLog` callback and the main interface standard debugger
 messages. Logging can be enabled or disabled while Cast workers are active;
 `OnError` remains independent and is not suppressed.
   
