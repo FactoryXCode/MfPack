@@ -13,8 +13,8 @@ package RDJControls;
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS ON}
-{$RANGECHECKS ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
 {$STACKFRAMES ON}
@@ -30,7 +30,8 @@ package RDJControls;
 requires
   rtl,
   vcl,
-  vclimg;
+  vclimg,
+  MfPackX400;
 
 contains
   MfTrackBar in 'MfTrackBar.pas',
@@ -38,7 +39,7 @@ contains
   MPxpButtons in 'MPxpButtons.pas',
   MfJogShuttle in 'MfJogShuttle.pas',
   MfBeatLed in 'MfBeatLed.pas',
-  MfLevelProgressBar in 'MfLevelProgressBar.pas';
+  MfLevelProgressBar in 'MfLevelProgressBar.pas',
+  RdjAudioMixVisualizer in 'RdjAudioMixVisualizer.pas';
 
 end.
-
