@@ -1,17 +1,17 @@
 ## MfPack Cast V2.1
   
-Version: 4.0.0
+Version: 4.0.1
   
 **NOTES:**
   
-- This release is updated for compiler version 17 up to 34.
+- This release is updated for compiler version 17 up to 35.
 - SDK version: 10.0.28000.2705 (Win 11)
 - Requires Windows 10 or later.
 - Minimum supported MfPack version: 4.0.0
   
 ---
   
-***MfCast.pas*** is the API main interface (TMfCast class).  
+***MfCast.pas*** is the application main interface (TMfCast class).  
 The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
 a local HTTP server.  
   
@@ -24,11 +24,11 @@ direct-control applications.
 Callbacks originate on the subsystem's worker threads. A VCL application must  
 marshal UI changes to the main thread. MfSimpleCastPlayer uses PostMessage  
 for this purpose. Connect, receiver launch, and initial media load can wait on  
-network timeouts, so the sample invokes the main interface Cast method from a worker  
+network timeouts, so the sample invokes the main interface's Cast method from a worker  
 thread.  
 
 Diagnostic logging is enabled by default. Set `TMfCast.LoggingEnabled` to
-`False` to suppress the `OnLog` callback and the main interface standard debugger
+`False` to suppress the `OnLog` callback and the facade's standard debugger
 messages. Logging can be enabled or disabled while Cast workers are active;
 `OnError` remains independent and is not suppressed.
   
@@ -52,7 +52,8 @@ uses receiver **SET_VOLUME** when device volume is adjustable, or media-session
 These routes control only MfCast playback and cannot override a Chromecast/Google TV system mute set by its physical remote.  
 Buffered receiver audio may make a PCM change audible a few seconds after the command.  
   
-**GetMediaTracks** returns stable Int64 track IDs together with the source stream index, kind,  
+**GetMediaTracks**  
+This method returns stable Int64 track IDs together with the source stream index, kind,  
 source, language, name, and selection state.  
 For an active transcode, **SelectAudioTrack** restarts at the current source position using the chosen Media Foundation audio stream.  
   
@@ -65,8 +66,8 @@ burned subtitles continue to use **cmmTranscodeBurnedSubtitles**. Remuxed stream
 retain the generated-stream restart behavior for seeking, while volume remains  
 receiver-controlled because there is no decoded PCM gain stage.  
   
-**TMfCastSubtitleAsset.SourceName** identifies the selected sidecar file or, for  
-an embedded track, the media file.  
+**TMfCastSubtitleAsset.SourceName**  
+Identifies the selected sidecar file or, for an embedded track, the media file.  
 For embedded Matroska text and VobSub bitmap tracks, **TrackId**, **StreamIndex**,  
 and **HasStreamIndex** provide exact selection even when language metadata is  
 absent or duplicated. Text tracks and selected `.idx`/`.sub` sidecars or embedded  
@@ -74,11 +75,10 @@ absent or duplicated. Text tracks and selected `.idx`/`.sub` sidecars or embedde
 are also drawn in the local EVR preview. Embedded PGS tracks are identified but  
 are not decoded.  
   
-**SelectSubtitle**  
-and **DisableSubtitles** switch the active transcoded presentation at its current  
+**SelectSubtitle** and **DisableSubtitles** switch the active transcoded presentation at its current  
 source position.  
   
-Cast V2 protobuf envelope encoding/decoding is isolated in  
+Cast V2.1 protobuf envelope encoding/decoding is isolated in  
 **MfCastProtocol.pas**; **MfCastChannel** owns transport, heartbeats, request state,  
 and receiver/media command policy.  
   
