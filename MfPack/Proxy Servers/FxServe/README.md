@@ -1,8 +1,8 @@
 # FxServe V1.1
   
 FxServe is the lightweight FactoryX HTTP media server for MfPack, MfRdj, and
-RDJ Pro. It serves the web player and generated media files and forwards the
-small set of live endpoints currently handled by Caddy.
+RDJ Pro. It serves the web player and generated media files and forwards a
+small set of live endpoints.
   
 FxServe can run interactively as a console application or as a native Windows
 service. Its LAN listener remains on port 8080. An optional HTTP.sys front end
@@ -45,7 +45,7 @@ dcc32 -B FxServe.dpr
 dcc64 -B FxServe.dpr
 ```
   
-The source currently builds with Delphi compiler version 28.0 up to 31.1.
+The source currently builds with Delphi compiler version 28.0 up to 35.
   
 ### Self-contained deployment build
   
@@ -277,7 +277,7 @@ remote Windows Service Control Manager, with FxServe-only defaults,
 configuration editing, log/folder access, and HTTP health checks. **Save &
 apply** writes the selected public hostname to `FxServe.ini` and publishes the
 server/public URL metadata in `www\fxserve-config.json`; live publisher JSON is
-never rewritten. It manages only FxServe; Caddy and other web servers retain
+never rewritten. It manages only FxServe; other web servers (like for instance Caddy) retain
 their own administration tools.
 
 ## Documentation
