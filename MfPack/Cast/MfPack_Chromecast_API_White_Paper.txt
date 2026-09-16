@@ -2,7 +2,7 @@ MfPack Chromecast API
 Independent Delphi Chromecast Framework
 Design Notes
 
-Version: 4.0.0 (Cast V2.1)
+Version: 4.0.1 (Cast V2.1)
 Date: 15 September 2026
 
 
@@ -79,7 +79,7 @@ modification.
 
 The public API and sample stay small and understandable.
 
-The sample shows:
+Samples like MfSimpleCstPlayer, MfCastPlayer and MfCastPlayer II shows:
 
 - How to discover Chromecast devices
 - How to connect
@@ -88,6 +88,7 @@ The sample shows:
 - How to set volume
 - How to work with subtitles
 - How local files are made accessible to Chromecast
+- How Desktop Publishing is made accessible to Chromecast
 
 without having to understand a complete media-player application.
 
@@ -237,7 +238,7 @@ The important part is that every unit has one clear job.
 6.1 MfCast.pas
 --------------
 
-Public facade of the subsystem.
+Public main interface of the subsystem.
 
 Applications normally use this unit instead of the lower-level protocol classes.
 
@@ -478,7 +479,7 @@ Dependencies flow in this direction:
 
                  +--------------------+
                  |       MfCast       |
-                 |   Public Facade    |
+                 |  Public interface  |
                  +---------+----------+
                            |
                      Controller
@@ -1122,10 +1123,10 @@ to:
 Stable abstractions are especially important because Chromecast behavior involves several independent technologies underneath one apparently simple operation.
 
 
-26. Public Facade Shape
+26. Public Interface Shape
 =======================
 
-The public facade is shaped like this (overloads abbreviated):
+The public interface is shaped like this (overloads abbreviated):
 
     TMfCast = class
     public
