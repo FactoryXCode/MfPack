@@ -185,6 +185,14 @@ users can watch the video and are able to take snapshots or record the camera st
 Note: The PWA operates like an app, that can be installed via the Install button in the browser.  
 There is no need to get the PWA from any "Store".
   
+The browser player includes:
+  
+- A live elapsed timer;
+- PNG snapshots of the current camera frame;
+- Client-side recording through `MediaRecorder` (downloaded as WebM);
+- Live viewer count with privacy-masked IP addresses;
+- Sound, playback, reconnect, and live-edge controls.
+
 ---
   
 **MfSimpleCastPlayer Sample**
