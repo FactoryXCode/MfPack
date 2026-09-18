@@ -287,6 +287,8 @@ type
                                       out ChangedParam: PGUID;
                                       out ChangedParamCount: ULONG): HResult; stdcall;
   end;
+  IID_ICodecAPI = ICodecAPI;
+  {$EXTERNALSYM IID_ICodecAPI}
 
 
   // Additional Prototypes for ALL Interfaces

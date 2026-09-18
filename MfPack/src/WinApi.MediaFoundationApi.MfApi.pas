@@ -2494,7 +2494,7 @@ const
 
 
   // Register an MFT class in-process, by CLSID
-  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID;    // The class identifier (CLSID) of the MFT.
+  function MFTRegisterLocalByCLSID(const clsidMFT: REFCLSID;    // The class identifier (CLSID) of the MFT.
                                    const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
                                    pszName: LPCWSTR;      // A wide-character null-terminated string that contains the friendly name of the MFT.
                                    Flags: UINT32;         // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.

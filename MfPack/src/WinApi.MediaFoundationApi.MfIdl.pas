@@ -5762,6 +5762,9 @@ type
   function MFCreateSourceResolver(out ppISourceResolver: IMFSourceResolver): HResult; stdcall;
   {$EXTERNALSYM MFCreateSourceResolver}
 
+  // This API is not supported and may be altered or unavailable in the future.
+  // Instead, applications should use the PSCreateMemoryPropertyStore function to create property stores.
+  // PSCreateMemoryPropertyStore is located at propsys.h
   function CreatePropertyStore(out ppStore: IPropertyStore): HResult; stdcall;
   {$EXTERNALSYM CreatePropertyStore}
 
@@ -6772,9 +6775,9 @@ const
   function MFGetService;                   external MfIdlLib1 name 'MFGetService' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreatePresentationClock;      external MfIdlLib1 name 'MFCreatePresentationClock' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreateSystemTimeSource;       external MfIdlLib1 name 'MFCreateSystemTimeSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSystemTimeSource;       external MfIdlLib2 name 'MFCreateSystemTimeSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreatePropertyStore;            external MfIdlLib1 name 'CreatePropertyStore' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreatePropertyStore;            external MfIdlLib2 name 'CreatePropertyStore' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFGetSupportedSchemes;          external MfIdlLib1 name 'MFGetSupportedSchemes' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFGetSupportedMimeTypes;        external MfIdlLib1 name 'MFGetSupportedSchemes' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateSequencerSource;        external MfIdlLib1 name 'MFCreateSequencerSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
