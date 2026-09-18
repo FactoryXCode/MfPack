@@ -139,7 +139,25 @@ There are 4 samples in 4 project degrees.
   *inside a Delphi application, without using 3th party components.*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
+
+
+---
   
+**MfProtectedPlayback**
+  
+This sample demonstrates playback of clear and protected media with  
+Microsoft Media Foundation and the Protected Media Path (PMP). It is a close  
+Delphi translation of Microsoft's `ProtectedPlayback` C++ sample and uses the  
+Media Foundation declarations supplied by MfPack.  
+  
+The translation of this Microsoft sample preserves the structure, class names, method names, and
+control flow of the original sample wherever Delphi permits them. 
+The sample includes the original C++ code for references.  
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfProtectedPlayback.png)
+
+---
+
 ---
   
 **Ducking Media Player**
