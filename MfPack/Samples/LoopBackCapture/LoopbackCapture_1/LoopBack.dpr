@@ -1,13 +1,6 @@
 program LoopBack;
 
 uses
-
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-
   Vcl.Forms,
   frmWasapiLoopBack in 'frmWasapiLoopBack.pas' {frmLoopBackCapture},
   WasapiLoopback in 'WasapiLoopback.pas',

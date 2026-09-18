@@ -1,0 +1,26 @@
+{
+  "id": "./webcam_stream.html",
+  "name": "MfWebCamStreamer",
+  "short_name": "WebCam",
+  "description": "Live FactoryX webcam and microphone stream delivered by FxServe.",
+  "start_url": "./webcam_stream.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a1015",
+  "theme_color": "#0a1015",
+  "icons": [
+    {
+      "src": "webcam-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "webcam-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
