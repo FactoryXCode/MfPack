@@ -1,5 +1,15 @@
 # Sample 4 - Grayscale MFT in a Media Session topology
 
+Version: 4.0.0  
+  
+  
+NOTES:  
+  
+* This release is updated for compiler version 17 up to 35.
+* SDK version: 10.0.28000.2705 (Win 11)
+* Requires Windows 10 or later.
+* Minimum supported MfPack version: 4.0.0
+
 This sample inserts the unregistered grayscale transform directly into a
 Media Session playback topology. The Media Session owns the pipeline, drives
 it with its presentation clock, and sends the transformed frames to the
@@ -66,3 +76,13 @@ Choose **Open video**, wait for **Topology ready**, and click **Play**.
 
 Sample 5 will add COM and Media Foundation registration so the same transform
 can be discovered and activated by applications such as MfMftExplorer.
+  
+Project: Media Foundation - MFPack - Samples  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 02/08/2026  
+Final release date: 15/09/2026  
+  
+Copyright © FactoryX. All rights reserved.

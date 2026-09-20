@@ -139,5 +139,4 @@ const
 XAPOFxLib                            = 'XAPOFX1_5.dll';
 
 
-
 //<eof>

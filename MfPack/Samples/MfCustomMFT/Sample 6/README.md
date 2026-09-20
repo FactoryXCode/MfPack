@@ -1,5 +1,15 @@
 # Sample 6 - Playback through the registered MFT DLL
 
+Version: 4.0.0  
+  
+  
+NOTES:  
+  
+* This release is updated for compiler version 17 up to 35.
+* SDK version: 10.0.28000.2705 (Win 11)
+* Requires Windows 10 or later.
+* Minimum supported MfPack version: 4.0.0
+
 This sample proves that the DLL built by Sample 5 works outside its own
 project. It does not compile or link the grayscale transform implementation.
 Instead, it discovers the installed Video Effect with `MFTEnumEx`, activates
@@ -82,3 +92,13 @@ interface is released.
 - no fallback to a locally linked transform;
 - no automatic registration, because failure when unregistered is part of
   what this sample demonstrates.
+  
+Project: Media Foundation - MFPack - Samples  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 02/08/2026  
+Final release date: 15/09/2026  
+  
+Copyright © FactoryX. All rights reserved.

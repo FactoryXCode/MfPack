@@ -1,14 +1,24 @@
 # Sample 2 - Source Reader to grayscale MFT
-
+  
+Version: 4.0.0  
+  
+  
+NOTES:  
+  
+* This release is updated for compiler version 17 up to 35.
+* SDK version: 10.0.28000.2705 (Win 11)
+* Requires Windows 10 or later.
+* Minimum supported MfPack version: 4.0.0
+  
 This sample applies the synchronous RGB32 grayscale transform from Sample 1
 to decoded frames from a video file.
-
+  
 The application deliberately seeks and reads one frame when the trackbar thumb
 is released. That makes the Media Foundation data flow visible without adding
 callback, threading, audio, or playback-clock code.
-
+  
 ## Data flow
-
+  
 ```text
 video file
     -> IMFSourceReader (decode and convert to RGB32)
@@ -54,3 +64,13 @@ decode and transform the frame at that position.
 
 Those features would obscure the first useful connection between an
 `IMFSourceReader` and a custom `IMFTransform`.
+  
+Project: Media Foundation - MFPack - Samples  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 02/08/2026  
+Final release date: 15/09/2026  
+  
+Copyright © FactoryX. All rights reserved.

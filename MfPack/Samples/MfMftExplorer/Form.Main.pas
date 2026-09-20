@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // MfMftExplorer - beginner-oriented Media Foundation Transform explorer.
 //
@@ -107,6 +107,7 @@ type
     FriendlyName: string;
     ClassId: TGUID;
     HardwareUrl: string;
+    IsVideoCategory: Boolean;
     AdapterName: string;
     AdapterLuid: string;
     Activate: IMFActivate;
@@ -155,6 +156,8 @@ type
                               out AName: string): Boolean;
 
     function SelectedFlags(): UINT32;
+
+    function HResultText(const AValue: HResult): string;
 
     function ReadAllocatedString(const AAttributes: IMFAttributes;
                                  const AKey: TGUID): string;
@@ -294,6 +297,25 @@ begin
 
   if chkSortAndFilter.Checked then
     Result := Result or MFT_ENUM_FLAG_SORTANDFILTER;
+end;
+
+
+function TfrmMain.HResultText(const AValue: HResult): string;
+var
+  MessageText: string;
+
+begin
+
+  // Put Delphi's hexadecimal notation first. The 0x form is kept so a
+  // student can use the same number when reading Windows documentation.
+  Result := Format('$%.8x (0x%.8x)',
+                   [Cardinal(AValue), Cardinal(AValue)]);
+
+  // SysErrorMessage asks Windows for the message in the user's language.
+  // It also resolves Media Foundation HRESULTs when their messages are known.
+  MessageText := Trim(SysErrorMessage(Cardinal(AValue)));
+  if (MessageText <> '') then
+    Result := Result + ': ' + MessageText;
 end;
 
 
@@ -626,6 +648,10 @@ begin
   FEntries[EntryIndex].HardwareUrl := ReadAllocatedString(AActivate,
                                                           MFT_ENUM_HARDWARE_URL_Attribute);
 
+  // Keep the category used for this enumeration with the entry. The user can
+  // change the category combo box before selecting an already listed MFT.
+  FEntries[EntryIndex].IsVideoCategory := (cbCategory.ItemIndex >= 0) and
+                                          (cbCategory.ItemIndex <= 4);
   FEntries[EntryIndex].Activate := AActivate;
   FEntries[EntryIndex].AdapterName := AAdapterName;
   FEntries[EntryIndex].AdapterLuid := AAdapterLuid;
@@ -674,8 +700,7 @@ begin
                   Count);
   if FAILED(Hr) then
     begin
-      lblStatus.Caption := Format('MFTEnumEx failed: HRESULT 0x%.8x',
-                                  [Cardinal(Hr)]);
+      lblStatus.Caption := 'MFTEnumEx failed: ' + HResultText(Hr);
       Exit;
     end;
 
@@ -754,8 +779,7 @@ begin
                                  1);
         if FAILED(Hr) then
           begin
-            lblStatus.Caption := Format('MFCreateAttributes failed: 0x%.8x',
-                                        [Cardinal(Hr)]);
+            lblStatus.Caption := 'MFCreateAttributes failed: ' + HResultText(Hr);
             Exit(-1);
           end;
 
@@ -767,8 +791,7 @@ begin
                                  SizeOf(LUID));
         if FAILED(Hr) then
           begin
-            lblStatus.Caption := Format('Setting adapter LUID failed: 0x%.8x',
-                                        [Cardinal(Hr)]);
+            lblStatus.Caption := 'Setting adapter LUID failed: ' + HResultText(Hr);
             Exit(-1);
           end;
 
@@ -784,8 +807,9 @@ begin
                        Count);
         if FAILED(Hr) then
           begin
-            lblStatus.Caption := Format('MFTEnum2 failed for %s: 0x%.8x',
-                                        [FAdapters[AdapterIndex].Name, Cardinal(Hr)]);
+            lblStatus.Caption := Format('MFTEnum2 failed for %s: %s',
+                                        [FAdapters[AdapterIndex].Name,
+                                         HResultText(Hr)]);
             Exit(-1);
           end;
         FAdapters[AdapterIndex].RawMftCount := Count;
@@ -1047,13 +1071,20 @@ begin
         begin
           ALines.Add('      Runtime types require the opposite stream type ' +
                      'to be selected first.');
+          ALines.Add('      ' + HResultText(Hr));
+          Exit;
+        end;
+
+      if (Hr = E_NOTIMPL) then
+        begin
+          ALines.Add('      No preferred runtime type list (optional).');
+          ALines.Add('      ' + HResultText(Hr));
           Exit;
         end;
 
       if FAILED(Hr) then
         begin
-          ALines.Add(Format('      Query failed: HRESULT 0x%.8x',
-                            [Cardinal(Hr)]));
+          ALines.Add('      Query failed: ' + HResultText(Hr));
           Exit;
         end;
 
@@ -1100,6 +1131,7 @@ begin
     memDetails.Lines.Add(StringOfChar('=', 72));
     memDetails.Lines.Add('Activated IMFTransform inspection');
     memDetails.Lines.Add(StringOfChar('=', 72));
+    memDetails.Lines.Add('Media types are not set during this inspection.');
 
     if (AIndex < 0) or (AIndex >= Length(FEntries)) or
        not Assigned(FEntries[AIndex].Activate) then
@@ -1113,8 +1145,7 @@ begin
                                                    Pointer(Transform));
     if FAILED(Hr) then
       begin
-        memDetails.Lines.Add(Format('ActivateObject failed: HRESULT 0x%.8x',
-                                    [Cardinal(Hr)]));
+        memDetails.Lines.Add('ActivateObject failed: ' + HResultText(Hr));
         lblStatus.Caption := 'Transform activation failed.';
         Exit;
       end;
@@ -1135,13 +1166,20 @@ begin
             begin
               UnlockHr := Attributes.SetUINT32(MF_TRANSFORM_ASYNC_UNLOCK,
                                                1);
-              memDetails.Lines.Add(Format('Async unlock: HRESULT 0x%.8x',
-                                          [Cardinal(UnlockHr)]));
+              memDetails.Lines.Add('Async unlock: ' + HResultText(UnlockHr));
             end;
         end
       else
-        memDetails.Lines.Add(Format('GetAttributes failed: HRESULT 0x%.8x',
-                                    [Cardinal(Hr)]));
+        if Hr = E_NOTIMPL then
+          begin
+            // GetAttributes is optional for software MFTs. An absent store
+            // does not mean that activation or stream inspection failed.
+            memDetails.Lines.Add('GetAttributes: no attribute store (optional).');
+            memDetails.Lines.Add('  ' + HResultText(Hr));
+            memDetails.Lines.Add('Asynchronous MFT: unknown (no attributes).');
+          end
+        else
+          memDetails.Lines.Add('GetAttributes failed: ' + HResultText(Hr));
 
       InputMinimum := 0;
       InputMaximum := 0;
@@ -1154,7 +1192,9 @@ begin
                                       OutputMaximum);
       if SUCCEEDED(Hr) then
         memDetails.Lines.Add(Format('Stream limits: input %d..%d, output %d..%d',
-                                     [InputMinimum, InputMaximum, OutputMinimum, OutputMaximum]));
+                                     [InputMinimum, InputMaximum, OutputMinimum, OutputMaximum]))
+      else
+        memDetails.Lines.Add('GetStreamLimits failed: ' + HResultText(Hr));
 
       InputCount := 0;
       OutputCount := 0;
@@ -1163,8 +1203,7 @@ begin
                                      OutputCount);
       if FAILED(Hr) then
         begin
-          memDetails.Lines.Add(Format('GetStreamCount failed: HRESULT 0x%.8x',
-                                      [Cardinal(Hr)]));
+          memDetails.Lines.Add('GetStreamCount failed: ' + HResultText(Hr));
           Exit;
         end;
       memDetails.Lines.Add(Format('Current streams: %d input, %d output',
@@ -1177,8 +1216,7 @@ begin
                          OutputIds);
       if FAILED(Hr) then
         begin
-          memDetails.Lines.Add(Format('GetStreamIDs failed: HRESULT 0x%.8x',
-                                      [Cardinal(Hr)]));
+          memDetails.Lines.Add('GetStreamIDs failed: ' + HResultText(Hr));
           Exit;
         end;
 
@@ -1203,8 +1241,13 @@ begin
                                            InputInfo.hnsMaxLatency]));
             end
           else
-            memDetails.Lines.Add(Format('  GetInputStreamInfo failed: HRESULT 0x%.8x',
-                                        [Cardinal(Hr)]));
+            begin
+              if Hr = MF_E_TRANSFORM_TYPE_NOT_SET then
+                memDetails.Lines.Add('  GetInputStreamInfo: type required.')
+              else
+                memDetails.Lines.Add('  GetInputStreamInfo failed:');
+              memDetails.Lines.Add('    ' + HResultText(Hr));
+            end;
           memDetails.Lines.Add('  Runtime available input types:');
 
           ListAvailableTypes(Transform,
@@ -1231,7 +1274,13 @@ begin
                                           [OutputInfo.cbSize, OutputInfo.cbAlignment]));
             end
           else
-            memDetails.Lines.Add(Format('  GetOutputStreamInfo failed: HRESULT 0x%.8x', [Cardinal(Hr)]));
+            begin
+              if Hr = MF_E_TRANSFORM_TYPE_NOT_SET then
+                memDetails.Lines.Add('  GetOutputStreamInfo: type required.')
+              else
+                memDetails.Lines.Add('  GetOutputStreamInfo failed:');
+              memDetails.Lines.Add('    ' + HResultText(Hr));
+            end;
 
           memDetails.Lines.Add('  Runtime available output types:');
 
@@ -1248,8 +1297,7 @@ begin
       Transform := nil;
       ShutdownHr := FEntries[AIndex].Activate.ShutdownObject();
       memDetails.Lines.Add('');
-      memDetails.Lines.Add(Format('ShutdownObject: HRESULT 0x%.8x',
-                                  [Cardinal(ShutdownHr)]));
+      memDetails.Lines.Add('ShutdownObject: ' + HResultText(ShutdownHr));
     end;
   finally
     memDetails.Lines.EndUpdate();
@@ -1444,8 +1492,7 @@ begin
                                        Pointer(Transform));
   if FAILED(Hr) then
     begin
-      ALines.Add(Format('  Activation failed: HRESULT 0x%.8x',
-                        [Cardinal(Hr)]));
+      ALines.Add('  Activation failed: ' + HResultText(Hr));
       Exit;
     end;
 
@@ -1484,8 +1531,7 @@ begin
                                    OutputCount);
     if FAILED(Hr) then
       begin
-        ALines.Add(Format('  GetStreamCount failed: HRESULT 0x%.8x',
-                          [Cardinal(Hr)]));
+        ALines.Add('  GetStreamCount failed: ' + HResultText(Hr));
         Exit;
       end;
 
@@ -1499,8 +1545,7 @@ begin
                        OutputIds);
     if FAILED(Hr) then
       begin
-        ALines.Add(Format('  Stream discovery failed: HRESULT 0x%.8x',
-                          [Cardinal(Hr)]));
+        ALines.Add('  Stream discovery failed: ' + HResultText(Hr));
         Exit;
       end;
 
@@ -1563,8 +1608,10 @@ begin
                           [BoolToStr(MainSupported, True)]));
 
         if not MainSupported then
-          ALines.Add(Format('      output HRESULT 0x%.8x, input HRESULT 0x%.8x',
-                            [Cardinal(OutputHr), Cardinal(InputHr)]));
+          begin
+            ALines.Add('      Output result: ' + HResultText(OutputHr));
+            ALines.Add('      Input result: ' + HResultText(InputHr));
+          end;
 
         Main10Supported := TestHevcProfile(Transform,
                                            InputIds[0],
@@ -1577,8 +1624,10 @@ begin
                           [BoolToStr(Main10Supported, True)]));
 
         if not Main10Supported then
-          ALines.Add(Format('      output HRESULT 0x%.8x, input HRESULT 0x%.8x',
-                            [Cardinal(OutputHr), Cardinal(InputHr)]));
+          begin
+            ALines.Add('      Output result: ' + HResultText(OutputHr));
+            ALines.Add('      Input result: ' + HResultText(InputHr));
+          end;
       end
     else
       ALines.Add('  Format-specific strategy: generic inspection only');
@@ -1587,8 +1636,7 @@ begin
     Attributes := nil;
     Transform := nil;
     Hr := AEntry.Activate.ShutdownObject;
-    ALines.Add(Format('  ShutdownObject: HRESULT 0x%.8x',
-                      [Cardinal(Hr)]));
+    ALines.Add('  ShutdownObject: ' + HResultText(Hr));
   end;
 end;
 
@@ -1758,16 +1806,20 @@ begin
     else
       memDetails.Lines.Add('  (not present)');
 
-    memDetails.Lines.Add('');
-    memDetails.Lines.Add('DXGI video adapter');
-
-    if (FEntries[AIndex].AdapterName <> '') then
+    // DXGI adapter attribution applies only to video MFT categories.
+    if FEntries[AIndex].IsVideoCategory then
       begin
-        memDetails.Lines.Add('  ' + FEntries[AIndex].AdapterName);
-        memDetails.Lines.Add('  LUID ' + FEntries[AIndex].AdapterLuid);
-      end
-    else
-      memDetails.Lines.Add('  (select Hardware MFTs scope for adapter attribution)');
+        memDetails.Lines.Add('');
+        memDetails.Lines.Add('DXGI video adapter');
+
+        if (FEntries[AIndex].AdapterName <> '') then
+          begin
+            memDetails.Lines.Add('  ' + FEntries[AIndex].AdapterName);
+            memDetails.Lines.Add('  LUID ' + FEntries[AIndex].AdapterLuid);
+          end
+        else
+          memDetails.Lines.Add('  (select Hardware MFTs scope for adapter attribution)');
+      end;
 
     memDetails.Lines.Add('');
     memDetails.Lines.Add('Registered input types');

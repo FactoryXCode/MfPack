@@ -1,0 +1,21 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{0AB6A2D2-C464-48DE-B623-BFDC1249131A}</ProjectGuid>
+    <MainSource>MfDtsMftSmoke.dpr</MainSource><Base>True</Base>
+    <Config Condition="'$(Config)'==''">Release</Config><Platform Condition="'$(Platform)'==''">Win32</Platform>
+    <AppType>Console</AppType><FrameworkType>None</FrameworkType><ProjectVersion>16.0</ProjectVersion>
+    <TargetedPlatforms>3</TargetedPlatforms><DCC_DependencyCheckOutputName>MfDtsMftSmoke.exe</DCC_DependencyCheckOutputName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Base)'!=''">
+    <DCC_Namespace>System;System.Win;Winapi;$(DCC_Namespace)</DCC_Namespace>
+    <DCC_UnitSearchPath>D:\PROJECTS\MfPack\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+    <DCC_DcuOutput>$(Platform)\dcu</DCC_DcuOutput><DCC_ExeOutput>$(Platform)</DCC_ExeOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Config)'=='Release'"><Base>true</Base><DCC_Define>RELEASE;$(DCC_Define)</DCC_Define><DCC_DebugInformation>0</DCC_DebugInformation></PropertyGroup>
+  <ItemGroup>
+    <DelphiCompile Include="$(MainSource)"><MainSource>MainSource</MainSource></DelphiCompile>
+    <BuildConfiguration Include="Release"><Key>Release</Key></BuildConfiguration>
+  </ItemGroup>
+  <ProjectExtensions><Borland.Personality>Delphi.Personality.12</Borland.Personality><Borland.ProjectType>Console</Borland.ProjectType><BorlandProject><Delphi.Personality><Source><Source Name="MainSource">MfDtsMftSmoke.dpr</Source></Source></Delphi.Personality><Platforms><Platform value="Win32">True</Platform><Platform value="Win64">True</Platform></Platforms></BorlandProject></ProjectExtensions>
+  <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+</Project>

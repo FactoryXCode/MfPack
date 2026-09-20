@@ -1,5 +1,15 @@
 # MfCustomMFT
 
+Version: 4.0.0  
+  
+  
+NOTES:  
+  
+* This release is updated for compiler version 17 up to 35.
+* SDK version: 10.0.28000.2705 (Win 11)
+* Requires Windows 10 or later.
+* Minimum supported MfPack version: 4.0.0
+
 `MfCustomMFT` is a beginner-oriented custom Media Foundation Transform sample.
 It implements a synchronous video effect that converts an RGB32 frame to
 grayscale.
@@ -133,3 +143,13 @@ compiler range as MfPack 4.0.0.
    rejected.
 5. Replace the grayscale formula with a different per-pixel effect while
    leaving the MFT state machine unchanged.
+  
+Project: Media Foundation - MFPack - Samples  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 02/08/2026  
+Final release date: 15/09/2026  
+  
+Copyright © FactoryX. All rights reserved.
