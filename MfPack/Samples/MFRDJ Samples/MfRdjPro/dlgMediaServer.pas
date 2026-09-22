@@ -674,6 +674,7 @@ uses
 
   {Application}
   RDJ.Setup,
+  RDJ.Log,
   frmMainMDI;
 
 type
@@ -2603,20 +2604,29 @@ begin
   lblCastState.Caption := 'Connecting...';
   memLog.Lines.Add('Casting the live fragmented MP4 stream to ' +
                    DeviceName + '.');
+  RDJLog('Cast',
+         'Casting the live fragmented MP4 stream to ' + DeviceName + '.');
   UpdateCastControls();
 end;
 
 
 procedure TfrmMediaServer.LogCastResult(const AOperation: string;
                                         const AHResult: HRESULT);
+var
+  MessageText: string;
+
 begin
 
   if SUCCEEDED(AHResult) then
-    memLog.Lines.Add(AOperation + ': OK')
+    MessageText := AOperation + ': OK'
   else
-    memLog.Lines.Add(Format('%s failed (HRESULT $%.8x)',
-                            [AOperation,
-                             DWORD(AHResult)]));
+    MessageText := Format('%s failed (HRESULT $%.8x)',
+                          [AOperation,
+                           DWORD(AHResult)]);
+
+  memLog.Lines.Add(MessageText);
+  RDJLog('Cast',
+         MessageText);
 end;
 
 
@@ -2667,6 +2677,8 @@ begin
   ErrorMessage := TMfCastUiLogMessage(Message.WParam);
   try
     memLog.Lines.Add(ErrorMessage.Text);
+    RDJLog('Cast error',
+           ErrorMessage.Text);
     lblCastState.Caption := 'Cast error';
     UpdateCastControls();
   finally
@@ -2727,6 +2739,8 @@ begin
   LogMessage := TMfCastUiLogMessage(Message.WParam);
   try
     memLog.Lines.Add(LogMessage.Text);
+    RDJLog('Cast',
+           LogMessage.Text);
   finally
     LogMessage.Free();
   end;
@@ -2775,6 +2789,8 @@ begin
 
   lblCastState.Caption := 'Preparing live stream...';
   memLog.Lines.Add('Preparing the live fragmented MP4 stream for Cast.');
+  RDJLog('Cast',
+         'Preparing the live fragmented MP4 stream for Cast.');
   TryStartPendingCastLive();
   UpdateCastControls();
 end;
@@ -2852,6 +2868,8 @@ end;
 procedure TfrmMediaServer.FormCreate(Sender: TObject);
 begin
 
+  RDJLog('MediaServer',
+         'Media server form created.');
   chkBroadcast.Checked := False;
   chkBroadcast.Enabled := True;
 
@@ -2991,11 +3009,19 @@ var
 
 begin
 
+  RDJLog('Shutdown',
+         'Media server destruction: begin.');
   FCastClosing := True;
+  RDJLog('Shutdown',
+         'Clearing Cast live byte stream: begin.');
   ClearCastLiveByteStream();
+  RDJLog('Shutdown',
+         'Clearing Cast live byte stream: complete.');
 
   if Assigned(FCast) then
     begin
+      RDJLog('Shutdown',
+             'Detaching Cast callbacks.');
       FCast.OnDeviceAdded := nil;
       FCast.OnDeviceUpdated := nil;
       FCast.OnDeviceRemoved := nil;
@@ -3007,19 +3033,36 @@ begin
 
   if Assigned(FCastWorker) then
     begin
+      RDJLogFmt('Shutdown',
+                'Waiting for Cast worker: begin. ThreadID=%d',
+                [FCastWorker.ThreadID]);
       FCastWorker.WaitFor();
+      RDJLog('Shutdown',
+             'Waiting for Cast worker: complete.');
       FreeAndNil(FCastWorker);
     end;
 
   if Assigned(FCast) then
     begin
+      RDJLog('Shutdown',
+             'Stopping Cast controller: begin.');
       FCast.Stop();
+      RDJLog('Shutdown',
+             'Cast Stop: complete; Disconnect: begin.');
       FCast.Disconnect();
+      RDJLog('Shutdown',
+             'Cast Disconnect: complete; destruction: begin.');
       FreeAndNil(FCast);
+      RDJLog('Shutdown',
+             'Cast controller destruction: complete.');
     end;
 
+  RDJLog('Shutdown',
+         'Cast live helpers destruction: begin.');
   FreeAndNil(FCastLiveRebaser);
   FreeAndNil(FCastLiveStreamLock);
+  RDJLog('Shutdown',
+         'Cast live helpers destruction: complete.');
 
   while PeekMessage(PendingMessage,
                     Handle,
@@ -3046,40 +3089,72 @@ begin
   CleanupMirrorDir := FBroadcastMseMirrorDir;
   FRdjProBroadcasting := False;
 
+  RDJLog('Shutdown',
+         'Broadcast mirror thread shutdown: begin.');
   StopBroadcastMseMirrorThread();
+  RDJLog('Shutdown',
+         'Broadcast mirror thread shutdown: complete.');
 
   FreeAndNil(FBroadcastMseGroupStream);
   SetLength(FBroadcastMseGroupBytes, 0);
 
+  RDJLog('Shutdown',
+         'Device notification unregister: begin.');
   UnRegisterForDeviceNotification(FPtrDevNotify);
   FPtrDevNotify := nil;
+  RDJLog('Shutdown',
+         'Device notification unregister: complete.');
 
   if Assigned(FRdjProBroadcastMp4Recorder) then
     begin
+      RDJLog('Shutdown',
+             'Broadcast recorder StopRecording: begin.');
       FRdjProBroadcastMp4Recorder.StopRecording();
+      RDJLog('Shutdown',
+             'Broadcast recorder StopRecording: complete; destruction: begin.');
       FreeAndNil(FRdjProBroadcastMp4Recorder);
+      RDJLog('Shutdown',
+             'Broadcast recorder destruction: complete.');
     end;
 
+  RDJLog('Shutdown',
+         'Broadcast handover lock release: begin.');
   ReleaseBroadcastHandoverLock(True);
+  RDJLog('Shutdown',
+         'Broadcast handover lock release: complete.');
 
   LaunchBroadcastMseCleanupBatch(CleanupDumpDir,
                                  CleanupMirrorDir);
 
   if Assigned(FRdjProMp4Recorder) then
     begin
+      RDJLog('Shutdown',
+             'Local MP4 recorder StopRecording: begin.');
       FRdjProMp4Recorder.StopRecording();
+      RDJLog('Shutdown',
+             'Local MP4 recorder StopRecording: complete; destruction: begin.');
       FreeAndNil(FRdjProMp4Recorder);
+      RDJLog('Shutdown',
+             'Local MP4 recorder destruction: complete.');
     end;
 
   if Assigned(FRdjProCaptureManager) then
     begin
+      RDJLog('Shutdown',
+             'Capture manager shutdown: begin.');
       FRdjProCaptureManager.ShutDownEngine();
+      RDJLog('Shutdown',
+             'Capture manager shutdown: complete; destruction: begin.');
       FreeAndNil(FRdjProCaptureManager);
+      RDJLog('Shutdown',
+             'Capture manager destruction: complete.');
     end;
 
   FStaticVideoBuffer := nil;
   FStaticVideoMediaType := nil;
   FreeAndNil(FStaticVideoBitmap);
+  RDJLog('Shutdown',
+         'Media server destruction: complete.');
 end;
 
 
@@ -3180,12 +3255,18 @@ begin
       ((NowTick - FLastBroadcastHealthLogTick) >= RDJ_BROADCAST_HEALTH_LOG_REPEAT_MS)) then
     ShouldLog := True;
 
-  if ShouldLog and Assigned(memLog) and (AMessage <> '') then
+  if ShouldLog and (AMessage <> '') then
     begin
-      memLog.Lines.Append(FormatDateTime('hh:nn:ss  ',
-                                         Now) + AMessage);
-      while (memLog.Lines.Count > 250) do
-        memLog.Lines.Delete(0);
+      RDJLog('Broadcast',
+             ACaption + ': ' + AMessage);
+
+      if Assigned(memLog) then
+        begin
+          memLog.Lines.Append(FormatDateTime('hh:nn:ss  ',
+                                             Now) + AMessage);
+          while (memLog.Lines.Count > 250) do
+            memLog.Lines.Delete(0);
+        end;
 
       FLastBroadcastHealthLogTick := NowTick;
     end;
@@ -5464,6 +5545,8 @@ begin
       SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
                                         UNLOCKED_COLOR);
       AMessage := 'Broadcast handover lock bypassed for debugger execution.';
+      RDJLog('Broadcast lock',
+             AMessage);
       Result := True;
       Exit;
     end;
@@ -5534,6 +5617,8 @@ begin
         AMessage := AMessage + ' since ' + OwnerUpdated;
 
       AMessage := AMessage + '. Wait for the handover message before taking over.';
+      RDJLog('Broadcast lock',
+             AMessage);
       Exit(False);
     end;
 
@@ -5559,6 +5644,8 @@ begin
     end;
 
   AMessage := 'Broadcast lock acquired by ' + BroadcastHandoverOwnerDisplay() + '.';
+  RDJLog('Broadcast lock',
+         AMessage);
   Result := True;
 end;
 
@@ -5577,6 +5664,8 @@ begin
   if FBroadcastHandoverLockBypassed then
     begin
       // No shared lock or handover status was created for this debug session.
+      RDJLog('Broadcast lock',
+             'Debugger bypass released; no shared lock existed.');
       FBroadcastHandoverLockAcquired := False;
       FBroadcastHandoverOwnerId := '';
       FBroadcastHandoverConnectionLost := False;
@@ -5614,7 +5703,11 @@ begin
     end;
 
   if OwnsServerLock then
-    DeleteBroadcastHandoverLockDir(LockDir);
+    begin
+      DeleteBroadcastHandoverLockDir(LockDir);
+      RDJLog('Broadcast lock',
+             'Shared broadcast lock removed.');
+    end;
 
   if (not OwnsServerLock) and Assigned(memLog) then
     memLog.Lines.Append('Broadcast lock was not removed because server ownership could not be verified.');
@@ -6526,6 +6619,7 @@ var
   PrivateMb: UInt64;
   MirrorQ: Integer;
   Diag: TRdjProFmp4LiveDiagnostics;
+  MessageText: string;
 
 begin
 
@@ -6572,27 +6666,30 @@ begin
   if Assigned(FBroadcastMseMirrorThread) then
     MirrorQ := FBroadcastMseMirrorThread.QueueCount();
 
-  OutputDebugString(PChar(Format('TfrmMediaServer.MSE MEM[%s]: WorkMB=%d PeakWorkMB=%d PagefileMB=%d PrivateMB=%d VQ=%d AQ=%d RawQ=%d PatchedQ=%d MirrorQ=%d GroupParts=%d/%d GroupBytes=%d PublicSeq=%d SourceSeq=%d LastVms=%d LastAms=%d ParserBytes=%d PendingMoof=%d TotalBytes=%d',
-                                 [AWhere,
-                                  WorkMb,
-                                  PeakWorkMb,
-                                  PagefileMb,
-                                  PrivateMb,
-                                  Diag.VideoQueueCount,
-                                  Diag.AudioQueueCount,
-                                  Diag.RawFragmentQueueCount,
-                                  Diag.PatchedFragmentQueueCount,
-                                  MirrorQ,
-                                  FBroadcastMseGroupPartCount,
-                                  BroadcastMseGroupSourceFragments(),
-                                  CurrentBroadcastMseGroupBytes(),
-                                  FBroadcastMsePublicSeq,
-                                  FBroadcastMseFragmentSeq,
-                                  Diag.LastVideoWriteElapsedMs,
-                                  Diag.LastAudioWriteElapsedMs,
-                                  Diag.ParserBufferSize,
-                                  Diag.PendingMoofBytes,
-                                  Diag.TotalBytesWritten])));
+  MessageText := Format('MSE MEM[%s]: WorkMB=%d PeakWorkMB=%d PagefileMB=%d PrivateMB=%d VQ=%d AQ=%d RawQ=%d PatchedQ=%d MirrorQ=%d GroupParts=%d/%d GroupBytes=%d PublicSeq=%d SourceSeq=%d LastVms=%d LastAms=%d ParserBytes=%d PendingMoof=%d TotalBytes=%d',
+                        [AWhere,
+                         WorkMb,
+                         PeakWorkMb,
+                         PagefileMb,
+                         PrivateMb,
+                         Diag.VideoQueueCount,
+                         Diag.AudioQueueCount,
+                         Diag.RawFragmentQueueCount,
+                         Diag.PatchedFragmentQueueCount,
+                         MirrorQ,
+                         FBroadcastMseGroupPartCount,
+                         BroadcastMseGroupSourceFragments(),
+                         CurrentBroadcastMseGroupBytes(),
+                         FBroadcastMsePublicSeq,
+                         FBroadcastMseFragmentSeq,
+                         Diag.LastVideoWriteElapsedMs,
+                         Diag.LastAudioWriteElapsedMs,
+                         Diag.ParserBufferSize,
+                         Diag.PendingMoofBytes,
+                         Diag.TotalBytesWritten]);
+  OutputDebugString(PChar('TfrmMediaServer.' + MessageText));
+  RDJLog('Broadcast diag',
+         MessageText);
 
   if ((Diag.LastVideoWriteElapsedMs >= RDJ_MSE_RECORDER_RESTART_SLOW_VIDEO_MS) and
       (Diag.VideoQueueCount >= RDJ_MSE_RECORDER_RESTART_VIDEO_QUEUE)) or

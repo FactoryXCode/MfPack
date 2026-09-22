@@ -7,9 +7,11 @@ object frmPlaylistEditor: TfrmPlaylistEditor
   Margins.Bottom = 0
   BorderIcons = []
   BorderStyle = bsSizeToolWin
-  ClientHeight = 815
-  ClientWidth = 1265
+  ClientHeight = 721
+  ClientWidth = 1264
   Color = 5850948
+  Constraints.MinHeight = 760
+  Constraints.MinWidth = 1280
   DefaultMonitor = dmDesktop
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -28,39 +30,43 @@ object frmPlaylistEditor: TfrmPlaylistEditor
   TextHeight = 16
   object pnlClient: TPanel
     Left = 0
-    Top = 136
-    Width = 1265
-    Height = 650
+    Top = 143
+    Width = 1264
+    Height = 549
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitTop = 136
+    ExplicitWidth = 1265
+    ExplicitHeight = 650
     object splLeft: TSplitter
       Left = 520
       Top = 0
       Width = 5
-      Height = 650
+      Height = 549
       Color = clGray
       MinSize = 5
       ParentColor = False
-      ExplicitHeight = 647
+      ExplicitHeight = 643
     end
     object pnlLibrary: TPanel
       Left = 0
       Top = 0
       Width = 520
-      Height = 650
+      Height = 549
       Align = alLeft
       TabOrder = 0
+      ExplicitHeight = 650
       object grdLibrary: TStringGrid
         Left = 1
         Top = 1
-        Width = 519
-        Height = 648
+        Width = 518
+        Height = 547
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        Align = alLeft
+        Align = alClient
         Color = 5850948
         DefaultRowHeight = 20
         DoubleBuffered = False
@@ -83,22 +89,25 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnMouseDown = grdLibraryMouseDown
         OnSelectCell = grdLibrarySelectCell
         OnSetEditText = grdLibrarySetEditText
+        ExplicitWidth = 521
+        ExplicitHeight = 641
       end
     end
     object pnlActions: TPanel
       Left = 525
       Top = 0
       Width = 119
-      Height = 650
+      Height = 549
       Align = alLeft
-      BevelOuter = bvNone
       Color = 5850948
       ParentBackground = False
       TabOrder = 1
+      ExplicitLeft = 526
+      ExplicitHeight = 643
       object btnAddToPlaylist: TMPxpButton
-        Left = 7
-        Top = 214
-        Width = 107
+        Left = 12
+        Top = 105
+        Width = 100
         Height = 40
         Alignment = taCenter
         AllowAllUp = True
@@ -108,7 +117,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -146,9 +154,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnAddToPlaylistClick
       end
       object btnRemoveFromPlaylist: TMPxpButton
-        Left = 7
-        Top = 261
-        Width = 106
+        Left = 10
+        Top = 151
+        Width = 100
         Height = 40
         Alignment = taCenter
         AllowAllUp = True
@@ -158,7 +166,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -195,9 +202,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnRemoveFromPlaylistClick
       end
       object btnMoveUp: TMPxpButton
-        Left = 7
-        Top = 313
-        Width = 106
+        Left = 10
+        Top = 204
+        Width = 100
         Height = 40
         Alignment = taCenter
         AllowAllUp = True
@@ -207,7 +214,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -245,9 +251,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnMoveUpClick
       end
       object btnMoveDown: TMPxpButton
-        Left = 6
-        Top = 360
-        Width = 107
+        Left = 9
+        Top = 250
+        Width = 100
         Height = 40
         Alignment = taCenter
         AllowAllUp = True
@@ -257,7 +263,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -295,19 +300,18 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnMoveDownClick
       end
       object MPxpButton1: TMPxpButton
-        Left = 7
+        Left = 10
         Top = 10
-        Width = 106
+        Width = 100
         Height = 40
         Alignment = taCenter
         AllowAllUp = True
-        Caption = 'Tag editor'
+        Caption = 'Tag Editor'
         Color = 6303744
         ColorWhenDown = 11363625
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -332,10 +336,13 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnTagEditorClick
       end
       object btnScanFolder: TMPxpButton
-        Left = 5
-        Top = 468
-        Width = 107
+        Left = 8
+        Top = 358
+        Width = 100
         Height = 40
+        Hint = 
+          'Scan folder inc. subfolders. Note: The database will be preserve' +
+          'd, new items will be added.'
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -346,7 +353,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Color = 5914932
         ColorWhenDown = 11363625
         ColorWhenUp = 5914932
-        Checked = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
         Font.Height = -13
@@ -364,14 +370,16 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         LightColor = 12348265
         ParentColor = False
         ParentFont = False
+        ParentShowHint = False
         ShadowColor = clSkyBlue
+        ShowHint = True
         Style = bsModern
         OnClick = btnScanFolderClick
       end
       object btnCancelScan: TMPxpButton
-        Left = 5
-        Top = 514
-        Width = 107
+        Left = 8
+        Top = 404
+        Width = 100
         Height = 40
         Margins.Left = 2
         Margins.Top = 2
@@ -383,7 +391,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Color = 5914932
         ColorWhenDown = 11363625
         ColorWhenUp = 5914932
-        Checked = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
         Font.Height = -13
@@ -406,9 +413,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnCancelScanClick
       end
       object btnClearLibrary: TMPxpButton
-        Left = 5
-        Top = 560
-        Width = 107
+        Left = 8
+        Top = 450
+        Width = 100
         Height = 40
         Margins.Left = 2
         Margins.Top = 2
@@ -420,7 +427,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Color = 5914932
         ColorWhenDown = 11363625
         ColorWhenUp = 5914932
-        Checked = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
         Font.Height = -13
@@ -443,9 +449,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnClearLibraryClick
       end
       object btnClearMissingTracks: TMPxpButton
-        Left = 5
-        Top = 606
-        Width = 107
+        Left = 8
+        Top = 496
+        Width = 100
         Height = 40
         Margins.Left = 2
         Margins.Top = 2
@@ -457,7 +463,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Color = 5914932
         ColorWhenDown = 11363625
         ColorWhenUp = 5914932
-        Checked = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
         Font.Height = -13
@@ -484,8 +489,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     object grdPlaylist: TStringGrid
       Left = 644
       Top = 0
-      Width = 621
-      Height = 650
+      Width = 620
+      Height = 549
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
@@ -508,29 +513,27 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ParentFont = False
       TabOrder = 2
       OnMouseDown = grdPlaylistMouseDown
-      ExplicitLeft = 642
+      ExplicitLeft = 637
+      ExplicitWidth = 628
+      ExplicitHeight = 643
     end
   end
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 1265
-    Height = 99
+    Width = 1264
+    Height = 106
     Align = alTop
     BevelOuter = bvNone
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    object Bevel2: TBevel
-      Left = 6
-      Top = -1
-      Width = 638
-      Height = 94
-    end
+    ExplicitTop = 39
+    ExplicitWidth = 1265
     object lblSearch: TLabel
-      Left = 10
-      Top = 18
-      Width = 85
+      Left = 15
+      Top = 19
+      Width = 81
       Height = 21
       Hint = 'Search for a name, title etc.'
       Alignment = taRightJustify
@@ -545,10 +548,28 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ParentShowHint = False
       ShowHint = True
     end
+    object Label1: TLabel
+      Left = 15
+      Top = 71
+      Width = 81
+      Height = 21
+      Hint = 'Search for a name, title etc.'
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'File:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+    end
     object edtSearch: TEdit
-      Left = 103
+      Left = 102
       Top = 16
-      Width = 302
+      Width = 320
       Height = 27
       Hint = 'Search for a name, title etc.'
       Alignment = taCenter
@@ -565,11 +586,11 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       TabOrder = 0
     end
     object btnSearch: TMPxpButton
-      Left = 417
-      Top = 7
-      Width = 106
+      Left = 428
+      Top = 6
+      Width = 100
       Height = 40
-      Hint = 'Search for an artist, title etc.'
+      Hint = 'Search in the database for an artist, title etc.'
       Alignment = taCenter
       AllowAllUp = True
       Caption = 'Search'
@@ -578,7 +599,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ColorWhenUp = 6303744
       ColorStyle = lcsQuicken
       Behavior = bbPushButton
-      Checked = False
       ImageIndexUnchecked = 1
       ImageIndexChecked = 0
       Font.Charset = DEFAULT_CHARSET
@@ -605,11 +625,11 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnClick = btnSearchClick
     end
     object btnClearSearch: TMPxpButton
-      Left = 532
+      Left = 535
       Top = 6
-      Width = 106
+      Width = 100
       Height = 40
-      Hint = 'Clear Search'
+      Hint = 'Clear searchfield'
       Alignment = taCenter
       AllowAllUp = True
       Caption = 'Clear'
@@ -618,7 +638,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ColorWhenUp = 6303744
       ColorStyle = lcsQuicken
       Behavior = bbPushButton
-      Checked = False
       ImageIndexUnchecked = 1
       ImageIndexChecked = 0
       Font.Charset = DEFAULT_CHARSET
@@ -645,21 +664,21 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnClick = btnClearSearchClick
     end
     object pnlPlaylist: TPanel
-      Left = 644
-      Top = 1
-      Width = 611
-      Height = 90
-      BevelOuter = bvNone
+      Left = 645
+      Top = -1
+      Width = 622
+      Height = 108
       Color = 5850948
       ParentBackground = False
       TabOrder = 3
       object lblPlaylist: TLabel
-        Left = 7
-        Top = 6
-        Width = 124
+        Left = -3
+        Top = 69
+        Width = 59
         Height = 23
+        Alignment = taRightJustify
         AutoSize = False
-        Caption = 'Playlist'
+        Caption = 'Playlist:'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
         Font.Height = -13
@@ -669,13 +688,13 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Layout = tlCenter
       end
       object lblPlayListDuration: TLabel
-        Left = 6
-        Top = 64
+        Left = 5
+        Top = 20
         Width = 123
         Height = 16
         Caption = 'Playlist Duration: 0'
         Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWhite
+        Font.Color = clAqua
         Font.Height = -13
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
@@ -683,9 +702,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Layout = tlCenter
       end
       object cbPlaylists: TComboBox
-        Left = 7
-        Top = 33
-        Width = 254
+        Left = 62
+        Top = 69
+        Width = 329
         Height = 24
         Hint = 'Select a playlist'
         Style = csDropDownList
@@ -703,9 +722,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnDblClick = cbPlaylistsDblClick
       end
       object btnDeletePlaylist: TMPxpButton
-        Left = 500
-        Top = 24
-        Width = 106
+        Left = 510
+        Top = 59
+        Width = 100
         Height = 40
         Hint = 'Delete current playlist'
         Alignment = taCenter
@@ -716,7 +735,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -742,49 +760,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Style = bsModern
         OnClick = btnDeletePlaylistClick
       end
-      object btnSavePlaylist: TMPxpButton
-        Left = 274
-        Top = 24
-        Width = 107
-        Height = 40
-        Hint = 'Save current playlist'
-        Alignment = taCenter
-        AllowAllUp = True
-        Caption = 'Save'
-        Color = 6303744
-        ColorWhenDown = 11363625
-        ColorWhenUp = 6303744
-        ColorStyle = lcsQuicken
-        Behavior = bbPushButton
-        Checked = False
-        ImageIndexUnchecked = 1
-        ImageIndexChecked = 0
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWhite
-        Font.Height = -13
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        GlyphTransparentColor = clFuchsia
-        GlyphTransparent = True
-        HotTrackColor = 5850948
-        HotTrackFont.Charset = DEFAULT_CHARSET
-        HotTrackFont.Color = clWindowText
-        HotTrackFont.Height = -18
-        HotTrackFont.Name = 'Segoe UI'
-        HotTrackFont.Style = []
-        Layout = blGlyphRight
-        LightColor = 12348265
-        ParentColor = False
-        ParentFont = False
-        ParentShowHint = False
-        ShadowColor = clSkyBlue
-        ShowHint = True
-        Style = bsModern
-        OnClick = btnSavePlaylistClick
-      end
       object btnNewPlaylist: TMPxpButton
-        Left = 387
-        Top = 24
+        Left = 397
+        Top = 59
         Width = 107
         Height = 40
         Hint = 'Add a new playlist'
@@ -796,7 +774,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         ColorWhenUp = 6303744
         ColorStyle = lcsQuicken
         Behavior = bbPushButton
-        Checked = False
         ImageIndexUnchecked = 1
         ImageIndexChecked = 0
         Font.Charset = DEFAULT_CHARSET
@@ -824,20 +801,19 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       end
     end
     object btnOpenFile: TMPxpButton
-      Left = 8
-      Top = 52
-      Width = 91
+      Left = 535
+      Top = 59
+      Width = 100
       Height = 40
       Hint = 'Search for an audiofile'
       Alignment = taCenter
       AllowAllUp = True
-      Caption = 'File'
+      Caption = 'Open File'
       Color = 6303744
       ColorWhenDown = 11363625
       ColorWhenUp = 6303744
       ColorStyle = lcsQuicken
       Behavior = bbPushButton
-      Checked = False
       ImageIndexUnchecked = 1
       ImageIndexChecked = 0
       Font.Charset = DEFAULT_CHARSET
@@ -864,10 +840,10 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnClick = btnOpenFileClick
     end
     object edFileName: TEdit
-      Left = 102
-      Top = 60
-      Width = 536
-      Height = 27
+      Left = 101
+      Top = 68
+      Width = 427
+      Height = 26
       Hint = 'Search for an audiofile'
       Alignment = taCenter
       AutoSize = False
@@ -887,8 +863,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 786
-    Width = 1265
+    Top = 692
+    Width = 1264
     Height = 29
     Align = alBottom
     BevelOuter = bvLowered
@@ -901,6 +877,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 786
+    ExplicitWidth = 1265
     object lblStatus: TLabel
       Left = 8
       Top = 7
@@ -918,7 +896,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 1265
+    Width = 1264
     Height = 37
     Align = alTop
     Color = 4865081
@@ -931,6 +909,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentFont = False
     TabOrder = 3
     OnMouseDown = pnlCaptionMouseDown
+    ExplicitWidth = 1265
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -954,7 +933,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnMouseDown = pnlCaptionMouseDown
     end
     object btnMinimize: TMPxpButton
-      Left = 1131
+      Left = 1130
       Top = 1
       Width = 67
       Height = 35
@@ -970,7 +949,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ColorWhenDown = 11363625
       ColorWhenUp = 5914932
       Behavior = bbPushButton
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -1005,9 +983,10 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
+      ExplicitLeft = 1131
     end
     object btnMaxNormal: TMPxpButton
-      Left = 1064
+      Left = 1063
       Top = 1
       Width = 67
       Height = 35
@@ -1023,7 +1002,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ColorWhenDown = 11363625
       ColorWhenUp = 5914932
       Behavior = bbPushButton
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -1058,9 +1036,10 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
+      ExplicitLeft = 1064
     end
     object btnExit: TMPxpButton
-      Left = 1198
+      Left = 1197
       Top = 1
       Width = 66
       Height = 35
@@ -1076,7 +1055,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ColorWhenDown = 11363625
       ColorWhenUp = 5914932
       Behavior = bbPushButton
-      Checked = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -1111,6 +1089,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
+      ExplicitLeft = 1198
     end
   end
 end

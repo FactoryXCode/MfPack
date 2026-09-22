@@ -458,7 +458,8 @@ uses
   System.IniFiles,
   {Application}
   LWFileBrowserExDlg,
-  RDJ.PlaylistDb;
+  RDJ.PlaylistDb,
+  RDJ.Log;
 
 const
   // Baseline target "minimum today" resolution.
@@ -719,10 +720,14 @@ end;
 procedure TMainMDIFrm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
+  RDJLog('Shutdown',
+         'Main form close requested.');
   CanClose := False;
 
   FAppClosing := True;
 
+  RDJLog('Shutdown',
+         'Disabling main timer and restoring lid policy.');
   tmrClock.Enabled:= False;
   RestoreLidClosePolicyOverride();
 
@@ -731,16 +736,34 @@ begin
   Sleep(1000);
 
   if Assigned(FMediaServer) then
-    FMediaServer.Free;
+    begin
+      RDJLog('Shutdown',
+             'Destroying media server form: begin.');
+      FMediaServer.Free;
+      RDJLog('Shutdown',
+             'Destroying media server form: complete.');
+    end;
 
   if Assigned(FPlayListEditor) then
-    FreeAndNil(FPlayListEditor);
+    begin
+      RDJLog('Shutdown',
+             'Destroying playlist editor: begin.');
+      FreeAndNil(FPlayListEditor);
+      RDJLog('Shutdown',
+             'Destroying playlist editor: complete.');
+    end;
 
+  RDJLog('Shutdown',
+         'Shutting down playlist database: begin.');
   RDJShutdownPlaylistDbFireDAC();
+  RDJLog('Shutdown',
+         'Shutting down playlist database: complete.');
 
   Sleep(1000);
 
-  CanClose := True
+  CanClose := True;
+  RDJLog('Shutdown',
+         'Main form close query completed; close accepted.');
 end;
 
 
@@ -1063,6 +1086,8 @@ end;
 procedure TMainMDIFrm.FormCreate(Sender: TObject);
 begin
 
+  RDJLog('Lifecycle',
+         'Main form created.');
   FAudioGraphRecoveryQueued := 0;
   FAudioGraphRecoveryDueTick := 0;
   FAudioGraphRecoveryReason := '';
@@ -1091,24 +1116,57 @@ var
 
 begin
 
+  RDJLog('Shutdown',
+         'Main form destruction: begin.');
+  RDJLog('Shutdown',
+         'Restoring execution-state and power policies: begin.');
   SetThreadExecutionState(ES_CONTINUOUS);
   RestoreLidClosePolicyOverride();
+  RDJLog('Shutdown',
+         'Restoring execution-state and power policies: complete.');
+
+  RDJLog('Shutdown',
+         'Final playlist database shutdown: begin.');
   RDJShutdownPlaylistDbFireDAC();
+  RDJLog('Shutdown',
+         'Final playlist database shutdown: complete.');
 
+  RDJLog('Shutdown',
+         'Endpoint notification teardown: begin.');
   TeardownEndpointNotifications();
+  RDJLog('Shutdown',
+         'Endpoint notification teardown: complete.');
 
+  RDJLog('Shutdown',
+         'Master FX form destruction: begin.');
   FreeAndNil(FfrmMasterFxRack);
+  RDJLog('Shutdown',
+         'Master FX form destruction: complete.');
 
+  RDJLog('Shutdown',
+         'Internal mixer recorder shutdown: begin.');
   StopInternalMixerRecording();
   FreeAndNil(FInternalMixRecorderPreFx);
   FreeAndNil(FInternalMixRecorderPostFx);
+  RDJLog('Shutdown',
+         'Internal mixer recorder shutdown: complete.');
 
+  RDJLog('Shutdown',
+         'Microphone deck destruction: begin.');
   FreeAndNil(FMicrophoneDeck);
+  RDJLog('Shutdown',
+         'Microphone deck destruction: complete.');
 
+  RDJLog('Shutdown',
+         'Audio outputs and mixer destruction: begin.');
   FreeAndNil(FCueOut);
   FreeAndNil(FMasterOut);
   FreeAndNil(FInternalMixer);
+  RDJLog('Shutdown',
+         'Audio outputs and mixer destruction: complete.');
 
+  RDJLog('Shutdown',
+         'Master FX objects destruction: begin.');
   for i := Low(FMasterFxObjects) to High(FMasterFxObjects) do
     FreeAndNil(FMasterFxObjects[i]);
 
@@ -1119,10 +1177,14 @@ begin
   FreeAndNil(FMasterFlangerEcho);
   FreeAndNil(FMasterCompLim);
   FreeAndNil(FMasterFXRack);
+  RDJLog('Shutdown',
+         'Master FX objects destruction: complete.');
 
   FreeAndNil(FRDJRadioStatusJson);
 
   DeleteCriticalSection(FCueBufferLock);
+  RDJLog('Shutdown',
+         'Main form destruction: complete.');
 end;
 
 

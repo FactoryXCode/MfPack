@@ -1,6 +1,7 @@
 program MfRdjJ;
 
 uses
+  System.SysUtils,
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
@@ -46,17 +47,42 @@ uses
   RDJ.RdjPro.SampleConverter in 'RDJ.RdjPro.SampleConverter.pas',
   RDJ.RdjPro.Mp4Recorder in 'RDJ.RdjPro.Mp4Recorder.pas',
   RDJ.RdjPro.BroadcastFmp4Recorder in 'RDJ.RdjPro.BroadcastFmp4Recorder.pas',
-  RDJ.RdjPro.CastFmp4Rebaser in 'RDJ.RdjPro.CastFmp4Rebaser.pas';
+  RDJ.RdjPro.CastFmp4Rebaser in 'RDJ.RdjPro.CastFmp4Rebaser.pas',
+  RDJ.Log in 'RDJ.Log.pas';
 
 {$R *.res}
 
 begin
-  Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.Title := 'RDJ Pro';
-  Application.CreateForm(TMainMDIFrm, MainMDIFrm);
-  // Autocreate these forms for less UI load during rendering in loopback.
-  Application.CreateForm(TLWFileBrowserExDlg, DlgLWFileBrowserEx);
-  Application.CreateForm(TfrmMediaServer, fMediaServer);
-  Application.Run;
+  RDJLogFmt('Application',
+            'Process starting. Executable=%s Log=%s',
+            [ParamStr(0),
+             RDJLogFileName()]);
+  try
+    try
+      Application.Initialize;
+      Application.MainFormOnTaskbar := True;
+      Application.Title := 'RDJ Pro';
+      Application.CreateForm(TMainMDIFrm, MainMDIFrm);
+      // Autocreate these forms for less UI load during rendering in loopback.
+      Application.CreateForm(TLWFileBrowserExDlg, DlgLWFileBrowserEx);
+      Application.CreateForm(TfrmMediaServer, fMediaServer);
+      RDJLog('Application',
+             'Initialization complete; entering message loop.');
+      Application.Run;
+      RDJLog('Application',
+             'Message loop returned.');
+    except
+      on E: Exception do
+        begin
+          RDJLogFmt('Exception',
+                    '%s: %s',
+                    [E.ClassName,
+                     E.Message]);
+          raise;
+        end;
+    end;
+  finally
+    RDJLog('Application',
+           'Process main routine ending.');
+  end;
 end.

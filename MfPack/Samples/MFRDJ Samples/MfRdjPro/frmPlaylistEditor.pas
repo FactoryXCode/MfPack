@@ -125,7 +125,6 @@ type
     btnClearMissingTracks: TMPxpButton;
     grdPlaylist: TStringGrid;
     pnlTop: TPanel;
-    Bevel2: TBevel;
     lblSearch: TLabel;
     edtSearch: TEdit;
     btnSearch: TMPxpButton;
@@ -134,7 +133,6 @@ type
     lblPlaylist: TLabel;
     cbPlaylists: TComboBox;
     btnDeletePlaylist: TMPxpButton;
-    btnSavePlaylist: TMPxpButton;
     btnNewPlaylist: TMPxpButton;
     btnOpenFile: TMPxpButton;
     edFileName: TEdit;
@@ -144,13 +142,13 @@ type
     btnMinimize: TMPxpButton;
     btnMaxNormal: TMPxpButton;
     btnExit: TMPxpButton;
+    Label1: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure btnClearSearchClick(Sender: TObject);
     procedure btnNewPlaylistClick(Sender: TObject);
-    procedure btnSavePlaylistClick(Sender: TObject);
     procedure btnDeletePlaylistClick(Sender: TObject);
     procedure cbPlaylistsChange(Sender: TObject);
     procedure btnAddToPlaylistClick(Sender: TObject);
@@ -233,6 +231,7 @@ type
     procedure InitLibraryGrid();
     procedure InitPlaylistGrid();
 
+    procedure SavePlaylist();
     procedure RefreshLibraryGrid(const ASearchText: string);
     procedure RefreshPlaylistGrid();
     procedure RefreshPlaylistsCombo();
@@ -557,6 +556,21 @@ begin
                     ExtractFileName(AFileName)]));
 
   Application.ProcessMessages;
+end;
+
+
+procedure TfrmPlaylistEditor.SavePlaylist();
+begin
+
+  if (FCurrentPlaylist = nil) then
+    Exit;
+
+  if FPlaylistMgr.SavePlaylist(FCurrentPlaylist) then
+    begin
+
+      RefreshPlaylistsCombo();
+      SetStatus('Playlist saved.');
+    end;
 end;
 
 
@@ -945,21 +959,6 @@ begin
 end;
 
 
-procedure TfrmPlaylistEditor.btnSavePlaylistClick(Sender: TObject);
-begin
-
-  if (FCurrentPlaylist = nil) then
-    Exit;
-
-  if FPlaylistMgr.SavePlaylist(FCurrentPlaylist) then
-    begin
-
-      RefreshPlaylistsCombo();
-      SetStatus('Playlist saved.');
-    end;
-end;
-
-
 procedure TfrmPlaylistEditor.btnScanFolderClick(Sender: TObject);
 var
   directory: string;
@@ -1065,10 +1064,10 @@ begin
 
   FPlaylistMgr.AddTrackToPlaylist(FCurrentPlaylist,
                                   TrackID);
-  RefreshPlaylistGrid;
+  RefreshPlaylistGrid();
   lblPlayListDuration.Caption := Format('Total duration: %s.',
-                                        [FormatDurationMs(FCurrentPlaylistDurationMs,
-                                                          True)]);
+                                        [FormatDurationMs(FCurrentPlaylistDurationMs, True)]);
+  SavePlaylist();
 end;
 
 
@@ -1089,8 +1088,8 @@ begin
                                   Idx);
   RefreshPlaylistGrid;
   lblPlayListDuration.Caption := Format('Total duration: %s.',
-                                        [FormatDurationMs(FCurrentPlaylistDurationMs,
-                                         True)]);
+                                        [FormatDurationMs(FCurrentPlaylistDurationMs, True)]);
+  SavePlaylist();
 end;
 
 
@@ -1126,8 +1125,8 @@ begin
   RefreshPlaylistGrid();
   grdPlaylist.Row := Idx;
   lblPlayListDuration.Caption := Format('Total duration: %s.',
-                                        [FormatDurationMs(FCurrentPlaylistDurationMs,
-                                         True)]);
+                                        [FormatDurationMs(FCurrentPlaylistDurationMs, True)]);
+  SavePlaylist();
 end;
 
 
@@ -1169,8 +1168,8 @@ begin
   RefreshPlaylistGrid();
   grdPlaylist.Row := Idx + 2;
   lblPlayListDuration.Caption := Format('Total duration: %s.',
-                                        [FormatDurationMs(FCurrentPlaylistDurationMs,
-                                         True)]);
+                                        [FormatDurationMs(FCurrentPlaylistDurationMs, True)]);
+  SavePlaylist();
 end;
 
 
@@ -2082,6 +2081,9 @@ begin
                    [Track.Artist,
                     Track.Title,
                     FCurrentPlaylist.Info.Name]));
+
+  // Save the playlist.
+  SavePlaylist();
 
   Result := True;
 end;

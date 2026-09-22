@@ -325,6 +325,7 @@ type
     function PlayNextPlaylistEntry(): HRESULT;
 
     function PlayPrevPlaylistEntry(): HRESULT;
+    function IsPlaylistEntryAvailable(const AIndex: Integer): Boolean;
     function ResolveNextPlaylistIndex(): Integer;
     function ResolvePrevPlaylistIndex(): Integer;
     procedure UpdateNextPlaylistPath();
@@ -1375,6 +1376,12 @@ begin
 
   Result := PlayPlaylistEntry(FCurrentPlaylistIndex,
                               True);
+
+  // The first stored entry may have been moved or deleted since the playlist
+  // was saved. Continue with the next playable entry instead of leaving the
+  // deck stopped.
+  if FAILED(Result) then
+    Result := PlayNextPlaylistEntry();
 end;
 
 
@@ -1664,6 +1671,7 @@ end;
 
 function TfrmChannelDeck.PlayNextPlaylistEntry(): HRESULT;
 var
+  HistoryIndex: Integer;
   NextIndex: Integer;
 
 begin
@@ -1687,16 +1695,49 @@ begin
       Exit;
     end;
 
-  if FPlaylistShuffle and (FShuffleHistoryPos < FShuffleHistory.Count - 1) and
-     (FShuffleHistory[FShuffleHistoryPos + 1] = NextIndex) then
-    Inc(FShuffleHistoryPos);
+  if FPlaylistShuffle and (FShuffleHistoryPos < FShuffleHistory.Count - 1) then
+    begin
+
+      for HistoryIndex := FShuffleHistoryPos + 1 to FShuffleHistory.Count - 1 do
+        if (FShuffleHistory[HistoryIndex] = NextIndex) then
+          begin
+
+            FShuffleHistoryPos := HistoryIndex;
+            Break;
+          end;
+    end;
 
   Result := PlayPlaylistEntry(NextIndex,
                               True);
 end;
 
 
+function TfrmChannelDeck.IsPlaylistEntryAvailable(const AIndex: Integer): Boolean;
+var
+  TrackPath: string;
+
+begin
+
+  Result := False;
+
+  if not Assigned(FCurrentPlaylist) then
+    Exit;
+
+  if (AIndex < 0) or (AIndex >= FCurrentPlaylist.Count) then
+    Exit;
+
+  TrackPath := Trim(FCurrentPlaylist[AIndex].Track.FullPath);
+  Result := (TrackPath <> '') and FileExists(TrackPath);
+end;
+
+
 function TfrmChannelDeck.ResolveNextPlaylistIndex(): Integer;
+var
+  CandidateIndex: Integer;
+  Candidates: TList<Integer>;
+  HistoryIndex: Integer;
+  i: Integer;
+
 begin
 
   Result := -1;
@@ -1712,59 +1753,84 @@ begin
   if FPlaylistShuffle then
     begin
 
-      // If there is already forward history, use it first.
-      if (FShuffleHistoryPos < FShuffleHistory.Count - 1) then
-        begin
+      // Prefer forward history after the user moved backwards, but silently
+      // skip entries whose files have since disappeared.
+      for HistoryIndex := FShuffleHistoryPos + 1 to FShuffleHistory.Count - 1 do
+        if IsPlaylistEntryAvailable(FShuffleHistory[HistoryIndex]) then
+          begin
 
-          Result := FShuffleHistory[FShuffleHistoryPos + 1];
-          Exit;
-        end;
+            Result := FShuffleHistory[HistoryIndex];
+            Exit;
+          end;
 
-      // One track playlist.
-      if (FCurrentPlaylist.Count = 1) then
-        begin
+      Candidates := TList<Integer>.Create();
+      try
 
-          if FRepeatPlay then
-            Result := 0
-          else
-            Result := -1;
+        // Continue the current shuffle cycle with playable, unvisited tracks.
+        for i := 0 to FCurrentPlaylist.Count - 1 do
+          if (i <> FCurrentPlaylistIndex) and
+             IsPlaylistEntryAvailable(i) and
+             (FShuffleHistory.IndexOf(i) < 0) then
+            Candidates.Add(i);
 
-          Exit;
-        end;
+        if (Candidates.Count = 0) then
+          begin
 
-      // End of current shuffle cycle.
-      if (FShuffleHistory.Count >= FCurrentPlaylist.Count) and
-         (FShuffleHistoryPos >= FShuffleHistory.Count - 1) then
-        begin
-
-          if not FRepeatPlay then
-            begin
-
-              Result := -1;
+            if not FRepeatPlay then
               Exit;
-            end;
 
-          ResetShuffleHistory();
-        end;
+            // Start a new cycle. Keep the current track in history so the
+            // first choice of the new cycle is not an immediate repeat.
+            ResetShuffleHistory();
 
-      repeat
+            if IsPlaylistEntryAvailable(FCurrentPlaylistIndex) then
+              AddCurrentToShuffleHistory(FCurrentPlaylistIndex);
 
-        Result := Random(FCurrentPlaylist.Count);
-      until (Result <> FCurrentPlaylistIndex) and
-            (FShuffleHistory.IndexOf(Result) < 0);
+            for i := 0 to FCurrentPlaylist.Count - 1 do
+              if (i <> FCurrentPlaylistIndex) and
+                 IsPlaylistEntryAvailable(i) then
+                Candidates.Add(i);
+
+            // A one-track playlist may repeat its only playable entry.
+            if (Candidates.Count = 0) and
+               IsPlaylistEntryAvailable(FCurrentPlaylistIndex) then
+              Candidates.Add(FCurrentPlaylistIndex);
+          end;
+
+        if (Candidates.Count > 0) then
+          Result := Candidates[Random(Candidates.Count)];
+      finally
+
+        Candidates.Free;
+      end;
 
       Exit;
     end;
 
-  Result := FCurrentPlaylistIndex + 1;
+  // Sequential playback: inspect at most one complete pass, skipping missing
+  // entries. Without Loop, reaching the bottom still finishes the playlist.
+  CandidateIndex := FCurrentPlaylistIndex;
 
-  if (Result >= FCurrentPlaylist.Count) then
+  for i := 1 to FCurrentPlaylist.Count do
     begin
 
-      if FRepeatPlay then
-        Result := 0
-      else
-        Result := -1;
+      Inc(CandidateIndex);
+
+      if (CandidateIndex >= FCurrentPlaylist.Count) then
+        begin
+
+          if not FRepeatPlay then
+            Exit;
+
+          CandidateIndex := 0;
+        end;
+
+      if IsPlaylistEntryAvailable(CandidateIndex) then
+        begin
+
+          Result := CandidateIndex;
+          Exit;
+        end;
     end;
 end;
 

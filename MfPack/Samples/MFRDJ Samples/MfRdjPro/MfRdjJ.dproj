@@ -1,0 +1,181 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{3AF3435D-A3AC-4B53-A238-FD379ADE2815}</ProjectGuid>
+        <MainSource>MfRdjJ.dpr</MainSource>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
+        <FrameworkType>VCL</FrameworkType>
+        <ProjectVersion>16.0</ProjectVersion>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_E>false</DCC_E>
+        <DCC_K>false</DCC_K>
+        <VerInfo_Locale>1043</VerInfo_Locale>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_F>false</DCC_F>
+        <SanitizedProjectName>MfRdjJ</SanitizedProjectName>
+        <DCC_N>false</DCC_N>
+        <DCC_S>false</DCC_S>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=;CFBundleName=</VerInfo_Keys>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_UnitSearchPath>D:\PROJECTS\MfPack\src;D:\PROJECTS\MfPack\Cast;D:\PROJECTS\MfPack\Cast\Media;D:\PROJECTS\MfPack\Samples\MfComponents;D:\PROJECTS\MfPack\Samples\MfRdjPro\Controls;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_Optimize>false</DCC_Optimize>
+        <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_MapFile>3</DCC_MapFile>
+        <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_UnitSearchPath>D:\PROJECTS\MfPack\src;D:\PROJECTS\MfPack\Cast;D:\PROJECTS\MfPack\Cast\Media;D:\PROJECTS\MfPack\Samples\MfComponents;D:\PROJECTS\MfPack\Samples\MFRDJ Samples\Controls;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="frmMasterDeck.pas">
+            <Form>MasterDeckFrm</Form>
+        </DCCReference>
+        <DCCReference Include="frmPlaylistEditor.pas">
+            <Form>frmPlaylistEditor</Form>
+        </DCCReference>
+        <DCCReference Include="frmSetup.pas">
+            <Form>frmSetup</Form>
+        </DCCReference>
+        <DCCReference Include="RDJ.LibraryScanner.pas"/>
+        <DCCReference Include="RDJ.PlaylistDb.pas"/>
+        <DCCReference Include="RDJ.PlaylistManager.pas"/>
+        <DCCReference Include="RDJ.PlaylistTypes.pas"/>
+        <DCCReference Include="RDJ.Setup.pas"/>
+        <DCCReference Include="RDJ.TagReader.pas"/>
+        <DCCReference Include="RDJ.TrackLibrary.pas"/>
+        <DCCReference Include="RDJ.LibraryScanThread.pas"/>
+        <DCCReference Include="RDJ.InternalMixer.pas"/>
+        <DCCReference Include="MfWasApiRenderOutputEngine.pas"/>
+        <DCCReference Include="MfChannelDeckEngine.pas"/>
+        <DCCReference Include="frmMasterFxRack.pas">
+            <Form>frmMasterFxRack</Form>
+        </DCCReference>
+        <DCCReference Include="frmTagEditor.pas">
+            <Form>frmTagEditor</Form>
+        </DCCReference>
+        <DCCReference Include="RDJ.TagWriter.pas"/>
+        <DCCReference Include="MfLoopbackDeckEngine.pas"/>
+        <DCCReference Include="frmLoopbackDeck.pas">
+            <Form>LoopbackDeckfrm</Form>
+        </DCCReference>
+        <DCCReference Include="LoopBackCapture.pas"/>
+        <DCCReference Include="frmChannelDeck.pas">
+            <Form>ChannelDeckFrm</Form>
+        </DCCReference>
+        <DCCReference Include="frmProcessPicker.pas">
+            <Form>dlgProcessPicker</Form>
+        </DCCReference>
+        <DCCReference Include="ProcessAudioPickerUtils.pas"/>
+        <DCCReference Include="MfAudioRecorder.pas"/>
+        <DCCReference Include="MfAudioFileWriter.pas"/>
+        <DCCReference Include="RDJ_Common.pas"/>
+        <DCCReference Include="frmMainMDI.pas">
+            <Form>MainMDIFrm</Form>
+        </DCCReference>
+        <DCCReference Include="MfMicrophoneFx.pas"/>
+        <DCCReference Include="MfMicrophoneDeckEngine.pas"/>
+        <DCCReference Include="MicrophoneDeckFrm.pas">
+            <Form>MicrophoneDeckFrm</Form>
+        </DCCReference>
+        <DCCReference Include="RDJ.JSon.pas"/>
+        <DCCReference Include="RDJ.FilenameParser.pas"/>
+        <DCCReference Include="dlgMediaServer.pas">
+            <Form>frmMediaServer</Form>
+        </DCCReference>
+        <DCCReference Include="dlgAudioDevices.pas">
+            <Form>AudioDevicesDlg</Form>
+        </DCCReference>
+        <DCCReference Include="LWFileBrowserExDlg.pas">
+            <Form>LWFileBrowserExDlg</Form>
+        </DCCReference>
+        <DCCReference Include="RDJ_NetWorkStationsScanner.pas"/>
+        <DCCReference Include="RDJ.RdjPro.Compositor.pas"/>
+        <DCCReference Include="RDJ.RdjPro.AudioQueue.pas"/>
+        <DCCReference Include="RDJ.RdjPro.CaptureEngine.pas"/>
+        <DCCReference Include="RDJ.RdjPro.SampleConverter.pas"/>
+        <DCCReference Include="RDJ.RdjPro.Mp4Recorder.pas"/>
+        <DCCReference Include="RDJ.RdjPro.BroadcastFmp4Recorder.pas"/>
+        <DCCReference Include="RDJ.RdjPro.CastFmp4Rebaser.pas"/>
+        <DCCReference Include="RDJ.Log.pas"/>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">MfRdjJ.dpr</Source>
+                </Source>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+</Project>
