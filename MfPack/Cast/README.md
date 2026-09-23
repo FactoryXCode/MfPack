@@ -11,6 +11,22 @@ Version: 4.0.1
   
 ---
   
+MfCast is an independent Chromecast subsystem for Delphi.
+It handles device discovery, receiver control, local media serving,
+media preparation, subtitles, track selection,
+and optional remuxing/transcoding behind a small public API.
+  
+MfCast can be used by:
+  
+- MfPack media-player samples
+- Audio players
+- Radio applications
+- Slideshow or image applications
+- Dedicated Chromecast control applications
+- Third-party Delphi applications that use MfPack
+- Applications that do not otherwise use MfPack player classes
+  
+  
 ***MfCast.pas*** is the application main interface (TMfCast class).  
 The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
 a local HTTP server.  
@@ -94,7 +110,9 @@ layer compile against those declarations.
 unit, including all units under "Cast/Media". Build it to perform a complete  
 static compile check after changes that may not be reached by the simple sample.  
 It requires the matching installed "MfPackXxxx" package but is not intended to  
-be installed or referenced by applications.  
+be installed or referenced by applications. 
+  
+Read the full documentation in  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt.
   
 Project: MFPack - Cast  
 Project location: MfPack  
