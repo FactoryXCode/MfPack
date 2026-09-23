@@ -1,4 +1,5 @@
 ## MfRDJ Samples
+  
 Version 4.0.0
 
 NOTES:
@@ -50,11 +51,14 @@ MfPack Cast V2 protocols.
 You have to know the principles of WASAPI, MFT's, MfPack Cast V2, FxServe and audio manipulation.  
 This sample is large and not suitable for beginners!  
 Before using this sample make sure, you have all needed components installed (see instructions).
-
+  
 Project: Media Foundation - MFPack - Samples - MFRDJ Samples
+  
 Project location: 
 https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
+  
 First release date: 02/08/2026
 Final release date: 09/09/2026
+  
 Copyright © FactoryX. All rights reserved.
