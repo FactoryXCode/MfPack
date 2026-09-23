@@ -289,8 +289,41 @@ Typical runtime public stream files:
 - `live.json`
 - `patched_frag_XXXXXX.m4s`
 
-## Summary
+##Hardware
 
+The software runs on a single laptop or PC without the need for extra hardware.
+
+The needed hardware as a minimum pretty to work configuration is:
+- Laptop/PC
+- 2 screens with one has a build-in audio device, or a second soundcard in your PC or laptop.
+- Headphone
+- Microphone 
+- Camera
+
+The needed hardware as the best configuration is:
+- Laptop/PC running RDJ
+- 1 wide (touch) screen that displays the application
+- 1 normal screen which has a build-in audio device, or a second soundcard in your PC or laptop.
+- Headphone
+- Studio microphone 
+- Studio camera
+- Internet connection
+- Remote server that has as minimum Windows 10 running on it, running FxServe or Caddy.
+- Router that supports DDNS or your own registered domain.
+- An amplifier + speakers for master sound
+
+## Test conditions
+  
+- RDJ Pro has been tested on long runs (max a month), 
+- Hard/software: HP laptop with i7-10510U CPU 1.80GHz (2.30 GHz), 16 gb memory, NVIDIA GeForce MX330 (2 GB) Intel(R) UHD Graphics (128 MB), Windows 11 Pro 64 bit.
+- HP monitor with build-in audio
+- Remote server: HP dual core PC Windows 10
+- Wireless WIFI (on bad router connection, 15% signal strength)
+- Wireless internet 4G and 5G (20% signal strength)
+  
+  
+## Summary
+  
 RDJPro uses Media Foundation for the hard media work: capture, encode, mux, and write fragmented MP4. RDJPro adds the live-broadcast layer around it: observing the fMP4 byte stream, extracting and patching fragments, grouping fragments for practical browser delivery, publishing a rolling manifest, mirroring to the web server, and feeding a browser MSE player.
 
 The result is a Windows desktop DJ application that can broadcast synchronized audio/video to modern browsers using standard web playback technology and FxServe or Caddy.
