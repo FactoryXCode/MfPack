@@ -657,7 +657,25 @@ The Caddy version in MfPack is packed in a zip file together with the needed fil
 local PC. The Caddy version also has a CaddyAdmin app, to install,  
 configure and control Caddy as a Windows service.  
   
+---
+***MfCast V2.1***
   
+MfCast is an independent Chromecast subsystem for Delphi.
+It handles device discovery, receiver control, local media serving,
+media preparation, subtitles, track selection,
+and optional remuxing/transcoding behind a small public API.
+  
+MfCast can be used by:
+  
+- MfPack media-player samples
+- Audio players
+- Radio applications
+- Slideshow or image applications
+- Dedicated Chromecast control applications
+- Third-party Delphi applications that use MfPack
+- Applications that do not otherwise use MfPack player classes
+
+---
   
 ***Tools***
   
