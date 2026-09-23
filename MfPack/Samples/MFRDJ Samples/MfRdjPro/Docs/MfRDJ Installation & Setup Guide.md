@@ -194,6 +194,74 @@ Note: No firewall setup needed
 
 ---
 
+# FireDAC and SQLite
+
+RDJ Pro uses **FireDAC** to store the music library and playlists in an
+**SQLite** database. FireDAC is a Delphi framework; it is not an RDJ Pro
+component package and does not need to be installed into the Tool Palette.
+
+## Install FireDAC in Delphi
+
+FireDAC must be present in the Delphi installation used to compile RDJ Pro. If
+Delphi reports that a unit such as `FireDAC.Comp.Client` or
+`FireDAC.Phys.SQLite` cannot be found, close Delphi and use the Delphi installer
+or feature manager to add FireDAC. Do not solve this by copying FireDAC DCU
+files from a different Delphi version.
+
+## SQLite used by the current sample
+
+The current RDJ Pro source uses FireDAC's built-in SQLite support. Normally no
+separate `sqlite3.dll` is required. On first use, RDJ Pro creates the database
+and its tables automatically at:
+
+```text
+<folder containing MfRdjJ.exe>\Data\RDJLibrary.db
+```
+
+For example, a Win32 Debug build normally uses:
+
+```text
+MfRdjPro\Win32\Debug\Data\RDJLibrary.db
+```
+
+Open **Playlist Composer** and use **Scan Folder** to add audio files. Scanning
+again adds new files and updates known files; it does not require recreating the
+database.
+
+## Optional external SQLite DLL
+
+The shared RDJ redistribution folder contains SQLite 3.53.0 for applications
+that are deliberately configured to load SQLite dynamically:
+
+```text
+..\Redist\sqlite-dll-win-x86-3530000.zip   Win32
+..\Redist\sqlite-dll-win-x64-3530000.zip   Win64
+```
+
+Extract `sqlite3.dll` from the archive matching the application platform and
+place it beside `MfRdjJ.exe`. The supplied `.def` file is for development and
+does not need to be distributed. Never put the x64 DLL beside a Win32 build, or
+the x86 DLL beside a Win64 build.
+
+Copying the DLL alone does not change the current sample from built-in to
+dynamic SQLite. A dynamic build must also set the FireDAC SQLite driver's
+`VendorLib` to that `sqlite3.dll` before opening the connection. Keep the
+built-in configuration unless there is a specific reason to maintain an
+external SQLite runtime.
+
+## Database care
+
+RDJ Pro uses SQLite WAL mode, so `RDJLibrary.db-wal` and `RDJLibrary.db-shm` may
+appear while it is running. This is normal.
+
+* Close RDJ Pro before backing up or replacing the database.
+* Back up the complete `Data` folder, not only a file that is open in RDJ Pro.
+* Do not let two RDJ Pro instances write to the same database.
+* Keep the live database on a reliable local disk. Do not run it directly from
+  an intermittent network share.
+
+---
+
 #  Running MfRdjPro
 
 First run:

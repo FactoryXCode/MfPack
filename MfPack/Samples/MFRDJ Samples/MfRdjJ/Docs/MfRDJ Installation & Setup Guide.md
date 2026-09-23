@@ -147,9 +147,89 @@ C:\Caddy\caddy.exe run --config "C:\Caddy\caddy.cff" --adapter caddyfile
 
 For a public domain, DNS must point to the router/server and external TCP ports 80 and 443 must reach Caddy. Caddy then obtains and renews the HTTPS certificate automatically.
 
-## 4. General tab - every field
+## 4. FireDAC and SQLite
 
-### 4.1 Endpoint devices
+MfRDJ uses **FireDAC** to store the music library and playlists in an
+**SQLite** database. FireDAC belongs to Delphi and is not a separate MfPack
+component or a control that must be installed on the Tool Palette.
+
+### 4.1 Install FireDAC in Delphi
+
+FireDAC must be included in the Delphi installation used to compile MfRDJ. If
+the compiler cannot find `FireDAC.Comp.Client`, `FireDAC.Phys.SQLite`, or another
+FireDAC unit, close Delphi and add FireDAC through the Delphi installer or
+feature manager. Do not copy DCU files from another Delphi release.
+
+### 4.2 Current built-in SQLite configuration
+
+The current MfRDJ sample uses FireDAC's built-in SQLite support. It normally
+does not require a separate `sqlite3.dll`. The application creates the database
+schema automatically when the playlist library is first opened:
+
+```text
+<folder containing MfRdjJ.exe>\Data\RDJLibrary.db
+```
+
+A normal Win32 Debug build therefore uses:
+
+```text
+MfRdjJ\Win32\Debug\Data\RDJLibrary.db
+```
+
+Use **Playlist Composer > Scan Folder** to add music. Running Scan Folder again
+adds newly copied audio files and updates files already known to the library; it
+does not require deleting the existing database or playlists.
+
+### 4.3 Optional external SQLite DLL
+
+The common redistribution folder includes SQLite 3.53.0 for projects that are
+deliberately changed to load SQLite dynamically:
+
+```text
+..\Redist\sqlite-dll-win-x86-3530000.zip   Win32
+..\Redist\sqlite-dll-win-x64-3530000.zip   Win64
+```
+
+Extract `sqlite3.dll` from the archive matching the application platform and
+place it in the same folder as `MfRdjJ.exe`. The `.def` file is used for
+development and does not need to be copied with the application.
+
+Copying the DLL by itself does not change the current sample to dynamic SQLite.
+That build must also set the FireDAC SQLite driver's `VendorLib` to the deployed
+DLL before opening `RDJLibrary.db`. Keep the built-in setup unless an external
+SQLite runtime is specifically required.
+
+The supplied projects currently target Win32, so use the x86 DLL for a dynamic
+Win32 build. Use x64 only after the application and every required dependency
+have been enabled and rebuilt for Win64. A DLL with the wrong architecture can
+produce an “Unable to load” or “not a valid Win32 application” error.
+
+### 4.4 Using and protecting the database
+
+SQLite runs inside MfRDJ; there is no database server, account, or manual schema
+installation. The library and playlists are managed through Playlist Composer.
+
+MfRDJ enables SQLite WAL mode. While the application is open, these companion
+files may appear next to the database:
+
+```text
+RDJLibrary.db-wal
+RDJLibrary.db-shm
+```
+
+They are normal working files. Follow these rules:
+
+* Close MfRDJ before backing up, replacing, or moving the database.
+* Back up the complete `Data` folder.
+* Do not run two MfRDJ/RDJ Pro instances against the same database.
+* Keep the active database on a reliable local disk rather than an intermittent
+  network share.
+* If the library unexpectedly appears empty, verify which Debug or Release
+  executable was started; every output folder can have its own `Data` folder.
+
+## 5. General tab - every field
+
+### 5.1 Endpoint devices
 
 | Field | What it controls | Recommended setting |
 | --- | --- | --- |
@@ -161,7 +241,7 @@ For a public domain, DNS must point to the router/server and external TCP ports 
 
 MfRDJ stores Windows endpoint IDs, not only display names. If a USB device is removed, moved to another system, or reinstalled, reopen Setup and select it again.
 
-### 4.2 Mixer layout and real-time buffer
+### 5.2 Mixer layout and real-time buffer
 
 | Field | Range/default | Meaning and advice |
 | --- | --- | --- |
@@ -171,7 +251,7 @@ MfRDJ stores Windows endpoint IDs, not only display names. If a USB device is re
 
 Changes to the mixer layout and endpoint routing are safest after restarting MfRDJ.
 
-### 4.3 Audio recorder
+### 5.3 Audio recorder
 
 | Field | Range/default | Meaning and advice |
 | --- | --- | --- |
@@ -183,7 +263,7 @@ Changes to the mixer layout and endpoint routing are safest after restarting MfR
 | **Enable stream switch detection** | On/off | Allows the recorder to react when the Windows default audio endpoint changes or the active stream is switched. Recommended when devices may be connected/disconnected while RDJ runs. |
 | **Output format** | WAV or FLAC | WAV is broadly compatible and large. FLAC is lossless and uses less disk space but needs FLAC-capable software. |
 
-### 4.4 Application directories
+### 5.4 Application directories
 
 | Field | Default | Purpose |
 | --- | --- | --- |
@@ -191,7 +271,7 @@ Changes to the mixer layout and endpoint routing are safest after restarting MfR
 | **Database** | `Data` | Folder for MfRDJ data, including the playlist/library SQLite database. Back up this folder. Do not place a live SQLite database on an unreliable or intermittently connected share. |
 | **Covers** | `Covers` | Local cover-art folder used by RDJ. The public Caddy cover destination is configured separately on the Broadcast tab. |
 
-## 5. Broadcast page - simple setup
+## 6. Broadcast page - simple setup
 
 Choose one setup below and copy its values into the Broadcast page:
 
@@ -201,7 +281,7 @@ Choose one setup below and copy its values into the Broadcast page:
 
 The LAN and WAN examples use `PCHP001` at `192.168.50.83`. The WAN example uses `radio.example.com`; replace this with your own Internet name. Replace `YOUR_PASSWORD` and the example station text with your own information.
 
-### 5.1 IceCast settings
+### 6.1 IceCast settings
 
 This section tells MfRDJ where to send the music and what listeners see.
 
@@ -265,7 +345,7 @@ This section tells MfRDJ where to send the music and what listeners see.
 | **Broadcast URL:** | Your station's website address. Leave it empty for Local and LAN. |
 | **Checkbox Public Stream on/off** | Controls public directory listing only. It is not the switch that enables Internet listening. |
 
-### 5.2 IceCast server manager
+### 6.2 IceCast server manager
 
 This section tells MfRDJ how to find IceCast and, for Local setup, how to start it.
 
@@ -323,7 +403,7 @@ If IceCast was installed in a different folder, use that folder instead of `C:\I
 | **Startup Delay:** | How long MfRDJ waits after starting IceCast. `3000` means 3 seconds. |
 | **Checkbox Auto Restart on/off** | Lets MfRDJ restart IceCast when both programs run on the same computer. |
 
-### 5.3 Caddy /json settings
+### 6.3 Caddy /json settings
 
 Caddy provides the web page, current-song information and cover pictures.
 
@@ -371,7 +451,7 @@ For LAN and WAN, the `\\PCHP001\Caddy` folder must open in Windows Explorer from
 
 For filling in the Broadcast page, you can stop here. The following sections are optional checks and troubleshooting.
 
-## 6. Complete setup recipes
+## 7. Complete setup recipes
 
 ### Recipe A - local test on one PC
 
@@ -414,7 +494,7 @@ For filling in the Broadcast page, you can stop here. The following sections are
 8. In MfRDJ, enable Broadcast and test `https://radio.example.com` from a phone using mobile data, not Wi-Fi.
 9. Confirm the player loads, `/live` plays, `nowplaying.json` changes, and cover URLs are HTTPS URLs rather than disk/UNC paths.
 
-## 7. Windows firewall and router checklist
+## 8. Windows firewall and router checklist
 
 | Service | Protocol/port | Local only | LAN | Public internet |
 | --- | --- | --- | --- | --- |
@@ -425,7 +505,7 @@ For filling in the Broadcast page, you can stop here. The following sections are
 
 Do not place the MfRDJ PC or server in the router's DMZ. Forward only required ports to the fixed internal address of the Caddy server.
 
-## 8. Operating sequence
+## 9. Operating sequence
 
 ### Local managed services
 
@@ -444,7 +524,7 @@ Do not place the MfRDJ PC or server in the router's DMZ. Forward only required p
 4. Click **Start/Confirm**. This is a reachability check in remote mode.
 5. When the log reports the remote server ready, click **Broadcast**.
 
-## 9. Verification commands
+## 10. Verification commands
 
 Replace the examples with your own host and domain.
 
@@ -471,7 +551,7 @@ https://radio.example.com
 https://radio.example.com/live
 ```
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 ### MfRDJ cannot connect as source
 
@@ -526,7 +606,7 @@ https://radio.example.com/live
 - Avoid Bluetooth, power-saving USB hubs and heavily loaded network shares.
 - Confirm all active audio endpoints support the selected format.
 
-## 11. Security and backup
+## 12. Security and backup
 
 - Change every example Icecast password before connecting the server to a network.
 - Use different strong passwords for source, relay and admin accounts.
@@ -537,7 +617,7 @@ https://radio.example.com/live
 - Back up the MfRDJ INI, `Data` database folder, Caddy configuration/web assets, and Icecast XML.
 - Test restoration before relying on the backups.
 
-## 12. Final commissioning checklist
+## 13. Final commissioning checklist
 
 ### Audio and recording
 
@@ -572,7 +652,7 @@ https://radio.example.com/live
 - [ ] HTTPS certificate is valid.
 - [ ] Public test succeeds from outside the LAN.
 
-## 13. Reference documentation
+## 14. Reference documentation
 
 - Icecast basic setup: https://icecast.org/docs/icecast-latest/basic_setup/
 - Icecast configuration reference: https://icecast.org/docs/icecast-latest/config_file/
