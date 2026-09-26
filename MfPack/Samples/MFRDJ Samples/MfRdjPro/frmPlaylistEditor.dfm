@@ -7,6 +7,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
   Margins.Bottom = 0
   BorderIcons = []
   BorderStyle = bsSizeToolWin
+  Caption = 'Playlist Composer'
   ClientHeight = 721
   ClientWidth = 1264
   Color = 5850948
@@ -36,9 +37,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 136
-    ExplicitWidth = 1265
-    ExplicitHeight = 650
     object splLeft: TSplitter
       Left = 520
       Top = 0
@@ -56,7 +54,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Height = 549
       Align = alLeft
       TabOrder = 0
-      ExplicitHeight = 650
       object grdLibrary: TStringGrid
         Left = 1
         Top = 1
@@ -89,8 +86,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnMouseDown = grdLibraryMouseDown
         OnSelectCell = grdLibrarySelectCell
         OnSetEditText = grdLibrarySetEditText
-        ExplicitWidth = 521
-        ExplicitHeight = 641
       end
     end
     object pnlActions: TPanel
@@ -102,8 +97,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Color = 5850948
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 526
-      ExplicitHeight = 643
       object btnAddToPlaylist: TMPxpButton
         Left = 12
         Top = 105
@@ -513,9 +506,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ParentFont = False
       TabOrder = 2
       OnMouseDown = grdPlaylistMouseDown
-      ExplicitLeft = 637
-      ExplicitWidth = 628
-      ExplicitHeight = 643
     end
   end
   object pnlTop: TPanel
@@ -528,11 +518,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 39
-    ExplicitWidth = 1265
     object lblSearch: TLabel
       Left = 15
-      Top = 19
+      Top = 21
       Width = 81
       Height = 21
       Hint = 'Search for a name, title etc.'
@@ -568,13 +556,13 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     end
     object edtSearch: TEdit
       Left = 102
-      Top = 16
+      Top = 18
       Width = 320
       Height = 27
       Hint = 'Search for a name, title etc.'
       Alignment = taCenter
       AutoSize = False
-      Color = 5850948
+      Color = 9216
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -587,7 +575,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     end
     object btnSearch: TMPxpButton
       Left = 428
-      Top = 6
+      Top = 8
       Width = 100
       Height = 40
       Hint = 'Search in the database for an artist, title etc.'
@@ -626,7 +614,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     end
     object btnClearSearch: TMPxpButton
       Left = 535
-      Top = 6
+      Top = 8
       Width = 100
       Height = 40
       Hint = 'Clear searchfield'
@@ -664,7 +652,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       OnClick = btnClearSearchClick
     end
     object pnlPlaylist: TPanel
-      Left = 645
+      Left = 644
       Top = -1
       Width = 622
       Height = 108
@@ -672,9 +660,9 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ParentBackground = False
       TabOrder = 3
       object lblPlaylist: TLabel
-        Left = -3
-        Top = 69
-        Width = 59
+        Left = 4
+        Top = 19
+        Width = 62
         Height = 23
         Alignment = taRightJustify
         AutoSize = False
@@ -688,8 +676,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Layout = tlCenter
       end
       object lblPlayListDuration: TLabel
-        Left = 5
-        Top = 20
+        Left = 15
+        Top = 72
         Width = 123
         Height = 16
         Caption = 'Playlist Duration: 0'
@@ -702,18 +690,18 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Layout = tlCenter
       end
       object cbPlaylists: TComboBox
-        Left = 62
-        Top = 69
-        Width = 329
-        Height = 24
+        Left = 72
+        Top = 19
+        Width = 321
+        Height = 22
         Hint = 'Select a playlist'
-        Style = csDropDownList
+        Style = csOwnerDrawFixed
+        Color = 9216
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clAqua
         Font.Height = -13
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
-        ParentColor = True
         ParentFont = False
         ParentShowHint = False
         ShowHint = True
@@ -722,8 +710,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnDblClick = cbPlaylistsDblClick
       end
       object btnDeletePlaylist: TMPxpButton
-        Left = 510
-        Top = 59
+        Left = 512
+        Top = 9
         Width = 100
         Height = 40
         Hint = 'Delete current playlist'
@@ -761,8 +749,8 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnClick = btnDeletePlaylistClick
       end
       object btnNewPlaylist: TMPxpButton
-        Left = 397
-        Top = 59
+        Left = 399
+        Top = 9
         Width = 107
         Height = 40
         Hint = 'Add a new playlist'
@@ -847,7 +835,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Hint = 'Search for an audiofile'
       Alignment = taCenter
       AutoSize = False
-      Color = 5850948
+      Color = 9216
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -877,8 +865,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitTop = 786
-    ExplicitWidth = 1265
     object lblStatus: TLabel
       Left = 8
       Top = 7
@@ -909,18 +895,17 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentFont = False
     TabOrder = 3
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 1265
     object lblCaption: TLabel
       Left = 8
       Top = 11
-      Width = 88
+      Width = 114
       Height = 16
       Hint = 'Channel number'
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
       Margins.Bottom = 2
-      Caption = 'Playlist Editor'
+      Caption = 'Playlist Composer'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
       Font.Height = -13
@@ -983,7 +968,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 1131
     end
     object btnMaxNormal: TMPxpButton
       Left = 1063
@@ -1036,7 +1020,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 1064
     end
     object btnExit: TMPxpButton
       Left = 1197
@@ -1089,7 +1072,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 1198
     end
   end
 end
