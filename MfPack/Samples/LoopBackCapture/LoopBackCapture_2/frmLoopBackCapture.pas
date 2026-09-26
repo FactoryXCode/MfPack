@@ -83,6 +83,7 @@ uses
   Vcl.Dialogs,
   Vcl.ComCtrls,
   Vcl.StdCtrls,
+  Vcl.Clipbrd,
   Vcl.ExtCtrls,
   Vcl.Samples.Spin,
   {MediaFoundationApi}
@@ -156,6 +157,7 @@ type
     FFileName: string;
     FOrgFileName: string;
     bEdited: Boolean;
+    FFileNameEditWindowProc: TWndMethod;
     iTotalBytesWritten: Int64;
     pvBufferDuration: REFERENCE_TIME;
     pvTargetLatency: REFERENCE_TIME;
@@ -172,6 +174,7 @@ type
     function CreateEngine(): Boolean;
     procedure RemoveEngine();
     procedure SetBufferDuration();
+    procedure FileNameEditWindowProc(var Message: TMessage);
 
     // Event handlers.
     procedure OnCapturingStartEvent(Sender: TObject);
@@ -378,6 +381,44 @@ begin
   CreateEngine();
   butGetPID.OnClick(Self);
   bEdited := False;
+
+  // Browsers can place text on the clipboard in a Unicode-only format that
+  // the standard edit control does not always consume correctly.
+  FFileNameEditWindowProc := edFileName.WindowProc;
+  edFileName.WindowProc := FileNameEditWindowProc;
+end;
+
+
+procedure TfrmMain.FileNameEditWindowProc(var Message: TMessage);
+var
+  ClipboardText: string;
+
+begin
+
+  if (Message.Msg = WM_PASTE) and Clipboard.HasFormat(CF_UNICODETEXT) then
+    begin
+
+      ClipboardText := Clipboard.AsText;
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13#10,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #10,
+                                     ' ',
+                                     [rfReplaceAll]);
+
+      edFileName.SelText := ClipboardText;
+      bEdited := True;
+      Message.Result := 0;
+      Exit;
+    end;
+
+  FFileNameEditWindowProc(Message);
 end;
 
 

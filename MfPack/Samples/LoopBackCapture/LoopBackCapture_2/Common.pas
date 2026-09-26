@@ -147,8 +147,8 @@ begin
 end;
 
 
-function TLoopbackCapture.EventWait(EventObj: TEvent;
-                                    Period: Integer = 100): HResult;
+function EventWait(EventObj: TEvent;
+                   Period: Integer = 100): HResult;
 var
   wrWaitResult: TWaitResult;
 

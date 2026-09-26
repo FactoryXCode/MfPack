@@ -1,6 +1,6 @@
 # MfRDJ Installation & Setup Guide
 
-> **Web-server:** RDJ Pro can use FxServe or Caddy. FxServe is the
+> **Web-server update:** RDJ Pro can now use FxServe or Caddy. FxServe is the
 > smaller RDJ-focused choice; Caddy remains available for larger or more complex
 > web setups. See [RDJ Web Server Setup](../../../FxServe/RDJ-Web-Server-Setup.md)
 > for the current paths and short installation steps. The Caddy examples below
@@ -74,7 +74,7 @@ Use this for:
 * Example:
 
 ```text
-yourradio.yourdomain.com
+factoryxradio.asuscomm.com
 ```
 
 ---
@@ -131,10 +131,10 @@ Enable **Port Forwarding**:
 
 # DDNS (Recommended)
 
-Example (ASUS):
+Example (ASUS router):
 
 ```text
-factoryxradio.asuscomm.com
+yourradio.asuscomm.com
 ```
 
 Enable:
@@ -230,6 +230,8 @@ database.
 
 ## Optional external SQLite DLL
 
+If your Delphi version does not contains FireDac, you need "SQLite3-Delphi-FPC"
+from Github. 
 The shared RDJ redistribution folder contains SQLite 3.53.0 for applications
 that are deliberately configured to load SQLite dynamically:
 

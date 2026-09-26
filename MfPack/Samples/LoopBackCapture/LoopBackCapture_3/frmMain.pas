@@ -77,6 +77,7 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.StdCtrls,
+  Vcl.Clipbrd,
   Vcl.ComCtrls,
   Vcl.Menus,
   Vcl.ExtCtrls,
@@ -161,6 +162,7 @@ type
     prFileName: TFileName;
     prOrgFileName: TFileName;
     prEdited: Boolean;
+    prFileNameEditWindowProc: TWndMethod;
 
     prEndPointDataFlow: EDataFlow;
     prEndPointRole: ERole;
@@ -187,6 +189,7 @@ type
     function CreateEngine(): Boolean;
     procedure RemoveEngine();
     procedure SetBufferDuration();
+    procedure FileNameEditWindowProc(var Message: TMessage);
 
     // Helper
     function OutputFormatFromCombo(cb: TComboBox): TOutputFormat;
@@ -586,8 +589,51 @@ begin
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
   aStopWatch := TStopwatch.Create();
   prEdited := False;
+
+  // The standard edit control does not always consume the Unicode-only text
+  // format placed on the clipboard by browsers.  Route paste messages through
+  // the VCL clipboard, which selects and converts the available text format.
+  prFileNameEditWindowProc := edFileName.WindowProc;
+  edFileName.WindowProc := FileNameEditWindowProc;
+
   cbxUseDefaultAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ 2 channels/ PCM).' + #13 +
-                                'If you disable this option, the endpoint''s audio format will be used.';
+                                 'If you disable this option, the endpoint''s audio format will be used.';
+end;
+
+
+procedure TMainForm.FileNameEditWindowProc(var Message: TMessage);
+var
+  ClipboardText: string;
+
+begin
+
+  if (Message.Msg = WM_PASTE) and Clipboard.HasFormat(CF_UNICODETEXT) then
+    begin
+
+      ClipboardText := Clipboard.AsText;
+
+      // A file name is a single line. Preserve words when text copied from a
+      // web page contains line endings.
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13#10,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #10,
+                                     ' ',
+                                     [rfReplaceAll]);
+
+      edFileName.SelText := ClipboardText;
+      prEdited := True;
+      Message.Result := 0;
+      Exit;
+    end;
+
+  prFileNameEditWindowProc(Message);
 end;
 
 

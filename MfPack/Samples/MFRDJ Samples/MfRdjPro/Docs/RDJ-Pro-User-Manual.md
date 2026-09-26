@@ -235,18 +235,21 @@ A loopback deck captures sound from another application running on the same comp
 | Clear | Removes the search filter. |
 | Playlist choice | Chooses the playlist to view or edit. |
 | New | Creates a playlist. |
-| Save | Saves the current playlist and its order. |
 | Delete | Deletes the selected playlist. |
 | Add | Adds the selected library track to the playlist. |
 | Remove | Removes the selected playlist entry. The audio file is not deleted. |
 | Move Up / Move Down | Changes the selected track's place in the playlist. |
 | File | Chooses one audio file to add. |
-| Scan Folder | Adds supported audio files from a folder to the library. |
+| Scan Folder | Adds supported audio files from a folder and it's sub-folders to the library. |
 | Cancel Scan | Stops a folder scan. |
 | Clear Library | Removes all entries from the library database. It does not delete audio files. |
 | Clear Missing Tracks | Removes library entries whose files can no longer be found. |
 | Tag editor | Opens the selected track's tag information. |
 | Playlist Duration and Status | Show the total playing time and current action. |
+
+Notes:
+- Every change in a playlist will be automatically saved.
+- When you need an update for the folders you did scan earlier, select Scan Folder again.  
 
 ## Tag Editor
 

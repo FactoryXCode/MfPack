@@ -77,6 +77,7 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.StdCtrls,
+  Vcl.Clipbrd,
   Vcl.ComCtrls,
   Vcl.Menus,
   Vcl.ExtCtrls,
@@ -142,6 +143,7 @@ type
     prFileName: TFileName;
     prOrgFileName: TFileName;
     prEdited: Boolean;
+    prFileNameEditWindowProc: TWndMethod;
 
     prEndPointDataFlow: EDataFlow;
     prEndPointRole: ERole;
@@ -166,6 +168,7 @@ type
     procedure OnTimer(Sender: TObject);
 
     procedure SetBufferDuration();
+    procedure FileNameEditWindowProc(var Message: TMessage);
 
   public
     { Public declarations }
@@ -496,6 +499,44 @@ begin
   thrTimer.OnTimerEvent := OnTimer;
   CreateNewAudioSink();
   prEdited := False;
+
+  // Browsers can place text on the clipboard in a Unicode-only format that
+  // the standard edit control does not always consume correctly.
+  prFileNameEditWindowProc := edFileName.WindowProc;
+  edFileName.WindowProc := FileNameEditWindowProc;
+end;
+
+
+procedure TfrmLoopBackCapture.FileNameEditWindowProc(var Message: TMessage);
+var
+  ClipboardText: string;
+
+begin
+
+  if (Message.Msg = WM_PASTE) and Clipboard.HasFormat(CF_UNICODETEXT) then
+    begin
+
+      ClipboardText := Clipboard.AsText;
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13#10,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #13,
+                                     ' ',
+                                     [rfReplaceAll]);
+      ClipboardText := StringReplace(ClipboardText,
+                                     #10,
+                                     ' ',
+                                     [rfReplaceAll]);
+
+      edFileName.SelText := ClipboardText;
+      prEdited := True;
+      Message.Result := 0;
+      Exit;
+    end;
+
+  prFileNameEditWindowProc(Message);
 end;
 
 

@@ -30,7 +30,7 @@ To make all work correctly, you should activate port forwarding in your router.
 CaddyHTTP	    80	                80	               192.168.xxx.xxx	    TCP		
 CaddyHTTPS     443                  443                  192.168.xxx.xxx	    TCP
 
-**When your router supports DDNS, do as follows:**
+**When your router supports DDNS, like ASUS routers, do as follows:**
 DDNS: Enable
 // Note that these are depended of your router brand (in this case we have an Asus router). 
 Server: For example www.asus.com

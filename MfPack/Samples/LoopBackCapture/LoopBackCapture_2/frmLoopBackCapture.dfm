@@ -486,6 +486,7 @@ object frmMain: TfrmMain
       Font.Height = -20
       Font.Name = 'Tahoma'
       Font.Style = []
+      OEMConvert = False
       ParentFont = False
       TabOrder = 0
       Text = 'loopback-capture'

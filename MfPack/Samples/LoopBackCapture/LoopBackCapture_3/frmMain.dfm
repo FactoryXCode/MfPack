@@ -13,6 +13,7 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery

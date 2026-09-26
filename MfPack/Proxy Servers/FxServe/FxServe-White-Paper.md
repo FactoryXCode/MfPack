@@ -6,8 +6,8 @@ Platform: Windows 10 and higher.
 
 ## Summary
 
-FxServe is a small Windows web server made for RDJ and RDJ Pro.  
-It serves the FactoryX Radio web application, artwork, JSON metadata, and live media files.  
+FxServe is a small Windows web server used by the samples RDJ, RDJ Pro and MfWebCamStreamer.  
+It serves the radio and webcam web application, artwork, JSON metadata, and live media files.  
 It also provides public HTTPS and can proxy selected routes to a local media server.  
   
 A third-party application like Caddy can do the same job and offers more web-server features.  
@@ -16,27 +16,27 @@ a small and fixed set of functions. FxServe covers that set without trying to be
 a general-purpose web server.  
   
 FxServe is part of MfPack because it completes the browser-broadcast path used by  
-the RDJ sample applications. Media Foundation creates the media, RDJ publishes  
+the RDJ and MfWebCamStreamer samples. Media Foundation creates the media, RDJ publishes  
 it, FxServe delivers it, and the browser plays it.  
   
 ## Publishing
   
-RDJ and RDJ Pro can publish a broadcast to web browsers.  
+RDJ, RDJ Pro and MfWebCamStreamer can publish a broadcast to web browsers.  
 The browser needs more than the audio or video encoder output:  
   
 - A HTML application;
 - Artwork and icons;
 - Now-playing information;
 - A live-stream manifest;
-- Fragmented MP4 files for RDJ Pro;
+- Fragmented MP4 files for RDJ Pro and  MfWebCamStreamer;
 - Byte-range support for media requests;
 - Correct content types;
 - Public HTTPS;
 - A stable and protected Windows service that starts with the remote server.
   
 A full web server handles all of this, but it also includes many features that a  
-normal RDJ station does not use. FxServe provides the smaller set needed by the  
-FactoryX Radio applications.  
+normal RDJ station or  MfWebCamStreamer does not use. FxServe provides the smaller set needed for  
+audio/video streaming applications.  
 
 ## Design
 
@@ -98,9 +98,9 @@ The default FxServe proxy routes are:
 The normal upstream address is `127.0.0.1:8000` when Icecast runs on the same
 server as FxServe.
 
-## RDJ Pro signal path
+## RDJ Pro and MfWebCamStreamer signal paths
 
-RDJ Pro does not need Icecast for its browser fMP4 broadcast. It writes the web
+RDJ Pro and MfWebCamStreamer do not need Icecast for its browser fMP4 broadcast. It writes the web
 metadata, artwork, initialization segment, media fragments, and live manifest to
 the shared FxServe web root.
 
@@ -108,7 +108,7 @@ the shared FxServe web root.
 Camera, audio devices, decks, microphone, and loopback sources
                               |
                               v
-                           RDJ Pro
+              RDJ Pro/MfWebCamStreamer
                               |
               Media Foundation fMP4 output
                               |
@@ -132,7 +132,7 @@ The main live files are:
 | `stream/patched_frag_*.m4s` | Rolling live audio/video fragments. |
 | `nowplaying.json` | Artist, title, show, and station information. |
 | `Artwork/hero.jpg` | Main station image used by the web application. |
-| `Artwork/cover.jpg` | Current programme or track artwork. |
+| `Artwork/cover.jpg` | Current show or track artwork. |
 
 ## Server layout
 
@@ -152,14 +152,20 @@ C:\FxServe
     +---Artwork
     |       hero.jpg
     |       cover.jpg
+    |       FactoryXradio_TestImage.png
     |
     +---icons
     |
     +---Stream
-            rdj_stream.html
-            live.json
-            init.mp4
-            patched_frag_*.m4s
+    |       rdj_stream.html
+    |       live.json
+    |       init.mp4
+    |       patched_frag_*.m4s
+    |
+    |
+    +---WebCam
+            sw.js
+            webcam_stream.html
 ```
 
 The shared publishing path is:
@@ -234,7 +240,7 @@ FxServe reads `FxServe.ini`. A normal setup contains these sections:
 
 The INI contains ordinary server and public-listener configuration only. It
 does not contain ACME account information, certificate thumbprints, private-key
-material, or renewal state. RDJ and RDJ Pro therefore never need access to
+material, or renewal state. RDJ, RDJ Pro and  therefore never need access to
 certificate-management data.
 
 Example:
@@ -460,7 +466,7 @@ needed.
 ## Why FxServe belongs in MfPack
 
 MfPack provides Delphi access to Microsoft Media Foundation and related Windows
-media APIs. RDJ and RDJ Pro use those APIs in a complete broadcasting workflow.
+media APIs. Samples like RDJ, RDJ Pro and MfWebCamStreamer use those APIs in a complete streaming workflow.
 The browser output is the last part of that workflow.
 
 FxServe fits MfPack because it:
@@ -474,11 +480,11 @@ FxServe fits MfPack because it:
 
 ## Recommended use
 
-Use FxServe for a normal RDJ or RDJ Pro station with one FactoryX Radio website.
+Use FxServe for a normal RDJ, RDJ Pro station and MfWebCamStreamer with one radio website.
 Use Caddy when the same server must handle more websites, custom routing, or
 other web applications.
 
-Both choices use the same public router ports and the same FactoryX Radio browser
+Both choices use the same public router ports and the same radio browser
 application. The difference is the size and range of the web server behind them.
 
 ## Related documents

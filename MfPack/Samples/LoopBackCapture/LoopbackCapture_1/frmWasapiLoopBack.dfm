@@ -440,6 +440,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Font.Height = -20
       Font.Name = 'Tahoma'
       Font.Style = []
+      OEMConvert = False
       ParentFont = False
       TabOrder = 1
       Text = 'loopback-capture'

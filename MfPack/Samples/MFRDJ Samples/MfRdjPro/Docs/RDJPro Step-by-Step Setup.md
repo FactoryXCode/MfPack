@@ -300,7 +300,7 @@ nowplaying.json
 For long broadcasts:
 
 1. Disable Windows sleep or enable the RDJPro sleep override option.
-2. Do not close the laptop lid unless the lid action is configured correctly.
+2. Do not close the laptop lid when RDJpro is running on a laptop, unless the lid action is configured correctly.
 3. Keep FxServe or Caddy running.
 4. Make sure the selected stream folder is writable.
 5. Watch RDJPro debug/memory heartbeat messages during testing.
@@ -324,7 +324,7 @@ FireDAC cannot load `sqlite3.dll`, or Windows reports a bad image:
 
 For a dynamic SQLite build, place the DLL beside the executable and make sure
 its architecture matches the application: x86 for Win32, x64 for Win64. The
-standard sample uses built-in SQLite and normally does not need this DLL.
+standard sample uses Delphi's built-in SQLite and normally does not need this DLL.
 
 Playlist Composer opens an empty database unexpectedly:
 

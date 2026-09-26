@@ -7,12 +7,12 @@ Only one of them can run at a time because both use ports 80 and 443.
 
 ### Use FxServe when
 
-- The server is mainly used for RDJ or RDJ Pro.
+- The server is mainly used for RDJ, RDJ Pro or MfWebCamStreamer.
 - You want a small web server with a simple setup.
-- You only need the FactoryX Radio website and live stream.
+- You only need a radio website and live stream.
 - You want to use less memory and disk space.
 
-FxServe is the normal choice for a new RDJ installation.
+FxServe is the normal choice for a new RDJ or MfWebCamStreamer installation.
 
 ### Use Caddy when
 
@@ -76,7 +76,7 @@ validated during initial issue and later renewals.
 
 ## RDJ Pro with Caddy
 
-1. Copy the Caddy files and FactoryX Radio website to:
+1. Copy the Caddy files and radio website to:
 
    ```text
    C:\Caddy
@@ -145,4 +145,4 @@ own ports 80 and 443 at a time.
 ## More information
 
 See the [FxServe White Paper](FxServe-White-Paper.md) for the architecture,
-security model, HTTPS renewal flow, limits, and MfPack scope.
+security model, HTTPS reiteration flow, limits, and MfPack scope.
