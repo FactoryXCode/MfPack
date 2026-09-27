@@ -1,6 +1,6 @@
 # MfPlayer X2
   
-MfPlayer X2 is an advanced Media Foundation player sample for Delphi.  
+MfPlayer X2 is an advanced Media Foundation player sample written for Delphi.  
   
 The sample is based on the earlier MfPlayer X project, but replaces the floating  
 subtitle overlay with a real video-frame subtitle pipeline. Subtitle pixels can  
@@ -9,7 +9,7 @@ Chromecast streaming.
   
 MfPlayer X2 also demonstrates how Media Foundation playback, timed text,  
 custom MFT processing, Source Reader/Sink Writer transcoding, `IMFByteStream`,  
-mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together  
+mDNS, TLS, Google Cast V2/V2.1 messages, and a local HTTP server can work together  
 inside one Delphi application.  
   
 ---
