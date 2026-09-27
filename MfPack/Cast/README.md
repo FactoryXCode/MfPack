@@ -25,9 +25,11 @@ MfCast can be used by:
 - Dedicated Chromecast control applications
 - Third-party Delphi applications that use MfPack
 - Applications that do not otherwise use MfPack player classes
+
+Note: Older Chromecast V1 devices are supported if they had the latest firmware update installed for that device.
   
   
-***MfCast.pas*** is the application main interface (TMfCast class).  
+***MfCast.pas*** contains the application main interface (TMfCast class).  
 The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
 a local HTTP server.  
   
