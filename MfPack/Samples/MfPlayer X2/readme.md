@@ -120,7 +120,7 @@ are not claimed as supported by this snapshot.
 * Windows SDK: `10.0.28000.2705`.  
 * A Media Foundation compatible video and audio decoder for the selected source.  
 * An H.264 encoder and AAC encoder for export or transcoded casting.  
-* A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.  
+* A Chromecast device, Chromecast-enabled television, Android TV or any other device using ChromeCast for Cast tests.  
 * The PC and Cast receiver must be reachable on the same local network.  
 * Windows Firewall must permit the temporary local HTTP listener.  
   
