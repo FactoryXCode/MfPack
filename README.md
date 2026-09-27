@@ -157,8 +157,6 @@ The sample includes the original C++ code for references.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfProtectedPlayback.png)
 
 ---
-
----
   
 **Ducking Media Player**
   
@@ -210,7 +208,9 @@ The browser player includes:
 - Client-side recording through `MediaRecorder` (downloaded as WebM);
 - Live viewer count with privacy-masked IP addresses;
 - Sound, playback, reconnect, and live-edge controls.
-
+  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfWebCamStreamer.png)
+  
 ---
   
 **MfSimpleCastPlayer Sample**
@@ -675,6 +675,13 @@ MfCast can be used by:
 - Third-party Delphi applications that use MfPack
 - Applications that do not otherwise use MfPack player classes
 
+Samples using MfCast are:
+- MfSimpleCastPlayer
+- MfCastPlayer
+- MfCastPlayerII
+- MfPlayer X2
+- RDJ Pro.
+  
 ---
   
 ***Tools***
