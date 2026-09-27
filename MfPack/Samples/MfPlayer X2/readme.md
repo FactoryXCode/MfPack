@@ -9,8 +9,9 @@ Chromecast streaming.
   
 MfPlayer X2 also demonstrates how Media Foundation playback, timed text,  
 custom MFT processing, Source Reader/Sink Writer transcoding, `IMFByteStream`,  
-mDNS, TLS, Google Cast V2/V2.1 messages, and a local HTTP server can work together  
+mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together  
 inside one Delphi application.  
+Note: Older Chromecast devices are supported if they had the latest firmware update for that device.
   
 ---
   
