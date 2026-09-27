@@ -102,7 +102,7 @@ and receiver/media command policy.
   
 The direct-control contract is Media Foundation-neutral: **MfCastTypes.pas** and  
 **MfCastInterfaces.pas** do not import MfPack Media Foundation declaration units.  
-The optional byte-stream, sample, remux, and transcode contracts are isolated in  
+The optional byte-stream, sample, remux, and transcode contracts are kept apart in  
 **MfCastMediaInterfaces.pas**; only the media implementations and their composition  
 layer compile against those declarations.  
   
@@ -110,9 +110,9 @@ layer compile against those declarations.
   
 **MfCastCompile.dpk** is a non-installed runtime package that lists every Cast  
 unit, including all units under "Cast/Media". Build it to perform a complete  
-static compile check after changes that may not be reached by the simple sample.  
+static compile check after changes that may not be reached by project code.  
 It requires the matching installed "MfPackXxxx" package but is not intended to  
-be installed or referenced by applications. 
+be installed or referenced by Delphi projects. 
   
 Read the full documentation in  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt.
   
