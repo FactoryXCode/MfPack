@@ -444,6 +444,8 @@ making it suitable for large audio files (e.g. FLAC > 100 MB).
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
   
 ---
+
+##WASAPI Player samples
   
 ** Player Sample 1**
   
@@ -458,7 +460,7 @@ IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player1.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
   
 ---
   
@@ -467,7 +469,7 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 This sample is based on Sample 1, but includes full threaded code,  
 using threadsafe events and also uses a custom MFT for bass and treble control.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player2.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
   
 ---
   
@@ -477,7 +479,7 @@ This sample is based on Sample 2, instead of a bass/treble MFT, this one is equi
 a 3 band High, Mid(Peaking or Notch) and Low EQ MFT and a spectrum analizer.  
 It also stores and read back settings for the MFT.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player3.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
   
 ---
   
@@ -504,7 +506,7 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 **Note:**  
 This is not a sample for absolute beginners. Please read the documents included with this sample.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Player4.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer4.png)
   
 ---
   
