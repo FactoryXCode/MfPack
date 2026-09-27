@@ -1,6 +1,6 @@
 # MfSimpleCastPlayer
   
-Version 3.2.0
+Version 4.0.0
   
 `MfSimpleCastPlayer` is a compact Delphi VCL example for the public  
 `TMfCast` main interface. It demonstrates the complete path from discovering a Google  
@@ -15,7 +15,8 @@ full media-library application.
   
 - Windows 10 or later;
 - Delphi compiler version 17 through 35;
-- MfPack 3.2.0 or later;
+- MfPack 4.0.0 or later;
+- MfCast V2;
 - A Chromecast, Google TV, Android TV, speaker, or other compatible Google Cast
   receiver;
 - The sender PC and receiver must be reachable on the same local network.
