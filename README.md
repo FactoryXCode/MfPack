@@ -445,9 +445,9 @@ making it suitable for large audio files (e.g. FLAC > 100 MB).
   
 ---
 
-##WASAPI Player samples
+## WASAPI Player samples
   
-** Player Sample 1**
+**Player Sample 1**
   
 This sample demonstrates how to use the IAudioClient to render different  
 audio formats like WAV, FLAC, MP3 etc.  
@@ -464,7 +464,7 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
   
 ---
   
-** Player Sample 2**
+**Player Sample 2**
   
 This sample is based on Sample 1, but includes full threaded code,  
 using threadsafe events and also uses a custom MFT for bass and treble control.  
@@ -473,7 +473,7 @@ using threadsafe events and also uses a custom MFT for bass and treble control.
   
 ---
   
-** Player Sample 3**
+**Player Sample 3**
   
 This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with  
 a 3 band High, Mid(Peaking or Notch) and Low EQ MFT and a spectrum analizer.  
@@ -483,7 +483,7 @@ It also stores and read back settings for the MFT.
   
 ---
   
-** Player Sample 4**
+**Player Sample 4**
   
 This sample demonstrates a **real-time audio playback engine on Windows** using:
   
