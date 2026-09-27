@@ -6,7 +6,8 @@ NOTES:
 This release is updated for compiler version 17 up to 35.  
 SDK version: 10.0.28000.2705 (Win 11)  
 Requires Windows 10 or later.  
-Minimum supported MfPack version: 3.2.0  
+Minimum supported MfPack version: 4.0.0
+MfCast V2
   
   
 This Delphi XE7 and higher compatible VCL sample demonstrates the public `TMfCast` main interface.  
