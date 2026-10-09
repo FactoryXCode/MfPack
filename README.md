@@ -560,16 +560,15 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
   
 ***Complex samples***
   
-**MfRDJ Radio Mixer sample**  
-This sample demonstrates how to build an audio mixer,  
+**MfRDJ Radio Mixer**  
+This application demonstrates how to build an audio mixer,  
 effects and how to implement IceCast/Caddy for internet broadcasting.  
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.  
 All WASAPI sample code comes together in this sample.  
   
 **Notes:**  
  You have to know the principles of WASAPI, MFT's and audio manipulation.  
- This application is large and not suitable for beginners!  
- Before using this sample make sure, you have all needed components installed (see instructions).
+ Before compiling this sample make sure, you have all needed components compiled and installed (see instructions).
  
  This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)
   
@@ -602,8 +601,7 @@ MfPack Cast V2 protocols.
   
 **Note:**  
 You have to know the principles of WASAPI, MFT's, MfPack Cast V2, FxServe and audio manipulation.  
-This application is large and not suitable for beginners!  
-Before using this sample make sure, you have all needed components installed (see instructions).  
+Before compiling this sample make sure, you have all needed components compiled and installed (see instructions). 
 
 This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)  
 
