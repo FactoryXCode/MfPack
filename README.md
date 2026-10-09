@@ -558,10 +558,10 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
   
 ---
   
-***Complex samples***
+***Complex code***
   
-**MfRDJ Radio Mixer sample**  
-This sample demonstrates how to build an audio mixer,  
+**MfRDJ Radio Mixer**  
+This application demonstrates how to build an audio mixer,  
 effects and how to implement IceCast/Caddy for internet broadcasting.  
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.  
 All WASAPI sample code comes together in this sample.  
@@ -569,14 +569,14 @@ All WASAPI sample code comes together in this sample.
 **Notes:**  
  You have to know the principles of WASAPI, MFT's and audio manipulation.  
  This application is large and not suitable for beginners!  
- Before using this sample make sure, you have all needed components installed (see instructions).
+ Before compiling this sample make sure, you have all needed components installed (see instructions).
  
- This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)
+ This application has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJ_Interface_s.png)
   
   
-**MfRDJ Pro Radio Mixer sample**  
+**MfRDJ Pro Radio Mixer**  
 MfRDJPro is the extended version of MfRDJ.
   
 Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,  
@@ -595,6 +595,7 @@ writes a rolling live.json manifest, and serves the result through FxServe or an
 Modern browsers can then play the stream using Media Source Extensions.  
 MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and  
 listener counts to JSON files for the web interface.  
+
 It includes safeguards for long-running broadcasts, such as bounded queues,  
 fragment cleanup, FxServe mirroring, sleep prevention options, and clean shutdown handling.  
 MfRDJ Pro supports casting to Cromecast devices on your local network using the  
@@ -602,8 +603,7 @@ MfPack Cast V2 protocols.
   
 **Note:**  
 You have to know the principles of WASAPI, MFT's, MfPack Cast V2, FxServe and audio manipulation.  
-This application is large and not suitable for beginners!  
-Before using this sample make sure, you have all needed components installed (see instructions).  
+Before compiling this sample make sure, you have all needed components installed (see instructions).  
 
 This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)  
 
