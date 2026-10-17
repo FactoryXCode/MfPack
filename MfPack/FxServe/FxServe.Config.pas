@@ -88,6 +88,7 @@ type
     FNoStoreRoutes: TStringList;
     FLogFileName: string;
     FLogRetentionDays: Integer;
+    FAlertStatusFileName: string;
     FProtectionEnabled: Boolean;
     FProtectionRequestsPerMinute: Integer;
     FProtectionBurst: Integer;
@@ -130,6 +131,7 @@ type
     property CorsEnabled: Boolean read FCorsEnabled;
     property LogFileName: string read FLogFileName;
     property LogRetentionDays: Integer read FLogRetentionDays;
+    property AlertStatusFileName: string read FAlertStatusFileName;
     property ProtectionEnabled: Boolean read FProtectionEnabled;
     property ProtectionRequestsPerMinute: Integer read FProtectionRequestsPerMinute;
     property ProtectionBurst: Integer read FProtectionBurst;
@@ -311,6 +313,14 @@ begin
       FWebRoot := ExpandFileName(FWebRoot);
 
     FWebRoot := ExcludeTrailingPathDelimiter(FWebRoot);
+
+    FAlertStatusFileName := Trim(Ini.ReadString('FxAlert', 'StatusFile', ''));
+    if FAlertStatusFileName = '' then
+      FAlertStatusFileName := TPath.Combine(TPath.Combine(FWebRoot, 'FxAlert'), 'status.json')
+    else if not TPath.IsPathRooted(FAlertStatusFileName) then
+      FAlertStatusFileName := ExpandFileName(IncludeTrailingPathDelimiter(BaseDir) + FAlertStatusFileName)
+    else
+      FAlertStatusFileName := ExpandFileName(FAlertStatusFileName);
 
     FIndexFile := Trim(Ini.ReadString('Server',
                                       'IndexFile',

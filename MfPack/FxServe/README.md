@@ -82,6 +82,24 @@ Paths in the INI file are resolved relative to the INI file. For an RDJ
 installation, set `WebRoot` to the directory containing the web application,
 artwork, JSON, video, and stream directories.
   
+## FxAlert heartbeat source
+
+When FxRecord runs independently, it writes `FxAlert\status.json` beside its
+configuration/log files. Point the FxServe instance hosting FxAlert at the
+recorder that the public page should monitor:
+
+```ini
+[FxAlert]
+StatusFile=C:\FxRecord\FxAlert\status.json
+```
+
+Relative paths resolve beside `FxServe.ini`. Without this setting, FxServe uses
+`WebRoot\FxAlert\status.json` for existing installations. Only the exact
+`/FxAlert/status.json` endpoint uses this mapping; other files remain under the
+web root. Status responses disable caching. A missing configured file returns
+404 rather than falling back to an obsolete status file. FxAlert monitors the
+recorder heartbeat separately from whether the broadcast stream is playing.
+
 ## Command-line reference
   
 Display the built-in command-line help with any of these forms:

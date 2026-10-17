@@ -889,8 +889,7 @@ var
   FileTime: TDateTime;
   CurrentTick: Cardinal;
 begin
-  FileName := TPath.Combine(TPath.Combine(FConfig.WebRoot, 'FxAlert'),
-                            'status.json');
+  FileName := FConfig.AlertStatusFileName;
   if not FileExists(FileName) then
     begin
       CurrentTick := GetTickCount();

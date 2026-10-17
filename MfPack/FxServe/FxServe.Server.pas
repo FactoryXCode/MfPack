@@ -1307,6 +1307,11 @@ begin
       Exit;
     end;
 
+  // The independent recorder may publish outside the web root. Only this
+  // specific endpoint can read the explicitly configured heartbeat file.
+  if SameText(DecodedPath, '/FxAlert/status.json') then
+    FileName := FConfig.AlertStatusFileName;
+
   if not FileExists(FileName) then
     begin
       SendError(ASocket,
@@ -1402,7 +1407,7 @@ begin
       Header := Header + 'Access-Control-Allow-Origin: *'#13#10 +
                          'Access-Control-Expose-Headers: Accept-Ranges, Content-Length, Content-Range'#13#10;
 
-    if FConfig.IsNoStoreRoute(APath) then
+    if FConfig.IsNoStoreRoute(APath) or SameText(DecodedPath, '/FxAlert/status.json') then
       Header := Header + 'Cache-Control: no-store, no-cache, must-revalidate'#13#10;
 
     Header := Header + 'Connection: close'#13#10#13#10;
