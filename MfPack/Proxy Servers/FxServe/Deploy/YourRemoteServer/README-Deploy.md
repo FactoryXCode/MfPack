@@ -40,6 +40,17 @@ The installer:
 - restores the previous executable, INI, and static web files if an update
   fails.
 
+The default configuration enables FxAlert secure Web Push. Before production
+use, change `[Push] Contact` in `C:\FxServe\FxServe.ini` from the placeholder to
+a real `mailto:` address or HTTPS contact URL. Preserve
+`FxAlert.vapid.dat` and `FxAlert.subscriptions.dat`; they are protected by
+Windows DPAPI for that server and contain the push identity and registered
+devices.
+
+After HTTPS is working, open `https://YOUR-HOST/FxAlert/` on each Android or
+Windows device and choose **Enable alerts**. On iPhone or iPad, add FxAlert to
+the Home Screen first, open the installed app, and enable alerts from there.
+
 To require an active RDJ stream as part of deployment validation:
 
 ```powershell
@@ -69,7 +80,8 @@ remote management. The supplied YourRemoteServeName profile uses service `FxServ
 Set the server, share, server-local path, and public hostname, then choose
 **Save & apply**. FxServe Admin updates `[Wan] HostName` in `FxServe.ini` and
 `www\fxserve-config.json`, making `.bak` backups and leaving live stream files
-untouched. Restart FxServe afterward to apply the WAN hostname.
+untouched. A running FxServe validates and applies the changed INI automatically
+after its one-second stability interval; a manual restart is no longer required.
 
 FxServe Admin also provides service status, start, stop, restart, registration,
 folder/log access, INI editing with backup, LAN health checks, and shortcuts to

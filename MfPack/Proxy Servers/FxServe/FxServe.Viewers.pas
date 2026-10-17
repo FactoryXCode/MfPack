@@ -62,6 +62,8 @@ unit FxServe.Viewers;
 interface
 
 uses
+
+  {System}
   System.SysUtils;
 
 procedure TouchWebCamViewer(const ATarget, AAddress: string);
@@ -70,7 +72,10 @@ function WebCamViewerSnapshotJson(): UTF8String;
 implementation
 
 uses
+  
+  {WinApi} 
   WinApi.Windows,
+  {System}
   System.Classes,
   System.SyncObjs,
   System.Generics.Collections;
@@ -91,9 +96,11 @@ type
     FLock: TCriticalSection;
     FItems: TObjectDictionary<string, TWebCamViewer>;
     procedure RemoveExpired(const ANow: Cardinal);
-  public
+  
+public
     constructor Create();
     destructor Destroy(); override;
+    
     procedure Touch(const AId, AAddress: string);
     function SnapshotJson(): UTF8String;
   end;
@@ -108,14 +115,20 @@ var
   Parts: TStringList;
   I: Integer;
   EqualPos: Integer;
+
 begin
+  
   Result := '';
-  QueryPos := Pos('?', ATarget);
+  QueryPos := Pos('?', 
+                                 ATarget);
   if QueryPos = 0 then
     Exit;
 
-  Query := Copy(ATarget, QueryPos + 1, MaxInt);
+  Query := Copy(ATarget,
+                            QueryPos + 1,
+                            MaxInt);
   Parts := TStringList.Create();
+  
   try
     Parts.StrictDelimiter := True;
     Parts.Delimiter := '&';
@@ -124,19 +137,28 @@ begin
       begin
         EqualPos := Pos('=', Parts[I]);
         if (EqualPos > 0) and
-           SameText(Copy(Parts[I], 1, EqualPos - 1), AName) then
-          Exit(Copy(Parts[I], EqualPos + 1, MaxInt));
+           SameText(Copy(Parts[I], 
+                                         1,
+                                         EqualPos - 1),
+                                         AName) then
+          Exit(Copy(Parts[I], 
+                             EqualPos + 1,
+                             MaxInt));
       end;
+
   finally
     Parts.Free();
   end;
 end;
 
+
 function SafeViewerId(const AValue: string): string;
 var
   I: Integer;
+
 begin
-  Result := '';
+  
+Result := '';
   if (AValue = '') or (Length(AValue) > 80) then
     Exit;
 
@@ -147,89 +169,121 @@ begin
   Result := AValue;
 end;
 
+
 function MaskAddress(const AAddress: string): string;
 var
   Dot: Integer;
   Colon: Integer;
+
 begin
-  Result := Trim(AAddress);
-  Dot := LastDelimiter('.', Result);
+  
+Result := Trim(AAddress);
+  Dot := LastDelimiter('.',
+                                      Result);
   if Dot > 0 then
-    Exit(Copy(Result, 1, Dot) + 'x');
+    Exit(Copy(Result, 
+                      1,
+                      Dot) + 'x');
 
-  Colon := Pos(':', Result);
+  Colon := Pos(':',
+                          Result);
   if Colon > 0 then
-    Result := Copy(Result, 1, Colon - 1) + ':…';
+    Result := Copy(Result,
+                              1,
+                              Colon - 1) + ':…';
 
-  if Result = '' then
+  if (Result = '') then
     Result := 'unknown';
 end;
 
+
 function IsLoopbackAddress(const AAddress: string): Boolean;
 begin
-  Result := SameText(AAddress, '127.0.0.x') or
-            SameText(AAddress, ':…');
+  
+Result := SameText(AAddress,
+                                  '127.0.0.x') or
+            SameText(AAddress,
+                               ':…');
 end;
+
 
 constructor TWebCamViewerRegistry.Create();
 begin
+  
   inherited Create();
-  FLock := TCriticalSection.Create();
+  
+FLock := TCriticalSection.Create();
   FItems := TObjectDictionary<string, TWebCamViewer>.Create([doOwnsValues]);
 end;
 
+
 destructor TWebCamViewerRegistry.Destroy();
 begin
+  
   FItems.Free();
   FLock.Free();
+  
   inherited Destroy();
 end;
+
 
 procedure TWebCamViewerRegistry.RemoveExpired(const ANow: Cardinal);
 var
   Expired: TList<string>;
   Pair: TPair<string, TWebCamViewer>;
   Id: string;
+
 begin
+  
   Expired := TList<string>.Create();
+  
   try
     for Pair in FItems do
-      if Cardinal(ANow - Pair.Value.LastSeen) > VIEWER_TIMEOUT_MS then
+      if (Cardinal(ANow - Pair.Value.LastSeen) > VIEWER_TIMEOUT_MS) then
         Expired.Add(Pair.Key);
 
     for Id in Expired do
       FItems.Remove(Id);
+
   finally
     Expired.Free();
   end;
 end;
+
 
 procedure TWebCamViewerRegistry.Touch(const AId, AAddress: string);
 var
   Viewer: TWebCamViewer;
   NowTick: Cardinal;
   MaskedAddress: string;
+
 begin
-  NowTick := GetTickCount();
+  
+NowTick := GetTickCount();
   MaskedAddress := MaskAddress(AAddress);
   FLock.Acquire();
-  try
+  
+try
     RemoveExpired(NowTick);
+    
     if not FItems.TryGetValue(AId, Viewer) then
       begin
         Viewer := TWebCamViewer.Create();
         Viewer.Id := AId;
         FItems.Add(AId, Viewer);
       end;
+
     if (Viewer.Address = '') or
        not IsLoopbackAddress(MaskedAddress) or
        IsLoopbackAddress(Viewer.Address) then
       Viewer.Address := MaskedAddress;
     Viewer.LastSeen := NowTick;
+
   finally
     FLock.Release();
   end;
 end;
+
 
 function TWebCamViewerRegistry.SnapshotJson(): UTF8String;
 var
@@ -238,9 +292,12 @@ var
   NowTick: Cardinal;
   First: Boolean;
   AgeSeconds: Cardinal;
+
 begin
+  
   Builder := TStringBuilder.Create();
   FLock.Acquire();
+  
   try
     NowTick := GetTickCount();
     RemoveExpired(NowTick);
@@ -248,10 +305,12 @@ begin
     Builder.Append(FItems.Count);
     Builder.Append(',"viewers":[');
     First := True;
+    
     for Pair in FItems do
       begin
         if not First then
           Builder.Append(',');
+
         First := False;
         AgeSeconds := Cardinal(NowTick - Pair.Value.LastSeen) div 1000;
         Builder.Append('{"ip":"');
@@ -260,28 +319,42 @@ begin
         Builder.Append(AgeSeconds);
         Builder.Append('}');
       end;
+
     Builder.Append(']}');
     Result := UTF8String(Builder.ToString());
+
   finally
     FLock.Release();
     Builder.Free();
   end;
 end;
 
-procedure TouchWebCamViewer(const ATarget, AAddress: string);
+
+procedure TouchWebCamViewer(const ATarget,
+                                                            AAddress: string);
 var
   ViewerId: string;
+
 begin
-  ViewerId := SafeViewerId(QueryValue(ATarget, 'viewer'));
+  
+ViewerId := SafeViewerId(QueryValue(ATarget,
+                                              'viewer'));
   if ViewerId = '' then
-    ViewerId := 'legacy-' + StringReplace(AAddress, ':', '-', [rfReplaceAll]);
-  ViewerRegistry.Touch(ViewerId, AAddress);
+    ViewerId := 'legacy-' + StringReplace(AAddress,
+                                                                     ':',
+                                                                     '-', 
+                                                                     [rfReplaceAll]);
+  ViewerRegistry.Touch(ViewerId,
+                                         AAddress);
 end;
+
 
 function WebCamViewerSnapshotJson(): UTF8String;
 begin
-  Result := ViewerRegistry.SnapshotJson();
+  
+Result := ViewerRegistry.SnapshotJson();
 end;
+
 
 initialization
   ViewerRegistry := TWebCamViewerRegistry.Create();

@@ -316,6 +316,30 @@ object frmFxServeAdmin: TfrmFxServeAdmin
       TabOrder = 18
       OnClick = HealthClick
     end
+    object btnBootSafety: TButton
+      Left = 505
+      Top = 228
+      Width = 96
+      Height = 28
+      Hint = 'Configure automatic startup and restart-on-failure for the selected web service and FxRecord.'
+      Caption = 'Boot safety'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 19
+      OnClick = BootSafetyClick
+    end
+    object btnUpdatePolicy: TButton
+      Left = 607
+      Top = 228
+      Width = 96
+      Height = 28
+      Hint = 'Require administrator approval before Windows downloads or installs updates.'
+      Caption = 'Update policy'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 20
+      OnClick = UpdatePolicyClick
+    end
     object btnOpenLan: TButton
       Left = 611
       Top = 70

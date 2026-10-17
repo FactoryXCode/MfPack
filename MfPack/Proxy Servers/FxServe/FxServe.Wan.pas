@@ -1075,7 +1075,7 @@ begin
       SendSimple(ARequestId,
                  502,
                  'Bad Gateway',
-                 'FxServe LAN listener is unavailable.');
+                 'FxServe could not obtain a valid response from its LAN listener.');
   finally
     if Assigned(FProtection) then
       FProtection.EndRequest(APeerAddress);
@@ -1228,6 +1228,26 @@ var
   Error: Cardinal;
 
   // Helpers
+  FailureStage: string;
+  FailureCode: Integer;
+  StartedTick: Cardinal;
+  LogTarget: string;
+
+  procedure LogUpstreamFailure;
+  var
+    QueryPos: Integer;
+  begin
+    // Queries can contain stream access tokens. Log only the route.
+    LogTarget := ATarget;
+    QueryPos := Pos('?', LogTarget);
+    if QueryPos > 0 then
+      SetLength(LogTarget, QueryPos - 1);
+    FLogger.Error(Format(
+      'WAN upstream failure method=%s path=%s upstream=127.0.0.1:%d stage=%s socketError=%d elapsedMs=%d headerBytes=%d',
+      [AMethod, LogTarget, FConfig.Port, FailureStage, FailureCode,
+       Cardinal(GetTickCount - StartedTick), Length(ResponseData)]));
+  end;
+
   procedure AddForwardHeader(const AName: string);
   var
     V: string;
@@ -1252,12 +1272,20 @@ var
 begin
 
   Result := False;
+  StartedTick := GetTickCount;
+  FailureStage := 'socket';
+  FailureCode := 0;
+  ResponseData := '';
   Upstream := socket(AF_INET,
                      SOCK_STREAM,
                      IPPROTO_TCP);
 
   if (Upstream = INVALID_SOCKET) then
-    Exit;
+    begin
+      FailureCode := WSAGetLastError;
+      LogUpstreamFailure;
+      Exit;
+    end;
 
   try
     Timeout := FConfig.SendTimeoutMs;
@@ -1280,10 +1308,14 @@ begin
     Address.sin_port := htons(FConfig.Port);
     Address.sin_addr.S_addr := inet_addr('127.0.0.1');
 
+    FailureStage := 'connect';
     if (connect(Upstream,
                Address,
                SizeOf(Address)) = SOCKET_ERROR) then
-      Exit;
+      begin
+        FailureCode := WSAGetLastError;
+        Exit;
+      end;
 
     RequestText := UTF8String(AMethod + ' ' + ATarget +
                               ' HTTP/1.1'#13#10 +
@@ -1304,21 +1336,32 @@ begin
     AddForwardHeader('User-Agent');
 
     RequestText := RequestText + 'Connection: close'#13#10#13#10;
+    FailureStage := 'send-request';
     if not SendSocketAll(Upstream,
                          RequestText[1],
                          Length(RequestText)) then
-      Exit;
+      begin
+        FailureCode := WSAGetLastError;
+        Exit;
+      end;
 
     ResponseData := '';
 
     repeat
+      FailureStage := 'receive-header';
       Count := recv(Upstream,
                     Buffer,
                     SizeOf(Buffer),
                     0);
 
       if (Count <= 0) then
-        Exit;
+        begin
+          if Count = SOCKET_ERROR then
+            FailureCode := WSAGetLastError
+          else
+            FailureStage := 'header-connection-closed';
+          Exit;
+        end;
 
       SetLength(ResponseData,
                 Length(ResponseData) + Count);
@@ -1329,6 +1372,7 @@ begin
       HeaderEnd := Pos(#13#10#13#10, string(ResponseData));
     until (HeaderEnd > 0) or (Length(ResponseData) >= WAN_MAX_UPSTREAM_HEADER);
 
+    FailureStage := 'header-too-large';
     if (HeaderEnd = 0) then
       Exit;
 
@@ -1344,6 +1388,7 @@ begin
                                   sLineBreak,
                                   [rfReplaceAll]);
 
+      FailureStage := 'invalid-status-line';
       if (Lines.Count = 0) or not ParseStatusLine(Lines[0],
                                                   Status,
                                                   Reason) then
@@ -1586,6 +1631,8 @@ begin
   finally
     shutdown(Upstream, SD_BOTH);
     closesocket(Upstream);
+    if not Result then
+      LogUpstreamFailure;
   end;
 end;
 

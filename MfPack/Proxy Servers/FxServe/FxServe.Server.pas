@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -609,8 +609,14 @@ procedure TFxServeClientThread.Execute();
 begin
 
   try
-    FServer.HandleClient(FSocket,
-                         FPeerAddress);
+    try
+      FServer.HandleClient(FSocket,
+                           FPeerAddress);
+    except
+      on E: Exception do
+        FServer.FLogger.Error(Format('LAN request failed peer=%s exception=%s message=%s',
+          [FPeerAddress, E.ClassName, E.Message]));
+    end;
 
   finally
     FServer.UnregisterClient(FSocket);
@@ -1210,7 +1216,10 @@ var
   RootPrefix: string;
   Segments: TStringList;
   I: Integer;
-  Stream: TFileStream;
+  Stream: THandleStream;
+  FileHandle: THandle;
+  OpenError: DWORD;
+  OpenAttempt: Integer;
   FileSize: Int64;
   StartOffset: Int64;
   EndOffset: Int64;
@@ -1307,9 +1316,49 @@ begin
       Exit;
     end;
 
-  Stream := TFileStream.Create(FileName,
-                               fmOpenRead or fmShareDenyNone);
+  // Published playlists are replaced while requests are being served. Allow
+  // replacement of the open version and tolerate short writer/rename locks.
+  OpenError := ERROR_SUCCESS;
+  for OpenAttempt := 0 to 20 do
+    begin
+      FileHandle := CreateFile(PChar(FileName), GENERIC_READ,
+        FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE,
+        nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN, 0);
+      if FileHandle <> INVALID_HANDLE_VALUE then
+        Break;
+      OpenError := GetLastError;
+      if not (OpenError in [ERROR_FILE_NOT_FOUND, ERROR_ACCESS_DENIED,
+                             ERROR_SHARING_VIOLATION, ERROR_LOCK_VIOLATION]) or
+         (OpenAttempt = 20) then
+        Break;
+      Sleep(10);
+    end;
+
+  if FileHandle = INVALID_HANDLE_VALUE then
+    begin
+      FLogger.Error(Format('Static file open failed path=%s winError=%d attempts=%d',
+        [APath, OpenError, OpenAttempt + 1]));
+      case OpenError of
+        ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND:
+          SendError(ASocket, 404, HttpReason(404), 'Not found.');
+        ERROR_ACCESS_DENIED:
+          SendError(ASocket, 403, HttpReason(403), 'Access denied.');
+        ERROR_SHARING_VIOLATION, ERROR_LOCK_VIOLATION:
+          SendError(ASocket, 503, 'Service Unavailable',
+            'The requested file is temporarily busy.', 'Retry-After', '1');
+      else
+        SendError(ASocket, 500, 'Internal Server Error', 'Could not open the requested file.');
+      end;
+      Exit;
+    end;
+
+  if OpenAttempt > 0 then
+    FLogger.Info(Format('Static file open recovered path=%s attempts=%d',
+      [APath, OpenAttempt + 1]));
+
+  Stream := nil;
   try
+    Stream := THandleStream.Create(FileHandle);
     FileSize := Stream.Size;
     StartOffset := 0;
     EndOffset := FileSize - 1;
@@ -1387,6 +1436,7 @@ begin
 
   finally
     Stream.Free;
+    CloseHandle(FileHandle);
   end;
 end;
 

@@ -148,6 +148,20 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $targetWebRoot 'Stream') -Force | Out-Null
 
     $iniText = Get-Content -LiteralPath $targetIni
+    if (-not ($iniText | Where-Object { $_ -match '^\s*\[Push\]\s*$' })) {
+        $pushSection = @"
+
+[Push]
+Enabled=True
+Contact=mailto:admin@localhost
+PollIntervalMs=5000
+SubscriptionFile=.\FxAlert.subscriptions.dat
+VapidKeyFile=.\FxAlert.vapid.dat
+"@
+        [IO.File]::AppendAllText($targetIni, $pushSection, [Text.UTF8Encoding]::new($false))
+        Write-Host 'Enabled FxAlert secure Web Push in FxServe.ini.'
+        $iniText = Get-Content -LiteralPath $targetIni
+    }
     $configuredRoot = $iniText | Where-Object { $_ -match '^\s*WebRoot\s*=' } | Select-Object -First 1
     $configuredValue = [string]($configuredRoot -replace '^\s*WebRoot\s*=\s*', '')
     if (-not [IO.Path]::IsPathRooted($configuredValue)) {

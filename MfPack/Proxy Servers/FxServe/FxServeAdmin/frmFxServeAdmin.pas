@@ -150,6 +150,8 @@ type
     btnOpenHttps: TButton;
     btnSaveSettings: TButton;
     btnChangePassword: TButton;
+    btnBootSafety: TButton;
+    btnUpdatePolicy: TButton;
     Bevel1: TBevel;
     Bevel2: TBevel;
     Bevel3: TBevel;
@@ -171,6 +173,8 @@ type
     procedure OpenPublicClick(Sender: TObject);
     procedure SaveClick(Sender: TObject);
     procedure ChangePasswordClick(Sender: TObject);
+    procedure BootSafetyClick(Sender: TObject);
+    procedure UpdatePolicyClick(Sender: TObject);
 
   private
 
@@ -252,6 +256,18 @@ type
     procedure RestartFxServe();
     procedure InstallFxServe();
     procedure UninstallFxServe();
+    function PreferredWebService(): string;
+    procedure StorePreferredWebService(const AServiceName: string);
+    function ConfigureNamedServiceResilience(const AServiceName: string;
+                                             const AStartType: DWORD;
+                                             const ADelayedStart: Boolean;
+                                             const ADependencies: string = ''): Boolean;
+    procedure ApplyBootSafety(const APreferredService: string);
+    function CheckRemoteRestartPending(out APending: Boolean;
+                                       out AError: string): Boolean;
+    function ConfigureWindowsUpdatePolicy(out ADescription,
+                                                AError: string): Boolean;
+    function ReadWindowsUpdatePolicy(out ADescription: string): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
@@ -1196,6 +1212,306 @@ begin
 end;
 
 
+function TfrmFxServeAdmin.PreferredWebService(): string;
+var
+  Registry: TRegistry;
+begin
+  Result := DEFAULT_SERVICE;
+  Registry := TRegistry.Create(KEY_READ);
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    if Registry.OpenKeyReadOnly(REGISTRY_KEY) and
+       Registry.ValueExists('PreferredWebService') then
+      Result := Trim(Registry.ReadString('PreferredWebService'));
+  finally
+    Registry.Free();
+  end;
+  if Result = '' then
+    Result := DEFAULT_SERVICE;
+end;
+
+
+procedure TfrmFxServeAdmin.StorePreferredWebService(
+  const AServiceName: string);
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create(KEY_WRITE);
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    if not Registry.OpenKey(REGISTRY_KEY, True) then
+      raise Exception.Create('Could not save the preferred web service.');
+    Registry.WriteString('PreferredWebService', Trim(AServiceName));
+  finally
+    Registry.Free();
+  end;
+end;
+
+
+function TfrmFxServeAdmin.ConfigureNamedServiceResilience(
+  const AServiceName: string; const AStartType: DWORD;
+  const ADelayedStart: Boolean; const ADependencies: string): Boolean;
+var
+  Manager: SC_HANDLE;
+  Service: SC_HANDLE;
+  DelayedInfo: SERVICE_DELAYED_AUTO_START_INFO;
+  FailureFlag: SERVICE_FAILURE_ACTIONS_FLAG;
+  Actions: array[0..2] of SC_ACTION;
+  FailureActions: SERVICE_FAILURE_ACTIONS;
+  Dependencies: string;
+  DependenciesPointer: PChar;
+begin
+  Result := False;
+  if not OpenNamedServiceHandle(AServiceName,
+    SERVICE_CHANGE_CONFIG or SERVICE_QUERY_STATUS, Manager, Service, True) then
+    Exit;
+  try
+    DependenciesPointer := nil;
+    Dependencies := '';
+    if ADependencies <> '' then
+      begin
+        Dependencies := ADependencies + #0#0;
+        DependenciesPointer := PChar(Dependencies);
+      end;
+    if not ChangeServiceConfig(Service, SERVICE_NO_CHANGE, AStartType,
+      SERVICE_NO_CHANGE, nil, nil, nil, DependenciesPointer, nil, nil,
+      nil) then
+      begin
+        AddLog('Could not change startup for ' + AServiceName + ': ' +
+               SysErrorMessage(GetLastError));
+        Exit;
+      end;
+
+    DelayedInfo.fDelayedAutostart := ADelayedStart;
+    if not ChangeServiceConfig2(Service,
+      SERVICE_CONFIG_DELAYED_AUTO_START_INFO, @DelayedInfo) then
+      begin
+        AddLog('Could not configure delayed start for ' + AServiceName +
+               ': ' + SysErrorMessage(GetLastError));
+        Exit;
+      end;
+
+    Actions[0].&Type := SC_ACTION_RESTART;
+    Actions[0].Delay := 60000;
+    Actions[1].&Type := SC_ACTION_RESTART;
+    Actions[1].Delay := 60000;
+    Actions[2].&Type := SC_ACTION_RESTART;
+    Actions[2].Delay := 60000;
+    FillChar(FailureActions, SizeOf(FailureActions), 0);
+    FailureActions.dwResetPeriod := 86400;
+    FailureActions.cActions := Length(Actions);
+    FailureActions.lpsaActions := @Actions[0];
+    if not ChangeServiceConfig2(Service, SERVICE_CONFIG_FAILURE_ACTIONS,
+                                @FailureActions) then
+      begin
+        AddLog('Could not configure recovery for ' + AServiceName + ': ' +
+               SysErrorMessage(GetLastError));
+        Exit;
+      end;
+    FailureFlag.fFailureActionsOnNonCrashFailures := True;
+    if not ChangeServiceConfig2(Service,
+      SERVICE_CONFIG_FAILURE_ACTIONS_FLAG, @FailureFlag) then
+      begin
+        AddLog('Could not enable recovery for all failures on ' +
+               AServiceName + ': ' + SysErrorMessage(GetLastError));
+        Exit;
+      end;
+    Result := True;
+  finally
+    CloseServiceHandle(Service);
+    CloseServiceHandle(Manager);
+  end;
+end;
+
+
+procedure TfrmFxServeAdmin.ApplyBootSafety(
+  const APreferredService: string);
+var
+  OtherService: string;
+  State: DWORD;
+  ProcessId: DWORD;
+  Win32ExitCode: DWORD;
+  ServiceExitCode: DWORD;
+begin
+  if not QueryNamedServiceState(APreferredService, State, ProcessId,
+    Win32ExitCode, ServiceExitCode, False) then
+    raise Exception.Create('The preferred web service is not installed: ' +
+                           APreferredService);
+
+  if SameText(APreferredService, 'FxServe') then
+    OtherService := 'caddy'
+  else if SameText(APreferredService, 'caddy') then
+    OtherService := 'FxServe'
+  else
+    OtherService := '';
+
+  if OtherService <> '' then
+    begin
+      if QueryNamedServiceState(OtherService, State, ProcessId,
+        Win32ExitCode, ServiceExitCode, False) then
+        begin
+          StopNamedService(OtherService);
+          ConfigureNamedServiceResilience(OtherService, SERVICE_DEMAND_START,
+                                          False);
+          AddLog(OtherService + ' will remain available for manual use.');
+        end;
+    end;
+
+  if not ConfigureNamedServiceResilience(APreferredService,
+    SERVICE_AUTO_START, False) then
+    raise Exception.Create('Could not configure ' + APreferredService + '.');
+  AddLog(APreferredService +
+         ' is the preferred automatic web service with failure recovery.');
+  StorePreferredWebService(APreferredService);
+
+  if QueryNamedServiceState('FxRecord', State, ProcessId, Win32ExitCode,
+    ServiceExitCode, False) then
+    begin
+      if not ConfigureNamedServiceResilience('FxRecord', SERVICE_AUTO_START,
+        True, APreferredService + #0 + 'Tcpip') then
+        raise Exception.Create('Could not configure FxRecord resilience.');
+      AddLog('FxRecord uses delayed automatic start after ' +
+             APreferredService + ' and TCP/IP.');
+    end
+  else
+    AddLog('FxRecord service is not installed yet. Run FxRecord.exe --install on the server, then apply Boot safety again.');
+
+  StartNamedService(APreferredService);
+  if QueryNamedServiceState('FxRecord', State, ProcessId, Win32ExitCode,
+    ServiceExitCode, False) then
+    StartNamedService('FxRecord');
+end;
+
+
+function TfrmFxServeAdmin.CheckRemoteRestartPending(out APending: Boolean;
+  out AError: string): Boolean;
+var
+  Registry: TRegistry;
+  Machine: string;
+begin
+  Result := False;
+  APending := False;
+  AError := '';
+  Registry := TRegistry.Create(KEY_READ or KEY_WOW64_64KEY);
+  try
+    try
+      Registry.RootKey := HKEY_LOCAL_MACHINE;
+      Machine := ServerMachineName();
+      if (Machine <> '') and not Registry.RegistryConnect(Machine) then
+        begin
+          AError := 'Remote Registry connection failed.';
+          Exit;
+        end;
+      APending := Registry.KeyExists(
+        '\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending') or
+        Registry.KeyExists(
+        '\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired');
+      Result := True;
+    except
+      on E: Exception do
+        AError := E.Message;
+    end;
+  finally
+    Registry.Free();
+  end;
+end;
+
+
+function TfrmFxServeAdmin.ConfigureWindowsUpdatePolicy(
+  out ADescription, AError: string): Boolean;
+var
+  Registry: TRegistry;
+  Machine: string;
+  InstallationType: string;
+  OptionValue: Integer;
+begin
+  Result := False;
+  ADescription := '';
+  AError := '';
+  Registry := TRegistry.Create(KEY_READ or KEY_WRITE or KEY_WOW64_64KEY);
+  try
+    try
+      Registry.RootKey := HKEY_LOCAL_MACHINE;
+      Machine := ServerMachineName();
+      if (Machine <> '') and not Registry.RegistryConnect(Machine) then
+        begin
+          AError := 'Remote Registry connection failed.';
+          Exit;
+        end;
+
+      InstallationType := '';
+      if Registry.OpenKeyReadOnly(
+        '\SOFTWARE\Microsoft\Windows NT\CurrentVersion') then
+        begin
+          if Registry.ValueExists('InstallationType') then
+            InstallationType := Registry.ReadString('InstallationType');
+          Registry.CloseKey();
+        end;
+      if Pos('SERVER', UpperCase(InstallationType)) > 0 then
+        OptionValue := 7
+      else
+        OptionValue := 2;
+
+      if not Registry.OpenKey(
+        '\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU', True) then
+        begin
+          AError := 'The Windows Update policy key could not be opened.';
+          Exit;
+        end;
+      Registry.WriteInteger('NoAutoUpdate', 0);
+      Registry.WriteInteger('AUOptions', OptionValue);
+      Registry.WriteInteger('AlwaysAutoRebootAtScheduledTime', 0);
+      Registry.WriteInteger('NoAutoRebootWithLoggedOnUsers', 1);
+      Registry.CloseKey();
+
+      if OptionValue = 7 then
+        ADescription := 'Windows Server: notify before installation and notify before restart (option 7).'
+      else
+        ADescription := 'Windows: notify before download and installation (option 2).';
+      Result := True;
+    except
+      on E: Exception do
+        AError := E.Message;
+    end;
+  finally
+    Registry.Free();
+  end;
+end;
+
+
+function TfrmFxServeAdmin.ReadWindowsUpdatePolicy(
+  out ADescription: string): Boolean;
+var
+  Registry: TRegistry;
+  Machine: string;
+  OptionValue: Integer;
+begin
+  Result := False;
+  ADescription := 'not configured';
+  Registry := TRegistry.Create(KEY_READ or KEY_WOW64_64KEY);
+  try
+    Registry.RootKey := HKEY_LOCAL_MACHINE;
+    Machine := ServerMachineName();
+    if (Machine <> '') and not Registry.RegistryConnect(Machine) then
+      Exit;
+    if not Registry.OpenKeyReadOnly(
+      '\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU') or
+       not Registry.ValueExists('AUOptions') then
+      Exit;
+    OptionValue := Registry.ReadInteger('AUOptions');
+    case OptionValue of
+      2: ADescription := 'admin approval required before download (option 2)';
+      7: ADescription := 'admin approval required before install/restart (server option 7)';
+    else
+      ADescription := Format('automatic-update option %d', [OptionValue]);
+    end;
+    Result := (OptionValue = 2) or (OptionValue = 7);
+  finally
+    Registry.Free();
+  end;
+end;
+
+
 procedure TfrmFxServeAdmin.ApplyDeploymentSettings();
 var
   ShareValue: string;
@@ -1963,6 +2279,13 @@ begin
     CloseServiceHandle(Manager);
   end;
 
+  if ConfigureNamedServiceResilience(ServiceName, SERVICE_AUTO_START,
+                                     False) then
+    begin
+      StorePreferredWebService(ServiceName);
+      AddLog('FxServe automatic startup and failure recovery configured.');
+    end;
+
   RefreshServiceStatus();
 end;
 
@@ -2320,6 +2643,12 @@ var
   DisplayUrl,
   ErrorText: string;
   Status: DWORD;
+  ServiceState: DWORD;
+  ProcessId: DWORD;
+  Win32ExitCode: DWORD;
+  ServiceExitCode: DWORD;
+  PendingRestart: Boolean;
+  PreferredService: string;
 
 begin
 
@@ -2354,6 +2683,114 @@ begin
       else
         AddLog('Public HTTPS check failed: ' + ErrorText);
     end;
+
+    PreferredService := PreferredWebService();
+    if QueryNamedServiceState(PreferredService, ServiceState, ProcessId,
+      Win32ExitCode, ServiceExitCode, False) then
+      AddLog(PreferredService + ' service: ' + StateText(ServiceState))
+    else
+      AddLog(PreferredService + ' service: not installed or unavailable.');
+
+    if QueryNamedServiceState('FxRecord', ServiceState, ProcessId,
+      Win32ExitCode, ServiceExitCode, False) then
+      AddLog('FxRecord service: ' + StateText(ServiceState))
+    else
+      AddLog('FxRecord service: not installed or unavailable.');
+
+    if CheckRemoteRestartPending(PendingRestart, ErrorText) then
+      begin
+        if PendingRestart then
+          AddLog('Windows Update: WARNING - the server requires a restart.')
+        else
+          AddLog('Windows Update: OK - no pending restart detected.');
+      end
+    else
+      AddLog('Windows Update status could not be checked: ' + ErrorText);
+
+    try
+      if ReadWindowsUpdatePolicy(ErrorText) then
+        AddLog('Windows Update policy: OK - ' + ErrorText + '.')
+      else
+        AddLog('Windows Update policy: WARNING - ' + ErrorText + '.');
+    except
+      on E: Exception do
+        AddLog('Windows Update policy could not be checked: ' + E.Message);
+    end;
+  finally
+    EndBusy();
+  end;
+end;
+
+
+procedure TfrmFxServeAdmin.BootSafetyClick(Sender: TObject);
+var
+  PreferredService: string;
+begin
+  PreferredService := PreferredWebService();
+  if not InputQuery('Boot safety',
+    'Windows service name of the preferred web server:',
+    PreferredService) then
+    Exit;
+  PreferredService := Trim(PreferredService);
+  if PreferredService = '' then
+    begin
+      MessageDlg('Enter a Windows service name.', mtError, [mbOK], 0);
+      Exit;
+    end;
+  if SameText(PreferredService, 'FxRecord') then
+    begin
+      MessageDlg('FxRecord cannot be selected as the web server.',
+                 mtError, [mbOK], 0);
+      Exit;
+    end;
+  if MessageDlg('Configure ' + PreferredService +
+    ' as the automatic web service and configure FxRecord for delayed automatic startup?'#13#10#13#10 +
+    'If the alternative FxServe/Caddy service is installed, it will be stopped and changed to manual startup.',
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  BeginBusy('configuring boot safety.');
+  try
+    try
+      ApplyBootSafety(PreferredService);
+      AddLog('Boot safety configuration completed.');
+    except
+      on E: Exception do
+        begin
+          AddLog('Boot safety failed: ' + E.Message);
+          MessageDlg(E.Message, mtError, [mbOK], 0);
+        end;
+    end;
+  finally
+    EndBusy();
+  end;
+end;
+
+
+procedure TfrmFxServeAdmin.UpdatePolicyClick(Sender: TObject);
+var
+  Description: string;
+  ErrorText: string;
+begin
+  if MessageDlg(
+    'Require administrator approval before Windows downloads or installs updates on the configured server?'#13#10#13#10 +
+    'Windows Update remains enabled. The administrator must regularly install security updates during a maintenance window.'#13#10#13#10 +
+    'A domain policy can override this local setting.',
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  BeginBusy('configuring the Windows Update policy.');
+  try
+    if ConfigureWindowsUpdatePolicy(Description, ErrorText) then
+      begin
+        AddLog('Windows Update policy configured: ' + Description);
+        MessageDlg(Description, mtInformation, [mbOK], 0);
+      end
+    else
+      begin
+        AddLog('Windows Update policy failed: ' + ErrorText);
+        MessageDlg(ErrorText, mtError, [mbOK], 0);
+      end;
   finally
     EndBusy();
   end;

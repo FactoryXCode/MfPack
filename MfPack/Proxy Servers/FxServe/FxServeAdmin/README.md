@@ -83,6 +83,23 @@ The service buttons use the native Windows Service Control Manager and manage
 only the configured FxServe service. FxServe Admin does not stop, start, or
 reconfigure Caddy or another web server. If another server uses ports 80 or 443,
 manage it separately before starting FxServe WAN.
+
+## Boot safety and Windows Update
+
+**Boot safety** accepts the Windows service name of the preferred web server.
+It is not limited to FxServe or Caddy. The selected web service is configured
+for automatic startup and restart-on-failure. When FxServe or Caddy is chosen,
+the other one is stopped and changed to manual startup so both programs cannot
+claim the same ports. If the `FxRecord` service is installed, it receives a
+delayed automatic start, restart-on-failure, and dependencies on TCP/IP and the
+selected web service.
+
+**Update policy** keeps Windows Update enabled but requires administrator
+approval. Windows Server uses notification option 7; Windows desktop editions
+use option 2. This prevents an ordinary automatic update from silently
+installing and restarting the broadcast server. A domain policy can override
+the local setting, so **Health check** reports the effective configured option
+and whether Windows currently requires a restart.
   
 When FxServe WAN HTTPS is enabled, the server obtains and binds its certificate
 automatically. Keep public port 80 forwarded to the server for ACME validation
