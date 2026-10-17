@@ -493,5 +493,5 @@ application. The difference is the size and range of the web server behind them.
 - [FxServe README](README.md)
 - [FxServe deployment guide](Deploy/YourRemoteServer/README-Deploy.md)
 - [FxServeAdmin README](FxServeAdmin/README.md)
-- [RDJ User Manual](../Samples/MfRdjJ/Docs/RDJ-User-Manual.md)
-- [RDJ Pro User Manual](../Samples/MfRdjPro/Docs/RDJ-Pro-User-Manual.md)
+- [RDJ User Manual](https://github.com/FactoryXCode/FactoryX-Radio-DJ/blob/main/RadioDJ/MfRdjJ/Docs/RDJ-User-Manual.md)
+- [RDJ Pro User Manual](https://github.com/FactoryXCode/FactoryX-Radio-DJ/blob/main/RadioDJ/MfRdjPro/Docs/RDJ-Pro-User-Manual.md)
