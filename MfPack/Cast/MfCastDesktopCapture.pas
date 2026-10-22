@@ -640,15 +640,12 @@ var
   VideoInputView: ID3D11VideoProcessorInputView;
   VideoOutputView: ID3D11VideoProcessorOutputView;
   VideoSampleAllocator: IMFVideoSampleAllocatorEx;
-  AllocatorAttributes: IMFAttributes;
-  AllocatorMediaType: IMFMediaType;
+
   GpuSample: IMFSample;
   GpuBuffer: IMFMediaBuffer;
   GpuDxgiBuffer: IMFDXGIBuffer;
   GpuBuffer2D: IMF2DBuffer;
-  GpuBufferLength: DWORD;
   DxgiDeviceManager: IMFDXGIDeviceManager;
-  DxgiResetToken: UINT;
   DxgiDevice: IDXGIDevice;
   Adapter: IDXGIAdapter;
   Output: IDXGIOutput;

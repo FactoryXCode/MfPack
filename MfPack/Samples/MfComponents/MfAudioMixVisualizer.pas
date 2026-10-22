@@ -712,41 +712,36 @@ var
   EventHandle: THandle;
   WaitHandles: array[0..1] of THandle;
 
-  PacketFrames, NumFrames: UINT32;
+  PacketFrames: UINT32;
+  NumFrames: UINT32;
   pData: PByte;
   Flags: DWORD;
 
-  channels,
+  channels: Integer;
   sampleRate: Integer;
   isFloat: Boolean;
 
-  peakL,
+  peakL: Single;
   peakR: Single;
-  sumSqL,
+  sumSqL: Double;
   sumSqR: Double;
   nSamp: Integer;
 
-  smPeakL,
-  smPeakR,
-  smRmsL,
+  smPeakL: Single;
+  smPeakR: Single;
+  smRmsL: Single;
   smRmsR: Single;
-  attackA,
+  attackA: Single;
   releaseA: Single;
 
   monoBlock: TArray<Single>;
-  re,
+  re: TArray<Single>;
   im: TArray<Single>;
   mags: TArray<Single>;
   bars: TArray<Single>;
 
   fftN, barCount: Integer;
-  i,
-  k,
-  bar: Integer;
-  idxStart,
-  idxEnd: Integer;
-  maxMag,
-  v: Single;
+  i: Integer;
 
   lastDispatchTick: DWORD;
 
@@ -754,15 +749,13 @@ var
 
   pf: PSingle;
   ps: PSmallInt;
-  a,
+  a: Single;
   b: Single;
-  rmsL,
+  rmsL: Single;
   rmsR: Single;
-  aAtk,
+  aAtk: Single;
   aRel: Single;
 
-  t0,
-  t1: Double;
   acc: Single;
   cnt: Integer;
 

@@ -559,7 +559,7 @@ begin
 
   smS := RampCoefPerSample(SampleRate);
 
-  phOff := ((FCStereoPhaseDeg * PI) / 180.0) * 1.0;
+  //phOff := ((FCStereoPhaseDeg * PI) / 180.0) * 1.0;
 
   p := pData;
 

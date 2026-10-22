@@ -193,47 +193,47 @@ type
   end;
 
 
-// Security
-function AcquireCredentialsHandleA(pszPrincipal: PAnsiChar;
-                                   pszPackage: PAnsiChar;
-                                   fCredentialUse: Cardinal;
-                                   pvLogonID: Pointer;
-                                   pAuthData: Pointer;
-                                   pGetKeyFn: Pointer;
-                                   pvGetKeyArgument: Pointer;
-                                   var phCredential: TSecHandle;
-                                   var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
+  // Security
+  function AcquireCredentialsHandleA(pszPrincipal: PAnsiChar;
+                                     pszPackage: PAnsiChar;
+                                     fCredentialUse: Cardinal;
+                                     pvLogonID: Pointer;
+                                     pAuthData: Pointer;
+                                     pGetKeyFn: Pointer;
+                                     pvGetKeyArgument: Pointer;
+                                     var phCredential: TSecHandle;
+                                     var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
 
-function InitializeSecurityContextA(phCredential: PSecHandle;
-                                    phContext: PSecHandle;
-                                    pszTargetName: PAnsiChar;
-                                    fContextReq: Cardinal;
-                                    Reserved1: Cardinal;
-                                    TargetDataRep: Cardinal;
-                                    pInput: PSecBufferDesc;
-                                    Reserved2: Cardinal;
-                                    var phNewContext: TSecHandle;
-                                    pOutput: PSecBufferDesc;
-                                    var pfContextAttr: Cardinal;
-                                    var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
+  function InitializeSecurityContextA(phCredential: PSecHandle;
+                                      phContext: PSecHandle;
+                                      pszTargetName: PAnsiChar;
+                                      fContextReq: Cardinal;
+                                      Reserved1: Cardinal;
+                                      TargetDataRep: Cardinal;
+                                      pInput: PSecBufferDesc;
+                                      Reserved2: Cardinal;
+                                      var phNewContext: TSecHandle;
+                                      pOutput: PSecBufferDesc;
+                                      var pfContextAttr: Cardinal;
+                                      var ptsExpiry: TTimeStamp): TSecurityStatus; stdcall;
 
-function FreeCredentialsHandle(var phCredential: TSecHandle): TSecurityStatus; stdcall;
-function DeleteSecurityContext(var phContext: TSecHandle): TSecurityStatus; stdcall;
-function FreeContextBuffer(pvContextBuffer: Pointer): TSecurityStatus; stdcall;
+  function FreeCredentialsHandle(var phCredential: TSecHandle): TSecurityStatus; stdcall;
+  function DeleteSecurityContext(var phContext: TSecHandle): TSecurityStatus; stdcall;
+  function FreeContextBuffer(pvContextBuffer: Pointer): TSecurityStatus; stdcall;
 
-function QueryContextAttributesA(var phContext: TSecHandle;
-                                 ulAttribute: Cardinal;
-                                 pBuffer: Pointer): TSecurityStatus; stdcall;
+  function QueryContextAttributesA(var phContext: TSecHandle;
+                                   ulAttribute: Cardinal;
+                                   pBuffer: Pointer): TSecurityStatus; stdcall;
 
-function EncryptMessage(var phContext: TSecHandle;
-                        fQOP: Cardinal;
-                        pMessage: PSecBufferDesc;
-                        MessageSeqNo: Cardinal): TSecurityStatus; stdcall;
+  function EncryptMessage(var phContext: TSecHandle;
+                          fQOP: Cardinal;
+                          pMessage: PSecBufferDesc;
+                          MessageSeqNo: Cardinal): TSecurityStatus; stdcall;
 
-function DecryptMessage(var phContext: TSecHandle;
-                        pMessage: PSecBufferDesc;
-                        MessageSeqNo: Cardinal;
-                        var pfQOP: Cardinal): TSecurityStatus; stdcall;
+  function DecryptMessage(var phContext: TSecHandle;
+                          pMessage: PSecBufferDesc;
+                          MessageSeqNo: Cardinal;
+                          var pfQOP: Cardinal): TSecurityStatus; stdcall;
 
 
 implementation
@@ -601,9 +601,11 @@ begin
 
   TargetName := AnsiString(AHost);
   HaveContext := False;
-  Status := SEC_I_CONTINUE_NEEDED;
+  Status := S_OK;
 
-  while Status = SEC_I_CONTINUE_NEEDED do
+  // Always perform the initial handshake, and retry incomplete input after
+  // receiving more bytes. Status is assigned by SSPI on every iteration.
+  while (True) do
     begin
       FillChar(OutBuffers,
                SizeOf(OutBuffers),
@@ -735,6 +737,9 @@ begin
           Result := Status;
           Exit;
         end;
+
+      if (Status = SEC_E_OK) then
+        Break;
     end;
 
   if (Status <> SEC_E_OK) then
