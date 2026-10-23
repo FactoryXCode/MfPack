@@ -2,7 +2,7 @@ object frmFxServeAdmin: TfrmFxServeAdmin
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'FxServe Admin 1.1'
+  Caption = 'FxServe Admin 4.0.1'
   ClientHeight = 472
   ClientWidth = 714
   Color = clGray
@@ -35,8 +35,6 @@ object frmFxServeAdmin: TfrmFxServeAdmin
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 0
-    ExplicitTop = 265
-    ExplicitHeight = 281
   end
   object Panel1: TPanel
     Left = 0
@@ -48,7 +46,6 @@ object frmFxServeAdmin: TfrmFxServeAdmin
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
-    ExplicitTop = 2
     object Bevel3: TBevel
       Left = 6
       Top = 17
@@ -321,7 +318,9 @@ object frmFxServeAdmin: TfrmFxServeAdmin
       Top = 228
       Width = 96
       Height = 28
-      Hint = 'Configure automatic startup and restart-on-failure for the selected web service and FxRecord.'
+      Hint = 
+        'Configure automatic startup and restart-on-failure for the selec' +
+        'ted web service and FxRecord.'
       Caption = 'Boot safety'
       ParentShowHint = False
       ShowHint = True
@@ -333,7 +332,9 @@ object frmFxServeAdmin: TfrmFxServeAdmin
       Top = 228
       Width = 96
       Height = 28
-      Hint = 'Require administrator approval before Windows downloads or installs updates.'
+      Hint = 
+        'Require administrator approval before Windows downloads or insta' +
+        'lls updates.'
       Caption = 'Update policy'
       ParentShowHint = False
       ShowHint = True
@@ -404,6 +405,5 @@ object frmFxServeAdmin: TfrmFxServeAdmin
     ParentFont = False
     TabOrder = 2
     Transparent = False
-    ExplicitTop = 552
   end
 end
