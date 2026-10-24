@@ -560,27 +560,27 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
   
 ***Complex samples***
   
-**MfRDJ Radio Mixer**  
+**RDJ Mixer sample**  
 This application demonstrates how to build an audio mixer,  
 effects and how to implement IceCast/Caddy for internet broadcasting.  
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.  
-All WASAPI sample code comes together in this sample.  
+All WASAPI and MFT sample code comes together in this sample.  
   
 **Notes:**  
- You have to know the principles of WASAPI, MFT's and audio manipulation.  
+ You have to know the principles of WASAPI, MFT's (see MFT samples) and audio manipulation.  
  Before compiling this sample make sure, you have all needed components compiled and installed (see instructions).
  
- This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)
+ This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ)
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJ_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJ_Interface_s.png)
   
   
-**MfRDJ Pro Radio Mixer sample**  
-MfRDJPro is the extended version of MfRDJ.
+**RDJ Pro Mixer sample**  
+RDJ Pro is the extended version of RDJ.
   
-Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,  
-MfRDJ Pro adds a complete live broadcast layer around the mixer.  
-MfRDJ Pro still provides the familiar RDJ functions: channel decks,  
+Where RDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,  
+RDJ Pro adds a complete live broadcast layer around the mixer.  
+RDJ Pro still provides the familiar RDJ functions: channel decks,  
 loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing,  
 tag editing, and local recording.  
   
@@ -600,12 +600,12 @@ MfRDJ Pro supports casting to Cromecast devices on your local network using the
 MfPack Cast V2 protocols.  
   
 **Note:**  
-You have to know the principles of WASAPI, MFT's, MfPack Cast V2, FxServe and audio manipulation.  
+You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2, FxServe and audio manipulation.  
 Before compiling this sample make sure, you have all needed components compiled and installed (see instructions). 
 
-This sample has been moved to the ![Radio DJ repo](https://github.com/FactoryXCode/FactoryX-Radio-DJ)  
+This sample has been moved to the [RDJ Pro repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ%20Pro)  
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJPro_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJPro_Interface_s.png)
   
 ---
 **MfMftExplorer sample**
