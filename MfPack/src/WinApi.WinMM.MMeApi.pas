@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 24/10/2026 Carmen              Corrected allignments.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -541,6 +542,8 @@ type
 type
 
   PWAVEFORMATEX = ^tWAVEFORMATEX;
+  // Match the SDK byte packing for wave format headers on both platforms.
+{$ALIGN 1}
   tWAVEFORMATEX = record
     wFormatTag: WORD;               { format type }
     nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
@@ -552,6 +555,13 @@ type
                                     { extra information (after cbSize) }
   end;
   {$EXTERNALSYM tWAVEFORMATEX}
+
+{$IFDEF WIN32}
+  {$ALIGN 1}
+{$ELSE}
+  {$ALIGN 8}
+{$ENDIF}
+
   WAVEFORMATEX = tWAVEFORMATEX;
   {$EXTERNALSYM WAVEFORMATEX}
   NPWAVEFORMATEX = ^tWAVEFORMATEX;

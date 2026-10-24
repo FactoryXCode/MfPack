@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 24/10/2026 Carmen              Corrected allignments.
 //------------------------------------------------------------------------------
 //
 // Remarks: Delphi : The IUnknown entries of functions should be casted like this:
@@ -4644,7 +4645,7 @@ type
  // WAVEFORMATEXTENSIBLE
  // ====================
 
-{$ALIGN ON}
+{$ALIGN 1}
 
   PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
   {$EXTERNALSYM PWAVEFORMATEXTENSIBLE}
@@ -4660,6 +4661,9 @@ type
     SubFormat: TGUID;
   end;
   {$EXTERNALSYM WAVEFORMATEXTENSIBLE}
+
+{$ALIGN ON}
+
 {$DEFINE __WAVEFORMATEXTENSIBLE__DEFINED}
 {$ENDIF} // !_WAVEFORMATEXTENSIBLE_
 
