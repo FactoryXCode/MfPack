@@ -32,7 +32,7 @@ SDK version: 10.0.28000.2705 (Windows 11).
   
   
 **Important note:**  
-The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) codecs.  
+The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders.  
 Those you can buy from Microsoft Store or download elsewhere.
   
   
