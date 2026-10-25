@@ -621,8 +621,8 @@ Windows system and their properties.
 **MfCustomMFT samples**  
 Small, beginner-oriented examples that introduce custom Media Foundation  
 Transforms one step at a time.  
-The project has 6 samples where each sample is lifted from the previous one.  
-At sample 6 a programmer should be able to build a simple registered MFT and  
+The project has 15 samples where each sample is lifted from the previous one.  
+At sample 7 a programmer should be able to build a simple registered MFT and  
 how to use it in Media Foundation.  
   
 [Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
@@ -637,7 +637,7 @@ Sample 1
 
 **FxServe**
   
-FxServe is a light weight reverse proxy HTTP/HTTPS server for MfRdj,  
+FxServe is a light weight reverse proxy HTTP/HTTPS server for RDJ,  
 RDJ Pro or other apps that stream audio/video on LAN/WAN.  
 It serves web and local network players and generated media files and forwards the  
 small set of live endpoints, in the same way 3th party servers as Caddy do.  
