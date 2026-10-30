@@ -687,6 +687,32 @@ Samples using MfCast are:
 - RDJ Pro.
   
 ---
+***HEOS CLI and AVR***
+
+FactoryX HEOS CLI provides Delphi APIs for controlling HEOS-enabled audio devices from Denon and Marantz.
+It supports player control, volume and mute, music browsing, queues, playlists, grouping and receiver events.
+The APIs use native Windows sockets; no Indy or third-party JSON libraries are needed.
+
+**AVR control**
+
+The AVR API adds receiver power, Main Zone and Zone 2 activation, input selection, volume, mute, balance and tone controls.
+It also provides surround mode and Dynamic EQ commands.
+HEOS playback and AVR settings use separate protocols, with availability depending on the receiver, firmware and music service.
+
+**Remote samples**
+
+The API's have the following samples:
+- A simple HEOS remote demonstrates the CLI with standard Delphi VCL components.
+
+![](https://github.com/FactoryXCode/FactoryX-HEOS-CLI/blob/main/Pic/SimpleHEOSRemote_s.png)  
+  
+- The complete HEOS Remote application adds playlist editing, file streaming, playlist streaming and Windows audio (loopback) streaming.
+Its controls and form layouts are included for editing in the Delphi IDE.
+
+![](https://github.com/FactoryXCode/FactoryX-HEOS-CLI/blob/main/Pic/HEOSRemote_s.png)
+
+See the complete HEOS/AVR Delphi API [HERE](https://github.com/FactoryXCode/FactoryX-HEOS-CLI
+---
   
 ***Tools***
   
