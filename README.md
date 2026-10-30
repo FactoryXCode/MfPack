@@ -710,8 +710,9 @@ The API's have the following samples:
 Its controls and form layouts are included for editing in the Delphi IDE.
 
 ![](https://github.com/FactoryXCode/FactoryX-HEOS-CLI/blob/main/Pic/HEOSRemote_s.png)
-
-See the complete HEOS/AVR Delphi API [HERE](https://github.com/FactoryXCode/FactoryX-HEOS-CLI
+  
+You can find the complete HEOS/AVR Delphi API and samples [HERE](https://github.com/FactoryXCode/FactoryX-HEOS-CLI)  
+  
 ---
   
 ***Tools***
