@@ -1188,7 +1188,7 @@ begin
         Exit;
       end;
 
-    if FConfig.IsProxyRoute(Path) then
+    if FConfig.IsRadioRoute(Path) or FConfig.IsProxyRoute(Path) then
       ProxyRequest(ASocket,
                    MethodName,
                    Target,
@@ -1461,10 +1461,19 @@ var
   Count: Integer;
   HeaderEnd: Integer;
   Value: string;
+  UpstreamHost: string;
+  UpstreamPort: Word;
 
 begin
 
-  if not ResolveIPv4(FConfig.ProxyHost,
+  UpstreamHost := FConfig.ProxyHost;
+  UpstreamPort := FConfig.ProxyPort;
+  if FConfig.IsRadioRoute(ATarget) then
+    begin
+      UpstreamHost := FConfig.RadioHost;
+      UpstreamPort := FConfig.RadioPort;
+    end;
+  if not ResolveIPv4(UpstreamHost,
                      IpAddress) then
     begin
       SendError(ASocket,
@@ -1493,7 +1502,7 @@ begin
              0);
 
     Address.sin_family := AF_INET;
-    Address.sin_port := htons(FConfig.ProxyPort);
+    Address.sin_port := htons(UpstreamPort);
     Address.sin_addr.S_addr := IpAddress;
 
     if (connect(Upstream,
@@ -1509,8 +1518,8 @@ begin
 
     RequestText := AnsiString(AMethod + ' ' +
                               ATarget + ' HTTP/1.1'#13#10 +
-                              'Host: ' + FConfig.ProxyHost + ':' +
-                              IntToStr(FConfig.ProxyPort) + #13#10);
+                              'Host: ' + UpstreamHost + ':' +
+                              IntToStr(UpstreamPort) + #13#10);
     Value := HeaderValue(ARequestHeader,
                          'User-Agent');
 

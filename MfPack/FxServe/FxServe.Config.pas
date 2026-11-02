@@ -80,6 +80,9 @@ type
     FMaxConnections: Integer;
     FHeaderTimeoutMs: Integer;
     FSendTimeoutMs: Integer;
+    FRadioEnabled: Boolean;
+    FRadioHost: string;
+    FRadioPort: Word;
     FProxyEnabled: Boolean;
     FProxyHost: string;
     FProxyPort: Word;
@@ -115,6 +118,7 @@ type
     destructor Destroy(); override;
 
     procedure LoadFromFile(const AFileName: string);
+    function IsRadioRoute(const APath: string): Boolean;
     function IsProxyRoute(const APath: string): Boolean;
     function IsNoStoreRoute(const APath: string): Boolean;
 
@@ -125,6 +129,9 @@ type
     property MaxConnections: Integer read FMaxConnections;
     property HeaderTimeoutMs: Integer read FHeaderTimeoutMs;
     property SendTimeoutMs: Integer read FSendTimeoutMs;
+    property RadioEnabled: Boolean read FRadioEnabled;
+    property RadioHost: string read FRadioHost;
+    property RadioPort: Word read FRadioPort;
     property ProxyEnabled: Boolean read FProxyEnabled;
     property ProxyHost: string read FProxyHost;
     property ProxyPort: Word read FProxyPort;
@@ -409,6 +416,17 @@ begin
           raise Exception.Create('WAN HTTP and HTTPS ports must differ.');
       end;
 
+    FRadioEnabled := ReadIniBoolean(Ini, 'Radio', 'Enabled', False);
+    FRadioHost := Trim(Ini.ReadString('Radio', 'Host', '127.0.0.1'));
+    Value := Ini.ReadInteger('Radio', 'Port', 8098);
+    if (Value < 1) or (Value > 65535) then
+      raise Exception.Create('Radio Port must be between 1 and 65535.');
+    FRadioPort := Value;
+    if FRadioEnabled and ((FRadioHost = '') or (Pos(#13, FRadioHost) > 0) or
+                          (Pos(#10, FRadioHost) > 0) or (Pos('/', FRadioHost) > 0) or
+                          (Pos(' ', FRadioHost) > 0) or (Pos(':', FRadioHost) > 0)) then
+      raise Exception.Create('Radio Host must be an IPv4 address or host name without a URL scheme or port.');
+
     FProxyEnabled := ReadIniBoolean(Ini,
                                     'Proxy',
                                     'Enabled',
@@ -499,6 +517,21 @@ begin
     Ini.Free;
   end;
 
+end;
+
+
+function TFxServeConfig.IsRadioRoute(const APath: string): Boolean;
+var
+  Path: string;
+  P: Integer;
+
+begin
+
+  Path := APath;
+  P := Pos('?', Path);
+  if (P > 0) then
+    Path := Copy(Path, 1, P - 1);
+  Result := FRadioEnabled and SameText(Path, '/radio/live.aac');
 end;
 
 

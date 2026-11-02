@@ -547,7 +547,7 @@ function SendEntity(AQueue: THandle;
                     ARequestId: UInt64;
                     const AData: RawByteString;
                     AMoreData: Boolean;
-                    AAutomaticChunking: Boolean): Boolean;
+                    ACloseDelimited: Boolean): Boolean;
 var
   Chunk: THttpDataChunk;
   Flags: Cardinal;
@@ -572,8 +572,8 @@ begin
     Flags := Flags or HTTP_SEND_RESPONSE_FLAG_MORE_DATA;
 
 
-  if AAutomaticChunking and AMoreData then
-    Flags := Flags or HTTP_SEND_RESPONSE_FLAG_AUTOMATIC_CHUNKING;
+  if ACloseDelimited and not AMoreData then
+    Flags := Flags or HTTP_SEND_RESPONSE_FLAG_DISCONNECT;
 
   Sent := 0;
 
@@ -603,7 +603,7 @@ begin
 
   Error := HttpSendResponseEntityBody(AQueue,
                                       ARequestId,
-                                      0,
+                                      HTTP_SEND_RESPONSE_FLAG_DISCONNECT,
                                       0,
                                       nil,
                                       @Sent,
@@ -1222,7 +1222,8 @@ var
   Remaining: Int64;
   TransferChunked: Boolean;
   HasBody: Boolean;
-  AutoChunk: Boolean;
+  CloseDelimited: Boolean;
+  ConnectionValue: RawByteString;
   Flags: Cardinal;
   Sent: Cardinal;
   Error: Cardinal;
@@ -1266,7 +1267,7 @@ var
                          ARequestId,
                          AData,
                          not AFinal,
-                         AutoChunk);
+                         CloseDelimited);
   end;
 
 begin
@@ -1506,16 +1507,20 @@ begin
                 (Status <> 304) and
                 ((ContentLength <> 0) or TransferChunked);
 
-      AutoChunk := TransferChunked or (ContentLength < 0);
-      Flags := HTTP_SEND_RESPONSE_FLAG_DISCONNECT;
+      CloseDelimited := ContentLength < 0;
+
+      // Continuous AAC has no Content-Length. Keep the response open while
+      // sending its body and disconnect only on the final entity-body call.
+      // DISCONNECT and MORE_DATA must never be combined in the header call.
+      // Do not require the newer automatic-chunking HTTP.sys flag.
+      ConnectionValue := 'close';
+      Response.Headers.KnownHeaders[HttpHeaderConnection].RawValueLength := Length(ConnectionValue);
+      Response.Headers.KnownHeaders[HttpHeaderConnection].pRawValue := @ConnectionValue[1];
 
       if HasBody then
-        begin
-          Flags := Flags or HTTP_SEND_RESPONSE_FLAG_MORE_DATA;
-
-          if AutoChunk then
-            Flags := Flags or HTTP_SEND_RESPONSE_FLAG_AUTOMATIC_CHUNKING;
-        end;
+        Flags := HTTP_SEND_RESPONSE_FLAG_MORE_DATA
+      else
+        Flags := HTTP_SEND_RESPONSE_FLAG_DISCONNECT;
 
       Sent := 0;
 
@@ -1530,7 +1535,11 @@ begin
                                     nil,
                                     nil);
       if (Error <> NO_ERROR) then
-        Exit(True);
+        begin
+          FLogger.Error(Format('WAN response header failed: method=%s status=%d flags=%d error=%d',
+                               [AMethod, Status, Flags, Error]));
+          Exit(True);
+        end;
 
       if not HasBody then
         Exit(True);

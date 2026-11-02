@@ -308,3 +308,18 @@ their own administration tools.
   RDJ Pro and MfWebCamStreamer signal paths, HTTPS reiteration, security, limits, and MfPack scope.
 - [Remote server deployment guide](Deploy/YourRemoteServer/README-Deploy.md) covers server
   installation, updates, health checks, and rollback.
+
+## RDJ Pro audio radio
+
+Enable the Media Server's **Start audio radio** in RDJ Pro. It serves a
+continuous AAC-LC 192 kbps stereo stream at `/radio/live.aac` on port 8098.
+To expose it through FxServe, set `[Radio] Enabled=True`, `Host` to the RDJ
+computer's LAN IPv4/name, and `Port=8098` in FxServe.ini. This is a separate
+upstream from `[Proxy]`: webcam `/live`, status and video routes keep their
+existing host and port. Radio is disabled by default. No path rewriting or
+static fragment concatenation is used. HTTPS uses the existing HTTP.sys edge.
+
+The public URL is `https://factoryxradio.asuscomm.com/radio/live.aac` once the
+updated server and configuration are deployed and RDJ audio radio is running.
+A successful HEOS Play URL response confirms command acceptance, not audible
+playback. Test the LAN audio endpoint first, then HTTPS and the receiver.
