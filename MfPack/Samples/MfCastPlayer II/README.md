@@ -10,7 +10,7 @@ Minimum supported MfPack version: 4.0.0
 MfCast V2.1  
   
   
-This Delphi XE7-compatible VCL sample demonstrates the public `TMfCast` interface.  
+This sample demonstrates the public `TMfCast` interface.  
 
 **It demonstrates:**
   
@@ -28,10 +28,16 @@ This Delphi XE7-compatible VCL sample demonstrates the public `TMfCast` interfac
 Please read the white paper document  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API  
   
 **How to build**  
-Build `MfCastPlayer.dproj` for Win32. The project search paths point to  
-`MfPack\src`, `MfPack\Cast`, and `MfPack\Cast\Media`. Shared units  
-are found through those search paths and do not need to be added to the sample's  
-Project Manager.  
+Build `MfCastPlayer.dproj` for Win32.
+The project search paths point to  `MfPack\src`, `MfPack\Cast`, and `MfPack\Cast\Media`.
+Shared units  are found through those search paths and do not need to be added to the sample's Project Manager.
+In Project/Options/Delphi Compiler add the following:
+'Output Directory:' .\$(Platform)\$(Config)
+'Search Path:' // The absolute paths, like for instance:
+                        D:\PROJECTS\MfPack\src;
+                        D:\PROJECTS\MfPack\Cast;
+                        D:\PROJECTS\MfPack\Cast\Media
+'Unit Output Directory:' .\$(Platform)\$(Config)
   
 **Brief workflow**  
 The sample enables the optional Media Foundation conversion stack. Compatible  
@@ -95,6 +101,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 14/09/2026  
+Final release date: 07/11/2026  
   
 Copyright © FactoryX. All rights reserved.
