@@ -1507,17 +1507,6 @@ begin
   Settings.Reset();
   Settings.CaptureSystemAudio := chkCaptureAudio.Checked;
 
-  if not SelectCaptureMonitor(Settings.OutputIndex,
-                              MonitorDescription) then
-    begin
-      memLog.Lines.Add('Desktop casting cancelled: no screen was selected.');
-      Exit;
-    end;
-
-  memLog.Lines.Add(Format('Desktop source: %s (DXGI output %d).',
-                          [MonitorDescription,
-                           Settings.OutputIndex]));
-
   memLog.Lines.Add(Format('Desktop target: name="%s", model="%s", address=%s:%d, capabilities=%d.',
                           [FDevices[cbxDevices.ItemIndex].FriendlyName,
                            FDevices[cbxDevices.ItemIndex].ModelName,
@@ -1543,6 +1532,31 @@ begin
       Exit;
     end;
 
+  Settings.AudioOnly := Capabilities.AudioOnly;
+  if Settings.AudioOnly then
+    begin
+      if not Settings.CaptureSystemAudio then
+        begin
+          memLog.Lines.Add(
+            'Audio-only casting requires the Capture audio option to be enabled.');
+          Exit;
+        end;
+      memLog.Lines.Add(
+        'Audio source: default Windows playback device (WASAPI loopback); DXGI is not used.');
+    end
+  else
+    begin
+      if not SelectCaptureMonitor(Settings.OutputIndex,
+                                  MonitorDescription) then
+        begin
+          memLog.Lines.Add('Desktop casting cancelled: no screen was selected.');
+          Exit;
+        end;
+      memLog.Lines.Add(Format('Desktop source: %s (DXGI output %d).',
+                              [MonitorDescription,
+                               Settings.OutputIndex]));
+    end;
+
   case Capabilities.SelectedCodec of
     cvcH264: CodecName := 'H.264';
     cvcHEVC: CodecName := 'HEVC';
@@ -1550,8 +1564,9 @@ begin
     CodecName := 'none';
   end;
 
-  memLog.Lines.Add(Format('Desktop capture: codec=%s, hardware H.264=%s, hardware HEVC=%s, receiver HEVC=%s, audio=%s.',
-                          [CodecName,
+  memLog.Lines.Add(Format('Capture mode: audioOnly=%s, codec=%s, hardware H.264=%s, hardware HEVC=%s, receiver HEVC=%s, audio=%s.',
+                          [BoolToStr(Settings.AudioOnly, True),
+                           CodecName,
                            BoolToStr(Capabilities.HardwareH264EncoderAvailable, True),
                            BoolToStr(Capabilities.HardwareHEVCEncoderAvailable, True),
                            BoolToStr(Capabilities.ReceiverSupportsHEVC, True),
@@ -1566,7 +1581,10 @@ begin
 
   FWorker.Start();
 
-  memLog.Lines.Add('Starting DXGI/WASAPI desktop casting in a worker thread...');
+  if Settings.AudioOnly then
+    memLog.Lines.Add('Starting WASAPI audio-only casting in a worker thread...')
+  else
+    memLog.Lines.Add('Starting DXGI/WASAPI desktop casting in a worker thread...');
   UpdateControls();
 end;
 

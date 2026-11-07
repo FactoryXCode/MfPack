@@ -136,6 +136,7 @@ type
     FSeekInProgress: Boolean;
     FReplacementLoadPending: Boolean;
     FNetworkRecoveryInProgress: Integer;
+    FControlRecoveryInProgress: Integer;
     FAudioArtworkSourceName: string;
     FQueuedAudioTrackId: Int64;
     FQueuedAudioStreamIndex: DWORD;
@@ -159,6 +160,7 @@ type
     procedure CleanupMediaForLoad();
     procedure ReleaseResolvedSource();
     function RecreateControlChannel(): HRESULT;
+    function RecoverControlConnection(): HRESULT;
 
     function ConnectReceiver(const ADevice: TMfCastDevice): HRESULT;
     function ExecuteCastFile(const ADevice: TMfCastDevice;
@@ -292,6 +294,16 @@ type
                        const APosition100ns: Int64);
   end;
 
+  TMfCastControlRecoveryThread = class(TThread)
+  private
+    FController: TMfCastController;
+    FControllerReference: IMfCastController;
+  protected
+    procedure Execute(); override;
+  public
+    constructor Create(const AController: TMfCastController);
+  end;
+
 
 constructor TMfCastNetworkRecoveryThread.Create(
   const AController: TMfCastController;
@@ -308,7 +320,9 @@ end;
 procedure TMfCastNetworkRecoveryThread.Execute();
 var
   Hr: HRESULT;
+  
 begin
+ 
   try
     Hr := FController.Seek(FPosition100ns);
     if FAILED(Hr) then
@@ -318,8 +332,49 @@ begin
     else
       FController.Log(cllInfo,
                       'Automatic media-network recovery LOAD was accepted.');
+                      
   finally
     InterlockedExchange(FController.FNetworkRecoveryInProgress, 0);
+    FControllerReference := nil;
+  end;
+end;
+
+
+constructor TMfCastControlRecoveryThread.Create(const AController: TMfCastController);
+begin
+ 
+  inherited Create(True);
+ 
+  FreeOnTerminate := True;
+  FController := AController;
+  FControllerReference := AController;
+end;
+
+
+procedure TMfCastControlRecoveryThread.Execute();
+var
+  Hr: HRESULT;
+
+begin
+ 
+  try
+    Hr := FController.RecoverControlConnection();
+
+    if FAILED(Hr) then
+      begin
+        FController.Log(cllError,
+                        Format('Automatic Cast control-channel recovery failed: HRESULT $%.8x.',
+                               [DWORD(Hr)]));
+
+        FController.CleanupCastAttempt(False);
+        FController.SetState(csStopped);
+      end
+    else
+      FController.Log(cllInfo,
+                      'Cast control channel reconnected; the live media stream was preserved.');
+
+  finally
+    InterlockedExchange(FController.FControlRecoveryInProgress, 0);
     FControllerReference := nil;
   end;
 end;
@@ -529,6 +584,7 @@ begin
   FSeekInProgress := False;
   FReplacementLoadPending := False;
   FNetworkRecoveryInProgress := 0;
+  FControlRecoveryInProgress := 0;
   FAudioArtworkSourceName := '';
   FQueuedAudioTrackId := 0;
   FQueuedAudioStreamIndex := 0;
@@ -1085,8 +1141,8 @@ begin
     begin
       Log(cllDebug,
           Format('Normalizing receiver position %.3f to source position %.3f seconds.',
-                 [Result / 10000000.0,
-                  (Result + FPlaybackTimeOffset100ns) / 10000000.0]));
+                 [Result / 10000000.0, (Result + FPlaybackTimeOffset100ns) / 10000000.0]));
+      
       Inc(Result,
           FPlaybackTimeOffset100ns);
     end;
@@ -1134,6 +1190,7 @@ begin
 
       FComponents.Channel.Disconnect();
       Result := RecreateControlChannel();
+      
       Log(cllDebug,
           Format('Launch recovery: recreate channel HRESULT $%.8x.',
                  [DWORD(Result)]));
@@ -1391,8 +1448,7 @@ begin
 
   Log(cllDebug,
       Format('Local HTTP server started: advertisedAddress=%s port=%d',
-             [HttpSettings.AdvertisedAddress,
-              FComponents.HttpServer.GetListenPort()]));
+             [HttpSettings.AdvertisedAddress, FComponents.HttpServer.GetListenPort()]));
 
   Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
                                                             0,
@@ -1482,10 +1538,9 @@ begin
 end;
 
 
-function TMfCastController.CastDesktop(
-  const ADevice: TMfCastDevice;
-  const ASettings: TMfCastCaptureSettings;
-  const AVideoSubtype: TGUID): HRESULT;
+function TMfCastController.CastDesktop(const ADevice: TMfCastDevice;
+                                       const ASettings: TMfCastCaptureSettings;
+                                       const AVideoSubtype: TGUID): HRESULT;
 var
   HttpSettings: TMfCastHttpSettings;
   DeviceHost: string;
@@ -1495,15 +1550,19 @@ var
   Url: string;
 
 begin
-  if FState in [csConnecting, csConnected, csLaunchingReceiver,
-                csPreparingMedia, csBuffering, csPlaying, csPaused,
-                csStopping] then Exit(HRESULT_FROM_WIN32(ERROR_BUSY));
+  
+  if FState in [csConnecting, csConnected, csLaunchingReceiver, csPreparingMedia, csBuffering, csPlaying, csPaused, csStopping] then
+    Exit(HRESULT_FROM_WIN32(ERROR_BUSY));
+    
   if (not Assigned(FComponents.Channel)) or
      (not Assigned(FComponents.DesktopHttpServer)) or
      (not Assigned(FComponents.DesktopPublisher)) or
-     (not Assigned(FComponents.CapturePipeline)) then Exit(E_POINTER);
+     (not Assigned(FComponents.CapturePipeline)) then
+    Exit(E_POINTER);
 
-  if FState in [csError, csStopped] then CleanupCastAttempt();
+  if FState in [csError, csStopped] then
+    CleanupCastAttempt();
+    
   FCurrentDevice := ADevice;
   FCurrentMedia.Reset();
   FPendingLoadRequest.Reset();
@@ -1520,36 +1579,71 @@ begin
 
   if FComponents.DesktopHttpServer.IsRunning() then
     FComponents.DesktopHttpServer.Stop();
+    
   HttpSettings := FSettings.Http;
   DeviceHost := Trim(ADevice.Address);
-  if DeviceHost = '' then DeviceHost := Trim(ADevice.HostName);
+  
+  if (DeviceHost = '') then
+    DeviceHost := Trim(ADevice.HostName);
+    
   DevicePort := ADevice.Port;
-  if DevicePort = 0 then DevicePort := FSettings.Protocol.ControlPort;
-  if (Trim(HttpSettings.AdvertisedAddress) = '') and
-     MfCastResolveLocalIPv4ForPeer(DeviceHost, DevicePort,
-                                   AdvertisedAddress) then
+  
+  if (DevicePort = 0) then
+    DevicePort := FSettings.Protocol.ControlPort;
+    
+  if (Trim(HttpSettings.AdvertisedAddress) = '') and MfCastResolveLocalIPv4ForPeer(DeviceHost,
+                                                                                   DevicePort,
+                                                                                   AdvertisedAddress) then
     HttpSettings.AdvertisedAddress := AdvertisedAddress;
 
   Result := FComponents.DesktopHttpServer.Configure(HttpSettings);
-  if FAILED(Result) then Exit(FailCastAttempt(Result,
-    'Configure capture HTTP server',
-    'The local capture HTTP server could not be configured.'));
+  
+  if FAILED(Result) then
+    Exit(FailCastAttempt(Result,
+                         'Configure capture HTTP server',
+                         'The local capture HTTP server could not be configured.'));
+  
   Result := FComponents.DesktopHttpServer.Start();
-  if FAILED(Result) then Exit(FailCastAttempt(Result,
-    'Start capture HTTP server',
-    'The local capture HTTP server could not be started.'));
-  Result := FComponents.DesktopPublisher.BeginPresentation('video/mp4', 0, EntryPath);
-  if FAILED(Result) then Exit(FailCastAttempt(Result,
-    'Publish desktop capture',
-    'The desktop capture resource could not be published.'));
-  Result := FComponents.DesktopHttpServer.BuildUrl(EntryPath, Url);
-  if FAILED(Result) then Exit(FailCastAttempt(Result,
-    'Build capture URL', 'The desktop capture URL could not be created.'));
+  
+  if FAILED(Result) then
+    Exit(FailCastAttempt(Result,
+                         'Start capture HTTP server',
+                         'The local capture HTTP server could not be started.'));
+                         
+  if ASettings.AudioOnly then
+    Result := FComponents.DesktopPublisher.BeginPresentation('audio/aac',
+                                                             0,
+                                                             EntryPath)
+  else
+    Result := FComponents.DesktopPublisher.BeginPresentation('video/mp4',
+                                                             0,
+                                                             EntryPath);
+  
+  if FAILED(Result) then
+    Exit(FailCastAttempt(Result,
+                         'Publish desktop capture',
+                         'The desktop capture resource could not be published.'));
+  
+  Result := FComponents.DesktopHttpServer.BuildUrl(EntryPath,
+                                                   Url);
+  if FAILED(Result) then
+    Exit(FailCastAttempt(Result,
+                         'Build capture URL', 'The desktop capture URL could not be created.'));
 
   FPendingLoadRequest.ContentId := Url;
-  FPendingLoadRequest.ContentType := 'video/mp4';
+  
+  if ASettings.AudioOnly then
+    FPendingLoadRequest.ContentType := 'audio/aac'
+  else
+    FPendingLoadRequest.ContentType := 'video/mp4';
+    
   FPendingLoadRequest.StreamType := cstLive;
-  FPendingLoadRequest.Title := 'Desktop capture';
+  
+  if ASettings.AudioOnly then
+    FPendingLoadRequest.Title := 'System audio capture'
+  else
+    FPendingLoadRequest.Title := 'Desktop capture';
+    
   FPendingLoadRequest.AutoPlay := True;
 
   Result := ConnectReceiver(ADevice);
@@ -1568,9 +1662,15 @@ begin
                                               FComponents.PreviewSink);
   if FAILED(Result) then
     begin
-      Result := FailCastAttempt(Result,
-        'Start desktop capture',
-        'DXGI desktop capture or the hardware encoder could not be started.');
+      if ASettings.AudioOnly then
+        Result := FailCastAttempt(Result,
+          'Start system-audio capture',
+          'WASAPI loopback or the AAC encoder could not be started.')
+      else
+        Result := FailCastAttempt(Result,
+          'Start desktop capture',
+          'DXGI desktop capture or the hardware encoder could not be started.');
+          
       CleanupCastAttempt();
       Exit;
     end;
@@ -1581,7 +1681,15 @@ begin
       CleanupCastAttempt();
       Exit;
     end;
-  Log(cllInfo, Format('Desktop capture LOAD accepted: url="%s".', [Url]));
+    
+  if ASettings.AudioOnly then
+    Log(cllInfo,
+        Format('System-audio capture LOAD accepted: url="%s".',
+               [Url]))
+  else
+    Log(cllInfo,
+        Format('Desktop capture LOAD accepted: url="%s".',
+               [Url]));
 end;
 
 
@@ -2031,9 +2139,12 @@ function TMfCastController.SetAudioArtwork(const ASourceName: string): HRESULT;
 var
   Extension: string;
   SourceName: string;
+  
 begin
+  
   SourceName := Trim(ASourceName);
-  if SourceName = '' then
+  
+  if (SourceName = '') then
     begin
       FAudioArtworkSourceName := '';
       Result := S_OK;
@@ -2047,6 +2158,7 @@ begin
     end;
 
   Extension := LowerCase(ExtractFileExt(SourceName));
+  
   if not ((Extension = '.jpg') or
           (Extension = '.jpeg') or
           (Extension = '.png') or
@@ -2062,8 +2174,7 @@ begin
 end;
 
 
-function TMfCastController.SetSourceResolver(
-  const AResolver: IMfCastSourceResolver): HRESULT;
+function TMfCastController.SetSourceResolver(const AResolver: IMfCastSourceResolver): HRESULT;
 begin
 
   if FState in [csConnecting,
@@ -2366,6 +2477,7 @@ begin
       ReloadRequest := FActiveLoadRequest;
       RestartRequest := FActiveTranscodeRequest;
       RemuxRestartRequest := FActiveRemuxRequest;
+      
       try
         FMediaLoadStartTick := 0;
         FMediaPlaybackStarted := False;
@@ -2497,6 +2609,7 @@ begin
   // Generated output is rebased to zero at its source start position. Keep
   // callers on the original file timeline and translate only for the receiver.
   ReceiverPosition100ns := SeekPosition100ns - FPlaybackTimeOffset100ns;
+  
   if (ReceiverPosition100ns < 0) then
     ReceiverPosition100ns := 0;
 
@@ -2523,8 +2636,7 @@ begin
   if not MfCastDecodeTrackId(ATrackId,
                              Kind,
                              Source,
-                             StreamIndex) or
-     (Kind <> ctkAudio) or (Source <> ctsMediaFoundation) then
+                             StreamIndex) or (Kind <> ctkAudio) or (Source <> ctsMediaFoundation) then
     begin
       Result := E_INVALIDARG;
       Exit;
@@ -2579,6 +2691,7 @@ begin
               ASubtitle.Language]));
 
   FActiveTranscodeRequest.SubtitleMode := csmBurnIntoVideo;
+  
   if ASubtitle.Embedded or (Trim(ASubtitle.SourceName) = '') then
     FActiveTranscodeRequest.SubtitleSourceName := FActiveTranscodeRequest.SourceName
   else
@@ -2677,14 +2790,58 @@ begin
 end;
 
 
+function TMfCastController.RecoverControlConnection(): HRESULT;
+const
+  CONTROL_RECOVERY_STATUS_TIMEOUT_MS = 5000;
+
+begin
+  
+  Log(cllDebug, 'Control recovery: recreating the Cast channel.');
+  Result := RecreateControlChannel();
+
+  if FAILED(Result) then
+    Exit;
+
+  Result := FComponents.Channel.Connect(FCurrentDevice);
+  Log(cllDebug,
+      Format('Control recovery: connect HRESULT $%.8x.',
+             [DWORD(Result)]));
+
+  if FAILED(Result) then
+    Exit;
+
+  // LAUNCH is idempotent for an already-running Default Media Receiver. It
+  // gives the new TLS channel the current session and transport identifiers
+  // without replacing the media LOAD or its live HTTP connection.
+  Result := FComponents.Channel.LaunchReceiver();
+  Log(cllDebug,
+      Format('Control recovery: attach receiver HRESULT $%.8x.',
+             [DWORD(Result)]));
+
+  if FAILED(Result) then
+    Exit;
+
+  Result := FComponents.Channel.SynchronizeMediaStatus(
+    CONTROL_RECOVERY_STATUS_TIMEOUT_MS);
+  if Result = S_FALSE then
+    Result := HRESULT_FROM_WIN32(ERROR_TIMEOUT);
+
+  Log(cllDebug,
+      Format('Control recovery: synchronize media HRESULT $%.8x.',
+             [DWORD(Result)]));
+end;
+
+
 function TMfCastController.SetVolume(const AVolume: Single): HRESULT;
 begin
 
   FPreviewVolume := AVolume;
-  if FPreviewVolume < 0.0 then
+  
+  if (FPreviewVolume < 0.0) then
     FPreviewVolume := 0.0
-  else if FPreviewVolume > 1.0 then
-    FPreviewVolume := 1.0;
+  else 
+    if (FPreviewVolume > 1.0) then
+      FPreviewVolume := 1.0;
 
   Log(cllInfo,
       Format('Volume requested: %.0f%%.',
@@ -2838,6 +2995,9 @@ end;
 
 
 procedure TMfCastController.ReceiverClosed();
+var
+  RecoveryThread: TMfCastControlRecoveryThread;
+
 begin
 
   if (FState = csStopping) then
@@ -2847,6 +3007,42 @@ begin
     begin
       Log(cllDebug,
           'Ignoring receiver-close callback while media-network recovery is active.');
+      Exit;
+    end;
+
+  if InterlockedCompareExchange(FControlRecoveryInProgress, 0, 0) <> 0 then
+    begin
+      Log(cllDebug,
+          'Ignoring duplicate receiver-close callback while control recovery is active.');
+      Exit;
+    end;
+
+  if (FState in [csBuffering, csPlaying, csPaused]) and
+     ((Trim(FCurrentDevice.Address) <> '') or
+      (Trim(FCurrentDevice.HostName) <> '')) then
+    begin
+      if InterlockedCompareExchange(FControlRecoveryInProgress, 1, 0) = 0 then
+        begin
+          Log(cllWarning,
+              'Receiver closed the Cast control channel; reconnecting without stopping the active media stream.');
+
+          try
+            RecoveryThread := TMfCastControlRecoveryThread.Create(Self);
+            RecoveryThread.Start();
+
+          except
+            on E: Exception do
+              begin
+                InterlockedExchange(FControlRecoveryInProgress, 0);
+
+                Log(cllError,
+                    'Could not start control-channel recovery: ' + E.Message);
+
+                CleanupCastAttempt(False);
+                SetState(csStopped);
+              end;
+          end;
+        end;
       Exit;
     end;
 

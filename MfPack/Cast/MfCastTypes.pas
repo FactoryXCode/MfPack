@@ -451,6 +451,7 @@ type
     SourceKind: TMfCastCaptureSourceKind;
     SourceWindow: HWND;
     OutputIndex: Cardinal;
+    AudioOnly: Boolean;
     IncludeCursor: Boolean;
     CaptureSystemAudio: Boolean;
     CodecPreference: TMfCastVideoCodecPreference;
@@ -465,6 +466,7 @@ type
   end;
 
   TMfCastCaptureCapabilities = record
+    AudioOnly: Boolean;
     HardwareH264EncoderAvailable: Boolean;
     HardwareHEVCEncoderAvailable: Boolean;
     ReceiverSupportsH264: Boolean;
@@ -505,6 +507,7 @@ type
                                out AStreamIndex: DWORD): Boolean;
 
   function MfCastStablePathIndex(const AFileName: string): DWORD;
+  
 
 implementation
 
@@ -867,6 +870,7 @@ begin
   SourceKind := ccskDesktop;
   SourceWindow := 0;
   OutputIndex := 0;
+  AudioOnly := False;
   IncludeCursor := True;
   CaptureSystemAudio := True;
   CodecPreference := cvcpAutomatic;
@@ -885,6 +889,7 @@ end;
 procedure TMfCastCaptureCapabilities.Reset();
 begin
 
+  AudioOnly := False;
   HardwareH264EncoderAvailable := False;
   HardwareHEVCEncoderAvailable := False;
   ReceiverSupportsH264 := True;

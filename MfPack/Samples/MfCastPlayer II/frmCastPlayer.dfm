@@ -1,7 +1,7 @@
 object CastPlayerForm: TCastPlayerForm
   Left = 0
   Top = 0
-  Caption = 'MfCastPlayer V2.1'
+  Caption = 'MfCastPlayer V2.2'
   ClientHeight = 717
   ClientWidth = 700
   Color = clBtnFace
@@ -50,7 +50,6 @@ object CastPlayerForm: TCastPlayerForm
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 0
-    ExplicitLeft = -1
   end
   object pnlPreview: TPanel
     Left = 0

@@ -123,6 +123,7 @@ type
     function GetLoggingEnabled(): Boolean;
 
     procedure SetLoggingEnabled(const AValue: Boolean);
+  
   public
 
     constructor Create(const AEnableTranscoding: Boolean = False);
@@ -167,10 +168,9 @@ type
                                    out AByteStream: IMFByteStream): HRESULT;
 
     // Resolve the immutable video codec before a V2.1 capture session starts.
-    function GetCaptureCapabilities(
-      const ADevice: TMfCastDevice;
-      const APreference: TMfCastVideoCodecPreference;
-      out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+    function GetCaptureCapabilities(const ADevice: TMfCastDevice;
+                                    const APreference: TMfCastVideoCodecPreference;
+                                    out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
 
     function CastDesktop(const ADevice: TMfCastDevice;
                          const ASettings: TMfCastCaptureSettings;
@@ -349,7 +349,7 @@ begin
 end;
 
 
-destructor TMfCast.Destroy;
+destructor TMfCast.Destroy();
 var
   Callbacks: TMfCastControllerCallbacks;
 
@@ -567,10 +567,9 @@ begin
 end;
 
 
-function TMfCast.GetCaptureCapabilities(
-  const ADevice: TMfCastDevice;
-  const APreference: TMfCastVideoCodecPreference;
-  out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+function TMfCast.GetCaptureCapabilities(const ADevice: TMfCastDevice;
+                                        const APreference: TMfCastVideoCodecPreference;
+                                        out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
 begin
 
   Result := MfCastGetCaptureCapabilities(ADevice,
@@ -579,18 +578,32 @@ begin
 end;
 
 
-function TMfCast.CastDesktop(
-  const ADevice: TMfCastDevice;
-  const ASettings: TMfCastCaptureSettings;
-  out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+function TMfCast.CastDesktop(const ADevice: TMfCastDevice;
+                             const ASettings: TMfCastCaptureSettings;
+                             out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+var
+  EffectiveSettings: TMfCastCaptureSettings;
+  
 begin
+  
   Result := MfCastGetCaptureCapabilities(ADevice,
                                          ASettings.CodecPreference,
                                          ACapabilities);
   if FAILED(Result) then
     Exit;
+    
+  EffectiveSettings := ASettings;
+  EffectiveSettings.AudioOnly := ACapabilities.AudioOnly;
+  
+  if EffectiveSettings.AudioOnly and (not EffectiveSettings.CaptureSystemAudio) then
+    begin
+      ACapabilities.SelectionReason :=
+        'The selected receiver is audio-only, but system-audio capture is disabled.';
+      Exit(E_INVALIDARG);
+    end;
+    
   Result := FController.CastDesktop(ADevice,
-                                    ASettings,
+                                    EffectiveSettings,
                                     ACapabilities.SelectedVideoSubtype);
 end;
 
