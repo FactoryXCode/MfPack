@@ -238,6 +238,7 @@ The units are organized like this:
         MfCastRemux.pas
         MfCastTranscode.pas
         MfCastWindowsSupport.pas
+       MfCastAndroidTvRemote.pas
         Media\
             LangTags.pas
             MfEmbeddedSubtitleReader.pas
