@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.1
+// Revision Version: 4.1.0
 // Description: Public `TMfCast` interface for Cast discovery, connection, media loading,
 //              and playback control.
 //
@@ -126,6 +126,7 @@ type
   
   public
 
+    class function ApiVersion(): string; static;
     constructor Create(const AEnableTranscoding: Boolean = False);
     destructor Destroy(); override;
 
@@ -170,7 +171,10 @@ type
     // Resolve the immutable video codec before a V2.1 capture session starts.
     function GetCaptureCapabilities(const ADevice: TMfCastDevice;
                                     const APreference: TMfCastVideoCodecPreference;
-                                    out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+                                    out ACapabilities: TMfCastCaptureCapabilities): HRESULT; overload;
+    function GetCaptureCapabilities(const ADevice: TMfCastDevice;
+                                    const ASettings: TMfCastCaptureSettings;
+                                    out ACapabilities: TMfCastCaptureCapabilities): HRESULT; overload;
 
     function CastDesktop(const ADevice: TMfCastDevice;
                          const ASettings: TMfCastCaptureSettings;
@@ -187,6 +191,23 @@ type
     function DisableSubtitles(): HRESULT;
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
+
+    // Register an existing Remote v2 pairing (empty-password PFX containing its
+    // certificate/private key). Stored with DPAPI for this user and Cast ID.
+    function ImportAndroidTvPairing(const ADevice: TMfCastDevice;
+                                    const APfx: TBytes): HRESULT;
+    function HasAndroidTvPairing(const ADevice: TMfCastDevice): Boolean;
+
+    // Paired Android TVs only. S_FALSE means no pairing is registered;
+    // AIsOn is authoritative only when GetDevicePowerState returns S_OK.
+    function GetDevicePowerState(const ADevice: TMfCastDevice;
+                                 out AIsOn: Boolean;
+                                 out ADetail: string): HRESULT;
+    function RequestDeviceStandby(const ADevice: TMfCastDevice;
+                                  out ADetail: string): HRESULT;
+
+    // Stop casting and detach; registered paired TVs also receive standby.
+    // This can block during the remote handshake; UI clients should use a worker.
     function Disconnect(): HRESULT;
     function State(): TMfCastState;
 
@@ -214,7 +235,8 @@ uses
   MfCastDirectPreviewPlayer,
   MfCastRemux,
   MfCastTranscode,
-  MfCastController;
+  MfCastController,
+  MfCastAndroidTvRemote;
 
 type
   TMfCastLogger = class(TInterfacedObject, IMfCastLogger)
@@ -320,7 +342,7 @@ begin
     begin
       Components.SegmentPublisher := TMfCastSegmentPublisher.Create(Components.HttpServer);
       Components.DesktopPublisher := TMfCastSegmentPublisher.Create(Components.DesktopHttpServer,
-                                                                     'desktop.mp4');
+                                                                     'desktop.mp4', True);
       Components.RemuxPipeline := TMfCastRemuxPipeline.Create();
       Components.TranscodePipeline := TMfCastTranscodePipeline.Create();
       Components.CapturePipeline := TMfCastDesktopCapturePipeline.Create();
@@ -450,6 +472,7 @@ end;
 
 function TMfCast.UpdatePreviewSubtitles(): HRESULT;
 begin
+
   if Assigned(FDirectPreviewPlayer) then
     Result := FDirectPreviewPlayer.UpdateSubtitles()
   else
@@ -578,6 +601,57 @@ begin
 end;
 
 
+function TMfCast.GetCaptureCapabilities(const ADevice: TMfCastDevice;
+                                        const ASettings: TMfCastCaptureSettings;
+                                        out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
+begin
+
+  // Explicit audio-only capture needs neither DXGI nor a hardware video encoder.
+  if (Trim(ASettings.ArtworkSourceName) <> '') then
+    begin
+      ACapabilities.Reset();
+
+      if ASettings.AudioOnly or (not ASettings.CaptureSystemAudio) then
+        begin
+          ACapabilities.SelectionReason := 'Audio with artwork requires system audio and a video track.';
+          Exit(E_INVALIDARG);
+        end;
+
+      if MfCastDeviceIsAudioOnly(ADevice) then
+        begin
+          ACapabilities.SelectionReason := 'Audio with artwork requires a video-capable receiver.';
+          Exit(E_INVALIDARG);
+        end;
+
+      if not FileExists(ASettings.ArtworkSourceName) then
+        begin
+          ACapabilities.SelectionReason := 'The selected artwork file does not exist.';
+          Exit(HRESULT(DWORD($80070002)));
+        end;
+    end;
+
+  if ASettings.AudioOnly then
+    begin
+      ACapabilities.Reset();
+      ACapabilities.AudioOnly := True;
+      ACapabilities.SelectionReason :=
+        'Audio-only capture was requested; capture will use WASAPI audio without DXGI video.';
+      Result := S_OK;
+    end
+  else
+    Result := GetCaptureCapabilities(ADevice, ASettings.CodecPreference,
+                                     ACapabilities);
+
+  if SUCCEEDED(Result) and ACapabilities.AudioOnly and
+     (not ASettings.CaptureSystemAudio) then
+    begin
+      ACapabilities.SelectionReason :=
+        'Audio-only capture requires system-audio capture to be enabled.';
+      Result := E_INVALIDARG;
+    end;
+end;
+
+
 function TMfCast.CastDesktop(const ADevice: TMfCastDevice;
                              const ASettings: TMfCastCaptureSettings;
                              out ACapabilities: TMfCastCaptureCapabilities): HRESULT;
@@ -586,21 +660,16 @@ var
   
 begin
   
-  Result := MfCastGetCaptureCapabilities(ADevice,
-                                         ASettings.CodecPreference,
-                                         ACapabilities);
+  Result := GetCaptureCapabilities(ADevice,
+                                   ASettings,
+                                   ACapabilities);
   if FAILED(Result) then
     Exit;
     
   EffectiveSettings := ASettings;
   EffectiveSettings.AudioOnly := ACapabilities.AudioOnly;
   
-  if EffectiveSettings.AudioOnly and (not EffectiveSettings.CaptureSystemAudio) then
-    begin
-      ACapabilities.SelectionReason :=
-        'The selected receiver is audio-only, but system-audio capture is disabled.';
-      Exit(E_INVALIDARG);
-    end;
+
     
   Result := FController.CastDesktop(ADevice,
                                     EffectiveSettings,
@@ -695,6 +764,81 @@ begin
 end;
 
 
+class function TMfCast.ApiVersion(): string;
+begin
+  Result := MFCAST_API_VERSION;
+end;
+
+
+function TMfCast.ImportAndroidTvPairing(const ADevice: TMfCastDevice;
+  const APfx: TBytes): HRESULT;
+begin
+  Result := MfCastImportAndroidTvPairing(ADevice, APfx);
+  if Succeeded(Result) then
+    DispatchLog(cllInfo, 'AndroidTvRemote',
+      'Paired Android TV credential registered for this Cast device.')
+  else
+    DispatchLog(cllWarning, 'AndroidTvRemote',
+      Format('Could not register the paired Android TV credential: HRESULT $%.8x.',
+             [DWORD(Result)]));
+end;
+
+
+function TMfCast.HasAndroidTvPairing(const ADevice: TMfCastDevice): Boolean;
+var
+  FileName: string;
+
+begin
+
+  FileName := MfCastAndroidTvPairingFile(ADevice);
+  Result := (FileName <> '') and FileExists(FileName);
+end;
+
+
+function TMfCast.GetDevicePowerState(const ADevice: TMfCastDevice;
+                                     out AIsOn: Boolean;
+                                     out ADetail: string): HRESULT;
+begin
+
+  Result := MfCastAndroidTvPower(ADevice,
+                                 False,
+                                 AIsOn,
+                                 ADetail);
+
+  if Failed(Result) then
+    DispatchLog(cllWarning,
+                'AndroidTvRemote',
+                ADetail)
+  else
+    DispatchLog(cllDebug,
+                'AndroidTvRemote',
+                ADetail);
+end;
+
+
+function TMfCast.RequestDeviceStandby(const ADevice: TMfCastDevice;
+                                      out ADetail: string): HRESULT;
+var
+  IsOn: Boolean;
+
+begin
+
+  Result := MfCastAndroidTvPower(ADevice,
+                                 True,
+                                 IsOn,
+                                 ADetail);
+
+  if Failed(Result) then
+    DispatchLog(cllWarning,
+                'AndroidTvRemote',
+                ADetail)
+  else
+    DispatchLog(cllInfo,
+                'AndroidTvRemote',
+                ADetail);
+end;
+
+
 function TMfCast.Disconnect(): HRESULT;
 begin
 
@@ -771,9 +915,7 @@ begin
     Exit;
 
   Text := Format('[MfCast][%s][%s] %s',
-                 [MfCastLogLevelToString(ALevel),
-                  ASource,
-                  AMessage]);
+                 [MfCastLogLevelToString(ALevel), ASource, AMessage]);
 
   OutputDebugString(PChar(Text));
 

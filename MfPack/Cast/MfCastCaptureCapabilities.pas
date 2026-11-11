@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX. All rights reserved.
 //
@@ -125,14 +125,10 @@ var
   InputType: MFT_REGISTER_TYPE_INFO;
   OutputType: MFT_REGISTER_TYPE_INFO;
   Activates: PIMFActivateArray;
-  Activate: IMFActivate;
-  Transform: IMFTransform;
   Count: UINT32;
   Index: UINT32;
   Hr: HRESULT;
-  
 begin
-  
   Result := False;
   Activates := nil;
   Count := 0;
@@ -140,47 +136,33 @@ begin
   InputType.guidSubtype := MFVideoFormat_NV12;
   OutputType.guidMajorType := MFMediaType_Video;
   OutputType.guidSubtype := ASubtype;
-  
+
   Hr := MFTEnumEx(MFT_CATEGORY_VIDEO_ENCODER,
                   MFT_ENUM_FLAG_HARDWARE or MFT_ENUM_FLAG_SORTANDFILTER,
-                  @InputType,
-                  @OutputType,
-                  Activates,
-                  Count);
+                  @InputType, @OutputType, Activates, Count);
   if FAILED(Hr) then
     Exit;
-    
+
   try
-    if (Count > 0) then
+    // A capability query must not create or shut down GPU encoder instances.
+    // Activation can block inside a driver, especially while another capture
+    // owns an encoder. Enumerate the advertised NV12/output registrations;
+    // the capture pipeline validates actual encoder startup when it is used.
+    if Assigned(Activates) and (Count > 0) then
       for Index := 0 to Count - 1 do
-        begin
-          Activate := Activates^[Index];
-          if Assigned(Activate) then
-            begin
-              Transform := nil;
-              
-              Hr := Activate.ActivateObject(IID_IMFTransform,
-                                            Transform);
-              if SUCCEEDED(Hr) and Assigned(Transform) then
-                begin
-                  Result := True;
-                  Transform := nil;
-                  Activate.ShutdownObject();
-                  Break;
-                end;
-            end;
-        end;
-        
+        if Assigned(Activates^[Index]) then
+          begin
+            Result := True;
+            Break;
+          end;
   finally
-    Activate := nil;
-    Transform := nil;
-    
-    if (Count > 0) then
-      for Index := 0 to Count - 1 do
-        Activates^[Index] := nil;
-        
     if Assigned(Activates) then
-      CoTaskMemFree(Activates);
+      begin
+        if Count > 0 then
+          for Index := 0 to Count - 1 do
+            Activates^[Index] := nil;
+        CoTaskMemFree(Activates);
+      end;
   end;
 end;
 

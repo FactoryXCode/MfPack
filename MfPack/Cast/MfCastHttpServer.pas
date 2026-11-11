@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -126,6 +126,8 @@ type
   private
     FLock: TCriticalSection;
     FData: TBytes;
+    FSpool: THandleStream;
+    FSpoolHandle: THandle;
     FBaseOffset: UInt64;
     FLength: UInt64;
     FLastWriteDebugLength: UInt64;
@@ -138,7 +140,7 @@ type
 
   public
 
-    constructor Create();
+    constructor Create(const ADiskBacked: Boolean = False);
     destructor Destroy(); override;
 
     function WriteAt(const AOffset: UInt64;
@@ -343,6 +345,7 @@ type
     FServer: IMfCastHttpServer;
     FLogger: IMfCastLogger;
     FResourceName: string;
+    FDiskBacked: Boolean;
     FEntryPath: string;
     FBuffer: IMfCastLiveBuffer;
     FContent: IMfCastHttpContent;
@@ -351,7 +354,8 @@ type
   public
 
     constructor Create(const AServer: IMfCastHttpServer;
-                       const AResourceName: string = '');
+                       const AResourceName: string = '';
+                       const ADiskBacked: Boolean = False);
     destructor Destroy(); override;
 
     procedure SetLogger(const ALogger: IMfCastLogger);
@@ -410,11 +414,17 @@ begin
 end;
 
 
-constructor TMfCastLiveBuffer.Create();
+constructor TMfCastLiveBuffer.Create(const ADiskBacked: Boolean);
+var
+  TempPath: array[0..MAX_PATH] of Char;
+  TempName: array[0..MAX_PATH] of Char;
+  PathLength: DWORD;
+  ErrorCode: DWORD;
 begin
 
   inherited Create();
 
+  FSpoolHandle := INVALID_HANDLE_VALUE;
   FLock := TCriticalSection.Create;
   FBaseOffset := 0;
   FLength := 0;
@@ -422,12 +432,32 @@ begin
   FLastPruneDebugOffset := 0;
   FComplete := False;
   FClosed := False;
+  if ADiskBacked then
+    begin
+      PathLength := GetTempPath(Length(TempPath), TempPath);
+      if (PathLength = 0) or (PathLength >= DWORD(Length(TempPath))) then
+        RaiseLastOSError;
+      if GetTempFileName(TempPath, 'mfc', 0, TempName) = 0 then
+        RaiseLastOSError;
+      FSpoolHandle := CreateFile(TempName, GENERIC_READ or GENERIC_WRITE,
+        FILE_SHARE_READ or FILE_SHARE_DELETE, nil, OPEN_EXISTING,
+        FILE_ATTRIBUTE_TEMPORARY or FILE_FLAG_DELETE_ON_CLOSE, 0);
+      if FSpoolHandle = INVALID_HANDLE_VALUE then
+        begin
+          ErrorCode := GetLastError;
+          Winapi.Windows.DeleteFile(TempName);
+          RaiseLastOSError(ErrorCode);
+        end;
+      FSpool := THandleStream.Create(FSpoolHandle);
+    end;
 end;
 
 
 destructor TMfCastLiveBuffer.Destroy();
 begin
 
+  if Assigned(FLock) then
+    Close();
   FLock.Free;
 
   inherited Destroy;
@@ -557,6 +587,20 @@ begin
           Exit;
         end;
 
+      if Assigned(FSpool) then
+        begin
+          if (ASize > Cardinal(MaxInt)) or (AOffset > UInt64(High(Int64)) - ASize) then
+            Exit(E_INVALIDARG);
+          if FSpool.Seek(Int64(AOffset), soBeginning) <> Int64(AOffset) then
+            Exit(HRESULT_FROM_WIN32(ERROR_SEEK));
+          if (ASize > 0) and (FSpool.Write(ABuffer^, Integer(ASize)) <> Integer(ASize)) then
+            Exit(HRESULT_FROM_WIN32(ERROR_WRITE_FAULT));
+          Required := AOffset + ASize;
+          if Required > FLength then
+            FLength := Required;
+          Exit(S_OK);
+        end;
+
       if (AOffset < FBaseOffset) then
         begin
           OutputDebugString(PChar(Format('MfCast live buffer write before base offset=%d base=%d',
@@ -651,6 +695,25 @@ begin
   FLock.Acquire;
 
   try
+    if Assigned(FSpool) then
+      begin
+        if FClosed then Exit(E_ABORT);
+        if AOffset >= FLength then Exit(S_OK);
+        Available := FLength - AOffset;
+        if Available > ABufferSize then Available := ABufferSize;
+        if Available > UInt64(MaxInt) then Exit(E_INVALIDARG);
+        if FSpool.Seek(Int64(AOffset), soBeginning) <> Int64(AOffset) then
+          Exit(HRESULT_FROM_WIN32(ERROR_SEEK));
+        if Available > 0 then
+          begin
+            if FSpool.Read(ABuffer^, Integer(Available)) <> Integer(Available) then
+              Exit(HRESULT_FROM_WIN32(ERROR_READ_FAULT));
+            ABytesRead := Cardinal(Available);
+          end;
+        Exit(S_OK);
+      end;
+    if FClosed then Exit(E_ABORT);
+
     if (AOffset < FBaseOffset) then
       begin
         OutputDebugString(PChar(Format('MfCast live buffer read before base offset=%d base=%d',
@@ -758,6 +821,17 @@ begin
         Exit;
       end;
 
+    if Assigned(FSpool) then
+      begin
+        if ALength > UInt64(High(Int64)) then Exit(E_INVALIDARG);
+        if FSpool.Seek(Int64(ALength), soBeginning) <> Int64(ALength) then
+          Exit(HRESULT_FROM_WIN32(ERROR_SEEK));
+        if not SetEndOfFile(FSpoolHandle) then
+          Exit(HRESULT_FROM_WIN32(GetLastError));
+        FLength := ALength;
+        Exit(S_OK);
+      end;
+
     if (ALength < FBaseOffset) then
       begin
         SetLength(FData, 0);
@@ -827,6 +901,12 @@ begin
   try
     FClosed := True;
     FComplete := True;
+    FreeAndNil(FSpool);
+    if FSpoolHandle <> INVALID_HANDLE_VALUE then
+      begin
+        CloseHandle(FSpoolHandle);
+        FSpoolHandle := INVALID_HANDLE_VALUE;
+      end;
   finally
     FLock.Release;
   end;
@@ -2469,13 +2549,15 @@ end;
 
 
 constructor TMfCastSegmentPublisher.Create(const AServer: IMfCastHttpServer;
-                                            const AResourceName: string);
+                                            const AResourceName: string;
+                                            const ADiskBacked: Boolean);
 begin
 
   inherited Create();
 
   FServer := AServer;
   FResourceName := Trim(AResourceName);
+  FDiskBacked := ADiskBacked;
 end;
 
 
@@ -2530,7 +2612,16 @@ begin
       Exit;
     end;
 
-  FBuffer := TMfCastLiveBuffer.Create();
+  // Desktop receivers can reopen the URL from byte zero after a socket drop.
+  // Retain that session on disk, rather than keeping an unbounded RAM buffer
+  // or discarding the MP4 initialization and old fragments. Delete-on-close
+  // removes the temporary file when the session ends, including process exit.
+  try
+    FBuffer := TMfCastLiveBuffer.Create(FDiskBacked);
+  except
+    on E: EOSError do Exit(HRESULT_FROM_WIN32(E.ErrorCode));
+    on E: EOutOfMemory do Exit(E_OUTOFMEMORY);
+  end;
 
   FContent := TMfCastLiveStreamContent.Create(FBuffer,
                                               AContentType,

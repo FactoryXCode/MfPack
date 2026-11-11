@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -121,6 +121,9 @@ type
 
 
 implementation
+
+uses
+  MfCastWakeOnLan;
 
 const
   MFCAST_MDNS_IPV4_ADDRESS = '224.0.0.251';
@@ -1045,6 +1048,7 @@ begin
                         Device.Address,
                         Device.Port,
                         BytesRead]));
+            MfCastRememberWakeTarget(Device);
             UpsertDevice(Device);
           end
         else

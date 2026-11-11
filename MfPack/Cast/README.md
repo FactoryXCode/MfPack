@@ -1,6 +1,9 @@
-## MfPack Cast V2.1
+## MfPack Cast API 4.1.0
   
-Version: 4.0.1
+Version: 4.1.0 (Cast V2.1 wire protocol)
+
+`TMfCast.ApiVersion()` and `MFCAST_API_VERSION` report the public API release.
+Version 4.1.0 adds paired Android TV standby/power control through `TMfCast`.
   
 **NOTES:**
   
@@ -25,11 +28,9 @@ MfCast can be used by:
 - Dedicated Chromecast control applications
 - Third-party Delphi applications that use MfPack
 - Applications that do not otherwise use MfPack player classes
-
-Note: Older Chromecast V1 devices are supported if they had the latest firmware update installed for that device.
   
   
-***MfCast.pas*** contains the application main interface (TMfCast class).  
+***MfCast.pas*** is the application main interface (TMfCast class).  
 The other units contain device discovery, Cast V2.1 TLS/channel handling, controller logic, media planning, and  
 a local HTTP server.  
   
@@ -102,27 +103,99 @@ and receiver/media command policy.
   
 The direct-control contract is Media Foundation-neutral: **MfCastTypes.pas** and  
 **MfCastInterfaces.pas** do not import MfPack Media Foundation declaration units.  
-The optional byte-stream, sample, remux, and transcode contracts are kept apart in  
+The optional byte-stream, sample, remux, and transcode contracts are isolated in  
 **MfCastMediaInterfaces.pas**; only the media implementations and their composition  
 layer compile against those declarations.  
   
-## Compile validation
-  
-**MfCastCompile.dpk** is a non-installed runtime package that lists every Cast  
-unit, including all units under "Cast/Media". Build it to perform a complete  
-static compile check after changes that may not be reached by project code.  
-It requires the matching installed "MfPackXxxx" package but is not intended to  
-be installed or referenced by Delphi projects. 
-  
+### Automatic receiver wake-up
+
+All applications using the shared TMfCast controller try the normal Cast
+connection first. After a retryable connection failure, a known receiver MAC
+address enables native Wake-on-LAN recovery, followed by bounded Cast connection
+retries. Receivers that connect immediately, including always-available speakers,
+use the normal path without sending wake packets.
+
+The MAC address is learned from the Windows IPv4 neighbor table during discovery
+and after a successful connection. Discover or connect once while the receiver is
+awake. The per-receiver cache is shared by these applications for the current
+Windows user at `%LOCALAPPDATA%\MfPack\Cast\WakeTargets.ini`. It is keyed by the
+Cast device identity, not just an IP address. The current local interface and
+subnet broadcast address are selected again for each attempt. A missing or
+unusable MAC skips wake-up and retains ordinary retries.
+
+Wake-on-LAN uses three bursts of standard 102-byte magic packets over UDP port 9,
+addressed to the receiver's MAC via subnet broadcast and unicast. The receiver
+must support network wake-up. HDMI-CEC can also turn connected equipment on.
+This is native Delphi/Windows code; Python and remote-control pairing are not
+required. Logs distinguish wake packets sent, wake-up skipped, and connection
+retry results. File, URL, desktop, and RDJ live-stream casting share this behavior.
+### Standby on explicit disconnect (paired Android TV)
+
+The implementation unit `MfCastAndroidTvRemote.pas` is part of the Cast API in
+`MfPack\Cast` and is included in `MfCastCompile.dpk`/`.dproj`. Applications use
+the public `TMfCast` facade; they do not need to reference the remote unit:
+
+```pascal
+Cast.ImportAndroidTvPairing(Device, ExistingPairedPfxBytes);
+if Cast.HasAndroidTvPairing(Device) then
+begin
+  Hr := Cast.GetDevicePowerState(Device, IsOn, Detail);
+  // IsOn is valid only for S_OK. S_FALSE means no pairing is registered.
+  Hr := Cast.RequestDeviceStandby(Device, Detail);
+end;
+```
+
+`RequestDeviceStandby` operates on the specified paired receiver. `Disconnect`
+already stops the active cast and requests standby for its paired receiver;
+applications must not issue a second power command after Disconnect. Both power
+operations can wait for network responses, so UI applications should call them
+from a worker. Neither importing an existing pairing nor querying its presence
+creates a new pairing or contacts the TV.
+
+`TMfCast.Disconnect` first stops the Cast receiver and closes the Cast connections.
+For an Android TV whose paired Remote v2 credential has been registered, it then
+reads the actual TV power state and sends one remote POWER press only while the
+TV reports on. The connection services power updates and heartbeats during a
+five-second settling interval before that press. A subsequent power report must
+confirm standby; errors and missing confirmation are logged. The power toggle is
+never retried. An already-off TV is left off.
+
+The standby target is the successfully connected Cast receiver, retained after
+`Stop`; changing a sender's device selection cannot redirect the power command.
+The target is cleared by Disconnect so repeated disconnects do not toggle power.
+CastPlayer performs Disconnect on a worker thread to keep its window responsive.
+The reusable `TMfCastDisconnectWorker` and its `WM_MFCAST_DISCONNECT_FINISHED`
+completion message are part of `MfCastWindowsSupport`; the application only
+starts the worker and handles its completion.
+
+Pairing credentials are registered per stable Cast ID (with service-instance
+fallback), not per IP address. They are encrypted for the current Windows user
+with DPAPI under `%LOCALAPPDATA%\MfPack\Cast\AndroidTvRemotes`. Credentials and
+network addresses are not embedded in source or executables. The native helper
+`AndroidTvControl` can list Cast IDs, import an existing paired certificate/key
+in an empty-password PFX, read power status, or request standby.
+
+Importing an identity does not pair a new TV; the certificate must already have
+been paired with that TV. Treat PFX files as private credentials and remove any
+temporary conversion files after import. CastPlayer itself uses native Windows
+SChannel and DPAPI and does not require Python or an external remote executable.
+The current Sharp pairing can be reused without entering a new TV pairing code.
+
+Unregistered devices receive ordinary Cast STOP/CLOSE and a log explaining that
+no paired standby control is configured. This does not claim universal physical
+standby: external Chromecast displays depend on their firmware/HDMI-CEC behavior,
+and other receiver types require their own supported power-control mechanism.
+
 Read the full documentation in  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt.
   
-Project: MFPack - Cast  
+Project: MfPack - Cast  
 Project location: MfPack  
   
 https://github.com/FactoryXCode/MfPack  
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 15/09/2026  
+Final release date: 11/11/2026  
   
 Copyright © FactoryX. All rights reserved.
+

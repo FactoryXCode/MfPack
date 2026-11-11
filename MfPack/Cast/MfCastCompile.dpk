@@ -25,6 +25,7 @@ package MfCastCompile;
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
 {$IMPLICITBUILD ON}
+{$R *.res}
 
 requires
   rtl,
@@ -33,8 +34,10 @@ requires
 
 contains
   MfCast in 'MfCast.pas',
+  MfCastAndroidTvRemote in 'MfCastAndroidTvRemote.pas',
   MfCastChannel in 'MfCastChannel.pas',
   MfCastCaptureCapabilities in 'MfCastCaptureCapabilities.pas',
+  MfCastCaptureWriter in 'MfCastCaptureWriter.pas',
   MfCastController in 'MfCastController.pas',
   MfCastDiscovery in 'MfCastDiscovery.pas',
   MfCastDesktopCapture in 'MfCastDesktopCapture.pas',
@@ -47,8 +50,10 @@ contains
   MfCastTranscode in 'MfCastTranscode.pas',
   MfCastTransport in 'MfCastTransport.pas',
   MfCastTypes in 'MfCastTypes.pas',
+  MfCastWakeOnLan in 'MfCastWakeOnLan.pas',
   MfCastWindowsSupport in 'MfCastWindowsSupport.pas',
   LangTags in 'Media\LangTags.pas',
+  MfCastArtwork in 'Media\MfCastArtwork.pas',
   MfEmbeddedSubtitleReader in 'Media\MfEmbeddedSubtitleReader.pas',
   MfVobSubReader in 'Media\MfVobSubReader.pas',
   MfMatroskaSubtitleReader in 'Media\MfMatroskaSubtitleReader.pas',

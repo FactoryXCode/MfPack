@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -147,6 +147,13 @@ type
     function Resume(): HRESULT;
     function Stop(): HRESULT;
     function GetState(): TMfCastState;
+  end;
+
+  // Optional extension: existing capture pipeline implementations stay compatible.
+  IMfCastLiveArtworkControl = interface
+    ['{C183D472-9C7B-4524-B911-275351B4C260}']
+    // S_FALSE means no live artwork presentation is active.
+    function SetArtwork(const ASourceName: string): HRESULT;
   end;
 
   IMfCastCapturePipeline = interface

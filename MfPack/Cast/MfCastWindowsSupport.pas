@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.1
+// Revision Version: 4.1.0
 // Description: Optional Windows-message bridge and command workers for Cast
 //              applications that marshal asynchronous results to a window.
 //
@@ -88,8 +88,23 @@ const
   WM_MFCAST_LOG = WM_APP + 106;
   WM_MFCAST_SUBTITLE_FINISHED = WM_APP + 107;
   WM_MFCAST_AUDIO_TRACK_FINISHED = WM_APP + 108;
+  WM_MFCAST_DISCONNECT_FINISHED = WM_APP + 109;
 
 type
+  TMfCastDisconnectWorker = class(TThread)
+  private
+    FCast: TMfCast;
+    FTargetWindow: HWND;
+
+  protected
+    procedure Execute(); override;
+
+  public
+
+    constructor Create(const ACast: TMfCast;
+                       const ATargetWindow: HWND);
+  end;
+
   TMfCastFileWorker = class(TThread)
   private
     FCast: TMfCast;
@@ -136,8 +151,10 @@ type
     FSubtitle: TMfCastSubtitleAsset;
     FEnabled: Boolean;
     FTargetWindow: HWND;
+
   protected
     procedure Execute(); override;
+
   public
     constructor Create(const ACast: TMfCast;
                        const ASubtitle: TMfCastSubtitleAsset;
@@ -150,8 +167,10 @@ type
     FCast: TMfCast;
     FTrackId: Int64;
     FTargetWindow: HWND;
+
   protected
     procedure Execute(); override;
+
   public
     constructor Create(const ACast: TMfCast;
                        const ATrackId: Int64;
@@ -161,10 +180,72 @@ type
   TMfCastUiLogMessage = class
   public
     Text: string;
+
     constructor Create(const AText: string);
   end;
 
+
 implementation
+
+constructor TMfCastDisconnectWorker.Create(const ACast: TMfCast;
+                                           const ATargetWindow: HWND);
+begin
+
+  inherited Create(True);
+
+  FreeOnTerminate := False;
+  FCast := ACast;
+  FTargetWindow := ATargetWindow;
+end;
+
+
+procedure TMfCastDisconnectWorker.Execute();
+var
+  Hr, HrCom: HRESULT;
+  ComInitialized: Boolean;
+  LogMessage: TMfCastUiLogMessage;
+
+begin
+
+  Hr := E_POINTER;
+  ComInitialized := False;
+
+  try
+    try
+      HrCom := CoInitializeEx(nil,
+                              COINIT_MULTITHREADED);
+      ComInitialized := Succeeded(HrCom);
+
+      if Failed(HrCom) and (HrCom <> RPC_E_CHANGED_MODE) then
+        Hr := HrCom
+      else
+        if Assigned(FCast) then
+          Hr := FCast.Disconnect();
+
+    except
+      on E: Exception do
+        begin
+          Hr := E_FAIL;
+          LogMessage := TMfCastUiLogMessage.Create('Disconnect worker exception: ' + E.Message);
+
+          if not PostMessage(FTargetWindow,
+                             WM_MFCAST_LOG,
+                             WPARAM(LogMessage),
+                             0) then
+            LogMessage.Free;
+        end;
+    end;
+
+  finally
+    if ComInitialized then
+      CoUninitialize;
+
+    PostMessage(FTargetWindow,
+                WM_MFCAST_DISCONNECT_FINISHED,
+                WPARAM(Hr),
+                0);
+  end;
+end;
 
 
 constructor TMfCastFileWorker.Create(const ACast: TMfCast;

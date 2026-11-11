@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.1
+// Revision Version: 4.1.0
 // Description: WinSock + SChannel transport for the Cast control channel.
 //
 // Company: FactoryX
@@ -145,6 +145,7 @@ type
     FStreamSizes: TStreamSizes;
     FEncryptedBuffer: TBytes;
     FPlainBuffer: TBytes;
+    FClientCertificate: Pointer;
 
     function ResolveHost(const AHost: string;
                          out AAddress: TInAddr): HRESULT;
@@ -177,6 +178,8 @@ type
 
     function Configure(const ASettings: TMfCastProtocolSettings): HRESULT;
     procedure SetLogger(const ALogger: IMfCastLogger);
+    // Borrowed PCCERT_CONTEXT; caller keeps it alive until Disconnect completes.
+    function SetClientCertificate(const ACertificate: Pointer): HRESULT;
     function Connect(const AHost: string;
                      const APort: Word): HRESULT;
 
@@ -312,6 +315,15 @@ procedure TMfCastTcpTransport.SetLogger(const ALogger: IMfCastLogger);
 begin
 
   FLogger := ALogger;
+end;
+
+
+function TMfCastTcpTransport.SetClientCertificate(const ACertificate: Pointer): HRESULT;
+begin
+  if IsConnected() then
+    Exit(E_UNEXPECTED);
+  FClientCertificate := ACertificate;
+  Result := S_OK;
 end;
 
 
@@ -462,6 +474,11 @@ begin
            0);
 
   Cred.dwVersion := SCHANNEL_CRED_VERSION;
+  if Assigned(FClientCertificate) then
+    begin
+      Cred.cCreds := 1;
+      Cred.paCred := @FClientCertificate;
+    end;
   // Some Cast receivers reset the connection when offered TLS 1.3. The Cast
   // control channel works with TLS 1.2 on those receivers.
   Cred.grbitEnabledProtocols := SP_PROT_TLS1_2_CLIENT;

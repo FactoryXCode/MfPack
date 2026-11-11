@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.1
+// Revision Version: 4.1.0
 // Description: Shared enums, device information, media information,
 //              load requests, status records, codec profiles, and all configurable settings.
 //
@@ -71,6 +71,13 @@ uses
   System.SysUtils,
   {WinApi}
   System.Classes;
+
+const
+  MFCAST_API_VERSION = '4.1.0';
+  MFCAST_API_VERSION_MAJOR = 4;
+  MFCAST_API_VERSION_MINOR = 1;
+  MFCAST_API_VERSION_RELEASE = 0;
+  MFCAST_API_VERSION_BUILD = 0;
 
 type
 
@@ -454,6 +461,7 @@ type
     AudioOnly: Boolean;
     IncludeCursor: Boolean;
     CaptureSystemAudio: Boolean;
+    ArtworkSourceName: string;
     CodecPreference: TMfCastVideoCodecPreference;
     Width: Cardinal;
     Height: Cardinal;
@@ -873,6 +881,7 @@ begin
   AudioOnly := False;
   IncludeCursor := True;
   CaptureSystemAudio := True;
+  ArtworkSourceName := '';
   CodecPreference := cvcpAutomatic;
   Width := 1920;
   Height := 1080;

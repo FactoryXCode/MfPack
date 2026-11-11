@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.1
+// Revision Version: 4.1.0
 // Description: TLS, protobuf framing, receiver launch, heartbeat, media loading,
 //              playback commands, and status messages.
 //
@@ -1502,6 +1502,8 @@ procedure TMfCastChannel.StopWorker(const ADisconnectTransport: Boolean);
 var
   CalledFromWorker: Boolean;
   Worker: TMfCastChannelWorker;
+  ReceiverId: string;
+  CloseResult: HRESULT;
 
 begin
 
@@ -1517,26 +1519,52 @@ begin
     FWorkerLock.Release();
   end;
 
-  if not Assigned(Worker) then
-    begin
-      if ADisconnectTransport and Assigned(FTransport) then
-        FTransport.Disconnect();
-
-      Exit;
-    end;
-
-  Worker.Terminate();
+  if Assigned(Worker) then
+    Worker.Terminate();
 
   if ADisconnectTransport and Assigned(FTransport) then
     begin
       FSendLock.Acquire();
 
       try
+        // End both virtual connections before closing TLS, as VLC does.
+        // STOP ends playback/the receiver app; it does not detach the sender.
+        // A device may use the last sender's departure to become inactive.
+        if FTransport.IsConnected() and (FTransportId <> '') then
+          begin
+            ReceiverId := FSettings.ReceiverId;
+            if (ReceiverId = '') then
+              ReceiverId := 'receiver-0';
+
+            if not SameText(FTransportId, ReceiverId) then
+              begin
+                CloseResult := SendJson(FTransportId,
+                                       FSettings.NamespaceConnection,
+                                       '{"type":"CLOSE"}');
+                if FAILED(CloseResult) and Assigned(FLogger) then
+                  FLogger.Log(cllDebug, 'Channel',
+                    Format('Application CLOSE failed: HRESULT $%.8x.',
+                           [DWORD(CloseResult)]));
+              end;
+
+            // Still close the device connection if the app has already exited.
+            CloseResult := SendJson(ReceiverId,
+                                   FSettings.NamespaceConnection,
+                                   '{"type":"CLOSE"}');
+            if Assigned(FLogger) then
+              FLogger.Log(cllDebug, 'Channel',
+                Format('Receiver CLOSE completed: HRESULT $%.8x.',
+                       [DWORD(CloseResult)]));
+          end;
+
         FTransport.Disconnect();
       finally
         FSendLock.Release();
       end;
     end;
+
+  if not Assigned(Worker) then
+    Exit;
 
   if CalledFromWorker then
     begin

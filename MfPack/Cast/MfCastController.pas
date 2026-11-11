@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 29-07-2026
 // Language: ENU
 //
-// Revision Version: 4.0.2
+// Revision Version: 4.1.0
 // Description: GUI-independent orchestration of discovery, preparation,
 //              HTTP publishing, connection, receiver launch, load, playback, and shutdown.
 //
@@ -114,6 +114,7 @@ type
     FLogger: IMfCastLogger;
     FState: TMfCastState;
     FCurrentDevice: TMfCastDevice;
+    FStandbyDevice: TMfCastDevice;
     FCurrentMedia: TMfCastMediaInfo;
     FPendingLoadRequest: TMfCastLoadRequest;
     FPendingTranscodeRequest: TMfCastTranscodeRequest;
@@ -278,7 +279,9 @@ uses
   {Cast}
   MfCastHttpServer,
   MfCastChannel,
-  MfCastTransport;
+  MfCastTransport,
+  MfCastWakeOnLan,
+  MfCastAndroidTvRemote;
 
 type
 
@@ -287,8 +290,10 @@ type
     FController: TMfCastController;
     FControllerReference: IMfCastController;
     FPosition100ns: Int64;
+
   protected
     procedure Execute(); override;
+
   public
     constructor Create(const AController: TMfCastController;
                        const APosition100ns: Int64);
@@ -298,18 +303,21 @@ type
   private
     FController: TMfCastController;
     FControllerReference: IMfCastController;
+
   protected
     procedure Execute(); override;
+
   public
     constructor Create(const AController: TMfCastController);
   end;
 
 
-constructor TMfCastNetworkRecoveryThread.Create(
-  const AController: TMfCastController;
-  const APosition100ns: Int64);
+constructor TMfCastNetworkRecoveryThread.Create(const AController: TMfCastController;
+                                                const APosition100ns: Int64);
 begin
+
   inherited Create(True);
+
   FreeOnTerminate := True;
   FController := AController;
   FControllerReference := AController;
@@ -374,7 +382,8 @@ begin
                       'Cast control channel reconnected; the live media stream was preserved.');
 
   finally
-    InterlockedExchange(FController.FControlRecoveryInProgress, 0);
+    InterlockedExchange(FController.FControlRecoveryInProgress,
+                        0);
     FControllerReference := nil;
   end;
 end;
@@ -401,6 +410,16 @@ begin
             (AHResult = HRESULT_FROM_WIN32(WSAECONNRESET)) or
             (AHResult = HRESULT_FROM_WIN32(WSAENOTCONN)) or
             (AHResult = HRESULT_FROM_WIN32(WSAESHUTDOWN));
+end;
+
+
+function MfCastIsConnectRetryable(const AHResult: HRESULT): Boolean;
+begin
+
+  Result := (AHResult = HRESULT_FROM_WIN32(WSAETIMEDOUT)) or
+            (AHResult = HRESULT_FROM_WIN32(WSAECONNREFUSED)) or
+            (AHResult = HRESULT_FROM_WIN32(WSAEHOSTUNREACH)) or
+            (AHResult = HRESULT_FROM_WIN32(WSAENETUNREACH));
 end;
 
 
@@ -564,6 +583,7 @@ begin
   FState := csIdle;
   FCallbacks.Reset;
   FCurrentDevice.Reset;
+  FStandbyDevice.Reset;
   FCurrentMedia.Reset;
   FPendingLoadRequest.Reset;
   FPendingTranscodeRequest.Reset;
@@ -728,6 +748,7 @@ begin
     begin
       try
         FSourceResolver.Release(ResolvedSource);
+
       except
         on E: Exception do
           Log(cllWarning,
@@ -985,6 +1006,7 @@ begin
     begin
       SetLength(ADevices,
                 0);
+
       Result := E_POINTER;
       Exit;
   end;
@@ -1032,8 +1054,7 @@ begin
 
   if FHasPendingTranscode then
     begin
-      if not Assigned(FComponents.TranscodePipeline) or
-         not Assigned(FComponents.SegmentPublisher) then
+      if not Assigned(FComponents.TranscodePipeline) or not Assigned(FComponents.SegmentPublisher) then
         begin
           Result := FailCastAttempt(E_POINTER,
                                     'Start transcoder',
@@ -1042,8 +1063,8 @@ begin
         end;
 
       hr := FComponents.TranscodePipeline.Start(FPendingTranscodeRequest,
-                                                 FComponents.SegmentPublisher,
-                                                 nil);
+                                                FComponents.SegmentPublisher,
+                                                nil);
       if (hr <> S_OK) then
         begin
           Result := FailCastAttempt(hr,
@@ -1085,10 +1106,10 @@ begin
             end;
 
           hr := FComponents.DirectPreviewPlayer.Open(FCurrentMedia.SourceName,
-                                                      FPreviewVolume,
-                                                      FPreviewMuted,
-                                                      PreviewAudioStreamIndex,
-                                                      PreviewHasAudioStreamIndex);
+                                                     FPreviewVolume,
+                                                     FPreviewMuted,
+                                                     PreviewAudioStreamIndex,
+                                                     PreviewHasAudioStreamIndex);
           if FAILED(hr) then
             Log(cllWarning,
                 Format('Local direct preview could not be opened (HRESULT $%.8x); receiver playback continues.',
@@ -1096,6 +1117,7 @@ begin
           else if FUsingTranscodedStream then
             begin
               hr := FComponents.DirectPreviewPlayer.ConfigureSubtitles(FActiveTranscodeRequest);
+
               if FAILED(hr) then
                 Log(cllWarning,
                     Format('Local EVR subtitle overlay could not be prepared (HRESULT $%.8x).',
@@ -1108,7 +1130,7 @@ begin
     begin
       if Result = HRESULT(DWORD($800705B4)) then
         begin
-          if HttpRequestsAfter = HttpRequestsBefore then
+          if (HttpRequestsAfter = HttpRequestsBefore) then
             Result := FailCastAttempt(Result,
                                       'Load media',
                                       'The Chromecast did not acknowledge LOAD and made no request to the local media URL.')
@@ -1151,8 +1173,21 @@ end;
 
 function TMfCastController.ConnectReceiver(
   const ADevice: TMfCastDevice): HRESULT;
+const
+  MFCAST_CONNECT_RETRY_COUNT = 3;
+  MFCAST_CONNECT_RETRY_DELAY_MS = 1000;
+  MFCAST_WAKE_CONNECT_RETRY_COUNT = 6;
+
+var
+  RetryIndex: Integer;
+  RetryCount: Integer;
+  WakeTarget: TMfCastWakeTarget;
+  HaveWakeTarget: Boolean;
+  WakeResult: HRESULT;
+
 begin
 
+  FStandbyDevice.Reset;
   FCurrentDevice := ADevice;
   SetState(csConnecting);
 
@@ -1164,7 +1199,59 @@ begin
               ADevice.Port,
               ADevice.RawCapabilities]));
 
+  // Snapshot the neighbor entry before a failed TCP attempt can invalidate it.
+  HaveWakeTarget := MfCastGetWakeTarget(ADevice,
+                                        WakeTarget);
+  RetryIndex := 0;
+  RetryCount := MFCAST_CONNECT_RETRY_COUNT;
   Result := FComponents.Channel.Connect(ADevice);
+
+  if MfCastIsConnectRetryable(Result) then
+    begin
+      if HaveWakeTarget then
+        begin
+          Log(cllInfo,
+              Format('Receiver is unreachable; sending Wake-on-LAN to %s (%s) via %s.',
+                     [WakeTarget.Address, WakeTarget.MacAddress, WakeTarget.LocalAddress]));
+
+          WakeResult := MfCastSendWakeOnLan(WakeTarget);
+
+          if SUCCEEDED(WakeResult) then
+            begin
+              RetryCount := MFCAST_WAKE_CONNECT_RETRY_COUNT;
+              Log(cllInfo, 'Wake-on-LAN packets sent; waiting for the Cast control service.');
+            end
+          else
+            Log(cllWarning,
+                Format('Wake-on-LAN could not be sent (HRESULT $%.8x); continuing normal connection retries.',
+                       [DWORD(WakeResult)]));
+        end
+      else
+        Log(cllInfo,
+            'Wake-on-LAN skipped: no hardware address is known on the receiver network. Discover or connect once while the receiver is awake to learn it.');
+    end;
+
+  while MfCastIsConnectRetryable(Result) and
+        (RetryIndex < RetryCount) do
+    begin
+      Inc(RetryIndex);
+
+      Log(cllWarning,
+          Format('Receiver is not ready (HRESULT $%.8x); waiting %d ms before connection retry %d of %d.',
+                 [DWORD(Result),
+                  MFCAST_CONNECT_RETRY_DELAY_MS,
+                  RetryIndex,
+                  RetryCount]));
+
+      Sleep(MFCAST_CONNECT_RETRY_DELAY_MS);
+      Result := FComponents.Channel.Connect(ADevice);
+    end;
+
+  if (Result = S_OK) and (RetryIndex > 0) then
+    Log(cllInfo,
+        Format('Chromecast control channel became available after connection retry %d.',
+               [RetryIndex]));
+
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
@@ -1173,6 +1260,7 @@ begin
       Exit;
     end;
 
+  MfCastRememberWakeTarget(ADevice);
   SetState(csLaunchingReceiver);
 
   Log(cllInfo,
@@ -1226,6 +1314,7 @@ begin
       Exit;
     end;
 
+  FStandbyDevice := ADevice;
   SetState(csConnected);
   Result := S_OK;
 end;
@@ -1478,6 +1567,7 @@ begin
   Result := AByteStream.Write(@AInitSegment[0],
                               Length(AInitSegment),
                               BytesWritten);
+
   if SUCCEEDED(Result) and (BytesWritten <> ULONG(Length(AInitSegment))) then
     Result := E_FAIL;
 
@@ -1642,9 +1732,14 @@ begin
   if ASettings.AudioOnly then
     FPendingLoadRequest.Title := 'System audio capture'
   else
-    FPendingLoadRequest.Title := 'Desktop capture';
-    
-  FPendingLoadRequest.AutoPlay := True;
+    if (Trim(ASettings.ArtworkSourceName) <> '') then
+      FPendingLoadRequest.Title := 'System audio with artwork'
+    else
+      FPendingLoadRequest.Title := 'Desktop capture';
+
+  // Create the media session paused so fixed-volume receivers can also be
+  // silenced before the first audio sample is played.
+  FPendingLoadRequest.AutoPlay := False;
 
   Result := ConnectReceiver(ADevice);
   if FAILED(Result) then
@@ -1657,7 +1752,8 @@ begin
   // selected receiver has accepted its control connection. Besides avoiding
   // needless capture work, this keeps receiver failures separate from local
   // DXGI/WASAPI failures in the diagnostic log.
-  Result := FComponents.CapturePipeline.Start(ASettings, AVideoSubtype,
+  Result := FComponents.CapturePipeline.Start(ASettings,
+                                              AVideoSubtype,
                                               FComponents.DesktopPublisher,
                                               FComponents.PreviewSink);
   if FAILED(Result) then
@@ -1667,10 +1763,15 @@ begin
           'Start system-audio capture',
           'WASAPI loopback or the AAC encoder could not be started.')
       else
-        Result := FailCastAttempt(Result,
-          'Start desktop capture',
-          'DXGI desktop capture or the hardware encoder could not be started.');
-          
+        if Trim(ASettings.ArtworkSourceName) <> '' then
+          Result := FailCastAttempt(Result,
+                                    'Start audio with artwork',
+                                    'The artwork image, WASAPI loopback, or the video/audio encoder could not be started.')
+        else
+          Result := FailCastAttempt(Result,
+                                    'Start desktop capture',
+                                    'DXGI desktop capture or the hardware encoder could not be started.');
+
       CleanupCastAttempt();
       Exit;
     end;
@@ -1682,6 +1783,20 @@ begin
       Exit;
     end;
     
+  // LOAD has acknowledged the paused media session. SetVolume can now target
+  // either receiver volume or a fixed-volume receiver's media-stream volume.
+  Result := SetVolume(0.0);
+  if SUCCEEDED(Result) then
+    Result := FComponents.Channel.Play();
+  if FAILED(Result) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Start silent desktop playback',
+                                'The receiver could not start desktop playback at zero volume.');
+      CleanupCastAttempt();
+      Exit;
+    end;
+
   if ASettings.AudioOnly then
     Log(cllInfo,
         Format('System-audio capture LOAD accepted: url="%s".',
@@ -1875,9 +1990,10 @@ begin
 
   if FHasResolvedSource then
     begin
-      if Trim(FResolvedSource.ContentType) <> '' then
+      if (Trim(FResolvedSource.ContentType) <> '') then
         FCurrentMedia.ContentType := Trim(FResolvedSource.ContentType);
-      if Trim(FResolvedSource.ContainerName) <> '' then
+
+      if (Trim(FResolvedSource.ContainerName) <> '') then
         FCurrentMedia.ContainerName := Trim(FResolvedSource.ContainerName);
     end;
 
@@ -2137,6 +2253,7 @@ end;
 
 function TMfCastController.SetAudioArtwork(const ASourceName: string): HRESULT;
 var
+  LiveArtwork: IMfCastLiveArtworkControl;
   Extension: string;
   SourceName: string;
   
@@ -2169,6 +2286,12 @@ begin
       Exit;
     end;
 
+  if Supports(FComponents.CapturePipeline, IMfCastLiveArtworkControl, LiveArtwork) then
+    begin
+      Result := LiveArtwork.SetArtwork(SourceName);
+      if FAILED(Result) then
+        Exit;
+    end;
   FAudioArtworkSourceName := SourceName;
   Result := S_OK;
 end;
@@ -2293,9 +2416,7 @@ begin
         Result := RecoveryResult;
     end;
 
-  if SUCCEEDED(Result) and
-     Assigned(FComponents.DirectPreviewPlayer) and
-     FComponents.DirectPreviewPlayer.IsActive() then
+  if SUCCEEDED(Result) and Assigned(FComponents.DirectPreviewPlayer) and FComponents.DirectPreviewPlayer.IsActive() then
     FComponents.DirectPreviewPlayer.Play();
 end;
 
@@ -2312,13 +2433,10 @@ begin
      Assigned(FComponents.RemuxPipeline) then
     FComponents.RemuxPipeline.Pause();
 
-  if SUCCEEDED(Result) and FUsingTranscodedStream and
-     Assigned(FComponents.TranscodePipeline) then
+  if SUCCEEDED(Result) and FUsingTranscodedStream and Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Pause();
 
-  if SUCCEEDED(Result) and
-     Assigned(FComponents.DirectPreviewPlayer) and
-     FComponents.DirectPreviewPlayer.IsActive() then
+  if SUCCEEDED(Result) and Assigned(FComponents.DirectPreviewPlayer) and FComponents.DirectPreviewPlayer.IsActive() then
     FComponents.DirectPreviewPlayer.Pause();
 end;
 
@@ -2702,6 +2820,7 @@ begin
   FActiveTranscodeRequest.SubtitleStreamIndex := ASubtitle.StreamIndex;
   FActiveTranscodeRequest.HasSubtitleStreamIndex := ASubtitle.HasStreamIndex;
   FActiveTranscodeRequest.SubtitleAspectRatio := ASubtitle.AspectRatio;
+
   FActiveTranscodeRequest.SubtitleData := Copy(ASubtitle.Data,
                                                0,
                                                Length(ASubtitle.Data));
@@ -2906,10 +3025,32 @@ end;
 
 
 function TMfCastController.Disconnect(): HRESULT;
+var
+  Device: TMfCastDevice;
+  Detail: string;
+  IsOn: Boolean;
+  StandbyResult: HRESULT;
 begin
 
+  // Retain the actual connected receiver, including after Stop clears media
+  // state. Never use a potentially different selection in the sender's UI.
+  Device := FStandbyDevice;
+  FStandbyDevice.Reset;
   CleanupCastAttempt();
   SetState(csIdle);
+  StandbyResult := MfCastAndroidTvPower(Device, True, IsOn, Detail);
+
+  if (StandbyResult = S_OK) then
+    Log(cllInfo, Detail)
+  else
+    if (StandbyResult = S_FALSE) then
+      begin
+        if (Device.Id <> '') or (Device.ServiceInstance <> '') then
+          Log(cllInfo, 'Receiver disconnected. ' + Detail);
+      end
+    else
+      Log(cllWarning, Format('Receiver disconnected, but standby control returned $%.8x: %s',
+                             [DWORD(StandbyResult), Detail]));
   Result := S_OK;
 end;
 
@@ -3083,9 +3224,7 @@ begin
   if FSeekInProgress and (FMediaLoadStartTick = 0) then
     Exit;
 
-  if FReplacementLoadPending and
-     (FReplacedMediaSessionId <> 0) and
-     (AStatus.MediaSessionId = FReplacedMediaSessionId) then
+  if FReplacementLoadPending and (FReplacedMediaSessionId <> 0) and (AStatus.MediaSessionId = FReplacedMediaSessionId) then
     begin
       Log(cllDebug,
           Format('Ignoring status from replaced media session %d.',
@@ -3213,19 +3352,23 @@ begin
      FMediaPlaybackStarted and
      (FUsingTranscodedStream or FUsingRemuxedStream) then
     begin
-      if InterlockedCompareExchange(FNetworkRecoveryInProgress, 1, 0) = 0 then
+      if (InterlockedCompareExchange(FNetworkRecoveryInProgress,
+                                     1,
+                                     0) = 0) then
         begin
           RecoveryPosition100ns := CurrentFilePosition100ns();
+
           Log(cllWarning,
               Format('Chromecast interrupted the generated media download; restarting at %.3f seconds.',
                      [RecoveryPosition100ns / 10000000.0]));
           try
-            RecoveryThread := TMfCastNetworkRecoveryThread.Create(
-                                Self,
-                                RecoveryPosition100ns);
+            RecoveryThread := TMfCastNetworkRecoveryThread.Create(Self,
+                                                                  RecoveryPosition100ns);
             RecoveryThread.Start();
+
           except
-            InterlockedExchange(FNetworkRecoveryInProgress, 0);
+            InterlockedExchange(FNetworkRecoveryInProgress,
+                                0);
             raise;
           end;
         end;
@@ -3254,8 +3397,7 @@ begin
 
   Log(cllDebug,
       Format('State changed: %s -> %s',
-             [MfCastStateToString(OldState),
-              MfCastStateToString(AState)]));
+             [MfCastStateToString(OldState), MfCastStateToString(AState)]));
 
   if Assigned(FCallbacks.OnStateChanged) then
     FCallbacks.OnStateChanged(OldState,

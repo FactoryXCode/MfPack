@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright (c) FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -68,6 +68,7 @@ uses
   WinApi.Windows,
   {System}
   System.Classes,
+  System.SysUtils,
   System.SyncObjs,
   {Cast}
   MfCastTypes,
@@ -75,8 +76,14 @@ uses
   MfCastMediaInterfaces;
 type
   TMfCastDesktopCapturePipeline = class(TInterfacedObject,
-                                        IMfCastCapturePipeline)
+                                        IMfCastCapturePipeline,
+                                        IMfCastLiveArtworkControl)
   private
+    FArtworkLock: TCriticalSection;
+    FPendingArtwork: TBytes;
+    FArtworkWidth: UINT32;
+    FArtworkHeight: UINT32;
+    FArtworkEpoch: Cardinal;
     FSettings: TMfCastCaptureSettings;
     FVideoSubtype: TGUID;
     FPublisher: IMfCastSegmentPublisher;
@@ -102,6 +109,7 @@ type
                    const APreviewSink: IMfCastPreviewSink): HRESULT;
     function Stop(): HRESULT;
     function GetState(): TMfCastState;
+    function SetArtwork(const ASourceName: string): HRESULT;
   end;
   
 
@@ -112,8 +120,6 @@ uses
   {WinApi}
   WinApi.ActiveX,
   WinApi.WinError,
-  {System}
-  System.SysUtils,
   {DirectX}
   WinApi.DirectX.D3DCommon,
   WinApi.DirectX.D3D11,
@@ -132,7 +138,9 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfReadWrite,
-  WinApi.MediaFoundationApi.MfTransform;
+  WinApi.MediaFoundationApi.MfTransform,
+  MfCastArtwork,
+  MfCastCaptureWriter;
   
 const
   // MF_SINK_WRITER_D3D_MANAGER, absent from some Delphi SDK translations.
@@ -145,6 +153,19 @@ type
   TMfCastDesktopCaptureWorker = class(TThread)
   private
     FOwner: TMfCastDesktopCapturePipeline;
+    FEncodeQueue: TMfCastCaptureWriter;
+    FPreviewQueue: TMfCastCaptureWriter;
+    FQueuedSinkWriter: IMFSinkWriter;
+    FQueuedByteStream: IMFByteStream;
+    FQueuedVideoIndex: DWORD;
+    FQueuedAudioIndex: DWORD;
+    FPreviewWidth: UINT32;
+    FPreviewHeight: UINT32;
+    function SubmitEncodedSample(const AAudio: Boolean; const AData: TBytes;
+      const ATime, ADuration: Int64): HRESULT;
+    function SubmitPreviewSample(const AAudio: Boolean; const AData: TBytes;
+      const ATime, ADuration: Int64): HRESULT;
+    procedure StopOutputQueues();
     function CreateWriter(const AByteStream: IMFByteStream;
                           const AWidth: UINT32;
                           const AHeight: UINT32;
@@ -208,6 +229,51 @@ begin
   FOwner := AOwner;
 
 end;
+
+function TMfCastDesktopCaptureWorker.SubmitEncodedSample(const AAudio: Boolean;
+  const AData: TBytes; const ATime, ADuration: Int64): HRESULT;
+var EncodedLength: QWORD;
+begin
+  if AAudio then
+    Result := WriteAudioPacket(FQueuedSinkWriter, FQueuedAudioIndex,
+      @AData[0], Length(AData), False, ATime, ADuration)
+  else
+    Result := WriteFrame(FQueuedSinkWriter, FQueuedVideoIndex,
+      AData, ATime, ADuration);
+  if SUCCEEDED(Result) and (not AAudio) and not FOwner.FStartupReady then
+    begin
+      Result := FQueuedByteStream.GetLength(EncodedLength);
+      if SUCCEEDED(Result) and (EncodedLength > 83) then
+        begin
+          FOwner.Log(cllDebug, Format('Encoded live MP4 data ready: %d bytes.', [EncodedLength]));
+          FOwner.SignalStartup(S_OK);
+        end;
+    end;
+end;
+
+function TMfCastDesktopCaptureWorker.SubmitPreviewSample(const AAudio: Boolean;
+  const AData: TBytes; const ATime, ADuration: Int64): HRESULT;
+begin
+  Result := PresentPreviewFrame(AData, FPreviewWidth, FPreviewHeight, ATime, ADuration);
+end;
+
+procedure TMfCastDesktopCaptureWorker.StopOutputQueues();
+var VideoPeak, AudioPeak, VideoDropped, AudioDropped: Integer;
+begin
+  if Assigned(FPreviewQueue) then
+    FreeAndNil(FPreviewQueue);
+  if Assigned(FEncodeQueue) then
+    begin
+      FEncodeQueue.Terminate();
+      FEncodeQueue.GetStats(VideoPeak, AudioPeak, VideoDropped, AudioDropped);
+      FreeAndNil(FEncodeQueue);
+      FOwner.Log(cllDebug, Format('Capture output queue statistics: videoPeak=%d audioPeak=%d droppedVideo=%d droppedAudio=%d.',
+        [VideoPeak, AudioPeak, VideoDropped, AudioDropped]));
+    end;
+  FQueuedSinkWriter := nil;
+  FQueuedByteStream := nil;
+end;
+
 
 function TMfCastDesktopCaptureWorker.CreateWriter(const AByteStream: IMFByteStream;
                                                    const AWidth: UINT32;
@@ -1056,9 +1122,16 @@ const
   // without converting static content into an artificial 30-fps sequence.
   MFCAST_VIDEO_KEEPALIVE_100NS = Int64(1000000); // 100 ms
   MFCAST_VIDEO_SCHEDULER_TOLERANCE_100NS = Int64(20000); // 2 ms
-  MFCAST_PREVIEW_INTERVAL_100NS = Int64(1000000); // 10 fps
+
   
 var
+  ArtworkMode: Boolean;
+  SilenceFrames: UINT32;
+  SilenceDuration: Int64;
+  LastRealPacketElapsed: Int64;
+  SyntheticSilenceActive: Boolean;
+  PreviewInterval: Int64;
+  AudioPacketsThisTurn: Integer;
   ByteStream: IMFByteStream;
   Device: ID3D11Device;
   Context: ID3D11DeviceContext;
@@ -1153,6 +1226,9 @@ var
   
 begin
   
+  ArtworkMode := Trim(FOwner.FSettings.ArtworkSourceName) <> '';
+  Width := 0;
+  Height := 0;
   WaveFormat := nil;
   AudioStarted := False;
   AudioTimelineStarted := False;
@@ -1168,6 +1244,33 @@ begin
   FOwner.Log(cllDebug,
              'Live MP4 byte stream acquired.');
              
+  if ArtworkMode then
+    begin
+      UseGpuSurfaces := False;
+      Width := FOwner.FSettings.Width;
+      Height := FOwner.FSettings.Height;
+      if Width = 0 then Width := 1280;
+      if Height = 0 then Height := 720;
+      Width := Width and not UINT32(1);
+      Height := Height and not UINT32(1);
+      Result := MfCastLoadArtworkRgb32(FOwner.FSettings.ArtworkSourceName,
+                                       Width, Height, Frame);
+      if FAILED(Result) then
+        begin
+          FOwner.Log(cllError, 'The selected artwork image could not be decoded.');
+          Exit;
+        end;
+      FOwner.FArtworkLock.Acquire;
+      try
+        FOwner.FArtworkWidth := Width;
+        FOwner.FArtworkHeight := Height;
+      finally
+        FOwner.FArtworkLock.Release;
+      end;
+      FOwner.Log(cllInfo, 'Static artwork decoded; live system audio uses WASAPI without desktop duplication.');
+    end
+  else
+    begin
   FeatureLevels[0] := D3D_FEATURE_LEVEL_11_0;
   FeatureLevels[1] := D3D_FEATURE_LEVEL_10_0;
   
@@ -1297,6 +1400,8 @@ begin
              Format('DXGI 1.6 output selected: %d bits per colour, colour space %d; desktop duplication uses DXGI 1.5 DuplicateOutput1 (BGRA8).',
                     [OutputDescription1.BitsPerColor, Ord(OutputDescription1.ColorSpace)]));
   
+    end;
+
   if FOwner.FSettings.CaptureSystemAudio then
     begin
       FOwner.Log(cllDebug, 'Initializing the private WASAPI loopback client.');
@@ -1347,8 +1452,11 @@ begin
   // Follow MfCaptureVideoFromGPU II and take the dimensions from the selected
   // output rectangle. Querying the duplication descriptor here proved to be a
   // driver-dependent blocking point on this system.
-  Width := UINT32(OutputDescription1.DesktopCoordinates.Right - OutputDescription1.DesktopCoordinates.Left);
-  Height := UINT32(OutputDescription1.DesktopCoordinates.Bottom - OutputDescription1.DesktopCoordinates.Top);
+  if not ArtworkMode then
+    begin
+      Width := UINT32(OutputDescription1.DesktopCoordinates.Right - OutputDescription1.DesktopCoordinates.Left);
+      Height := UINT32(OutputDescription1.DesktopCoordinates.Bottom - OutputDescription1.DesktopCoordinates.Top);
+    end;
   
   FOwner.Log(cllDebug,
              Format('Selected desktop dimensions resolved: %dx%d.',
@@ -1531,6 +1639,8 @@ begin
     FOwner.Log(cllInfo,
            'Desktop conversion uses a private D3D11 NV12 staging path; Media Foundation receives contiguous NV12 samples.');
   
+  if not ArtworkMode then
+    begin
   StagingDescription := Description;
   StagingDescription.Width := Width;
   StagingDescription.Height := Height;
@@ -1557,6 +1667,8 @@ begin
   else
     SetLength(Frame, Width * Height * 4);
     
+    end;
+
   if Assigned(FOwner.FPreviewSink) then
     begin
       SetLength(PreviewFrame,
@@ -1572,6 +1684,29 @@ begin
     
   FrameDuration := (Int64(10000000) * FrameRateDenominator) div FrameRateNumerator;
   
+  // Capture, fMP4 encoding and GDI presentation have independent workers.
+  // Keep at most eight encoder frames and two preview frames; preview drops
+  // stale images instead of delaying capture. Use source cadence up to 30 fps.
+  PreviewInterval := FrameDuration;
+  if PreviewInterval < 333333 then PreviewInterval := 333333;
+  FQueuedSinkWriter := Writer;
+  FQueuedByteStream := ByteStream;
+  FQueuedVideoIndex := StreamIndex;
+  FQueuedAudioIndex := AudioStreamIndex;
+  FPreviewWidth := Width;
+  FPreviewHeight := Height;
+  FEncodeQueue := TMfCastCaptureWriter.Create(SubmitEncodedSample,
+    FOwner.FLogger, 'CaptureEncoder');
+  FEncodeQueue.Start();
+  if Assigned(FOwner.FPreviewSink) then
+    begin
+      FPreviewQueue := TMfCastCaptureWriter.Create(SubmitPreviewSample,
+        FOwner.FLogger, 'CapturePreview', 2, 0);
+      FPreviewQueue.Start();
+    end;
+  FOwner.Log(cllInfo, Format('Independent capture/encoder/preview workers; PCM batching=100 ms; preview interval=%d us.',
+    [PreviewInterval div 10]));
+
   if not QueryPerformanceFrequency(PerformanceFrequency) then
     Exit(HRESULT_FROM_WIN32(GetLastError()));
     
@@ -1604,27 +1739,68 @@ begin
   FirstAudioTime := -1;
   TimelineLogTick := 0;
   MissedDesktopFrames := 0;
-  FrameHeld := False;
+  FrameHeld := ArtworkMode;
+  LastRealPacketElapsed := 0;
+  SyntheticSilenceActive := False;
+  SilenceFrames := 0;
+  SilenceDuration := 0;
+  if Assigned(CaptureClient) and Assigned(WaveFormat) then
+    begin
+      SilenceFrames := WaveFormat^.nSamplesPerSec div 100;
+      if SilenceFrames = 0 then SilenceFrames := 1;
+      SilenceDuration := (Int64(SilenceFrames) * 10000000) div WaveFormat^.nSamplesPerSec;
+    end;
   VideoProcessorFrame := 0;
   FOwner.SetState(csPlaying);
   
-  // The desktop pipeline is now completely initialized: duplication, WASAPI,
-  // converter and Sink Writer are all live. The controller may safely expose
-  // the dedicated desktop URL to the receiver.
-  FOwner.SignalStartup(S_OK);
+  // Signal startup only when encoded MP4 data follows the opening file header.
   
   FOwner.Log(cllInfo,
-              Format('DXGI capture started: %dx%d, codec=%s.',
+              Format('Live video capture started: %dx%d, codec=%s.',
                      [Width, Height, GUIDToString(FOwner.FVideoSubtype)]));
                      
   while not Terminated do
     begin
+      Result := FEncodeQueue.GetResult();
+      if FAILED(Result) then Exit;
       Resource := nil;
       DesktopTexture := nil;
       MappedTexture := False;
       FrameUpdated := False;
       PreviewFrameUpdated := False;
       
+      if ArtworkMode then
+        begin
+          // The UI decodes replacements outside the lock. Swap only complete
+          // frames here; encoder, audio clock and receiver session keep running.
+          FOwner.FArtworkLock.Acquire;
+          try
+            if Length(FOwner.FPendingArtwork) > 0 then
+              begin
+                Frame := FOwner.FPendingArtwork;
+                FOwner.FPendingArtwork := nil;
+              end;
+          finally
+            FOwner.FArtworkLock.Release;
+          end;
+          Sleep(5);
+          if not QueryPerformanceCounter(CurrentCounter) then
+            Exit(HRESULT_FROM_WIN32(GetLastError()));
+          ElapsedTime := MfCastPerformanceDelta100ns(CurrentCounter - CaptureStartCounter,
+                                                     PerformanceFrequency);
+          FramePresentationTime := (ElapsedTime div FrameDuration) * FrameDuration;
+          FrameUpdated := (LastVideoTime < 0) or
+                            (FramePresentationTime >= LastVideoTime + FrameDuration);
+          if Assigned(FOwner.FPreviewSink) and
+             ((LastPreviewTime < 0) or (ElapsedTime >= LastPreviewTime + PreviewInterval)) then
+            begin
+              Hr := FPreviewQueue.QueueVideo(Frame, FramePresentationTime,
+                                          PreviewInterval);
+              if SUCCEEDED(Hr) then LastPreviewTime := ElapsedTime;
+            end;
+        end
+      else
+        begin
       Hr := Duplication.AcquireNextFrame(5,
                                          FrameInfo,
                                          Resource);
@@ -1664,7 +1840,7 @@ begin
           FramePresentationTime := ((FramePresentationTime + (FrameDuration div 2)) div FrameDuration) * FrameDuration;
           ShouldCaptureFrame := (LastVideoTime < 0) or (FramePresentationTime + MFCAST_VIDEO_SCHEDULER_TOLERANCE_100NS >= LastVideoTime + FrameDuration);
           
-          ShouldPresentPreview := Assigned(FOwner.FPreviewSink) and ((LastPreviewTime < 0) or FramePresentationTime >= LastPreviewTime + MFCAST_PREVIEW_INTERVAL_100NS));
+          ShouldPresentPreview := Assigned(FOwner.FPreviewSink) and ((LastPreviewTime < 0) or (FramePresentationTime >= LastPreviewTime + PreviewInterval));
           
           try
             // Desktop duplication commonly reports at 60 Hz while a first-
@@ -1753,10 +1929,9 @@ begin
                     end;
                   end;
                   
-                // The encoder normally stays entirely on the GPU. At a
-                // deliberately lower cadence, copy one desktop frame to a
-                // staging texture for the local preview window. This avoids
-                // putting a synchronous GPU readback in every 30-fps frame.
+                // The preview needs BGRA in addition to the encoder's NV12.
+                // Read back only at preview cadence, then hand a private copy
+                // to its independent presentation worker.
                 if (not UseGpuSurfaces) or ShouldPresentPreview then
                   begin
                     Context.CopySubresourceRegion(StagingTexture,
@@ -1814,11 +1989,8 @@ begin
           
           if PreviewFrameUpdated then
             begin
-              Hr := PresentPreviewFrame(PreviewFrame,
-                                        Width,
-                                        Height,
-                                        FramePresentationTime,
-                                        MFCAST_PREVIEW_INTERVAL_100NS);
+              Hr := FPreviewQueue.QueueVideo(PreviewFrame, FramePresentationTime,
+                                        PreviewInterval);
               if SUCCEEDED(Hr) then
                 LastPreviewTime := FramePresentationTime;
             end;
@@ -1830,6 +2002,8 @@ begin
               Exit;
             end;
             
+        end;
+
       if not QueryPerformanceCounter(CurrentCounter) then
         begin
           Result := HRESULT_FROM_WIN32(GetLastError());
@@ -1848,8 +2022,10 @@ begin
               Exit;
             end;
             
-          while (PacketFrames > 0) do
+          AudioPacketsThisTurn := 0;
+          while (PacketFrames > 0) and (AudioPacketsThisTurn < 16) do
             begin
+              Inc(AudioPacketsThisTurn);
               AudioData := nil;
               AudioFrames := 0;
               AudioFlags := 0;
@@ -1870,6 +2046,12 @@ begin
               try
                 if (AudioFrames > 0) then
                   begin
+                    LastRealPacketElapsed := ElapsedTime;
+                    if SyntheticSilenceActive then
+                      begin
+                        FOwner.Log(cllDebug, 'WASAPI packets resumed; continuing live audio from the silence timeline.');
+                        SyntheticSilenceActive := False;
+                      end;
                     AudioBytes := AudioFrames * WaveFormat^.nBlockAlign;
                     AudioDuration := (Int64(AudioFrames) * 10000000) div WaveFormat^.nSamplesPerSec;
                     
@@ -1899,8 +2081,7 @@ begin
                     if (FirstAudioTime < 0) then
                       FirstAudioTime := AudioTime;
                       
-                    Result := WriteAudioPacket(Writer,
-                                               AudioStreamIndex,
+                    Result := FEncodeQueue.QueueAudio(
                                                AudioData,
                                                AudioBytes,
                                                (AudioFlags and
@@ -1928,6 +2109,34 @@ begin
             end;
         end;
         
+      // A/V MP4 requires both tracks to advance. A silent playback endpoint
+      // may deliver no loopback packets at all, even while video is captured.
+      if Assigned(CaptureClient) and
+         (ElapsedTime - LastRealPacketElapsed >= 500000) and
+         (SilenceDuration > 0) then
+        begin
+          if not SyntheticSilenceActive then
+            begin
+              FOwner.Log(cllDebug, 'No WASAPI packets; supplying silent AAC input to keep live video publishing.');
+              SyntheticSilenceActive := True;
+            end;
+          if not AudioTimelineStarted then
+            begin
+              AudioTime := 0;
+              AudioTimelineStarted := True;
+            end;
+          if ElapsedTime - AudioTime > 2000000 then
+            AudioTime := ElapsedTime - 2000000;
+          if FirstAudioTime < 0 then FirstAudioTime := AudioTime;
+          while AudioTime + SilenceDuration <= ElapsedTime do
+            begin
+              Result := FEncodeQueue.QueueAudio(nil,
+                SilenceFrames * WaveFormat^.nBlockAlign, True,
+                AudioTime, SilenceDuration);
+              if FAILED(Result) then Exit;
+              Inc(AudioTime, SilenceDuration);
+            end;
+        end;
       if FrameHeld and
          ((FrameUpdated and 
          ((LastVideoTime < 0) or 
@@ -1943,21 +2152,17 @@ begin
           if (FirstVideoTime < 0) then
             FirstVideoTime := LastVideoTime;
             
-          Result := WriteFrame(Writer,
-                               StreamIndex,
-                               Frame,
-                               LastVideoTime,
-                               FrameDuration);
+          Result := FEncodeQueue.QueueVideo(Frame, LastVideoTime, FrameDuration);
           if FAILED(Result) and UseGpuSurfaces then
             FOwner.Log(cllError,
-                       Format('Encoder rejected a GPU NV12 surface (0x%.8x).',
-                              [Cardinal(Result)]));
+              Format('Encoder queue rejected an NV12 frame (0x%.8x).',
+                [Cardinal(Result)]));
                               
           if FAILED(Result) then Exit;
           // This diagnostic is intentionally sparse. It shows whether the
           // samples entering Media Foundation remain aligned, without adding
           // enough debugger traffic to disturb real-time capture.
-          if (FirstAudioTime >= 0) and ((TimelineLogTick = 0) or (GetTickCount() - TimelineLogTick) >= 30000)) then
+          if (FirstAudioTime >= 0) and ((TimelineLogTick = 0) or ((GetTickCount() - TimelineLogTick) >= 30000)) then
             begin
               TimelineLogTick := GetTickCount();
               FOwner.Log(cllDebug,
@@ -1972,6 +2177,7 @@ begin
                Format('DXGI reported %d accumulated desktop frame(s) that could not be read individually.',
                       [MissedDesktopFrames]));
                       
+  StopOutputQueues();
   if Terminated then
     begin
       
@@ -1987,6 +2193,7 @@ begin
     Result := Writer.Finalize();
     
   finally
+    StopOutputQueues();
     if AudioStarted and Assigned(AudioClient) then
       AudioClient.Stop();
       
@@ -2033,6 +2240,7 @@ begin
     if (ComResult <> RPC_E_CHANGED_MODE) then
       begin
         FOwner.FWorkerResult := ComResult;
+        FOwner.SignalStartup(ComResult);
         FOwner.SetState(csError);
         Exit;
       end;
@@ -2042,10 +2250,18 @@ begin
                Format('Capture worker COM initialization returned HRESULT $%.8x.',
                       [Cardinal(ComResult)]));
              
-    if FOwner.FSettings.AudioOnly then
-      FOwner.FWorkerResult := RunAudioCapture()
-    else
-      FOwner.FWorkerResult := RunCapture();
+    try
+      if FOwner.FSettings.AudioOnly then
+        FOwner.FWorkerResult := RunAudioCapture()
+      else
+        FOwner.FWorkerResult := RunCapture();
+    except
+      on E: Exception do
+        begin
+          FOwner.FWorkerResult := E_FAIL;
+          FOwner.Log(cllError, 'Capture worker exception: ' + E.Message);
+        end;
+    end;
       
     // Every initialization failure must wake Start; otherwise the caller
     // would wait for a stream that can never produce an MP4 header.
@@ -2083,6 +2299,7 @@ begin
   
   inherited Create();
   
+  FArtworkLock := TCriticalSection.Create;
   FState := csIdle;
   FWorker := nil;
   FWorkerResult := S_OK;
@@ -2101,6 +2318,7 @@ begin
   
   Stop();
   FreeAndNil(FStartupEvent);
+  FreeAndNil(FArtworkLock);
   inherited Destroy();
 end;
 
@@ -2124,6 +2342,10 @@ begin
   if (ASettings.SourceKind <> ccskDesktop) then
     Exit(E_NOTIMPL);
     
+  if (Trim(ASettings.ArtworkSourceName) <> '') and
+     (ASettings.AudioOnly or (not ASettings.CaptureSystemAudio)) then
+    Exit(E_INVALIDARG);
+
   if ASettings.AudioOnly then
     begin
       if not ASettings.CaptureSystemAudio then
@@ -2175,7 +2397,16 @@ end;
 
 function TMfCastDesktopCapturePipeline.Stop(): HRESULT;
 begin
-  
+  FArtworkLock.Acquire;
+  try
+    Inc(FArtworkEpoch);
+    FArtworkWidth := 0;
+    FArtworkHeight := 0;
+    FPendingArtwork := nil;
+  finally
+    FArtworkLock.Release;
+  end;
+
   if Assigned(FWorker) then
     begin
       FWorker.Terminate();
@@ -2188,6 +2419,51 @@ begin
   FPublisher := nil;
   FPreviewSink := nil;
   SetState(csStopped);
+  Result := S_OK;
+end;
+
+
+function TMfCastDesktopCapturePipeline.SetArtwork(const ASourceName: string): HRESULT;
+var
+  Width, Height: UINT32;
+  Epoch: Cardinal;
+  Pixels: TBytes;
+  ComResult: HRESULT;
+begin
+  FArtworkLock.Acquire;
+  try
+    if (FArtworkWidth = 0) or (FArtworkHeight = 0) or
+       (FState <> csPlaying) then
+      Exit(S_FALSE);
+    Width := FArtworkWidth;
+    Height := FArtworkHeight;
+    Epoch := FArtworkEpoch;
+  finally
+    FArtworkLock.Release;
+  end;
+
+  ComResult := CoInitializeEx(nil, COINIT_MULTITHREADED);
+  if FAILED(ComResult) and (ComResult <> RPC_E_CHANGED_MODE) then
+    Exit(ComResult);
+  try
+    Result := MfCastLoadArtworkRgb32(ASourceName, Width, Height, Pixels);
+  finally
+    if SUCCEEDED(ComResult) then
+      CoUninitialize;
+  end;
+  if FAILED(Result) then
+    Exit; // Preserve the current image if the replacement cannot be decoded.
+
+  FArtworkLock.Acquire;
+  try
+    if (Epoch <> FArtworkEpoch) or (FArtworkWidth = 0) or
+       (FState <> csPlaying) then
+      Exit(S_FALSE);
+    FPendingArtwork := Pixels;
+  finally
+    FArtworkLock.Release;
+  end;
+  Log(cllInfo, 'Live artwork replacement queued: ' + ASourceName);
   Result := S_OK;
 end;
 

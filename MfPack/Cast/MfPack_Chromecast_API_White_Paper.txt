@@ -2,8 +2,33 @@ MfPack Chromecast API
 Independent Delphi Chromecast Framework
 Design Notes
 
-Version: 4.0.1 (Cast V2.1)
-Date: 15 September 2026
+Version: 4.1.0 (Cast V2.1 wire protocol)
+Date: 11 November 2026
+
+API 4.1.0: paired Android TV standby
+---------------------------------
+
+TMfCast.ApiVersion() and MFCAST_API_VERSION identify the library API release.
+All Cast-specific implementation units, including MfCastAndroidTvRemote.pas,
+belong to MfPack/Cast and are registered in the Cast API package.
+
+Applications use TMfCast.ImportAndroidTvPairing to register an already-paired
+Remote v2 identity from an empty-password PFX containing its certificate and key.
+TMfCast.HasAndroidTvPairing checks whether that device has a registered credential.
+TMfCast.GetDevicePowerState reads the paired TV's state; the output is valid only
+for S_OK. S_FALSE means that no pairing has been registered for the device.
+TMfCast.RequestDeviceStandby sends at most one power command to an awake paired
+TV and waits for the TV to confirm standby. It never retries the power toggle.
+Credentials are DPAPI-protected for the current Windows user and bound to the
+stable Cast identity rather than its IP address. Importing a credential does
+not perform the TV's interactive pairing procedure.
+
+TMfCast.Disconnect stops the cast, detaches its connections, and also requests
+standby for a registered paired TV. The controller retains the actual connected
+receiver after Stop, so a later UI selection cannot redirect the power command.
+CastPlayer invokes Disconnect on a worker to remain responsive. Do not issue a
+second power command after Disconnect. Unregistered receivers retain ordinary
+Cast shutdown; universal physical standby is not a Cast protocol guarantee.
 
 
 MfCast is an independent Chromecast subsystem for Delphi.
