@@ -2,7 +2,10 @@ program MfCastPlayer;
 
 uses
   Vcl.Forms,
-  frmCastPlayer in 'frmCastPlayer.pas' {CastPlayerForm};
+  frmCastPlayer in 'frmCastPlayer.pas' {CastPlayerForm},
+  dlgCaptureMonitor in 'dlgCaptureMonitor.pas' {CaptureMonitorDlg},
+  LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {DlgLWFileBrowserEx},
+  MfYouTubeSourceResolver in 'MfYouTubeSourceResolver.pas';
 
 {$R *.res}
 

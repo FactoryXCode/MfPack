@@ -1,0 +1,81 @@
+object CaptureMonitorDlg: TCaptureMonitorDlg
+  Left = 0
+  Top = 0
+  ActiveControl = lstMonitors
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Select a screen to cast from...'
+  ClientHeight = 238
+  ClientWidth = 500
+  Font.Charset = DEFAULT_CHARSET
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PopupMode = pmExplicit
+  Position = poOwnerFormCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  Color = clBtnFace
+  Font.Color = clWindowText
+  object lblPrompt: TLabel
+    Left = 16
+    Top = 16
+    Width = 237
+    Height = 16
+    Caption = 'Choose the screen that should be casted:'
+    FocusControl = lstMonitors
+    Font.Charset = DEFAULT_CHARSET
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    Font.Color = clWindowText
+  end
+  object lstMonitors: TListBox
+    Left = 16
+    Top = 38
+    Width = 468
+    Height = 144
+    Font.Charset = DEFAULT_CHARSET
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    Color = clWindow
+    Font.Color = clWindowText
+  end
+  object btnCast: TButton
+    Left = 328
+    Top = 198
+    Width = 74
+    Height = 25
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    Caption = 'Cast'
+    TabStop = True
+    OnClick = btnCastClick
+    ParentFont = True
+    WordWrap = True
+    Default = True
+  end
+  object btnCancel: TButton
+    Left = 410
+    Top = 198
+    Width = 74
+    Height = 25
+    Margins.Left = 2
+    Margins.Top = 2
+    Margins.Right = 2
+    Margins.Bottom = 2
+    Caption = 'Cancel'
+    TabStop = True
+    OnClick = btnCancelClick
+    ParentFont = True
+    WordWrap = True
+    Cancel = True
+  end
+end

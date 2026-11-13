@@ -2,8 +2,8 @@ object CastPlayerForm: TCastPlayerForm
   Left = 0
   Top = 0
   Caption = 'MfCastPlayer V2.2'
-  ClientHeight = 717
-  ClientWidth = 700
+  ClientHeight = 799
+  ClientWidth = 1036
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,31 +18,30 @@ object CastPlayerForm: TCastPlayerForm
   TextHeight = 13
   object lblState: TLabel
     Left = 0
-    Top = 637
-    Width = 700
+    Top = 719
+    Width = 1036
     Height = 18
     Align = alBottom
     AutoSize = False
     Caption = 'State: Idle'
-    Color = 1977626
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clAqua
+    Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
-    ParentColor = False
     ParentFont = False
     Transparent = False
+    ExplicitTop = 637
+    ExplicitWidth = 700
   end
   object memLog: TMemo
     Left = 0
-    Top = 655
-    Width = 700
+    Top = 737
+    Width = 1036
     Height = 62
     Align = alBottom
-    Color = 1977626
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWhite
+    Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -53,37 +52,39 @@ object CastPlayerForm: TCastPlayerForm
   end
   object pnlPreview: TPanel
     Left = 0
-    Top = 299
-    Width = 700
-    Height = 338
+    Top = 345
+    Width = 1036
+    Height = 374
     Align = alClient
     BevelOuter = bvNone
-    Color = 1977626
+    Color = clBlack
     ParentBackground = False
     TabOrder = 1
   end
   object pnlCtrl: TPanel
     Left = 0
     Top = 0
-    Width = 700
-    Height = 299
+    Width = 1036
+    Height = 345
     Align = alTop
+    Constraints.MinHeight = 335
+    Constraints.MinWidth = 1036
     TabOrder = 2
     object Bevel2: TBevel
-      Left = 4
-      Top = 17
-      Width = 298
-      Height = 142
+      Left = 6
+      Top = 15
+      Width = 590
+      Height = 288
     end
     object Bevel1: TBevel
-      Left = 308
-      Top = 17
-      Width = 381
-      Height = 142
+      Left = 602
+      Top = 15
+      Width = 437
+      Height = 288
     end
     object lblDevices: TLabel
       Left = 16
-      Top = 30
+      Top = 32
       Width = 44
       Height = 13
       Caption = 'Devices'
@@ -96,7 +97,7 @@ object CastPlayerForm: TCastPlayerForm
     end
     object lblSource: TLabel
       Left = 16
-      Top = 82
+      Top = 88
       Width = 168
       Height = 13
       Caption = 'Media file or direct media URL'
@@ -108,22 +109,38 @@ object CastPlayerForm: TCastPlayerForm
       ParentFont = False
     end
     object lblCaptureCodec: TLabel
-      Left = 320
-      Top = 108
-      Width = 70
+      Left = 614
+      Top = 170
+      Width = 80
       Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Capture codec'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
     end
     object lblArtwork: TLabel
-      Left = 321
-      Top = 30
-      Width = 38
+      Left = 614
+      Top = 56
+      Width = 80
       Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Artwork'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
     end
     object lblSeek: TLabel
       Left = 16
-      Top = 172
+      Top = 177
       Width = 80
       Height = 13
       Caption = 'Position (sec.)'
@@ -136,10 +153,10 @@ object CastPlayerForm: TCastPlayerForm
     end
     object lblVolume: TLabel
       Left = 16
-      Top = 231
-      Width = 42
+      Top = 233
+      Width = 65
       Height = 13
-      Caption = 'Volume'
+      Caption = 'Volume 0%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -148,16 +165,16 @@ object CastPlayerForm: TCastPlayerForm
       ParentFont = False
     end
     object Label1: TLabel
-      Left = 317
-      Top = 9
-      Width = 58
-      Height = 13
+      Left = 611
+      Top = 5
+      Width = 62
+      Height = 20
       Alignment = taCenter
       AutoSize = False
       Caption = 'Options'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -13
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
@@ -165,365 +182,439 @@ object CastPlayerForm: TCastPlayerForm
     end
     object Bevel3: TBevel
       Left = 1
-      Top = 264
-      Width = 698
-      Height = 34
+      Top = 309
+      Width = 1034
+      Height = 35
       Align = alBottom
-      ExplicitLeft = 2
-      ExplicitTop = 273
+      ExplicitTop = 310
     end
     object Label2: TLabel
-      Left = 11
-      Top = 9
-      Width = 82
-      Height = 13
+      Left = 18
+      Top = 5
+      Width = 89
+      Height = 20
       Alignment = taCenter
       AutoSize = False
       Caption = 'Chromecast'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -13
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
       Transparent = False
     end
     object lblAudioStream: TLabel
-      Left = 320
-      Top = 84
-      Width = 63
+      Left = 614
+      Top = 134
+      Width = 80
       Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Audio stream'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label3: TLabel
+      Left = 615
+      Top = 98
+      Width = 80
+      Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Subtitles'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label4: TLabel
+      Left = 615
+      Top = 208
+      Width = 80
+      Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Stream Format'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object trkVolume: TTrackBar
+      Left = 16
+      Top = 252
+      Width = 505
+      Height = 43
+      Max = 100
+      ShowSelRange = False
+      TabOrder = 22
+      TickStyle = tsNone
+      OnChange = trkVolumeChange
     end
     object cbxDevices: TComboBox
-      Left = 16
-      Top = 49
-      Width = 279
-      Height = 21
-      Style = csDropDownList
+      Left = 18
+      Top = 51
+      Width = 412
+      Height = 24
+      BevelInner = bvNone
+      BevelKind = bkSoft
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 0
       OnChange = SourceOrDeviceChanged
     end
-    object btnDiscover: TButton
-      Left = 151
-      Top = 23
-      Width = 72
-      Height = 25
-      Caption = 'Discover'
+    object edtSource: TEdit
+      Left = 18
+      Top = 107
+      Width = 490
+      Height = 24
+      BevelInner = bvNone
+      BevelKind = bkFlat
+      BevelOuter = bvRaised
+      BorderStyle = bsNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -13
       Font.Name = 'Tahoma'
-      Font.Style = [fsItalic]
+      Font.Style = []
       ParentFont = False
       TabOrder = 1
-      OnClick = btnDiscoverClick
+      OnChange = SourceOrDeviceChanged
     end
-    object btnRefresh: TButton
-      Left = 223
-      Top = 23
-      Width = 72
-      Height = 25
-      Caption = 'Refresh'
+    object edtArtwork: TEdit
+      Left = 700
+      Top = 53
+      Width = 239
+      Height = 21
+      Hint = 'Artwork for audio files or Audio + artwork desktop casting'
+      BevelInner = bvNone
+      BevelKind = bkFlat
+      BevelOuter = bvRaised
+      BorderStyle = bsNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Tahoma'
-      Font.Style = [fsItalic]
+      Font.Style = []
       ParentFont = False
-      TabOrder = 2
-      OnClick = btnRefreshClick
-    end
-    object edtSource: TEdit
-      Left = 16
-      Top = 101
-      Width = 279
-      Height = 21
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 3
       OnChange = SourceOrDeviceChanged
     end
-    object btnBrowse: TButton
-      Left = 223
-      Top = 75
-      Width = 72
-      Height = 25
-      Caption = 'Browse...'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsItalic]
-      ParentFont = False
-      TabOrder = 4
-      OnClick = btnBrowseClick
-    end
-    object edtArtwork: TEdit
-      Left = 370
-      Top = 27
-      Width = 239
-      Height = 21
-      Hint = 'Artwork only works in combination with audio only.'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 11
-      OnChange = SourceOrDeviceChanged
-    end
-    object btnBrowseArtwork: TButton
-      Left = 611
-      Top = 25
-      Width = 72
-      Height = 25
-      Caption = 'Browse...'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsItalic]
-      ParentFont = False
-      TabOrder = 12
-      OnClick = btnBrowseArtworkClick
-    end
-    object chkEmbeddedSubtitles: TCheckBox
-      Left = 321
-      Top = 56
-      Width = 98
-      Height = 17
-      Alignment = taLeftJustify
-      Caption = 'Enable subtitles'
-      Checked = True
-      State = cbChecked
-      TabOrder = 5
-      OnClick = SourceOrDeviceChanged
-    end
-    object trkSeek: TTrackBar
-      Left = 14
-      Top = 191
-      Width = 677
-      Height = 29
-      Max = 7200
-      Frequency = 300
-      TabOrder = 6
-      OnChange = trkSeekChange
-    end
-    object btnSeek: TButton
-      Left = 120
-      Top = 167
-      Width = 52
-      Height = 25
-      Caption = 'Seek'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsItalic]
-      ParentFont = False
-      TabOrder = 7
-      OnClick = btnSeekClick
-    end
-    object trkVolume: TTrackBar
-      Left = 120
-      Top = 231
-      Width = 571
-      Height = 26
-      Hint = 'Global: Ctrl+Alt+Up / Ctrl+Alt+Down'
-      Max = 100
-      ParentShowHint = False
-      Frequency = 10
-      Position = 75
-      ShowHint = True
-      TabOrder = 8
-      OnChange = trkVolumeChange
-    end
-    object chkMuted: TCheckBox
-      Left = 67
-      Top = 230
-      Width = 55
-      Height = 17
-      Hint = 'Global: Ctrl+Alt+M'
-      Caption = 'Mute'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 9
-      OnClick = chkMutedClick
-    end
     object cbxSubtitleLanguage: TComboBox
-      Left = 425
-      Top = 53
-      Width = 184
-      Height = 21
-      Style = csDropDownList
-      TabOrder = 10
+      Left = 701
+      Top = 93
+      Width = 239
+      Height = 24
+      BevelInner = bvNone
+      BevelKind = bkSoft
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 2
       OnChange = SubtitleSelectionChanged
     end
     object cbxCaptureCodec: TComboBox
-      Left = 396
-      Top = 105
-      Width = 106
-      Height = 21
-      Style = csDropDownList
+      Left = 700
+      Top = 165
+      Width = 123
+      Height = 24
+      BevelInner = bvNone
+      BevelKind = bkSoft
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
       ItemIndex = 0
-      TabOrder = 13
+      ParentFont = False
+      TabOrder = 4
       Text = 'Automatic'
       Items.Strings = (
         'Automatic'
         'H.264'
         'HEVC')
     end
-    object chkCaptureAudio: TCheckBox
-      Left = 515
-      Top = 107
-      Width = 168
-      Height = 17
-      Caption = 'Capture system audio'
-      Checked = True
-      State = cbChecked
-      TabOrder = 20
-    end
-    object btnCast: TButton
-      Left = 11
-      Top = 268
-      Width = 72
-      Height = 25
-      Hint = 'Global: Ctrl+Alt+C'
-      Caption = 'Cast'
+    object cbxAudioStream: TComboBox
+      Left = 700
+      Top = 129
+      Width = 239
+      Height = 24
+      BevelInner = bvNone
+      BevelKind = bkSoft
+      BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -13
       Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 5
+      OnChange = AudioSelectionChanged
+    end
+    object btnCastDiscover: TButton
+      Left = 435
+      Top = 49
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Discover'
+      TabOrder = 6
+      WordWrap = True
+      OnClick = btnDiscoverClick
+    end
+    object btnRefresh: TButton
+      Left = 513
+      Top = 50
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Refresh'
+      TabOrder = 7
+      WordWrap = True
+      OnClick = btnRefreshClick
+    end
+    object btnBrowse: TButton
+      Left = 513
+      Top = 106
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Browse...'
+      TabOrder = 8
+      WordWrap = True
+      OnClick = btnBrowseClick
+    end
+    object cbxKeepOnTop: TCheckBox
+      Left = 927
+      Top = 245
+      Width = 93
+      Height = 24
+      Hint = 'Use a static image instead of the camera.'
+      Caption = 'Keep on top'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 9
+      WordWrap = True
+      OnClick = cbxKeepOnTopClick
+    end
+    object cbxCaptureMode: TComboBox
+      Left = 701
+      Top = 203
+      Width = 181
+      Height = 24
+      Hint = 'Streams to capture when using Cast desktop'
+      BevelInner = bvNone
+      BevelKind = bkSoft
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ItemIndex = 0
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
+      TabOrder = 12
+      Text = 'Audio + video'
+      OnChange = CaptureModeChanged
+      Items.Strings = (
+        'Audio + video'
+        'Audio only'
+        'Video only'
+        'Audio + artwork')
+    end
+    object chkEmbeddedSubtitles: TCheckBox
+      Left = 946
+      Top = 84
+      Width = 56
+      Height = 42
+      Hint = 'Use a static image instead of the camera.'
+      Caption = 'Enable subtitles'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 10
+      WordWrap = True
+      OnClick = SourceOrDeviceChanged
+    end
+    object btnBrowseArtwork: TButton
+      Left = 946
+      Top = 50
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Browse...'
+      TabOrder = 11
+      WordWrap = True
+      OnClick = btnBrowseArtworkClick
+    end
+    object MPxpButton6: TButton
+      Left = 98
+      Top = 345
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Cast'
+      TabOrder = 13
+      WordWrap = True
+    end
+    object btnCast: TButton
+      Left = 7
+      Top = 314
+      Width = 90
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Cast'
       TabOrder = 14
+      WordWrap = True
       OnClick = btnCastClick
     end
     object btnPlay: TButton
-      Left = 85
-      Top = 268
-      Width = 72
+      Left = 101
+      Top = 314
+      Width = 90
       Height = 25
-      Hint = 'Global: Ctrl+Alt+F5'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Caption = 'Play'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
       TabOrder = 15
+      WordWrap = True
       OnClick = btnPlayClick
     end
     object btnPause: TButton
-      Left = 157
-      Top = 268
-      Width = 72
+      Left = 195
+      Top = 314
+      Width = 90
       Height = 25
-      Hint = 'Global: Ctrl+Alt+F6'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Caption = 'Pause'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
       TabOrder = 16
+      WordWrap = True
       OnClick = btnPauseClick
     end
     object btnStop: TButton
-      Left = 230
-      Top = 268
-      Width = 72
+      Left = 289
+      Top = 314
+      Width = 90
       Height = 25
-      Hint = 'Global: Ctrl+Alt+F7'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Caption = 'Stop'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
       TabOrder = 17
+      WordWrap = True
       OnClick = btnStopClick
     end
     object btnDisconnect: TButton
-      Left = 303
-      Top = 268
-      Width = 72
+      Left = 390
+      Top = 314
+      Width = 90
       Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Caption = 'Disconnect'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
       TabOrder = 18
+      WordWrap = True
       OnClick = btnDisconnectClick
     end
     object btnCastDesktop: TButton
-      Left = 380
-      Top = 268
-      Width = 104
+      Left = 488
+      Top = 314
+      Width = 95
       Height = 25
-      Hint = 'Global: Ctrl+Alt+D'
-      Caption = 'Cast desktop'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Cast Desktop'
       TabOrder = 19
+      WordWrap = True
       OnClick = btnCastDesktopClick
     end
-    object cbxKeepOnTop: TCheckBox
-      Left = 321
-      Top = 134
-      Width = 88
-      Height = 17
-      Alignment = taLeftJustify
-      Caption = 'Keep on top'
-      Checked = True
-      State = cbChecked
+    object btnSeek: TButton
+      Left = 514
+      Top = 195
+      Width = 74
+      Height = 25
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
+      Caption = 'Seek'
+      TabOrder = 20
+      WordWrap = True
+      OnClick = btnSeekClick
+    end
+    object chkMuted: TCheckBox
+      Left = 537
+      Top = 255
+      Width = 50
+      Height = 34
+      Hint = 'Use a static image instead of the camera.'
+      Caption = 'Mute'
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 21
-      OnClick = cbxKeepOnTopClick
+      WordWrap = True
+      OnClick = chkMutedClick
     end
-    object cbxAudioStream: TComboBox
-      Left = 396
-      Top = 80
-      Width = 213
-      Height = 21
-      Style = csDropDownList
-      TabOrder = 22
-      OnChange = AudioSelectionChanged
+    object trkSeek: TTrackBar
+      Left = 16
+      Top = 196
+      Width = 493
+      Height = 23
+      Max = 7200
+      ShowSelRange = False
+      TabOrder = 23
+      TickStyle = tsNone
+      OnChange = trkSeekChange
     end
-  end
-  object OpenDialog: TOpenDialog
-    Filter = 
-      'Cast media|*.mp4;*.m4v;*.m4a;*.webm;*.mp3;*.aac;*.flac;*.wav;*.o' +
-      'gg;*.oga;*.opus;*.mkv;*.avi|All files|*.*'
-    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Left = 232
-    Top = 352
-  end
-  object ArtworkDialog: TOpenDialog
-    Filter = 'Picture files|*.jpg;*.jpeg;*.png;*.bmp;*.gif|All files|*.*'
-    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Left = 314
-    Top = 352
   end
 end
