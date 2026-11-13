@@ -31,6 +31,12 @@ Delphi XE2 (minimum recommended version: Delphi XE7) up to and including Delphi 
 SDK version: 10.0.28000.2705 (Windows 11).  
   
   
+# Free Pascal / Lazarus  
+We are working on a MfPack port to FPC 3.2.2.  
+You can find FPC-MfPack (here)[https://github.com/FactoryXCode/MfPack-FPC].  
+It can take some while before we're done completely.  
+  
+  
 **Important note:**  
 The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders.  
 Those you can buy from Microsoft Store or download elsewhere.
