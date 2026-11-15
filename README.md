@@ -26,7 +26,7 @@
   
 # <u>Latest release:</u> 
   
-# MfPack  Version 4.0.0  
+# MfPack  Version 4.1.0  
 Delphi XE2 (minimum recommended version: Delphi XE7) up to and including Delphi 13.1  
 SDK version: 10.0.28000.2705 (Windows 11).  
   
