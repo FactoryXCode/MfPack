@@ -1,4 +1,4 @@
-MfPack X 4.0.0
+MfPack X 4.1.0
 
 /* Recommended project settings */
 
@@ -54,7 +54,7 @@ MFPack is the Delphi version of Microsoft Media Foundation, Core Audio etc. for 
 
 /* WIC API */
 
-/* DirectX The folllowing API's are included, to support Media Foundation. */
+/* DirectX. The following API's are included, to support Media Foundation. */
 
    - D2D1 API
    - DirectComposition API
@@ -70,6 +70,12 @@ MFPack is the Delphi version of Microsoft Media Foundation, Core Audio etc. for 
 /* Windows Media The full Windows Media Api. */ 
    This API has been added to MfPack to support the Core Audio API. 
    Note: Delphi's implementation (MMSystem) is just a sub-set of this Api.
+
+/* Cast API */
+   MfCast is an independent Chromecast subsystem for Delphi.
+   It handles device discovery, receiver control, local media serving,
+   media preparation, subtitles, track selection,
+   and optional remuxing/transcoding behind a small public API.
 
 /* about */ 
   DirectShow, DirectSound and DirectX DirectShow and Clootie DirectX platforms are not included with MfPack.

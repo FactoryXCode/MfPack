@@ -1,6 +1,6 @@
 ## MfPack Cast API 4.1.0
   
-Version: 4.1.0 (Cast V2.1 wire protocol)
+Version: 4.1.0 (Cast V2.2 wire protocol)
 
 `TMfCast.ApiVersion()` and `MFCAST_API_VERSION` report the public API release.
 Version 4.1.0 adds paired Android TV standby/power control through `TMfCast`.

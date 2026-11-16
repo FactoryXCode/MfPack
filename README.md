@@ -19,14 +19,14 @@
   
 # MfPack API's and Samples
   
-- MfPack Cast V2.1 API.
+- MfPack Cast V2.2 API.
 - MfPack FxServe V1.1 API.
 - Media Foundation, WASAPI, XAudio2 and streaming samples.
   
   
 # <u>Latest release:</u> 
   
-# MfPack  Version 4.0.0  
+# MfPack  Version 4.1.0  
 Delphi XE2 (minimum recommended version: Delphi XE7) up to and including Delphi 13.1  
 SDK version: 10.0.28000.2705 (Windows 11).  
   
@@ -668,7 +668,7 @@ local PC. The Caddy version also has a CaddyAdmin app, to install,
 configure and control Caddy as a Windows service.  
   
 ---
-***MfCast V2.1***
+***MfCast V2.2***
   
 MfCast is an independent Chromecast subsystem for Delphi.
 It handles device discovery, receiver control, local media serving,
