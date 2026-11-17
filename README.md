@@ -179,7 +179,7 @@ to the volume control in the volume mixer.
 This sample implements a simple "Chat" that demonstrates the Windows audio  
 ducking feature. In capture mode, audio from the default communications  
 capture endpoint is routed to the default playback endpoint.  
-Select Capture in the application to hear the routed input.  
+Select 'Use default input device' in the application to hear the routed input.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
   
