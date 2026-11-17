@@ -576,9 +576,9 @@ All WASAPI and MFT sample code comes together in this sample.
  You have to know the principles of WASAPI, MFT's (see MFT samples) and audio manipulation.  
  Before compiling this sample make sure, you have all needed components compiled and installed (see instructions).
  
- This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ)
+ This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ)
   
-![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJ_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJ_Interface_s.png)
   
   
 **RDJ Pro Mixer sample**  
@@ -609,9 +609,9 @@ MfPack Cast V2 protocols.
 You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2, FxServe and audio manipulation.  
 Before compiling this sample make sure, you have all needed components compiled and installed (see instructions). 
 
-This sample has been moved to the [RDJ Pro repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ%20Pro)  
+This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ)  
 
-![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJPro_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJPro_Interface_s.png)
   
 ---
 **MfMftExplorer sample**
