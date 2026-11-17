@@ -518,7 +518,7 @@ This is not a sample for absolute beginners. Please read the documents included 
   
 ** Player Sample 5**
   
-This is a non-visual components application sample using .  
+This is a non-visual components application sample.  
 The sample shows you how to build a real-time audio playback engine for  
 Windows using Delphi style components.  
   
