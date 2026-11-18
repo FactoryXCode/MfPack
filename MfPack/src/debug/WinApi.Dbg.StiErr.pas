@@ -10,7 +10,7 @@
 // Release date: 24-11-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Returns code definitions of the WinError32 errors.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -199,8 +199,7 @@ begin
         HrStr := 'Unknown identifier.';
         HrDescr := 'Unknown HResult code.';
         HeaderFile := 'Unknown.';
-        FWinHResultCracker.ClearResults();
-        hr := aHResult;
+        hr := HResult($80070490);
       end;
   end;
   Result := hr;
@@ -218,16 +217,14 @@ begin
   hr := S_OK;
 
   // Get the regioncode
-  s := IntToHex(aHResult, 8);
-  s := '$' + RightStr(s, 4);
-  li := StrToInt(s);
+  li := DWORD(aHResult) and $FFFF;
 
   // Find the region.
   if (li >= 0) and (li <= 1000) then
     aRegion := 'Still image APIs error.'
   else
     begin
-      hr := ERROR_NOT_FOUND;
+      hr := HResult($80070490);
       aRegion := 'Unknown Region error.';
     end;
   Result := hr;

@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   Audio MFT class:
@@ -29,14 +29,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/WasApiPlayer/Example3
+// Related projects: MfPackX410/Samples/WasApiPlayer/Example3
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -398,6 +398,7 @@ begin
       FMidDbCur := FMidDbTarget;
       FHighDbCur := FHighDbTarget;
       FRampSamplesLeft := 0;
+      UpdateCoeffsLocked();
       Exit;
     end;
 
@@ -673,27 +674,35 @@ begin
   if (FBitsPerSample = 32) then
     begin
 
-      // Teaching assumption: 32-bit PCM is float32.
+      // The negotiated subtype distinguishes signed PCM32 from float32.
       pf32 := PSingle(pData);
 
       for i := 0 to frames - 1 do
         begin
 
-          x := pf32^;
+          if FIsFloat then x := pf32^
+          else x := PInteger(pf32)^ / 2147483648.0;
           y := FLowL.Process(x);
           y := FMidL.Process(y);
           y := FHighL.Process(y);
-          pf32^ := y;
+          if FIsFloat then pf32^ := y
+          else if y >= 1.0 then PInteger(pf32)^ := High(Integer)
+          else if y <= -1.0 then PInteger(pf32)^ := Low(Integer)
+          else PInteger(pf32)^ := Round(y * 2147483648.0);
           Inc(pf32);
 
           if (ch > 1) then
             begin
 
-              x := pf32^;
+              if FIsFloat then x := pf32^
+          else x := PInteger(pf32)^ / 2147483648.0;
               y := FLowR.Process(x);
               y := FMidR.Process(y);
               y := FHighR.Process(y);
-              pf32^ := y;
+              if FIsFloat then pf32^ := y
+          else if y >= 1.0 then PInteger(pf32)^ := High(Integer)
+          else if y <= -1.0 then PInteger(pf32)^ := Low(Integer)
+          else PInteger(pf32)^ := Round(y * 2147483648.0);
               Inc(pf32);
             end;
 

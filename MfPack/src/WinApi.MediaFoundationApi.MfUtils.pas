@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -130,10 +130,11 @@ type
 
   procedure SafeRelease(var IUnk);
   // Use for releasing objects.
-  procedure SAFE_RELEASE(const [ref] IUnk);
+  procedure SAFE_RELEASE(var IUnk);
 
   procedure Cpp_FreeAndNil(var Obj: TObject);
 
+  // Initializes storage only; release an initialized value with PropVariantClear first.
   procedure PropVariantClearSafe(var pv: PROPVARIANT); inline;
 
   // Compare GUIDS
@@ -153,15 +154,15 @@ type
   function IsEqualFMTID(rfmtid1: TGUID;
                         rfmtid2: TGUID): BOOL; inline;
 
-  // Compare GUID pointers
-  function IsEqualPGUID(rguid1: REFGUID;
-                        rguid2: REFGUID): BOOL; stdcall;
+  // Compare GUID pointers (nil pointers are rejected).
+  function IsEqualPGUID(rguid1: PGUID;
+                        rguid2: PGUID): BOOL; stdcall;
 
-  function IsEqualPIID(riid1: TGUID;
-                       riid2: TGUID): BOOL; stdcall;
+  function IsEqualPIID(riid1: PGUID;
+                       riid2: PGUID): BOOL; stdcall;
 
-  function IsEqualPCLSID(rclsid1: TGUID;
-                         rclsid2: TGUID): BOOL; stdcall;
+  function IsEqualPCLSID(rclsid1: PGUID;
+                         rclsid2: PGUID): BOOL; stdcall;
 
   // Other guid methods
   function GuidFromString(Value: string): TGuid; inline;
@@ -172,8 +173,8 @@ type
   // From wtypes.h
   procedure DECIMAL_SETZERO(var dec: DECIMAL); inline;
 
-  // Macro translation to calculate the size of the pbClipData declared in tagCLIPDATA in WTypes.pas
-  function CBPCLIPDATA(_clipdata: CLIPDATA): PByte; inline;
+  // Returns the clip payload byte count; malformed smaller headers return zero.
+  function CBPCLIPDATA(_clipdata: CLIPDATA): SIZE_T; inline;
 
   // Functions to keep byte values in range of 0 - 255
   function ClipByteValue(byteval: UINT32): Byte; inline;
@@ -203,13 +204,13 @@ type
 
   // C++ translations
   //=================
-  function UIntAdd(var uAugend: UINT32;
+  function UIntAdd(const uAugend: UINT32;
                    const uAddend: UINT32;
-                   out puResult: PUINT32): HRESULT; inline;
+                   out puResult: UINT32): HRESULT;
 
   function SizeTMult(const cbMultiplicand: SIZE_T;
                      const cbMultiplier: SIZE_T;
-                     out pcbResult: PSIZE_T): HRESULT; inline;
+                     out pcbResult: SIZE_T): HRESULT;
 
   // Time formatting
   // Converts 100-Nano second units (Hns unit) to time string format.
@@ -386,8 +387,8 @@ type
   function StringFromCLSID(const rclsid: REFCLSID;
                            var lplpsz: POleStr): HResult; stdcall;
 
-  // Simplified helper of StringToWideChar function
-  function StrToPWideChar(source: string): PWideChar; //inline;
+  // Borrows the UTF-16 buffer; retain the source string while using the pointer.
+  function StrToPWideChar(const source: string): PWideChar; //inline;
 
 
   // MFVideoNormalizedRect methods
@@ -407,7 +408,7 @@ type
 
   // Copy a MFVideoNormalizedRect to a PMFVideoNormalizedRect
   procedure CopyVNRectToPVNRect(rs: MFVideoNormalizedRect;
-                                out rd: PMFVideoNormalizedRect); inline;
+                                rd: PMFVideoNormalizedRect); inline;
 
   // Copy a PMFVideoNormalizedRect to a MFVideoNormalizedRect
   procedure CopyPVNRectToVNRect(rs: PMFVideoNormalizedRect;
@@ -434,7 +435,7 @@ type
   // Checks whether a MFVideoNormalizedRect is empty
   function IsEmptyNrRect(const nnRect: MFVideoNormalizedRect): Boolean; inline;
 
-  //Clear PMFVideoNormalizedRect
+  // Clears a borrowed pointer without freeing its storage.
   procedure ClearVNRect(var ppRect: PMFVideoNormalizedRect); inline;
 
   // Copy a TRect to a MFVideoNormalizedRect
@@ -451,7 +452,7 @@ type
 
   // Copy a PMFVideoNormalizedRect to a PRect
   procedure CopyPVNRectToPRect(rs: PMFVideoNormalizedRect;
-                               out rd: PRect); inline;
+                               rd: PRect); inline;
   // TRect methods //
 
   // Copy TRect values to another TRect
@@ -492,7 +493,7 @@ type
 
   // Get the display area from a (video) media type.
   function GetVideoDisplayArea(pType: IMFMediaType;
-                               pArea: MFVideoArea): HRESULT;
+                               out pArea: MFVideoArea): HRESULT;
 
   // initializes a MFVideoArea structure.
   function MakeArea(X: FLOAT;
@@ -513,61 +514,62 @@ type
 
 
   // Bitfield manipulation functions
-  // Source: Embarcadero
+  // Encoded index: (offset shl 8) or width; invalid fields raise ERangeError.
+  // Values are unsigned and saturate to the field mask.
   //================================
 
   // UINT64
   // Getter
   function Get64bitBits(const data: UINT64;
-                        const index: Integer): Integer; inline;
+                        const index: Integer): UINT64;
 
   // Setter
   procedure Set64bitBits(var data: UINT64;
                          const index: Integer;
-                         const value: Integer); inline;
+                         const value: UINT64);
 
 
   // DWORD
   // Getter
   function GetDWordBits(const data: DWORD;
-                        const index: Integer): Integer; inline;
+                        const index: Integer): DWORD;
 
   // Setter
   procedure SetDWordBits(var data: DWORD;
                          const index: Integer;
-                         const value: Integer); inline;
+                         const value: DWORD);
 
 
   // WORD
   // Getter
   function GetWordBits(const data: WORD;
-                       const index: Integer): WORD; inline;
+                       const index: Integer): WORD;
 
 
   // Setter
   procedure SetWordBits(var data: WORD;
                         const index: Integer;
-                        const value: Integer); inline;
+                        const value: WORD);
 
 
 
   // BYTE
   // Getter
   function GetByteBits(const data: Byte;
-                       const index: Integer): Byte; inline;
+                       const index: Integer): Byte;
 
 
   // Setter
   procedure SetByteBits(var data: Byte;
                         const index: Integer;
-                        const value: Integer); inline;
+                        const value: Byte);
 
 
   // System
   //=======
   function BoolToStrYesNo(const aBoolean: Boolean;
                           sYes: string = 'Yes';
-                          sNo: string = 'No'): string; inline;
+                          sNo: string = 'No'): string;
   // = BoolToStr, for backward compatibility.
   function MfpBoolToStr(const aBoolean: Boolean): string; inline;
   function BoolToStr(const aBoolean: Boolean): string; inline;
@@ -605,10 +607,10 @@ type
 
   // Since Win 10, use this function to create a file.
   function CreateFile2(lpFileName: PWideChar;
-      {[in]}           dwDesiredAccess: DWORD;
-      {[in]}           dwShareMode: DWORD;
-      {[in]}           dwCreationDisposition: DWORD;
-      {[in, optional]} pCreateExParams: LPCREATEFILE2_EXTENDED_PARAMETERS): THandle; stdcall;
+                       {[in]}           dwDesiredAccess: DWORD;
+                       {[in]}           dwShareMode: DWORD;
+                       {[in]}           dwCreationDisposition: DWORD;
+                       {[in, optional]} pCreateExParams: LPCREATEFILE2_EXTENDED_PARAMETERS): THandle; stdcall;
 
   // Replaces TFile::Size
   function GetFileSize64(const AFileName: string;
@@ -672,8 +674,8 @@ type
   // MulDiv is 32-bit (Integer in/out). With range checking on, Delphi throws "Range check error".
   // If working with Int64, use this method, instead of MulDiv.
   function MulDiv64(const aNumber,
-                          aNumerator,
-                          aDenominator: Int64): Int64; inline;
+                    aNumerator,
+                    aDenominator: Int64): Int64; inline;
 
 
 implementation
@@ -724,7 +726,7 @@ end;
 
 
 // Note: Here the object does NOT initiate a reference call.
-procedure Safe_Release(const [ref] IUnk);
+procedure Safe_Release(var IUnk);
 begin
   if Assigned(IUnknown(IUnk)) then
     IUnknown(Pointer(@IUnk)^):= nil;
@@ -751,9 +753,27 @@ end;
 
 {$WARN SYMBOL_PLATFORM OFF}
 // ole2: compare GUID type pointers
-function IsEqualPGUID;   external Ole32Lib name 'IsEqualGUID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function IsEqualPIID;    external Ole32Lib name 'IsEqualIID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function IsEqualPCLSID;  external Ole32Lib name 'IsEqualCLSID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function IsEqualPGUID(rguid1: PGUID;
+                      rguid2: PGUID): BOOL; stdcall;
+begin
+  Result := (rguid1 <> nil) and (rguid2 <> nil);
+  if Result then
+    Result := CompareMem(rguid1,rguid2,SizeOf(TGUID));
+end;
+function IsEqualPIID(riid1: PGUID;
+                     riid2: PGUID): BOOL; stdcall;
+begin
+  Result := (riid1 <> nil) and (riid2 <> nil);
+  if Result then
+    Result := CompareMem(riid1,riid2,SizeOf(TGUID));
+end;
+function IsEqualPCLSID(rclsid1: PGUID;
+                       rclsid2: PGUID): BOOL; stdcall;
+begin
+  Result := (rclsid1 <> nil) and (rclsid2 <> nil);
+  if Result then
+    Result := CompareMem(rclsid1,rclsid2,SizeOf(TGUID));
+end;
 {$WARN SYMBOL_PLATFORM ON}
 
 function InlineIsEqualGUID(rguid1: TGUID;
@@ -833,15 +853,18 @@ end;
 //==================
 procedure DECIMAL_SETZERO(var dec: DECIMAL); inline;
 begin
-  dec.Lo32 := 0;
+  dec.Lo64 := 0;
   dec.Hi32 := 0;
   dec.signscale := 0;
 end;
 
 
-function CBPCLIPDATA(_clipdata: CLIPDATA): PByte; inline;
+function CBPCLIPDATA(_clipdata: CLIPDATA): SIZE_T; inline;
 begin
-  Result:= Pbyte(_clipdata.cbSize - sizeof(_clipdata.ulClipFmt));
+  if _clipdata.cbSize < SizeOf(_clipdata.ulClipFmt) then
+    Result := 0
+  else
+    Result := _clipdata.cbSize-SizeOf(_clipdata.ulClipFmt);
 end;
 
 
@@ -872,7 +895,7 @@ end;
 
 function VerifyVersionInfo(var LPOSVERSIONINFOEX : OSVERSIONINFOEX;
                            dwTypeMask: DWORD;
-                           dwlConditionMask: Int64): BOOL; stdcall; external Kernel32Lib name 'VerifyVersionInfoA';
+                           dwlConditionMask: Int64): BOOL; stdcall; external Kernel32Lib name 'VerifyVersionInfoW';
 
 
 function VerSetConditionMask(dwlConditionMask: Int64;
@@ -915,96 +938,96 @@ end;
 //
 function OsIsWinXPOrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WINXP),
-                             LoByte(_WIN32_WINNT_WINXP),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WINXP shr 8),
+                             (_WIN32_WINNT_WINXP and $FF),
                              0);
 end;
 
 //
 function OsIsWinXPSP1OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WINXP),
-                             LoByte(_WIN32_WINNT_WINXP),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WINXP shr 8),
+                             (_WIN32_WINNT_WINXP and $FF),
                              1);
 end;
 
 //
 function OsIsWinXPSP2OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WINXP),
-                             LoByte(_WIN32_WINNT_WINXP),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WINXP shr 8),
+                             (_WIN32_WINNT_WINXP and $FF),
                              2);
 end;
 
 //
 function OsIsWinXPSP3OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WINXP),
-                             LoByte(_WIN32_WINNT_WINXP),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WINXP shr 8),
+                             (_WIN32_WINNT_WINXP and $FF),
                              3);
 end;
 
 //
 function OsIsWinVistaOrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_VISTA),
-                             LoByte(_WIN32_WINNT_VISTA),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_VISTA shr 8),
+                             (_WIN32_WINNT_VISTA and $FF),
                              0);
 end;
 
 //
 function OsIsWinVistaSP1OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_VISTA),
-                             LoByte(_WIN32_WINNT_VISTA),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_VISTA shr 8),
+                             (_WIN32_WINNT_VISTA and $FF),
                              1);
 end;
 
 //
 function OsIsWinVistaSP2OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_VISTA),
-                             LoByte(_WIN32_WINNT_VISTA),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_VISTA shr 8),
+                             (_WIN32_WINNT_VISTA and $FF),
                              2);
 end;
 
 //
 function OsIsWin7OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WIN7),
-                             LoByte(_WIN32_WINNT_WIN7),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WIN7 shr 8),
+                             (_WIN32_WINNT_WIN7 and $FF),
                              0);
 end;
 
 //
 function OsIsWin7SP1OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WIN7),
-                             LoByte(_WIN32_WINNT_WIN7),
-                             0);
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WIN7 shr 8),
+                             (_WIN32_WINNT_WIN7 and $FF),
+                             1);
 end;
 
 //
 function OsIsWin8OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WIN8),
-                             LoByte(_WIN32_WINNT_WIN8),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WIN8 shr 8),
+                             (_WIN32_WINNT_WIN8 and $FF),
                              0);
 end;
 
 //
 function OsIsWin81OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WINBLUE),
-                             LoByte(_WIN32_WINNT_WINBLUE),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WINBLUE shr 8),
+                             (_WIN32_WINNT_WINBLUE and $FF),
                              0);
 end;
 
 //
 function OsIsWin10OrHigher(): Boolean;
 begin
-  Result := IsWinVerOrHigher(HiByte(_WIN32_WINNT_WIN10),
-                             LoByte(_WIN32_WINNT_WIN10),
+  Result := IsWinVerOrHigher((_WIN32_WINNT_WIN10 shr 8),
+                             (_WIN32_WINNT_WIN10 and $FF),
                              0);
 end;
 
@@ -1050,14 +1073,15 @@ end;
   //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
 function SizeTMult(const cbMultiplicand: SIZE_T;
                    const cbMultiplier: SIZE_T;
-                   out pcbResult: PSIZE_T): HRESULT;
+                   out pcbResult: SIZE_T): HRESULT;
 begin
-  try
-    pcbResult := pointer(cbMultiplier * cbMultiplicand);
-    Result := S_OK;
-  except //Silent exception
-    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  if (cbMultiplier <> 0) and (cbMultiplicand > High(SIZE_T) div cbMultiplier) then
+  begin
+    pcbResult := High(SIZE_T);
+    Exit(INTSAFE_E_ARITHMETIC_OVERFLOW);
   end;
+  pcbResult := cbMultiplicand * cbMultiplier;
+  Result := S_OK;
 end; // SizeTMult
 
 
@@ -1089,18 +1113,17 @@ end;
   // Remarks
   // This is one of a set of inline functions designed to provide arithmetic operations and
   // perform validity checks with minimal impact on performance.
-function UIntAdd(var uAugend: UINT32;
+function UIntAdd(const uAugend: UINT32;
                  const uAddend: UINT32;
-                 out puResult: PUINT32): HRESULT;
+                 out puResult: UINT32): HRESULT;
 begin
-  try
-    uAugend := uAugend + uAddend;
-    puResult := Pointer(uAugend);
-
-    Result := S_OK;
-  except //Silent exception
-    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  if uAddend > High(UINT32) - uAugend then
+  begin
+    puResult := High(UINT32);
+    Exit(INTSAFE_E_ARITHMETIC_OVERFLOW);
   end;
+  puResult := uAugend + uAddend;
+  Result := S_OK;
 end;
 
 
@@ -1109,7 +1132,7 @@ end;
 
 function NanoSecondsToMilliSeconds(aNanoSec: Int64): Int64; inline;
 begin
-  Result :=  aNanoSec div 1000;
+  Result :=  aNanoSec div 1000000;
 end;
 
 
@@ -1256,41 +1279,29 @@ end;
 function TimeToHnsTime(TimeStamp: string;
                        HnsTimeUnits: Boolean = True): MFTIME; inline;
 var
-  hour,
-  min,
-  sec,
-  ms: LONG;
-  mft: MFTIME;
-
+  Hours: Integer;
+  Minutes: Integer;
+  Seconds: Integer;
+  Milliseconds: Integer;
 begin
-  TryStrToInt(Copy(TimeStamp,
-                   1,
-                   2),
-              hour);
-
-  TryStrToInt(Copy(TimeStamp,
-                   4,
-                   2),
-              min);
-
-  TryStrToInt(Copy(TimeStamp,
-                   7,
-                   2),
-              sec);
-
-  TryStrToInt(Copy(TimeStamp,
-                   10,
-                   3),
-              ms);
-
-  mft := (hour * 3600000) +
-         (min * 60000) +
-         (sec * 1000) + ms;
-
+  Result := 0;
+  if Length(TimeStamp) <> 12 then
+    Exit;
+  if (TimeStamp[3] <> ':') or (TimeStamp[6] <> ':') or
+     ((TimeStamp[9] <> ',') and (TimeStamp[9] <> '.')) then
+    Exit;
+  if not TryStrToInt(Copy(TimeStamp,1,2),Hours) or
+     not TryStrToInt(Copy(TimeStamp,4,2),Minutes) or
+     not TryStrToInt(Copy(TimeStamp,7,2),Seconds) or
+     not TryStrToInt(Copy(TimeStamp,10,3),Milliseconds) then
+    Exit;
+  if (Hours < 0) or (Minutes < 0) or (Minutes > 59) or
+     (Seconds < 0) or (Seconds > 59) or
+     (Milliseconds < 0) or (Milliseconds > 999) then
+    Exit;
+  Result := Int64(Hours)*3600000+Minutes*60000+Seconds*1000+Milliseconds;
   if HnsTimeUnits then
-    Result := MSecToHnsTime(mft)
-  else
-    Result := mft;
+    Result := Result*ONE_HNS_MSEC;
 end;
 
 //
@@ -1706,7 +1717,7 @@ function SetVNRect(const nrLeft: FLOAT = 0.0;
                    const nrBottom: FLOAT = 0.0): MFVideoNormalizedRect; inline;
 begin
   Result.Top := nrTop;
-  Result.Bottom := nrRight;
+  Result.Bottom := nrBottom;
   Result.Left := nrLeft;
   Result.Right := nrRight;
 end;
@@ -1725,9 +1736,11 @@ end;
 
 // Copy a MFVideoNormalizedRect to a PMFVideoNormalizedRect
 procedure CopyVNRectToPVNRect(rs: MFVideoNormalizedRect;
-                              out rd: PMFVideoNormalizedRect); inline;
+                              rd: PMFVideoNormalizedRect); inline;
 begin
-  rd := @rs
+  if rd = nil then
+    raise EArgumentException.Create('Destination rectangle is nil');
+  rd^ := rs;
 end;
 
 
@@ -1775,21 +1788,21 @@ begin
 // Get the width of a MFVideoNormalizedRect
 function GetNrRectWidth(const rc: MFVideoNormalizedRect): LONG; inline;
 begin
-  Result := Trunc(rc.Left + rc.Right);
+  Result := Trunc(rc.Right-rc.Left);
 end;
 
 
 // Get the height of a MFVideoNormalizedRect
 function GetNrRectHeight(const rc: MFVideoNormalizedRect): LONG; inline;
 begin
-  Result := Trunc(rc.Top + rc.Bottom);
+  Result := Trunc(rc.Bottom-rc.Top);
 end;
 
 
 // Checks whether a MFVideoNormalizedRect is empty
 function IsEmptyNrRect(const nnRect: MFVideoNormalizedRect): Boolean; inline;
 begin
-  Result := (nnRect.Left <= nnRect.Right) and (nnRect.Top <= nnRect.Bottom);
+  Result := (nnRect.Right <= nnRect.Left) or (nnRect.Bottom <= nnRect.Top);
 end;
 
 
@@ -1833,12 +1846,11 @@ end;
 
 // Copy a PMFVideoNormalizedRect to a PRect
 procedure CopyPVNRectToPRect(rs: PMFVideoNormalizedRect;
-                             out rd: PRect); inline;
+                             rd: PRect); inline;
 begin
-  rd.Top := Trunc(rs.Top);
-  rd.Bottom := Trunc(rs.Bottom);
-  rd.Left := Trunc(rs.Left);
-  rd.Right := Trunc(rs.Right);
+  if (rs = nil) or (rd = nil) then
+    raise EArgumentException.Create('Rectangle pointer is nil');
+  CopyVNRectToTRect(rs^,rd^);
 end;
 
 
@@ -1859,14 +1871,14 @@ end;
 // Get the width of a MFVideoNormalizedRect
 function GetTRectWidth(const rc: TRect): LONG; inline;
 begin
-  Result := rc.Left + rc.Right;
+  Result := rc.Right-rc.Left;
 end;
 
 
 // Get the height of a MFVideoNormalizedRect
 function GetTRectHeight(const rc: TRect): LONG; inline;
 begin
-  Result := rc.Top + rc.Bottom;
+  Result := rc.Bottom-rc.Top;
 end;
 
 
@@ -1875,19 +1887,10 @@ end;
 // Copy a TRect to a LPRECT
 procedure CopyTRectToLPRect(rs: TRect;
                             var rd: LPRECT); inline;
-var
-  rdRect: LPRect;
 begin
-  New(rdRect); // Create new structure in memory
-try
-  rdRect.Top := rs.Top;
-  rdRect.Left := rs.Left;
-  rdRect.Height := rs.Height;
-  rdRect.Width := rs.Width;
-finally
-  rd := rdRect;
-  Dispose(rdRect);
-end;
+  if rd = nil then
+    raise EArgumentException.Create('Destination rectangle is nil');
+  rd^ := rs;
 end;
 
 
@@ -1900,40 +1903,21 @@ end;
 
 // Copy a TRect to a PRect
 procedure CopyTRectToPRect(rs: TRect;
-                           var rd: PRect ); inline;
-var
-  rdRect: PRect;
-
+                           var rd: PRect); inline;
 begin
-  New(rdRect); // Create new structure in memory
-try
-  rdRect.Top := rs.Top;
-  rdRect.Left := rs.Left;
-  rdRect.Height := rs.Height;
-  rdRect.Width := rs.Width;
-finally
-  rd := rdRect;
-  Dispose(rdRect);
-end;
+  if rd = nil then
+    raise EArgumentException.Create('Destination rectangle is nil');
+  rd^ := rs;
 end;
 
 
 // Copy a PRect to a TRect
 procedure CopyPRectToTRect(rs: PRect;
                            var rd: TRect); inline;
-var
-  rsRect: PRect;
 begin
-  New(rsRect); // Create new structure in memory
-try
-  rsRect := rs;
-  rd.Top := rsRect.Top;
-  rd.Left := rsRect.Left;
-  rd.Height := rsRect.Height;
-  rd.Width := rsRect.Width;
-finally
-  Dispose(rsRect);
-end;
+  if rs = nil then
+    raise EArgumentException.Create('Source rectangle is nil');
+  rd := rs^;
 end;
 
 
@@ -1950,76 +1934,41 @@ end;
 // The value of the number is value + (fract / float(65536.0)).
 function MakeOffset(v: Single): MFOffset; inline;
 var
-  offset: MFOffset;
-  i: Integer;
-
+  I: Integer;
 begin
-  i := Trunc(v);
-  offset.value := SHORT(i);
-  offset.fract := WORD(65536 * (i - offset.value));
-
-  Result := offset;
+  if (v < Low(SHORT)) or (v >= 32768.0) then
+    raise ERangeError.Create('MFOffset outside signed 16-bit range');
+  I := Trunc(v);
+  if v < I then
+    Dec(I);
+  Result.value := SHORT(I);
+  Result.fract := WORD(Trunc((v-I)*65536.0));
 end;
 
 
 // Get the display area from a video media type.
 function GetVideoDisplayArea(pType: IMFMediaType;
-                             pArea: MFVideoArea): HRESULT;
+                             out pArea: MFVideoArea): HRESULT;
 var
-  hr: HResult;
-  bPanScan: BOOL;
-  unWidth: UINT32;
-  unHeight: UINT32;
-
+  Width: UINT32;
+  Height: UINT32;
 begin
-  hr := S_OK;
-  bPanScan := BOOL(MFGetAttributeUINT32(pType,
-                                        MF_MT_PAN_SCAN_ENABLED,
-                                        UINT32(False)));
-{$POINTERMATH ON}
-  // In pan/scan mode, try to get the pan/scan region.
-  if (bPanScan) then
-    hr := pType.GetBlob(MF_MT_PAN_SCAN_APERTURE,
-                        PUINT8(@pArea),
-                        SizeOf(MFVideoArea),
-                        nil);
-
-
-  // If not in pan/scan mode, or the pan/scan region is not set, get the minimimum display aperture.
-  if (bPanScan or (hr = MF_E_ATTRIBUTENOTFOUND)) then
-    begin
-      hr := pType.GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,
-                          PUINT8(@pArea),
-                          SizeOf(MFVideoArea),
-                          nil);
-
-
-      if (hr = MF_E_ATTRIBUTENOTFOUND) then
-        begin
-          // Minimum display aperture is not set.
-          // For backward compatibility with some components, check for a geometric aperture.
-          hr := pType.GetBlob(MF_MT_GEOMETRIC_APERTURE,
-                              PUINT8(@pArea),
-                              SizeOf(MFVideoArea),
-                              nil);
-        end;
-
-      // Default: Use the entire video area.
-      if (hr = MF_E_ATTRIBUTENOTFOUND) then
-        begin
-          hr := MFGetAttributeSize(pType,
-                                   MF_MT_FRAME_SIZE,
-                                   unWidth,
-                                   unHeight);
-          if SUCCEEDED(hr) then
-            pArea := MakeArea(0.0,
-                              0.0,
-                              unWidth,
-                              unHeight);
-        end;
-    end;
-{$POINTERMATH OFF}
-  Result := hr;
+  FillChar(pArea,SizeOf(pArea),0);
+  if pType = nil then
+    Exit(E_POINTER);
+  Result := MF_E_ATTRIBUTENOTFOUND;
+  if MFGetAttributeUINT32(pType,MF_MT_PAN_SCAN_ENABLED,0) <> 0 then
+    Result := pType.GetBlob(MF_MT_PAN_SCAN_APERTURE,PUINT8(@pArea),SizeOf(pArea),nil);
+  if Result = MF_E_ATTRIBUTENOTFOUND then
+    Result := pType.GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,PUINT8(@pArea),SizeOf(pArea),nil);
+  if Result = MF_E_ATTRIBUTENOTFOUND then
+    Result := pType.GetBlob(MF_MT_GEOMETRIC_APERTURE,PUINT8(@pArea),SizeOf(pArea),nil);
+  if Result = MF_E_ATTRIBUTENOTFOUND then
+  begin
+    Result := MFGetAttributeSize(pType,MF_MT_FRAME_SIZE,Width,Height);
+    if SUCCEEDED(Result) then
+      pArea := MakeArea(0.0,0.0,Width,Height);
+  end;
 end;
 
 
@@ -2047,7 +1996,7 @@ end;
 
 
 // Keep for previous versions;
-function StrToPWideChar(source: string): PWideChar;// inline;
+function StrToPWideChar(const source: string): PWideChar;// inline;
 begin
   Result := PWideChar(source);
 end;
@@ -2068,18 +2017,32 @@ begin
 end;
 
 
-// Get FOURCC as string (little-endian)
-function GETFOURCC(frcc: DWord): WideString; inline;
+// Get all four FOURCC bytes as uppercase text, including embedded nulls.
+function GETFOURCC(frcc: DWORD): WideString; inline;
 var
-  afc : array[0..3] of AnsiChar;
+  I: Integer;
 begin
-  afc[0] := AnsiChar(ord(frcc));
-  afc[1] := AnsiChar(ord(frcc shr 8));
-  afc[2] := AnsiChar(ord(frcc shr 16));
-  afc[3] := AnsiChar(ord(frcc shr 24));
-  Result := UpperCase(WideString(afc));
+  SetLength(Result,4);
+  for I := 0 to 3 do
+    Result[I+1] := WideChar((frcc shr (I*8)) and $FF);
+  Result := UpperCase(Result);
 end;
 
+
+function MfBitMask(const index: Integer;const bits: Integer): UINT64;
+var
+  Width: Integer;
+  Offset: Integer;
+begin
+  Width := index and $FF;
+  Offset := index shr 8;
+  if (index < 0) or (Width < 1) or (Width > bits) or (Offset > bits-Width) then
+    raise ERangeError.Create('Invalid encoded bitfield');
+  if Width = 64 then
+    Result := High(UINT64)
+  else
+    Result := (UINT64(1) shl Width)-1;
+end;
 
 // Bitshifting helpers
 // Source: Patrick van Logchem, Embarcadero
@@ -2088,32 +2051,26 @@ end;
 // UINT64
 // getter
 function Get64bitBits(const data: UINT64;
-                      const index: Integer): Integer; inline;
+                      const index: Integer): UINT64;
 begin
-  Result := (data shr (index shr 8)) and // offset
-            ((1 shl Byte(index)) - 1);   // mask
+  Result := UINT64((UINT64(data) shr (index shr 8)) and MfBitMask(index,64));
 end;
 
 // Setter
 procedure Set64bitBits(var data: UINT64;
                        const index: Integer;
-                       const value: Integer); inline;
+                       const value: UINT64);
 var
-  offset: Byte;
-  mask: Integer;
-  val: Integer;
-
+  Mask: UINT64;
+  Clipped: UINT64;
+  Offset: Integer;
 begin
-  val := value;
-  Mask := ((1 shl Byte(index)) - 1);
-
-  //Assert(value <= Mask);
-  if (val > mask) then
-    val := mask;
-
-  offset := index shr 8;
-  data := (data and (not (mask shl offset)))
-           OR UINT64(val shl offset);
+  Mask := MfBitMask(index,64);
+  Clipped := value;
+  if Clipped > Mask then
+    Clipped := Mask;
+  Offset := index shr 8;
+  data := UINT64((UINT64(data) and not (Mask shl Offset)) or (Clipped shl Offset));
 end;
 
 
@@ -2121,32 +2078,26 @@ end;
 // DWORD
 // Getter
 function GetDWordBits(const data: DWORD;
-                      const index: Integer): Integer; inline;
+                      const index: Integer): DWORD;
 begin
-  Result := (data shr (index shr 8)) and // offset
-            ((1 shl Byte(index)) - 1);   // mask
+  Result := DWORD((UINT64(data) shr (index shr 8)) and MfBitMask(index,32));
 end;
 
 // Setter
 procedure SetDWordBits(var data: DWORD;
                        const index: Integer;
-                       const value: Integer); inline;
+                       const value: DWORD);
 var
-  offset: Byte;
-  mask: Integer;
-  val: Integer;
-
+  Mask: UINT64;
+  Clipped: UINT64;
+  Offset: Integer;
 begin
-  val := value;
-  Mask := ((1 shl Byte(index)) - 1);
-
-  // Assert(value <= Mask);
-  if val > mask then
-    val := mask;
-
-  offset := index shr 8;
-  data := (data and (not (mask shl offset)))
-          OR DWORD(val shl offset);
+  Mask := MfBitMask(index,32);
+  Clipped := value;
+  if Clipped > Mask then
+    Clipped := Mask;
+  Offset := index shr 8;
+  data := DWORD((UINT64(data) and not (Mask shl Offset)) or (Clipped shl Offset));
 end;
 
 // Note: UINT can be casted as DWORD, use Set/GetDWordBits
@@ -2154,32 +2105,26 @@ end;
 // WORD
 // Getter
 function GetWordBits(const data: WORD;
-                     const index: Integer): WORD; inline;
+                     const index: Integer): WORD;
 begin
-  Result := (data shr (index shr 8)) and // offset
-            ((1 shl Byte(index)) - 1);   // mask
+  Result := WORD((UINT64(data) shr (index shr 8)) and MfBitMask(index,16));
 end;
 
 // Setter
 procedure SetWordBits(var data: WORD;
                       const index: Integer;
-                      const value: Integer); inline;
+                      const value: WORD);
 var
-  offset: Byte;
-  mask: Integer;
-  val: Integer;
-
+  Mask: UINT64;
+  Clipped: UINT64;
+  Offset: Integer;
 begin
-  val := value;
-  Mask := ((1 shl Byte(index)) - 1);
-
-  //Assert(value <= Mask);
-  if val > mask then
-    val := mask;
-
-  offset := index shr 8;
-  data := (data and (not (mask shl offset)))
-          OR WORD(val shl offset);
+  Mask := MfBitMask(index,16);
+  Clipped := value;
+  if Clipped > Mask then
+    Clipped := Mask;
+  Offset := index shr 8;
+  data := WORD((UINT64(data) and not (Mask shl Offset)) or (Clipped shl Offset));
 end;
 
 
@@ -2187,26 +2132,33 @@ end;
 // BYTE
 // Getter
 function GetByteBits(const data: Byte;
-                     const index: Integer): Byte; inline;
+                     const index: Integer): Byte;
 begin
-  Result := (data shr (index shr 8)) and
-            ((1 shl Byte(index)) - 1);
+  Result := Byte((UINT64(data) shr (index shr 8)) and MfBitMask(index,8));
 end;
 
 // Setter
 procedure SetByteBits(var data: Byte;
                       const index: Integer;
-                      const value: Integer); inline;
+                      const value: Byte);
+var
+  Mask: UINT64;
+  Clipped: UINT64;
+  Offset: Integer;
 begin
-  data := (data and (not ((index and $FF) shl (index shr 8)))) or
-          ((value and index and $FF) shl (index shr 8));
+  Mask := MfBitMask(index,8);
+  Clipped := value;
+  if Clipped > Mask then
+    Clipped := Mask;
+  Offset := index shr 8;
+  data := Byte((UINT64(data) and not (Mask shl Offset)) or (Clipped shl Offset));
 end;
 
 
 // System
 function BoolToStrYesNo(const aBoolean: Boolean;
                         sYes: string = 'Yes';
-                        sNo: string = 'No'): string; inline;
+                        sNo: string = 'No'): string;
 begin
   if aBoolean then
     Result := sYes
@@ -2218,7 +2170,7 @@ end;
 // For backward compatibility
 function MfpBoolToStr(const aBoolean: Boolean): string; inline;
 begin
-  BoolToStr(aBoolean);
+  Result := BoolToStr(aBoolean);
 end;
 
 
@@ -2365,8 +2317,64 @@ function PowerSetActiveScheme; external PowrProfLib name 'PowerSetActiveScheme' 
 
 function CreateFile2; external Kernel32Lib name 'CreateFile2' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-function StringCbCatA; external Kernel32Lib name 'StringCbCatA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function StringCbCatW; external Kernel32Lib name 'StringCbCatW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function StringCbCatA(pszDest: PAnsiChar;
+                      cbDest: SIZE_T;
+                      pszSrc: PAnsiChar): HRESULT; stdcall;
+var
+  Capacity: SIZE_T;
+  Used: SIZE_T;
+  I: SIZE_T;
+begin
+  Capacity := cbDest div 1;
+  if (Capacity = 0) or (Capacity > $7FFFFFFF) or (pszDest = nil) or (pszSrc = nil) then
+    Exit(HRESULT($80070057));
+  Used := 0;
+  while (Used < Capacity) and (pszDest[Used] <> #0) do
+    Inc(Used);
+  if Used = Capacity then
+    Exit(HRESULT($80070057));
+  I := 0;
+  while (Used < Capacity-1) and (pszSrc[I] <> #0) do
+  begin
+    pszDest[Used] := pszSrc[I];
+    Inc(Used);
+    Inc(I);
+  end;
+  pszDest[Used] := #0;
+  if pszSrc[I] <> #0 then
+    Result := HRESULT($8007007A)
+  else
+    Result := S_OK;
+end;
+function StringCbCatW(pszDest: PWideChar;
+                      cbDest: SIZE_T;
+                      pszSrc: PWideChar): HRESULT; stdcall;
+var
+  Capacity: SIZE_T;
+  Used: SIZE_T;
+  I: SIZE_T;
+begin
+  Capacity := cbDest div 2;
+  if (Capacity = 0) or (Capacity > $7FFFFFFF) or (pszDest = nil) or (pszSrc = nil) then
+    Exit(HRESULT($80070057));
+  Used := 0;
+  while (Used < Capacity) and (pszDest[Used] <> #0) do
+    Inc(Used);
+  if Used = Capacity then
+    Exit(HRESULT($80070057));
+  I := 0;
+  while (Used < Capacity-1) and (pszSrc[I] <> #0) do
+  begin
+    pszDest[Used] := pszSrc[I];
+    Inc(Used);
+    Inc(I);
+  end;
+  pszDest[Used] := #0;
+  if pszSrc[I] <> #0 then
+    Result := HRESULT($8007007A)
+  else
+    Result := S_OK;
+end;
 
 {$IF COMPILERVERSION < 29.0}
 function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -2413,8 +2421,8 @@ end;
 // If working with Int64, use this method, instead of MulDiv.
 // All parameters must be of type Int64!
 function MulDiv64(const aNumber,
-                        aNumerator,
-                        aDenominator: Int64): Int64;
+                  aNumerator,
+                  aDenominator: Int64): Int64;
 begin
 
   if (aDenominator <= 0) then

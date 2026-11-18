@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,14 +10,14 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX),
 //                 Peter Larson (ozships),
-//                 Tilo Güldner (TiloGueldner),
+//                 Tilo Gï¿½ldner (TiloGueldner),
 //                 (wsandor)
 //                 Frank Siek (Cypheros-de)
 //
@@ -25,14 +25,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 09/09/2025 Frank Siek          Fixed wrong parameter definition of procedure DrawBitmap.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -94,9 +94,10 @@ uses
 
 
 const
-  D2D1_INVALID_PROPERTY_INDEX = $7FFFFFFF; // max value for an unsigned int;
+  D2D1_INVALID_PROPERTY_INDEX = $FFFFFFFF; // max value for an unsigned int;
 
 type
+  PUINT32 = ^UINT32;
 
   // Function pointer that sets a property on an effect.
   // Delphi Note: Moved from D2D1EffectAuthor.pas to prevent circular references
@@ -109,9 +110,9 @@ type
   // Function pointer that gets a property from an effect.
   // Delphi Note: Moved from D2D1EffectAuthor.pas to prevent circular references
   PD2D1_PROPERTY_GET_FUNCTION = function({in} effect: IUnknown;
-                                         out data: PByte;
+                                         data: PByte;
                                          dataSize: UINT32;
-                                         actualSize: UINT32): HRESULT; stdcall;
+                                         actualSize: PUINT32): HRESULT; stdcall;
   {$EXTERNALSYM PD2D1_PROPERTY_GET_FUNCTION}
 
 type
@@ -200,25 +201,25 @@ type
   D2D1_PROPERTY = DWord;
   {$EXTERNALSYM D2D1_PROPERTY}
 const
-  D2D1_PROPERTY_CLSID       = D2D1_PROPERTY(0);
+  D2D1_PROPERTY_CLSID       = D2D1_PROPERTY($80000000);
   {$EXTERNALSYM D2D1_PROPERTY_CLSID}
-  D2D1_PROPERTY_DISPLAYNAME = D2D1_PROPERTY(1);
+  D2D1_PROPERTY_DISPLAYNAME = D2D1_PROPERTY($80000001);
   {$EXTERNALSYM D2D1_PROPERTY_DISPLAYNAME}
-  D2D1_PROPERTY_AUTHOR      = D2D1_PROPERTY(2);
+  D2D1_PROPERTY_AUTHOR      = D2D1_PROPERTY($80000002);
   {$EXTERNALSYM D2D1_PROPERTY_AUTHOR}
-  D2D1_PROPERTY_CATEGORY    = D2D1_PROPERTY(3);
+  D2D1_PROPERTY_CATEGORY    = D2D1_PROPERTY($80000003);
   {$EXTERNALSYM D2D1_PROPERTY_CATEGORY}
-  D2D1_PROPERTY_DESCRIPTION = D2D1_PROPERTY(4);
+  D2D1_PROPERTY_DESCRIPTION = D2D1_PROPERTY($80000004);
   {$EXTERNALSYM D2D1_PROPERTY_DESCRIPTION}
-  D2D1_PROPERTY_INPUTS      = D2D1_PROPERTY(5);
+  D2D1_PROPERTY_INPUTS      = D2D1_PROPERTY($80000005);
   {$EXTERNALSYM D2D1_PROPERTY_INPUTS}
-  D2D1_PROPERTY_CACHED      = D2D1_PROPERTY(6);
+  D2D1_PROPERTY_CACHED      = D2D1_PROPERTY($80000006);
   {$EXTERNALSYM D2D1_PROPERTY_CACHED}
-  D2D1_PROPERTY_PRECISION   = D2D1_PROPERTY(7);
+  D2D1_PROPERTY_PRECISION   = D2D1_PROPERTY($80000007);
   {$EXTERNALSYM D2D1_PROPERTY_PRECISION}
-  D2D1_PROPERTY_MIN_INPUTS  = D2D1_PROPERTY(8);
+  D2D1_PROPERTY_MIN_INPUTS  = D2D1_PROPERTY($80000008);
   {$EXTERNALSYM D2D1_PROPERTY_MIN_INPUTS}
-  D2D1_PROPERTY_MAX_INPUTS  = D2D1_PROPERTY(9);
+  D2D1_PROPERTY_MAX_INPUTS  = D2D1_PROPERTY($80000009);
   {$EXTERNALSYM D2D1_PROPERTY_MAX_INPUTS}
   //D2D1_PROPERTY_FORCE_DWORD = FORCEDWORD;
 
@@ -229,19 +230,19 @@ type
   D2D1_SUBPROPERTY = Dword;
   {$EXTERNALSYM D2D1_SUBPROPERTY}
 const
-  D2D1_SUBPROPERTY_DISPLAYNAME = D2D1_PROPERTY(0);
+  D2D1_SUBPROPERTY_DISPLAYNAME = D2D1_SUBPROPERTY($80000000);
   {$EXTERNALSYM D2D1_SUBPROPERTY_DISPLAYNAME}
-  D2D1_SUBPROPERTY_ISREADONLY  = D2D1_PROPERTY(1);
+  D2D1_SUBPROPERTY_ISREADONLY  = D2D1_SUBPROPERTY($80000001);
   {$EXTERNALSYM D2D1_SUBPROPERTY_ISREADONLY}
-  D2D1_SUBPROPERTY_MIN         = D2D1_PROPERTY(2);
+  D2D1_SUBPROPERTY_MIN         = D2D1_SUBPROPERTY($80000002);
   {$EXTERNALSYM D2D1_SUBPROPERTY_MIN}
-  D2D1_SUBPROPERTY_MAX         = D2D1_PROPERTY(3);
+  D2D1_SUBPROPERTY_MAX         = D2D1_SUBPROPERTY($80000003);
   {$EXTERNALSYM D2D1_SUBPROPERTY_MAX}
-  D2D1_SUBPROPERTY_DEFAULT     = D2D1_PROPERTY(4);
+  D2D1_SUBPROPERTY_DEFAULT     = D2D1_SUBPROPERTY($80000004);
   {$EXTERNALSYM D2D1_SUBPROPERTY_DEFAULT}
-  D2D1_SUBPROPERTY_FIELDS      = D2D1_PROPERTY(5);
+  D2D1_SUBPROPERTY_FIELDS      = D2D1_SUBPROPERTY($80000005);
   {$EXTERNALSYM D2D1_SUBPROPERTY_FIELDS}
-  D2D1_SUBPROPERTY_INDEX       = D2D1_PROPERTY(6);
+  D2D1_SUBPROPERTY_INDEX       = D2D1_SUBPROPERTY($80000006);
   {$EXTERNALSYM D2D1_SUBPROPERTY_INDEX}
   //D2D1_SUBPROPERTY_FORCE_DWORD = FORCEDWORD;
 
@@ -702,12 +703,8 @@ type
   {$EXTERNALSYM ID2D1GdiMetafileSink}
   ID2D1GdiMetafileSink = interface(IUnknown)
   ['{82237326-8111-4f7c-bcf4-b5c1175564fe}']
-
-    // Callback for examining a metafile record.
-    function ProcessRecord(recordType: DWORD;
-                           recordData: Pointer;
-                           recordDataSize: DWORD): HResult; stdcall;
-
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function ProcessRecord(recordType: DWORD; recordData: Pointer; recordDataSize: DWORD): HRESULT; stdcall; overload;
   end;
   IID_ID2D1GdiMetafileSink = ID2D1GdiMetafileSink;
   {$EXTERNALSYM IID_ID2D1GdiMetafileSink}
@@ -721,14 +718,10 @@ type
   {$EXTERNALSYM ID2D1GdiMetafile}
   ID2D1GdiMetafile = interface(ID2D1Resource)
   ['{2f543dc3-cfc1-4211-864f-cfd91c6f3395}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function Stream(sink: ID2D1GdiMetafileSink): HRESULT; stdcall; overload;
 
-    // Play the metafile into a caller-supplied sink interface.
-    function Stream(sink: ID2D1GdiMetafileSink): HResult; stdcall;
-
-
-    // Gets the bounds of the metafile.
-    function GetBounds(out bounds: D2D1_RECT_F): HResult; stdcall;
-
+    function GetBounds(bounds: PD2D1_RECT_F): HRESULT; stdcall; overload;
   end;
   IID_ID2D1GdiMetafile = ID2D1GdiMetafile;
   {$EXTERNALSYM IID_ID2D1GdiMetafile}
@@ -743,89 +736,56 @@ type
   {$EXTERNALSYM ID2D1CommandSink}
   ID2D1CommandSink = interface(IUnknown)
   ['{54D7898A-A061-40A7-BEC7-E465BCBA2C4F}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function BeginDraw(): HRESULT; stdcall; overload;
 
-    function BeginDraw(): HRESULT; stdcall;
-    function EndDraw(): HRESULT; stdcall;
+    function EndDraw(): HRESULT; stdcall; overload;
 
-    function SetAntialiasMode(antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall;
+    function SetAntialiasMode(antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall; overload;
 
-    function SetTags(tag1: D2D1_TAG;
-                     tag2: D2D1_TAG): HRESULT; stdcall;
+    function SetTags(tag1: D2D1_TAG; tag2: D2D1_TAG): HRESULT; stdcall; overload;
 
-    function SetTextAntialiasMode(textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE): HRESULT; stdcall;
+    function SetTextAntialiasMode(textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE): HRESULT; stdcall; overload;
 
-    function SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams): HRESULT; stdcall;
+    function SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams): HRESULT; stdcall; overload;
 
-    function SetTransform(const transform: D2D1_MATRIX_3X2_F): HRESULT; stdcall;
+    function SetTransform(transform: PD2D1_MATRIX_3X2_F): HRESULT; stdcall; overload;
 
-    function SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND): HRESULT; stdcall;
+    function SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND): HRESULT; stdcall; overload;
 
-    function SetUnitMode(unitMode: D2D1_UNIT_MODE): HRESULT; stdcall;
+    function SetUnitMode(unitMode: D2D1_UNIT_MODE): HRESULT; stdcall; overload;
 
-    function Clear(const color: D2D1_COLOR_F): HRESULT; stdcall;
+    function Clear(color: PD2D1_COLOR_F): HRESULT; stdcall; overload;
 
-    function DrawGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                          const glyphRun: DWRITE_GLYPH_RUN;
-                          const glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
-                          foregroundBrush: ID2D1Brush;
-                          measuringMode: DWRITE_MEASURING_MODE): HRESULT; stdcall;
+    function DrawGlyphRun(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION; foregroundBrush: ID2D1Brush; measuringMode: DWRITE_MEASURING_MODE): HRESULT; stdcall; overload;
 
-    function DrawLine(point0: D2D1_POINT_2F;
-                      point1: D2D1_POINT_2F;
-                      brush: ID2D1Brush;
-                      strokeWidth: Single;
-                      strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
+    function DrawLine(point0: D2D1_POINT_2F; point1: D2D1_POINT_2F; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall; overload;
 
-    function DrawGeometry(geometry: ID2D1Geometry;
-                          brush: ID2D1Brush;
-                          strokeWidth: Single;
-                          strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
+    function DrawGeometry(geometry: ID2D1Geometry; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall; overload;
 
-    function DrawRectangle(const rect: D2D1_RECT_F;
-                           brush: ID2D1Brush;
-                           strokeWidth: Single;
-                           strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
+    function DrawRectangle(rect: PD2D1_RECT_F; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall; overload;
 
-    function DrawBitmap(bitmap: ID2D1Bitmap;
-                        destinationRectangle: PD2D1_RECT_F;
-                        opacity: Single;
-                        interpolationMode: D2D1_INTERPOLATION_MODE;
-                        sourceRectangle: PD2D1_RECT_F;
-                        perspectiveTransform: PD2D1_MATRIX_4X4_F): HRESULT; stdcall;
+    function DrawBitmap(bitmap: ID2D1Bitmap; destinationRectangle: PD2D1_RECT_F; opacity: Single; interpolationMode: D2D1_INTERPOLATION_MODE; sourceRectangle: PD2D1_RECT_F; perspectiveTransform: PD2D1_MATRIX_4X4_F): HRESULT; stdcall; overload;
 
-    function DrawImage(image: ID2D1Image;
-                       targetOffset: D2D1_POINT_2F;
-                       const imageRectangle: D2D1_RECT_F;
-                       interpolationMode: D2D1_INTERPOLATION_MODE;
-                       compositeMode: D2D1_COMPOSITE_MODE): HRESULT; stdcall;
+    function DrawImage(image: ID2D1Image; targetOffset: PD2D1_POINT_2F; imageRectangle: PD2D1_RECT_F; interpolationMode: D2D1_INTERPOLATION_MODE; compositeMode: D2D1_COMPOSITE_MODE): HRESULT; stdcall; overload;
 
-    function DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile;
-                             targetOffset: D2D1_POINT_2F): HRESULT; stdcall;
+    function DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile; targetOffset: PD2D1_POINT_2F): HRESULT; stdcall; overload;
 
-    function FillMesh(mesh: ID2D1Mesh;
-                      brush: ID2D1Brush): HRESULT; stdcall;
+    function FillMesh(mesh: ID2D1Mesh; brush: ID2D1Brush): HRESULT; stdcall; overload;
 
-    function FillOpacityMask(opacityMask: ID2D1Bitmap;
-                             brush: ID2D1Brush;
-                             const destinationRectangle: D2D1_RECT_F;
-                             const sourceRectangle: D2D1_RECT_F): HRESULT; stdcall;
+    function FillOpacityMask(opacityMask: ID2D1Bitmap; brush: ID2D1Brush; destinationRectangle: PD2D1_RECT_F; sourceRectangle: PD2D1_RECT_F): HRESULT; stdcall; overload;
 
-    function FillGeometry(geometry: ID2D1Geometry;
-                          brush: ID2D1Brush;
-                          opacityBrush: ID2D1Brush): HRESULT; stdcall;
+    function FillGeometry(geometry: ID2D1Geometry; brush: ID2D1Brush; opacityBrush: ID2D1Brush): HRESULT; stdcall; overload;
 
-    function FillRectangle(const rect: D2D1_RECT_F;
-                           brush: ID2D1Brush): HRESULT; stdcall;
+    function FillRectangle(rect: PD2D1_RECT_F; brush: ID2D1Brush): HRESULT; stdcall; overload;
 
-    function PushAxisAlignedClip(const clipRect: D2D1_RECT_F;
-                                 antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall;
+    function PushAxisAlignedClip(clipRect: PD2D1_RECT_F; antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall; overload;
 
-    function PushLayer(const layerParameters1: D2D1_LAYER_PARAMETERS1;
-                       layer: ID2D1Layer): HRESULT; stdcall;
+    function PushLayer(layerParameters1: PD2D1_LAYER_PARAMETERS1; layer: ID2D1Layer): HRESULT; stdcall; overload;
 
-    function PopAxisAlignedClip(): HRESULT; stdcall;
+    function PopAxisAlignedClip(): HRESULT; stdcall; overload;
 
-    function PopLayer(): HRESULT; stdcall;
+    function PopLayer(): HRESULT; stdcall; overload;
   end;
   IID_ID2D1CommandSink = ID2D1CommandSink;
   {$EXTERNALSYM IID_ID2D1CommandSink}
@@ -838,13 +798,10 @@ type
   {$EXTERNALSYM ID2D1CommandList}
   ID2D1CommandList = interface(ID2D1Image)
   ['{b4f34a19-2383-4d76-94f6-ec343657c3dc}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function Stream(sink: ID2D1CommandSink): HRESULT; stdcall; overload;
 
-    // Play the command list into a caller-supplied sink interface.
-    function Stream(sink: ID2D1CommandSink): HResult; stdcall;
-
-    // Marks the command list as ready for use.
-    function Close(): HResult; stdcall;
-
+    function Close(): HRESULT; stdcall; overload;
   end;
   IID_ID2D1CommandList = ID2D1CommandList;
   {$EXTERNALSYM IID_ID2D1CommandList}
@@ -859,15 +816,10 @@ type
   {$EXTERNALSYM ID2D1PrintControl}
   ID2D1PrintControl = interface(IUnknown)
   ['{2c1d867d-c290-41c8-ae7e-34a98702e9a5}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function AddPage(commandList: ID2D1CommandList; pageSize: D2D_SIZE_F; pagePrintTicketStream: IStream; tag1: PD2D1_TAG; tag2: PD2D1_TAG): HRESULT; stdcall; overload;
 
-    function AddPage(commandList: ID2D1CommandList;
-                     const pageSize: D2D_SIZE_F;
-                     pagePrintTicketStream: IStream;
-           {out_opt} tag1: PD2D1_TAG = nil;
-           {out_opt} tag2: PD2D1_TAG = nil): HResult; stdcall;
-
-    function Close(): HResult; stdcall;
-
+    function Close(): HRESULT; stdcall; overload;
   end;
   IID_ID2D1PrintControl = ID2D1PrintControl;
   {$EXTERNALSYM IID_ID2D1PrintControl}
@@ -882,27 +834,26 @@ type
   {$EXTERNALSYM ID2D1ImageBrush}
   ID2D1ImageBrush = interface(ID2D1Brush)
   ['{fe9e984d-3f95-407c-b5db-cb94d4e8f87c}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure SetImage(image: ID2D1Image); stdcall; overload;
 
-    procedure SetImage(image: ID2D1Image); stdcall;
+    procedure SetExtendModeX(extendModeX: D2D1_EXTEND_MODE); stdcall; overload;
 
-    procedure SetExtendModeX(extendModeX: D2D1_EXTEND_MODE); stdcall;
+    procedure SetExtendModeY(extendModeY: D2D1_EXTEND_MODE); stdcall; overload;
 
-    procedure SetExtendModeY(extendModeY: D2D1_EXTEND_MODE); stdcall;
+    procedure SetInterpolationMode(interpolationMode: D2D1_INTERPOLATION_MODE); stdcall; overload;
 
-    procedure SetInterpolationMode(interpolationMode: D2D1_INTERPOLATION_MODE); stdcall;
+    procedure SetSourceRectangle(sourceRectangle: PD2D1_RECT_F); stdcall; overload;
 
-    procedure SetSourceRectangle(sourceRectangle: D2D1_RECT_F); stdcall;
+    procedure GetImage(out image: ID2D1Image); stdcall; overload;
 
-    procedure GetImage(out image: ID2D1Image); stdcall;
+    function GetExtendModeX(): D2D1_EXTEND_MODE; stdcall; overload;
 
-    function GetExtendModeX(): D2D1_EXTEND_MODE; stdcall;
+    function GetExtendModeY(): D2D1_EXTEND_MODE; stdcall; overload;
 
-    function GetExtendModeY(): D2D1_EXTEND_MODE; stdcall;
+    function GetInterpolationMode(): D2D1_INTERPOLATION_MODE; stdcall; overload;
 
-    function GetInterpolationMode(): D2D1_INTERPOLATION_MODE; stdcall;
-
-    procedure GetSourceRectangle(out sourceRectangle: D2D1_RECT_F); stdcall;
-
+    procedure GetSourceRectangle(sourceRectangle: PD2D1_RECT_F); stdcall; overload;
   end;
   IID_ID2D1ImageBrush = ID2D1ImageBrush;
   {$EXTERNALSYM IID_ID2D1ImageBrush}
@@ -917,12 +868,10 @@ type
   {$EXTERNALSYM ID2D1BitmapBrush1}
   ID2D1BitmapBrush1 = interface(ID2D1BitmapBrush)
   ['{41343a53-e41a-49a2-91cd-21793bbb62e5}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure SetInterpolationMode1(interpolationMode: D2D1_INTERPOLATION_MODE); stdcall; overload;
 
-    // Sets the interpolation mode used when this brush is used.
-    procedure SetInterpolationMode1(interpolationMode: D2D1_INTERPOLATION_MODE); stdcall;
-
-    function GetInterpolationMode1(): D2D1_INTERPOLATION_MODE; stdcall;
-
+    function GetInterpolationMode1(): D2D1_INTERPOLATION_MODE; stdcall; overload;
   end;
   IID_ID2D1BitmapBrush1 = ID2D1BitmapBrush1;
   {$EXTERNALSYM IID_ID2D1BitmapBrush1}
@@ -936,9 +885,8 @@ type
   {$EXTERNALSYM ID2D1StrokeStyle1}
   ID2D1StrokeStyle1 = interface(ID2D1StrokeStyle)
   ['{10a72a66-e91c-43f4-993f-ddf4b82b0b4a}']
-
-    function GetStrokeTransformType(): D2D1_STROKE_TRANSFORM_TYPE; stdcall;
-
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function GetStrokeTransformType(): D2D1_STROKE_TRANSFORM_TYPE; stdcall; overload;
   end;
   IID_ID2D1StrokeStyle1 = ID2D1StrokeStyle1;
   {$EXTERNALSYM IID_ID2D1StrokeStyle1}
@@ -954,13 +902,8 @@ type
   {$EXTERNALSYM ID2D1PathGeometry1}
   ID2D1PathGeometry1 = interface(ID2D1PathGeometry)
   ['{62baa2d2-ab54-41b7-b872-787e0106a421}']
-
-    function ComputePointAndSegmentAtLength(_length: Single;
-                                            startSegment: UINT32;
-                                            worldTransform: D2D1_MATRIX_3X2_F;
-                                            flatteningTolerance: Single;
-                                            out pointDescription: D2D1_POINT_DESCRIPTION): HResult; stdcall;
-
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function ComputePointAndSegmentAtLength(length: Single; startSegment: UINT32; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; pointDescription: PD2D1_POINT_DESCRIPTION): HRESULT; stdcall; overload;
   end;
   IID_ID2D1PathGeometry1 = ID2D1PathGeometry1;
   {$EXTERNALSYM IID_ID2D1PathGeometry1}
@@ -975,56 +918,28 @@ type
   {$EXTERNALSYM ID2D1Properties}
   ID2D1Properties = interface(IUnknown)
   ['{483473d7-cd46-4f9d-9d3a-3112aa80159d}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function GetPropertyCount(): UINT32; stdcall; overload;
 
-    // Returns the total number of custom properties in this interface.
-    function GetPropertyCount(): UINT32; stdcall;
+    function GetPropertyName(index: UINT32; name: PWideChar; nameCount: UINT32): HRESULT; stdcall; overload;
 
-    // Retrieves the property name from the given property index.
-    function GetPropertyName(index: UINT32;
-                             out name: LPWSTR;
-                             nameCount: UINT32): HResult; stdcall;
+    function GetPropertyNameLength(index: UINT32): UINT32; stdcall; overload;
 
-    // Returns the length of the property name from the given index.
-    function GetPropertyNameLength(index: UINT32): UINT32; stdcall;
+    function GetType(index: UINT32): D2D1_PROPERTY_TYPE; stdcall; overload;
 
-    // Retrieves the type of the given property.
-    function GetType(index: UINT32): D2D1_PROPERTY_TYPE; stdcall;
+    function GetPropertyIndex(name: PWideChar): UINT32; stdcall; overload;
 
-    // Retrieves the property index for the given property name.
-    function GetPropertyIndex(name: PWideChar): UINT32; stdcall;
+    function SetValueByName(name: PWideChar; _type: D2D1_PROPERTY_TYPE; data: PByte; dataSize: UINT32): HRESULT; stdcall; overload;
 
-    // Sets the value of the given property using its name.
-    function SetValueByName(name: PWideChar;
-                            _type: D2D1_PROPERTY_TYPE;
-                            data: PByte;
-                            dataSize: UINT32): HResult; stdcall;
+    function SetValue(index: UINT32; _type: D2D1_PROPERTY_TYPE; data: PByte; dataSize: UINT32): HRESULT; stdcall; overload;
 
-    // Sets the given value using the property index.
-    function SetValue(index: UINT32;
-                      _type: D2D1_PROPERTY_TYPE;
-                      data: PByte;
-                      dataSize: UINT32): HResult; stdcall;
+    function GetValueByName(name: PWideChar; _type: D2D1_PROPERTY_TYPE; data: PByte; dataSize: UINT32): HRESULT; stdcall; overload;
 
-    // Retrieves the given property or sub-property by name. '.' is the delimiter for
-    // sub-properties.
-    function GetValueByName(name: PWideChar;
-                            _type: D2D1_PROPERTY_TYPE;
-                            data: PByte;
-                            dataSize: UINT32): HResult; stdcall;
+    function GetValue(index: UINT32; _type: D2D1_PROPERTY_TYPE; data: PByte; dataSize: UINT32): HRESULT; stdcall; overload;
 
-    // Retrieves the given value by index.
-    function GetValue(index: UINT32;
-                      _type: D2D1_PROPERTY_TYPE;
-                      data: PByte;
-                      dataSize: UINT32): HResult; stdcall;
+    function GetValueSize(index: UINT32): UINT32; stdcall; overload;
 
-    // Returns the value size for the given property index.
-    function GetValueSize(index: UINT32): UINT32; stdcall;
-
-    // Retrieves the sub-properties of the given property by index.
-    function GetSubProperties(index: UINT32;
-                              out subProperties: ID2D1Properties): HResult; stdcall;
-
+    function GetSubProperties(index: UINT32; out subProperties: ID2D1Properties): HRESULT; stdcall; overload;
   end;
   IID_ID2D1Properties = ID2D1Properties;
   {$EXTERNALSYM IID_ID2D1Properties}
@@ -1039,30 +954,16 @@ type
   {$EXTERNALSYM ID2D1Effect}
   ID2D1Effect = interface(ID2D1Properties)
   ['{28211a43-7d89-476f-8181-2d6159b220ad}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure SetInput(index: UINT32; input: ID2D1Image; invalidate: BOOL); stdcall; overload;
 
-    // Sets the input to the given effect. The input can be a concrete bitmap or the
-    // output of another effect.
-    procedure SetInput(index: UINT32;
-                       input: ID2D1Image = nil;
-                       invalidate: BOOL = TRUE); stdcall;
+    function SetInputCount(inputCount: UINT32): HRESULT; stdcall; overload;
 
-    // If the effect supports a variable number of inputs, this sets the number of
-    // input that are currently active on the effect.
-    function SetInputCount(inputCount: UINT32): HResult; stdcall;
+    procedure GetInput(index: UINT32; out input: ID2D1Image); stdcall; overload;
 
-    // Returns the input image to the effect. The input could be another effect or a
-    // bitmap.
-    procedure GetInput(index: UINT32;
-                       out input: ID2D1Image); stdcall;
+    function GetInputCount(): UINT32; stdcall; overload;
 
-    // This returns the number of input that are bound into this effect.
-    function GetInputCount(): UINT32; stdcall;
-
-
-    // Returns the output image of the given effect. This can be set as the input to
-    // another effect or can be drawn with DrawImage.
-    procedure GetOutput(out outputImage: ID2D1Image); stdcall;
-
+    procedure GetOutput(out outputImage: ID2D1Image); stdcall; overload;
   end;
   IID_ID2D1Effect = ID2D1Effect;
   {$EXTERNALSYM IID_ID2D1Effect}
@@ -1077,25 +978,16 @@ type
   {$EXTERNALSYM ID2D1Bitmap1}
   ID2D1Bitmap1 = interface(ID2D1Bitmap)
   ['{a898a84c-3873-4588-b08b-ebbf978df041}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure GetColorContext(out colorContext: ID2D1ColorContext); stdcall; overload;
 
-    // Retrieves the color context information associated with the bitmap.
-    procedure GetColorContext(out colorContext: ID2D1ColorContext); stdcall;
+    function GetOptions(): D2D1_BITMAP_OPTIONS; stdcall; overload;
 
-    // Retrieves the bitmap options used when creating the API.
-    function GetOptions(): D2D1_BITMAP_OPTIONS; stdcall;
+    function GetSurface(out dxgiSurface: IDXGISurface): HRESULT; stdcall; overload;
 
-    // Retrieves the DXGI surface from the corresponding bitmap, if the bitmap was
-    // created from a device derived from a D3D device.
-    function GetSurface(out dxgiSurface: IDXGISurface): HResult; stdcall;
+    function Map(options: D2D1_MAP_OPTIONS; mappedRect: PD2D1_MAPPED_RECT): HRESULT; stdcall; overload;
 
-    // Maps the given bitmap into memory. The bitmap must have been created with the
-    // D2D1_BITMAP_OPTIONS_CPU_READ flag.
-    function Map(options: D2D1_MAP_OPTIONS;
-                 out mappedRect: D2D1_MAPPED_RECT): HResult; stdcall;
-
-    // Unmaps the given bitmap from memory.
-    function Unmap(): HResult; stdcall;
-
+    function Unmap(): HRESULT; stdcall; overload;
   end;
   IID_ID2D1Bitmap1 = ID2D1Bitmap1;
   {$EXTERNALSYM IID_ID2D1Bitmap1}
@@ -1109,17 +1001,12 @@ type
   {$EXTERNALSYM ID2D1ColorContext}
   ID2D1ColorContext = interface(ID2D1Resource)
   ['{1c4820bb-5771-4518-a581-2fe4dd0ec657}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function GetColorSpace(): D2D1_COLOR_SPACE; stdcall; overload;
 
-    // Retrieves the color space of the color context.
-    function GetColorSpace(): D2D1_COLOR_SPACE; stdcall;
+    function GetProfileSize(): UINT32; stdcall; overload;
 
-    // Retrieves the size of the color profile, in bytes.
-    function GetProfileSize(): UINT32; stdcall;
-
-    // Retrieves the color profile bytes.
-    function GetProfile(out profile: PByte;
-                        profileSize: UINT32): HResult; stdcall;
-
+    function GetProfile(profile: PByte; profileSize: UINT32): HRESULT; stdcall; overload;
   end;
   IID_ID2D1ColorContext = ID2D1ColorContext;
   {$EXTERNALSYM IID_ID2D1ColorContext}
@@ -1134,35 +1021,16 @@ type
   {$EXTERNALSYM ID2D1GradientStopCollection1}
   ID2D1GradientStopCollection1 = interface(ID2D1GradientStopCollection)
   ['{ae1572f4-5dd0-4777-998b-9279472ae63b}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure GetGradientStops1(gradientStops: PD2D1_GRADIENT_STOP; gradientStopsCount: UINT32); stdcall; overload;
 
-    // Copies the gradient stops from the collection into the caller's memory. If this
-    // object was created using ID2D1DeviceContext.CreateGradientStopCollection, this
-    // method returns the same values as were specified in the creation method. If this
-    // object was created using ID2D1RenderTarget.CreateGradientStopCollection, the
-    // stops returned here will first be transformed into the gamma space specified by
-    // the colorInterpolationGamma parameter.
-    procedure GetGradientStops1(out gradientStops: PD2D1_GRADIENT_STOP;
-                                gradientStopsCount: UINT32); stdcall;
+    function GetPreInterpolationSpace(): D2D1_COLOR_SPACE; stdcall; overload;
 
-    // Returns the color space in which interpolation occurs. If this object was
-    // created using ID2D1RenderTarget.CreateGradientStopCollection, this method
-    // returns the color space related to the color interpolation gamma.
-    function GetPreInterpolationSpace(): D2D1_COLOR_SPACE; stdcall;
+    function GetPostInterpolationSpace(): D2D1_COLOR_SPACE; stdcall; overload;
 
-    // Returns the color space colors will be converted to after interpolation occurs.
-    // If this object was created using
-    // ID2D1RenderTarget.CreateGradientStopCollection, this method returns
-    // D2D1_COLOR_SPACE_SRGB.
-    function GetPostInterpolationSpace(): D2D1_COLOR_SPACE; stdcall;
+    function GetBufferPrecision(): D2D1_BUFFER_PRECISION; stdcall; overload;
 
-    // Returns the buffer precision of this gradient. If this object was created using
-    // ID2D1RenderTarget.CreateGradientStopCollection, this method returns
-    // D2D1_BUFFER_PRECISION_8BPC_UNORM.
-    function GetBufferPrecision(): D2D1_BUFFER_PRECISION; stdcall;
-
-    // Returns the interpolation mode used to interpolate colors in the gradient.
-    function GetColorInterpolationMode(): D2D1_COLOR_INTERPOLATION_MODE; stdcall;
-
+    function GetColorInterpolationMode(): D2D1_COLOR_INTERPOLATION_MODE; stdcall; overload;
   end;
   IID_ID2D1GradientStopCollection1 = ID2D1GradientStopCollection1;
   {$EXTERNALSYM IID_ID2D1GradientStopCollection1}
@@ -1176,13 +1044,10 @@ type
   {$EXTERNALSYM ID2D1DrawingStateBlock1}
   ID2D1DrawingStateBlock1 = interface(ID2D1DrawingStateBlock)
   ['{689f1f85-c72e-4e33-8f19-85754efd5ace}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    procedure GetDescription(stateDescription: PD2D1_DRAWING_STATE_DESCRIPTION1); stdcall; overload;
 
-    // Retrieves the state currently contained within this state block resource.
-    procedure GetDescription(out stateDescription: D2D1_DRAWING_STATE_DESCRIPTION1); stdcall;
-
-    // Sets the state description of this state block resource.
-    procedure SetDescription(stateDescription: D2D1_DRAWING_STATE_DESCRIPTION1); stdcall;
-
+    procedure SetDescription(stateDescription: PD2D1_DRAWING_STATE_DESCRIPTION1); stdcall; overload;
   end;
   IID_ID2D1DrawingStateBlock1 = ID2D1DrawingStateBlock1;
   {$EXTERNALSYM IID_ID2D1DrawingStateBlock1}
@@ -1197,136 +1062,76 @@ type
   {$EXTERNALSYM ID2D1DeviceContext}
   ID2D1DeviceContext = interface(ID2D1RenderTarget)
   ['{e8f7fe7a-191c-466d-ad95-975678bda998}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function CreateBitmap(size: D2D1_SIZE_U; sourceData: Pointer; pitch: UINT32; bitmapProperties: PD2D1_BITMAP_PROPERTIES1; out bitmap: ID2D1Bitmap1): HRESULT; stdcall; overload;
 
-    function CreateBitmap(size: D2D1_SIZE_U;
-                          sourceData: Pointer;
-                          pitch: UINT32;
-                          bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
-                          out bitmap: ID2D1Bitmap1): HResult; stdcall;
+    function CreateBitmapFromWicBitmap(wicBitmapSource: IWICBitmapSource; bitmapProperties: PD2D1_BITMAP_PROPERTIES1; out bitmap: ID2D1Bitmap1): HRESULT; stdcall; overload;
 
-    function CreateBitmapFromWicBitmap(wicBitmapSource: IWICBitmapSource;
-                                       bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
-                                       out bitmap: ID2D1Bitmap1): HResult; stdcall;
+    function CreateColorContext(space: D2D1_COLOR_SPACE; profile: PByte; profileSize: UINT32; out colorContext: ID2D1ColorContext): HRESULT; stdcall; overload;
 
-    function CreateColorContext(space: D2D1_COLOR_SPACE;
-                                profile: PByte;
-                                profileSize: UINT32;
-                                out colorContext: ID2D1ColorContext): HResult; stdcall;
+    function CreateColorContextFromFilename(filename: PWideChar; out colorContext: ID2D1ColorContext): HRESULT; stdcall; overload;
 
-    function CreateColorContextFromFilename(filename: PWideChar;
-                                            out colorContext: ID2D1ColorContext): HResult; stdcall;
+    function CreateColorContextFromWicColorContext(wicColorContext: IWICColorContext; out colorContext: ID2D1ColorContext): HRESULT; stdcall; overload;
 
-    function CreateColorContextFromWicColorContext(wicColorContext: IWICColorContext;
-                                                   out colorContext: ID2D1ColorContext): HResult; stdcall;
+    function CreateBitmapFromDxgiSurface(surface: IDXGISurface; bitmapProperties: PD2D1_BITMAP_PROPERTIES1; out bitmap: ID2D1Bitmap1): HRESULT; stdcall; overload;
 
-    function CreateBitmapFromDxgiSurface(surface: IDXGISurface;
-                                         bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
-                                         out bitmap: ID2D1Bitmap1): HResult; stdcall;
+    function CreateEffect(const effectId: TGUID; out effect: ID2D1Effect): HRESULT; stdcall; overload;
 
-    function CreateEffect(const effectId: TGuid;
-                          out effect: ID2D1Effect): HResult; stdcall;
+    function CreateGradientStopCollection(straightAlphaGradientStops: PD2D1_GRADIENT_STOP; straightAlphaGradientStopsCount: UINT32; preInterpolationSpace: D2D1_COLOR_SPACE; postInterpolationSpace: D2D1_COLOR_SPACE; bufferPrecision: D2D1_BUFFER_PRECISION; extendMode: D2D1_EXTEND_MODE; colorInterpolationMode: D2D1_COLOR_INTERPOLATION_MODE; out gradientStopCollection1: ID2D1GradientStopCollection1): HRESULT; stdcall; overload;
 
-    function CreateGradientStopCollection(straightAlphaGradientStops: PD2D1_GRADIENT_STOP;
-                                          straightAlphaGradientStopsCount: UINT32;
-                                          preInterpolationSpace: D2D1_COLOR_SPACE;
-                                          postInterpolationSpace: D2D1_COLOR_SPACE;
-                                          bufferPrecision: D2D1_BUFFER_PRECISION;
-                                          extendMode: D2D1_EXTEND_MODE;
-                                          colorInterpolationMode: D2D1_COLOR_INTERPOLATION_MODE;
-                                          out gradientStopCollection1: ID2D1GradientStopCollection1): HResult; stdcall;
+    function CreateImageBrush(image: ID2D1Image; imageBrushProperties: PD2D1_IMAGE_BRUSH_PROPERTIES; brushProperties: PD2D1_BRUSH_PROPERTIES; out imageBrush: ID2D1ImageBrush): HRESULT; stdcall; overload;
 
-    function CreateImageBrush(image: ID2D1Image;
-                              imageBrushProperties: D2D1_IMAGE_BRUSH_PROPERTIES;
-                              brushProperties: D2D1_BRUSH_PROPERTIES;
-                              out imageBrush: ID2D1ImageBrush): HResult; stdcall;
+    function CreateBitmapBrush(bitmap: ID2D1Bitmap; bitmapBrushProperties: PD2D1_BITMAP_BRUSH_PROPERTIES1; brushProperties: PD2D1_BRUSH_PROPERTIES; out bitmapBrush: ID2D1BitmapBrush1): HRESULT; stdcall; overload;
 
-    function CreateBitmapBrush(bitmap: ID2D1Bitmap;
-                               bitmapBrushProperties: PD2D1_BITMAP_BRUSH_PROPERTIES1;
-                               brushProperties: D2D1_BRUSH_PROPERTIES;
-                               out bitmapBrush: ID2D1BitmapBrush1): HResult; stdcall;
+    function CreateCommandList(out commandList: ID2D1CommandList): HRESULT; stdcall; overload;
 
-    function CreateCommandList(out commandList: ID2D1CommandList): HResult; stdcall;
+    function IsDxgiFormatSupported(format: DXGI_FORMAT): BOOL; stdcall; overload;
 
-    function IsDxgiFormatSupported(format: DXGI_FORMAT): BOOL; stdcall;
+    function IsBufferPrecisionSupported(bufferPrecision: D2D1_BUFFER_PRECISION): BOOL; stdcall; overload;
 
-    function IsBufferPrecisionSupported(bufferPrecision: D2D1_BUFFER_PRECISION): BOOL; stdcall;
+    function GetImageLocalBounds(image: ID2D1Image; localBounds: PD2D1_RECT_F): HRESULT; stdcall; overload;
 
-    function GetImageLocalBounds(image: ID2D1Image;
-                                 out localBounds: D2D1_RECT_F): HResult; stdcall;
+    function GetImageWorldBounds(image: ID2D1Image; worldBounds: PD2D1_RECT_F): HRESULT; stdcall; overload;
 
-    function GetImageWorldBounds(image: ID2D1Image;
-                                 out worldBounds: D2D1_RECT_F): HResult; stdcall;
+    function GetGlyphRunWorldBounds(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; measuringMode: DWRITE_MEASURING_MODE; bounds: PD2D1_RECT_F): HRESULT; stdcall; overload;
 
-    function GetGlyphRunWorldBounds(baselineOrigin: D2D1_POINT_2F;
-                                    glyphRun: DWRITE_GLYPH_RUN;
-                                    measuringMode: DWRITE_MEASURING_MODE;
-                                    out bounds: D2D1_RECT_F): HResult; stdcall;
+    procedure GetDevice(out device: ID2D1Device); stdcall; overload;
 
-    procedure GetDevice(out device: ID2D1Device); stdcall;
+    procedure SetTarget(image: ID2D1Image); stdcall; overload;
 
-    procedure SetTarget(image: ID2D1Image); stdcall;
+    procedure GetTarget(out image: ID2D1Image); stdcall; overload;
 
-    procedure GetTarget(out image: ID2D1Image); stdcall;
+    procedure SetRenderingControls(renderingControls: PD2D1_RENDERING_CONTROLS); stdcall; overload;
 
-    procedure SetRenderingControls(renderingControls: D2D1_RENDERING_CONTROLS); stdcall;
+    procedure GetRenderingControls(renderingControls: PD2D1_RENDERING_CONTROLS); stdcall; overload;
 
-    procedure GetRenderingControls(out renderingControls: D2D1_RENDERING_CONTROLS); stdcall;
+    procedure SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND); stdcall; overload;
 
-    procedure SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND); stdcall;
+    function GetPrimitiveBlend(): D2D1_PRIMITIVE_BLEND; stdcall; overload;
 
-    function GetPrimitiveBlend(): D2D1_PRIMITIVE_BLEND; stdcall;
+    procedure SetUnitMode(unitMode: D2D1_UNIT_MODE); stdcall; overload;
 
-    procedure SetUnitMode(unitMode: D2D1_UNIT_MODE); stdcall;
+    function GetUnitMode(): D2D1_UNIT_MODE; stdcall; overload;
 
-    function GetUnitMode(): D2D1_UNIT_MODE; stdcall;
+    procedure DrawGlyphRun(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION; foregroundBrush: ID2D1Brush; measuringMode: DWRITE_MEASURING_MODE); stdcall; overload;
 
-    procedure DrawGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                           glyphRun: DWRITE_GLYPH_RUN;
-                           glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
-                           foregroundBrush: ID2D1Brush;
-                           measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL); stdcall;
+    procedure DrawImage(image: ID2D1Image; targetOffset: PD2D1_POINT_2F; imageRectangle: PD2D1_RECT_F; interpolationMode: D2D1_INTERPOLATION_MODE; compositeMode: D2D1_COMPOSITE_MODE); stdcall; overload;
 
-    procedure DrawImage(image: ID2D1Image;
-                        targetOffset: PD2D1_POINT_2F = nil;
-                        imageRectangle: PD2D1_RECT_F = nil;
-                        interpolationMode: D2D1_INTERPOLATION_MODE = D2D1_INTERPOLATION_MODE_LINEAR;
-                        compositeMode: D2D1_COMPOSITE_MODE = D2D1_COMPOSITE_MODE_SOURCE_OVER); stdcall;
+    procedure DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile; targetOffset: PD2D1_POINT_2F); stdcall; overload;
 
-    procedure DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile;
-                              targetOffset: PD2D1_POINT_2F = nil); stdcall;
+    procedure DrawBitmap(bitmap: ID2D1Bitmap; destinationRectangle: PD2D1_RECT_F; opacity: Single; interpolationMode: D2D1_INTERPOLATION_MODE; sourceRectangle: PD2D1_RECT_F; perspectiveTransform: PD2D1_MATRIX_4X4_F); stdcall; overload;
 
-    procedure DrawBitmap(bitmap: ID2D1Bitmap;
-                         destinationRectangle: PD2D1_RECT_F = nil;
-                         opacity: Single = 1.0;
-                         interpolationMode: D2D1_INTERPOLATION_MODE = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
-                         sourceRectangle: PD2D1_RECT_F = nil;
-                         perspectiveTransform: PD2D1_MATRIX_4X4_F = nil); stdcall;
+    procedure PushLayer(layerParameters: PD2D1_LAYER_PARAMETERS1; layer: ID2D1Layer); stdcall; overload;
 
-    procedure PushLayer(layerParameters: D2D1_LAYER_PARAMETERS1;
-                        layer: ID2D1Layer); stdcall;
+    function InvalidateEffectInputRectangle(effect: ID2D1Effect; input: UINT32; inputRectangle: PD2D1_RECT_F): HRESULT; stdcall; overload;
 
-    function InvalidateEffectInputRectangle(effect: ID2D1Effect;
-                                            input: UINT32;
-                                            inputRectangle: D2D1_RECT_F): HResult; stdcall;
+    function GetEffectInvalidRectangleCount(effect: ID2D1Effect; rectangleCount: PUINT32): HRESULT; stdcall; overload;
 
-    function GetEffectInvalidRectangleCount(effect: ID2D1Effect;
-                                            out rectangleCount: UINT32): HResult; stdcall;
+    function GetEffectInvalidRectangles(effect: ID2D1Effect; rectangles: PD2D1_RECT_F; rectanglesCount: UINT32): HRESULT; stdcall; overload;
 
-    function GetEffectInvalidRectangles(effect: ID2D1Effect;
-                                        rectangles: PD2D1_RECT_F;
-                                        rectanglesCount: UINT32): HResult; stdcall;
+    function GetEffectRequiredInputRectangles(renderEffect: ID2D1Effect; renderImageRectangle: PD2D1_RECT_F; inputDescriptions: PD2D1_EFFECT_INPUT_DESCRIPTION; requiredInputRects: PD2D1_RECT_F; inputCount: UINT32): HRESULT; stdcall; overload;
 
-    function GetEffectRequiredInputRectangles(renderEffect: ID2D1Effect;
-                                              renderImageRectangle: D2D1_RECT_F;
-                                              inputDescriptions: PD2D1_EFFECT_INPUT_DESCRIPTION;
-                                              requiredInputRects: PD2D1_RECT_F;
-                                              inputCount: UINT32): HResult; stdcall;
-
-    procedure FillOpacityMask(opacityMask: ID2D1Bitmap;
-                              brush: ID2D1Brush;
-                              destinationRectangle: PD2D1_RECT_F = nil;
-                              sourceRectangle: PD2D1_RECT_F = nil); stdcall;
-
+    procedure FillOpacityMask(opacityMask: ID2D1Bitmap; brush: ID2D1Brush; destinationRectangle: PD2D1_RECT_F; sourceRectangle: PD2D1_RECT_F); stdcall; overload;
   end;
   IID_ID2D1DeviceContext = ID2D1DeviceContext;
   {$EXTERNALSYM IID_ID2D1DeviceContext}
@@ -1341,27 +1146,16 @@ type
   {$EXTERNALSYM ID2D1Device}
   ID2D1Device = interface(ID2D1Resource)
   ['{47dd575d-ac05-4cdd-8049-9b02cd16f44c}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function CreateDeviceContext(options: D2D1_DEVICE_CONTEXT_OPTIONS; out deviceContext: ID2D1DeviceContext): HRESULT; stdcall; overload;
 
-    // Creates a new device context with no initially assigned target.
-    function CreateDeviceContext(options: D2D1_DEVICE_CONTEXT_OPTIONS;
-                                 out deviceContext: ID2D1DeviceContext): HResult; stdcall;
+    function CreatePrintControl(wicFactory: IWICImagingFactory; documentTarget: IPrintDocumentPackageTarget; printControlProperties: PD2D1_PRINT_CONTROL_PROPERTIES; out printControl: ID2D1PrintControl): HRESULT; stdcall; overload;
 
-    // Creates a D2D print control.
-    function CreatePrintControl(wicFactory: IWICImagingFactory;
-                                documentTarget: IPrintDocumentPackageTarget;
-                                printControlProperties: D2D1_PRINT_CONTROL_PROPERTIES;
-                                out printControl: ID2D1PrintControl): HResult; stdcall;
+    procedure SetMaximumTextureMemory(maximumInBytes: UINT64); stdcall; overload;
 
-    // Sets the maximum amount of texture memory to maintain before evicting caches.
-    procedure SetMaximumTextureMemory(maximumInBytes: UINT64); stdcall;
+    function GetMaximumTextureMemory(): UINT64; stdcall; overload;
 
-    // Gets the maximum amount of texture memory to maintain before evicting caches.
-    function GetMaximumTextureMemory(): UINT64; stdcall;
-
-    // Clears all resources that are cached but not held in use by the application
-    // through an interface reference.
-    procedure ClearResources(millisecondsSinceUse: UINT32 = 0); stdcall;
-
+    procedure ClearResources(millisecondsSinceUse: UINT32); stdcall; overload;
   end;
   IID_ID2D1Device = ID2D1Device;
   {$EXTERNALSYM IID_ID2D1Device}
@@ -1375,70 +1169,26 @@ type
   {$EXTERNALSYM ID2D1Factory1}
   ID2D1Factory1 = interface(ID2D1Factory)
   ['{bb12d362-daee-4b9a-aa1d-14ba401cfa1f}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function CreateDevice(dxgiDevice: IDXGIDevice; out d2dDevice: ID2D1Device): HRESULT; stdcall; overload;
 
-    // This creates a new Direct2D device from the given IDXGIDevice.
-    function CreateDevice(dxgiDevice: IDXGIDevice;
-                          out d2dDevice: ID2D1Device): HResult; stdcall;
+    function CreateStrokeStyle(strokeStyleProperties: PD2D1_STROKE_STYLE_PROPERTIES1; dashes: PSingle; dashesCount: UINT32; out strokeStyle: ID2D1StrokeStyle1): HRESULT; stdcall; overload;
 
-    // This creates a stroke style with the ability to preserve stroke width in various
-    // ways.
-    function CreateStrokeStyle(const strokeStyleProperties: D2D1_STROKE_STYLE_PROPERTIES1;
-                               dashes: PSingle;
-                               dashesCount: UINT32;
-                               out strokeStyle: ID2D1StrokeStyle1): HResult; stdcall;
+    function CreatePathGeometry(out pathGeometry: ID2D1PathGeometry1): HRESULT; stdcall; overload;
 
-    // Creates a path geometry with new operational methods.
-    function CreatePathGeometry(out pathGeometry: ID2D1PathGeometry1): HResult; stdcall;
+    function CreateDrawingStateBlock(drawingStateDescription: PD2D1_DRAWING_STATE_DESCRIPTION1; textRenderingParams: IDWriteRenderingParams; out drawingStateBlock: ID2D1DrawingStateBlock1): HRESULT; stdcall; overload;
 
-    // Creates a new drawing state block, this can be used in subsequent
-    // SaveDrawingState and RestoreDrawingState operations on the render target.
-    function CreateDrawingStateBlock(drawingStateDescription: D2D1_DRAWING_STATE_DESCRIPTION1;
-                                     textRenderingParams: IDWriteRenderingParams;
-                                     out drawingStateBlock: ID2D1DrawingStateBlock1): HResult; stdcall;
+    function CreateGdiMetafile(metafileStream: IStream; out metafile: ID2D1GdiMetafile): HRESULT; stdcall; overload;
 
-    // Creates a new GDI metafile.
-    function CreateGdiMetafile(metafileStream: IStream;
-                               out metafile: ID2D1GdiMetafile): HResult; stdcall;
+    function RegisterEffectFromStream(const classId: TGUID; propertyXml: IStream; bindings: PD2D1_PROPERTY_BINDING; bindingsCount: UINT32; effectFactory: PD2D1_EFFECT_FACTORY): HRESULT; stdcall; overload;
 
-    // This globally registers the given effect. The effect can later be instantiated
-    // by using the registered class id. The effect registration is reference counted.
-    function RegisterEffectFromStream(const classId: TGuid;
-                                      propertyXml: IStream;
-                                      bindings: PD2D1_PROPERTY_BINDING; // pointer to array
-                                      bindingsCount: UINT32;
-                                      effectFactory: PD2D1_EFFECT_FACTORY): HResult; stdcall;
+    function RegisterEffectFromString(const classId: TGUID; propertyXml: PWideChar; bindings: PD2D1_PROPERTY_BINDING; bindingsCount: UINT32; effectFactory: PD2D1_EFFECT_FACTORY): HRESULT; stdcall; overload;
 
-    // This globally registers the given effect. The effect can later be instantiated
-    // by using the registered class id. The effect registration is reference counted.
-    function RegisterEffectFromString(const classId: TGuid;
-                                      propertyXml: PWidechar;
-                                      bindings: PD2D1_PROPERTY_BINDING; // pointer to array
-                                      bindingsCount: UINT32;
-                                      effectFactory: PD2D1_EFFECT_FACTORY): HResult; stdcall;
+    function UnregisterEffect(const classId: TGUID): HRESULT; stdcall; overload;
 
-    // This unregisters the given effect by its class id, you need to call
-    // UnregisterEffect for every call to ID2D1Factory1.RegisterEffectFromStream and
-    // ID2D1Factory1.RegisterEffectFromString to completely unregister it.
-    function UnregisterEffect(classId: TGuid): HResult; stdcall;
+    function GetRegisteredEffects(effects: PCLSID; effectsCount: UINT32; effectsReturned: PUINT32; effectsRegistered: PUINT32): HRESULT; stdcall; overload;
 
-    // This returns all of the registered effects in the process, including any
-    // built-in effects.
-
-    // <param name="effectsReturned">The number of effects returned into the passed in
-    // effects array.</param>
-    // <param name="effectsRegistered">The number of effects currently registered in
-    // the system.</param>
-    function GetRegisteredEffects({out} effects: PGuid; // When this method returns, contains an array of effects. nils if no effects are retrieved.
-                                  effectsCount: UINT32;
-                                  {out_opt} out effectsReturned: UINT32;
-                                  {out_opt} out effectsRegistered: UINT32): HResult; stdcall;
-
-    // This retrieves the effect properties for the given effect, all of the effect
-    // properties will be set to a default value since an effect is not instantiated to
-    // implement the returned property interface.
-    function GetEffectProperties(effectId: TGuid;
-                                 out properties: ID2D1Properties): HResult; stdcall;
-
+    function GetEffectProperties(const effectId: TGUID; out properties: ID2D1Properties): HRESULT; stdcall; overload;
   end;
   IID_ID2D1Factory1 = ID2D1Factory1;
   {$EXTERNALSYM IID_ID2D1Factory1}
@@ -1453,17 +1203,12 @@ type
   {$EXTERNALSYM ID2D1Multithread}
   ID2D1Multithread = interface(IUnknown)
   ['{31e6e7bc-e0ff-4d46-8c64-a0a8c41c15d3}']
+    // SDK native virtual slots; inline convenience overloads are excluded.
+    function GetMultithreadProtected(): BOOL; stdcall; overload;
 
-    // Returns whether the D2D factory was created with
-    // D2D1_FACTORY_TYPE_MULTI_THREADED.
-    function GetMultithreadProtected(): BOOL; stdcall;
+    procedure Enter(); stdcall; overload;
 
-      // Enters the D2D API critical section, if it exists.
-    procedure Enter(); stdcall;
-
-      // Leaves the D2D API critical section, if it exists.
-    procedure Leave(); stdcall;
-
+    procedure Leave(); stdcall; overload;
   end;
   IID_ID2D1Multithread = ID2D1Multithread;
   {$EXTERNALSYM IID_ID2D1Multithread}
@@ -1474,33 +1219,23 @@ type
   // FUNCTIONS ////////////////////////////////////////////
 
 
-  function D2D1CreateDevice(dxgiDevice: IDXGIDevice;
-                            creationProperties: PD2D1_CREATION_PROPERTIES;
-                            out d2dDevice: ID2D1Device): HResult; stdcall;
+  function D2D1CreateDevice(dxgiDevice: IDXGIDevice; creationProperties: PD2D1_CREATION_PROPERTIES; out d2dDevice: ID2D1Device): HRESULT; stdcall;
   {$EXTERNALSYM D2D1CreateDevice}
 
 
-  function D2D1CreateDeviceContext(dxgiSurface: IDXGISurface;
-                                   creationProperties: D2D1_CREATION_PROPERTIES;
-                                   out d2dDeviceContext: ID2D1DeviceContext): HResult; stdcall;
+  function D2D1CreateDeviceContext(dxgiSurface: IDXGISurface; creationProperties: PD2D1_CREATION_PROPERTIES; out d2dDeviceContext: ID2D1DeviceContext): HRESULT; stdcall;
   {$EXTERNALSYM D2D1CreateDeviceContext}
 
-  function D2D1ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE;
-                                 destinationColorSpace: D2D1_COLOR_SPACE;
-                                 color: D2D1_COLOR_F): D2D1_COLOR_F; stdcall;
+  function D2D1ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE; destinationColorSpace: D2D1_COLOR_SPACE; color: PD2D1_COLOR_F): D2D1_COLOR_F; stdcall;
   {$EXTERNALSYM D2D1ConvertColorSpace}
 
-  procedure D2D1SinCos(angle: Single;
-                       out s: Single;
-                       out c: Single); stdcall;
+  procedure D2D1SinCos(angle: Single; s: PSingle; c: PSingle); stdcall;
   {$EXTERNALSYM D2D1SinCos}
 
   function D2D1Tan(angle: Single): Single; stdcall;
   {$EXTERNALSYM D2D1Tan}
 
-  function D2D1Vec3Length(x: Single;
-                          y: Single;
-                          z: Single): Single; stdcall;
+  function D2D1Vec3Length(x: Single; y: Single; z: Single): Single; stdcall;
   {$EXTERNALSYM D2D1Vec3Length}
 
 
@@ -1516,12 +1251,12 @@ const
 
 
 {$WARN SYMBOL_PLATFORM OFF}
-  function D2D1CreateDevice;        external D2D1lib name 'CreateDevice' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function D2D1CreateDevice;        external D2D1lib name 'D2D1CreateDevice' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D2D1CreateDeviceContext; external D2D1lib name 'D2D1CreateDeviceContext' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D2D1ConvertColorSpace;   external D2D1lib name 'D2D1ConvertColorSpace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  procedure D2D1SinCos;             external D2D1lib name 'D2D1SinCos' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function D2D1Tan;                 external D2D1lib name 'D2D1Tan' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function D2D1Vec3Length;          external D2D1lib name 'D2D1Vec3Length' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  procedure D2D1SinCos;             external D2D1lib name 'D2D1SinCos';
+  function D2D1Tan;                 external D2D1lib name 'D2D1Tan';
+  function D2D1Vec3Length;          external D2D1lib name 'D2D1Vec3Length';
 {$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.

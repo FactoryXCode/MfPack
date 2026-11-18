@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: ApiSet Contract for api-ms-win-mm-joystick-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -490,27 +490,27 @@ type
   { joystick function prototypes }
 
   function joyGetPosEx(uJoyID: UINT;
-                      {_Out_} pji: LPJOYINFOEX): MMRESULT; stdcall;
+                       pji: LPJOYINFOEX): MMRESULT; stdcall;
 
-  function joyGetNumDevs(): MMRESULT; stdcall;
+  function joyGetNumDevs(): UINT; stdcall;
 
   function joyGetDevCapsA(uJoyID: UINT_PTR;
-                          {_Out_} pjc: LPJOYCAPSA;
+                          pjc: LPJOYCAPSA;
                           cbjc: UINT): MMRESULT; stdcall;
 
   function joyGetDevCapsW(uJoyID: UINT_PTR;
-                          {_Out_} pjc: LPJOYCAPSW;
+                          pjc: LPJOYCAPSW;
                           cbjc: UINT): MMRESULT; stdcall;
   { Delphi }
   function joyGetDevCaps(uJoyID: UINT_PTR;
-                         {_Out_} pjc: LPJOYCAPSW;
+                         pjc: LPJOYCAPSW;
                          cbjc: UINT): MMRESULT; stdcall;
 
   function joyGetPos(uJoyID: UINT;
-                     {_Out_} pji: LPJOYINFO): MMRESULT; stdcall;
+                     pji: LPJOYINFO): MMRESULT; stdcall;
 
   function joyGetThreshold(uJoyID: UINT;
-                           {_Out_} puThreshold: PUINT): MMRESULT; stdcall;
+                           puThreshold: PUINT): MMRESULT; stdcall;
 
   function joyReleaseCapture(uJoyID: UINT): MMRESULT; stdcall;
 

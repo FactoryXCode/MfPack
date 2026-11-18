@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectWrite
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1052,9 +1052,9 @@ type
   // context of the first field.
   PDWRITE_PANOSE = ^DWRITE_PANOSE;
   DWRITE_PANOSE = record
-    values: array [0..9] of UINT8;
-    //familyKind: UINT8;  // this is the only field that never changes meaning
-    case familyKind: UINT8 of
+    case Integer of
+      0:(values: array [0..9] of UINT8);
+      1:(familyKind: UINT8);
       2:(_familyKind: UINT8;
          serifStyle: UINT8;
          weight: UINT8;
@@ -1315,7 +1315,7 @@ type
     // these and continue on with font fallback in your layout if the metrics
     // for the glyph are zero.
     //
-    function GetEudcFontCollection(fontCollection: IDWriteFontCollection;
+    function GetEudcFontCollection(out fontCollection: IDWriteFontCollection;
                                    checkForUpdates: BOOL = FALSE): HResult; stdcall;
 
 
@@ -1337,7 +1337,7 @@ type
                                          clearTypeLevel: Single;
                                          pixelGeometry: DWRITE_PIXEL_GEOMETRY;
                                          renderingMode: DWRITE_RENDERING_MODE;
-                                         out renderingParams: IDWriteRenderingParams1): HResult; stdcall;
+                                         out renderingParams: IDWriteRenderingParams1): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFactory1 = IDWriteFactory1;
@@ -1361,7 +1361,7 @@ type
     // These metrics are applicable to all the glyphs within a font,
     // and are used by applications for layout calculations.
     // <param name="fontMetrics">Metrics structure to fill in.</param>
-    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS1); stdcall;
+    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS1); stdcall; overload;
 
     // Gets common metrics for the font in design units.
     // These metrics are applicable to all the glyphs within a font,
@@ -1379,7 +1379,7 @@ type
     function GetGdiCompatibleMetrics(emSize: Single;
                                      pixelsPerDip: Single;
                                      transform: PDWRITE_MATRIX;
-                                     out fontMetrics: DWRITE_FONT_METRICS1): HResult; stdcall;
+                                     out fontMetrics: DWRITE_FONT_METRICS1): HResult; stdcall; overload;
 
 
     // Gets caret metrics for the font in design units. These are used by
@@ -1405,7 +1405,7 @@ type
     // Standard HRESULT error code.
     function GetUnicodeRanges(maxRangeCount: UINT32;
                               unicodeRanges: PDWRITE_UNICODE_RANGE;
-                              actualRangeCount: UINT32): HResult; stdcall;
+                              out actualRangeCount: UINT32): HResult; stdcall;
 
     // Returns True if the font is monospaced, meaning its characters are the
     // same fixed-pitch width (non-proportional).
@@ -1425,8 +1425,8 @@ type
     // Standard HRESULT error code.
 
     function GetDesignGlyphAdvances(glyphCount: UINT32;
-                                    glyphIndices: UINT16;
-                                    glyphAdvances: INT32;
+                                    glyphIndices: PWORD;
+                                    out glyphAdvances: INT32;
                                     isSideways: BOOL = FALSE): HResult; stdcall;
 
     // Returns the pixel-aligned advances for a sequences of glyphs, the same
@@ -1462,7 +1462,7 @@ type
                                            useGdiNatural: BOOL;
                                            isSideways: BOOL;
                                            glyphCount: UINT32;
-                                           glyphIndices: UINT16;
+                                           glyphIndices: PWORD;
                                            out glyphAdvances: INT32): HResult; stdcall;
 
     // Retrieves the kerning pair adjustments from the font's kern table.
@@ -1487,7 +1487,7 @@ type
     //
     // Standard HRESULT error code.
     function GetKerningPairAdjustments(glyphCount: UINT32;
-                                       glyphIndices: UINT16;
+                                       glyphIndices: PWORD;
                                        out glyphAdvanceAdjustments: INT32): HResult; stdcall;
 
     // Returns whether or not the font supports pair-kerning.
@@ -1518,11 +1518,11 @@ type
     function GetRecommendedRenderingMode(fontEmSize: Single;
                                          dpiX: Single;
                                          dpiY: Single;
-                                         transform: DWRITE_MATRIX;
+                                         transform: PDWRITE_MATRIX;
                                          isSideways: BOOL;
                                          outlineThreshold: DWRITE_OUTLINE_THRESHOLD;
                                          measuringMode: DWRITE_MEASURING_MODE;
-                                         out renderingMode: DWRITE_RENDERING_MODE): HResult; stdcall;
+                                         out renderingMode: DWRITE_RENDERING_MODE): HResult; stdcall; overload;
 
     // Retrieves the vertical forms of the nominal glyphs retrieved from
     // GetGlyphIndices, using the font's 'vert' table. This is used in
@@ -1537,8 +1537,8 @@ type
     //
     // Standard HRESULT error code.
     function GetVerticalGlyphVariants(glyphCount: UINT32;
-                                      nominalGlyphIndices: UINT16;
-                                      verticalGlyphIndices: UINT16): HResult; stdcall;
+                                      nominalGlyphIndices: PWORD;
+                                      verticalGlyphIndices: PWORD): HResult; stdcall;
 
     // Returns whether or not the font has any vertical glyph variants.
     // Remarks
@@ -1567,7 +1567,7 @@ type
     // These metrics are applicable to all the glyphs within a font,
     // and are used by applications for layout calculations.
     // <param name="fontMetrics">Metrics structure to fill in.</param>
-    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS1); stdcall;
+    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS1); stdcall; overload;
 
     // Gets the PANOSE values from the font, used for font selection and
     // matching.
@@ -1577,7 +1577,7 @@ type
     // proportion inferred on other values. If the font does not specify them,
     // they are all set to 'any' (0).
     //
-    procedure GetPanose(out panose: DWRITE_PANOSE); stdcall;
+    procedure GetPanose(out panose: DWRITE_PANOSE); stdcall; overload;
 
     // Returns the list of character ranges supported by the font, which is
     // useful for scenarios like character picking, glyph display, and
@@ -1594,8 +1594,8 @@ type
     //
     // Standard HRESULT error code.
     function GetUnicodeRanges(maxRangeCount: UINT32;
-                              unicodeRanges: PDWRITE_UNICODE_RANGE; // pointer to array
-                              actualRangeCount: UINT32): HResult; stdcall;
+                              unicodeRanges: PDWRITE_UNICODE_RANGE; 
+                              out actualRangeCount: UINT32): HResult; stdcall;
 
     // Returns True if the font is monospaced, meaning its characters are the
     // same fixed-pitch width (non-proportional).
@@ -1654,11 +1654,11 @@ type
                                    minimumAdvanceWidth: Single;
                                    textLength: UINT32;
                                    glyphCount: UINT32;
-                                   clusterMap: UINT16;
-                                   glyphAdvances: Single;
-                                   glyphOffsets: DWRITE_GLYPH_OFFSET;
-                                   glyphProperties: DWRITE_SHAPING_GLYPH_PROPERTIES;
-                                   modifiedGlyphAdvances: Single;
+                                   clusterMap: PWORD;
+                                   glyphAdvances: PSingle;
+                                   glyphOffsets: PDWRITE_GLYPH_OFFSET;
+                                   glyphProperties: PDWRITE_SHAPING_GLYPH_PROPERTIES;
+                                   modifiedGlyphAdvances: PSingle;
                                    modifiedGlyphOffsets: PDWRITE_GLYPH_OFFSET): HResult; stdcall;
 
     // Retrieves the given baseline from the font.
@@ -1683,7 +1683,7 @@ type
                          isVertical: BOOL;
                          isSimulationAllowed: BOOL;
                          scriptAnalysis: DWRITE_SCRIPT_ANALYSIS;
-                         localeName: WideChar;
+                         localeName: PWideChar;
                          out baselineCoordinate: INT32;
                          out exists: BOOL): HResult; stdcall;
 
@@ -1715,7 +1715,7 @@ type
     //
     function GetGlyphOrientationTransform(glyphOrientationAngle: DWRITE_GLYPH_ORIENTATION_ANGLE;
                                           isSideways: BOOL;
-                                          out transform: DWRITE_MATRIX): HResult; stdcall;
+                                          transform: PDWRITE_MATRIX): HResult; stdcall; overload;
 
     // Returns the properties for a given script.
     // <param name="scriptAnalysis">The script for a run of text returned
@@ -1724,7 +1724,7 @@ type
     // Returns properties for the given script. If the script is invalid,
     // it returns generic properties for the unknown script and E_INVALIDARG.
     function GetScriptProperties(scriptAnalysis: DWRITE_SCRIPT_ANALYSIS;
-                                 out scriptProperties: PDWRITE_SCRIPT_PROPERTIES): HResult; stdcall;
+                                 scriptProperties: PDWRITE_SCRIPT_PROPERTIES): HResult; stdcall;
 
     // Determines the complexity of text, and whether or not full script
     // shaping needs to be called (GetGlyphs).
@@ -1754,12 +1754,12 @@ type
     //
     // Standard HRESULT error code.
 
-    function GetTextComplexity(textString: WideChar;
+    function GetTextComplexity(textString: PWideChar;
                                textLength: UINT32;
                                fontFace: IDWriteFontFace;
-                               isTextSimple: BOOL;
-                               textLengthRead: UINT32;
-                               glyphIndices: UINT16): HResult; stdcall;
+                               out isTextSimple: BOOL;
+                               out textLengthRead: UINT32;
+                               glyphIndices: PWORD): HResult; stdcall;
 
     // Retrieves justification opportunity information for each of the glyphs
     // given the text and shaping glyph properties.
@@ -1785,10 +1785,10 @@ type
                                            scriptAnalysis: DWRITE_SCRIPT_ANALYSIS;
                                            textLength: UINT32;
                                            glyphCount: UINT32;
-                                           textString: WideChar;
-                                           clusterMap: UINT16;
-                                           glyphProperties: DWRITE_SHAPING_GLYPH_PROPERTIES;
-                                           out justificationOpportunities: DWRITE_JUSTIFICATION_OPPORTUNITY): HResult; stdcall;
+                                           textString: PWideChar;
+                                           clusterMap: PWORD;
+                                           glyphProperties: PDWRITE_SHAPING_GLYPH_PROPERTIES;
+                                           justificationOpportunities: PDWRITE_JUSTIFICATION_OPPORTUNITY): HResult; stdcall;
 
     // Justifies an array of glyph advances to fit the line width.
     // <param name="lineWidth">Width of the line.</param>
@@ -1808,11 +1808,11 @@ type
     // Standard HRESULT error code.
     function JustifyGlyphAdvances(lineWidth: Single;
                                   glyphCount: UINT32;
-                                  justificationOpportunities: DWRITE_JUSTIFICATION_OPPORTUNITY;
-                                  glyphAdvances: Single;
-                                  glyphOffsets: DWRITE_GLYPH_OFFSET;
-                                  out justifiedGlyphAdvances: PSingle;
-                                  out justifiedGlyphOffsets: PDWRITE_GLYPH_OFFSET): HResult; stdcall;
+                                  justificationOpportunities: PDWRITE_JUSTIFICATION_OPPORTUNITY;
+                                  glyphAdvances: PSingle;
+                                  glyphOffsets: PDWRITE_GLYPH_OFFSET;
+                                  justifiedGlyphAdvances: PSingle;
+                                  justifiedGlyphOffsets: PDWRITE_GLYPH_OFFSET): HResult; stdcall;
 
     // Fills in new glyphs for complex scripts where justification increased
     // the advances of glyphs, such as Arabic with kashida.
@@ -1855,16 +1855,16 @@ type
                                 textLength: UINT32;
                                 glyphCount: UINT32;
                                 maxGlyphCount: UINT32;
-                                clusterMap: UINT16;
-                                glyphIndices: UINT16;
-                                glyphAdvances: Single;
-                                justifiedGlyphAdvances: Single;
-                                justifiedGlyphOffsets: DWRITE_GLYPH_OFFSET;
-                                glyphProperties: DWRITE_SHAPING_GLYPH_PROPERTIES;
+                                clusterMap: PWORD;
+                                glyphIndices: PWORD;
+                                glyphAdvances: PSingle;
+                                justifiedGlyphAdvances: PSingle;
+                                justifiedGlyphOffsets: PDWRITE_GLYPH_OFFSET;
+                                glyphProperties: PDWRITE_SHAPING_GLYPH_PROPERTIES;
                                 out actualGlyphCount: UINT32;
                                 out modifiedClusterMap: UINT16;
                                 out modifiedGlyphIndices: UINT16;
-                                out modifiedGlyphAdvances: Single;
+                                modifiedGlyphAdvances: PSingle;
                                 out modifiedGlyphOffsets: DWRITE_GLYPH_OFFSET): HResult; stdcall;
 
   end;
@@ -1977,7 +1977,7 @@ type
     // <param name="textRange">The position range of the current format.</param>
     // Standard HRESULT error code.
     function GetPairKerning(currentPosition: UINT32;
-                            out isPairKerningEnabled: PBOOL;
+                            out isPairKerningEnabled: BOOL;
                             textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
 
     // Sets the spacing between characters.

@@ -10,7 +10,7 @@
 // Release date: 31-07-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: .
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -90,48 +90,42 @@ type
   PICameraUIControlEventCallback = ^ICameraUIControlEventCallback;
 
   PCameraUIControlMode = ^CameraUIControlMode;
-  CameraUIControlMode = (
-    Browse = 0,
-    Linear = (Browse + 1)
-  );
+  CameraUIControlMode = (Browse = 0,
+                         Linear = (Browse + 1)
+                        );
   {$EXTERNALSYM CameraUIControlMode}
 
   PCameraUIControlLinearSelectionMode = ^CameraUIControlLinearSelectionMode;
-  CameraUIControlLinearSelectionMode = (
-    Single   = 0,
-    Multiple = (Single + 1)
-  );
+  CameraUIControlLinearSelectionMode = (Single   = 0,
+                                        Multiple = (Single + 1)
+                                       );
   {$EXTERNALSYM CameraUIControlLinearSelectionMode}
 
   PCameraUIControlCaptureMode = ^CameraUIControlCaptureMode;
-  CameraUIControlCaptureMode = (
-    PhotoOrVideo = 0,
-    Photo        = (PhotoOrVideo + 1),
-    Video        = (Photo + 1)
-  );
+  CameraUIControlCaptureMode = (PhotoOrVideo = 0,
+                                Photo        = (PhotoOrVideo + 1),
+                                Video        = (Photo + 1)
+                               );
   {$EXTERNALSYM CameraUIControlCaptureMode}
 
 
   PCameraUIControlPhotoFormat = ^CameraUIControlPhotoFormat;
-  CameraUIControlPhotoFormat = (
-    Jpeg   = 0,
-    Png    = (Jpeg + 1),
-    JpegXR = (Png + 1)
-  );
+  CameraUIControlPhotoFormat = (Jpeg   = 0,
+                                Png    = (Jpeg + 1),
+                                JpegXR = (Png + 1)
+                               );
   {$EXTERNALSYM CameraUIControlPhotoFormat}
 
   PCameraUIControlVideoFormat = ^CameraUIControlVideoFormat;
-  CameraUIControlVideoFormat = (
-    Mp4 = 0,
-    Wmv = (Mp4 + 1)
-  );
+  CameraUIControlVideoFormat = (Mp4 = 0,
+                                Wmv = (Mp4 + 1)
+                               );
   {$EXTERNALSYM CameraUIControlVideoFormat}
 
   PCameraUIControlViewType = ^CameraUIControlViewType;
-  CameraUIControlViewType = (
-    SingleItem = 0,
-    ItemList   = (SingleItem + 1)
-  );
+  CameraUIControlViewType = (SingleItem = 0,
+                             ItemList   = (SingleItem + 1)
+                            );
   {$EXTERNALSYM CameraUIControlViewType}
 
 
@@ -144,9 +138,9 @@ type
 
     procedure OnSuspendComplete(); stdcall;
 
-    procedure OnItemCaptured(var pszPath: LPCWSTR); stdcall;
+    procedure OnItemCaptured(pszPath: LPCWSTR); stdcall;
 
-    procedure OnItemDeleted(var pszPath: LPCWSTR); stdcall;
+    procedure OnItemDeleted(pszPath: LPCWSTR); stdcall;
 
     procedure OnClosed(); stdcall;
 
@@ -158,14 +152,14 @@ type
   ICameraUIControl = interface(IUnknown)
   ['{B8733ADF-3D68-4b8f-BB08-E28A0BED0376}']
 
-    function Show(const pWindow: IUnknown;
+    function Show(pWindow: IUnknown;
                   mode: CameraUIControlMode;
                   selectionMode: CameraUIControlLinearSelectionMode;
                   captureMode: CameraUIControlCaptureMode;
                   photoFormat: CameraUIControlPhotoFormat;
                   videoFormat: CameraUIControlVideoFormat;
                   bHasCloseButton: BOOL;
-                  {optional} pEventCallback: PICameraUIControlEventCallback = Nil): HResult; stdcall;
+                  {optional} pEventCallback: ICameraUIControlEventCallback = Nil): HResult; stdcall;
 
     function Close(): HResult; stdcall;
 
@@ -177,7 +171,7 @@ type
 
     function GetActiveItem(out pbstrActiveItemPath: BSTR): HResult; stdcall;
 
-    function GetSelectedItems({out} ppSelectedItemPaths: PSAFEARRAY): HResult; stdcall;
+    function GetSelectedItems(out ppSelectedItemPaths: PSAFEARRAY): HResult; stdcall;
 
     function RemoveCapturedItem(pszPath: LPCWSTR): HResult; stdcall;
 

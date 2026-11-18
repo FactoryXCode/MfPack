@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: The main form where all user (front end) contol takes place.
 //              It also reads and write the MFT parameters from/to the ini file.
@@ -24,14 +24,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/WasApiPlayer/Example3
+// Related projects: MfPackX410/Samples/WasApiPlayer/Example3
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705

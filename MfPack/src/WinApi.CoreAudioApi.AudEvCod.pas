@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: List of Audio device error event codes and the expected params.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -80,21 +80,21 @@ const
 
 type
   PSNDDEV_ERR = ^SNDDEV_ERR;
-  _tagSND_DEVICE_ERROR           = (
-    SNDDEV_ERROR_Open            = 1,
-    SNDDEV_ERROR_Close           = 2,
-    SNDDEV_ERROR_GetCaps         = 3,
-    SNDDEV_ERROR_PrepareHeader   = 4,
-    SNDDEV_ERROR_UnprepareHeader = 5,
-    SNDDEV_ERROR_Reset           = 6,
-    SNDDEV_ERROR_Restart         = 7,
-    SNDDEV_ERROR_GetPosition     = 8,
-    SNDDEV_ERROR_Write           = 9,
-    SNDDEV_ERROR_Pause           = 10,
-    SNDDEV_ERROR_Stop            = 11,
-    SNDDEV_ERROR_Start           = 12,
-    SNDDEV_ERROR_AddBuffer       = 13,
-    SNDDEV_ERROR_Query           = 14);
+  _tagSND_DEVICE_ERROR = (SNDDEV_ERROR_Open = 1,
+                          SNDDEV_ERROR_Close = 2,
+                          SNDDEV_ERROR_GetCaps = 3,
+                          SNDDEV_ERROR_PrepareHeader = 4,
+                          SNDDEV_ERROR_UnprepareHeader = 5,
+                          SNDDEV_ERROR_Reset = 6,
+                          SNDDEV_ERROR_Restart = 7,
+                          SNDDEV_ERROR_GetPosition = 8,
+                          SNDDEV_ERROR_Write = 9,
+                          SNDDEV_ERROR_Pause = 10,
+                          SNDDEV_ERROR_Stop = 11,
+                          SNDDEV_ERROR_Start = 12,
+                          SNDDEV_ERROR_AddBuffer = 13,
+                          SNDDEV_ERROR_Query = 14
+                         );
   {$EXTERNALSYM _tagSND_DEVICE_ERROR}
   SNDDEV_ERR = _tagSND_DEVICE_ERROR;
   {$EXTERNALSYM SNDDEV_ERR}

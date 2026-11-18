@@ -10,7 +10,7 @@
 // Release date: 27-02-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: DXGI Debug Message Enumeration.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -80,8 +80,9 @@ uses
 // #if NTDDI_VERSION >= NTDDI_WIN7
 
 type
-  PDXGIMessageId = ^PDXGI_Message_Id;
   PDXGI_Message_Id = ^DXGI_Message_Id;
+  PDXGIMessageId = PDXGI_Message_Id;
+  PPDXGI_Message_Id = ^PDXGI_Message_Id;
   DXGI_Message_Id = DWord;
   {$EXTERNALSYM DXGI_Message_Id}
 const

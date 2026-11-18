@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Errors code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -233,7 +233,7 @@ const
   {$EXTERNALSYM FACILITY_QUIC}
   FACILITY_EAP                        = 66;
   {$EXTERNALSYM FACILITY_EAP}
-  FACILITY_IORING                     = 67;
+  FACILITY_IORING                     = 70;
   {$EXTERNALSYM FACILITY_IORING}
   FACILITY_WINDOWS_DEFENDER           = 80;
   {$EXTERNALSYM FACILITY_WINDOWS_DEFENDER}
@@ -403,7 +403,7 @@ const
   {$EXTERNALSYM FACILITY_WEP}
   FACILITY_SYNCENGINE                 = 2050;
   {$EXTERNALSYM FACILITY_SYNCENGINE}
-  FACILITY_GAME                       = 2051;
+  FACILITY_GAME                       = 2340;
   {$EXTERNALSYM FACILITY_GAME}
   FACILITY_XBOX                       = 2339;
   {$EXTERNALSYM FACILITY_XBOX}
@@ -33875,7 +33875,7 @@ const
   E_UNEXPECTED                        = HRESULT($8000FFFF);
   {$EXTERNALSYM E_UNEXPECTED}
 
-{$IFDEF WIN32}
+{$IF Defined(WIN32) OR Defined(WIN64)}
 
 //
 // MessageId: E_NOTIMPL

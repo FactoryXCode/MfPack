@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: MediaTransform Tool Dialog.
 //
 // Organisation: FactoryX
@@ -20,17 +20,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX320
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
+// SDK version: 10.0.28000.2705
 //
 // Todo: -
 //
@@ -64,17 +64,22 @@ unit MediaTransformToolDlg;
 interface
 
 uses
+
+  {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  {System}
   System.SysUtils,
   System.Variants,
   System.Classes,
+  {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
+  {Dbg}
   WinApi.Dbg.MFTUtils;
 
 type
@@ -87,11 +92,12 @@ type
     cbxChoose: TComboBox;
     procedure butListMFTsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure butExitClick(Sender: TObject);
   private
     { Private declarations }
     FListMFTs: TListMFTs;
   public
-    { Public declarations }
+    destructor Destroy; override;
 
   end;
 
@@ -110,17 +116,17 @@ begin
 
   cbxChoose.Items.Clear();
   // Video
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: All');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: YUY2');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: RGB24');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: NV11');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: NV12');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: NV21');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: H263');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: H264');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: H265');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: VP8');
-  cbxChoose.Items.Append('Video MFT''s for Input:  YUV2, Output: VP9');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: All');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: YUY2');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: RGB24');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: NV11');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: NV12');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: NV21');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: H263');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: H264');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: H265');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: VP8');
+  cbxChoose.Items.Append('Video MFT''s for Input:  YUY2, Output: VP9');
 
   // Audio
   cbxChoose.Items.Append('Audio MFT''s for Input: PCM, Output: All');
@@ -130,6 +136,18 @@ begin
   cbxChoose.Items.Append('Audio MFT''s for input: PCM, output: ALAC');
   cbxChoose.Items.Append('Audio MFT''s for input: PCM, output: OPUS');
 
+  cbxChoose.Style := csDropDownList;
+  cbxChoose.ItemIndex := 0;
+  butExit.OnClick := butExitClick;
+end;
+
+
+procedure TdlgMediaTransformTool.butListMFTsClick(Sender: TObject);
+var
+  I: Integer;
+  Text: UnicodeString;
+begin
+  mmoList.Clear;
   case cbxChoose.ItemIndex of
     // Video
     0: FListMFTs.ListTansforms(FListMFTs.videoYuv, nil);
@@ -152,14 +170,34 @@ begin
     16: FListMFTs.ListTansforms(FListMFTs.audioPCM, @FListMFTs.audioOPUS);
   end;
 
+  if FListMFTs.LastResult < 0 then
+    begin
+      mmoList.Lines.Add('Transform enumeration failed: ' + IntToHex(DWORD(FListMFTs.LastResult),8));
+      Exit;
+    end;
+  for I := 0 to Length(FListMFTs.FriendlyNames) - 1 do
+    begin
+      Text := UnicodeString(FListMFTs.FriendlyNames[I].pwcGuid);
+      if Text = '{00000000-0000-0000-0000-000000000000}' then
+        Text := '(CLSID unavailable)';
+      Text := Text + '  ' + UnicodeString(FListMFTs.FriendlyNames[I].pwcFriendlyName);
+      mmoList.Lines.Add({$IFDEF FPC}UTF8Encode(Text){$ELSE}Text{$ENDIF});
+    end;
+  if mmoList.Lines.Count = 0 then mmoList.Lines.Add('No matching transforms were found.');
 end;
 
 
-procedure TdlgMediaTransformTool.butListMFTsClick(Sender: TObject);
+procedure TdlgMediaTransformTool.butExitClick(Sender: TObject);
 begin
-  mmoList.Clear();
+  Close;
+end;
 
 
+destructor TdlgMediaTransformTool.Destroy;
+begin
+  if dlgMediaTransformTool = Self then dlgMediaTransformTool := nil;
+  FListMFTs.Free;
+  inherited;
 end;
 
 end.

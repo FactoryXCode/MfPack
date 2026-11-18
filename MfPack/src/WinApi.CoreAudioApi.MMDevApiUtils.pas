@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: MMDevApiUtils, Device api helper routines >= Win 8
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -32,7 +32,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -152,6 +152,15 @@ type
 
   TEndPointDeviceArray = array of TEndPointDevice;
 
+  // Entries in MfEnumerateEndpoints carry this real object, never a cast string pointer.
+  TEndpointIdObject = class(TObject)
+  private
+    FId: string;
+  public
+    constructor Create(const AId: string);
+    property Id: string read FId;
+  end;
+
   // "eState" (dwStateMask) as used by IMMDeviceEnumerator.EnumAudioEndpoints
   // Possible values or combinations:
   //   DEVICE_STATE_ACTIVE, DEVICE_STATE_DISABLED, DEVICE_STATE_NOTPRESENT, DEVICE_STATE_UNPLUGGED
@@ -179,6 +188,7 @@ type
   TAudioVolumeEvents = class(TObject)
   private
     hrStatus: HRESULT;
+    FRegistered: Boolean;
     pManager: IAudioSessionManager;
     pControl: IAudioSessionControl;
     pAudioEvents: IAudioSessionEvents;
@@ -211,6 +221,12 @@ type
                               out endpointdevices: TEndPointDeviceArray;
                               out devicesCount: DWord): HRESULT;
 
+  // Returned LPWSTR fields own CoTaskMem allocations. Clear before reuse and on completion.
+  procedure ClearEndpointDevices(var Devices: TEndPointDeviceArray);
+
+  // Frees endpoint ID objects and clears the list.
+  procedure ClearEndpointList(List: TStrings);
+
   // Get audioendpoint by a string containing the endpoint ID.
   // The caller typically obtains this string from the IMMDevice.GetId method (see: GetEndpointDevices) or
   // from one of the methods in the IMMNotificationClient interface.
@@ -238,6 +254,7 @@ type
   function MfGetEndpointFriendlyName(Device: IMMDevice): string;
   function MfDeviceIdToFriendlyName(const DeviceID: string): string;
 
+  // Objects are TEndpointIdObject instances; FPC list display text is UTF-8.
   procedure MfEnumerateEndpoints(DataFlow: EDataFlow;
                                  List: TStrings);
 
@@ -306,7 +323,7 @@ type
   // waveOut device that corresponds to the endpoint device.
   //-----------------------------------------------------------
   function GetWaveOutId(role: ERole;
-                        out pWaveOutId: PInteger): HRESULT;
+                        out pWaveOutId: UINT): HRESULT;
 
   //-----------------------------------------------------------
   // Get the IKsJackDescription interface that describes the
@@ -333,892 +350,477 @@ type
 
 implementation
 
+constructor TEndpointIdObject.Create(const AId: string);
+begin
+  inherited Create;
+  FId := AId;
+end;
 
-// Constructor
 constructor TAudioVolumeEvents.Create(flow: EDataFlow;
                                       role: ERole;
                                       AudioEvents: IAudioSessionEvents);
 var
-  pEnumerator: IMMDeviceEnumerator;
-  pDevice: IMMDevice;
-
+  Enumerator: IMMDeviceEnumerator;
+  Device: IMMDevice;
 begin
   inherited Create;
-
-  hrStatus := S_OK;
-  pManager := Nil;
-  pControl := Nil;
   pAudioEvents := AudioEvents;
-
-try
-
-  if not Assigned(pAudioEvents) then
-    begin
-      hrStatus := E_POINTER;
-      Abort;
-    end;
-
-
-  // Get the enumerator for the audio endpoint devices
-  // on this system.
-  hrStatus := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                               Nil,
-                               CLSCTX_INPROC_SERVER,
-                               IID_IMMDeviceEnumerator,
-                               pEnumerator);
-
-  if Failed(hrStatus) then
-    Abort;
-
-  // Get the audio endpoint device with the specified data-flow
-  // direction (eRender or eCapture) and device role.
-  hrStatus := pEnumerator.GetDefaultAudioEndpoint(flow,
-                                                  role,
-                                                  pDevice);
-  if Failed(hrStatus) then
-    Abort;
-
-  // Get the session manager for the endpoint device.
-  hrStatus := pDevice.Activate(IID_IAudioSessionManager,
-                               CLSCTX_INPROC_SERVER,
-                               Nil,
-                               Pointer(pManager));
-  if Failed(hrStatus) then
-    Abort;
-
-
-  // Get the control interface for the process-specific audio
-  // session with session GUID = GUID_NULL. This is the session
-  // that an audio stream for a DirectSound, DirectShow, waveOut,
-  // or PlaySound application stream belongs to by default.
-  hrStatus := pManager.GetAudioSessionControl(Nil,
-                                              0,
-                                              pControl);
-  if Failed(hrStatus) then
-    Abort;
-
+  hrStatus := E_POINTER;
+  if pAudioEvents = nil then
+    Exit;
+  hrStatus := CoCreateInstance(CLSID_MMDeviceEnumerator,nil,CLSCTX_INPROC_SERVER,
+                               IID_IMMDeviceEnumerator,Enumerator);
+  if FAILED(hrStatus) then
+    Exit;
+  hrStatus := Enumerator.GetDefaultAudioEndpoint(flow,role,Device);
+  if FAILED(hrStatus) then
+    Exit;
+  hrStatus := Device.Activate(IID_IAudioSessionManager,CLSCTX_INPROC_SERVER,nil,Pointer(pManager));
+  if FAILED(hrStatus) then
+    Exit;
+  hrStatus := pManager.GetAudioSessionControl(nil,0,pControl);
+  if FAILED(hrStatus) then
+    Exit;
   hrStatus := pControl.RegisterAudioSessionNotification(pAudioEvents);
-  if Failed(hrStatus) then
-    Abort;
-except
-  // Do nothing
+  FRegistered := SUCCEEDED(hrStatus);
 end;
 
-end;
-
-// Destructor
-destructor TAudioVolumeEvents.Destroy();
+destructor TAudioVolumeEvents.Destroy;
 begin
-  if Assigned(pControl) then
-    begin
-      pControl.UnregisterAudioSessionNotification(pAudioEvents);
-    end;
-  SafeRelease(pManager);
-  SafeRelease(pControl);
+  if FRegistered and (pControl <> nil) then
+    pControl.UnregisterAudioSessionNotification(pAudioEvents);
+  pControl := nil;
+  pManager := nil;
+  pAudioEvents := nil;
   inherited Destroy;
 end;
 
-
-function TAudioVolumeEvents.GetStatus(): HResult;
+function TAudioVolumeEvents.GetStatus(): HRESULT;
 begin
   Result := hrStatus;
 end;
 
-// eof AudioVolumeEvents
-
-
 function GetEndPointDeviceByID(const deviceId: PWideChar;
-                               out audioEndPoint: IMMDevice): HResult;
+                               out audioEndPoint: IMMDevice): HRESULT;
 var
-  pdeviceEnumerator: IMMDeviceEnumerator;
-  hr: HRESULT;
-
+  Enumerator: IMMDeviceEnumerator;
 begin
-  hr := E_FAIL;
-try
-try
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pdeviceEnumerator);
-  if Failed(hr) then
-    Abort;
-
-  hr := pdeviceEnumerator.GetDevice(deviceId,
-                                    audioEndPoint);
-  if Failed(hr) then
-    Abort;
-
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
-  Result := hr;
-end;
+  audioEndPoint := nil;
+  if deviceId = nil then
+    Exit(E_POINTER);
+  Result := CoCreateInstance(CLSID_MMDeviceEnumerator,nil,CLSCTX_ALL,
+                             IID_IMMDeviceEnumerator,Enumerator);
+  if SUCCEEDED(Result) then
+    Result := Enumerator.GetDevice(deviceId,audioEndPoint);
 end;
 
-
-// Get GetEndpointDevices
-// Remarks: the index of endpointdevices indicates also the device index.
-// Parameters
-// flow: eRender, eCapture or eAll.
-// state: value of this parameter is one of the following: DEVICE_STATE_ACTIVE
-//                                                         DEVICE_STATE_DISABLED
-//                                                         DEVICE_STATE_NOTPRESENT
-//                                                         DEVICE_STATE_UNPLUGGED
-// endpointdevices: Dynamic array that holds EndPointDevice properties.
-// devicesCount: Number of specified devices found
-function GetEndpointDevices(const flow: EDataFlow;
-                            state: eState;
-                            out endpointdevices: TEndPointDeviceArray;
-                            out devicesCount: DWord): HRESULT;
-var
-  hr: HResult;
-  pEnumerator: IMMDeviceEnumerator;
-  pCollection: IMMDeviceCollection;
-  pEndpoint: IMMDevice;
-  pProps: IPropertyStore;
-  DevIfaceName: PROPVARIANT;
-  DevDesc: PROPVARIANT;
-  DevName: PROPVARIANT;
-  pwszID: PWideChar;
-  count: UINT;
-  i: Integer;
-  dwState: DWord;
-
-label
-  done;
-
-  procedure CheckHr(hres: HResult);
-    begin
-      if FAILED(hres) then
-        Abort;
-    end;
-
-begin
-  hr := S_OK;
-
-  SetLength(endpointdevices,
-            0);
-
-  if (state = 0) then
-    state := $0000000F; {15 = ALL}
-
-  // Create the enumerator
-  CheckHr(CoCreateInstance(CLSID_MMDeviceEnumerator,
-                           nil,
-                           CLSCTX_ALL,
-                           IID_IMMDeviceEnumerator,
-                           pEnumerator));
-
-  CheckHr(pEnumerator.EnumAudioEndpoints(flow,
-                                         state,
-                                         pCollection));
-
-  CheckHr(pCollection.GetCount(count));
-
-  // No endpoints found.
-  if (count = 0) then
-    begin
-      devicesCount := 0;
-      hr := MF_E_NOT_FOUND;
-      goto done;
-    end;
-
-  // Store devices found
-  devicesCount := count;
-  // expand the array (in case we have an open array)
-  SetLength(endpointdevices,
-            count);
-  // Initialize containers for property values.
-  PropVariantInit(DevIfaceName);
-  PropVariantInit(DevDesc);
-  PropVariantInit(DevName);
-
-  // Each loop gets the properties of an endpoint device.
-  for i := 0 to count -1 do
-    begin
-      // Get pointer to endpoint i.
-      CheckHr(pCollection.Item(i,
-                               pEndpoint));
-      // Get the endpoint ID string.
-      CheckHr(pEndpoint.GetId(pwszID));
-      // Get the endpoint state
-      CheckHr(pEndpoint.GetState(dwState));
-      // Open propertystore, to get device descriptions
-      CheckHr(pEndpoint.OpenPropertyStore(STGM_READ,
-                                          pProps));
-
-      // Get the endpoint's friendly-name property.
-      CheckHr(pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
-                              DevIfaceName));
-      // Get the endpoint's device description property.
-      CheckHr(pProps.GetValue(PKEY_Device_DeviceDesc,
-                              DevDesc));
-      // Get the endpoint's device name property.
-      CheckHr(pProps.GetValue(PKEY_Device_FriendlyName,
-                              DevName));
-
-      // Store endpoint's properties in array.
-      endpointdevices[i].DevInterfaceName := DevIfaceName.pwszVal;
-      endpointdevices[i].DeviceDesc := DevDesc.pwszVal;
-      endpointdevices[i].DeviceName := DevName.pwszVal;
-      endpointdevices[i].pwszID := pwszID;
-      endpointdevices[i].dwState := dwState;
-      endpointdevices[i].sState := GetDeviceStateAsString(dwState);
-      endpointdevices[i].iID := i;
-      endpointdevices[i].DataFlow := EDataFlow(flow);
-      endpointdevices[i].Device := pEndpoint;
-      SafeRelease(pProps);
-      SafeRelease(pEndpoint);
-    end;
-
-done:
-  PropVariantClearSafe(DevIfaceName);
-  PropVariantClearSafe(DevDesc);
-  PropVariantClearSafe(DevName);
-  pwszID := nil;
-  Result := hr;
-end;
-
-
-// Get a reference to the endpoint of the default communication device for
-// rendering an audio stream.
 function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
-                                       Role: eRole = eMultimedia;
+                                       Role: ERole = eMultimedia;
                                        dataFlow: EDataFlow = eRender): HRESULT;
 var
-  pdeviceEnumerator: IMMDeviceEnumerator;
-  hr: HRESULT;
-
+  Enumerator: IMMDeviceEnumerator;
 begin
-  hr := E_FAIL;
-
-try
-try
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pdeviceEnumerator);
-  if Failed(hr) then
-    Abort;
-
-  if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
-    begin
-      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
-                                                      Role,
-                                                      audioEndPoint);
-      if Failed(hr) then
-        Abort;
-    end
-  else
-    hr := E_INVALIDARG;
-
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
-  Result := hr;
-end;
+  audioEndPoint := nil;
+  if (dataFlow <> eRender) and (dataFlow <> eCapture) then
+    Exit(E_INVALIDARG);
+  Result := CoCreateInstance(CLSID_MMDeviceEnumerator,nil,CLSCTX_ALL,
+                             IID_IMMDeviceEnumerator,Enumerator);
+  if SUCCEEDED(Result) then
+    Result := Enumerator.GetDefaultAudioEndpoint(dataFlow,Role,audioEndPoint);
 end;
 
-
-// Same as function GetDefaultEndPointAudioDevice, but with extra option to get the device by ID.
 function GetEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                 const deviceID: string;
-                                Role: eRole = eMultimedia;
+                                Role: ERole = eMultimedia;
                                 dataFlow: EDataFlow = eRender): HRESULT;
-var
-  hr: HRESULT;
-  pdeviceEnumerator: IMMDeviceEnumerator;
-
 begin
-  hr := E_FAIL;
-
-try
-try
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pdeviceEnumerator);
-  if Failed(hr) then
-    Abort;
-
   if deviceID = '' then
-    begin
-
-      if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
-        begin
-
-          hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
-                                                          Role,
-                                                          audioEndPoint);
-          if Failed(hr) then
-            Abort;
-        end
-      else
-        hr := E_INVALIDARG;
-    end
+    Result := GetDefaultEndPointAudioDevice(audioEndPoint,Role,dataFlow)
   else
-    begin
-
-      hr := pdeviceEnumerator.GetDevice((PWideChar(WideString(DeviceId))),
-                                        audioEndPoint);
-    end;
-
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
-  Result := hr;
-end;
+    Result := GetEndPointDeviceByID(PWideChar(deviceID),audioEndPoint);
 end;
 
-
-// Get the device descriptions of a device
 function GetDeviceDescriptions(DefaultDevice: IMMDevice;
-                               const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
+                               const DevicePkey: PROPERTYKEY;
                                out deviceDesc: WideString): HRESULT;
 var
-  hr: HResult;
-  psPropertyStore: IPropertyStore;
-  pvvar: PROPVARIANT;
-
-label
-  done;
-
+  Store: IPropertyStore;
+  Value: PROPVARIANT;
 begin
-  PropVariantInit(pvvar);
-  hr := DefaultDevice.OpenPropertyStore(STGM_READ,
-                                        psPropertyStore);
-  if SUCCEEDED(hr) then
+  deviceDesc := '';
+  if DefaultDevice = nil then
+    Exit(E_POINTER);
+  Result := DefaultDevice.OpenPropertyStore(STGM_READ,Store);
+  if FAILED(Result) then
+    Exit;
+  PropVariantInit(Value);
+  try
+    Result := Store.GetValue(DevicePkey,Value);
+    if SUCCEEDED(Result) then
     begin
-      hr := psPropertyStore.GetValue(DevicePkey,
-                                     pvvar);
-      if FAILED(hr) then
-        begin
-          OleCheck(hr);
-          goto done;
-        end;
-
-      deviceDesc := pvvar.pwszVal;
+      if Value.vt = VT_LPWSTR then
+        deviceDesc := WideString(Value.pwszVal)
+      else if Value.vt <> VT_EMPTY then
+        Result := E_UNEXPECTED;
     end;
-
-done:
-  PropVariantClear(pvvar);
-  Result := hr;
-end;
-
-
-function GetDeviceStateAsString(state: DWord): string;
-begin
-  case state of
-    DEVICE_STATE_ACTIVE:     Result := DEV_STATE_ACTIVE;
-    DEVICE_STATE_DISABLED:   Result := DEV_STATE_DISABLED;
-    DEVICE_STATE_NOTPRESENT: Result := DEV_STATE_NOTPRESENT;
-    DEVICE_STATE_UNPLUGGED:  Result := DEV_STATE_UNPLUGGED;
-    DEVICE_STATEMASK_ALL:    Result := DEV_STATEMASK_ALL;
+  finally
+    PropVariantClear(Value);
   end;
 end;
 
+function DuplicateTaskString(const Value: WideString): LPWSTR;
+var
+  Bytes: SIZE_T;
+begin
+  Bytes := (SIZE_T(Length(Value))+1)*SizeOf(WideChar);
+  Result := CoTaskMemAlloc(Bytes);
+  if Result = nil then
+    raise EOutOfMemory.Create('Endpoint string allocation failed');
+  if Length(Value) = 0 then
+    Result[0] := #0
+  else
+    Move(PWideChar(Value)^,Result^,Bytes);
+end;
+
+procedure ClearEndpointDevices(var Devices: TEndPointDeviceArray);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Devices) do
+  begin
+    CoTaskMemFree(Devices[I].DevInterfaceName);
+    CoTaskMemFree(Devices[I].DeviceDesc);
+    CoTaskMemFree(Devices[I].DeviceName);
+    CoTaskMemFree(Devices[I].pwszID);
+    Devices[I].DevInterfaceName := nil;
+    Devices[I].DeviceDesc := nil;
+    Devices[I].DeviceName := nil;
+    Devices[I].pwszID := nil;
+  end;
+  Devices := nil;
+end;
+
+function GetEndpointDevices(const flow: EDataFlow;
+                            state: eState;
+                            out endpointdevices: TEndPointDeviceArray;
+                            out devicesCount: DWORD): HRESULT;
+var
+  Enumerator: IMMDeviceEnumerator;
+  Collection: IMMDeviceCollection;
+  Device: IMMDevice;
+  Count: UINT;
+  I: UINT;
+  Description: WideString;
+begin
+  endpointdevices := nil;
+  devicesCount := 0;
+  if (flow <> eRender) and (flow <> eCapture) and (flow <> eAll) then
+    Exit(E_INVALIDARG);
+  if state = 0 then
+    state := DEVICE_STATEMASK_ALL;
+  if (state and not DEVICE_STATEMASK_ALL) <> 0 then
+    Exit(E_INVALIDARG);
+  Result := CoCreateInstance(CLSID_MMDeviceEnumerator,nil,CLSCTX_ALL,
+                             IID_IMMDeviceEnumerator,Enumerator);
+  if FAILED(Result) then
+    Exit;
+  Result := Enumerator.EnumAudioEndpoints(flow,state,Collection);
+  if FAILED(Result) then
+    Exit;
+  Result := Collection.GetCount(Count);
+  if FAILED(Result) then
+    Exit;
+  if Count = 0 then
+    Exit(MF_E_NOT_FOUND);
+  SetLength(endpointdevices,Count);
+  try
+    try
+      for I := 0 to Count-1 do
+      begin
+        Result := Collection.Item(I,Device);
+        if FAILED(Result) then
+          Exit;
+        Result := Device.GetId(endpointdevices[I].pwszID);
+        if FAILED(Result) then
+          Exit;
+        Result := Device.GetState(endpointdevices[I].dwState);
+        if FAILED(Result) then
+          Exit;
+        Result := GetDeviceDescriptions(Device,PKEY_DeviceInterface_FriendlyName,Description);
+        if FAILED(Result) then
+          Exit;
+        endpointdevices[I].DevInterfaceName := DuplicateTaskString(Description);
+        Result := GetDeviceDescriptions(Device,PKEY_Device_DeviceDesc,Description);
+        if FAILED(Result) then
+          Exit;
+        endpointdevices[I].DeviceDesc := DuplicateTaskString(Description);
+        Result := GetDeviceDescriptions(Device,PKEY_Device_FriendlyName,Description);
+        if FAILED(Result) then
+          Exit;
+        endpointdevices[I].DeviceName := DuplicateTaskString(Description);
+        endpointdevices[I].sState := GetDeviceStateAsString(endpointdevices[I].dwState);
+        endpointdevices[I].iID := I;
+        Result := GetDeviceDataFlow(Device,endpointdevices[I].DataFlow);
+        if FAILED(Result) then
+          Exit;
+        endpointdevices[I].Device := Device;
+      end;
+      devicesCount := Count;
+      Result := S_OK;
+    except
+      on E: EOutOfMemory do
+        Result := E_OUTOFMEMORY;
+    end;
+  finally
+    if FAILED(Result) then
+    begin
+      ClearEndpointDevices(endpointdevices);
+      devicesCount := 0;
+    end;
+  end;
+end;
+
+function GetDeviceStateAsString(state: DWORD): string;
+begin
+  case state of
+    DEVICE_STATE_ACTIVE: Result := DEV_STATE_ACTIVE;
+    DEVICE_STATE_DISABLED: Result := DEV_STATE_DISABLED;
+    DEVICE_STATE_NOTPRESENT: Result := DEV_STATE_NOTPRESENT;
+    DEVICE_STATE_UNPLUGGED: Result := DEV_STATE_UNPLUGGED;
+    DEVICE_STATEMASK_ALL: Result := DEV_STATEMASK_ALL;
+    else Result := 'Unknown';
+  end;
+end;
 
 function MfGetEndpointFriendlyName(Device: IMMDevice): string;
 var
-  Props: IPropertyStore;
-  Prop: PROPVARIANT;
-
+  Name: WideString;
 begin
-
   Result := '';
-
-  if (Device = nil) then
-    Exit;
-
-  if Succeeded(Device.OpenPropertyStore(STGM_READ,
-                                        Props)) then
-    begin
-
-      if Succeeded(Props.GetValue(PKEY_Device_FriendlyName,
-                                  Prop)) then
-        begin
-
-          Result := Prop.pwszVal;
-          PropVariantClear(Prop);
-        end;
-    end;
+  if SUCCEEDED(GetDeviceDescriptions(Device,PKEY_Device_FriendlyName,Name)) then
+    Result := string(Name);
 end;
-
 
 function MfDeviceIdToFriendlyName(const DeviceID: string): string;
 var
-  Dev: IMMDevice;
-
+  Device: IMMDevice;
 begin
-
   Result := '';
-
-  GetEndPointDeviceByID(PWideChar(DeviceID),
-                        Dev);
-
-  if (Dev <> nil) then
-    Result := MfGetEndpointFriendlyName(Dev);
+  if SUCCEEDED(GetEndPointDeviceByID(PWideChar(DeviceID),Device)) then
+    Result := MfGetEndpointFriendlyName(Device);
 end;
 
+procedure ClearEndpointList(List: TStrings);
+var
+  I: Integer;
+begin
+  if List = nil then
+    Exit;
+  if (List is TStringList) and TStringList(List).OwnsObjects then
+  begin
+    List.Clear;
+    Exit;
+  end;
+  for I := 0 to List.Count-1 do
+    if List.Objects[I] is TEndpointIdObject then
+    begin
+      List.Objects[I].Free;
+      List.Objects[I] := nil;
+    end;
+  List.Clear;
+end;
 
 procedure MfEnumerateEndpoints(DataFlow: EDataFlow;
                                List: TStrings);
 var
-  hr: HResult;
-  Enum: IMMDeviceEnumerator;
-  Col: IMMDeviceCollection;
-  Dev: IMMDevice;
-  Count: UINT;
-  i: Integer;
-  ID: PWideChar;
-  Name: string;
-
+  Devices: TEndPointDeviceArray;
+  Count: DWORD;
+  I: Integer;
+  Entry: TEndpointIdObject;
 begin
-
-  if (List = nil) then
+  if List = nil then
     Exit;
-
-  List.Clear;
-
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator,
-                         Enum);
-
-  if FAILED(hr) then
+  ClearEndpointList(List);
+  if FAILED(GetEndpointDevices(DataFlow,DEVICE_STATE_ACTIVE,Devices,Count)) then
     Exit;
-
-  hr := Enum.EnumAudioEndpoints(DataFlow,
-                                DEVICE_STATE_ACTIVE,
-                                Col);
-  if FAILED(hr) then
-    Exit;
-
-  Col.GetCount(Count);
-
-  for i := 0 to Count - 1 do
+  try
+    for I := 0 to High(Devices) do
     begin
-
-      Dev := nil;
-
-      if Failed(Col.Item(i,
-                         Dev)) then
-        Continue;
-
-      Dev.GetId(ID);
-
-      Name := MfGetEndpointFriendlyName(Dev);
-
-      List.AddObject(Name,
-                     TObject(Pointer(ID)));
+      Entry := TEndpointIdObject.Create(string(Devices[I].pwszID));
+      try
+        List.AddObject({$IFDEF FPC}UTF8Encode(string(Devices[I].DeviceName)){$ELSE}
+                       string(Devices[I].DeviceName){$ENDIF},Entry);
+      except
+        Entry.Free;
+        raise;
+      end;
     end;
+  finally
+    ClearEndpointDevices(Devices);
+  end;
 end;
 
-
-//-----------------------------------------------------------
-// Create a DirectShow audio rendering filter that
-// encapsulates the audio endpoint device that is currently
-// assigned to the specified device role.
-// Source: http://msdn.microsoft.com/en-us/library/windows/desktop/dd370815
-//-----------------------------------------------------------
-function CreateDShowAudioRenderer(const role: eRole;
+function CreateDShowAudioRenderer(const role: ERole;
                                   ppAudioRenderer: PIBaseFilter): HRESULT;
 var
-  hr: HRESULT;
-  daap: PDIRECTX_AUDIO_ACTIVATION_PARAMS;
-  pVar: PROPVARIANT;
-  pEnumerator: IMMDeviceEnumerator;
-  pDevice: IMMDevice;
-  guidAudioSessionId: TGUID;
-
+  Device: IMMDevice;
+  Params: DIRECTX_AUDIO_ACTIVATION_PARAMS;
+  Value: PROPVARIANT;
 begin
-  hr := E_FAIL;  // to prevent might not have been initialised warning
-
-  if (ppAudioRenderer = Nil) then
-    begin
-      Result := E_POINTER;
-      Exit;
-    end;
-
-try
-try
-
-  // Activate the IBaseFilter interface on the
-  // audio renderer with the specified role.
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator,
-                         IUnknown(pEnumerator));
-  if Failed(hr) then
-    Abort;
-
-  hr := pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
-                                            ERole(role),
-                                            pDevice);
-  if Failed(hr) then
-    Abort;
-
-  // Create this application's audio session GUID
-  // We could just write this, however not every Delphi compiler supports this: guidAudioSessionId := TGUID.NewGuid;
-  hr := CreateGUID(guidAudioSessionId);
-  if Failed(hr) then
-    Abort;
-
-  // daap  DIRECTX_AUDIO_ACTIVATION_PARAMS
-  daap.cbDirectXAudioActivationParams := SizeOf(daap);
-  daap.guidAudioSession := guidAudioSessionId;
-  daap.dwAudioStreamFlags := AUDCLNT_STREAMFLAGS_CROSSPROCESS;
-
-  //
-  PropVariantInit(pVar);
-
-  pVar.vt := VT_BLOB;
-  pVar.blob.cbSize := SizeOf(daap);
-  pVar.blob.pBlobData := @daap;
-
-  hr := pDevice.Activate(IID_IBaseFilter,
-                         CLSCTX_ALL,
-                         @pVar,
-                         Pointer(ppAudioRenderer));
-  if Failed(hr) then
-    Abort;
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
-  Result := hr;
-end;
+  if ppAudioRenderer = nil then
+    Exit(E_POINTER);
+  ppAudioRenderer^ := nil;
+  Result := GetDefaultEndPointAudioDevice(Device,role,eRender);
+  if FAILED(Result) then
+    Exit;
+  FillChar(Params,SizeOf(Params),0);
+  Params.cbDirectXAudioActivationParams := SizeOf(Params);
+  Result := CreateGUID(Params.guidAudioSession);
+  if FAILED(Result) then
+    Exit;
+  Params.dwAudioStreamFlags := AUDCLNT_STREAMFLAGS_CROSSPROCESS;
+  PropVariantInit(Value);
+  Value.vt := VT_BLOB;
+  Value.blob.cbSize := SizeOf(Params);
+  Value.blob.pBlobData := @Params;
+  // The blob borrows stack storage only for this synchronous Activate call.
+  Result := Device.Activate(IID_IBaseFilter,CLSCTX_ALL,@Value,Pointer(ppAudioRenderer^));
 end;
 
-
-//-----------------------------------------------------------
-// Get the DirectSound or DirectSoundCapture device GUID for
-// an audio endpoint device. If flow = eRender, the function
-// gets the DirectSound device GUID for the rendering device
-// with the specified device role. If flow = eCapture, the
-// function gets the DirectSoundCapture device GUID for the
-// capture device with the specified device role.
-// Source: http://msdn.microsoft.com/en-us/library/windows/desktop/dd370817
-//-----------------------------------------------------------
-function GetDirectSoundGuid(flow: eDataFlow;
-                            role: eRole;
-                            out pDevGuid: TGuid): HRESULT;
+function GetDirectSoundGuid(flow: EDataFlow;
+                            role: ERole;
+                            out pDevGuid: TGUID): HRESULT;
 var
-  hr: HRESULT;
-  pEnumerator: IMMDeviceEnumerator;
-  pDevice: IMMDevice;
-  pProps: IPropertyStore;
-  pVar: PROPVARIANT;
-
+  Device: IMMDevice;
+  Text: WideString;
 begin
-  hr:= S_OK;
-try
-try
-  PropVariantInit(pVar);
-
-  if (SizeOf(pDevGuid) = 0) then
-    begin
-      Result := E_POINTER;
-      Abort;
-    end;
-
-  // Get a device enumerator for the audio endpoint
-  // devices in the system.
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator,
-                         IUnknown(pEnumerator));
-  if Failed(hr) then
-    Abort;
-
-  // Get the endpoint device with the specified dataflow
-  // direction (eRender or eCapture) and device role.
-  hr := pEnumerator.GetDefaultAudioEndpoint(flow,
-                                            role,
-                                            pDevice);
-  if Failed(hr) then
-    Abort;
-
-  hr := pDevice.OpenPropertyStore(STGM_READ,
-                                  pProps);
-  if Failed(hr) then
-    Abort;
-
-  // Get the DirectSound or DirectSoundCapture device GUID
-  // (in WCHAR string format) for the endpoint device.
-  hr := pProps.GetValue(PKEY_AudioEndpoint_GUID,
-                        pVar);
-  if Failed(hr) then
-    Abort;
-
-  // Convert the WCHAR string to a GUID structure.
-  hr := CLSIDFromString(pVar.pwszVal,
-                        pDevGuid);
-  if Failed(hr) then
-    Abort;
-
-except
-  // Do Nothing. Caller is responsible for error handling.
+  pDevGuid := GUID_NULL;
+  Result := GetDefaultEndPointAudioDevice(Device,role,flow);
+  if FAILED(Result) then
+    Exit;
+  Result := GetDeviceDescriptions(Device,PKEY_AudioEndpoint_GUID,Text);
+  if SUCCEEDED(Result) then
+    Result := CLSIDFromString(PWideChar(Text),pDevGuid);
 end;
-finally
-  PropVariantClear(pVar);
-  Result := hr;
-end;
-end;
-
 
 function GetWaveOutId(role: ERole;
-                      out pWaveOutId: PInteger): HRESULT;
+                      out pWaveOutId: UINT): HRESULT;
 var
-  hr: HResult;
-  pEnumerator: IMMDeviceEnumerator;
-  pDevice: IMMDevice;
-  pstrEndpointIdKey: PWideChar;
-  pstrEndpointId: PWideChar;
-  cbEndpointIdKey: size_t;
-  waveOutId: Integer;
-  cWaveOutDevices: Integer;
-  mmr: MMRESULT;
-  cbEndpointId: SIZE_T;
-
-label
-  leave;
-
+  Device: IMMDevice;
+  EndpointId: LPWSTR;
+  Buffer: LPWSTR;
+  Bytes: DWORD;
+  DeviceIndex: UINT;
+  DeviceCount: UINT;
+  Status: MMRESULT;
 begin
-
-  pstrEndpointIdKey := nil;
-  pstrEndpointId := Nil;
-  cbEndpointId := 0;
-
-  if (pWaveOutId = nil) then
+  pWaveOutId := High(UINT);
+  EndpointId := nil;
+  Buffer := nil;
+  Result := GetDefaultEndPointAudioDevice(Device,role,eRender);
+  if FAILED(Result) then
+    Exit;
+  Result := Device.GetId(EndpointId);
+  if FAILED(Result) then
+    Exit;
+  try
+    DeviceCount := waveOutGetNumDevs;
+    if DeviceCount = 0 then
+      Exit(E_UNEXPECTED);
+    for DeviceIndex := 0 to DeviceCount-1 do
     begin
-      Result:= E_POINTER;
-      Exit;
-    end;
-
-  // Create an audio endpoint device enumerator.
-  hr := CoCreateInstance(IID_IMMDeviceEnumerator,
-                         nil,
-                         CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator,
-                         pEnumerator);
-  if Failed(hr) then
-    goto leave;
-
-  // Get the audio endpoint device that the user has
-  // assigned to the specified device role.
-  hr := pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
-                                            role,
-                                            pDevice);
-  if Failed(hr) then
-    goto leave;
-
-  // Get the endpoint ID string of the audio endpoint device.
-  hr := pDevice.GetId(pstrEndpointIdKey);
-  if Failed(hr) then
-    goto leave;
-
-  // Get the size of the endpoint ID string.
-  cbEndpointIdKey := (Length(pstrEndpointIdKey) * SizeOf(WCHAR));
-
-  // Include terminating null in string size.
-  cbEndpointIdKey := cbEndpointIdKey + sizeof(WCHAR);
-
-  // Allocate a buffer for a second string of the same size.
-  pstrEndpointId := CoTaskMemAlloc(cbEndpointIdKey);
-  if (pstrEndpointId = nil) then
-    begin
-      hr := E_OUTOFMEMORY;
-      goto leave;
-    end;
-
-  // Each for-loop iteration below compares the endpoint ID
-  // string of the audio endpoint device to the endpoint ID
-  // string of an enumerated waveOut device. If the strings
-  // match, then we've found the waveOut device that is
-  // assigned to the specified device role.
-
-  cWaveOutDevices := waveOutGetNumDevs();
-
-  for waveOutId := 0 to waveOutId -1 do
-    begin
-      if (waveOutId < cWaveOutDevices) then
+      Bytes := 0;
+      Status := waveOutMessage(HWAVEOUT(NativeUInt(DeviceIndex)),DRV_QUERYFUNCTIONINSTANCEIDSIZE,
+                               DWORD_PTR(@Bytes),0);
+      if (Status <> MMSYSERR_NOERROR) or (Bytes < SizeOf(WideChar)) or
+         (Bytes > 65536) or ((Bytes mod SizeOf(WideChar)) <> 0) then
+        Continue;
+      Buffer := CoTaskMemAlloc(Bytes);
+      if Buffer = nil then
+        Exit(E_OUTOFMEMORY);
+      try
+        FillChar(Buffer^,Bytes,0);
+        Status := waveOutMessage(HWAVEOUT(NativeUInt(DeviceIndex)),DRV_QUERYFUNCTIONINSTANCEID,
+                                 DWORD_PTR(Buffer),Bytes);
+        if Status <> MMSYSERR_NOERROR then
+          Continue;
+        Buffer[(Bytes div SizeOf(WideChar))-1] := #0;
+        if lstrcmpiW(Buffer,EndpointId) = 0 then
         begin
-          // Get the size (including the terminating null) of
-          // the endpoint ID string of the waveOut device.
-          mmr := waveOutMessage(HWAVEOUT(waveOutId),
-                                DRV_QUERYFUNCTIONINSTANCEIDSIZE,
-                                DWORD_PTR(cbEndpointId),
-                                DWORD_PTR(Nil));
-
-          if (mmr <> MMSYSERR_NOERROR) Or
-             (cbEndpointIdKey <> cbEndpointId) then // do sizes match?
-            begin
-              continue;  // not a matching device
-            end;
-
-          // Get the endpoint ID string for this waveOut device.
-          mmr := waveOutMessage(HWAVEOUT(waveOutId),
-                                DRV_QUERYFUNCTIONINSTANCEID,
-                                DWORD_PTR(pstrEndpointId),
-                                cbEndpointId);
-
-          if (mmr <> MMSYSERR_NOERROR) then
-            begin
-              continue;
-            end;
-
-          // Check whether the endpoint ID string of this waveOut
-          // device matches that of the audio endpoint device.
-          if (lstrcmpi(pstrEndpointId, pstrEndpointIdKey) = 0) then
-            begin
-              pWaveOutId := @waveOutId;  // found match
-              hr := S_OK;
-              Break;
-            end;
+          pWaveOutId := DeviceIndex;
+          Exit(S_OK);
         end;
-    end;
-
-    if (waveOutId = cWaveOutDevices) then
-      begin
-        // We reached the end of the for-loop above without
-        // finding a waveOut device with a matching endpoint
-        // ID string. This behavior is quite unexpected.
-        hr := E_UNEXPECTED;
+      finally
+        CoTaskMemFree(Buffer);
+        Buffer := nil;
       end;
-
-leave:
-    CoTaskMemFree(pstrEndpointIdKey);  // Nil pointer okay
-    CoTaskMemFree(pstrEndpointId);
-    Result := hr;
+    end;
+    Result := E_UNEXPECTED;
+  finally
+    CoTaskMemFree(EndpointId);
+  end;
 end;
-
 
 function GetJackInfo(pDevice: IMMDevice;
-                     out ppJackDesc: IKsJackDescription): HResult;
+                     out ppJackDesc: IKsJackDescription): HRESULT;
 var
-  hr: HResult;
-  pDeviceTopology: IDeviceTopology;
-  pConnFrom: IConnector;
-  pConnTo: IConnector;
-  pPart: IPart;
-  pJackDesc: IKsJackDescription;
-
-label
-  leave;
-
+  Topology: IDeviceTopology;
+  FromConnector: IConnector;
+  ToConnector: IConnector;
+  Part: IPart;
 begin
-
-  // Get the endpoint device's IDeviceTopology interface.
-  hr := pDevice.Activate(IID_IDeviceTopology,
-                         CLSCTX_ALL,
-                         nil,
-                         Pointer(pDeviceTopology));
-
-  if FAILED(hr) then
-    goto leave;
-
-  // The device topology for an endpoint device always
-  // contains just one connector (connector number 0).
-  hr := pDeviceTopology.GetConnector(0,
-                                     pConnFrom);
-  if FAILED(hr) then
-    goto leave;
-
-  // Step across the connection to the jack on the adapter.
-  hr := pConnFrom.GetConnectedTo(pConnTo);
-
-  if (hr = ERROR_PATH_NOT_FOUND) then
-    // The adapter device is not currently active.
-    hr := E_NOINTERFACE;
-
-  if FAILED(hr) then
-    goto leave;
-
-
-  // Get the connector's IPart interface.
-  hr := pConnTo.QueryInterface(IID_IPart,
-                               Pointer(pPart));
-  if FAILED(hr) then
-    goto leave;
-
-  // Activate the connector's IKsJackDescription interface.
-  hr := pPart.Activate(CLSCTX_INPROC_SERVER,
-                       IID_IKsJackDescription,
-                       Pointer(pJackDesc));
-  if FAILED(hr) then
-    goto leave;
-
-  ppJackDesc := pJackDesc;
-
-leave:
-  Result := hr;
+  ppJackDesc := nil;
+  if pDevice = nil then
+    Exit(E_POINTER);
+  Result := pDevice.Activate(IID_IDeviceTopology,CLSCTX_ALL,nil,Pointer(Topology));
+  if FAILED(Result) then
+    Exit;
+  Result := Topology.GetConnector(0,FromConnector);
+  if FAILED(Result) then
+    Exit;
+  Result := FromConnector.GetConnectedTo(ToConnector);
+  if Result = HRESULT($80070003) then
+    Result := E_NOINTERFACE;
+  if FAILED(Result) then
+    Exit;
+  Result := ToConnector.QueryInterface(IID_IPart,Part);
+  if SUCCEEDED(Result) then
+    Result := Part.Activate(CLSCTX_INPROC_SERVER,IID_IKsJackDescription,ppJackDesc);
 end;
-
 
 function GetDeviceDataFlow(pDevice: IMMDevice;
-                           out pDataFlow: eDataFlow): HResult;
+                           out pDataFlow: EDataFlow): HRESULT;
 var
-  hr: HResult;
-  endPoint: IMMEndpoint;
-
+  Endpoint: IMMEndpoint;
 begin
-
-  // Query for IMMEndpoint.
-  hr := pDevice.QueryInterface(IID_IMMEndpoint,
-                               IUnknown(endPoint));
-
-  if SUCCEEDED(hr) then
-    hr := endPoint.GetDataFlow(pDataFlow);
-
-  Result := hr;
+  pDataFlow := eAll;
+  if pDevice = nil then
+    Exit(E_POINTER);
+  Result := pDevice.QueryInterface(IID_IMMEndpoint,Endpoint);
+  if SUCCEEDED(Result) then
+    Result := Endpoint.GetDataFlow(pDataFlow);
 end;
-
 
 procedure ConfigureRawAudioStream(const AAudioClient: IAudioClient;
                                   const ACategory: AUDIO_STREAM_CATEGORY;
                                   const AContext: string);
 var
-  Hr: HRESULT;
-  AudioClient2: IAudioClient2;
+  Client2: IAudioClient2;
   Props: AudioClientProperties;
-
+  Status: HRESULT;
 begin
-
-
-  if not Assigned(AAudioClient) then
+  if AAudioClient = nil then
     Exit;
-
-  if not Supports(AAudioClient,
-                  IAudioClient2,
-                  AudioClient2) then
+  if not Supports(AAudioClient,IAudioClient2,Client2) then
     Exit;
-
-  FillChar(Props,
-           SizeOf(Props),
-           0);
-
+  FillChar(Props,SizeOf(Props),0);
   Props.cbSize := SizeOf(Props);
-  Props.bIsOffload := False;
   Props.eCategory := ACategory;
   Props.Options := AUDCLNT_STREAMOPTIONS_RAW;
-
-  Hr := AudioClient2.SetClientProperties(Props);
-  if FAILED(Hr) then
-    OutputDebugString(PChar(Format('%s: AUDCLNT_STREAMOPTIONS_RAW not accepted, hr=0x%.8x',
-                                  [AContext,
-                                   Cardinal(Hr)])));
+  Status := Client2.SetClientProperties(Props);
+  if FAILED(Status) then
+    OutputDebugStringW(PWideChar(AContext+': AUDCLNT_STREAMOPTIONS_RAW rejected, hr='+
+                                 string(IntToHex(Cardinal(Status),8))));
 end;
-
 
 end.

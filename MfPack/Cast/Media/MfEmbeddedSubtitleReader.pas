@@ -23,17 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
-// 02/08/2026 Carmen              Added direct Matroska text-track fallback.
-// 01/08/2026 Carmen              Added exact embedded-track selection and end-of-stream safety.
-// 01/08/2026 Carmen              Robust stream classification and explicit Source Reader type selection.
-// 31/07/2026 Carmen              Embedded SRT/UTF-8 and SSA/ASS subtitle import.
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: TMfTimedText, TMfSubtitleCompositor
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 //
 // Known Issues: Bitmap subtitle streams (PGS/VobSub) are detected but are not
 //               decoded. The native Microsoft MP4 source ignores non-audio/
@@ -1118,7 +1114,7 @@ var
   CandidateFound: Boolean;
   CandidateSupported: Boolean;
   SubtitleFormat: TMfEmbeddedSubtitleFormat;
-  IsSelected: Boolean;
+  IsSelected: BOOL;
 
 begin
 

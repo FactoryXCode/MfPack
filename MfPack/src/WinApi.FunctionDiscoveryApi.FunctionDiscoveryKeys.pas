@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 17-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1460,6 +1460,13 @@ const
   // Additional prototypes for ALL interfaces
 
   // End of additional prototypes
+
+// Additional key definitions from SDK 10.0.28000.0.
+const
+  PKEY_PNPX_MachineName: PROPERTYKEY = (fmtid: (D1: $656A3BB3; D2: $ECC0; D3: $43FD; D4: ($84, $77, $4A, $E0, $40, $4A, $96, $CD)); pid: 20481);
+  {$EXTERNALSYM PKEY_PNPX_MachineName}
+  PKEY_WCN_DeviceType: PROPERTYKEY = (fmtid: (D1: $88190B86; D2: $4684; D3: $11DA; D4: ($A2, $6A, $00, $02, $B3, $98, $8E, $81)); pid: 7);
+  {$EXTERNALSYM PKEY_WCN_DeviceType}
 
 implementation
 

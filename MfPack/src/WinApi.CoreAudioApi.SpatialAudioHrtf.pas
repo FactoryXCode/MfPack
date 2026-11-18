@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Media Foundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Shared part of the Core Audio Interfaces
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -115,6 +115,7 @@ type
 //#pragma pack(push, 1)
 {$ALIGN 1}
 
+  {$ALIGN 4} // Native float records and the directivity union have 4-byte alignment.
   PSpatialAudioHrtfDirectivity = ^SpatialAudioHrtfDirectivity;
   SpatialAudioHrtfDirectivity = record
     _Type: SpatialAudioHrtfDirectivityType;  // Indicates the type of directivity.
@@ -158,29 +159,31 @@ type
 
 
   SpatialAudioHrtfOrientation = array[0..8] of Single;
+  PSpatialAudioHrtfOrientation = ^SpatialAudioHrtfOrientation;
   {$EXTERNALSYM SpatialAudioHrtfOrientation}
   // Indicates the orientation of an HRTF directivity object. This is a row-major 3x3 rotation matrix.
 
+  {$ALIGN 8} // Activation records also contain native pointers/handles.
   PSpatialAudioHrtfActivationParams = ^SpatialAudioHrtfActivationParams;
   SpatialAudioHrtfActivationParams = record
-    ObjectFormat: WAVEFORMATEX;                            // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;                            // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;                  // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;                          // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
     MaxDynamicObjectCount: UINT32;                          // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
     Category: AUDIO_STREAM_CATEGORY;                        // Specifies the category of an audio stream and its spatial audio objects.
     EventHandle: THandle;                                   // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
     NotifyObject: ISpatialAudioObjectRenderStreamNotify;    // Notification sink (can be nullptr)
-    DistanceDecay: SpatialAudioHrtfDistanceDecay;           // Optional Distance Decay Settings - All dynamic objects from this stream will default to this setting  (nullptr if unused)
-    Directivity: SpatialAudioHrtfDirectivityUnion;          // Optional Directivity - All dynamic objects from this stream will default to this value   (nullptr if unused)
-    Environment: SpatialAudioHrtfEnvironmentType;           // Optional Environment - All dynamic objects from this stream will default to this value  (nullptr if unused)
-    Orientation: SpatialAudioHrtfOrientation;               // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    DistanceDecay: PSpatialAudioHrtfDistanceDecay;           // Optional Distance Decay Settings - All dynamic objects from this stream will default to this setting  (nullptr if unused)
+    Directivity: PSpatialAudioHrtfDirectivityUnion;          // Optional Directivity - All dynamic objects from this stream will default to this value   (nullptr if unused)
+    Environment: PSpatialAudioHrtfEnvironmentType;           // Optional Environment - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    Orientation: PSpatialAudioHrtfOrientation;               // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
   end;
   {$EXTERNALSYM SpatialAudioHrtfActivationParams}
 
 
   PSpatialAudioHrtfActivationParams2 = ^SpatialAudioHrtfActivationParams2;
   SpatialAudioHrtfActivationParams2 = record
-    ObjectFormat: WAVEFORMATEX;                            // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;                            // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;                 // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;                         // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
     MaxDynamicObjectCount: UINT32;                         // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
@@ -188,9 +191,9 @@ type
     EventHandle: THandle;                                  // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
     NotifyObject: ISpatialAudioObjectRenderStreamNotify;   // Notification sink (can be nullptr)
     DistanceDecay: PSpatialAudioHrtfDistanceDecay;         // Optional Distance Decay Settings - All dynamic objects from this stream will default to this setting  (nullptr if unused)
-    Directivity: SpatialAudioHrtfDirectivityUnion;         // Optional Directivity - All dynamic objects from this stream will default to this value   (nullptr if unused)
-    Environment: SpatialAudioHrtfEnvironmentType;          // Optional Environment - All dynamic objects from this stream will default to this value  (nullptr if unused)
-    Orientation: SpatialAudioHrtfOrientation;              // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    Directivity: PSpatialAudioHrtfDirectivityUnion;         // Optional Directivity - All dynamic objects from this stream will default to this value   (nullptr if unused)
+    Environment: PSpatialAudioHrtfEnvironmentType;          // Optional Environment - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    Orientation: PSpatialAudioHrtfOrientation;              // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
     Options: SPATIAL_AUDIO_STREAM_OPTIONS;
   end;
   {$EXTERNALSYM SpatialAudioHrtfActivationParams2}
@@ -218,16 +221,16 @@ type
     function SetGain(gain: FLOAT): HResult; stdcall;
 
     // The rotation matrix for the source orientation, with respect to the listener's frame of reference (the listener's coordinate system).
-    function SetOrientation(orientation: SpatialAudioHrtfOrientation): HResult; stdcall;
+    function SetOrientation(orientation: PSpatialAudioHrtfOrientation): HResult; stdcall;
 
     // Selects the acoustic environment to simulate.
     function SetEnvironment(environment: SpatialAudioHrtfEnvironmentType): HResult; stdcall;
 
     // Specifies the decay rate with respect to distance
-    function SetDistanceDecay(distanceDecay: SpatialAudioHrtfDistanceDecay): HResult; stdcall;
+    function SetDistanceDecay(distanceDecay: PSpatialAudioHrtfDistanceDecay): HResult; stdcall;
 
     // Specifies the directional shape of the sound emitter, omni-directional, Cardioid, or cone
-    function SetDirectivity(directivity: SpatialAudioHrtfDirectivityUnion): HResult; stdcall;
+    function SetDirectivity(directivity: PSpatialAudioHrtfDirectivityUnion): HResult; stdcall;
   end;
   IID_ISpatialAudioObjectForHrtf = ISpatialAudioObjectForHrtf;
   {$EXTERNALSYM IID_ISpatialAudioObjectForHrtf}

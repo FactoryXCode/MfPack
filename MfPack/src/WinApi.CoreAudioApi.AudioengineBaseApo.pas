@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MFPack - CoreAudio - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,7 +46,7 @@
 //          Fields with a Common Type Specification.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -154,9 +154,10 @@ const
 
 
   // Signatures for data structures.
-  APO_CONNECTION_DESCRIPTOR_SIGNATURE = ' ACDS ';
+  APO_CONNECTION_DESCRIPTOR_SIGNATURE = DWORD($41434453);
   {$EXTERNALSYM APO_CONNECTION_DESCRIPTOR_SIGNATURE}
-  APO_CONNECTION_PROPERTY_SIGNATURE   = ' ACPS ';
+  APO_CONNECTION_PROPERTY_SIGNATURE   = DWORD($41435053);
+  APO_CONNECTION_PROPERTY_V2_SIGNATURE = DWORD($41435032);
   {$EXTERNALSYM APO_CONNECTION_PROPERTY_SIGNATURE}
 
   // Min and max framerates for the engine")
@@ -220,6 +221,7 @@ type
   end;
   {$EXTERNALSYM APO_CONNECTION_DESCRIPTOR}
   PApoConnectionDescriptor = ^APO_CONNECTION_DESCRIPTOR;
+  PPApoConnectionDescriptor = ^PApoConnectionDescriptor;
   ApoConnectionDescriptor = APO_CONNECTION_DESCRIPTOR;
   {$EXTERNALSYM ApoConnectionDescriptor}
 
@@ -295,7 +297,7 @@ type
     u32NumAPOInterfaces: UINT32;
     // This is an array of GUIDs that define all the APO interfaces that can be found in this APO.
     // There are u32NumAPOInterfaces in the list.
-    iidAPOInterfaceList: array of IID;    //<< Open dynamic array
+    iidAPOInterfaceList: array[0..0] of IID;    //<< Open dynamic array
   end;
   {$EXTERNALSYM APO_REG_PROPERTIES}
   ApoRegProperties = APO_REG_PROPERTIES;
@@ -365,10 +367,10 @@ type
   PAPOInitSystemEffects = ^APOInitSystemEffects;
   APOInitSystemEffects = record
     APOInit: APOInitBaseStruct;                // currently defined in AudioEngineBaseAPO.idl
-    pAPOEndpointProperties: ^IPropertyStore;
-    pAPOSystemEffectsProperties: ^IPropertyStore;
+    pAPOEndpointProperties: IPropertyStore;
+    pAPOSystemEffectsProperties: IPropertyStore;
     pReserved: Pointer;                        // TBD for Transport Endpoint interface
-    pDeviceCollection: ^IMMDeviceCollection;   // A collection of Endpoint, Topology filter, Wave filter.
+    pDeviceCollection: IMMDeviceCollection;   // A collection of Endpoint, Topology filter, Wave filter.
   end;
   {$EXTERNALSYM APOInitSystemEffects}
 
@@ -803,10 +805,10 @@ type
   {$HPPEMIT '  DECLARE_DINTERFACE_TYPE(IAudioProcessingObjectRT);'}
   IAudioProcessingObjectRT = interface(IUnknown)
   ['{9E1D6A6D-DDBC-4E95-A4C7-AD64BA37846C}']
-    function APOProcess(u32NumInputConnections: UINT32;
-                        ppInputConnections: TApoConnectionPropertyArray;
-                        u32NumOutputConnections: UINT32;
-                        var ppOutputConnections: TApoConnectionPropertyArray): HRESULT; stdcall; overload;
+    procedure APOProcess(u32NumInputConnections: UINT32;
+                          ppInputConnections: PPAPO_CONNECTION_PROPERTY;
+                          u32NumOutputConnections: UINT32;
+                          ppOutputConnections: PPAPO_CONNECTION_PROPERTY); stdcall;
 
     function CalcInputFrames(u32OutputFrameCount: UINT32): UINT32; stdcall;
 
@@ -971,7 +973,7 @@ type
   //
   // Each APO will have different initialization requirements.
   // APOs should define an Initialize routine if it needs one.
-  // LockForProcess should fail if this Initialize routine hasn’t been called.
+  // LockForProcess should fail if this Initialize routine hasnï¿½t been called.
   // All non-modifiable parameters should be set in the initalize routine. All parameters that can be set
   // after LockForProcess should have their own interface methods.
   //
@@ -986,9 +988,9 @@ type
   IAudioProcessingObjectConfiguration = interface(IUnknown)
   ['{0E5ED805-ABA6-49c3-8F9A-2B8C889C4FA8}']
     function LockForProcess(const u32NumInputConnections: UINT32;
-                            ppInputConnections: PApoConnectionDescriptor;
+                            ppInputConnections: PPApoConnectionDescriptor;
                             const u32NumOutputConnections: UINT32;
-                            ppOutputConnections: PApoConnectionDescriptor): HRESULT; stdcall;
+                            ppOutputConnections: PPApoConnectionDescriptor): HRESULT; stdcall;
     // Description:
     // Releases the lock imposed by LockForProcess.
     //
@@ -1056,7 +1058,7 @@ type
   //
   // See AudioEngineCoreAPO.idl for examples of these methods.
   //
-  // APOs that require more functionality than what’s provided in the base APO
+  // APOs that require more functionality than whatï¿½s provided in the base APO
   // interface may need to create their own interface. APOs may support any number
   // of optional interfaces including IMediaParams, IPersistStream, etc.
   // See individual APOs for examples.
@@ -1140,22 +1142,7 @@ type
       //
       // Note: This method may not be called from a real-time processing thread.
 
-    function GetInputChannelCount(out pu32ChannelCount: UINT32): HResult; stdcall;
-    // Description:
-    // Returns the input channel count (samples-per-frame) for this APO.
-    //
-    // Parameters:
-    // pu32ChannelCount - [out] Points to a UINT32 that will receive the channel count.
-    //
-    // Return values:
-    // S_OK                    Successful completion.
-    // E_POINTER               Invalid pointer passed to function.
-    // APOERR_NOT_INITIALIZED  APO is not initialized.
-    //
-    // Remarks:
-    // The interface returns the number of channels on the input side of the APO.
-
-    function GetRegistrationProperties(out ppRegProps: ApoRegProperties): HRESULT; stdcall;
+    function GetRegistrationProperties(out ppRegProps: PApoRegProperties): HRESULT; stdcall;
     // Description:
     // Returns the registration properties of the APO.
     //
@@ -1176,6 +1163,36 @@ type
     // Note:
     // This method may not be called from a real-time processing thread.
 
+
+    function Initialize(cbDataSize: UINT32;
+                        pbyData: PByte): HResult; stdcall;
+    // Parameters:
+    // cbDataSize [const] This is the size, in bytes, of the initialization data.
+    //
+    // pbyData    [const] This is initialization data that is specific to this APO.
+    //
+    // Return value:
+    // The Initialize method returns a value of S_OK if the call was successful.
+    // Otherwise, this method returns one of the following error codes:
+    // Return code                  Description
+    // ---------------------------  ---------------------------------------------
+    // E_POINTER                    Invalid pointer passed to the function.
+    // E_INVALIDARG                 Invalid argument.
+    // APOERR_ALREADY_INITIALIZED   APO already initialized.
+    // Other HRESULTS               These additional error conditions are tracked by the audio engine.
+    //
+    // Remarks:
+    // If this method is used to initialize an APO without the need to initialize any data,
+    // it is acceptable to supply a NULL as the value of the pbyData parameter and a 0 (zero)
+    // as the value of the cbDataSize parameter.
+    // The data that is supplied is of variable length and must have the following format:
+    //
+    //    MyAPOInitializationData = record
+    //      APOInit : TAPOInitBaseStruct;    << declared in this unit.
+    //      list additional struct members here
+    //      ...
+    //    end;
+    //
 
     function IsInputFormatSupported(pOppositeFormat: IAudioMediaType;
                                     pRequestedInputFormat: IAudioMediaType;
@@ -1271,35 +1288,20 @@ type
     // an alternate requested format.  In this case it should create and return the
     // suggested format, and return S_FALSE.
 
-    function Initialize(cbDataSize: UINT32;
-                        pbyData: PByte): HResult; stdcall;
+    function GetInputChannelCount(out pu32ChannelCount: UINT32): HResult; stdcall;
+    // Description:
+    // Returns the input channel count (samples-per-frame) for this APO.
+    //
     // Parameters:
-    // cbDataSize [const] This is the size, in bytes, of the initialization data.
+    // pu32ChannelCount - [out] Points to a UINT32 that will receive the channel count.
     //
-    // pbyData    [const] This is initialization data that is specific to this APO.
-    //
-    // Return value:
-    // The Initialize method returns a value of S_OK if the call was successful.
-    // Otherwise, this method returns one of the following error codes:
-    // Return code                  Description
-    // ---------------------------  ---------------------------------------------
-    // E_POINTER                    Invalid pointer passed to the function.
-    // E_INVALIDARG                 Invalid argument.
-    // APOERR_ALREADY_INITIALIZED   APO already initialized.
-    // Other HRESULTS               These additional error conditions are tracked by the audio engine.
+    // Return values:
+    // S_OK                    Successful completion.
+    // E_POINTER               Invalid pointer passed to function.
+    // APOERR_NOT_INITIALIZED  APO is not initialized.
     //
     // Remarks:
-    // If this method is used to initialize an APO without the need to initialize any data,
-    // it is acceptable to supply a NULL as the value of the pbyData parameter and a 0 (zero)
-    // as the value of the cbDataSize parameter.
-    // The data that is supplied is of variable length and must have the following format:
-    //
-    //    MyAPOInitializationData = record
-    //      APOInit : TAPOInitBaseStruct;    << declared in this unit.
-    //      list additional struct members here
-    //      ...
-    //    end;
-    //
+    // The interface returns the number of channels on the input side of the APO.
 
 
   end;
@@ -1334,23 +1336,7 @@ type
   {$EXTERNALSYM IAudioSystemEffects}
   IAudioSystemEffects = interface(IUnknown)
   ['{5FA00F27-ADD6-499a-8A9D-6B98521FA75B}']
-    function Initialize(cbDataSize: UINT32;
-                        pbyData: PByte): HResult; stdcall;
-    //Parameters:
-    //  cbDataSize [const] : This is the size, in bytes, of the initialization data.
-    //  pbyData    [const] : This is initialization data that is specific to this APO.
-    //
-    //Return value:
-    //The Initialize method returns a value of S_OK if the call was successful.
-    //Otherwise, this method returns one of the following error codes:
-    //
-    // Return code                      Description
-    // ------------------------------   -----------------------------------------------------
-    // E_POINTER                        Invalid pointer passed to the function.
-    // E_INVALIDARG                     Invalid argument.
-    // APOERR_ALREADY_INITIALIZED       APO already initialized.
-    // Other HRESULTS                   These additional error conditions are tracked by the
-    //                                  audio engine.
+    // Marker interface: no methods beyond IUnknown.
 
   end;
   // IAudioSystemEffects
@@ -1506,7 +1492,7 @@ type
     function AddAuxiliaryInput({in} dwInputId: DWORD;
                                {in} cbDataSize: UINT32;
                                {in} pbyData: PByte;
-                               {in} pInputConnection: APO_CONNECTION_DESCRIPTOR): HResult; stdcall;
+                               {in} pInputConnection: PApoConnectionDescriptor): HResult; stdcall;
     // Description:
     //
     //  Adds an auxiliary input to the APO, and provides initialization parameters.
@@ -1632,7 +1618,7 @@ type
   IApoAuxiliaryInputRT = interface(IUnknown)
   ['{F851809C-C177-49A0-B1B2-B66F017943AB}']
     procedure AcceptInput({in} dwInputId: DWORD;
-                          {in} pInputConnection: APO_CONNECTION_PROPERTY);
+                          {in} pInputConnection: PAPO_CONNECTION_PROPERTY); stdcall;
     // Description:
     //
     //  Provides input to the APO on one of its auxiliary inputs
@@ -1695,7 +1681,7 @@ type
   // and wish to use post-volume processing loopback streams.
   {$HPPEMIT '  DECLARE_DINTERFACE_TYPE(IApoAcousticEchoCancellation);'}
   {$EXTERNALSYM IApoAcousticEchoCancellation2}
-  IApoAcousticEchoCancellation2 = interface(IUnknown)
+  IApoAcousticEchoCancellation2 = interface(IApoAcousticEchoCancellation)
     ['{F235855F-F06D-45B3-A63F-EE4B71509DC2}']
 
     function GetDesiredReferenceStreamProperties(out pProperties: APO_REFERENCE_STREAM_PROPERTIES): HRESULT; stdcall;
@@ -1706,12 +1692,13 @@ type
 
 
 type
-  FNAPONOTIFICATIONCALLBACK = function(pProperties : APO_REG_PROPERTIES;
+  FNAPONOTIFICATIONCALLBACK = function(pProperties : PApoRegProperties;
                                        pvRefData : Pointer): HRESULT; stdcall;
   {$EXTERNALSYM FNAPONOTIFICATIONCALLBACK}
 
 
-  function RegisterAPO(var pProperties: APO_REG_PROPERTIES): HResult; stdcall;
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
+  function RegisterAPO(pProperties: PApoRegProperties): HResult; stdcall;
   {$EXTERNALSYM RegisterAPO}
 
   function UnregisterAPO(clsid: REFCLSID): HResult; stdcall;
@@ -1728,7 +1715,7 @@ type
   {$EXTERNALSYM EnumerateAPOs}
 
   function GetAPOProperties(clsid: REFCLSID;
-                            var pProperties: APO_REG_PROPERTIES): HResult; stdcall;
+                            pProperties: PApoRegProperties): HResult; stdcall;
   {$EXTERNALSYM GetAPOProperties}
 
 
@@ -1736,20 +1723,20 @@ type
 
     // End of Additional Prototypes
 
+  {$ENDIF}
+
 implementation
 
     // Implement Additional functions here.
 
-const
-  AudioEngineBaseApoLib = 'audioses.dll';  // nvapo64v.dll > NVidia driver
-
-{$WARN SYMBOL_PLATFORM OFF}
-  function RegisterAPO; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function UnregisterAPO; external AudioEngineBaseApoLib name 'UnregisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function RegisterAPONotification; external AudioEngineBaseApoLib name 'RegisterAPONotification' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function UnregisterAPONotification; external AudioEngineBaseApoLib name 'UnregisterAPONotification' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function EnumerateAPOs; external AudioEngineBaseApoLib name 'EnumerateAPOs' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function GetAPOProperties; external AudioEngineBaseApoLib name 'GetAPOProperties' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-{$WARN SYMBOL_PLATFORM ON}
-
+// These helpers are supplied by the SDK static AudioBaseProcessingObject library,
+// not DLL exports. Calling them requires a compatible native static-library link.
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
+  function RegisterAPO; external;
+  function UnregisterAPO; external;
+  function RegisterAPONotification; external;
+  function UnregisterAPONotification; external;
+  function EnumerateAPOs; external;
+  function GetAPOProperties; external;
+  {$ENDIF}
 end.

@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -58,6 +58,7 @@
 // their product.
 //
 //==============================================================================
+
 unit MfCastAndroidTvRemote;
 
 // Paired Android TV Remote v2 power control. Pairing is opt-in per stable Cast
@@ -84,6 +85,8 @@ type
     FInput: TBytes;
     FFeatures: Cardinal;
     FSettleMs, FTimeoutMs: Cardinal;
+    FPowerCommandAttempted: Boolean;
+
 
     function Send(const AMessage: TBytes): HRESULT;
     function ReadMessage(out AMessage: TBytes;
@@ -101,6 +104,8 @@ type
 
     function ReadPower(out AIsOn: Boolean): HRESULT;
     function Standby(out ADetail: string): HRESULT;
+    property PowerCommandAttempted: Boolean read FPowerCommandAttempted;
+
   end;
 
   TRemoteBlob = record
@@ -133,6 +138,7 @@ type
                               Reserved,
                               Prompt: Pointer;
                               Flags: DWORD;
+
                               out Output: TRemoteBlob): BOOL; stdcall;
 
   function PFXImportCertStore(var Data: TRemoteBlob;
@@ -160,6 +166,62 @@ const
   MaxMessageSize = 65536;
   TimeoutResult = HRESULT($800705B4);
   Crypt32Lib = 'crypt32.dll';
+
+function SHGetKnownFolderPath(const AFolderId: TGUID; const AFlags: DWORD;
+
+  const AToken: THandle; out APath: PWideChar): HRESULT; stdcall;
+
+  external 'shell32.dll' name 'SHGetKnownFolderPath';
+
+procedure CoTaskMemFree(AData: Pointer); stdcall;
+
+  external 'ole32.dll' name 'CoTaskMemFree';
+
+
+
+function UserCredentialRoot(): string;
+
+const
+
+  LocalAppDataId: TGUID = '{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}';
+
+  NoPackageRedirection = $00010000;
+
+var
+
+  Path: PWideChar;
+
+  Hr: HRESULT;
+
+begin
+
+  // The pairing belongs to the Windows user, shared by all native Cast clients.
+
+  // A launcher may redirect LOCALAPPDATA into its own package/sandbox folder.
+
+  // Resolve the user's actual known folder instead of inheriting that location.
+
+  Result := '';
+
+  Path := nil;
+
+  Hr := SHGetKnownFolderPath(LocalAppDataId, NoPackageRedirection, 0, Path);
+
+  try
+
+    if (Hr = S_OK) and Assigned(Path) then
+
+      Result := string(Path);
+
+  finally
+
+    CoTaskMemFree(Path);
+
+  end;
+
+end;
+
+
 
 
 function LastErrorResult(): HRESULT;
@@ -382,7 +444,7 @@ begin
 
   AMessage := nil;
 
-  while (Integer(ADeadline - GetTickCount) > 0) do
+  while (Integer(DWORD((UInt64(ADeadline) + $100000000 - GetTickCount) and $FFFFFFFF)) > 0) do
     begin
       Offset := 0;
 
@@ -554,7 +616,7 @@ var
 begin
 
   AIsOn := False;
-  Deadline := GetTickCount + FTimeoutMs;
+  Deadline := DWORD((UInt64(GetTickCount) + FTimeoutMs) and $FFFFFFFF);
 
   repeat
     Result := ReadMessage(Message,
@@ -585,6 +647,8 @@ var
 
 begin
 
+  FPowerCommandAttempted := False;
+
   ADetail := '';
   Result := ReadPower(IsOn);
 
@@ -603,7 +667,7 @@ begin
   // This receiver accepts its power key after the remote handshake has settled.
   // Keep servicing pings and power updates during the same five-second interval
   // used in the successful physical test. Recheck state before the toggle.
-  Deadline := GetTickCount + FSettleMs;
+  Deadline := DWORD((UInt64(GetTickCount) + FSettleMs) and $FFFFFFFF);
 
   repeat
     Result := ReadMessage(Message,
@@ -640,7 +704,10 @@ begin
          Scalar(2,
          3)); // SHORT press, matching the verified paired test.
 
+  FPowerCommandAttempted := True;
+
   Result := Send(MessageField(10,
+
                               Key));
 
   if Failed(Result) then
@@ -649,7 +716,7 @@ begin
       Exit;
     end;
 
-  Deadline := GetTickCount + FTimeoutMs;
+  Deadline := DWORD((UInt64(GetTickCount) + FTimeoutMs) and $FFFFFFFF);
 
   repeat
     Result := ReadMessage(Message,
@@ -696,7 +763,8 @@ begin
 
   if (Identity = '') then
     Identity := Trim(ADevice.ServiceInstance);
-  Root := GetEnvironmentVariable('LOCALAPPDATA');
+  Root := UserCredentialRoot();
+
 
   if (Identity = '') or (Root = '') then
     Exit;
@@ -836,6 +904,12 @@ var
   Concrete: TMfCastTcpTransport;
   Transport: IMfCastTransport;
   Session: TMfCastAndroidTvSession;
+  Verifier: TMfCastAndroidTvSession;
+
+  PowerAttempted, VerifiedOn: Boolean;
+
+  VerifyResult: HRESULT;
+
   Settings: TMfCastSettings;
 
 begin
@@ -845,7 +919,17 @@ begin
   FileName := MfCastAndroidTvPairingFile(ADevice);
 
   if (FileName = '') or not FileExists(FileName) then
-    Exit(S_FALSE);
+
+    begin
+
+      if FileName <> '' then
+
+        ADetail := ADetail + ' Expected credential: ' + FileName;
+
+      Exit(S_FALSE);
+
+    end;
+
 
   ADetail := 'Cannot load the paired Android TV credential.';
 
@@ -926,11 +1010,22 @@ begin
           if Failed(Result) then
             Exit;
 
+          PowerAttempted := False;
+
           Session := TMfCastAndroidTvSession.Create(Transport);
+
 
           try
             if AStandby then
-              Result := Session.Standby(ADetail)
+
+              begin
+
+                Result := Session.Standby(ADetail);
+
+                PowerAttempted := Session.PowerCommandAttempted;
+
+              end
+
             else
               begin
                 Result := Session.ReadPower(AIsOn);
@@ -941,6 +1036,64 @@ begin
           finally
              Session.Free;
           end;
+
+
+          // Some TVs stop publishing power changes on the old remote connection
+
+          // while entering standby. Query a fresh session to verify the result.
+
+          // Never send another POWER key: it could turn the TV back on.
+
+          if AStandby and PowerAttempted and Failed(Result) then
+
+            begin
+
+              Transport.Disconnect();
+
+              VerifyResult := Transport.Connect(Host, 6466);
+
+              if VerifyResult = S_OK then
+
+                begin
+
+                  Verifier := TMfCastAndroidTvSession.Create(Transport, 0, 3000);
+
+                  try
+
+                    VerifyResult := Verifier.ReadPower(VerifiedOn);
+
+                    if VerifyResult = S_OK then
+
+                      begin
+
+                        AIsOn := VerifiedOn;
+
+                        if not VerifiedOn then
+
+                          begin
+
+                            Result := S_OK;
+
+                            ADetail := 'TV standby confirmed by the paired remote. Verified using a fresh power-state query.';
+
+                          end
+
+                        else
+
+                          ADetail := ADetail + ' A fresh remote query still reports the TV on.';
+
+                      end;
+
+                  finally
+
+                    Verifier.Free;
+
+                  end;
+
+                end;
+
+            end;
+
 
         finally
           Transport.Disconnect;

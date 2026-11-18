@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Returns code definitions of the D3D errors.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -185,11 +185,11 @@ begin
                                             hrDescr := 'The application is requesting more texture-filtering operations than the device supports.';
                                           end;
     D3DERR_CONFLICTINGTEXTUREFILTER:      begin
-                                            hrStr := 'D3DERR_UNSUPPORTEDFACTORVALUE';
+                                            hrStr := 'D3DERR_CONFLICTINGTEXTUREFILTER';
                                             hrDescr := 'The current texture filters cannot be used together.';
                                           end;
     D3DERR_UNSUPPORTEDFACTORVALUE:        begin
-                                            hrStr := 'D3D_OK';
+                                            hrStr := 'D3DERR_UNSUPPORTEDFACTORVALUE';
                                             hrDescr := 'The device does not support the specified texture factor value. Not used; provided only to support older drivers.';
                                           end;
     D3DERR_CONFLICTINGRENDERSTATE:        begin
@@ -201,11 +201,11 @@ begin
                                             hrDescr := 'The device does not support the specified texture filter.';
                                           end;
     D3DERR_CONFLICTINGTEXTUREPALETTE:     begin
-                                            hrStr := 'D3DERR_DRIVERINTERNALERROR';
+                                            hrStr := 'D3DERR_CONFLICTINGTEXTUREPALETTE';
                                             hrDescr := 'The current textures cannot be used simultaneously.';
                                           end;
     D3DERR_DRIVERINTERNALERROR:           begin
-                                            hrStr := 'D3D_OK';
+                                            hrStr := 'D3DERR_DRIVERINTERNALERROR';
                                             hrDescr := 'Internal driver error. Applications should destroy and recreate the device when receiving this error. For hints on debugging this error, see Driver Internal Errors (Direct3D 9). [3]';
                                           end;
 
@@ -251,11 +251,11 @@ begin
                                             hrDescr := 'The method call is invalid. For example, a method''s parameter may not be a valid pointer.';
                                           end;
     D3DERR_DRIVERINVALIDCALL:             begin
-                                            hrStr := 'D3DERR_WASSTILLDRAWING';
+                                            hrStr := 'D3DERR_DRIVERINVALIDCALL';
                                             hrDescr := 'Not used.';
                                           end;
     D3DERR_WASSTILLDRAWING:               begin
-                                            hrStr := 'D3D_OK';
+                                            hrStr := 'D3DERR_WASSTILLDRAWING';
                                             hrDescr := 'The previous blit operation that is transferring information to or from this surface is incomplete.';
                                           end;
     D3DERR_DEVICEREMOVED:                 begin
@@ -341,8 +341,7 @@ begin
         HrStr := 'Unknown identifier.';
         HrDescr := 'Unknown HResult code.';
         HeaderFile := 'Unknown.';
-        FWinHResultCracker.ClearResults();
-        hr := aHResult;
+        hr := HResult($80070490);
       end;
   end;
   Result := hr;
@@ -350,7 +349,7 @@ end;
 
 
 function GetD3DRegion(aHResult: HResult;
-                     out aRegion: string): HResult;
+                      out aRegion: string): HResult;
 const
   D3D = 'D3D region.';
 

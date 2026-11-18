@@ -5,12 +5,12 @@
 // Project: MfPack - CoreAudio - EndpointVolume
 // Project location: https://sourceforge.net/projects/MfPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.CoreAudioApi.EndPointVolume.pas
+// Module: WinApi.CoreAudioApi.AudioProfileUtils
 // Kind: Pascal / Delphi unit
 // Release date: 22-02-2024
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Audio tools like profiles, enum audio mft's etc.
 //              Supported audio are AAC, MP3, Dolby AC-3.
 //
@@ -23,14 +23,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -461,16 +461,17 @@ end;
 
 function TAudioMft.AddAACProfile(AACProfile: TAACProfileInfo;
                                  IncludePredefinedProfiles: Boolean = True): Integer;
+var
+  i: Integer;
 begin
   if IncludePredefinedProfiles then
-    SetLength(pa_AAC_profiles,
-              Length(predef_AAC_Profiles) + 1)
-  else
-    SetLength(pa_AAC_profiles,
-              Length(pa_AAC_profiles) + 1);
-
-  // Add the extra profile.
-  pa_AAC_profiles[Length(pa_AAC_profiles)] := AACProfile;
+    begin
+      SetLength(pa_AAC_profiles,Length(predef_aac_profiles));
+      for i := 0 to High(predef_aac_profiles) do
+        pa_AAC_profiles[i] := predef_aac_profiles[i];
+    end;
+  SetLength(pa_AAC_profiles,Length(pa_AAC_profiles) + 1);
+  pa_AAC_profiles[High(pa_AAC_profiles)] := AACProfile;
   Result := Length(pa_AAC_profiles);
 end;
 
@@ -552,7 +553,6 @@ function TAudioMft.CreateAACAudioType(profile: TAACProfileInfo;
 var
   hr: HRESULT;
   aType: IMFMediaType;
-  blockAlign: UINT32;
   bytesPerSecond: UINT32;
   sampleRateChecked: UINT32;
   channelsChecked: UINT32;
@@ -581,8 +581,7 @@ begin
   // - Additional format data for a media type. (MF_MT_USER_DATA)
 
   // Calculate the bitrate from derived values.
-  blockAlign := profile.Channels * (16 div 8);
-  bytesPerSecond := blockAlign * profile.samplesPerSec;
+  bytesPerSecond := profile.bytesPerSec;
 
   // Create an empty media type.
   hr := MFCreateMediaType(aType);
@@ -637,7 +636,7 @@ begin
   // The following values are supported: 12000, 16000, 20000 and 24000
   // Note: If using 6 channels, the values are multiplied by 6.
   //       The default value for both mono and stereo is 12000 (96 Kbps).
-  //       The default value for 6 channels is 60000.
+  //       The default value for 6 channels is 72000.
 
   // Set default.
   bytesPerSecondChecked := 12000;
@@ -654,12 +653,12 @@ begin
 
   if (channelsChecked = 6) then
     case bytesPerSecond of
-      12000,
-      16000,
-      20000,
-      24000: bytesPerSecondChecked := bytesPerSecond * 6;
+      72000,
+      96000,
+      120000,
+      144000: bytesPerSecondChecked := bytesPerSecond;
       else // Set to default.
-        bytesPerSecondChecked := 60000;
+        bytesPerSecondChecked := 72000;
     end;
 
 
@@ -672,9 +671,7 @@ begin
   // AAC payload type.
   case profile.aacPayloadType of
     0,
-    1,
-    2,
-    3: payloadTypeChecked := profile.aacPayloadType;
+    1: payloadTypeChecked := profile.aacPayloadType;
     else // Set to default.
       payloadTypeChecked := 0;
   end;
@@ -779,138 +776,65 @@ end;
 function TAudioMft.CreateMP3AudioType(mp3ProfileInfo: TMP3ProfileInfo;
                                       out mp3Type: IMFMediaType): HRESULT;
 var
-  hr: HRESULT;
   aType: IMFMediaType;
-  channelsChecked: UINT32;
-  sampleRateChecked: UINT32;
-  bytesPerSecondChecked: UINT32;
-
-label
-  done;
-
+  channelsChecked,sampleRateChecked,bytesPerSecondChecked: UINT32;
 begin
-  // Create an empty media type.
-  hr := MFCreateMediaType(aType);
-  if FAILED(hr) then
-    goto done;
-
-  // Set attributes on the type.
-  hr := aType.SetGUID(MF_MT_MAJOR_TYPE,
-                      MFMediaType_Audio);
-  if FAILED(hr) then
-    goto done;
-
-  hr := aType.SetGUID(MF_MT_SUBTYPE,
-                      MFAudioFormat_MP3);
-  if FAILED(hr) then
-    goto done;
-
-  // Number of supported channels are 1 or 2.
-  case MP3ProfileInfo.channels of
-    1,
-    2: channelsChecked := MP3ProfileInfo.channels;
-    else  // Set to default.
-      channelsChecked := 2;
-  end;
-
-  hr := aType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
-                        channelsChecked);
-  if FAILED(hr) then
-    goto done;
-
-
-  // Only 32, 44.1 and 48 khz sample rates are supported by Media Foundation/MP3 MPEG_1.
-  if (mp3ProfileInfo.mpegVersion = 1) then
+  mp3Type := nil;
+  if (mp3ProfileInfo.mpegVersion <> 1) and (mp3ProfileInfo.mpegVersion <> 2) then
     begin
-      case mp3ProfileInfo.sampleRate of
-        32000,
-        44100,
-        48000: sampleRateChecked := mp3ProfileInfo.sampleRate;
-        else  // Set to default.
-          sampleRateChecked := 44100;
-      end;
-
-      hr := aType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                            sampleRateChecked);
-      if FAILED(hr) then
-        goto done;
-
-      // Bit rate of the encoded MP3 MPEG_1 stream, in bytes per second.
-      // The encoder supports all bit rates defined by the standard (32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, or 320 kbps).
-      // The default bit rates are 128 Kbps for mono and 320 Kbps for stereo.
-      // Use this attribute to specify the encoded bit rate.
-      case mp3ProfileInfo.bytesPerSecond of
-        32,
-        40,
-        48,
-        56,
-        64,
-        80,
-        96,
-        112,
-        128,
-        160,
-        192,
-        224,
-        256,
-        320: bytesPerSecondChecked := mp3ProfileInfo.bytesPerSecond;
-        else  // Set to defaults.
-          if (mp3ProfileInfo.channels = 1) then
-            bytesPerSecondChecked := 128
-          else // 2 channels
-            bytesPerSecondChecked := 320;
-      end;
-
-      hr := aType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                              bytesPerSecondChecked);
-    end // MPEG_1
-  else if (mp3ProfileInfo.mpegVersion = 2) then
-    begin
-      case mp3ProfileInfo.sampleRate of
-        32000,
-        44100,
-        48000: sampleRateChecked := mp3ProfileInfo.sampleRate;
-        else  // Set to default.
-          sampleRateChecked := 44100;
-      end;
-
-      hr := aType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                            sampleRateChecked);
-      if FAILED(hr) then
-        goto done;
-
-      // Bit rate of the encoded MP3 MPEG_1 stream, in bytes per second.
-      // The encoder supports all bit rates defined by the standard (32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, or 320 kbps).
-      // The default bit rates are 128 Kbps for mono and 320 Kbps for stereo.
-      // Use this attribute to specify the encoded bit rate.
-      case mp3ProfileInfo.bytesPerSecond of
-        32,
-        40,
-        48,
-        56,
-        64,
-        80,
-        96,
-        112,
-        128,
-        160,
-        192,
-        224,
-        256,
-        320: bytesPerSecondChecked := mp3ProfileInfo.bytesPerSecond;
-        else  // Set to defaults.
-          if (mp3ProfileInfo.channels = 1) then
-            bytesPerSecondChecked := 128
-          else // 2 channels
-            bytesPerSecondChecked := 320;
-      end;
-
-      hr := aType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                            bytesPerSecondChecked);
+      Result := E_INVALIDARG;
+      Exit;
     end;
-
-done:
-  Result := hr;
+  channelsChecked := mp3ProfileInfo.channels;
+  if (channelsChecked <> 1) and (channelsChecked <> 2) then
+    channelsChecked := 2;
+  sampleRateChecked := mp3ProfileInfo.sampleRate;
+  bytesPerSecondChecked := mp3ProfileInfo.bytesPerSecond;
+  if mp3ProfileInfo.mpegVersion = 1 then
+    begin
+      case sampleRateChecked of
+        32000,44100,48000: ;
+        else sampleRateChecked := 44100;
+      end;
+      case bytesPerSecondChecked of
+        4000,5000,6000,7000,8000,10000,12000,14000,16000,20000,24000,28000,32000,40000: ;
+        else
+          if channelsChecked = 1 then
+            bytesPerSecondChecked := 16000
+          else
+            bytesPerSecondChecked := 40000;
+      end;
+    end
+  else
+    begin
+      case sampleRateChecked of
+        8000,11025,12000,16000,22050,24000: ;
+        else sampleRateChecked := 22050;
+      end;
+      case bytesPerSecondChecked of
+        1000,2000,3000,4000,5000,6000,7000,8000,10000,12000,14000,18000,20000: ;
+        else bytesPerSecondChecked := 8000;
+      end;
+      if ((sampleRateChecked <= 12000) and (bytesPerSecondChecked >= 10000)) or
+         ((sampleRateChecked = 8000) and (channelsChecked = 2) and (bytesPerSecondChecked <= 3000)) then
+        begin
+          Result := E_INVALIDARG;
+          Exit;
+        end;
+    end;
+  Result := MFCreateMediaType(aType);
+  if SUCCEEDED(Result) then
+    Result := aType.SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Audio);
+  if SUCCEEDED(Result) then
+    Result := aType.SetGUID(MF_MT_SUBTYPE,MFAudioFormat_MP3);
+  if SUCCEEDED(Result) then
+    Result := aType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,channelsChecked);
+  if SUCCEEDED(Result) then
+    Result := aType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,sampleRateChecked);
+  if SUCCEEDED(Result) then
+    Result := aType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,bytesPerSecondChecked);
+  if SUCCEEDED(Result) then
+    mp3Type := aType;
 end;
 
 
@@ -1013,6 +937,12 @@ label
   done;
 
 begin
+  FillChar(aProfile,SizeOf(aProfile),0);
+  if srcType = nil then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
 
   hr := srcType.GetMajorType(majortype);
   if FAILED(hr) then
@@ -1058,9 +988,7 @@ begin
                                                  MF_MT_AUDIO_BITS_PER_SAMPLE,
                                                  16);
 
-  aProfile.bytesPerSec :=  MFGetAttributeUINT32(srcType,
-                                                MF_MT_AUDIO_BITS_PER_SAMPLE,
-                                                16);
+  aProfile.bytesPerSec := MFGetAttributeUINT32(srcType,MF_MT_AUDIO_AVG_BYTES_PER_SECOND,12000);
 
   aProfile.aacProfile := $29;
 
@@ -1071,7 +999,7 @@ begin
   // Note: Some encoded audio formats do not contain a value for bits/sample.
   // In that case, use a default value of 16. Most codecs will accept this value.
    if (aProfile.samplesPerSec = 0) then
-     aProfile.samplesPerSec := 16;
+     aProfile.samplesPerSec := 44100;
 
   // Create the corresponding PCM audio type.
   hr := CreateAACAudioType(aProfile,

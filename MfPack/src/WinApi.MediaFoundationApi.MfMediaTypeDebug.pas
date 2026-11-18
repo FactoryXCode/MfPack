@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Code to view the contents of a media type (IMFMediaType) while debugging.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: How to use:
@@ -53,7 +53,7 @@
 //              {$ENDIF}
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -115,9 +115,7 @@ uses
   WinApi.MediaFoundationApi.MfMetLib,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfApi,
-  WinApi.MediaFoundationApi.MfError,
-  {Vcl}
-  Vcl.Forms;
+  WinApi.MediaFoundationApi.MfError;
 
 
 type
@@ -166,6 +164,28 @@ var
 
 implementation
 
+procedure SaveDebugStrings(List: TStringList;
+                           const FileName: string);
+var
+  Handle: THandle;
+  Stream: THandleStream;
+begin
+  Handle := CreateFileW(PWideChar(FileName),GENERIC_WRITE,0,nil,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0);
+  if Handle = INVALID_HANDLE_VALUE then
+    RaiseLastOSError;
+  try
+    Stream := THandleStream.Create(Handle);
+    try
+      List.SaveToStream(Stream{$IFNDEF FPC},TEncoding.UTF8{$ENDIF});
+    finally
+      Stream.Free;
+    end;
+  finally
+    CloseHandle(Handle);
+  end;
+end;
+
+
 
 {PUBLIC}
 constructor TMediaTypeDebug.Create();
@@ -174,7 +194,7 @@ begin
   slDebug := TStringlist.Create();
   SetLength(arDebug,
             0);
-  sDebugDirectory := ExtractFilePath(Application.ExeName);
+  sDebugDirectory := ExtractFilePath(ParamStr(0));
 end;
 
 
@@ -248,7 +268,7 @@ end;
 
 procedure TMediaTypeDebug.SafeAllDebugResultsToOneFile(pFileName: string);
 begin
-  slDebug.SaveToFile(sDebugDirectory + pFileName);
+  SaveDebugStrings(slDebug,IncludeTrailingPathDelimiter(sDebugDirectory) + pFileName);
 end;
 
 
@@ -299,7 +319,7 @@ begin
 
   // When you don't want to safe each item to file,
   // you should call property DebugResults.SafeToFile when done.
-  slDebug.SaveToFile(sFileName);
+  SaveDebugStrings(slDebug,sFileName);
   slDebug.Clear();
 
 end;
@@ -417,7 +437,7 @@ begin
                   end;
 
         VT_LPWSTR: DebugMsg(Format('Value: %s',
-                                   [PChar(@pvVar.pwszVal)]));
+                                   [pvVar.pwszVal]));
 
         VT_VECTOR or VT_UI1 : DebugMsg('Value: Byte Array');
 
@@ -459,7 +479,10 @@ begin
                   MF_MT_PIXEL_ASPECT_RATIO)) then
     begin
       // Attributes that contain two packed 32-bit values.
-      LogUINT32AsUINT64(pPropVar);
+      if pPropVar.vt = VT_UI8 then
+        LogUINT32AsUINT64(pPropVar)
+      else
+        hr := E_INVALIDARG;
     end
   else if (isEqualGuid(pGuid,
                        MF_MT_GEOMETRIC_APERTURE) or
@@ -499,16 +522,13 @@ var
 
 begin
 
-  if (pPropVar.caub.cElems < SizeOf(MFVideoArea)) then
+  if (pPropVar.vt <> (VT_VECTOR or VT_UI1)) or (pPropVar.caub.pElems = nil) then
+    Result := E_INVALIDARG
+  else if (pPropVar.caub.cElems < SizeOf(MFVideoArea)) then
     Result := MF_E_BUFFERTOOSMALL
   else
     begin
-{$POINTERMATH ON}
-      pArea := MakeArea(pPropVar.caub.pElems[0],
-                        pPropVar.caub.pElems[1],
-                        pPropVar.caub.pElems[2],
-                        pPropVar.caub.pElems[3]);
-{$POINTERMATH OFF}
+      Move(pPropVar.caub.pElems^,pArea,SizeOf(pArea));
 
       DebugMsg(StrToPWideChar(Format('MFVideoArea: (OffsetX: %f, OffsetY: %f) (cx: %d, cy: %d)',
                                      [MFOffsetToFloat(pArea.OffsetX),
@@ -524,8 +544,7 @@ end;
 procedure TMediaTypeDebug.DebugMsg(pFormat: string);
 begin
 {$IFDEF DEBUG}
-  OutputDebugString(StrToPWideChar(Format('%s',
-                                          [pFormat])));
+  OutputDebugStringW(PWideChar(pFormat));
 {$ENDIF}
 
   slDebug.Append(Format('%d %s',

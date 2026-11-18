@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This file defines the MPEG-2 section header bitfields. These are
 //              defined here instead of in mpegstructs.idl because of MIDL
 //              compiler conflicts with bitfield definitions.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,7 +73,7 @@ interface
 type
 
   PPID_BITS_MIDL = ^PID_BITS_MIDL;
-  PID_BITS_MIDL = record
+  PID_BITS_MIDL = packed record
     Bits: WORD;
   end;
   {$EXTERNALSYM PID_BITS_MIDL}
@@ -85,7 +85,7 @@ type
 type
 
   PMPEG_HEADER_BITS_MIDL = ^MPEG_HEADER_BITS_MIDL;
-  MPEG_HEADER_BITS_MIDL = record
+  MPEG_HEADER_BITS_MIDL = packed record
     Bits: WORD;
   end;
   {$EXTERNALSYM MPEG_HEADER_BITS_MIDL}
@@ -98,7 +98,7 @@ type
 type
 
   PMPEG_HEADER_VERSION_BITS_MIDL = ^MPEG_HEADER_VERSION_BITS_MIDL;
-  MPEG_HEADER_VERSION_BITS_MIDL = record
+  MPEG_HEADER_VERSION_BITS_MIDL = packed record
     Bits: Byte;
   end;
   {$EXTERNALSYM MPEG_HEADER_VERSION_BITS_MIDL}

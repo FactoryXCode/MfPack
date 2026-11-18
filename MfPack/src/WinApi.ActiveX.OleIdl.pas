@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MFPack - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: This header is used by Component Object Model (COM).
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -160,19 +160,19 @@ type
   {$EXTERNALSYM IOleAdviseHolder}
   IOleAdviseHolder = interface(IUnknown)
   ['{00000111-0000-0000-C000-000000000046}']
-    function Advise(advise: IAdviseSink;
-                    out dwConnection: Longint): HResult; stdcall;
 
-    function Unadvise(dwConnection: Longint): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Advise(pAdvise: IAdviseSink; pdwConnection: PDWORD): HRESULT; stdcall;
 
-    function EnumAdvise(out enumAdvise: IEnumStatData): HResult; stdcall;
+    function Unadvise(dwConnection: DWORD): HRESULT; stdcall;
 
-    function SendOnRename(mk: IMoniker): HResult; stdcall;
+    function EnumAdvise(out ppenumAdvise: IEnumSTATDATA): HRESULT; stdcall;
 
-    function SendOnSave: HResult; stdcall;
+    function SendOnRename(pmk: IMoniker): HRESULT; stdcall;
 
-    function SendOnClose: HResult; stdcall;
+    function SendOnSave(): HRESULT; stdcall;
 
+    function SendOnClose(): HRESULT; stdcall;
   end;
   IID_IOleAdviseHolder = IOleAdviseHolder;
   {$EXTERNALSYM IID_IOleAdviseHolder}
@@ -186,19 +186,17 @@ type
   {$EXTERNALSYM IOleCache}
   IOleCache = interface(IUnknown)
   ['{0000011E-0000-0000-C000-000000000046}']
-    function Cache(formatetc: FORMATETC;
-                   advf: Longint;
-                   out dwConnection: Longint): HResult; stdcall;
 
-    function Uncache(dwConnection: Longint): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Cache(pformatetc: PFORMATETC; advf: DWORD; pdwConnection: PDWORD): HRESULT; stdcall;
 
-    function EnumCache(out enumStatData: IEnumStatData): HResult; stdcall;
+    function Uncache(dwConnection: DWORD): HRESULT; stdcall;
 
-    function InitCache(dataObject: IDataObject): HResult; stdcall;
+    function EnumCache(out ppenumSTATDATA: IEnumSTATDATA): HRESULT; stdcall;
 
-    function SetData(formatetc: FORMATETC;
-                     medium: STGMEDIUM;
-                     fRelease: BOOL): HResult; stdcall;
+    function InitCache(pDataObject: IDataObject): HRESULT; stdcall;
+
+    function SetData(pformatetc: PFORMATETC; pmedium: PSTGMEDIUM; fRelease: BOOL): HRESULT; stdcall;
   end;
   IID_IOleCache = IOleCache;
   {$EXTERNALSYM IID_IOleCache}
@@ -223,12 +221,11 @@ type
   {$EXTERNALSYM IOleCache2}
   IOleCache2 = interface(IOleCache)
   ['{00000128-0000-0000-C000-000000000046}']
-    function UpdateCache(dataObject: IDataObject;
-                         grfUpdf: DWORD;
-                         pReserved: Pointer): HResult; stdcall;
 
-    function DiscardCache(dwDiscardOptions: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function UpdateCache(pDataObject: IDataObject; grfUpdf: DWORD; pReserved: Pointer): HRESULT; stdcall;
 
+    function DiscardCache(dwDiscardOptions: DWORD): HRESULT; stdcall;
   end;
   IID_IOleCache2 = IOleCache2;
   {$EXTERNALSYM IID_IOleCache2}
@@ -242,10 +239,11 @@ type
   {$EXTERNALSYM IOleCacheControl}
   IOleCacheControl = interface(IUnknown)
   ['{00000129-0000-0000-C000-000000000046}']
-    function OnRun(dataObject: IDataObject): HResult; stdcall;
 
-    function OnStop(): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnRun(pDataObject: IDataObject): HRESULT; stdcall;
 
+    function OnStop(): HRESULT; stdcall;
   end;
   IID_IOleCacheControl = IOleCacheControl;
   {$EXTERNALSYM IID_IOleCacheControl}
@@ -259,11 +257,9 @@ type
   {$EXTERNALSYM IParseDisplayName}
   IParseDisplayName = interface(IUnknown)
   ['{0000011A-0000-0000-C000-000000000046}']
-    function ParseDisplayName(bc: IBindCtx;
-                              pszDisplayName: LPOLESTR;
-                              out pchEaten: ULONG;
-                              out ppmkOut: IMoniker): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function ParseDisplayName(pbc: IBindCtx; pszDisplayName: PWideChar; pchEaten: PULONG; out ppmkOut: IMoniker): HRESULT; stdcall;
   end;
   IID_IParseDisplayName = IParseDisplayName;
   {$EXTERNALSYM IID_IParseDisplayName}
@@ -277,11 +273,11 @@ type
   {$EXTERNALSYM IOleContainer}
   IOleContainer = interface(IParseDisplayName)
   ['{0000011B-0000-0000-C000-000000000046}']
-    function EnumObjects(grfFlags: Longint;
-                         out Enum: IEnumUnknown): HResult; stdcall;
 
-    function LockContainer(fLock: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function EnumObjects(grfFlags: DWORD; out ppenum: IEnumUnknown): HRESULT; stdcall;
 
+    function LockContainer(fLock: BOOL): HRESULT; stdcall;
   end;
   IID_IOleContainer = IOleContainer;
   {$EXTERNALSYM IID_IOleContainer}
@@ -295,20 +291,19 @@ type
   {$EXTERNALSYM IOleClientSite}
   IOleClientSite = interface(IUnknown)
   ['{00000118-0000-0000-C000-000000000046}']
-    function SaveObject(): HResult; stdcall;
 
-    function GetMoniker(dwAssign: Longint;
-                        dwWhichMoniker: Longint;
-                        out mk: IMoniker): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SaveObject(): HRESULT; stdcall;
 
-    function GetContainer(out container: IOleContainer): HResult; stdcall;
+    function GetMoniker(dwAssign: DWORD; dwWhichMoniker: DWORD; out ppmk: IMoniker): HRESULT; stdcall;
 
-    function ShowObject(): HResult; stdcall;
+    function GetContainer(out ppContainer: IOleContainer): HRESULT; stdcall;
 
-    function OnShowWindow(fShow: BOOL): HResult; stdcall;
+    function ShowObject(): HRESULT; stdcall;
 
-    function RequestNewObjectLayout(): HResult; stdcall;
+    function OnShowWindow(fShow: BOOL): HRESULT; stdcall;
 
+    function RequestNewObjectLayout(): HRESULT; stdcall;
   end;
   IID_IOleClientSite = IOleClientSite;
   {$EXTERNALSYM IID_IOleClientSite}
@@ -393,70 +388,49 @@ type
   {$EXTERNALSYM IOleObject}
   IOleObject = interface(IUnknown)
   ['{00000112-0000-0000-C000-000000000046}']
-    function SetClientSite(clientSite: IOleClientSite): HResult; stdcall;
 
-    function GetClientSite(out clientSite: IOleClientSite): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SetClientSite(pClientSite: IOleClientSite): HRESULT; stdcall;
 
-    function SetHostNames(szContainerApp: POLESTR;
-                          szContainerObj: POLESTR): HResult; stdcall;
+    function GetClientSite(out ppClientSite: IOleClientSite): HRESULT; stdcall;
 
-    function Close(dwSaveOption: DWORD): HResult; stdcall;
+    function SetHostNames(szContainerApp: PWideChar; szContainerObj: PWideChar): HRESULT; stdcall;
 
-    function SetMoniker(dwWhichMoniker: DWORD;
-                        mk: IMoniker): HResult; stdcall;
+    function Close(dwSaveOption: DWORD): HRESULT; stdcall;
 
-    function GetMoniker(dwAssign: DWORD;
-                        dwWhichMoniker: DWORD;
-                        out mk: IMoniker): HResult; stdcall;
+    function SetMoniker(dwWhichMoniker: DWORD; pmk: IMoniker): HRESULT; stdcall;
 
-    function InitFromData(dataObject: IDataObject;
-                          fCreation: BOOL;
-                          dwReserved: DWORD): HResult; stdcall;
+    function GetMoniker(dwAssign: DWORD; dwWhichMoniker: DWORD; out ppmk: IMoniker): HRESULT; stdcall;
 
-    function GetClipboardData(dwReserved: Longint;
-                              out dataObject: IDataObject): HResult; stdcall;
+    function InitFromData(pDataObject: IDataObject; fCreation: BOOL; dwReserved: DWORD): HRESULT; stdcall;
 
-    function DoVerb(iVerb: Longint;
-                    _msg: PMsg;
-                    activeSite: IOleClientSite;
-                    lindex: Longint;
-                    hwndParent: HWND;
-                    const posRect: TRect): HResult; stdcall;
+    function GetClipboardData(dwReserved: DWORD; out ppDataObject: IDataObject): HRESULT; stdcall;
 
-    function EnumVerbs(out enumOleVerb: IEnumOleVerb): HResult; stdcall;
+    function DoVerb(iVerb: LONG; lpmsg: PMSG; pActiveSite: IOleClientSite; lindex: LONG; hwndParent: HWND; lprcPosRect: PRect): HRESULT; stdcall;
 
-    function Update(): HResult; stdcall;
+    function EnumVerbs(out ppEnumOleVerb: IEnumOLEVERB): HRESULT; stdcall;
 
-    function IsUpToDate(): HResult; stdcall;
+    function Update(): HRESULT; stdcall;
 
-    function GetUserClassID(out clsid: CLSID): HResult; stdcall;
+    function IsUpToDate(): HRESULT; stdcall;
 
-    function GetUserType(dwFormOfType: DWORD;
-                         out pszUserType: POLESTR): HResult; stdcall;
+    function GetUserClassID(pClsid: PGUID): HRESULT; stdcall;
 
-{$IFDEF WIN64}
-    function SetExtent(dwDrawAspect: DWORD;
-                       size: PSIZEL): HResult; stdcall;
-{$ELSE}
-    function SetExtent(dwDrawAspect: DWORD;
-                       const size: SIZEL): HResult; stdcall;
-{$ENDIF}
+    function GetUserType(dwFormOfType: DWORD; out pszUserType: PWideChar): HRESULT; stdcall;
 
-    function GetExtent(dwDrawAspect: DWORD;
-                       out size: SIZEL): HResult; stdcall;
+    function SetExtent(dwDrawAspect: DWORD; psizel: PSIZEL): HRESULT; stdcall;
 
-    function Advise(advSink: IAdviseSink;
-                    out dwConnection: Longint): HResult; stdcall;
+    function GetExtent(dwDrawAspect: DWORD; psizel: PSIZEL): HRESULT; stdcall;
 
-    function Unadvise(dwConnection: DWORD): HResult; stdcall;
+    function Advise(pAdvSink: IAdviseSink; pdwConnection: PDWORD): HRESULT; stdcall;
 
-    function EnumAdvise(out enumAdvise: IEnumStatData): HResult; stdcall;
+    function Unadvise(dwConnection: DWORD): HRESULT; stdcall;
 
-    function GetMiscStatus(dwAspect: DWORD;
-                           out dwStatus: DWORD): HResult; stdcall;
+    function EnumAdvise(out ppenumAdvise: IEnumSTATDATA): HRESULT; stdcall;
 
-    function SetColorScheme(const logpal: TLogPalette): HResult; stdcall;
+    function GetMiscStatus(dwAspect: DWORD; pdwStatus: PDWORD): HRESULT; stdcall;
 
+    function SetColorScheme(pLogpal: PLOGPALETTE): HRESULT; stdcall;
   end;
   IID_IOleObject = IOleObject;
   {$EXTERNALSYM IID_IOleObject}
@@ -548,10 +522,11 @@ type
   {$EXTERNALSYM IOleWindow}
   IOleWindow = interface(IUnknown)
   ['{00000114-0000-0000-C000-000000000046}']
-    function GetWindow(out phwnd: HWnd): HResult; stdcall;
 
-    function ContextSensitiveHelp(fEnterMode: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetWindow(out phwnd: HWND): HRESULT; stdcall;
 
+    function ContextSensitiveHelp(fEnterMode: BOOL): HRESULT; stdcall;
   end;
   IID_IOleWindow = IOleWindow;
   {$EXTERNALSYM IID_IOleWindow}
@@ -586,30 +561,29 @@ type
   {$EXTERNALSYM IOleLink}
   IOleLink = interface(IUnknown)
   ['{0000011D-0000-0000-C000-000000000046}']
-    function SetUpdateOptions(dwUpdateOpt: DWORD): HResult; stdcall;
 
-    function GetUpdateOptions(out dwUpdateOpt: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SetUpdateOptions(dwUpdateOpt: DWORD): HRESULT; stdcall;
 
-    function SetSourceMoniker(mk: IMoniker;
-                              const _clsid: CLSID): HResult; stdcall;
+    function GetUpdateOptions(pdwUpdateOpt: PDWORD): HRESULT; stdcall;
 
-    function GetSourceMoniker(out mk: IMoniker): HResult; stdcall;
+    function SetSourceMoniker(pmk: IMoniker; const rclsid: TGUID): HRESULT; stdcall;
 
-    function SetSourceDisplayName(pszDisplayName: POLESTR): HResult; stdcall;
+    function GetSourceMoniker(out ppmk: IMoniker): HRESULT; stdcall;
 
-    function GetSourceDisplayName(out pszDisplayName: POLESTR): HResult; stdcall;
+    function SetSourceDisplayName(pszStatusText: PWideChar): HRESULT; stdcall;
 
-    function BindToSource(bindflags: DWORD;
-                          const bc: IBindCtx): HResult; stdcall;
+    function GetSourceDisplayName(out ppszDisplayName: PWideChar): HRESULT; stdcall;
 
-    function BindIfRunning(): HResult; stdcall;
+    function BindToSource(bindflags: DWORD; pbc: IBindCtx): HRESULT; stdcall;
 
-    function GetBoundSource(out unk: IUnknown): HResult; stdcall;
+    function BindIfRunning(): HRESULT; stdcall;
 
-    function UnbindSource(): HResult; stdcall;
+    function GetBoundSource(out ppunk: IUnknown): HRESULT; stdcall;
 
-    function Update(const bc: IBindCtx): HResult; stdcall;
+    function UnbindSource(): HRESULT; stdcall;
 
+    function Update(pbc: IBindCtx): HRESULT; stdcall;
   end;
   IID_IOleLink = IOleLink;
   {$EXTERNALSYM IID_IOleLink}
@@ -622,19 +596,13 @@ type
   {$EXTERNALSYM IOleItemContainer}
   IOleItemContainer = interface(IOleContainer)
   ['{0000011C-0000-0000-C000-000000000046}']
-    function GetObject(pszItem: POLESTR;
-                       dwSpeedNeeded: Longint;
-                       bc: IBindCtx;
-                       const iid: IID;
-                       out vObject): HResult; stdcall;
 
-    function GetObjectStorage(pszItem: POLESTR;
-                              const bc: IBindCtx;
-                              const iid: IID;
-                              out vStorage): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetObject(pszItem: PWideChar; dwSpeedNeeded: DWORD; pbc: IBindCtx; const riid: TGUID; out ppvObject: Pointer): HRESULT; stdcall;
 
-    function IsRunning(pszItem: POLESTR): HResult; stdcall;
+    function GetObjectStorage(pszItem: PWideChar; pbc: IBindCtx; const riid: TGUID; out ppvStorage: Pointer): HRESULT; stdcall;
 
+    function IsRunning(pszItem: PWideChar): HRESULT; stdcall;
   end;
   IID_IOleItemContainer = IOleItemContainer;
   {$EXTERNALSYM IID_IOleItemContainer}
@@ -660,15 +628,15 @@ type
   {$EXTERNALSYM IOleInPlaceUIWindow}
   IOleInPlaceUIWindow = interface(IOleWindow)
   ['{00000115-0000-0000-C000-000000000046}']
-    function GetBorder(out lprectBorder: LPRECT): HResult; stdcall;
 
-    function RequestBorderSpace(pborderwidths: BORDERWIDTHS): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetBorder(lprectBorder: PRect): HRESULT; stdcall;
 
-    function SetBorderSpace(pborderwidths: BORDERWIDTHS): HResult; stdcall;
+    function RequestBorderSpace(pborderwidths: PBORDERWIDTHS): HRESULT; stdcall;
 
-    function SetActiveObject(activeObject: IOleInPlaceActiveObject;
-                             pszObjName: POLESTR): HResult; stdcall;
+    function SetBorderSpace(pborderwidths: PBORDERWIDTHS): HRESULT; stdcall;
 
+    function SetActiveObject(pActiveObject: IOleInPlaceActiveObject; pszObjName: PWideChar): HRESULT; stdcall;
   end;
   IID_IOleInPlaceUIWindow = IOleInPlaceUIWindow;
   {$EXTERNALSYM IID_IOleInPlaceUIWindow}
@@ -682,18 +650,17 @@ type
   {$EXTERNALSYM IOleInPlaceActiveObject}
   IOleInPlaceActiveObject = interface(IOleWindow)
   ['{00000117-0000-0000-C000-000000000046}']
-    function TranslateAccelerator(var lpmsg: TMsg): HResult; stdcall;
 
-    function OnFrameWindowActivate(fActivate: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function TranslateAccelerator(lpmsg: PMSG): HRESULT; stdcall;
 
-    function OnDocWindowActivate(fActivate: BOOL): HResult; stdcall;
+    function OnFrameWindowActivate(fActivate: BOOL): HRESULT; stdcall;
 
-    function ResizeBorder(prcBorder: LPCRECT;
-                          uiWindow: IOleInPlaceUIWindow;
-                          fFrameWindow: BOOL): HResult; stdcall;
+    function OnDocWindowActivate(fActivate: BOOL): HRESULT; stdcall;
 
-    function EnableModeless(fEnable: BOOL): HResult; stdcall;
+    function ResizeBorder(prcBorder: PRect; pUIWindow: IOleInPlaceUIWindow; fFrameWindow: BOOL): HRESULT; stdcall;
 
+    function EnableModeless(fEnable: BOOL): HRESULT; stdcall;
   end;
   IID_IOleInPlaceActiveObject = IOleInPlaceActiveObject;
   {$EXTERNALSYM IID_IOleInPlaceActiveObject}
@@ -701,11 +668,11 @@ type
 
   POLEINPLACEFRAMEINFO = ^OLEINPLACEFRAMEINFO;
   tagOIFI = record
-    cb: Integer;
+    cb: UINT;
     fMDIApp: BOOL;
     hwndFrame: HWND;
     haccel: HAccel;
-    cAccelEntries: Integer;
+    cAccelEntries: UINT;
   end;
   {$EXTERNALSYM tagOIFI}
   OLEINPLACEFRAMEINFO = tagOIFI;
@@ -732,23 +699,19 @@ type
   {$EXTERNALSYM IOleInPlaceFrame}
   IOleInPlaceFrame = interface(IOleInPlaceUIWindow)
   ['{00000116-0000-0000-C000-000000000046}']
-    
-    function InsertMenus(hmenuShared: HMenu;
-                         var menuWidths: OLEMENUGROUPWIDTHS): HResult; stdcall;
 
-    function SetMenu(hmenuShared: HMenu; 
-                     holemenu: HMenu;
-                     hwndActiveObject: HWnd): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function InsertMenus(hmenuShared: HMENU; lpMenuWidths: POLEMENUGROUPWIDTHS): HRESULT; stdcall;
 
-    function RemoveMenus(hmenuShared: HMenu): HResult; stdcall;
+    function SetMenu(hmenuShared: HMENU; holemenu: HOLEMENU; hwndActiveObject: HWND): HRESULT; stdcall;
 
-    function SetStatusText(pszStatusText: POLESTR): HResult; stdcall;
+    function RemoveMenus(hmenuShared: HMENU): HRESULT; stdcall;
 
-    function EnableModeless(fEnable: BOOL): HResult; stdcall;
+    function SetStatusText(pszStatusText: PWideChar): HRESULT; stdcall;
 
-    function TranslateAccelerator(var lpmsg: TMsg;
-                                  wID: Word): HResult; stdcall;
+    function EnableModeless(fEnable: BOOL): HRESULT; stdcall;
 
+    function TranslateAccelerator(lpmsg: PMSG; wID: WORD): HRESULT; stdcall;
   end;
   IID_IOleInPlaceFrame = IOleInPlaceFrame;
   {$EXTERNALSYM IID_IOleInPlaceFrame}
@@ -762,15 +725,15 @@ type
   {$EXTERNALSYM IOleInPlaceObject}
   IOleInPlaceObject = interface(IOleWindow)
   ['{00000113-0000-0000-C000-000000000046}']
-    function InPlaceDeactivate(): HResult; stdcall;
 
-    function UIDeactivate(): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function InPlaceDeactivate(): HRESULT; stdcall;
 
-    function SetObjectRects(const lprcPosRect: LPCRECT;
-                            const lprcClipRect: LPCRECT): HResult; stdcall;
+    function UIDeactivate(): HRESULT; stdcall;
 
-    function ReactivateAndUndo(): HResult; stdcall;
+    function SetObjectRects(lprcPosRect: PRect; lprcClipRect: PRect): HRESULT; stdcall;
 
+    function ReactivateAndUndo(): HRESULT; stdcall;
   end;
   IID_IOleInPlaceObject = IOleInPlaceObject;
   {$EXTERNALSYM IID_IOleInPlaceObject}
@@ -784,30 +747,27 @@ type
   {$EXTERNALSYM IOleInPlaceSite}
   IOleInPlaceSite = interface(IOleWindow)
   ['{00000119-0000-0000-C000-000000000046}']
-    function CanInPlaceActivate(): HResult; stdcall;
 
-    function OnInPlaceActivate(): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function CanInPlaceActivate(): HRESULT; stdcall;
 
-    function OnUIActivate(): HResult; stdcall;
+    function OnInPlaceActivate(): HRESULT; stdcall;
 
-    function GetWindowContext(out ppFrame: IOleInPlaceFrame;
-                              out ppDoc: IOleInPlaceUIWindow;
-                              out lprcPosRect: LPCRECT;
-                              out lprcClipRect: LPCRECT;
-                              out frameInfo: OLEINPLACEFRAMEINFO): HResult; stdcall;
+    function OnUIActivate(): HRESULT; stdcall;
 
-    function Scroll(scrollExtant: SIZE): HResult; stdcall;
+    function GetWindowContext(out ppFrame: IOleInPlaceFrame; out ppDoc: IOleInPlaceUIWindow; lprcPosRect: PRect; lprcClipRect: PRect; lpFrameInfo: POLEINPLACEFRAMEINFO): HRESULT; stdcall;
 
-    function OnUIDeactivate(fUndoable: BOOL): HResult; stdcall;
+    function Scroll(scrollExtant: SIZE): HRESULT; stdcall;
 
-    function OnInPlaceDeactivate(): HResult; stdcall;
+    function OnUIDeactivate(fUndoable: BOOL): HRESULT; stdcall;
 
-    function DiscardUndoState(): HResult; stdcall;
+    function OnInPlaceDeactivate(): HRESULT; stdcall;
 
-    function DeactivateAndUndo(): HResult; stdcall;
+    function DiscardUndoState(): HRESULT; stdcall;
 
-    function OnPosRectChange(const lprcPosRect: LPCRECT): HResult; stdcall;
+    function DeactivateAndUndo(): HRESULT; stdcall;
 
+    function OnPosRectChange(lprcPosRect: PRect): HRESULT; stdcall;
   end;
   IID_IOleInPlaceSite = IOleInPlaceSite;
   {$EXTERNALSYM IID_IOleInPlaceSite}
@@ -821,14 +781,15 @@ type
   {$EXTERNALSYM IContinue}
   IContinue = interface(IUnknown)
   ['{0000012a-0000-0000-C000-000000000046}']
-    function FContinue(): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function FContinue(): HRESULT; stdcall;
   end;
   IID_IContinue = IContinue;
   {$EXTERNALSYM IID_IContinue}
 
  //or see ActiveX
-  FuncContinue = function(dwContinue: Longint): BOOL; stdcall;
+  FuncContinue = function(dwContinue: ULONG_PTR): BOOL; stdcall;
   {$EXTERNALSYM FuncContinue}
 
 
@@ -839,39 +800,19 @@ type
   {$EXTERNALSYM IViewObject}
   IViewObject = interface(IUnknown)
   ['{0000010D-0000-0000-C000-000000000046}']
-    function Draw(dwDrawAspect: DWORD;
-                  lindex: LONG;
-                  pvAspect: Pointer;
-                  ptd: DVTargetDevice;
-                  hicTargetDev: HDC;
-                  hdcDraw: HDC;
-                  prcBounds: LPCRECTL;
-                  prcWBounds: LPCRECTL;
-                  fnContinue: FuncContinue; // IContinue
-                  dwContinue: Longint): HResult; stdcall;
 
-    function GetColorSet(dwDrawAspect: DWORD;
-                         lindex: LONG;
-                         pvAspect: Pointer;
-                         ptd: DVTARGETDEVICE;
-                         hicTargetDev: HDC;
-                         out colorSet: PLogPalette): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Draw(dwDrawAspect: DWORD; lindex: LONG; pvAspect: Pointer; ptd: PDVTARGETDEVICE; hdcTargetDev: HDC; hdcDraw: HDC; lprcBounds: PRect; lprcWBounds: PRect; pfnContinue: FuncContinue; dwContinue: ULONG_PTR): HRESULT; stdcall;
 
-    function Freeze(dwDrawAspect: DWORD;
-                    lindex: DWORD;
-                    pvAspect: Pointer;
-                    out dwFreeze: DWORD): HResult; stdcall;
+    function GetColorSet(dwDrawAspect: DWORD; lindex: LONG; pvAspect: Pointer; ptd: PDVTARGETDEVICE; hicTargetDev: HDC; out ppColorSet: PLOGPALETTE): HRESULT; stdcall;
 
-    function Unfreeze(dwFreeze: DWORD): HResult; stdcall;
+    function Freeze(dwDrawAspect: DWORD; lindex: LONG; pvAspect: Pointer; pdwFreeze: PDWORD): HRESULT; stdcall;
 
-    function SetAdvise(aspects: DWORD;
-                       advf: Longint;
-                       advSink: IAdviseSink): HResult; stdcall;
+    function Unfreeze(dwFreeze: DWORD): HRESULT; stdcall;
 
-    function GetAdvise(pAspects: DWORD;
-                       pAdvf: Longint;
-                       out advSink: IAdviseSink): HResult; stdcall;
+    function SetAdvise(aspects: DWORD; advf: DWORD; pAdvSink: IAdviseSink): HRESULT; stdcall;
 
+    function GetAdvise(pAspects: PDWORD; pAdvf: PDWORD; out ppAdvSink: IAdviseSink): HRESULT; stdcall;
   end;
   IID_IViewObject = IViewObject;
   {$EXTERNALSYM IID_IViewObject}
@@ -884,10 +825,9 @@ type
   {$EXTERNALSYM IViewObject2}
   IViewObject2 = interface(IViewObject)
   ['{00000127-0000-0000-C000-000000000046}']
-    function GetExtent(dwDrawAspect: DWORD;
-                       lindex: LONG;
-                       ptd: DVTARGETDEVICE;
-                       out lpsizel: SIZEL): HResult; stdcall;
+
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetExtent(dwDrawAspect: DWORD; lindex: LONG; ptd: PDVTARGETDEVICE; lpsizel: PSIZEL): HRESULT; stdcall;
   end;
 
 
@@ -899,11 +839,11 @@ type
   {$EXTERNALSYM IDropSource}
   IDropSource = interface(IUnknown)
   ['{00000121-0000-0000-C000-000000000046}']
-    function QueryContinueDrag(fEscapePressed: BOOL;
-                               grfKeyState: DWORD): HResult; stdcall;
 
-    function GiveFeedback(dwEffect: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: DWORD): HRESULT; stdcall;
 
+    function GiveFeedback(dwEffect: DWORD): HRESULT; stdcall;
   end;
   IID_IDropSource = IDropSource;
   {$EXTERNALSYM IID_IDropSource}
@@ -916,22 +856,15 @@ type
   {$EXTERNALSYM IDropTarget}
   IDropTarget = interface(IUnknown)
   ['{00000122-0000-0000-C000-000000000046}']
-    function DragEnter(dataObj: IDataObject;
-                       grfKeyState: DWORD;
-                       pt: POINTL;
-                       var dwEffect: DWORD): HResult; stdcall;
 
-    function DragOver(grfKeyState: DWORD;
-                      pt: POINTL;
-                      var dwEffect: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function DragEnter(pDataObj: IDataObject; grfKeyState: DWORD; pt: POINTL; pdwEffect: PDWORD): HRESULT; stdcall;
 
-    function DragLeave(): HResult; stdcall;
+    function DragOver(grfKeyState: DWORD; pt: POINTL; pdwEffect: PDWORD): HRESULT; stdcall;
 
-    function Drop(dataObj: IDataObject;
-                  grfKeyState: DWORD;
-                  pt: POINTL;
-                  var dwEffect: DWORD): HResult; stdcall;
+    function DragLeave(): HRESULT; stdcall;
 
+    function Drop(pDataObj: IDataObject; grfKeyState: DWORD; pt: POINTL; pdwEffect: PDWORD): HRESULT; stdcall;
   end;
   IID_IDropTarget = IDropTarget;
   {$EXTERNALSYM IID_IDropTarget}
@@ -945,10 +878,11 @@ type
   {$EXTERNALSYM IDropSourceNotify}
   IDropSourceNotify = interface(IUnknown)
   ['{0000012B-0000-0000-C000-000000000046}']
-    function DragEnterTarget(hwndTarget: HWND): HResult; stdcall;
 
-    function DragLeaveTarget(): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function DragEnterTarget(hwndTarget: HWND): HRESULT; stdcall;
 
+    function DragLeaveTarget(): HRESULT; stdcall;
   end;
   IID_IDropSourceNotify = IDropSourceNotify;
   {$EXTERNALSYM IID_IDropSourceNotify}
@@ -961,10 +895,11 @@ type
   {$EXTERNALSYM IEnterpriseDropTarget}
   IEnterpriseDropTarget = interface(IUnknown)
   ['{390E3878-FD55-4E18-819D-4682081C0CFD}']
-    function SetDropSourceEnterpriseId(identity: LPCWSTR): HResult; stdcall;
 
-    function IsEvaluatingEdpPolicy(out value: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SetDropSourceEnterpriseId(identity: PWideChar): HRESULT; stdcall;
 
+    function IsEvaluatingEdpPolicy(out value: BOOL): HRESULT; stdcall;
   end;
   IID_IEnterpriseDropTarget = IEnterpriseDropTarget;
   {$EXTERNALSYM IID_IEnterpriseDropTarget}
@@ -973,16 +908,16 @@ type
   POLEVERB = ^OLEVERB;
   tagOLEVERB = record
     lVerb: Longint;
-    lpszVerbName: POleStr;
-    fuFlags: Longint;
-    grfAttribs: Longint;
+    lpszVerbName: LPOLESTR;
+    fuFlags: DWORD;
+    grfAttribs: DWORD;
   end;
   {$EXTERNALSYM tagOLEVERB}
   OLEVERB = tagOLEVERB;
   {$EXTERNALSYM OLEVERB}
 
   // Bitwise verb attributes used in OLEVERB.grfAttribs
-  tagOLEVERBATTRIB = byte;           // bitwise
+  tagOLEVERBATTRIB = DWORD;           // bitwise
   {$EXTERNALSYM tagOLEVERBATTRIB}
   OLEVERBATTRIB = tagOLEVERBATTRIB;
   {$EXTERNALSYM OLEVERBATTRIB}
@@ -995,16 +930,15 @@ type
   {$EXTERNALSYM IEnumOLEVERB}
   IEnumOLEVERB = interface(IUnknown)
   ['{00000104-0000-0000-C000-000000000046}']
-    function Next(celt: ULONG; // Number of items to be retrieved.
-                  out elt;     // Array of enumerated items
-                  pceltFetched: ULONG): HResult; stdcall;
 
-    function Skip(celt: ULONG): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Next(celt: ULONG; rgelt: POLEVERB; pceltFetched: PULONG): HRESULT; stdcall;
 
-    function Reset(): HResult; stdcall;
+    function Skip(celt: ULONG): HRESULT; stdcall;
 
-    function Clone(out ppenum: IEnumOLEVERB): HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
+    function Clone(out ppenum: IEnumOLEVERB): HRESULT; stdcall;
   end;
   IID_IEnumOLEVERB = IEnumOLEVERB;
   {$EXTERNALSYM IID_IEnumOLEVERB}

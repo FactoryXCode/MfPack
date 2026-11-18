@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MFPack - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: This header is used by Component Object Model (COM).
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -91,6 +91,10 @@ uses
   {$ENDIF}
 
   {$INCLUDE 'WinApiTypes.inc'}
+
+type
+  PLCID = ^LCID;
+  PHRESULT = ^HRESULT;
 
 const
 
@@ -348,7 +352,7 @@ type
   PCAUUID = ^CAUUID;
   tagCAUUID = record
     cElems: ULONG;
-    pElems: TGuid;
+    pElems: PGUID;
   end;
   {$EXTERNALSYM tagCAUUID}
   CAUUID = tagCAUUID;
@@ -392,7 +396,7 @@ type
   HHANDLE = UINT_PTR;
   {$EXTERNALSYM HHANDLE}
 
-  tagVIEWSTATUS = byte;
+  tagVIEWSTATUS = DWORD;
   VIEWSTATUS = tagVIEWSTATUS;
   {$EXTERNALSYM VIEWSTATUS}
   // see above (const) for its values
@@ -407,7 +411,7 @@ type
   {$EXTERNALSYM tagHITRESULT}
   HITRESULT = tagHITRESULT;
 
-  tagDVASPECT2 = byte;
+  tagDVASPECT2 = DWORD;
   DVASPECT2 = tagDVASPECT2;
   {$EXTERNALSYM DVASPECT2}
   // see above (const) for its values
@@ -457,10 +461,11 @@ type
   {$EXTERNALSYM POINTERINACTIVE}
 
 
+  POleStringArrayElement = ^LPOLESTR;
   PCALPOLESTR = ^CALPOLESTR;
   tagCALPOLESTR = record
-    cElems: Longint;
-    pElems: POLESTR; // array of PWideChar
+    cElems: ULONG;
+    pElems: POleStringArrayElement; // array of LPOLESTR
   end;
   {$EXTERNALSYM tagCALPOLESTR}
   CALPOLESTR = tagCALPOLESTR;
@@ -496,7 +501,7 @@ type
     vt: VARTYPE;
     cfType: CLIPFORMAT;
     dwHint: DWORD;
-    pstrName: POLESTR;
+    pstrName: LPOLESTR;
     clsid: TGuid;
   end;
   {$EXTERNALSYM _tagPROPBAG2}
@@ -570,16 +575,15 @@ type
   {$EXTERNALSYM IEnumConnections}
   IEnumConnections = interface(IUnknown)
   ['{B196B287-BAB4-101A-B69C-00AA00341D07}']
-    function Next(cConnections: ULONG;
-                  out rgcd; //: LPCONNECTDATA;
-                  pcFetched: PULONG): HResult; stdcall;
 
-    function Skip(cConnections: ULONG): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Next(cConnections: ULONG; rgcd: PCONNECTDATA; pcFetched: PULONG): HRESULT; stdcall;
 
-    function Reset(): HResult; stdcall;
+    function Skip(cConnections: ULONG): HRESULT; stdcall;
 
-    function Clone(out ppEnum: IEnumConnections): HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
+    function Clone(out ppEnum: IEnumConnections): HRESULT; stdcall;
   end;
   IID_IEnumConnections = IEnumConnections;
   {$EXTERNALSYM IID_IEnumConnections}
@@ -593,17 +597,17 @@ type
   {$EXTERNALSYM IConnectionPoint}
   IConnectionPoint = interface(IUnknown)
   ['{B196B286-BAB4-101A-B69C-00AA00341D07}']
-    function GetConnectionInterface(out iid: IID): HResult; stdcall;
 
-    function GetConnectionPointContainer(out ppCPC: IConnectionPointContainer): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetConnectionInterface(pIID: PGUID): HRESULT; stdcall;
 
-    function Advise(const pUnkSink: IUnknown;
-                    out pdwCookie: DWORD): HResult; stdcall;
+    function GetConnectionPointContainer(out ppCPC: IConnectionPointContainer): HRESULT; stdcall;
 
-    function Unadvise(dwCookie: DWORD): HResult; stdcall;
+    function Advise(pUnkSink: IUnknown; pdwCookie: PDWORD): HRESULT; stdcall;
 
-    function EnumConnections(out Enum: IEnumConnections): HResult; stdcall;
+    function Unadvise(dwCookie: DWORD): HRESULT; stdcall;
 
+    function EnumConnections(out ppEnum: IEnumConnections): HRESULT; stdcall;
   end;
   IID_IConnectionPoint = IConnectionPoint;
   {$EXTERNALSYM IID_IConnectionPoint}
@@ -616,16 +620,15 @@ type
   {$EXTERNALSYM IEnumConnectionPoints}
   IEnumConnectionPoints = interface(IUnknown)
   ['{B196B285-BAB4-101A-B69C-00AA00341D07}']
-    function Next(celt: Longint;
-                  out ppCP; //: LPCONNECTIONPOINT;
-                  pceltFetched: PDWORD): HResult; stdcall;
 
-    function Skip(cConnections: ULONG): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Next(cConnections: ULONG; out ppCP: IConnectionPoint; pcFetched: PULONG): HRESULT; stdcall;
 
-    function Reset(): HResult; stdcall;
+    function Skip(cConnections: ULONG): HRESULT; stdcall;
 
-    function Clone(out ppEnum: IEnumConnectionPoints): HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
+    function Clone(out ppEnum: IEnumConnectionPoints): HRESULT; stdcall;
   end;
   IID_IEnumConnectionPoints = IEnumConnectionPoints;
   {$EXTERNALSYM IID_IEnumConnectionPoints}
@@ -638,11 +641,11 @@ type
   {$EXTERNALSYM IConnectionPointContainer}
   IConnectionPointContainer = interface(IUnknown)
   ['{B196B284-BAB4-101A-B69C-00AA00341D07}']
-    function EnumConnectionPoints(out ppEnum: IEnumConnectionPoints): HResult; stdcall;
 
-    function FindConnectionPoint(const riid: REFIID;
-                                 out ppCP: IConnectionPoint): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function EnumConnectionPoints(out ppEnum: IEnumConnectionPoints): HRESULT; stdcall;
 
+    function FindConnectionPoint(const riid: TGUID; out ppCP: IConnectionPoint): HRESULT; stdcall;
   end;
   IID_IConnectionPointContainer = IConnectionPointContainer;
   {$EXTERNALSYM IID_IConnectionPointContainer}
@@ -655,17 +658,13 @@ type
   {$EXTERNALSYM IClassFactory2}
   IClassFactory2 = interface(IClassFactory)
     ['{B196B28F-BAB4-101A-B69C-00AA00341D07}']
-    function GetLicInfo(var cbLicInfo: LICINFO): HResult; stdcall;
 
-    function RequestLicKey(dwResrved: DWORD;
-                           out bstrKey: BSTR): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetLicInfo(pLicInfo: PLICINFO): HRESULT; stdcall;
 
-    function CreateInstanceLic(punkOuter: IUnknown;
-                               punkReserved: IUnknown;
-                               const riid: REFIID;
-                               bstrKey: BSTR;
-                               out vObject): HResult; stdcall;
+    function RequestLicKey(dwReserved: DWORD; out pBstrKey: BSTR): HRESULT; stdcall;
 
+    function CreateInstanceLic(pUnkOuter: IUnknown; pUnkReserved: IUnknown; const riid: TGUID; bstrKey: BSTR; out ppvObj: Pointer): HRESULT; stdcall;
   end;
   IID_IClassFactory2 = IClassFactory2;
   {$EXTERNALSYM IID_IClassFactory2}
@@ -678,8 +677,9 @@ type
   {$EXTERNALSYM IProvideClassInfo}
   IProvideClassInfo = interface(IUnknown)
   ['{B196B283-BAB4-101A-B69C-00AA00341D07}']
-    function GetClassInfo(out ppTI: ITypeInfo): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetClassInfo(out ppTI: ITypeInfo): HRESULT; stdcall;
   end;
   IID_IProvideClassInfo = IProvideClassInfo;
   {$EXTERNALSYM IID_IProvideClassInfo}
@@ -692,9 +692,9 @@ type
   {$EXTERNALSYM IProvideClassInfo2}
   IProvideClassInfo2 = interface(IProvideClassInfo)
   ['{A6BC3AC0-DBAA-11CE-9DE3-00AA004BB851}']
-    function GetGUID(dwGuidKind: DWORD;
-                     out pGUID: TGuid): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetGUID(dwGuidKind: DWORD; pGUID: PGUID): HRESULT; stdcall;
   end;
   IID_IProvideClassInfo2 = IProvideClassInfo2;
   {$EXTERNALSYM IID_IProvideClassInfo2}
@@ -707,16 +707,11 @@ type
   {$EXTERNALSYM IProvideMultipleClassInfo}
   IProvideMultipleClassInfo = interface(IProvideClassInfo2)
   ['{A7ABA9C1-8983-11cf-8F20-00805F2CD064}']
-    function GetMultiTypeInfoCount(out pcti: ULONG): HResult; stdcall;
 
-    function GetInfoOfIndex(iti: ULONG;
-                            dwFlags: DWORD;
-                            out pptiCoClass: ITypeInfo;
-                            out pdwTIFlags: DWORD;
-                            out pcdispidReserved: ULONG;
-                            out piidPrimary: IID;
-                            out piidSource: IID): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetMultiTypeInfoCount(pcti: PULONG): HRESULT; stdcall;
 
+    function GetInfoOfIndex(iti: ULONG; dwFlags: DWORD; out pptiCoClass: ITypeInfo; pdwTIFlags: PDWORD; pcdispidReserved: PULONG; piidPrimary: PGUID; piidSource: PGUID): HRESULT; stdcall;
   end;
   IID_IProvideMultipleClassInfo = IProvideMultipleClassInfo;
   {$EXTERNALSYM IID_IProvideMultipleClassInfo}
@@ -729,14 +724,15 @@ type
   {$EXTERNALSYM IOleControl}
   IOleControl = interface(IUnknown)
   ['{B196B288-BAB4-101A-B69C-00AA00341D07}']
-    function GetControlInfo(var pCI: CONTROLINFO): HResult; stdcall;
 
-    function OnMnemonic(msg: PMsg): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetControlInfo(pCI: PCONTROLINFO): HRESULT; stdcall;
 
-    function OnAmbientPropertyChange(_dispid: TDISPID): HResult; stdcall;
+    function OnMnemonic(pMsg: PMSG): HRESULT; stdcall;
 
-    function FreezeEvents(bFreeze: BOOL): HResult; stdcall;
+    function OnAmbientPropertyChange(dispID: DISPID): HRESULT; stdcall;
 
+    function FreezeEvents(bFreeze: BOOL): HRESULT; stdcall;
   end;
   IID_IOleControl = IOleControl;
   {$EXTERNALSYM IID_IOleControl}
@@ -749,23 +745,21 @@ type
   {$EXTERNALSYM IOleControlSite}
   IOleControlSite = interface(IUnknown)
     ['{B196B289-BAB4-101A-B69C-00AA00341D07}']
-    function OnControlInfoChanged(): HResult; stdcall;
 
-    function LockInPlaceActive(fLock: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnControlInfoChanged(): HRESULT; stdcall;
 
-    function GetExtendedControl(out ppDisp: IDispatch): HResult; stdcall;
+    function LockInPlaceActive(fLock: BOOL): HRESULT; stdcall;
 
-    function TransformCoords(var ptlHimetric: POINTL;
-                             var ptfContainer: POINTF;
-                             flags: DWORD): HResult; stdcall;
+    function GetExtendedControl(out ppDisp: IDispatch): HRESULT; stdcall;
 
-    function TranslateAccelerator(pmsg: Msg;
-                                  grfModifiers: DWORD): HResult; stdcall;
+    function TransformCoords(pPtlHimetric: PPOINTL; pPtfContainer: PPOINTF; dwFlags: DWORD): HRESULT; stdcall;
 
-    function OnFocus(fGotFocus: BOOL): HResult; stdcall;
+    function TranslateAccelerator(pMsg: PMSG; grfModifiers: DWORD): HRESULT; stdcall;
 
-    function ShowPropertyFrame(): HResult; stdcall;
+    function OnFocus(fGotFocus: BOOL): HRESULT; stdcall;
 
+    function ShowPropertyFrame(): HRESULT; stdcall;
   end;
   IID_IOleControlSite = IOleControlSite;
   {$EXTERNALSYM IID_IOleControlSite}
@@ -778,31 +772,29 @@ type
   {$EXTERNALSYM IPropertyPage}
   IPropertyPage = interface(IUnknown)
   ['{B196B28D-BAB4-101A-B69C-00AA00341D07}']
-    function SetPageSite(const pageSite: IPropertyPageSite): HResult; stdcall;
 
-    function Activate(hWndParent: HWnd;
-                      const pRect: LPCRECT;
-                      bModal: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SetPageSite(pPageSite: IPropertyPageSite): HRESULT; stdcall;
 
-    function Deactivate(): HResult; stdcall;
+    function Activate(hWndParent: HWND; pRect: PRect; bModal: BOOL): HRESULT; stdcall;
 
-    function GetPageInfo(out pageInfo: PROPPAGEINFO): HResult; stdcall;
+    function Deactivate(): HRESULT; stdcall;
 
-    function SetObjects(cObjects: Longint;
-                        pUnkList: PUnknown): HResult; stdcall;
+    function GetPageInfo(pPageInfo: PPROPPAGEINFO): HRESULT; stdcall;
 
-    function Show(nCmdShow: UINT): HResult; stdcall;
+    function SetObjects(cObjects: ULONG; out ppUnk: IUnknown): HRESULT; stdcall;
 
-    function Move(const rect: LPCRECT): HResult; stdcall;
+    function Show(nCmdShow: UINT): HRESULT; stdcall;
 
-    function IsPageDirty(): HResult; stdcall;
+    function Move(pRect: PRect): HRESULT; stdcall;
 
-    function Apply(): HResult; stdcall;
+    function IsPageDirty(): HRESULT; stdcall;
 
-    function Help(pszHelpDir: LPCOLESTR): HResult; stdcall;
+    function Apply(): HRESULT; stdcall;
 
-    function TranslateAccelerator(msg: PMsg): HResult; stdcall;
+    function Help(pszHelpDir: PWideChar): HRESULT; stdcall;
 
+    function TranslateAccelerator(pMsg: PMSG): HRESULT; stdcall;
   end;
   IID_IPropertyPage = IPropertyPage;
   {$EXTERNALSYM IID_IPropertyPage}
@@ -815,8 +807,9 @@ type
   {$EXTERNALSYM IPropertyPage2}
   IPropertyPage2 = interface(IPropertyPage)
   ['{01E44665-24AC-101B-84ED-08002B2EC713}']
-    function EditProperty(_dispid: TDISPID): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function EditProperty(dispID: DISPID): HRESULT; stdcall;
   end;
   IID_IPropertyPage2 = IPropertyPage2;
   {$EXTERNALSYM IID_IPropertyPage2}
@@ -829,14 +822,15 @@ type
   {$EXTERNALSYM IPropertyPageSite}
   IPropertyPageSite = interface(IUnknown)
   ['{B196B28C-BAB4-101A-B69C-00AA00341D07}']
-    function OnStatusChange(flags: DWORD): HResult; stdcall;
 
-    function GetLocaleID(out localeID: LCID): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnStatusChange(dwFlags: DWORD): HRESULT; stdcall;
 
-    function GetPageContainer(out unk: IUnknown): HResult; stdcall;
+    function GetLocaleID(pLocaleID: PLCID): HRESULT; stdcall;
 
-    function TranslateAccelerator(msg: PMsg): HResult; stdcall;
+    function GetPageContainer(out ppUnk: IUnknown): HRESULT; stdcall;
 
+    function TranslateAccelerator(pMsg: PMSG): HRESULT; stdcall;
   end;
   IID_IPropertyPageSite = IPropertyPageSite;
   {$EXTERNALSYM IID_IPropertyPageSite}
@@ -849,10 +843,11 @@ type
   {$EXTERNALSYM IPropertyNotifySink}
   IPropertyNotifySink = interface(IUnknown)
   ['{9BFBBC02-EFF1-101A-84ED-00AA00341D07}']
-    function OnChanged(_dispid: TDISPID): HResult; stdcall;
 
-    function OnRequestEdit(_dispid: TDISPID): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnChanged(dispID: DISPID): HRESULT; stdcall;
 
+    function OnRequestEdit(dispID: DISPID): HRESULT; stdcall;
   end;
   IID_IPropertyNotifySink = IPropertyNotifySink;
   {$EXTERNALSYM IID_IPropertyNotifySink}
@@ -865,8 +860,9 @@ type
   {$EXTERNALSYM ISpecifyPropertyPages}
   ISpecifyPropertyPages = interface(IUnknown)
   ['{B196B28B-BAB4-101A-B69C-00AA00341D07}']
-    function GetPages(out pages: CAUUID): HResult; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetPages(pPages: PCAUUID): HRESULT; stdcall;
   end;
   IID_ISpecifyPropertyPages = ISpecifyPropertyPages;
   {$EXTERNALSYM IID_ISpecifyPropertyPages}
@@ -879,19 +875,17 @@ type
   {$EXTERNALSYM IPersistMemory}
   IPersistMemory = interface(IPersist)
   ['{BD1AE5E0-A6AE-11CE-BD37-504200C10000}']
-    function IsDirty(): HResult; stdcall;
 
-    function Load(pMem: Pointer;
-                  cbSize: ULONG): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function IsDirty(): HRESULT; stdcall;
 
-    function Save(out pMem: Pointer;
-                  fClearDirty: BOOL;
-                  cbSize: ULONG): HResult; stdcall;
+    function Load(pMem: Pointer; cbSize: ULONG): HRESULT; stdcall;
 
-    function GetSizeMax(out pCbSize: ULONG): HResult; stdcall;
+    function Save(pMem: Pointer; fClearDirty: BOOL; cbSize: ULONG): HRESULT; stdcall;
 
-    function InitNew(): HResult; stdcall;
+    function GetSizeMax(pCbSize: PULONG): HRESULT; stdcall;
 
+    function InitNew(): HRESULT; stdcall;
   end;
   IID_IPersistMemory = IPersistMemory;
   {$EXTERNALSYM IID_IPersistMemory}
@@ -904,17 +898,17 @@ type
   {$EXTERNALSYM IPersistStreamInit}
   IPersistStreamInit = interface(IPersist)
   ['{7FD52380-4E07-101B-AE2D-08002B2EC713}']
-    function IsDirty(): HResult; stdcall;
 
-    function Load(pStm: IStream): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function IsDirty(): HRESULT; stdcall;
 
-    function Save(const pStm: IStream;
-                  fClearDirty: BOOL): HResult; stdcall;
+    function Load(pStm: IStream): HRESULT; stdcall;
 
-    function GetSizeMax(out cbSize: ULARGE_INTEGER): HResult; stdcall;
+    function Save(pStm: IStream; fClearDirty: BOOL): HRESULT; stdcall;
 
-    function InitNew(): HResult; stdcall;
+    function GetSizeMax(pCbSize: PULARGE_INTEGER): HRESULT; stdcall;
 
+    function InitNew(): HRESULT; stdcall;
   end;
   IID_IPersistStreamInit = IPersistStreamInit;
   {$EXTERNALSYM IID_IPersistStreamInit}
@@ -928,15 +922,13 @@ type
   {$EXTERNALSYM IPersistPropertyBag}
   IPersistPropertyBag = interface(IPersist)
   ['{37D84F60-42CB-11CE-8135-00AA004BB851}']
-    function InitNew(): HResult; stdcall;
 
-    function Load(pPropBag: IPropertyBag;
-                  pErrorLog: IErrorLog): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function InitNew(): HRESULT; stdcall;
 
-    function Save(pPropBag: IPropertyBag;
-                  fClearDirty: BOOL;
-                  fSaveAllProperties: BOOL): HResult; stdcall;
+    function Load(pPropBag: IPropertyBag; pErrorLog: IErrorLog): HRESULT; stdcall;
 
+    function Save(pPropBag: IPropertyBag; fClearDirty: BOOL; fSaveAllProperties: BOOL): HRESULT; stdcall;
   end;
   IID_IPersistPropertyBag = IPersistPropertyBag;
   {$EXTERNALSYM IID_IPersistPropertyBag}
@@ -949,20 +941,11 @@ type
   {$EXTERNALSYM ISimpleFrameSite}
   ISimpleFrameSite = interface(IUnknown)
   ['{742B0E01-14E6-101B-914E-00AA00300CAB}']
-    function PreMessageFilter(_hWnd: HWnd;
-                              msg: UInt;
-                              wp: WPARAM;
-                              lp: LPARAM;
-                              out plResult: LRESULT;
-                              out pdwCookie: DWORD): HResult; stdcall;
 
-    function PostMessageFilter(_hWnd: HWnd;
-                               msg: UInt;
-                               wp: WPARAM;
-                               lp: LPARAM;
-                               out plResult: LRESULT;
-                               pdwCookie: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function PreMessageFilter(hWnd: HWND; msg: UINT; wp: WPARAM; lp: LPARAM; plResult: PLRESULT; pdwCookie: PDWORD): HRESULT; stdcall;
 
+    function PostMessageFilter(hWnd: HWND; msg: UINT; wp: WPARAM; lp: LPARAM; plResult: PLRESULT; dwCookie: DWORD): HRESULT; stdcall;
   end;
   IID_ISimpleFrameSite = ISimpleFrameSite;
   {$EXTERNALSYM IID_ISimpleFrameSite}
@@ -975,53 +958,55 @@ type
   {$EXTERNALSYM IFont}
   IFont = interface(IUnknown)
   ['{BEF6E002-A874-101A-8BBA-00AA00300CAB}']
-    function get_Name(out pname: BSTR): HResult; stdcall;
 
-    function put_Name(pname: BSTR): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function get_Name(out pName: BSTR): HRESULT; stdcall;
 
-    function get_Size(out pSize: CY): HResult; stdcall;
+    function put_Name(name: BSTR): HRESULT; stdcall;
 
-    function put_Size(pSize: CY): HResult; stdcall;
+    function get_Size(out pSize: CY): HRESULT; stdcall;
 
-    function get_Bold(out pBold: BOOL): HResult; stdcall;
+    function put_Size(size: CY): HRESULT; stdcall;
 
-    function put_Bold(bold: BOOL): HResult; stdcall;
+    function get_Bold(out pBold: BOOL): HRESULT; stdcall;
 
-    function get_Italic(out pItalic: BOOL): HResult; stdcall;
+    function put_Bold(bold: BOOL): HRESULT; stdcall;
 
-    function put_Italic(italic: BOOL): HResult; stdcall;
+    function get_Italic(out pItalic: BOOL): HRESULT; stdcall;
 
-    function get_Underline(out pUnderline: BOOL): HResult; stdcall;
+    function put_Italic(italic: BOOL): HRESULT; stdcall;
 
-    function put_Underline(Underline: BOOL): HResult; stdcall;
+    function get_Underline(out pUnderline: BOOL): HRESULT; stdcall;
 
-    function get_Strikethrough(out pStrikethrough: BOOL): HResult; stdcall;
+    function put_Underline(underline: BOOL): HRESULT; stdcall;
 
-    function put_Strikethrough(strikethrough: BOOL): HResult; stdcall;
+    function get_Strikethrough(out pStrikethrough: BOOL): HRESULT; stdcall;
 
-    function get_Weight(out pWeight: SHORT): HResult; stdcall;
+    function put_Strikethrough(strikethrough: BOOL): HRESULT; stdcall;
 
-    function put_Weight(weight: SHORT): HResult; stdcall;
+    function get_Weight(out pWeight: SHORT): HRESULT; stdcall;
 
-    function get_Charset(out pCharset: SHORT): HResult; stdcall;
+    function put_Weight(weight: SHORT): HRESULT; stdcall;
 
-    function put_Charset(charset: SHORT): HResult; stdcall;
+    function get_Charset(out pCharset: SHORT): HRESULT; stdcall;
 
-    function get_hFont(out phFont: HFONT): HResult; stdcall;
+    function put_Charset(charset: SHORT): HRESULT; stdcall;
 
-    function Clone(out ppFont: IFont): HResult; stdcall;
+    function get_hFont(out phFont: HFONT): HRESULT; stdcall;
 
-    function IsEqual(const pFontOther: IFont): HResult; stdcall;
+    function Clone(out ppFont: IFont): HRESULT; stdcall;
 
-    function SetRatio(cyLogical: LONG;
-                      cyHimetric: LONG): HResult; stdcall;
+    function IsEqual(pFontOther: IFont): HRESULT; stdcall;
 
-    function QueryTextMetrics(out pTM: TEXTMETRICOLE): HResult; stdcall;
+    function SetRatio(cyLogical: LONG; cyHimetric: LONG): HRESULT; stdcall;
 
-    function AddRefHfont(_hFont: HFont): HResult; stdcall;
+    function QueryTextMetrics(pTM: PTEXTMETRICOLE): HRESULT; stdcall;
 
-    function ReleaseHfont(_hFont: HFont): HResult; stdcall;
+    function AddRefHfont(hFont: HFONT): HRESULT; stdcall;
 
+    function ReleaseHfont(hFont: HFONT): HRESULT; stdcall;
+
+    function SetHdc(hDC: HDC): HRESULT; stdcall;
   end;
   IID_IFont = IFont;
   {$EXTERNALSYM IID_IFont}
@@ -1034,47 +1019,35 @@ type
   {$EXTERNALSYM IPicture}
   IPicture = interface(IUnknown)
   ['{7BF80980-BF32-101A-8BBB-00AA00300CAB}']
-    function get_Handle(out pHandle: OLE_HANDLE): HResult;  stdcall;
 
-    function get_hPal(out pHandle: OLE_HANDLE): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function get_Handle(out pHandle: OLE_HANDLE): HRESULT; stdcall;
 
-    function get_Type(out pType: SHORT): HResult; stdcall;
+    function get_hPal(out phPal: OLE_HANDLE): HRESULT; stdcall;
 
-    function get_Width(out pWidth: OLE_XSIZE_HIMETRIC): HResult; stdcall;
+    function get_Type(out pType: SHORT): HRESULT; stdcall;
 
-    function get_Height(out pHeight: OLE_YSIZE_HIMETRIC): HResult; stdcall;
+    function get_Width(out pWidth: OLE_XSIZE_HIMETRIC): HRESULT; stdcall;
 
-    function Render(dc: HDC;
-                    x: LONG;
-                    y: LONG;
-                    cx: LONG;
-                    cy: LONG;
-                    xSrc: OLE_XPOS_HIMETRIC;
-                    ySrc: OLE_YPOS_HIMETRIC;
-                    cxSrc: OLE_XSIZE_HIMETRIC;
-                    cySrc: OLE_YSIZE_HIMETRIC;
-                    const pRcWBounds: LPCRECT): HResult; stdcall;
+    function get_Height(out pHeight: OLE_YSIZE_HIMETRIC): HRESULT; stdcall;
 
-    function set_hPal(hPal: OLE_HANDLE): HResult; stdcall;
+    function Render(hDC: HDC; x: LONG; y: LONG; cx: LONG; cy: LONG; xSrc: OLE_XPOS_HIMETRIC; ySrc: OLE_YPOS_HIMETRIC; cxSrc: OLE_XSIZE_HIMETRIC; cySrc: OLE_YSIZE_HIMETRIC; pRcWBounds: PRect): HRESULT; stdcall;
 
-    function get_CurDC(out hDCout: HDC): HResult; stdcall;
+    function set_hPal(hPal: OLE_HANDLE): HRESULT; stdcall;
 
-    function SelectPicture(hDCIn: HDC;
-                           out phDCOut: HDC;
-                           out phBmpOut: OLE_HANDLE): HResult; stdcall;
+    function get_CurDC(out phDC: HDC): HRESULT; stdcall;
 
-    function get_KeepOriginalFormat(out pKeep: BOOL): HResult; stdcall;
+    function SelectPicture(hDCIn: HDC; out phDCOut: HDC; out phBmpOut: OLE_HANDLE): HRESULT; stdcall;
 
-    function put_KeepOriginalFormat(keep: BOOL): HResult; stdcall;
+    function get_KeepOriginalFormat(out pKeep: BOOL): HRESULT; stdcall;
 
-    function PictureChanged(): HResult; stdcall;
+    function put_KeepOriginalFormat(keep: BOOL): HRESULT; stdcall;
 
-    function SaveAsFile(stream: IStream;
-                        fSaveMemCopy: BOOL;
-                        out cbSize: LONG): HResult; stdcall;
+    function PictureChanged(): HRESULT; stdcall;
 
-    function get_Attributes(out dwAttr: DWORD): HResult; stdcall;
+    function SaveAsFile(pStream: IStream; fSaveMemCopy: BOOL; pCbSize: PLongint): HRESULT; stdcall;
 
+    function get_Attributes(pDwAttr: PDWORD): HRESULT; stdcall;
   end;
   IID_IPicture = IPicture;
   {$EXTERNALSYM IID_IPicture}
@@ -1104,47 +1077,35 @@ type
   {$EXTERNALSYM IPicture2}
   IPicture2 = interface(IUnknown)
   ['{F5185DD8-2012-4b0b-AAD9-F052C6BD482B}']
-    function get_Handle(out pHandle: HHANDLE): HResult; stdcall;
 
-    function get_hPal(out phPal: HHANDLE): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function get_Handle(out pHandle: HHANDLE): HRESULT; stdcall;
 
-    function get_Type(out pType: SHORT): HResult; stdcall;
+    function get_hPal(out phPal: HHANDLE): HRESULT; stdcall;
 
-    function get_Width(out pWidth: OLE_XSIZE_HIMETRIC): HResult; stdcall;
+    function get_Type(out pType: SHORT): HRESULT; stdcall;
 
-    function get_Height(out pHeight: OLE_YSIZE_HIMETRIC): HResult; stdcall;
+    function get_Width(out pWidth: OLE_XSIZE_HIMETRIC): HRESULT; stdcall;
 
-    function Render(hDC: HDC;
-                    x: LONG;
-                    y: LONG;
-                    cx: LONG;
-                    cy: LONG;
-                    xSrc: OLE_XPOS_HIMETRIC;
-                    ySrc: OLE_YPOS_HIMETRIC;
-                    cxSrc: OLE_XSIZE_HIMETRIC;
-                    cySrc: OLE_YSIZE_HIMETRIC;
-                    pRcWBounds: LPCRECT): HResult; stdcall;
+    function get_Height(out pHeight: OLE_YSIZE_HIMETRIC): HRESULT; stdcall;
 
-    function set_hPal(hPal: HHANDLE): HResult; stdcall;
+    function Render(hDC: HDC; x: LONG; y: LONG; cx: LONG; cy: LONG; xSrc: OLE_XPOS_HIMETRIC; ySrc: OLE_YPOS_HIMETRIC; cxSrc: OLE_XSIZE_HIMETRIC; cySrc: OLE_YSIZE_HIMETRIC; pRcWBounds: PRect): HRESULT; stdcall;
 
-    function get_CurDC(out _phDC: PHDC): HResult; stdcall;
+    function set_hPal(hPal: HHANDLE): HRESULT; stdcall;
 
-    function SelectPicture(hDCIn: HDC;
-                           out phDCOut: HDC;
-                           out phBmpOut: HHANDLE): HResult; stdcall;
+    function get_CurDC(out phDC: HDC): HRESULT; stdcall;
 
-    function get_KeepOriginalFormat(out pKeep: PBOOL): HResult; stdcall;
+    function SelectPicture(hDCIn: HDC; out phDCOut: HDC; out phBmpOut: HHANDLE): HRESULT; stdcall;
 
-    function put_KeepOriginalFormat(keep: BOOL): HResult; stdcall;
+    function get_KeepOriginalFormat(out pKeep: BOOL): HRESULT; stdcall;
 
-    function PictureChanged(): HResult; stdcall;
+    function put_KeepOriginalFormat(keep: BOOL): HRESULT; stdcall;
 
-    function SaveAsFile(pStream: IStream;
-                        fSaveMemCopy: BOOL;
-                        out pCbSize: LONG): HResult; stdcall;
+    function PictureChanged(): HRESULT; stdcall;
 
-    function get_Attributes(out pDwAttr: DWORD): HResult; stdcall;
+    function SaveAsFile(pStream: IStream; fSaveMemCopy: BOOL; pCbSize: PLongint): HRESULT; stdcall;
 
+    function get_Attributes(pDwAttr: PDWORD): HRESULT; stdcall;
   end;
   IID_IPicture2 = IPicture2;
   {$EXTERNALSYM IID_IPicture2}
@@ -1157,6 +1118,8 @@ type
   {$EXTERNALSYM IFontEventsDisp}
   IFontEventsDisp = interface(IDispatch)
   ['{4EF6100A-AF88-11D0-9846-00C04FC29993}']
+
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
 
   end;
   IID_IFontEventsDisp = IFontEventsDisp;
@@ -1171,6 +1134,8 @@ type
   IFontDisp = interface(IDispatch)
   ['{BEF6E003-A874-101A-8BBA-00AA00300CAB}']
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+
   end;
   IID_IFontDisp = IFontDisp;
   {$EXTERNALSYM IID_IFontDisp}
@@ -1183,6 +1148,8 @@ type
   {$EXTERNALSYM IPictureDisp}
   IPictureDisp = interface(IDispatch)
   ['{7BF80981-BF32-101A-8BBB-00AA00300CAB}']
+
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
 
   end;
   IID_IPictureDisp = IPictureDisp;
@@ -1202,13 +1169,11 @@ type
   {$EXTERNALSYM IOleInPlaceObjectWindowless}
   IOleInPlaceObjectWindowless = interface(IOleInPlaceObject)
   ['{1C2056CC-5EF4-101B-8BC8-00AA003E3B29}']
-    function OnWindowMessage(msg: LongWord;
-                             wParam: WPARAM;
-                             lParam: LPARAM;
-                             var plResult: LRESULT): HResult; stdcall;
 
-    function GetDropTarget(out pDropTarget: IDropTarget): HResult ; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnWindowMessage(msg: UINT; wParam: WPARAM; lParam: LPARAM; plResult: PLRESULT): HRESULT; stdcall;
 
+    function GetDropTarget(out ppDropTarget: IDropTarget): HRESULT; stdcall;
   end;
   IID_IOleInPlaceObjectWindowless = IOleInPlaceObjectWindowless;
   {$EXTERNALSYM IID_IOleInPlaceObjectWindowless}
@@ -1221,13 +1186,13 @@ type
   {$EXTERNALSYM IOleInPlaceSiteEx}
   IOleInPlaceSiteEx = interface(IOleInPlaceSite)
   ['{9C2CAD80-3424-11CF-B670-00AA004CD6D8}']
-    function OnInPlaceActivateEx(fNoRedraw: PBOOL;
-                                 dwFlags: DWORD): HResult; stdcall;
 
-    function OnInPlaceDeActivateEx(fNoRedraw: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function OnInPlaceActivateEx(out pfNoRedraw: BOOL; dwFlags: DWORD): HRESULT; stdcall;
 
-    function RequestUIActivate: HResult; stdcall;
+    function OnInPlaceDeactivateEx(fNoRedraw: BOOL): HRESULT; stdcall;
 
+    function RequestUIActivate(): HRESULT; stdcall;
   end;
   IID_IOleInPlaceSiteEx = IOleInPlaceSiteEx;
   {$EXTERNALSYM IID_IOleInPlaceSiteEx}
@@ -1240,40 +1205,31 @@ type
   {$EXTERNALSYM IOleInPlaceSiteWindowless}
   IOleInPlaceSiteWindowless = interface(IOleInPlaceSiteEx)
   ['{922EADA0-3424-11CF-B670-00AA004CD6D8}']
-    function CanWindowlessActivate(): HResult; stdcall;
 
-    function GetCapture(): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function CanWindowlessActivate(): HRESULT; stdcall;
 
-    function SetCapture(fCapture: BOOL): HResult; stdcall;
+    function GetCapture(): HRESULT; stdcall;
 
-    function GetFocus(): HResult; stdcall;
+    function SetCapture(fCapture: BOOL): HRESULT; stdcall;
 
-    function SetFocus(fFocus: BOOL): HResult; stdcall;
+    function GetFocus(): HRESULT; stdcall;
 
-    function GetDC(var _pRect: LPCRECT;
-                   qrfFlags: DWORD;
-                   var _hDC: HDC): HResult; stdcall;
+    function SetFocus(fFocus: BOOL): HRESULT; stdcall;
 
-    function ReleaseDC(_hDC: HDC): HResult; stdcall;
+    function GetDC(pRect: PRect; grfFlags: DWORD; out phDC: HDC): HRESULT; stdcall;
 
-    function InvalidateRect(var _pRect: TRect;
-                            fErase: BOOL): HResult; stdcall;
+    function ReleaseDC(hDC: HDC): HRESULT; stdcall;
 
-    function InvalidateRgn(_hRGN: HRGN;
-                           fErase: BOOL): HResult; stdcall;
+    function InvalidateRect(pRect: PRect; fErase: BOOL): HRESULT; stdcall;
 
-    function ScrollRect(dx: INT;
-                        dy: INT;
-                        var RectScroll: LPCRECT;
-                        var RectClip: LPCRECT): HResult; stdcall;
+    function InvalidateRgn(hRGN: HRGN; fErase: BOOL): HRESULT; stdcall;
 
-    function AdjustRect(var rc: LPCRECT): HResult; stdcall;
+    function ScrollRect(dx: INT; dy: INT; pRectScroll: PRect; pRectClip: PRect): HRESULT; stdcall;
 
-    function OnDefWindowMessage(_msg: UINT;
-                                wParam: WPARAM;
-                                lParam: LPARAM;
-                                var plResult: LRESULT): HResult; stdcall;
+    function AdjustRect(prc: PRect): HRESULT; stdcall;
 
+    function OnDefWindowMessage(msg: UINT; wParam: WPARAM; lParam: LPARAM; plResult: PLRESULT): HRESULT; stdcall;
   end;
   IID_IOleInPlaceSiteWindowless = IOleInPlaceSiteWindowless;
   {$EXTERNALSYM IID_IOleInPlaceSiteWindowless}
@@ -1286,30 +1242,17 @@ type
   {$EXTERNALSYM IViewObjectEx}
   IViewObjectEx = interface(IViewObject2)
   ['{3AF24292-0C96-11CE-A0CF-00AA00600AB8}']
-    function GetRect(dwAspect: DWORD;
-                     out pRect: LPRECTL): HResult; stdcall;
 
-    function GetViewStatus(out pdwStatus: PDWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetRect(dwAspect: DWORD; pRect: PRect): HRESULT; stdcall;
 
-    function QueryHitPoint(dwAspect: DWORD;
-                           pRectBounds: LPCRECT;
-                           ptlLoc: POINT;
-                           lCloseHint: LONG;
-                           out pHitResult: DWORD): HResult; stdcall;
+    function GetViewStatus(pdwStatus: PDWORD): HRESULT; stdcall;
 
-    function QueryHitRect(dwAspect: DWORD;
-                          pRectBounds: LPCRECT;
-                          pRectLoc: LPCRECT;
-                          lCloseHint: LONG;
-                          out pHitResult: DWORD): HResult; stdcall;
+    function QueryHitPoint(dwAspect: DWORD; pRectBounds: PRect; ptlLoc: POINT; lCloseHint: LONG; pHitResult: PDWORD): HRESULT; stdcall;
 
-    function GetNaturalExtent(dwAspect: DWORD;
-                              lindex: LONG;
-                              ptd: DVTARGETDEVICE;
-                              hicTargetDev: HDC;
-                              pExtentInfo: DVEXTENTINFO;
-                              out pSizel: LPSIZEL): HResult; stdcall;
+    function QueryHitRect(dwAspect: DWORD; pRectBounds: PRect; pRectLoc: PRect; lCloseHint: LONG; pHitResult: PDWORD): HRESULT; stdcall;
 
+    function GetNaturalExtent(dwAspect: DWORD; lindex: LONG; ptd: PDVTARGETDEVICE; hicTargetDev: HDC; pExtentInfo: PDVEXTENTINFO; pSizel: PSIZEL): HRESULT; stdcall;
   end;
   IID_IViewObjectEx = IViewObjectEx;
   {$EXTERNALSYM IID_IViewObjectEx}
@@ -1322,15 +1265,15 @@ type
   {$EXTERNALSYM IOleUndoUnit}
   IOleUndoUnit = interface(IUnknown)
   ['{894AD3B0-EF97-11CE-9BC9-00AA00608E01}']
-    function _Do(pUndoManager: IOleUndoManager): HResult; stdcall;
 
-    function GetDescription(out pBstr: BSTR): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function &Do(pUndoManager: IOleUndoManager): HRESULT; stdcall;
 
-    function GetUnitType(out pClsid: CLSID;
-                         out plID: LONG): HResult; stdcall;
+    function GetDescription(out pBstr: BSTR): HRESULT; stdcall;
 
-    function OnNextAdd(): HResult; stdcall;
+    function GetUnitType(pClsid: PGUID; plID: PLongint): HRESULT; stdcall;
 
+    function OnNextAdd(): HRESULT; stdcall;
   end;
   IID_IOleUndoUnit = IOleUndoUnit;
   {$EXTERNALSYM IID_IOleUndoUnit}
@@ -1344,17 +1287,17 @@ type
   {$EXTERNALSYM IOleParentUndoUnit}
   IOleParentUndoUnit = interface(IOleUndoUnit)
   ['{A1FAF330-EF97-11CE-9BC9-00AA00608E01}']
-    function Open(pPUU: IOleParentUndoUnit): HResult; stdcall;
 
-    function Close(pPUU: IOleParentUndoUnit;
-                   fCommit: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Open(pPUU: IOleParentUndoUnit): HRESULT; stdcall;
 
-    function Add(pUU: IOleUndoUnit): HResult; stdcall;
+    function Close(pPUU: IOleParentUndoUnit; fCommit: BOOL): HRESULT; stdcall;
 
-    function FindUnit(pUU: IOleUndoUnit): HResult; stdcall;
+    function Add(pUU: IOleUndoUnit): HRESULT; stdcall;
 
-    function GetParentState(out pdwState: DWORD): HResult; stdcall;
+    function FindUnit(pUU: IOleUndoUnit): HRESULT; stdcall;
 
+    function GetParentState(pdwState: PDWORD): HRESULT; stdcall;
   end;
   IID_IOleParentUndoUnit = IOleParentUndoUnit;
   {$EXTERNALSYM IID_IOleParentUndoUnit}
@@ -1368,16 +1311,15 @@ type
   {$EXTERNALSYM IEnumOleUndoUnits}
   IEnumOleUndoUnits = interface(IUnknown)
   ['{B3E7C340-EF97-11CE-9BC9-00AA00608E01}']
-    function Next(cElt: ULONG;
-                  out rgElt: IOleUndoUnit;
-                  out pcEltFetched: ULONG): HResult; stdcall;
 
-    function Skip(cElt: ULONG): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Next(cElt: ULONG; out rgElt: IOleUndoUnit; pcEltFetched: PULONG): HRESULT; stdcall;
 
-    function Reset(): HResult; stdcall;
+    function Skip(cElt: ULONG): HRESULT; stdcall;
 
-    function Clone(out ppEnum: IEnumOleUndoUnits): HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
+    function Clone(out ppEnum: IEnumOleUndoUnits): HRESULT; stdcall;
   end;
   IID_IEnumOleUndoUnits = IEnumOleUndoUnits;
   {$EXTERNALSYM IID_IEnumOleUndoUnits}
@@ -1391,31 +1333,31 @@ type
   {$EXTERNALSYM IOleUndoManager}
   IOleUndoManager = interface(IUnknown)
   ['{D001F200-EF97-11CE-9BC9-00AA00608E01}']
-    function Open(pPUU: IOleParentUndoUnit): HResult; stdcall;
 
-    function Close(pPUU: IOleParentUndoUnit;
-                   fCommit: BOOL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Open(pPUU: IOleParentUndoUnit): HRESULT; stdcall;
 
-    function Add(pUU: IOleUndoUnit): HResult; stdcall;
+    function Close(pPUU: IOleParentUndoUnit; fCommit: BOOL): HRESULT; stdcall;
 
-    function GetOpenParentState(out pdwState: DWORD): HResult; stdcall;
+    function Add(pUU: IOleUndoUnit): HRESULT; stdcall;
 
-    function DiscardFrom(pUU: IOleUndoUnit): HResult; stdcall;
+    function GetOpenParentState(pdwState: PDWORD): HRESULT; stdcall;
 
-    function UndoTo(pUU: IOleUndoUnit): HResult; stdcall;
+    function DiscardFrom(pUU: IOleUndoUnit): HRESULT; stdcall;
 
-    function RedoTo(pUU: IOleUndoUnit): HResult; stdcall;
+    function UndoTo(pUU: IOleUndoUnit): HRESULT; stdcall;
 
-    function EnumUndoable(out ppEnum: IEnumOleUndoUnits): HResult; stdcall;
+    function RedoTo(pUU: IOleUndoUnit): HRESULT; stdcall;
 
-    function EnumRedoable(out ppEnum: IEnumOleUndoUnits): HResult; stdcall;
+    function EnumUndoable(out ppEnum: IEnumOleUndoUnits): HRESULT; stdcall;
 
-    function GetLastUndoDescription(out pBstr: PBSTR): HResult; stdcall;
+    function EnumRedoable(out ppEnum: IEnumOleUndoUnits): HRESULT; stdcall;
 
-    function GetLastRedoDescription(out pBstr: PBSTR): HResult; stdcall;
+    function GetLastUndoDescription(out pBstr: BSTR): HRESULT; stdcall;
 
-    function Enable(fEnable: BOOL): HResult; stdcall;
+    function GetLastRedoDescription(out pBstr: BSTR): HRESULT; stdcall;
 
+    function Enable(fEnable: BOOL): HRESULT; stdcall;
   end;
   IID_IOleUndoManager = IOleUndoManager;
   {$EXTERNALSYM IID_IOleUndoManager}
@@ -1429,19 +1371,13 @@ type
   {$EXTERNALSYM IPointerInactive}
   IPointerInactive = interface(IUnknown)
   ['{55980BA0-35AA-11CF-B671-00AA004CD6D8}']
-    function GetActivationPolicy(out pdwPolicy: DWORD): HResult; stdcall;
 
-    function OnInactiveMouseMove(pRectBounds: LPCRECT;
-                                 x: LONG;
-                                 y: LONG;
-                                 grfKeyState: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetActivationPolicy(pdwPolicy: PDWORD): HRESULT; stdcall;
 
-    function OnInactiveSetCursor(pRectBounds: LPCRECT;
-                                 x: LONG;
-                                 y: LONG;
-                                 dwMouseMsg: DWORD;
-                                 fSetAlways: BOOL): HResult; stdcall;
+    function OnInactiveMouseMove(pRectBounds: PRect; x: LONG; y: LONG; grfKeyState: DWORD): HRESULT; stdcall;
 
+    function OnInactiveSetCursor(pRectBounds: PRect; x: LONG; y: LONG; dwMouseMsg: DWORD; fSetAlways: BOOL): HRESULT; stdcall;
   end;
   IID_IPointerInactive = IPointerInactive;
   {$EXTERNALSYM IID_IPointerInactive}
@@ -1455,11 +1391,11 @@ type
   {$EXTERNALSYM IObjectWithSite}
   IObjectWithSite = interface(IUnknown)
   ['{FC4801A3-2BA9-11CF-A229-00AA003D7352}']
-    function SetSite(pUnkSite: IUnknown ): HResult; stdcall;
 
-    function GetSite(const riid: REFIID;
-                     out ppvSite): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function SetSite(pUnkSite: IUnknown): HRESULT; stdcall;
 
+    function GetSite(const riid: TGUID; out ppvSite: Pointer): HRESULT; stdcall;
   end;
   IID_IObjectWithSite = IObjectWithSite;
   {$EXTERNALSYM IID_IObjectWithSite}
@@ -1473,20 +1409,15 @@ type
   {$EXTERNALSYM IPerPropertyBrowsing}
   IPerPropertyBrowsing = interface(IUnknown)
   ['{376BD3AA-3845-101B-84ED-08002B2EC713}']
-    function GetDisplayString(_dispid: TDISPID;
-                              out bstr: BSTR): HResult; stdcall;
 
-    function MapPropertyToPage(_dispid: TDISPID;
-                               out clsid: CLSID): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function GetDisplayString(dispID: DISPID; out pBstr: BSTR): HRESULT; stdcall;
 
-    function GetPredefinedStrings(_dispid: TDispID;
-                                  out caStringsOut: CALPOLESTR;
-                                  out caCookiesOut: CADWORD): HResult; stdcall;
+    function MapPropertyToPage(dispID: DISPID; pClsid: PGUID): HRESULT; stdcall;
 
-    function GetPredefinedValue(_dispid: TDISPID;
-                                dwCookie: Longint;
-                                out varOut: OleVariant): HResult; stdcall;
+    function GetPredefinedStrings(dispID: DISPID; pCaStringsOut: PCALPOLESTR; pCaCookiesOut: PCADWORD): HRESULT; stdcall;
 
+    function GetPredefinedValue(dispID: DISPID; dwCookie: DWORD; pVarOut: PVARIANT): HRESULT; stdcall;
   end;
   IID_IPerPropertyBrowsing = IPerPropertyBrowsing;
   {$EXTERNALSYM IID_IPerPropertyBrowsing}
@@ -1500,28 +1431,17 @@ type
   {$EXTERNALSYM IPropertyBag2}
   IPropertyBag2 = interface(IUnknown)
   ['{22F55882-280B-11d0-A8A9-00A0C90C2004}']
-    function Read(cProperties: ULONG;
-                  pPropBag: PROPBAG2;
-                  pErrLog: IErrorLog;
-                  pvarValue: VARIANT;
-                  var phrError: HRESULT): HResult; stdcall;
 
-    function Write(cProperties: ULONG;
-                   pPropBag: PROPBAG2;
-                   pvarValue: PVARIANT): HRESULT; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Read(cProperties: ULONG; pPropBag: PPROPBAG2; pErrLog: IErrorLog; pvarValue: PVARIANT; phrError: PHRESULT): HRESULT; stdcall;
 
-    function CountProperties(var pcProperties: ULONG): HRESULT; stdcall;
+    function Write(cProperties: ULONG; pPropBag: PPROPBAG2; pvarValue: PVARIANT): HRESULT; stdcall;
 
-    function GetPropertyInfo(iProperty: ULONG;
-                             cProperties: ULONG;
-                             pPropBag: PROPBAG2;
-                             var pcProperties: ULONG): HRESULT; stdcall;
+    function CountProperties(pcProperties: PULONG): HRESULT; stdcall;
 
-    function LoadObject(pstrName: POleStr;
-                        dwHint: DWORD;
-                        pUnkObject: IUnknown;
-                        pErrLog: IErrorLog): HRESULT; stdcall;
+    function GetPropertyInfo(iProperty: ULONG; cProperties: ULONG; pPropBag: PPROPBAG2; pcProperties: PULONG): HRESULT; stdcall;
 
+    function LoadObject(pstrName: PWideChar; dwHint: DWORD; pUnkObject: IUnknown; pErrLog: IErrorLog): HRESULT; stdcall;
   end;
   IID_IPropertyBag2 = IPropertyBag2;
   {$EXTERNALSYM IID_IPropertyBag2}
@@ -1535,17 +1455,15 @@ type
   {$EXTERNALSYM IPersistPropertyBag2}
   IPersistPropertyBag2 = interface(IPersist)
   ['{22F55881-280B-11d0-A8A9-00A0C90C2004}']
+
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
     function InitNew(): HRESULT; stdcall;
 
-    function Load(pPropBag: IPropertyBag2;
-                  pErrLog: IErrorLog): HRESULT; stdcall;
+    function Load(pPropBag: IPropertyBag2; pErrLog: IErrorLog): HRESULT; stdcall;
 
-    function Save(pPropBag: IPropertyBag2;
-                  fClearDirty: BOOL;
-                  fSaveAllProperties: BOOL): HRESULT; stdcall;
+    function Save(pPropBag: IPropertyBag2; fClearDirty: BOOL; fSaveAllProperties: BOOL): HRESULT; stdcall;
 
     function IsDirty(): HRESULT; stdcall;
-
   end;
   IID_IPersistPropertyBag2 = IPersistPropertyBag2;
   {$EXTERNALSYM IID_IPersistPropertyBag2}
@@ -1559,8 +1477,9 @@ type
   {$EXTERNALSYM IAdviseSinkEx}
   IAdviseSinkEx = interface(IAdviseSink)
   ['{3AF24290-0C96-11CE-A0CF-00AA00600AB8}']
-    function OnViewStatusChange(dwViewStatus: DWORD): HRESULT; stdcall;
 
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    procedure OnViewStatusChange(dwViewStatus: DWORD); stdcall;
   end;
   IID_IAdviseSinkEx = IAdviseSinkEx;
   {$EXTERNALSYM IID_IAdviseSinkEx}
@@ -1573,16 +1492,13 @@ type
   {$EXTERNALSYM IQuickActivate}
   IQuickActivate = interface(IUnknown)
   ['{cf51ed10-62fe-11cf-bf86-00a0c9034836}']
-    function QuickActivate(var qaCont: tagQACONTAINER;
-                           var qaCtrl: tagQACONTROL): HResult; stdcall;
-{$IFDEF WIN64}
-    function SetContentExtent(pSizel: LPSIZEL): HResult; stdcall;
-{$ELSE}
-    function SetContentExtent(const pSizel: SIZEL): HResult; stdcall;
-{$ENDIF}
 
-    function GetContentExtent(out sizel: SIZEL): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function QuickActivate(pQaContainer: PQACONTAINER; pQaControl: PQACONTROL): HRESULT; stdcall;
 
+    function SetContentExtent(pSizel: PSIZEL): HRESULT; stdcall;
+
+    function GetContentExtent(pSizel: PSIZEL): HRESULT; stdcall;
   end;
   IID_IQuickActivate = IQuickActivate;
   {$EXTERNALSYM IID_IQuickActivate}

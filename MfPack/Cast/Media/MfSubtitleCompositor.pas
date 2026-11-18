@@ -23,16 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
-// 02/08/2026 Carmen              Cache subtitle overlays to remove per-frame GDI allocation.
-// 01/08/2026 Carmen              Added selectable MKV tracks and thread-safe timed-text swaps.
-// 31/07/2026 Carmen              Added sidecar-first embedded subtitle fallback.
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

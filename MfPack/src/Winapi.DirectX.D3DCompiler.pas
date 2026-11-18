@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: D3D Compilation Types and APIs.
 //              This header is used by HLSL. For more information, see:
 //              https://learn.microsoft.com/en-us/windows/win32/api/_direct3dhlsl/
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2025 All                 Ozzy Osbourne release  SDK 10.0.28000.2705 (Windows 11)
+// 16/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11 and this file are outdated!
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -69,17 +69,9 @@ interface
   {$HPPEMIT '#include "D3DCompiler.h"'}
 
 uses
-  {Winapi}
-  Winapi.Windows,
-  {D3D10}
-  Winapi.D3D10,
-  {D3D11}
-  Winapi.D3D11,
+  Windows,
+  WinApi.WinApiTypes,
   Winapi.DirectX.D3D11Shader,
-  {D3D12}
-  Winapi.DirectX.D3D12,
-  Winapi.DirectX.D3D12Shader,
-  {DirectX}
   Winapi.DirectX.D3DCommon;
 
 
@@ -115,8 +107,7 @@ const
   // Simple helper routine to read a file on disk into memory
   // for passing to other routines in this API.
   //----------------------------------------------------------------------------
-  function D3DReadFileToBlob(pFileName: LPCWSTR;
-                      {out}  ppContents: PID3DBlob):HRESULT; stdcall;
+  function D3DReadFileToBlob(pFileName: LPCWSTR; out ppContents: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DReadFileToBlob}
 
 
@@ -125,9 +116,7 @@ const
   // ------------------
   // Simple helper routine to write a memory blob to a file on disk.
   //----------------------------------------------------------------------------
-  function D3DWriteBlobToFile(pBlob: ID3DBlob;
-                              pFileName: LPCWSTR;
-                              bOverwrite: BOOL): HRESULT; stdcall;
+  function D3DWriteBlobToFile(pBlob: ID3DBlob; pFileName: LPCWSTR; bOverwrite: BOOL): HRESULT; stdcall;
   {$EXTERNALSYM D3DWriteBlobToFile}
 
 
@@ -299,33 +288,13 @@ const
   //const
   //  D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
 
-  function D3DCompile(pSrcData: LPCVOID;
-                      SrcDataSize: SIZE_T;
-           {_In_opt_} pSourceName: LPCSTR;
-                      const pDefines: LPD3D_SHADER_MACRO;
-           {_In_opt_} pInclude: ID3DInclude;
-           {_In_opt_} pEntrypoint: LPCSTR;
-                      pTarget: LPCSTR;
-                      Flags1: UINT;
-                      Flags2: UINT;
-                      out ppCode: ID3DBlob;
-      {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
+  function D3DCompile(pSrcData: LPCVOID; SrcDataSize: SIZE_T; pSourceName: LPCSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; pEntrypoint: LPCSTR; pTarget: LPCSTR; Flags1: UINT; Flags2: UINT; out ppCode: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCompile}
 
 
 type
 
-  pD3DCompile = function (pSrcData: LPCVOID;
-                          SrcDataSize: SIZE_T;
-                          pFileName: LPCSTR;
-                          const pDefines: LPD3D_SHADER_MACRO;
-                          pInclude: ID3DInclude;
-                          pEntrypoint: LPCSTR;
-                          pTarget: LPCSTR;
-                          Flags1: UINT;
-                          Flags2: UINT;
-                          out ppCode: ID3DBlob;
-          {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
+  pD3DCompile = function(pSrcData: LPCVOID; SrcDataSize: SIZE_T; pSourceName: LPCSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; pEntrypoint: LPCSTR; pTarget: LPCSTR; Flags1: UINT; Flags2: UINT; out ppCode: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM pD3DCompile}
 
 const
@@ -338,31 +307,10 @@ const
   {$EXTERNALSYM D3DCOMPILE_SECDATA_REQUIRE_TEMPLATE_MATCH}
 
 
-  function D3DCompile2(pSrcData: LPCVOID;
-                       SrcDataSize: SIZE_T;
-              {in_opt} pSourceName: LPCSTR;
-                       const pDefines: LPD3D_SHADER_MACRO;
-              {in_opt} pInclude: ID3DInclude;
-                       pEntrypoint: LPCSTR;
-                       pTarget: LPCSTR;
-                       Flags1: UINT;
-                       Flags2: UINT;
-                       SecondaryDataFlags: UINT;
-                       pSecondaryData: LPCVOID;
-                       SecondaryDataSize: SIZE_T;
-                       out ppCode: ID3DBlob;
-       {out, optional} ppErrorMsgs: PID3DBlob):HRESULT; stdcall;
+  function D3DCompile2(pSrcData: LPCVOID; SrcDataSize: SIZE_T; pSourceName: LPCSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; pEntrypoint: LPCSTR; pTarget: LPCSTR; Flags1: UINT; Flags2: UINT; SecondaryDataFlags: UINT; pSecondaryData: LPCVOID; SecondaryDataSize: SIZE_T; out ppCode: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCompile2}
 
-  function D3DCompileFromFile(pFileName: LPCWSTR;
-                              const pDefines: LPD3D_SHADER_MACRO;
-                              pInclude: ID3DInclude;
-                              pEntrypoint: LPCSTR;
-                              pTarget: LPCSTR;
-                              Flags1: UINT;
-                              Flags2: UINT;
-                              out ppCode: ID3DBlob;
-                              ppErrorMsgs: PPointer):HRESULT; stdcall;
+  function D3DCompileFromFile(pFileName: LPCWSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; pEntrypoint: LPCSTR; pTarget: LPCSTR; Flags1: UINT; Flags2: UINT; out ppCode: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCompileFromFile}
 
   //----------------------------------------------------------------------------
@@ -372,24 +320,12 @@ const
   // the resulting text.
   //----------------------------------------------------------------------------
 
-  function D3DPreprocess(pSrcData: LPCVOID;
-                         SrcDataSize: SIZE_T;
-                {in_opt} pSourceName: LPCSTR;
-                {in_opt} pDefines: LPD3D_SHADER_MACRO;
-                {in_opt} pInclude: ID3DInclude;
-                         out ppCodeText: ID3DBlob;
-         {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
+  function D3DPreprocess(pSrcData: LPCVOID; SrcDataSize: SIZE_T; pSourceName: LPCSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; out ppCodeText: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DPreprocess}
 
 type
 
-  pD3DPreprocess = function(pSrcData: LPCVOID;
-                            SrcDataSize: SIZE_T;
-                            pFileName:LPCSTR;
-                            pDefines: LPD3D_SHADER_MACRO;
-                            pInclude: ID3DInclude;
-                            out ppCodeText: ID3DBlob;
-            {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
+  pD3DPreprocess = function(pSrcData: LPCVOID; SrcDataSize: SIZE_T; pSourceName: LPCSTR; pDefines: LPD3D_SHADER_MACRO; pInclude: ID3DInclude; out ppCodeText: ID3DBlob; ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM pD3DPreprocess}
 
   //----------------------------------------------------------------------------
@@ -399,9 +335,7 @@ type
   // embedded in the body of the shader.
   //----------------------------------------------------------------------------
 
-  function D3DGetDebugInfo(pSrcData: LPCVOID;
-                           SrcDataSize: SIZE_T;
-                           out ppDebugInfo: PID3DBlob): HRESULT; stdcall;
+  function D3DGetDebugInfo(pSrcData: LPCVOID; SrcDataSize: SIZE_T; out ppDebugInfo: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetDebugInfo}
 
   //----------------------------------------------------------------------------
@@ -411,10 +345,7 @@ type
   // reflection APIs.
   //----------------------------------------------------------------------------
 
-  function D3DReflect(pSrcData: LPCVOID;
-                      SrcDataSize: SIZE_T;
-                      const pInterface: TGUID;
-                      out ppReflector): HRESULT; stdcall;
+  function D3DReflect(pSrcData: LPCVOID; SrcDataSize: SIZE_T; const pInterface: TGUID; out ppReflector): HRESULT; stdcall;
   {$EXTERNALSYM D3DReflect}
 
   //----------------------------------------------------------------------------
@@ -424,10 +355,7 @@ type
   // reflection APIs.
   //----------------------------------------------------------------------------
 
-  function D3DReflectLibrary(pSrcData: LPCVOID;
-                             SrcDataSize: SIZE_T;
-                             const riid: TGUID;
-                             out ppReflector: LPVOID): HRESULT; stdcall;
+  function D3DReflectLibrary(pSrcData: LPCVOID; SrcDataSize: SIZE_T; const riid: TGUID; out ppReflector): HRESULT; stdcall;
   {$EXTERNALSYM D3DReflectLibrary}
 
   //----------------------------------------------------------------------------
@@ -455,11 +383,7 @@ const
   D3D_DISASM_PRINT_HEX_LITERALS             = $00000080;
   {$EXTERNALSYM D3D_DISASM_PRINT_HEX_LITERALS}
 
-  function D3DDisassemble(pSrcData: LPCVOID;
-                          SrcDataSize: SIZE_T;
-                          Flags: UINT;
-                 {in_opt} szComments: LPCSTR;
-                          out ppDisassembly: ID3DBlob): HRESULT; stdcall;
+  function D3DDisassemble(pSrcData: LPCVOID; SrcDataSize: SIZE_T; Flags: UINT; szComments: LPCSTR; out ppDisassembly: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DDisassemble}
 
 type
@@ -471,14 +395,7 @@ type
                           out ppDisassembly: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM pD3DDisassemble}
 
-  function D3DDisassembleRegion(pSrcData: LPCVOID;
-                                SrcDataSize: SIZE_T;
-                                Flags: UINT;
-                       {in_opt} szComments: LPCSTR;
-                                StartByteOffset: SIZE_T;
-                                NumInsts: SIZE_T;
-                    {_Out_opt_} pFinishByteOffset: PSIZE_T;
-                                out ppDisassembly: ID3DBlob): HRESULT; stdcall;
+  function D3DDisassembleRegion(pSrcData: LPCVOID; SrcDataSize: SIZE_T; Flags: UINT; szComments: LPCSTR; StartByteOffset: SIZE_T; NumInsts: SIZE_T; pFinishByteOffset: PSIZE_T; out ppDisassembly: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DDisassembleRegion}
 
   //----------------------------------------------------------------------------
@@ -488,13 +405,10 @@ type
   function D3DCreateLinker(out ppLinker: ID3D11Linker): HRESULT; stdcall;
   {$EXTERNALSYM D3DCreateLinker}
 
-  function D3DLoadModule(pSrcData: LPCVOID;
-                         cbSrcDataSize: SIZE_T;
-                         out ppModule: ID3D11Module): HRESULT; stdcall;
+  function D3DLoadModule(pSrcData: LPCVOID; cbSrcDataSize: SIZE_T; out ppModule: ID3D11Module): HRESULT; stdcall;
   {$EXTERNALSYM D3DLoadModule}
 
-  function D3DCreateFunctionLinkingGraph(uFlags: UINT;
-                                         out ppFunctionLinkingGraph: ID3D11FunctionLinkingGraph): HRESULT; stdcall;
+  function D3DCreateFunctionLinkingGraph(uFlags: UINT; out ppFunctionLinkingGraph: ID3D11FunctionLinkingGraph): HRESULT; stdcall;
    {$EXTERNALSYM D3DCreateFunctionLinkingGraph}
 
   //----------------------------------------------------------------------------
@@ -510,13 +424,7 @@ const
   D3D_GET_INST_OFFSETS_INCLUDE_NON_EXECUTABLE = $00000001;
   {$EXTERNALSYM D3D_GET_INST_OFFSETS_INCLUDE_NON_EXECUTABLE}
 
-  function D3DGetTraceInstructionOffsets(pSrcData: LPCVOID;
-                                         SrcDataSize: SIZE_T;
-                                         Flags: UINT;
-                                         StartInstIndex: SIZE_T;
-                                         NumInsts: SIZE_T;
-                                         pOffsets: PSIZE_T;
-                             {_Out_opt_} pTotalInsts: PSIZE_T): HRESULT; stdcall;
+  function D3DGetTraceInstructionOffsets(pSrcData: LPCVOID; SrcDataSize: SIZE_T; Flags: UINT; StartInstIndex: SIZE_T; NumInsts: SIZE_T; pOffsets: PSIZE_T; pTotalInsts: PSIZE_T): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetTraceInstructionOffsets}
 
   //----------------------------------------------------------------------------
@@ -526,9 +434,7 @@ const
   //----------------------------------------------------------------------------
 
 
-function D3DGetInputSignatureBlob(pSrcData: LPCVOID;
-                                  SrcDataSize: SIZE_T;
-                                  out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
+function D3DGetInputSignatureBlob(pSrcData: LPCVOID; SrcDataSize: SIZE_T; out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
 {$EXTERNALSYM D3DGetInputSignatureBlob}
 
   //----------------------------------------------------------------------------
@@ -537,9 +443,7 @@ function D3DGetInputSignatureBlob(pSrcData: LPCVOID;
   // Retrieve the output signature from a compilation result.
   //----------------------------------------------------------------------------
 
-  function D3DGetOutputSignatureBlob(pSrcData: LPCVOID;
-                                     SrcDataSize: SIZE_T;
-                                     out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
+  function D3DGetOutputSignatureBlob(pSrcData: LPCVOID; SrcDataSize: SIZE_T; out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetOutputSignatureBlob}
 
   //----------------------------------------------------------------------------
@@ -548,9 +452,7 @@ function D3DGetInputSignatureBlob(pSrcData: LPCVOID;
   // Retrieve the input and output signatures from a compilation result.
   //----------------------------------------------------------------------------
 
-  function D3DGetInputAndOutputSignatureBlob(pSrcData: LPCVOID;
-                                             SrcDataSize: SIZE_T;
-                                             out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
+  function D3DGetInputAndOutputSignatureBlob(pSrcData: LPCVOID; SrcDataSize: SIZE_T; out ppSignatureBlob: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetInputAndOutputSignatureBlob}
 
   //----------------------------------------------------------------------------
@@ -573,11 +475,7 @@ type
   {$EXTERNALSYM D3DCOMPILER_STRIP_FLAGS}
 
 
-  function D3DStripShader(pShaderBytecode: LPCVOID;
-                          BytecodeLength: SIZE_T;
-                          uStripFlags: UINT;
-                          out ppStrippedBlob: ID3DBlob): HRESULT;
-  {$EXTERNALSYM D3DStripShader}
+  function D3DStripShader(pShaderBytecode: LPCVOID; BytecodeLength: SIZE_T; uStripFlags: UINT; out ppStrippedBlob: ID3DBlob): HRESULT; stdcall;{$EXTERNALSYM D3DStripShader}
 
 
   //----------------------------------------------------------------------------
@@ -611,11 +509,7 @@ type
                    {$EXTERNALSYM D3D_BLOB_PART}
 
 
-  function D3DGetBlobPart(pSrcData: LPCVOID;
-                          SrcDataSize: SIZE_T;
-                          Part: D3D_BLOB_PART;
-                          Flags: UINT;
-                          out ppPart: ID3DBlob): HRESULT; stdcall;
+  function D3DGetBlobPart(pSrcData: LPCVOID; SrcDataSize: SIZE_T; Part: D3D_BLOB_PART; Flags: UINT; out ppPart: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetBlobPart}
 
   //----------------------------------------------------------------------------
@@ -624,13 +518,7 @@ type
   // Update information in a compilation result.
   //----------------------------------------------------------------------------
 
-  function D3DSetBlobPart(pSrcData: LPCVOID;
-                          SrcDataSize: SIZE_T;
-                          Part: D3D_BLOB_PART;
-                          Flags: UINT;
-                          pPart: LPCVOID;
-                          PartSize: SIZE_T;
-                          out ppNewShader: ID3DBlob): HRESULT; stdcall;
+  function D3DSetBlobPart(pSrcData: LPCVOID; SrcDataSize: SIZE_T; Part: D3D_BLOB_PART; Flags: UINT; pPart: LPCVOID; PartSize: SIZE_T; out ppNewShader: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DSetBlobPart}
 
   //----------------------------------------------------------------------------
@@ -639,8 +527,7 @@ type
   // Create an ID3DBlob instance.
   //----------------------------------------------------------------------------
 
-  function D3DCreateBlob(Size: SIZE_T;
-                     out ppBlob: ID3DBlob): HRESULT; stdcall;
+  function D3DCreateBlob(Size: SIZE_T; out ppBlob: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCreateBlob}
 
   //----------------------------------------------------------------------------
@@ -669,10 +556,7 @@ const
   {$EXTERNALSYM D3D_COMPRESS_SHADER_KEEP_ALL_PARTS}
 
 
-  function D3DCompressShaders(uNumShaders: UINT;
-                              pShaderData: D3D_SHADER_DATA;
-                              uFlags: UINT;
-                              out ppCompressedData: ID3DBlob): HRESULT; stdcall;
+  function D3DCompressShaders(uNumShaders: UINT; pShaderData: PD3D_SHADER_DATA; uFlags: UINT; out ppCompressedData: ID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCompressShaders}
 
   //----------------------------------------------------------------------------
@@ -681,14 +565,7 @@ const
   // Decompresses one or more shaders from a compressed set.
   //----------------------------------------------------------------------------
 
-  function D3DDecompressShaders(pSrcData: LPCVOID;
-                                SrcDataSize: SIZE_T;
-                                uNumShaders: UINT;
-                                uStartIndex: UINT;
-                                pIndices: PUINT;
-                                uFlags: UINT;
-                                out ppShaders: ID3DBlob;
-                    {_Out_opt_} pTotalShaders: PUINT): HRESULT; stdcall;
+  function D3DDecompressShaders(pSrcData: LPCVOID; SrcDataSize: SIZE_T; uNumShaders: UINT; uStartIndex: UINT; pIndices: PUINT; uFlags: UINT; ppShaders: PID3DBlob; pTotalShaders: PUINT): HRESULT; stdcall;
   {$EXTERNALSYM D3DDecompressShaders}
 
 
@@ -699,15 +576,17 @@ const
   // buffer containing text assembly.
   //----------------------------------------------------------------------------
 
-  function D3DDisassemble10Effect(pEffect: ID3D10Effect;
-                                  Flags: UINT;
-                                  out ppDisassembly: ID3DBlob): HRESULT;
-  {$EXTERNALSYM D3DDisassemble10Effect}
+  function D3DDisassemble10Effect(pEffect: Pointer; Flags: UINT; out ppDisassembly: ID3DBlob): HRESULT; stdcall;{$EXTERNALSYM D3DDisassemble10Effect}
 
+
+const
+  // Native compiler sentinel; this is not a dereferenceable include handler.
+  D3D_COMPILE_STANDARD_FILE_INCLUDE = ID3DInclude(1);
+
+const
+  D3D_BLOB_DEBUG_NAME: D3D_BLOB_PART = D3D_BLOB_PART(12);
 
 implementation
-
-
 const
 
   D3DCOMPILER_DLL_W = 'd3dcompiler_47.dll';
@@ -742,7 +621,7 @@ const
   function D3DDisassembleRegion; external D3DCompilerLib name 'D3DDisassembleRegion' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D3DCreateLinker; external D3DCompilerLib name 'D3DCreateLinker' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D3DLoadModule; external D3DCompilerLib name 'D3DLoadModule' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function D3DCreatefunctionLinkingGraph; external D3DCompilerLib name 'D3DCreate  functionLinkingGraph' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function D3DCreatefunctionLinkingGraph; external D3DCompilerLib name 'D3DCreateFunctionLinkingGraph' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D3DGetTraceInstructionOffsets; external D3DCompilerLib name 'D3DGetTraceInstructionOffsets' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D3DGetInputSignatureBlob; external D3DCompilerLib name 'D3DGetInputSignatureBlob' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function D3DGetOutputSignatureBlob; external D3DCompilerLib name 'D3DGetOutputSignatureBlob' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Remote Desktop
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This header is used by Remote Desktop Services.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -146,6 +146,7 @@ type
   end;
   {$EXTERNALSYM APO_CONNECTION_PROPERTY}
   PAPO_CONNECTION_PROPERTY = ^APO_CONNECTION_PROPERTY;
+  PPAPO_CONNECTION_PROPERTY = ^PAPO_CONNECTION_PROPERTY;
 
 
   // This structure defines V2 of the APO_CONNECTION_PROPERTY.

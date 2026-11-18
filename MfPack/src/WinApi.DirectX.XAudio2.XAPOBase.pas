@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: See WinApi.DirectX.XAudio2.XAPO.pas for the rules governing XAPO interface behaviour.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -117,10 +117,11 @@ const
 
 
   //////////////////////////////////////////////////////////////////////////////
-  // Because Delphi is not capable of (yet) linking with .lib files,
-  // both CXAPOBase and CXAPOParametersBase classes are translated with only their interface implementations
-  // This should not be a big deal, because the functionality of the IXAPO and
-  // IXAPOParameters interfaces will do.
+  // These templates do not link to the SDK C++ base-class library.
+  // CXAPOBase and CXAPOParametersBase are Pascal implementation templates.
+  // Format negotiation and locking return E_NOTIMPL until overridden.
+  // Subclasses must implement Process and parameter transfer; SDK matrix mixing
+  // and triple-buffer synchronization helpers are not implemented here.
   //////////////////////////////////////////////////////////////////////////////
 
 
@@ -141,9 +142,9 @@ type
   CXAPOBase = class(TInterfacedObject, IXAPO)
   private
 {$HINTS OFF}
-    m_pRegistrationProperties: XAPO_REGISTRATION_PROPERTIES;  // pointer to registration properties of the XAPO, set via constructor
+    m_pRegistrationProperties: XAPO_REGISTRATION_PROPERTIES;  // registration properties copied by the constructor
     m_pfnMatrixMixFunction: Pointer;      // optimal matrix function pointer, used for thru processing
-    m_pfl32MatrixCoefficients: FLOAT32;   // matrix coefficient table, used for thru processing
+    m_pfl32MatrixCoefficients: PSingle;   // matrix coefficient table, used for thru processing
     m_nSrcFormatType: UINT32;             // input format type, used for thru processing
     m_fIsScalarMatrix: BOOL;              // TRUE if m_pfl32MatrixCoefficients is diagonal matrix with all main diagonal entries equal, i.e. m_pfnMatrixMixFunction only used for type conversion (no channel conversion), used for thru processing
     m_fIsLocked: BOOL;                    // TRUE if XAPO locked via CXAPOBase.LockForProcess
@@ -172,26 +173,24 @@ type
     // Allocates a copy of the registration properties of the XAPO.
     // This default implementation returns a copy of the registration
     // properties given to the constructor, allocated via XAPOAlloc.
-    function GetRegistrationProperties(out ppRegistrationProperties: XAPO_REGISTRATION_PROPERTIES): HRESULT; stdcall;
+    function GetRegistrationProperties(ppRegistrationProperties: PPXAPO_REGISTRATION_PROPERTIES): HRESULT; virtual; stdcall;
 
     // Queries if a specific input format is supported for a given output format.
-    // This default implementation assumes only the format described by the
-    // XAPOBASE_DEFAULT_FORMAT values are supported for both input and output.
-    function IsInputFormatSupported(pOutputFormat: WAVEFORMATEX;
-                                    pRequestedInputFormat: WAVEFORMATEX;
-                                    out ppSupportedInputFormat: WAVEFORMATEX): HRESULT; stdcall;
+    // Template stub: returns E_NOTIMPL. Override to negotiate formats.
+    function IsInputFormatSupported(pOutputFormat: PWAVEFORMATEX;
+                                    pRequestedInputFormat: PWAVEFORMATEX;
+                                    ppSupportedInputFormat: PPWAVEFORMATEX): HRESULT; virtual; stdcall;
 
     // Queries if a specific output format is supported for a given input format.
-    // This default implementation assumes only the format described by the
-    // XAPOBASE_DEFAULT_FORMAT values are supported for both input and output.
-    function IsOutputFormatSupported(pInputFormat: WAVEFORMATEX;
-                                     pRequestedOutputFormat: WAVEFORMATEX;
-                                     out ppSupportedOutputFormat: WAVEFORMATEX): HRESULT; stdcall;
+    // Template stub: returns E_NOTIMPL. Override to negotiate formats.
+    function IsOutputFormatSupported(pInputFormat: PWAVEFORMATEX;
+                                     pRequestedOutputFormat: PWAVEFORMATEX;
+                                     ppSupportedOutputFormat: PPWAVEFORMATEX): HRESULT; virtual; stdcall;
 
     // Performs any effect-specific initialization.
     // This default implementation is a no-op and only returns S_OK.
     function Initialize(pData: Pointer;
-                        DataByteSize: UINT32): HRESULT; stdcall;
+                        DataByteSize: UINT32): HRESULT; virtual; stdcall;
 
     {
         UNREFERENCED_PARAMETER(DataByteSize);
@@ -201,35 +200,34 @@ type
     // Resets variables dependent on frame history.
     // This default implementation is a no-op: this base class contains no
     // relevant state to reset.
-    procedure Reset(); stdcall;
+    procedure Reset(); virtual; stdcall;
 
     // Notifies XAPO of buffer formats Process() will be given.
-    // This default implementation performs basic input/output format
-    // validation against the XAPO's registration properties.
-    // Derived XAPOs should call the base implementation first.
+    // Template stub: returns E_NOTIMPL. Subclasses must validate formats
+    // and manage their own locked state.
     function LockForProcess(InputLockedParameterCount: UINT32;
                             pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
+                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; virtual; stdcall;
 
     // Opposite of LockForProcess.
     // Derived XAPOs should call the base implementation first.
-    procedure UnlockForProcess(); stdcall;
+    procedure UnlockForProcess(); virtual; stdcall;
 
     // Needs POINTERMATH turned On!
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: PXAPO_PROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                      IsEnabled: BOOL); stdcall;
+                      pOutputProcessParameters: PXAPO_PROCESS_BUFFER_PARAMETERS;
+                      IsEnabled: BOOL); virtual; stdcall; abstract;
 
     // Returns the number of input frames required to generate the requested number of output frames.
     // By default, this method returns the same number of frames it was passed.
-    function CalcInputFrames(OutputFrameCount: UINT32): UINT32; stdcall;
+    function CalcInputFrames(OutputFrameCount: UINT32): UINT32; virtual; stdcall;
 
     // Returns the number of output frames generated for the requested number of input frames.
     // By default, this method returns the same number of frames it was passed.
-    function CalcOutputFrames(InputFrameCount: UINT32): UINT32; stdcall;
+    function CalcOutputFrames(InputFrameCount: UINT32): UINT32; virtual; stdcall;
 
   end;
 
@@ -287,14 +285,14 @@ type
     // Sets effect-specific parameters.
     // This method may only be called on the realtime audio processing thread.
     procedure SetParameters(pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
+                            ParameterByteSize: UINT32); virtual; stdcall; abstract;
 
 
     // Gets effect-specific parameters.
     // This method may block and should not be called from the realtime thread.
-    // Get the current parameters via BeginProcess.
-    procedure GetParameters(out pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
+    // Subclasses must supply parameter storage and synchronization.
+    procedure GetParameters(pParameters: Pointer;
+                            ParameterByteSize: UINT32); virtual; stdcall; abstract;
 
 
     // Called by SetParameters() to allow for user-defined parameter validation.
@@ -319,7 +317,7 @@ type
     //
     //
     procedure OnSetParameters(pParameters: Pointer;
-                              ParameterByteSize: UINT32); stdcall;
+                              ParameterByteSize: UINT32); virtual; stdcall;
 
     ////////////////////////////////////////////////////////////////////////////
     ///
@@ -397,7 +395,24 @@ end;
 
 // IXAPO implementations ///////////////////////////////////////////////////////
 
-function CXAPOBase.GetRegistrationProperties(out ppRegistrationProperties: XAPO_REGISTRATION_PROPERTIES): HRESULT;
+function CXAPOBase.GetRegistrationProperties(ppRegistrationProperties: PPXAPO_REGISTRATION_PROPERTIES): HRESULT;
+var
+  Properties: PXAPO_REGISTRATION_PROPERTIES;
+begin
+  if ppRegistrationProperties = nil then
+    Exit(E_POINTER);
+  Properties := XAPOAlloc(SizeOf(XAPO_REGISTRATION_PROPERTIES));
+  if Properties = nil then
+    Exit(E_OUTOFMEMORY);
+  Properties^ := m_pRegistrationProperties;
+  ppRegistrationProperties^ := Properties;
+  Result := S_OK;
+end;
+
+
+function CXAPOBase.IsInputFormatSupported(pOutputFormat: PWAVEFORMATEX;
+                                          pRequestedInputFormat: PWAVEFORMATEX;
+                                          ppSupportedInputFormat: PPWAVEFORMATEX): HRESULT;
 begin
 
   Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
@@ -405,19 +420,9 @@ begin
 end;
 
 
-function CXAPOBase.IsInputFormatSupported(pOutputFormat: WAVEFORMATEX;
-                                          pRequestedInputFormat: WAVEFORMATEX;
-                                          out ppSupportedInputFormat: WAVEFORMATEX): HRESULT;
-begin
-
-  Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
-
-end;
-
-
-function CXAPOBase.IsOutputFormatSupported(pInputFormat: WAVEFORMATEX;
-                                           pRequestedOutputFormat: WAVEFORMATEX;
-                                           out ppSupportedOutputFormat: WAVEFORMATEX): HRESULT;
+function CXAPOBase.IsOutputFormatSupported(pInputFormat: PWAVEFORMATEX;
+                                           pRequestedOutputFormat: PWAVEFORMATEX;
+                                           ppSupportedOutputFormat: PPWAVEFORMATEX): HRESULT;
 begin
 
   Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
@@ -451,22 +456,12 @@ begin
 end;
 
 
-procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
-                            pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                            OutputProcessParameterCount: UINT32;
-                            var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                            IsEnabled: BOOL);
-begin
-
-   // Do your implementations here
-
-end;
 
 
 function CXAPOBase.CalcInputFrames(OutputFrameCount: UINT32): UINT32;
 begin
 
-  Result := 0; // Do your implementations here, by replacing this line for your code.
+  Result := OutputFrameCount;
 
 end;
 
@@ -474,7 +469,7 @@ end;
 function CXAPOBase.CalcOutputFrames(InputFrameCount: UINT32): UINT32;
 begin
 
-  Result := 0; // Do your implementations here, by replacing this line for your code.
+  Result := InputFrameCount;
 
 end;
 
@@ -507,22 +502,8 @@ end;
 ////////////////////////////////////////////////////////////////////////////
 
 
-procedure CXAPOParametersBase.SetParameters(pParameters: Pointer;
-                                            ParameterByteSize: UINT32);
-begin
-
-  // Do your implementations here
-
-end;
 
 
-procedure CXAPOParametersBase.GetParameters(out pParameters: Pointer;
-                                            ParameterByteSize: UINT32);
-begin
-
-  // Do your implementations here
-
-end;
 
 
 procedure CXAPOParametersBase.OnSetParameters(pParameters: Pointer;

@@ -10,7 +10,7 @@
 // Release date: 19-08-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Provides APIs for synchronizing access to Direct3D resources
 //              between Media Foundation producers and consumers.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -169,8 +169,8 @@ type
   // (NTDDI_VERSION >= NTDDI_WIN10_CO)
 
   function MFCreateD3D12SynchronizationObject(pDevice: ID3D12Device;
-                                              const riid: REFIID;
-                                              out ppvSyncObject: Pointer): HResult; stdcall;
+                                              const riid: TGUID;
+                                              out ppvSyncObject): HResult; cdecl;
   {$EXTERNALSYM MFCreateD3D12SynchronizationObject}
   // This function is used to instantiate an MF D3D12 synchronization primitive used to synchronize
   // access to a D3D12 resource stored in an MF object.
@@ -191,10 +191,9 @@ type
   // This enumeration indicates the D3D version of the resource used in the stream associated with a media type.
   //
   PMF_MT_D3D_RESOURCE_VERSION_ENUM = ^MF_MT_D3D_RESOURCE_VERSION_ENUM;
-  MF_MT_D3D_RESOURCE_VERSION_ENUM = (
-    MF_D3D11_RESOURCE,
-    MF_D3D12_RESOURCE
-  );
+  MF_MT_D3D_RESOURCE_VERSION_ENUM = (MF_D3D11_RESOURCE = 0,
+                                     MF_D3D12_RESOURCE = 1
+                                    );
   {$EXTERNALSYM MF_MT_D3D_RESOURCE_VERSION_ENUM}
 
 const
@@ -211,7 +210,7 @@ const
   MF_D3D12_SYNCHRONIZATION_OBJECT :                     TGUID = (D1: $2a7c8d6a;
                                                                  D2: $85a6;
                                                                  D3: $494d;
-                                                                 D4: ($a0, $46, $60, $ea, $1a, $13, $8f, $4b));
+                                                                 D4: ($a0, $46, $06, $ea, $1a, $13, $8f, $4b));
 
   //
   // MF D3D12 media type attributes.
@@ -241,9 +240,9 @@ const
   // Data type: UINT32
   // This attribute indicates the texture layout options that were used to create the resources.  The value of this attribute
   // corresponds to values in the D3D12_TEXTURE_LAYOUT enumeration.
-  // {97c85caa-beb-4ee1-9715-f2-2f-ad-8c-10-f5}
+  // {97c85caa-0beb-4ee1-9715-f2-2f-ad-8c-10-f5}
   MF_MT_D3D12_TEXTURE_LAYOUT :                          TGUID = (D1: $97c85caa;
-                                                                 D2: $beb0;
+                                                                 D2: $0beb;
                                                                  D3: $4ee1;
                                                                  D4: ($97, $15, $f2, $2f, $ad, $8c, $10, $f5));
 
@@ -306,11 +305,11 @@ const
   // This attribute indicates whether the resources in the stream can be simultaneously accessed by multiple different
   // command queues.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS value from the
   // D3D12_RESOURCE_FLAGS enumeration.
-  // {a4940b20-cfd6-4738-9d02-98-11-37-34-01-5a}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : TGUID = (D1: $a4940b20;
+  // {0a4940b2-cfd6-4738-9d02-98-11-37-34-01-5a}
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : TGUID = (D1: $0a4940b2;
                                                                  D2: $cfd6;
                                                                  D3: $4738;
-                                                                 D4: ($9d, $20, $98, $11, $37, $34, $10, $5a));
+                                                                 D4: ($9d, $02, $98, $11, $37, $34, $01, $5a));
 
   // MF_MT_D3D12_RESOURCE_DIMENSION
   // Data type: UINT32 (treat as enum of D3D12_RESOURCE_DIMENSION)

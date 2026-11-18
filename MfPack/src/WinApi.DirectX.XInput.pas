@@ -10,7 +10,7 @@
 // Release date: 14-01-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This module defines Xbox 360 Common Controller APIs
 //              and constants for the Windows platform.
 //              Windows Vista or later.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -37,7 +37,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -434,16 +434,16 @@ type
 
 
   function XInputGetState(dwUserIndex: DWORD;  // Index of the gamer associated with the device
-                          pState: XINPUT_STATE): DWORD; stdcall;
+                          pState: PXINPUT_STATE): DWORD; stdcall;
   {$EXTERNALSYM XInputGetState}
 
   function XInputSetState(dwUserIndex: DWORD;  // Index of the gamer associated with the device
-                          pVibration: XINPUT_VIBRATION): DWORD; stdcall; // The vibration information to send to the controller
+                          pVibration: PXINPUT_VIBRATION): DWORD; stdcall; // The vibration information to send to the controller
   {$EXTERNALSYM XInputSetState}
 
   function XInputGetCapabilities(dwUserIndex: DWORD;  // Index of the gamer associated with the device
                                  dwFlags: DWORD;      // Input flags that identify the device type
-                                 out pCapabilities: XINPUT_CAPABILITIES): DWORD; stdcall; // Receives the capabilities
+                                 pCapabilities: PXINPUT_CAPABILITIES): DWORD; stdcall; // Receives the capabilities
   {$EXTERNALSYM XInputGetCapabilities}
 
 
@@ -451,30 +451,30 @@ type
 // #if(_WIN32_WINNT >= _WIN32_WINNT_WIN8)
   //procedure XInputEnable({in} enable: BOOL); stdcall;
 //#if(_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-  procedure XInputEnable({in} enable: BOOL); stdcall; deprecated 'Only valid for Win 8 and 8.1';
+  procedure XInputEnable({in} enable: BOOL); stdcall; deprecated 'Deprecated by the Windows 10 SDK';
   {$EXTERNALSYM XInputEnable}
 //#endif
 
 {ENDIF}
 
   function XInputGetAudioDeviceIds(dwUserIndex: DWORD;               // Index of the gamer associated with the device
-                                   out pRenderDeviceId: PWideChar;   // Windows Core Audio device ID string for render (speakers)
-                                   var pRenderCount: UINT;           // Size of render device ID string buffer (in wide-chars)
-                                   out pCaptureDeviceId: PWideChar;  // Windows Core Audio device ID string for capture (microphone)
-                                   var pCaptureCount: UINT): DWORD; stdcall;  // Size of capture device ID string buffer (in wide-chars)
+                                   pRenderDeviceId: PWideChar;   // Windows Core Audio device ID string for render (speakers)
+                                   pRenderCount: PUINT;           // Size of render device ID string buffer (in wide-chars)
+                                   pCaptureDeviceId: PWideChar;  // Windows Core Audio device ID string for capture (microphone)
+                                   pCaptureCount: PUINT): DWORD; stdcall;  // Size of capture device ID string buffer (in wide-chars)
   {$EXTERNALSYM XInputGetAudioDeviceIds}
 
 
 
   function XInputGetBatteryInformation(dwUserIndex: DWORD;           // Index of the gamer associated with the device
                                        devType: Byte;                // Which device on this user index
-                                       out pBatteryInformation: XINPUT_BATTERY_INFORMATION): DWORD; stdcall; // Contains the level and types of batteries
+                                       pBatteryInformation: PXINPUT_BATTERY_INFORMATION): DWORD; stdcall; // Contains the level and types of batteries
   {$EXTERNALSYM XInputGetBatteryInformation}
 
 
   function XInputGetKeystroke(dwUserIndex: DWORD;           // Index of the gamer associated with the device
                               dwReserved: DWORD;            // Reserved for future use
-                              out pKeystroke: PXINPUT_KEYSTROKE): DWORD; stdcall; // Pointer to an XINPUT_KEYSTROKE structure that receives an input event.
+                              pKeystroke: PXINPUT_KEYSTROKE): DWORD; stdcall; // Pointer to an XINPUT_KEYSTROKE structure that receives an input event.
   {$EXTERNALSYM XInputGetKeystroke}
 
 
@@ -508,7 +508,28 @@ procedure XInputEnable;                   external XINPUT_DLL name 'XInputEnable
 function XInputGetAudioDeviceIds;         external XINPUT_DLL name 'XInputGetAudioDeviceIds' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function XInputGetBatteryInformation;     external XINPUT_DLL name 'XInputGetBatteryInformation' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function XInputGetKeystroke;              external XINPUT_DLL name 'XInputGetKeystroke' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function XInputGetDSoundAudioDeviceGuids; external XINPUT_DLL name 'XInputGetDSoundAudioDeviceGuids' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+// This legacy API is absent from XInput 1.4. Keep the compatibility entry point
+// without a mandatory import of an unavailable export.
+function XInputGetDSoundAudioDeviceGuids(dwUserIndex: DWORD;
+                                       out pDSoundRenderGuid: TGUID;
+                                       out pDSoundCaptureGuid: TGUID): DWORD;
+type
+  TGetDSoundAudioDeviceGuids = function(dwUserIndex: DWORD;
+                                      out pRenderGuid: TGUID;
+                                      out pCaptureGuid: TGUID): DWORD; stdcall;
+var
+  Module: HMODULE;
+  GetGuids: TGetDSoundAudioDeviceGuids;
+begin
+  Module := GetModuleHandleW(PWideChar(XINPUT_DLL_W));
+  GetGuids := nil;
+  if Module <> 0 then
+    GetGuids := TGetDSoundAudioDeviceGuids(GetProcAddress(Module,'XInputGetDSoundAudioDeviceGuids'));
+  if Assigned(GetGuids) then
+    Result := GetGuids(dwUserIndex,pDSoundRenderGuid,pDSoundCaptureGuid)
+  else
+    Result := ERROR_PROC_NOT_FOUND;
+end;
 
 {$WARN SYMBOL_PLATFORM ON}
 

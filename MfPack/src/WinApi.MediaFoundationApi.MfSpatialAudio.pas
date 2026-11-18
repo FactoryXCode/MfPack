@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: SpatialAudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone (rs) 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -105,7 +105,7 @@ type
   IMFSpatialAudioObjectBuffer = interface(IMFMediaBuffer)
   ['{d396ec8c-605e-4249-978d-72ad1c312872}']
 
-    function SetID(u32ID: INT32): HRESULT; stdcall;
+    function SetID(u32ID: UINT32): HRESULT; stdcall;
     // <summary>
     //     The SetID() method sets the ID of the spatial audio object.
     // </summary>
@@ -203,7 +203,7 @@ type
     // </param>
 
     function GetSpatialAudioObjectByIndex(const dwIndex: DWORD;
-                                          {out} ppAudioObjBuffer: PIMFSpatialAudioObjectBuffer): HRESULT; stdcall;
+                                          out ppAudioObjBuffer: IMFSpatialAudioObjectBuffer): HRESULT; stdcall;
     // <summary>
     //     The GetSpatialAudioObjectByIndex() method returns an audio object specified
     //     with the passed-in index.

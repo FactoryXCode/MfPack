@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Direct3D include file.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -530,7 +530,7 @@ type
       property VideoTransferMatrix:    Integer index $0f03 read ReadBits write WriteBits; // 3 bits at offset 15, See DXVA_VideoTransferMatrix
       property VideoLighting:          Integer index $1204 read ReadBits write WriteBits; // 4 bits at offset 18, See DXVA_VideoLighting
       property VideoPrimaries:         Integer index $1605 read ReadBits write WriteBits; // 5 bits at offset 22, See DXVA_VideoPrimaries
-      property VideoTransferFunction:  Integer index $1b01 read ReadBits write WriteBits; // 5 bits at offset 27, See DXVA_VideoTransferFunction
+      property VideoTransferFunction:  Integer index $1b05 read ReadBits write WriteBits; // 5 bits at offset 27, See DXVA_VideoTransferFunction
   end;
   {$EXTERNALSYM _DXVA_ExtendedFormat}
  DXVA_ExtendedFormat = _DXVA_ExtendedFormat;
@@ -718,7 +718,7 @@ type
   DXVA_SampleFlags = _DXVA_SampleFlags;
   {$EXTERNALSYM DXVA_SampleFlags}
 const
-  DXVA_SampleFlagsMask              = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 1); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
+  DXVA_SampleFlagsMask              = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
   {$EXTERNALSYM DXVA_SampleFlagsMask}
   DXVA_SampleFlag_Palette_Changed   = $0001;
   {$EXTERNALSYM DXVA_SampleFlag_Palette_Changed}
@@ -737,7 +737,7 @@ type
   DXVA_DestinationFlags = _DXVA_DestinationFlags;
   {$EXTERNALSYM DXVA_DestinationFlags}
 const
-  DXVA_DestinationFlagMask                = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 1); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
+  DXVA_DestinationFlagMask                = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
   {$EXTERNALSYM DXVA_DestinationFlagMask}
   DXVA_DestinationFlag_Background_Changed = $0001;
   {$EXTERNALSYM DXVA_DestinationFlag_Background_Changed}
@@ -1603,10 +1603,10 @@ end;
     NrBits := iIndex and $FF;
     Offset := iIndex shr 8;
     Mask := ((1 shl NrBits) - 1);
-{$IF DEBUG}
-    Assert(Value <= Mask);
+{$IFDEF DEBUG}
+    Assert(iValue <= Mask);
 {$ENDIF}
-    Value := (iValue and (not (Mask shl Offset))) or (iValue shl Offset);
+    Value := (Value and (not (Mask shl Offset))) or ((iValue and Mask) shl Offset);
   end;
 
 // END DXVA2_ExtendedFormat ////////////////////////////////////////////////////

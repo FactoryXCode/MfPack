@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - AudioEndPoints
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -34,7 +34,7 @@
 //          Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -153,7 +153,8 @@ type
     eOffloadConnector         = (eHostProcessConnector + 1),
     eLoopbackConnector        = (eOffloadConnector + 1),
     eKeywordDetectorConnector = (eLoopbackConnector + 1),
-    eConnectorCount           = (eKeywordDetectorConnector + 1)
+    eLoopbackConnectorPostVolume = (eKeywordDetectorConnector + 1),
+    eConnectorCount           = (eLoopbackConnectorPostVolume + 1)
   );
   {$EXTERNALSYM EndpointConnectorType}
 
@@ -300,7 +301,7 @@ type
   {$EXTERNALSYM IAudioEndpoint}
   IAudioEndpoint = interface(IUnknown)
   ['{30A99515-1527-4451-AF9F-00C5F0234DAF}']
-    function GetFrameFormat(out ppFormat: WAVEFORMATEX): HResult; stdcall;
+    function GetFrameFormat(out ppFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //  Returns the format of the endpoint.
     // Parameters:
@@ -386,14 +387,14 @@ type
   {$EXTERNALSYM IID_IAudioEndpoint}
 
 
-  // Interface IAudioProcessingObjectRT
+  // Interface IAudioEndpointRT
   // ==================================
   // The AudioProcessor uses this interface to discover the current padding between read
   // and write positions.
   //
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioProcessingObjectRT);'}
-  {$EXTERNALSYM IAudioProcessingObjectRT}
-  IAudioProcessingObjectRT = interface(IUnknown)
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioEndpointRT);'}
+  {$EXTERNALSYM IAudioEndpointRT}
+  IAudioEndpointRT = interface(IUnknown)
   ['{DFD2005F-A6E5-4d39-A265-939ADA9FBB4D}']
     procedure GetCurrentPadding(out pPadding: HNSTIME;
                                 out pAeCurrentPosition: AeCurrentPosition); stdcall;
@@ -475,9 +476,9 @@ type
     // implementation of this method does not and should not block, touch
     // paged memory, or call any blocking system routines.
   end;
-  // IAudioProcessingObjectRT
-  IID_IAudioProcessingObjectRT = IAudioProcessingObjectRT;
-  {$EXTERNALSYM IID_IAudioProcessingObjectRT}
+  // IAudioEndpointRT
+  IID_IAudioEndpointRT = IAudioEndpointRT;
+  {$EXTERNALSYM IID_IAudioEndpointRT}
 
 
   // Interface IAudioInputEndpointRT
@@ -489,7 +490,7 @@ type
   {$EXTERNALSYM IAudioInputEndpointRT}
   IAudioInputEndpointRT = interface(IUnknown)
   ['{8026AB61-92B2-43c1-A1DF-5C37EBD08D82}']
-    procedure GetInputDataPointer(pConnectionProperty: APO_CONNECTION_PROPERTY;
+    procedure GetInputDataPointer(pConnectionProperty: PAPO_CONNECTION_PROPERTY;
                                   pAeTimeStamp: PAeCurrentPosition = Nil); stdcall;
     // Description:
     // Returns pointer to the data that will be read.
@@ -607,7 +608,7 @@ type
   IAudioOutputEndpointRT = interface(IUnknown)
   ['{8FA906E4-C31C-4e31-932E-19A66385E9AA}']
     function GetOutputDataPointer(u32FrameCount: UINT32;
-                                  pAeTimeStamp: AE_CURRENT_POSITION): UINT_PTR; stdcall;
+                                  pAeTimeStamp: PAeCurrentPosition): UINT_PTR; stdcall;
     // Description:
     // Returns pointer to a buffer that will be written to.
     // Parameters:
@@ -623,7 +624,7 @@ type
     // This method returns a pointer to a buffer into which to place the data
     // that is output from the engine.
     //
-    // The data won’t be valid except during the duration of the
+    // The data wonï¿½t be valid except during the duration of the
     // ReleaseOutputDataPointer method.
     //
     // The returned pointer must be frame-aligned.
@@ -633,7 +634,7 @@ type
     // must be <= to the frame count returned in IAudioEndpoint.GetFramesPerPacket.
     //
     // In the case where there is internally not enough
-    // room to satisfy the client’s request for a buffer pointer, a glitch may
+    // room to satisfy the clientï¿½s request for a buffer pointer, a glitch may
     // occur. In this case, the endpoint should still return an address which can
     // be written to, however, when ReleaseOutputDataPointer is called this
     // data will be lost. The glitch should be logged with the wmi logging
@@ -801,7 +802,7 @@ type
     function SetChannelVolumes(u32ChannelCount: UINT32;
                                pf32Volumes: PFloat32;
                                u32CurveType: AUDIO_CURVE_TYPE;   // Used to be in KsMedia.h, since win 8 it's re-defined in AudioAPOTypes.h  (Tony)
-                               pCurveDuration: HNSTIME): HResult; stdcall;
+                               pCurveDuration: PHNSTIME): HResult; stdcall;
 
     function GetChannelVolumes(u32ChannelCount: UINT32;
                                {out} pf32Volumes: PFloat32): HResult; stdcall;
@@ -821,9 +822,9 @@ type
   IAudioEndpointOffloadStreamMute = interface(IUnknown)
   ['{DFE21355-5EC2-40E0-8D6B-710AC3C00249}']
 
-    function SetMute(bMuted: BOOL): HResult; stdcall;
+    function SetMute(bMuted: Boolean): HResult; stdcall;
 
-    function GetMute(out pbMuted: BOOL): HResult; stdcall;
+    function GetMute(out pbMuted: Boolean): HResult; stdcall;
 
   end;
   // IAudioEndpointOffloadStreamMute
@@ -865,7 +866,7 @@ type
 
     function IsLastBufferControlSupported(): BOOL; stdcall;
 
-    procedure ReleaseOutputDataPointerForLastBuffer(pConnectionProperty: APO_CONNECTION_PROPERTY); stdcall;
+    procedure ReleaseOutputDataPointerForLastBuffer(pConnectionProperty: PAPO_CONNECTION_PROPERTY); stdcall;
 
   end;
   // IAudioEndpointLastBufferControl
@@ -912,7 +913,7 @@ type
                              out _ppwfxFormat: PWAVEFORMATEX): HResult; stdcall;
 
     function SetEngineDeviceFormat(pDevice: IMMDevice;
-                                   _pwfxFormat: WAVEFORMATEX): HResult; stdcall;
+                                   _pwfxFormat: PWAVEFORMATEX): HResult; stdcall;
 
     function SetGfxState(pDevice: IMMDevice;
                          _bEnable: BOOL): HResult; stdcall;

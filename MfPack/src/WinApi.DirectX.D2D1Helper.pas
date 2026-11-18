@@ -10,7 +10,7 @@
 // Release date: 29-03-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Because Delphi does not accept complex types (like functions) as default values,
@@ -32,7 +32,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -81,8 +81,8 @@ uses
   {Vcl}
   Vcl.Graphics,
   {WinApi.DirectX}
-  WinApi.DirectX.D2D1,
   WinApi.DirectX.DCommon,
+  WinApi.DirectX.D2D1,
   WinApi.DirectX.DXGIFormat;
 
   {$WEAKPACKAGEUNIT ON}
@@ -93,6 +93,10 @@ uses
   // Forward declared IdentityMatrix function to allow matrix class to use
   // these constructors.
   //
+type
+  // SDK RGB color names are distinct from Windows BGR TColor values.
+  D2D1_KNOWN_COLOR = type UInt32;
+
   function IdentityMatrix(): D2D1_MATRIX_3X2_F; inline;
   {$EXTERNALSYM IdentityMatrix}
 
@@ -191,7 +195,7 @@ type
                          radiusY: FLOAT): D2D1_ROUNDED_RECT; inline;
     {$EXTERNALSYM RoundedRect}
 
-    // Delphi Note: The default value will be set in the funtionbody
+    // Required record arguments are copied as supplied by the caller.
     function BrushProperties(transform: D2D1_MATRIX_3X2_F{ = IdentityMatrix()};
                              opacity: FLOAT = 1.0): D2D1_BRUSH_PROPERTIES; inline;
     {$EXTERNALSYM BrushProperties}
@@ -241,7 +245,7 @@ type
     // Bitmaps
     //
 
-    // Delphi Note: The default value will be set in the funtionbody
+    // Required record arguments are copied as supplied by the caller.
     function BitmapProperties(_pixelFormat: D2D1_PIXEL_FORMAT{ = PixelFormat()};
                               dpiX: FLOAT = 96.0;
                               dpiY: FLOAT = 96.0): D2D1_BITMAP_PROPERTIES; inline;
@@ -251,7 +255,7 @@ type
     //
     // Render Targets
     //
-    // Delphi Note: The default value will be set in the funtionbody
+    // Required record arguments are copied as supplied by the caller.
     function RenderTargetProperties(_pixelFormat: D2D1_PIXEL_FORMAT{ = PixelFormat()};
                                     _type: D2D1_RENDER_TARGET_TYPE = D2D1_RENDER_TARGET_TYPE_DEFAULT;
                                     dpiX: FLOAT = 0.0;
@@ -287,293 +291,291 @@ type
 
 
   //
-  // Colors, this enum defines a set of predefined colors.
-  //
-  // Delphi Note: We don't use the enum, but public constants.
-  //              The values are translated to TColor values, to meet the equal colors,
-  //              specified in the original headerfile.
+  // SDK RRGGBB constants use a distinct type to select RGB overloads.
+  // Windows BGR TColor inputs use separate conversion overloads.
 
 const
 
-  AliceBlue =            TColor($F0F8FF);
+  {$J-}
+  AliceBlue: D2D1_KNOWN_COLOR = $F0F8FF;
   {$EXTERNALSYM AliceBlue}
-  AntiqueWhite =         TColor($FAEBD7);
+  AntiqueWhite: D2D1_KNOWN_COLOR = $FAEBD7;
   {$EXTERNALSYM AntiqueWhite}
-  Aqua =                 TColor($00FFFF);
+  Aqua: D2D1_KNOWN_COLOR = $00FFFF;
   {$EXTERNALSYM Aqua}
-  Aquamarine =           TColor($7FFFD4);
+  Aquamarine: D2D1_KNOWN_COLOR = $7FFFD4;
   {$EXTERNALSYM Aquamarine}
-  Azure =                TColor($F0FFFF);
+  Azure: D2D1_KNOWN_COLOR = $F0FFFF;
   {$EXTERNALSYM Azure}
-  Beige =                TColor($F5F5DC);
+  Beige: D2D1_KNOWN_COLOR = $F5F5DC;
   {$EXTERNALSYM Beige}
-  Bisque =               TColor($FFE4C4);
+  Bisque: D2D1_KNOWN_COLOR = $FFE4C4;
   {$EXTERNALSYM Bisque}
-  Black =                TColor($000000);
+  Black: D2D1_KNOWN_COLOR = $000000;
   {$EXTERNALSYM Black}
-  BlanchedAlmond =       TColor($FFEBCD);
+  BlanchedAlmond: D2D1_KNOWN_COLOR = $FFEBCD;
   {$EXTERNALSYM BlanchedAlmond}
-  Blue =                 TColor($0000FF);
+  Blue: D2D1_KNOWN_COLOR = $0000FF;
   {$EXTERNALSYM Blue}
-  BlueViolet =           TColor($8A2BE2);
+  BlueViolet: D2D1_KNOWN_COLOR = $8A2BE2;
   {$EXTERNALSYM BlueViolet}
-  Brown =                TColor($A52A2A);
+  Brown: D2D1_KNOWN_COLOR = $A52A2A;
   {$EXTERNALSYM Brown}
-  BurlyWood =            TColor($DEB887);
+  BurlyWood: D2D1_KNOWN_COLOR = $DEB887;
   {$EXTERNALSYM BurlyWood}
-  CadetBlue =            TColor($5F9EA0);
+  CadetBlue: D2D1_KNOWN_COLOR = $5F9EA0;
   {$EXTERNALSYM CadetBlue}
-  Chartreuse =           TColor($7FFF00);
+  Chartreuse: D2D1_KNOWN_COLOR = $7FFF00;
   {$EXTERNALSYM Chartreuse}
-  Chocolate =            TColor($D2691E);
+  Chocolate: D2D1_KNOWN_COLOR = $D2691E;
   {$EXTERNALSYM Chocolate}
-  Coral =                TColor($FF7F50);
+  Coral: D2D1_KNOWN_COLOR = $FF7F50;
   {$EXTERNALSYM Coral}
-  CornflowerBlue =       TColor($6495ED);
+  CornflowerBlue: D2D1_KNOWN_COLOR = $6495ED;
   {$EXTERNALSYM CornflowerBlue}
-  Cornsilk =             TColor($FFF8DC);
+  Cornsilk: D2D1_KNOWN_COLOR = $FFF8DC;
   {$EXTERNALSYM Cornsilk}
-  Crimson =              TColor($DC143C);
+  Crimson: D2D1_KNOWN_COLOR = $DC143C;
   {$EXTERNALSYM Crimson}
-  Cyan =                 TColor($00FFFF);
+  Cyan: D2D1_KNOWN_COLOR = $00FFFF;
   {$EXTERNALSYM Cyan}
-  DarkBlue =             TColor($00008B);
+  DarkBlue: D2D1_KNOWN_COLOR = $00008B;
   {$EXTERNALSYM DarkBlue}
-  DarkCyan =             TColor($008B8B);
+  DarkCyan: D2D1_KNOWN_COLOR = $008B8B;
   {$EXTERNALSYM DarkCyan}
-  DarkGoldenrod =        TColor($B8860B);
+  DarkGoldenrod: D2D1_KNOWN_COLOR = $B8860B;
   {$EXTERNALSYM DarkGoldenrod}
-  DarkGray =             TColor($A9A9A9);
+  DarkGray: D2D1_KNOWN_COLOR = $A9A9A9;
   {$EXTERNALSYM DarkGray}
-  DarkGreen =            TColor($006400);
+  DarkGreen: D2D1_KNOWN_COLOR = $006400;
   {$EXTERNALSYM DarkGreen}
-  DarkKhaki =            TColor($BDB76B);
+  DarkKhaki: D2D1_KNOWN_COLOR = $BDB76B;
   {$EXTERNALSYM DarkKhaki}
-  DarkMagenta =          TColor($8B008B);
+  DarkMagenta: D2D1_KNOWN_COLOR = $8B008B;
   {$EXTERNALSYM DarkMagenta}
-  DarkOliveGreen =       TColor($556B2F);
+  DarkOliveGreen: D2D1_KNOWN_COLOR = $556B2F;
   {$EXTERNALSYM DarkOliveGreen}
-  DarkOrange =           TColor($FF8C00);
+  DarkOrange: D2D1_KNOWN_COLOR = $FF8C00;
   {$EXTERNALSYM DarkOrange}
-  DarkOrchid =           TColor($9932CC);
+  DarkOrchid: D2D1_KNOWN_COLOR = $9932CC;
   {$EXTERNALSYM DarkOrchid}
-  DarkRed =              TColor($8B0000);
+  DarkRed: D2D1_KNOWN_COLOR = $8B0000;
   {$EXTERNALSYM DarkRed}
-  DarkSalmon =           TColor($E9967A);
+  DarkSalmon: D2D1_KNOWN_COLOR = $E9967A;
   {$EXTERNALSYM DarkSalmon}
-  DarkSeaGreen =         TColor($8FBC8F);
+  DarkSeaGreen: D2D1_KNOWN_COLOR = $8FBC8F;
   {$EXTERNALSYM DarkSeaGreen}
-  DarkSlateBlue =        TColor($483D8B);
+  DarkSlateBlue: D2D1_KNOWN_COLOR = $483D8B;
   {$EXTERNALSYM DarkSlateBlue}
-  DarkSlateGray =        TColor($2F4F4F);
+  DarkSlateGray: D2D1_KNOWN_COLOR = $2F4F4F;
   {$EXTERNALSYM DarkSlateGray}
-  DarkTurquoise =        TColor($00CED1);
+  DarkTurquoise: D2D1_KNOWN_COLOR = $00CED1;
   {$EXTERNALSYM DarkTurquoise}
-  DarkViolet =           TColor($9400D3);
+  DarkViolet: D2D1_KNOWN_COLOR = $9400D3;
   {$EXTERNALSYM DarkViolet}
-  DeepPink =             TColor($FF1493);
+  DeepPink: D2D1_KNOWN_COLOR = $FF1493;
   {$EXTERNALSYM DeepPink}
-  DeepSkyBlue =          TColor($00BFFF);
+  DeepSkyBlue: D2D1_KNOWN_COLOR = $00BFFF;
   {$EXTERNALSYM DeepSkyBlue}
-  DimGray =              TColor($696969);
+  DimGray: D2D1_KNOWN_COLOR = $696969;
   {$EXTERNALSYM DimGray}
-  DodgerBlue =           TColor($1E90FF);
+  DodgerBlue: D2D1_KNOWN_COLOR = $1E90FF;
   {$EXTERNALSYM DodgerBlue}
-  Firebrick =            TColor($B22222);
+  Firebrick: D2D1_KNOWN_COLOR = $B22222;
   {$EXTERNALSYM Firebrick}
-  FloralWhite =          TColor($FFFAF0);
+  FloralWhite: D2D1_KNOWN_COLOR = $FFFAF0;
   {$EXTERNALSYM FloralWhite}
-  ForestGreen =          TColor($228B22);
+  ForestGreen: D2D1_KNOWN_COLOR = $228B22;
   {$EXTERNALSYM ForestGreen}
-  Fuchsia =              TColor($FF00FF);
+  Fuchsia: D2D1_KNOWN_COLOR = $FF00FF;
   {$EXTERNALSYM Fuchsia}
-  Gainsboro =            TColor($DCDCDC);
+  Gainsboro: D2D1_KNOWN_COLOR = $DCDCDC;
   {$EXTERNALSYM Gainsboro}
-  GhostWhite =           TColor($F8F8FF);
+  GhostWhite: D2D1_KNOWN_COLOR = $F8F8FF;
   {$EXTERNALSYM GhostWhite}
-  Gold =                 TColor($FFD700);
+  Gold: D2D1_KNOWN_COLOR = $FFD700;
   {$EXTERNALSYM Gold}
-  Goldenrod =            TColor($DAA520);
+  Goldenrod: D2D1_KNOWN_COLOR = $DAA520;
   {$EXTERNALSYM Goldenrod}
-  Gray =                 TColor($808080);
+  Gray: D2D1_KNOWN_COLOR = $808080;
   {$EXTERNALSYM Gray}
-  Green =                TColor($008000);
+  Green: D2D1_KNOWN_COLOR = $008000;
   {$EXTERNALSYM Green}
-  GreenYellow =          TColor($ADFF2F);
+  GreenYellow: D2D1_KNOWN_COLOR = $ADFF2F;
   {$EXTERNALSYM GreenYellow}
-  Honeydew =             TColor($F0FFF0);
+  Honeydew: D2D1_KNOWN_COLOR = $F0FFF0;
   {$EXTERNALSYM Honeydew}
-  HotPink =              TColor($FF69B4);
+  HotPink: D2D1_KNOWN_COLOR = $FF69B4;
   {$EXTERNALSYM HotPink}
-  IndianRed =            TColor($CD5C5C);
+  IndianRed: D2D1_KNOWN_COLOR = $CD5C5C;
   {$EXTERNALSYM IndianRed}
-  Indigo =               TColor($4B0082);
+  Indigo: D2D1_KNOWN_COLOR = $4B0082;
   {$EXTERNALSYM Indigo}
-  Ivory =                TColor($FFFFF0);
+  Ivory: D2D1_KNOWN_COLOR = $FFFFF0;
   {$EXTERNALSYM Ivory}
-  Khaki =                TColor($F0E68C);
+  Khaki: D2D1_KNOWN_COLOR = $F0E68C;
   {$EXTERNALSYM Khaki}
-  Lavender =             TColor($E6E6FA);
+  Lavender: D2D1_KNOWN_COLOR = $E6E6FA;
   {$EXTERNALSYM Lavender}
-  LavenderBlush =        TColor($FFF0F5);
+  LavenderBlush: D2D1_KNOWN_COLOR = $FFF0F5;
   {$EXTERNALSYM LavenderBlush}
-  LawnGreen =            TColor($7CFC00);
+  LawnGreen: D2D1_KNOWN_COLOR = $7CFC00;
   {$EXTERNALSYM LawnGreen}
-  LemonChiffon =         TColor($FFFACD);
+  LemonChiffon: D2D1_KNOWN_COLOR = $FFFACD;
   {$EXTERNALSYM LemonChiffon}
-  LightBlue =            TColor($ADD8E6);
+  LightBlue: D2D1_KNOWN_COLOR = $ADD8E6;
   {$EXTERNALSYM LightBlue}
-  LightCoral =           TColor($F08080);
+  LightCoral: D2D1_KNOWN_COLOR = $F08080;
   {$EXTERNALSYM LightCoral}
-  LightCyan =            TColor($E0FFFF);
+  LightCyan: D2D1_KNOWN_COLOR = $E0FFFF;
   {$EXTERNALSYM LightCyan}
-  LightGoldenrodYellow = TColor($FAFAD2);
+  LightGoldenrodYellow: D2D1_KNOWN_COLOR = $FAFAD2;
   {$EXTERNALSYM LightGoldenrodYellow}
-  LightGreen =           TColor($90EE90);
+  LightGreen: D2D1_KNOWN_COLOR = $90EE90;
   {$EXTERNALSYM LightGreen}
-  LightGray =            TColor($D3D3D3);
+  LightGray: D2D1_KNOWN_COLOR = $D3D3D3;
   {$EXTERNALSYM LightGray}
-  LightPink =            TColor($FFB6C1);
+  LightPink: D2D1_KNOWN_COLOR = $FFB6C1;
   {$EXTERNALSYM LightPink}
-  LightSalmon =          TColor($FFA07A);
+  LightSalmon: D2D1_KNOWN_COLOR = $FFA07A;
   {$EXTERNALSYM LightSalmon}
-  LightSeaGreen =        TColor($20B2AA);
+  LightSeaGreen: D2D1_KNOWN_COLOR = $20B2AA;
   {$EXTERNALSYM LightSeaGreen}
-  LightSkyBlue =         TColor($87CEFA);
+  LightSkyBlue: D2D1_KNOWN_COLOR = $87CEFA;
   {$EXTERNALSYM LightSkyBlue}
-  LightSlateGray =       TColor($778899);
+  LightSlateGray: D2D1_KNOWN_COLOR = $778899;
   {$EXTERNALSYM LightSlateGray}
-  LightSteelBlue =       TColor($B0C4DE);
+  LightSteelBlue: D2D1_KNOWN_COLOR = $B0C4DE;
   {$EXTERNALSYM LightSteelBlue}
-  LightYellow =          TColor($FFFFE0);
+  LightYellow: D2D1_KNOWN_COLOR = $FFFFE0;
   {$EXTERNALSYM LightYellow}
-  Lime =                 TColor($00FF00);
+  Lime: D2D1_KNOWN_COLOR = $00FF00;
   {$EXTERNALSYM Lime}
-  LimeGreen =            TColor($32CD32);
+  LimeGreen: D2D1_KNOWN_COLOR = $32CD32;
   {$EXTERNALSYM LimeGreen}
-  Linen =                TColor($FAF0E6);
+  Linen: D2D1_KNOWN_COLOR = $FAF0E6;
   {$EXTERNALSYM Linen}
-  Magenta =              TColor($FF00FF);
+  Magenta: D2D1_KNOWN_COLOR = $FF00FF;
   {$EXTERNALSYM Magenta}
-  Maroon =               TColor($800000);
+  Maroon: D2D1_KNOWN_COLOR = $800000;
   {$EXTERNALSYM Maroon}
-  MediumAquamarine =     TColor($66CDAA);
+  MediumAquamarine: D2D1_KNOWN_COLOR = $66CDAA;
   {$EXTERNALSYM MediumAquamarine}
-  MediumBlue =           TColor($0000CD);
+  MediumBlue: D2D1_KNOWN_COLOR = $0000CD;
   {$EXTERNALSYM MediumBlue}
-  MediumOrchid =         TColor($BA55D3);
+  MediumOrchid: D2D1_KNOWN_COLOR = $BA55D3;
   {$EXTERNALSYM MediumOrchid}
-  MediumPurple =         TColor($9370DB);
+  MediumPurple: D2D1_KNOWN_COLOR = $9370DB;
   {$EXTERNALSYM MediumPurple}
-  MediumSeaGreen =       TColor($3CB371);
+  MediumSeaGreen: D2D1_KNOWN_COLOR = $3CB371;
   {$EXTERNALSYM MediumSeaGreen}
-  MediumSlateBlue =      TColor($7B68EE);
+  MediumSlateBlue: D2D1_KNOWN_COLOR = $7B68EE;
   {$EXTERNALSYM MediumSlateBlue}
-  MediumSpringGreen =    TColor($00FA9A);
+  MediumSpringGreen: D2D1_KNOWN_COLOR = $00FA9A;
   {$EXTERNALSYM MediumSpringGreen}
-  MediumTurquoise =      TColor($48D1CC);
+  MediumTurquoise: D2D1_KNOWN_COLOR = $48D1CC;
   {$EXTERNALSYM MediumTurquoise}
-  MediumVioletRed =      TColor($C71585);
+  MediumVioletRed: D2D1_KNOWN_COLOR = $C71585;
   {$EXTERNALSYM MediumVioletRed}
-  MidnightBlue =         TColor($191970);
+  MidnightBlue: D2D1_KNOWN_COLOR = $191970;
   {$EXTERNALSYM MidnightBlue}
-  MintCream =            TColor($F5FFFA);
+  MintCream: D2D1_KNOWN_COLOR = $F5FFFA;
   {$EXTERNALSYM MintCream}
-  MistyRose =            TColor($FFE4E1);
+  MistyRose: D2D1_KNOWN_COLOR = $FFE4E1;
   {$EXTERNALSYM MistyRose}
-  Moccasin =             TColor($FFE4B5);
+  Moccasin: D2D1_KNOWN_COLOR = $FFE4B5;
   {$EXTERNALSYM Moccasin}
-  NavajoWhite =          TColor($FFDEAD);
+  NavajoWhite: D2D1_KNOWN_COLOR = $FFDEAD;
   {$EXTERNALSYM NavajoWhite}
-  Navy =                 TColor($000080);
+  Navy: D2D1_KNOWN_COLOR = $000080;
   {$EXTERNALSYM Navy}
-  OldLace =              TColor($FDF5E6);
+  OldLace: D2D1_KNOWN_COLOR = $FDF5E6;
   {$EXTERNALSYM OldLace}
-  Olive =                TColor($808000);
+  Olive: D2D1_KNOWN_COLOR = $808000;
   {$EXTERNALSYM Olive}
-  OliveDrab =            TColor($6B8E23);
+  OliveDrab: D2D1_KNOWN_COLOR = $6B8E23;
   {$EXTERNALSYM OliveDrab}
-  Orange =               TColor($FFA500);
+  Orange: D2D1_KNOWN_COLOR = $FFA500;
   {$EXTERNALSYM Orange}
-  OrangeRed =            TColor($FF4500);
+  OrangeRed: D2D1_KNOWN_COLOR = $FF4500;
   {$EXTERNALSYM OrangeRed}
-  Orchid =               TColor($DA70D6);
+  Orchid: D2D1_KNOWN_COLOR = $DA70D6;
   {$EXTERNALSYM Orchid}
-  PaleGoldenrod =        TColor($EEE8AA);
+  PaleGoldenrod: D2D1_KNOWN_COLOR = $EEE8AA;
   {$EXTERNALSYM PaleGoldenrod}
-  PaleGreen =            TColor($98FB98);
+  PaleGreen: D2D1_KNOWN_COLOR = $98FB98;
   {$EXTERNALSYM PaleGreen}
-  PaleTurquoise =        TColor($AFEEEE);
+  PaleTurquoise: D2D1_KNOWN_COLOR = $AFEEEE;
   {$EXTERNALSYM PaleTurquoise}
-  PaleVioletRed =        TColor($DB7093);
+  PaleVioletRed: D2D1_KNOWN_COLOR = $DB7093;
   {$EXTERNALSYM PaleVioletRed}
-  PapayaWhip =           TColor($FFEFD5);
+  PapayaWhip: D2D1_KNOWN_COLOR = $FFEFD5;
   {$EXTERNALSYM PapayaWhip}
-  PeachPuff =            TColor($FFDAB9);
+  PeachPuff: D2D1_KNOWN_COLOR = $FFDAB9;
   {$EXTERNALSYM PeachPuff}
-  Peru =                 TColor($CD853F);
+  Peru: D2D1_KNOWN_COLOR = $CD853F;
   {$EXTERNALSYM Peru}
-  Pink =                 TColor($FFC0CB);
+  Pink: D2D1_KNOWN_COLOR = $FFC0CB;
   {$EXTERNALSYM Pink}
-  Plum =                 TColor($DDA0DD);
+  Plum: D2D1_KNOWN_COLOR = $DDA0DD;
   {$EXTERNALSYM Plum}
-  PowderBlue =           TColor($B0E0E6);
+  PowderBlue: D2D1_KNOWN_COLOR = $B0E0E6;
   {$EXTERNALSYM PowderBlue}
-  Purple =               TColor($800080);
+  Purple: D2D1_KNOWN_COLOR = $800080;
   {$EXTERNALSYM Purple}
-  Red =                  TColor($FF0000);
+  Red: D2D1_KNOWN_COLOR = $FF0000;
   {$EXTERNALSYM Red}
-  RosyBrown =            TColor($BC8F8F);
+  RosyBrown: D2D1_KNOWN_COLOR = $BC8F8F;
   {$EXTERNALSYM RosyBrown}
-  RoyalBlue =            TColor($4169E1);
+  RoyalBlue: D2D1_KNOWN_COLOR = $4169E1;
   {$EXTERNALSYM RoyalBlue}
-  SaddleBrown =          TColor($8B4513);
+  SaddleBrown: D2D1_KNOWN_COLOR = $8B4513;
   {$EXTERNALSYM SaddleBrown}
-  Salmon =               TColor($FA8072);
+  Salmon: D2D1_KNOWN_COLOR = $FA8072;
   {$EXTERNALSYM Salmon}
-  SandyBrown =           TColor($F4A460);
+  SandyBrown: D2D1_KNOWN_COLOR = $F4A460;
   {$EXTERNALSYM SandyBrown}
-  SeaGreen =             TColor($2E8B57);
+  SeaGreen: D2D1_KNOWN_COLOR = $2E8B57;
   {$EXTERNALSYM SeaGreen}
-  SeaShell =             TColor($FFF5EE);
+  SeaShell: D2D1_KNOWN_COLOR = $FFF5EE;
   {$EXTERNALSYM SeaShell}
-  Sienna =               TColor($A0522D);
+  Sienna: D2D1_KNOWN_COLOR = $A0522D;
   {$EXTERNALSYM Sienna}
-  Silver =               TColor($C0C0C0);
+  Silver: D2D1_KNOWN_COLOR = $C0C0C0;
   {$EXTERNALSYM Silver}
-  SkyBlue =              TColor($87CEEB);
+  SkyBlue: D2D1_KNOWN_COLOR = $87CEEB;
   {$EXTERNALSYM SkyBlue}
-  SlateBlue =            TColor($6A5ACD);
+  SlateBlue: D2D1_KNOWN_COLOR = $6A5ACD;
   {$EXTERNALSYM SlateBlue}
-  SlateGray =            TColor($708090);
+  SlateGray: D2D1_KNOWN_COLOR = $708090;
   {$EXTERNALSYM SlateGray}
-  Snow =                 TColor($FFFAFA);
+  Snow: D2D1_KNOWN_COLOR = $FFFAFA;
   {$EXTERNALSYM Snow}
-  SpringGreen =          TColor($00FF7F);
+  SpringGreen: D2D1_KNOWN_COLOR = $00FF7F;
   {$EXTERNALSYM SpringGreen}
-  SteelBlue =            TColor($4682B4);
+  SteelBlue: D2D1_KNOWN_COLOR = $4682B4;
   {$EXTERNALSYM SteelBlue}
-  Tan =                  TColor($D2B48C);
+  Tan: D2D1_KNOWN_COLOR = $D2B48C;
   {$EXTERNALSYM Tan}
-  Teal =                 TColor($008080);
+  Teal: D2D1_KNOWN_COLOR = $008080;
   {$EXTERNALSYM Teal}
-  Thistle =              TColor($D8BFD8);
+  Thistle: D2D1_KNOWN_COLOR = $D8BFD8;
   {$EXTERNALSYM Thistle}
-  Tomato =               TColor($FF6347);
+  Tomato: D2D1_KNOWN_COLOR = $FF6347;
   {$EXTERNALSYM Tomato}
-  Turquoise =            TColor($40E0D0);
+  Turquoise: D2D1_KNOWN_COLOR = $40E0D0;
   {$EXTERNALSYM Turquoise}
-  Violet =               TColor($EE82EE);
+  Violet: D2D1_KNOWN_COLOR = $EE82EE;
   {$EXTERNALSYM Violet}
-  Wheat =                TColor($F5DEB3);
+  Wheat: D2D1_KNOWN_COLOR = $F5DEB3;
   {$EXTERNALSYM Wheat}
-  White =                TColor($FFFFFF);
+  White: D2D1_KNOWN_COLOR = $FFFFFF;
   {$EXTERNALSYM White}
-  WhiteSmoke =           TColor($F5F5F5);
+  WhiteSmoke: D2D1_KNOWN_COLOR = $F5F5F5;
   {$EXTERNALSYM WhiteSmoke}
-  Yellow =               TColor($FFFF00);
+  Yellow: D2D1_KNOWN_COLOR = $FFFF00;
   {$EXTERNALSYM Yellow}
-  YellowGreen =          TColor($9ACD32);
+  YellowGreen: D2D1_KNOWN_COLOR = $9ACD32;
   {$EXTERNALSYM YellowGreen}
 
 
@@ -594,6 +596,9 @@ type
     // is never used.
     //
 
+    class function Create(const knownColor: D2D1_KNOWN_COLOR;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload; static; inline;
+
     class function Create(const knownColor: TColor;
                   const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload; static; inline;
 
@@ -607,6 +612,9 @@ type
                   const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload; static; inline;
 
     function Init(const rgb: UINT32;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
+
+    function Init(const knownColor: D2D1_KNOWN_COLOR;
                   const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
 
     function Init(const knownColor: TColor;
@@ -681,12 +689,13 @@ type
 
     //
     // Functions for convertion from the base D2D1_MATRIX_3X2_F to this type
-    // without making a copy.
+    // Pointer-to-record copies the value; record-to-pointer borrows a caller-owned
+    // variable whose lifetime must cover pointer use.
     //
 
     class function ReinterpretBaseType(const pMatrix: PD2D1_MATRIX_3X2_F): D2D1_MATRIX_3X2_F; overload; static;
 
-    class function ReinterpretBaseType(const pMatrix: D2D1_MATRIX_3X2_F): PD2D1_MATRIX_3X2_F; overload; static;
+    class function ReinterpretBaseType(var pMatrix: D2D1_MATRIX_3X2_F): PD2D1_MATRIX_3X2_F; overload; static;
 
 
     function Determinant(): FLOAT;
@@ -744,17 +753,18 @@ type
   {$EXTERNALSYM D2D1ArcSegment}
 
 
-{$IFDEF D2D1ColorF_DEFINED}
+
   function D2D1ColorF(const r: FLOAT;
                       const g: FLOAT;
                       const b: FLOAT;
                       const a: FLOAT): D2D1_COLOR_F;  overload;
   {$EXTERNALSYM D2D1ColorF}
 
+  function D2D1ColorF(color: D2D1_KNOWN_COLOR; const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
+
   // See also: D2D1colorhelperF
   function D2D1ColorF(color: TColor; const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
   {$EXTERNALSYM D2D1ColorF}
-{$ENDIF}
 
   function D2D1BezierSegment(const a: D2D1_POINT_2F;
                              const b: D2D1_POINT_2F;
@@ -927,8 +937,8 @@ begin
     begin
       left := -FloatMax();
       top := -FloatMax();
-      right := -FloatMax();
-      bottom := -FloatMax();
+      right := FloatMax();
+      bottom := FloatMax();
     end;
   Result := rectf;
 end;
@@ -980,20 +990,8 @@ end;
 
 function BrushProperties(transform: D2D1_MATRIX_3X2_F{ = IdentityMatrix()};
                          opacity: FLOAT = 1.0): D2D1_BRUSH_PROPERTIES;
-var
-  tf: D2D1_MATRIX_3X2_F;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@tf,
-                @transform,
-                SizeOf(tf)) = True then
-    tf := Identity() // IdentityMatrix()
-  else
-    tf := transform;
-
-  Result.opacity := opacity;
-  Result.transform := tf;
+  Result.opacity := opacity; Result.transform := transform;
 end;
 
 
@@ -1072,22 +1070,8 @@ end;
 function BitmapProperties(_pixelFormat: D2D1_PIXEL_FORMAT;
                           dpiX: FLOAT = 96.0;
                           dpiY: FLOAT = 96.0): D2D1_BITMAP_PROPERTIES;
-var
-  pf: D2D1_PIXEL_FORMAT;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@pf,
-                @_pixelFormat,
-                SizeOf(pf)) = True then
-    pf := PixelFormat()
-  else
-    pf := _pixelFormat;
-
-
-  Result._pixelFormat := pf;
-  Result.dpiX := dpiX;
-  Result.dpiY := dpiY;
+  Result._pixelFormat := _pixelFormat; Result.dpiX := dpiX; Result.dpiY := dpiY;
 end;
 
 
@@ -1097,48 +1081,16 @@ function RenderTargetProperties(_pixelFormat: D2D1_PIXEL_FORMAT;
                                 dpiY: FLOAT = 0.0;
                                 usage: D2D1_RENDER_TARGET_USAGE = D2D1_RENDER_TARGET_USAGE_NONE;
                                 minLevel: D2D1_FEATURE_LEVEL = D2D1_FEATURE_LEVEL_DEFAULT): D2D1_RENDER_TARGET_PROPERTIES;
-var
-  pf: D2D1_PIXEL_FORMAT;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@pf,
-                @_pixelFormat,
-                SizeOf(pf)) = True then
-    pf := PixelFormat()
-  else
-    pf := _pixelFormat;
-
-  Result._type := _type;
-  Result._pixelFormat := pf;
-  Result.dpiX := dpiX;
-  Result.dpiY := dpiY;
-  Result.usage := usage;
-  Result.minLevel := minLevel;
+  Result._type := _type; Result._pixelFormat := _pixelFormat; Result.dpiX := dpiX; Result.dpiY := dpiY; Result.usage := usage; Result.minLevel := minLevel;
 end;
 
 
 function HwndRenderTargetProperties(_hwnd: HWND;
                                     pixelSize: D2D1_SIZE_U;
                                     presentOptions: D2D1_PRESENT_OPTIONS = D2D1_PRESENT_OPTIONS_NONE): D2D1_HWND_RENDER_TARGET_PROPERTIES; inline;
-var
-  ps : D2D1_SIZE_U;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@ps,
-                @pixelSize,
-                SizeOf(ps)) = True then
-    begin
-      ps.width := 0;
-      ps.height := 0;
-    end
-  else
-    ps := pixelSize;
-
-  Result._hwnd := _hwnd;
-  Result._pixelSize := ps;
-  Result.presentOptions := presentOptions;
+  Result._hwnd := _hwnd; Result._pixelSize := pixelSize; Result.presentOptions := presentOptions;
 end;
 
 function LayerParameters(contentBounds: D2D1_RECT_F;
@@ -1148,33 +1100,8 @@ function LayerParameters(contentBounds: D2D1_RECT_F;
                          opacity: FLOAT = 1.0;
                          opacityBrush: ID2D1Brush = Nil;
                          layerOptions: D2D1_LAYER_OPTIONS = D2D1_LAYER_OPTIONS_NONE): D2D1_LAYER_PARAMETERS; inline;
-var
-  cb: D2D1_RECT_F;
-  mt: D2D1_MATRIX_3X2_F;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@cb,
-                @contentBounds,
-                SizeOf(cb)) = True then
-    cb := InfiniteRect()
-  else
-    cb := contentBounds;
-
-  if CompareMem(@mt,
-                @maskTransform,
-                SizeOf(mt)) = True then
-    mt := Identity() //IdentityMatrix()
-  else
-    mt := maskTransform;
-
-  Result.contentBounds := cb;
-  Result.geometricMask := geometricMask;
-  Result.maskAntialiasMode := maskAntialiasMode;
-  Result.maskTransform := mt;
-  Result.opacity := opacity;
-  Result.opacityBrush := opacityBrush;
-  Result.layerOptions := layerOptions;
+  Result.contentBounds := contentBounds; Result.geometricMask := geometricMask; Result.maskAntialiasMode := maskAntialiasMode; Result.maskTransform := maskTransform; Result.opacity := opacity; Result.opacityBrush := opacityBrush; Result.layerOptions := layerOptions;
 end;
 
 
@@ -1183,23 +1110,8 @@ function DrawingStateDescription(transform: D2D1_MATRIX_3X2_F;
                                  textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE = D2D1_TEXT_ANTIALIAS_MODE_DEFAULT;
                                  tag1: D2D1_TAG = 0;
                                  tag2: D2D1_TAG = 0): D2D1_DRAWING_STATE_DESCRIPTION; inline;
-var
-  tf: D2D1_MATRIX_3X2_F;
-
 begin
-  // To check if a record has a default value or not.
-  if CompareMem(@tf,
-                @Transform,
-                SizeOf(tf)) = True then
-    tf := Identity() //IdentityMatrix()
-  else
-    tf := transform;
-
-  Result.transform := tf;
-  Result.antialiasMode := antialiasMode;
-  Result.textAntialiasMode := textAntialiasMode;
-  Result.tag1 := tag1;
-  Result.tag2 := tag2;
+  Result.transform := transform; Result.antialiasMode := antialiasMode; Result.textAntialiasMode := textAntialiasMode; Result.tag1 := tag1; Result.tag2 := tag2;
 end;
 
 
@@ -1208,6 +1120,12 @@ end;
 //
 // ColorF / D2D1ColorFHelper
 //
+
+class function D2D1ColorFHelper.Create(const knownColor: D2D1_KNOWN_COLOR;
+                  const alpha: FLOAT): D2D1_COLOR_F;
+begin
+  Result := Result.Init(UINT32(knownColor), alpha);
+end;
 
 class function D2D1ColorFHelper.Create(const knownColor: TColor;
                   const alpha: FLOAT = 1.0): D2D1_COLOR_F;
@@ -1219,10 +1137,10 @@ class function D2D1ColorFHelper.Create(const C: TAlphaColor): D2D1_COLOR_F;
 begin
   with Result do
     begin
-      A := Byte((C shr 24) and $FF);
-      R := Byte((C shr 16) and $FF);
-      G := Byte((C shr 8)  and $FF);
-      B := Byte(C and $FF);
+      A := Byte((C shr 24) and $FF) / 255.0;
+      R := Byte((C shr 16) and $FF) / 255.0;
+      G := Byte((C shr 8) and $FF) / 255.0;
+      B := Byte(C and $FF) / 255.0;
     end;
 end;
 
@@ -1275,11 +1193,22 @@ begin
 end;
 
 
+function D2D1ColorFHelper.Init(const knownColor: D2D1_KNOWN_COLOR;
+                               const alpha: FLOAT): D2D1_COLOR_F;
+begin
+  Result := Init(UINT32(knownColor), alpha);
+end;
+
 function D2D1ColorFHelper.Init(const knownColor: TColor;
                                const alpha: FLOAT = 1.0): D2D1_COLOR_F;
+var
+  Bgr: DWORD;
 begin
-  Result := Init(UINT32(ColorToRGB(knownColor)),
-                 alpha);
+  if LongInt(knownColor) < 0 then
+    Bgr := GetSysColor(DWORD(knownColor) and $FF)
+  else
+    Bgr := DWORD(knownColor);
+  Result := Init(UINT32(((Bgr and $FF) shl 16) or (Bgr and $FF00) or ((Bgr shr 16) and $FF)), alpha);
 end;
 
 
@@ -1497,7 +1426,7 @@ begin
 end;
 
 
-class function Matrix3x2FHelper.ReinterpretBaseType(const pMatrix: D2D1_MATRIX_3X2_F): PD2D1_MATRIX_3X2_F;
+class function Matrix3x2FHelper.ReinterpretBaseType(var pMatrix: D2D1_MATRIX_3X2_F): PD2D1_MATRIX_3X2_F;
 begin
   Result := @pMatrix;
 end;
@@ -1505,7 +1434,7 @@ end;
 
 function Matrix3x2FHelper.Determinant(): FLOAT;
 begin
-  Result := (_11 * _21) - (_12 * _21);
+  Result := (_11 * _22) - (_12 * _21);
 end;
 
 
@@ -1541,9 +1470,10 @@ begin
       _12 := (a._11 * b._12) + (a._12 * b._22);
       _21 := (a._21 * b._11) + (a._22 * b._21);
       _22 := (a._21 * b._12) + (a._22 * b._22);
-      _31 := (a._31 * b._11) + ((a._32 * b._21) + b._31);
-      _32 := (a._31 * b._12) + ((a._32 * b._22) + b._32);
+      _31 := (a._31 * b._11) + (a._32 * b._21) + b._31;
+      _32 := (a._31 * b._12) + (a._32 * b._22) + b._32;
     end;
+  Self := Result;
 end;
 
 
@@ -1556,8 +1486,8 @@ end;
 
 function Matrix3x2FHelper.TransformPoint(const point: D2D1_POINT_2F): D2D1_POINT_2F;
 begin
-  Result.x := (point.x * _11) + ((point.y * _21) + _31);
-  Result.y := (point.x * _12) + ((point.y * _22) + _32);
+  Result.x := (point.x * _11) + (point.y * _21) + _31;
+  Result.y := (point.x * _12) + (point.y * _22) + _32;
 end;
 
 
@@ -1658,26 +1588,14 @@ begin
 end;
 
 
-function D2D1ColorF(color: TColor;
-                    const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
-const
-  sc_redShift   = 16;
-  sc_greenShift = 8;
-  sc_blueShift  = 0;
-{$WRITEABLECONST ON}
-  sc_redMask = $ff shl sc_redShift;
-  sc_greenMask = $ff shl sc_greenShift;
-  sc_blueMask = $ff shl sc_blueShift;
-{$WRITEABLECONST OFF}
-
+function D2D1ColorF(color: TColor; const alpha: FLOAT): D2D1_COLOR_F; overload;
 begin
-  with Result do
-    begin
-      r := ((color AND sc_redMask) shr sc_redShift) / 255.0;
-      g := ((color AND sc_greenMask) shr sc_greenShift) / 255.0;
-      b := ((color AND sc_blueMask) shr sc_blueShift) / 255.0;
-      a := alpha;
-    end;
+  Result := Result.Init(color, alpha);
+end;
+
+function D2D1ColorF(color: D2D1_KNOWN_COLOR; const alpha: FLOAT): D2D1_COLOR_F; overload;
+begin
+  Result := Result.Init(UINT32(color), alpha);
 end;
 
 

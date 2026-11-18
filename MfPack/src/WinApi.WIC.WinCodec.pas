@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MFPack - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Windows Imaging Component (WIC) API.
 //              This module contains the public data structures and API definitions
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -32,7 +32,7 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1865,7 +1865,7 @@ type
   IWICImagingFactory3 = interface;
 
 
-  D2D1_PIXEL_FORMAT = ^DWORD;
+  D2D1_PIXEL_FORMAT = WinApi.DirectX.DCommon.D2D1_PIXEL_FORMAT;
   {$EXTERNALSYM D2D1_PIXEL_FORMAT}
 
   PWICColor = ^WICColor;
@@ -1884,7 +1884,7 @@ type
 
   WICInProcPointer = PByte;
   {$EXTERNALSYM WICInProcPointer}
-  PWICInProcPointer = Pointer;
+  PWICInProcPointer = ^WICInProcPointer;
   {$EXTERNALSYM PWICInProcPointer}
 
 
@@ -1972,31 +1972,26 @@ type
   {$EXTERNALSYM IWICPalette}
   IWICPalette = interface(IUnknown)
   ['{00000040-a8f2-4877-ba0a-fd2b6645fb94}']
-    function InitializePredefined(ePaletteType: WICBitmapPaletteType;
-                                  fAddTransparentColor: BOOL): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function InitializePredefined(ePaletteType: WICBitmapPaletteType; fAddTransparentColor: BOOL): HRESULT; stdcall;
 
-    function InitializeCustom(pColors: PWICColor; // Array
-                              cCount: UINT): HResult; stdcall;
+    function InitializeCustom(pColors: PWICColor; cCount: UINT): HRESULT; stdcall;
 
-    function InitializeFromBitmap(pISurface: IWICBitmapSource;
-                                  cCount: UINT;
-                                  fAddTransparentColor: BOOL): HResult; stdcall;
+    function InitializeFromBitmap(pISurface: IWICBitmapSource; cCount: UINT; fAddTransparentColor: BOOL): HRESULT; stdcall;
 
-    function InitializeFromPalette(pIPalette: IWICPalette): HResult; stdcall;
+    function InitializeFromPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function GetType(var pePaletteType: WICBitmapPaletteType): HResult; stdcall;
+    function GetType(pePaletteType: PWICBitmapPaletteType): HRESULT; stdcall;
 
-    function GetColorCount(var pcCount: UINT): HResult; stdcall;
+    function GetColorCount(pcCount: PUINT): HRESULT; stdcall;
 
-    function GetColors(cCount: UINT;
-                       pColors: PWICColor;
-                       var pcActualColors: UINT): HResult; stdcall;
+    function GetColors(cCount: UINT; pColors: PWICColor; pcActualColors: PUINT): HRESULT; stdcall;
 
-    function IsBlackWhite(var pfIsBlackWhite: BOOL): HResult; stdcall;
+    function IsBlackWhite(pfIsBlackWhite: PBOOL): HRESULT; stdcall;
 
-    function IsGrayscale(var pfIsGrayscale: BOOL): HResult; stdcall;
+    function IsGrayscale(pfIsGrayscale: PBOOL): HRESULT; stdcall;
 
-    function HasAlpha(var pfHasAlpha: BOOL): HResult; stdcall;
+    function HasAlpha(pfHasAlpha: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICPalette = IWICPalette;
   {$EXTERNALSYM IID_IWICPalette}
@@ -2010,20 +2005,16 @@ type
   {$EXTERNALSYM IWICBitmapSource}
   IWICBitmapSource = interface(IUnknown)
   ['{00000120-a8f2-4877-ba0a-fd2b6645fb94}']
-    function GetSize(var puiWidth: UINT;
-                     var puiHeight: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetSize(puiWidth: PUINT; puiHeight: PUINT): HRESULT; stdcall;
 
-    function GetPixelFormat(var pPixelFormat: WICPixelFormatGUID): HResult; stdcall;
+    function GetPixelFormat(pPixelFormat: PWICPixelFormatGUID): HRESULT; stdcall;
 
-    function GetResolution(var pDpiX: Double;
-                           var pDpiY: Double): HResult; stdcall;
+    function GetResolution(pDpiX: PDouble; pDpiY: PDouble): HRESULT; stdcall;
 
-    function CopyPalette(pIPalette: IWICPalette): HResult; stdcall;
+    function CopyPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function CopyPixels(prc: PWICRect;
-                        cbStride: UINT;
-                        cbBufferSize: UINT;
-                        pbBuffer: PByte): HResult; stdcall;
+    function CopyPixels(prc: PWICRect; cbStride: UINT; cbBufferSize: UINT; pbBuffer: PByte): HRESULT; stdcall;
   end;
   IID_IWICBitmapSource = IWICBitmapSource;
   {$EXTERNALSYM IID_IWICBitmapSource}
@@ -2037,16 +2028,10 @@ type
   {$EXTERNALSYM IWICFormatConverter}
   IWICFormatConverter = interface(IWICBitmapSource)
   ['{00000301-a8f2-4877-ba0a-fd2b6645fb94}']
-    function Initialize(pISource: IWICBitmapSource;
-                        const dstFormat: WICPixelFormatGUID;
-                        dither: WICBitmapDitherType;
-                        const pIPalette: IWICPalette;
-                        alphaThresholdPercent: Double;
-                        paletteTranslate: WICBitmapPaletteType): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pISource: IWICBitmapSource; const dstFormat: WICPixelFormatGUID; dither: WICBitmapDitherType; pIPalette: IWICPalette; alphaThresholdPercent: Double; paletteTranslate: WICBitmapPaletteType): HRESULT; stdcall;
 
-    function CanConvert(const srcPixelFormat: REFWICPixelFormatGUID;
-                        const dstPixelFormat: REFWICPixelFormatGUID;
-                        var pfCanConvert: BOOL): HResult; stdcall;
+    function CanConvert(const srcPixelFormat: WICPixelFormatGUID; const dstPixelFormat: WICPixelFormatGUID; pfCanConvert: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICFormatConverter = IWICFormatConverter;
   {$EXTERNALSYM IID_IWICFormatConverter}
@@ -2060,19 +2045,10 @@ type
   {$EXTERNALSYM IWICPlanarFormatConverter}
   IWICPlanarFormatConverter = interface(IWICBitmapSource)
   ['{BEBEE9CB-83B0-4DCC-8132-B0AAA55EAC96}']
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(ppPlanes: PIWICBitmapSource; cPlanes: UINT; const dstFormat: WICPixelFormatGUID; dither: WICBitmapDitherType; pIPalette: IWICPalette; alphaThresholdPercent: Double; paletteTranslate: WICBitmapPaletteType): HRESULT; stdcall;
 
-    function Initialize(ppPlanes: PIWICBitmapSource;
-                        cPlanes: UINT;
-                        const dstFormat: REFWICPixelFormatGUID;
-                        dither: WICBitmapDitherType;
-                        const pIPalette: IWICPalette;
-                        alphaThresholdPercent: Double;
-                        paletteTranslate: WICBitmapPaletteType): HResult; stdcall;
-
-    function CanConvert(const pSrcPixelFormats: PWICPixelFormatGUID;
-                        cSrcPlanes: UINT;
-                        const dstPixelFormat: REFWICPixelFormatGUID;
-                        out pfCanConvert: BOOL): HResult; stdcall;
+    function CanConvert(pSrcPixelFormats: PWICPixelFormatGUID; cSrcPlanes: UINT; const dstPixelFormat: WICPixelFormatGUID; pfCanConvert: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICPlanarFormatConverter = IWICPlanarFormatConverter;
   {$EXTERNALSYM IID_IWICPlanarFormatConverter}
@@ -2086,10 +2062,8 @@ type
   {$EXTERNALSYM IWICBitmapScaler}
   IWICBitmapScaler = interface(IWICBitmapSource)
   ['{00000302-a8f2-4877-ba0a-fd2b6645fb94}']
-    function Initialize(pISource: IWICBitmapSource;
-                        uiWidth: UINT;
-                        uiHeight: UINT;
-                        mode: WICBitmapInterpolationMode): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pISource: IWICBitmapSource; uiWidth: UINT; uiHeight: UINT; mode: WICBitmapInterpolationMode): HRESULT; stdcall;
   end;
   IID_IWICBitmapScaler = IWICBitmapScaler;
   {$EXTERNALSYM IID_IWICBitmapScaler}
@@ -2103,8 +2077,8 @@ type
   {$EXTERNALSYM IWICBitmapClipper}
   IWICBitmapClipper = interface(IWICBitmapSource)
   ['{E4FBCF03-223D-4e81-9333-D635556DD1B5}']
-    function Initialize(pISource: IWICBitmapSource;
-                        var prc: WICRect): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pISource: IWICBitmapSource; prc: PWICRect): HRESULT; stdcall;
   end;
   IID_IWICBitmapClipper = IWICBitmapClipper;
   {$EXTERNALSYM IID_IWICBitmapClipper}
@@ -2118,8 +2092,8 @@ type
   {$EXTERNALSYM IWICBitmapFlipRotator}
   IWICBitmapFlipRotator = interface(IWICBitmapSource)
   ['{5009834F-2D6A-41ce-9E1B-17C5AFF7A782}']
-    function Initialize(pISource: IWICBitmapSource;
-                        options: WICBitmapTransformOptions): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pISource: IWICBitmapSource; options: WICBitmapTransformOptions): HRESULT; stdcall;
   end;
   IID_IWICBitmapFlipRotator = IWICBitmapFlipRotator;
   {$EXTERNALSYM IID_IWICBitmapFlipRotator}
@@ -2131,15 +2105,10 @@ type
   {$EXTERNALSYM IWICBitmapToneMapper}
   IWICBitmapToneMapper = interface(IWICBitmapSource)
   ['{44728ded-1edf-4fe9-b50b-c89a264c9439}']
-    function InitializeForHdrTarget(pISource: IWICBitmapSource;
-                                    const guidDstFormat: WICPixelFormatGUID;
-                                    fLuminanceInNits: FLOAT;
-                                    fWhiteLevelInNits: FLOAT;
-                                    mode: WICBitmapToneMappingMode): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function InitializeForHdrTarget(pISource: IWICBitmapSource; const guidDstFormat: WICPixelFormatGUID; fLuminanceInNits: Single; fWhiteLevelInNits: Single; mode: WICBitmapToneMappingMode): HRESULT; stdcall;
 
-    function InitializeForSdrTarget(pISource: IWICBitmapSource;
-                                    const guidDstFormat: WICPixelFormatGUID;
-                                    mode: WICBitmapToneMappingMode): HResult; stdcall;
+    function InitializeForSdrTarget(pISource: IWICBitmapSource; const guidDstFormat: WICPixelFormatGUID; mode: WICBitmapToneMappingMode): HRESULT; stdcall;
   end;
   IID_IWICBitmapToneMapper = IWICBitmapToneMapper;
   {$EXTERNALSYM IID_IWICBitmapToneMapper}
@@ -2153,15 +2122,14 @@ type
   {$EXTERNALSYM IWICBitmapLock}
   IWICBitmapLock = interface(IUnknown)
   ['{00000123-a8f2-4877-ba0a-fd2b6645fb94}']
-    function GetSize(var puiWidth: UINT;
-                     var puiHeight: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetSize(puiWidth: PUINT; puiHeight: PUINT): HRESULT; stdcall;
 
-    function GetStride(var pcbStride: UINT): HResult; stdcall;
+    function GetStride(pcbStride: PUINT): HRESULT; stdcall;
 
-    function GetDataPointer(var pcbBufferSize: UINT;
-                            var ppbData: WICInProcPointer): HResult; stdcall;
+    function GetDataPointer(pcbBufferSize: PUINT; ppbData: PWICInProcPointer): HRESULT; stdcall;
 
-    function GetPixelFormat(var pPixelFormat: WICPixelFormatGUID): HResult; stdcall;
+    function GetPixelFormat(pPixelFormat: PWICPixelFormatGUID): HRESULT; stdcall;
   end;
   IID_IWICBitmapLock = IWICBitmapLock;
   {$EXTERNALSYM IID_IWICBitmapLock}
@@ -2175,14 +2143,12 @@ type
   {$EXTERNALSYM IWICBitmap}
   IWICBitmap = interface(IWICBitmapSource)
   ['{00000121-a8f2-4877-ba0a-fd2b6645fb94}']
-    function Lock(const prcLock: WICRect;
-                  flags: DWORD; // WICBitmapLockFlags.
-                  out ppILock: IWICBitmapLock): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Lock(prcLock: PWICRect; flags: DWORD; out ppILock: IWICBitmapLock): HRESULT; stdcall;
 
-    function SetPalette(pIPalette: IWICPalette): HResult; stdcall;
+    function SetPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function SetResolution(dpiX: Double;
-                           dpiY: Double): HResult; stdcall;
+    function SetResolution(dpiX: Double; dpiY: Double): HRESULT; stdcall;
   end;
   IID_IWICBitmap = IWICBitmap;
   {$EXTERNALSYM IID_IWICBitmap}
@@ -2196,20 +2162,18 @@ type
   {$EXTERNALSYM IWICColorContext}
   IWICColorContext = interface(IUnknown)
   ['{3C613A02-34B2-44ea-9A7C-45AEA9C6FD6D}']
-    function InitializeFromFilename(wzFilename: LPCWSTR): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function InitializeFromFilename(wzFilename: PWideChar): HRESULT; stdcall;
 
-    function InitializeFromMemory(const pbBuffer: PByte;
-                                  cbBufferSize: UINT): HResult; stdcall;
+    function InitializeFromMemory(pbBuffer: PByte; cbBufferSize: UINT): HRESULT; stdcall;
 
-    function InitializeFromExifColorSpace(value: UINT): HResult; stdcall;
+    function InitializeFromExifColorSpace(value: UINT): HRESULT; stdcall;
 
-    function GetType(var pType: WICColorContextType): HResult; stdcall;
+    function GetType(pType: PWICColorContextType): HRESULT; stdcall;
 
-    function GetProfileBytes(cbBuffer: UINT;
-                             pbBuffer: PBYTE;
-                             var pcbActual: UINT): HResult; stdcall;
+    function GetProfileBytes(cbBuffer: UINT; pbBuffer: PByte; pcbActual: PUINT): HRESULT; stdcall;
 
-    function GetExifColorSpace(var pValue: UINT): HResult; stdcall;
+    function GetExifColorSpace(pValue: PUINT): HRESULT; stdcall;
   end;
   IID_IWICColorContext = IWICColorContext;
   {$EXTERNALSYM IID_IWICColorContext}
@@ -2223,10 +2187,8 @@ type
   {$EXTERNALSYM IWICColorTransform}
   IWICColorTransform = interface(IWICBitmapSource)
   ['{B66F034F-D0E2-40ab-B436-6DE39E321A94}']
-    function Initialize(pIBitmapSource: IWICBitmapSource;
-                        pIContextSource: IWICColorContext;
-                        pIContextDest: IWICColorContext;
-                        const pixelFmtDest: REFWICPixelFormatGUID): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pIBitmapSource: IWICBitmapSource; pIContextSource: IWICColorContext; pIContextDest: IWICColorContext; const pixelFmtDest: WICPixelFormatGUID): HRESULT; stdcall;
   end;
   IID_IWICColorTransform = IWICColorTransform;
   {$EXTERNALSYM IID_IWICColorTransform}
@@ -2240,9 +2202,10 @@ type
   {$EXTERNALSYM IWICFastMetadataEncoder}
   IWICFastMetadataEncoder = interface(IUnknown)
   ['{B84E2C09-78C9-4AC4-8BD3-524AE1663A2F}']
-    function Commit(): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Commit(): HRESULT; stdcall;
 
-    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: IWICMetadataQueryWriter): HResult; stdcall;
+    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
   end;
   IID_IWICFastMetadataEncoder = IWICFastMetadataEncoder;
   {$EXTERNALSYM IID_IWICFastMetadataEncoder}
@@ -2256,17 +2219,14 @@ type
   {$EXTERNALSYM IWICStream}
   IWICStream = interface(IStream)
   ['{135FF860-22B7-4ddf-B0F6-218F4F299A43}']
-    function InitializeFromIStream(pIStream: IStream): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function InitializeFromIStream(pIStream: IStream): HRESULT; stdcall;
 
-    function InitializeFromFilename(wzFileName: LPCWSTR;
-                                    dwDesiredAccess: DWORD): HResult; stdcall;
+    function InitializeFromFilename(wzFileName: PWideChar; dwDesiredAccess: DWORD): HRESULT; stdcall;
 
-    function InitializeFromMemory(pbBuffer: WICInProcPointer;
-                                  cbBufferSize: DWORD): HResult; stdcall;
+    function InitializeFromMemory(pbBuffer: WICInProcPointer; cbBufferSize: DWORD): HRESULT; stdcall;
 
-    function InitializeFromIStreamRegion(pIStream: IStream;
-                                         ulOffset: ULARGE_INTEGER;
-                                         ulMaxSize: ULARGE_INTEGER): HResult; stdcall;
+    function InitializeFromIStreamRegion(pIStream: IStream; ulOffset: ULARGE_INTEGER; ulMaxSize: ULARGE_INTEGER): HRESULT; stdcall;
   end;
   IID_IWICStream = IWICStream;
   {$EXTERNALSYM IID_IWICStream}
@@ -2280,17 +2240,14 @@ type
   {$EXTERNALSYM IWICEnumMetadataItem}
   IWICEnumMetadataItem = interface(IUnknown)
   ['{DC2BB46D-3F07-481E-8625-220C4AEDBB33}']
-    function Next(celt: Cardinal;
-                  rgeltSchema: PPROPVARIANT;
-                  rgeltID: PPROPVARIANT;
-                  rgeltValue: PPROPVARIANT;
-                  var pceltFetched: ULONG): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Next(celt: ULONG; rgeltSchema: PPROPVARIANT; rgeltId: PPROPVARIANT; rgeltValue: PPROPVARIANT; pceltFetched: PULONG): HRESULT; stdcall;
 
-    function Skip(celt: Cardinal): HResult; stdcall;
+    function Skip(celt: ULONG): HRESULT; stdcall;
 
-    function Reset: HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
-    function Clone(out ppIEnumMetadataItem: IWICEnumMetadataItem): HResult; stdcall;
+    function Clone(out ppIEnumMetadataItem: IWICEnumMetadataItem): HRESULT; stdcall;
   end;
   IID_IWICEnumMetadataItem = IWICEnumMetadataItem;
   {$EXTERNALSYM IID_IWICEnumMetadataItem}
@@ -2304,16 +2261,14 @@ type
   {$EXTERNALSYM IWICMetadataQueryReader}
   IWICMetadataQueryReader = interface(IUnknown)
   ['{30989668-E1C9-4597-B395-458EEDB808DF}']
-    function GetContainerFormat(var pguidContainerFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetContainerFormat(pguidContainerFormat: PGUID): HRESULT; stdcall;
 
-    function GetLocation(cchMaxLength: UINT;
-                         wzNamespace: PWCHAR;
-                         var pcchActualLength: UINT): HResult; stdcall;
+    function GetLocation(cchMaxLength: UINT; wzNamespace: PWideChar; pcchActualLength: PUINT): HRESULT; stdcall;
 
-    function GetMetadataByName(wzName: LPCWSTR;
-                               var pvarValue: PROPVARIANT): HResult; stdcall;
+    function GetMetadataByName(wzName: PWideChar; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function GetEnumerator(out ppIEnumString: IEnumString): HResult; stdcall;
+    function GetEnumerator(out ppIEnumString: IEnumString): HRESULT; stdcall;
   end;
   IID_IWICMetadataQueryReader = IWICMetadataQueryReader;
   {$EXTERNALSYM IID_IWICMetadataQueryReader}
@@ -2327,10 +2282,10 @@ type
   {$EXTERNALSYM IWICMetadataQueryWriter}
   IWICMetadataQueryWriter = interface(IWICMetadataQueryReader)
   ['{A721791A-0DEF-4d06-BD91-2118BF1DB10B}']
-    function SetMetadataByName(wzName: LPCWSTR;
-                               const pvarValue: PROPVARIANT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function SetMetadataByName(wzName: PWideChar; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function RemoveMetadataByName(wzName: LPCWSTR): HResult; stdcall;
+    function RemoveMetadataByName(wzName: PWideChar): HRESULT; stdcall;
   end;
   IID_IWICMetadataQueryWriter = IWICMetadataQueryWriter;
   {$EXTERNALSYM IID_IWICMetadataQueryWriter}
@@ -2344,28 +2299,26 @@ type
   {$EXTERNALSYM IWICBitmapEncoder}
   IWICBitmapEncoder = interface(IUnknown)
   ['{00000103-a8f2-4877-ba0a-fd2b6645fb94}']
-    function Initialize(pIStream: IStream;
-                        cacheOption: WICBitmapEncoderCacheOption): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pIStream: IStream; cacheOption: WICBitmapEncoderCacheOption): HRESULT; stdcall;
 
-    function GetContainerFormat(var pguidContainerFormat: TGuid): HResult; stdcall;
+    function GetContainerFormat(pguidContainerFormat: PGUID): HRESULT; stdcall;
 
-    function GetEncoderInfo(out ppIEncoderInfo: IWICBitmapEncoderInfo): HResult; stdcall;
+    function GetEncoderInfo(out ppIEncoderInfo: IWICBitmapEncoderInfo): HRESULT; stdcall;
 
-    function SetColorContexts(cCount: UINT;
-                              ppIColorContext: PIWICColorContext): HResult; stdcall;
+    function SetColorContexts(cCount: UINT; ppIColorContext: PIWICColorContext): HRESULT; stdcall;
 
-    function SetPalette(pIPalette: IWICPalette): HResult; stdcall;
+    function SetPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function SetThumbnail(pIThumbnail: IWICBitmapSource): HResult; stdcall;
+    function SetThumbnail(pIThumbnail: IWICBitmapSource): HRESULT; stdcall;
 
-    function SetPreview(pIPreview: IWICBitmapSource): HResult; stdcall;
+    function SetPreview(pIPreview: IWICBitmapSource): HRESULT; stdcall;
 
-    function CreateNewFrame(out ppIFrameEncode: IWICBitmapFrameEncode;
-                            var ppIEncoderOptions: IPropertyBag2): HResult; stdcall;
+    function CreateNewFrame(out ppIFrameEncode: IWICBitmapFrameEncode; out ppIEncoderOptions: IPropertyBag2): HRESULT; stdcall;
 
-    function Commit(): HResult; stdcall;
+    function Commit(): HRESULT; stdcall;
 
-    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: IWICMetadataQueryWriter): HResult; stdcall;
+    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
   end;
   IID_IWICBitmapEncoder = IWICBitmapEncoder;
   {$EXTERNALSYM IID_IWICBitmapEncoder}
@@ -2378,35 +2331,28 @@ type
   {$EXTERNALSYM IWICBitmapFrameEncode}
   IWICBitmapFrameEncode = interface(IUnknown)
   ['{00000105-a8f2-4877-ba0a-fd2b6645fb94}']
-    function Initialize(pIEncoderOptions: IPropertyBag2): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Initialize(pIEncoderOptions: IPropertyBag2): HRESULT; stdcall;
 
-    function SetSize(uiWidth: UINT;
-                     uiHeight: UINT): HResult; stdcall;
+    function SetSize(uiWidth: UINT; uiHeight: UINT): HRESULT; stdcall;
 
-    function SetResolution(dpiX: Double;
-                           dpiY: Double): HResult; stdcall;
+    function SetResolution(dpiX: Double; dpiY: Double): HRESULT; stdcall;
 
-    function SetPixelFormat(var pPixelFormat: WICPixelFormatGUID): HResult; stdcall;
+    function SetPixelFormat(pPixelFormat: PWICPixelFormatGUID): HRESULT; stdcall;
 
-    function SetColorContexts(cCount: UINT;
-                              ppIColorContext: PIWICColorContext): HResult; stdcall;
+    function SetColorContexts(cCount: UINT; ppIColorContext: PIWICColorContext): HRESULT; stdcall;
 
-    function SetPalette(pIPalette: PIWICPalette): HResult; stdcall;
+    function SetPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function SetThumbnail(pIThumbnail: PIWICBitmapSource): HResult; stdcall;
+    function SetThumbnail(pIThumbnail: IWICBitmapSource): HRESULT; stdcall;
 
-    function WritePixels(lineCount: UINT;
-                         cbStride: UINT;
-                         cbBufferSize: UINT;
-                         pbPixels: PByte): HResult; stdcall;
+    function WritePixels(lineCount: UINT; cbStride: UINT; cbBufferSize: UINT; pbPixels: PByte): HRESULT; stdcall;
 
-    function WriteSource(pIBitmapSource: PIWICBitmapSource;
-                         prc: PWICRect): HResult; stdcall;
+    function WriteSource(pIBitmapSource: IWICBitmapSource; prc: PWICRect): HRESULT; stdcall;
 
-    function Commit(): HResult; stdcall;
+    function Commit(): HRESULT; stdcall;
 
-    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: PIWICMetadataQueryWriter): HResult; stdcall;
-
+    function GetMetadataQueryWriter(out ppIMetadataQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
   end;
   IID_IWICBitmapFrameEncode = IWICBitmapFrameEncode;
   {$EXTERNALSYM IID_IWICBitmapFrameEncode}
@@ -2420,13 +2366,10 @@ type
   {$EXTERNALSYM IWICPlanarBitmapFrameEncode}
   IWICPlanarBitmapFrameEncode = interface(IUnknown)
   ['{F928B7B8-2221-40C1-B72E-7E82F1974D1A}']
-    function WritePixels(lineCount: UINT;
-                         pPlanes: PWICBitmapPlane;  // pointer to array
-                         cPlanes: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function WritePixels(lineCount: UINT; pPlanes: PWICBitmapPlane; cPlanes: UINT): HRESULT; stdcall;
 
-    function WriteSource(ppPlanes: PIWICBitmapSource; // pointer to array
-                         cPlanes: UINT;
-                         prcSource: PWICRect): HResult; stdcall;
+    function WriteSource(ppPlanes: PIWICBitmapSource; cPlanes: UINT; prcSource: PWICRect): HRESULT; stdcall;
   end;
   IID_IWICPlanarBitmapFrameEncode = IWICPlanarBitmapFrameEncode;
   {$EXTERNALSYM IID_IWICPlanarBitmapFrameEncode}
@@ -2441,17 +2384,12 @@ type
   {$EXTERNALSYM IWICImageEncoder}
   IWICImageEncoder = interface(IUnknown)
   ['{04C75BF8-3CE1-473B-ACC5-3CC4F5E94999}']
-    function WriteFrame(pImage: ID2D1Image;
-                        pFrameEncode: IWICBitmapFrameEncode;
-                        const pImageParameters: WICImageParameters): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function WriteFrame(pImage: ID2D1Image; pFrameEncode: IWICBitmapFrameEncode; pImageParameters: PWICImageParameters): HRESULT; stdcall;
 
-    function WriteFrameThumbnail(pImage: ID2D1Image;
-                                 pFrameEncode: IWICBitmapFrameEncode;
-                                 const pImageParameters: WICImageParameters): HResult; stdcall;
+    function WriteFrameThumbnail(pImage: ID2D1Image; pFrameEncode: IWICBitmapFrameEncode; pImageParameters: PWICImageParameters): HRESULT; stdcall;
 
-    function WriteThumbnail(pImage: ID2D1Image;
-                            pEncoder: IWICBitmapEncoder;
-                            const pImageParameters: WICImageParameters): HResult; stdcall;
+    function WriteThumbnail(pImage: ID2D1Image; pEncoder: IWICBitmapEncoder; pImageParameters: PWICImageParameters): HRESULT; stdcall;
   end;
   IID_IWICImageEncoder = IWICImageEncoder;
   {$EXTERNALSYM IID_IWICImageEncoder}
@@ -2465,32 +2403,28 @@ type
   {$EXTERNALSYM IWICBitmapDecoder}
   IWICBitmapDecoder = interface(IUnknown)
   ['{9EDDE9E7-8DEE-47ea-99DF-E6FAF2ED44BF}']
-    function QueryCapability(pIStream: IStream;
-                             out pdwCapability: DWORD): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function QueryCapability(pIStream: IStream; pdwCapability: PDWORD): HRESULT; stdcall;
 
-    function Initialize(pIStream: IStream;
-                        cacheOptions: WICDecodeOptions): HResult; stdcall;
+    function Initialize(pIStream: IStream; cacheOptions: WICDecodeOptions): HRESULT; stdcall;
 
-    function GetContainerFormat(out pguidContainerFormat: TGuid): HResult; stdcall;
+    function GetContainerFormat(pguidContainerFormat: PGUID): HRESULT; stdcall;
 
-    function GetDecoderInfo(out ppIDecoderInfo: IWICBitmapDecoderInfo): HResult; stdcall;
+    function GetDecoderInfo(out ppIDecoderInfo: IWICBitmapDecoderInfo): HRESULT; stdcall;
 
-    function CopyPalette(pIPalette: IWICPalette): HResult; stdcall;
+    function CopyPalette(pIPalette: IWICPalette): HRESULT; stdcall;
 
-    function GetMetadataQueryReader(out ppIMetadataQueryReader: IWICMetadataQueryReader): HResult; stdcall;
+    function GetMetadataQueryReader(out ppIMetadataQueryReader: IWICMetadataQueryReader): HRESULT; stdcall;
 
-    function GetPreview(out ppIBitmapSource: IWICBitmapSource): HResult; stdcall;
+    function GetPreview(out ppIBitmapSource: IWICBitmapSource): HRESULT; stdcall;
 
-    function GetColorContexts(cCount: UINT;
-                              var ppIColorContexts: IWICColorContext;
-                              out pcActualCount: UINT): HResult; stdcall;
+    function GetColorContexts(cCount: UINT; ppIColorContexts: PIWICColorContext; pcActualCount: PUINT): HRESULT; stdcall;
 
-    function GetThumbnail(out ppIThumbnail: IWICBitmapSource): HResult; stdcall;
+    function GetThumbnail(out ppIThumbnail: IWICBitmapSource): HRESULT; stdcall;
 
-    function GetFrameCount(out pCount: UINT): HResult; stdcall;
+    function GetFrameCount(pCount: PUINT): HRESULT; stdcall;
 
-    function GetFrame(index: UINT;
-                      out ppIBitmapFrame: IWICBitmapFrameDecode): HResult; stdcall;
+    function GetFrame(index: UINT; out ppIBitmapFrame: IWICBitmapFrameDecode): HRESULT; stdcall;
   end;
   IID_IWICBitmapDecoder = IWICBitmapDecoder;
   {$EXTERNALSYM IID_IWICBitmapDecoder}
@@ -2504,22 +2438,14 @@ type
   {$EXTERNALSYM IWICBitmapSourceTransform}
   IWICBitmapSourceTransform = interface(IUnknown)
   ['{3B16811B-6A43-4ec9-B713-3D5A0C13B940}']
-    function CopyPixels(const prc: WICRect;
-                        uiWidth: UINT;
-                        uiHeight: UINT;
-                        pguidDstFormat: WICPixelFormatGUID;
-                        dstTransform: WICBitmapTransformOptions;
-                        nStride: UINT;
-                        cbBufferSize: UINT;
-                        out pbBuffer: PByte): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CopyPixels(prc: PWICRect; uiWidth: UINT; uiHeight: UINT; pguidDstFormat: PWICPixelFormatGUID; dstTransform: WICBitmapTransformOptions; nStride: UINT; cbBufferSize: UINT; pbBuffer: PByte): HRESULT; stdcall;
 
-    function GetClosestSize(var puiWidth: UINT;
-                            var puiHeight: UINT): HResult; stdcall;
+    function GetClosestSize(puiWidth: PUINT; puiHeight: PUINT): HRESULT; stdcall;
 
-    function GetClosestPixelFormat(var pguidDstFormat: WICPixelFormatGUID): HResult; stdcall;
+    function GetClosestPixelFormat(pguidDstFormat: PWICPixelFormatGUID): HRESULT; stdcall;
 
-    function DoesSupportTransform(const dstTransform: WICBitmapTransformOptions;
-                                  out pfIsSupported: PBOOL): HResult; stdcall;
+    function DoesSupportTransform(dstTransform: WICBitmapTransformOptions; pfIsSupported: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICBitmapSourceTransform = IWICBitmapSourceTransform;
   {$EXTERNALSYM IID_IWICBitmapSourceTransform}
@@ -2533,22 +2459,10 @@ type
   {$EXTERNALSYM IWICPlanarBitmapSourceTransform}
   IWICPlanarBitmapSourceTransform = interface(IUnknown)
   ['{3AFF9CCE-BE95-4303-B927-E7D16FF4A613}']
-    function DoesSupportTransform(var puiWidth: UINT;
-                                  var puiHeight: UINT;
-                                  dstTransform: WICBitmapTransformOptions;
-                                  dstPlanarOptions: WICPlanarOptions;
-                                  pguidDstFormats: PWICPixelFormatGUID;
-                                  pPlaneDescriptions: PWICBitmapPlaneDescription;
-                                  cPlanes: UINT;
-                                  out pfIsSupported: BOOL): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function DoesSupportTransform(puiWidth: PUINT; puiHeight: PUINT; dstTransform: WICBitmapTransformOptions; dstPlanarOptions: WICPlanarOptions; pguidDstFormats: PWICPixelFormatGUID; pPlaneDescriptions: PWICBitmapPlaneDescription; cPlanes: UINT; pfIsSupported: PBOOL): HRESULT; stdcall;
 
-    function CopyPixels(const prcSource: WICRect;
-                        uiWidth: UINT;
-                        uiHeight: UINT;
-                        dstTransform: WICBitmapTransformOptions;
-                        dstPlanarOptions: WICPlanarOptions;
-                        pDstPlanes: PWICBitmapPlane;
-                        cPlanes: UINT): HResult; stdcall;
+    function CopyPixels(prcSource: PWICRect; uiWidth: UINT; uiHeight: UINT; dstTransform: WICBitmapTransformOptions; dstPlanarOptions: WICPlanarOptions; pDstPlanes: PWICBitmapPlane; cPlanes: UINT): HRESULT; stdcall;
   end;
   IID_IWICPlanarBitmapSourceTransform = IWICPlanarBitmapSourceTransform;
   {$EXTERNALSYM IID_IWICPlanarBitmapSourceTransform}
@@ -2562,13 +2476,12 @@ type
   {$EXTERNALSYM IWICBitmapFrameDecode}
   IWICBitmapFrameDecode = interface(IWICBitmapSource)
   ['{3B16811B-6A43-4ec9-A813-3D930C13B940}']
-    function GetMetadataQueryReader(ppIMetadataQueryReader: IWICMetadataQueryReader): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetMetadataQueryReader(out ppIMetadataQueryReader: IWICMetadataQueryReader): HRESULT; stdcall;
 
-    function GetColorContexts(cCount: UINT;
-                              ppIColorContexts: PIWICColorContext;
-                              var pcActualCount: UINT): HResult; stdcall;
+    function GetColorContexts(cCount: UINT; ppIColorContexts: PIWICColorContext; pcActualCount: PUINT): HRESULT; stdcall;
 
-    function GetThumbnail(var ppIThumbnail: IWICBitmapSource): HResult; stdcall;
+    function GetThumbnail(out ppIThumbnail: IWICBitmapSource): HRESULT; stdcall;
   end;
   IID_IWICBitmapFrameDecode = IWICBitmapFrameDecode;
   {$EXTERNALSYM IID_IWICBitmapFrameDecode}
@@ -2583,12 +2496,10 @@ type
   {$EXTERNALSYM IWICBitmapFrameChainReader}
   IWICBitmapFrameChainReader = interface(IUnknown)
   ['{0c599495-a120-4222-9130-a8c29410bd0b}']
-    function GetChainedFrameCount(chainType: WICBitmapChainType;
-                                  out pCount: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetChainedFrameCount(chainType: WICBitmapChainType; pCount: PUINT): HRESULT; stdcall;
 
-    function GetChainedFrame(chainType: WICBitmapChainType;
-                             const index: UINT;
-                             out ppIBitmapFrame: PIWICBitmapFrameDecode): HResult; stdcall;
+    function GetChainedFrame(chainType: WICBitmapChainType; index: UINT; out ppIBitmapFrame: IWICBitmapFrameDecode): HRESULT; stdcall;
   end;
   IID_IWICBitmapFrameChainReader = IWICBitmapFrameChainReader;
   {$EXTERNALSYM IID_IWICBitmapFrameChainReader}
@@ -2602,12 +2513,10 @@ type
   {$EXTERNALSYM IWICBitmapFrameChainWriter}
   IWICBitmapFrameChainWriter = interface(IUnknown)
   ['{40d9ea28-4768-47b3-8c12-558a48e98e38}']
-    function AppendFrameToChain(chainType: WICBitmapChainType;
-                                out ppIFrameEncode: PIWICBitmapFrameEncode;
-                                var ppIEncoderOptions: PIPropertyBag2): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function AppendFrameToChain(chainType: WICBitmapChainType; out ppIFrameEncode: IWICBitmapFrameEncode; out ppIEncoderOptions: IPropertyBag2): HRESULT; stdcall;
 
-    function DoesSupportChainType(chainType: WICBitmapChainType;
-                                  out pfIsSupported: BOOL): HResult; stdcall;
+    function DoesSupportChainType(chainType: WICBitmapChainType; pfIsSupported: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICBitmapFrameChainWriter = IWICBitmapFrameChainWriter;
   {$EXTERNALSYM IID_IWICBitmapFrameChainWriter}
@@ -2620,11 +2529,12 @@ type
   {$EXTERNALSYM IWICProgressiveLevelControl}
   IWICProgressiveLevelControl = interface(IUnknown)
   ['{DAAC296F-7AA5-4dbf-8D15-225C5976F891}']
-    function GetLevelCount(out pcLevels: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetLevelCount(pcLevels: PUINT): HRESULT; stdcall;
 
-    function GetCurrentLevel(out pnLevel: UINT): HResult; stdcall;
+    function GetCurrentLevel(pnLevel: PUINT): HRESULT; stdcall;
 
-    function SetCurrentLevel(nLevel: UINT): HResult; stdcall;
+    function SetCurrentLevel(nLevel: UINT): HRESULT; stdcall;
   end;
   IID_IWICProgressiveLevelControl = IWICProgressiveLevelControl;
   {$EXTERNALSYM IID_IWICProgressiveLevelControl}
@@ -2639,13 +2549,12 @@ type
   {$EXTERNALSYM IWICDisplayAdaptationControl}
   IWICDisplayAdaptationControl = interface(IUnknown)
   ['{de9d91d2-70b4-4f41-836c-25fcd39626d3}']
-    function DoesSupportChangingMaxLuminance(const pguidDstFormat: PWICPixelFormatGUID;
-                                             out pfIsSupported: BOOL): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function DoesSupportChangingMaxLuminance(pguidDstFormat: PWICPixelFormatGUID; pfIsSupported: PBOOL): HRESULT; stdcall;
 
-    function SetDisplayMaxLuminance(fLuminanceInNits: FLOAT): HResult; stdcall;
+    function SetDisplayMaxLuminance(fLuminanceInNits: Single): HRESULT; stdcall;
 
-    function GetDisplayMaxLuminance(out pfLuminanceInNits: FLOAT): HResult; stdcall;
-
+    function GetDisplayMaxLuminance(pfLuminanceInNits: PSingle): HRESULT; stdcall;
   end;
   IID_IWICDisplayAdaptationControl = IWICDisplayAdaptationControl;
   {$EXTERNALSYM IID_IWICDisplayAdaptationControl}
@@ -2660,16 +2569,16 @@ type
   {$EXTERNALSYM IWICDisplayAdaptationControl2}
   IWICDisplayAdaptationControl2 = interface(IWICDisplayAdaptationControl)
   ['{d7508d29-3ab7-447e-a676-4d80d7de726b}']
-    function SetSdrWhiteLevel(fWhiteLevelInNits: FLOAT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function SetSdrWhiteLevel(fWhiteLevelInNits: Single): HRESULT; stdcall;
 
-    function GetSdrWhiteLevel(out pfWhiteLevelInNits: PFLOAT): HResult; stdcall;
+    function GetSdrWhiteLevel(pfWhiteLevelInNits: PSingle): HRESULT; stdcall;
 
-    function SetToneMappingMode(mode: WICBitmapToneMappingMode): HResult; stdcall;
+    function SetToneMappingMode(mode: WICBitmapToneMappingMode): HRESULT; stdcall;
 
-    function GetToneMappingMode(out mode: WICBitmapToneMappingMode): HResult; stdcall;
+    function GetToneMappingMode(mode: PWICBitmapToneMappingMode): HRESULT; stdcall;
 
-    function DoesSupportToneMappingMode(mode: WICBitmapToneMappingMode;
-                                        out pfIsSupported: PBOOL): HResult; stdcall;
+    function DoesSupportToneMappingMode(mode: WICBitmapToneMappingMode; pfIsSupported: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICDisplayAdaptationControl2 = IWICDisplayAdaptationControl2;
   {$EXTERNALSYM IID_IWICDisplayAdaptationControl2}
@@ -2681,25 +2590,14 @@ type
   {$EXTERNALSYM IWICD3DTextureSource}
   IWICD3DTextureSource = interface(IUnknown)
   ['{caf65cc4-8ebe-4718-a21f-8dbf40bb7e25}']
-    function GetTexture(pD3DDevice: IUnknown;
-                        pID3DTextureOptions: IPropertyBag2;
-                        const riid: REFIID;
-                        out ppTexture: Pointer): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetTexture(pD3DDevice: IUnknown; pID3DTextureOptions: IPropertyBag2; const riid: TGUID; out ppTexture: Pointer): HRESULT; stdcall;
 
-    function GetTransformedTexture(prc: PWICRect;
-                                   uiWidth: UINT;
-                                   uiHeight: UINT;
-                                   pguidDstFormat: PWICPixelFormatGUID;
-                                   dstTransform: WICBitmapTransformOptions;
-                                   pD3DDevice: IUnknown;
-                                   pID3DTextureOptions: IPropertyBag2;
-                                   const riid: REFIID;
-                                   out ppTexture: Pointer): HResult; stdcall;
+    function GetTransformedTexture(prc: PWICRect; uiWidth: UINT; uiHeight: UINT; pguidDstFormat: PWICPixelFormatGUID; dstTransform: WICBitmapTransformOptions; pD3DDevice: IUnknown; pID3DTextureOptions: IPropertyBag2; const riid: TGUID; out ppTexture: Pointer): HRESULT; stdcall;
 
-    function DoesSupportD3DDeviceType(const riid: REFIID;
-                                      out pfIsSupported: BOOL): HResult; stdcall;
+    function DoesSupportD3DDeviceType(const riid: TGUID; pfIsSupported: PBOOL): HRESULT; stdcall;
 
-    function GetD3DTextureOptions(out ppID3DTextureOptions: IPropertyBag2): HResult; stdcall;
+    function GetD3DTextureOptions(out ppID3DTextureOptions: IPropertyBag2): HRESULT; stdcall;
   end;
   IID_IWICD3DTextureSource = IWICD3DTextureSource;
   {$EXTERNALSYM IID_IWICD3DTextureSource}
@@ -2713,9 +2611,8 @@ type
   {$EXTERNALSYM IWICProgressCallback}
   IWICProgressCallback = interface(IUnknown)
   ['{4776F9CD-9517-45FA-BF24-E89C5EC5C60C}']
-    function Notify(uFrameNum: ULONG;
-                    operation: WICProgressOperation;
-                    dblProgress: Double): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Notify(uFrameNum: ULONG; operation: WICProgressOperation; dblProgress: Double): HRESULT; stdcall;
   end;
   IID_IWICProgressCallback = IWICProgressCallback;
   {$EXTERNALSYM IID_IWICProgressCallback}
@@ -2737,9 +2634,8 @@ type
   {$EXTERNALSYM IWICBitmapCodecProgressNotification}
   IWICBitmapCodecProgressNotification = interface(IUnknown)
   ['{64C1024E-C3CF-4462-8078-88C2B11C46D9}']
-    function RegisterProgressNotification(pfnProgressNotification: FNProgressNotification;
-                                          pvData: Pointer;
-                                          dwProgressFlags: DWORD): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function RegisterProgressNotification(pfnProgressNotification: FNProgressNotification; pvData: Pointer; dwProgressFlags: DWORD): HRESULT; stdcall;
   end;
   IID_IWICBitmapCodecProgressNotification = IWICBitmapCodecProgressNotification;
   {$EXTERNALSYM IID_IWICBitmapCodecProgressNotification}
@@ -2753,29 +2649,22 @@ type
   {$EXTERNALSYM IWICComponentInfo}
   IWICComponentInfo = interface(IUnknown)
   ['{23BC3F0A-698B-4357-886B-F24D50671334}']
-    function GetComponentType(var pType: WICComponentType): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetComponentType(pType: PWICComponentType): HRESULT; stdcall;
 
-    function GetCLSID(var pclsid: TGuid): HResult; stdcall;
+    function GetCLSID(pclsid: PGUID): HRESULT; stdcall;
 
-    function GetSigningStatus(var pStatus: DWORD): HResult; stdcall;
+    function GetSigningStatus(pStatus: PDWORD): HRESULT; stdcall;
 
-    function GetAuthor(cchAuthor: UINT;
-                       wzAuthor: PWCHAR;
-                       var pcchActual: UINT): HResult; stdcall;
+    function GetAuthor(cchAuthor: UINT; wzAuthor: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetVendorGUID(var pguidVendor: TGuid): HResult; stdcall;
+    function GetVendorGUID(pguidVendor: PGUID): HRESULT; stdcall;
 
-    function GetVersion(cchVersion: UINT;
-                        wzVersion: PWCHAR;
-                        var pcchActual: UINT): HResult; stdcall;
+    function GetVersion(cchVersion: UINT; wzVersion: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetSpecVersion(cchSpecVersion: UINT;
-                            wzSpecVersion: PWCHAR;
-                            var pcchActual: UINT): HResult; stdcall;
+    function GetSpecVersion(cchSpecVersion: UINT; wzSpecVersion: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetFriendlyName(cchFriendlyName: UINT;
-                             wzFriendlyName: PWCHAR;
-                             var pcchActual: UINT): HResult; stdcall;
+    function GetFriendlyName(cchFriendlyName: UINT; wzFriendlyName: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
   end;
   IID_IWICComponentInfo = IWICComponentInfo;
   {$EXTERNALSYM IID_IWICComponentInfo}
@@ -2789,11 +2678,10 @@ type
   {$EXTERNALSYM IWICFormatConverterInfo}
   IWICFormatConverterInfo = interface(IWICComponentInfo)
   ['{9F34FB65-13F4-4f15-BC57-3726B5E53D9F}']
-    function GetPixelFormats(cFormats: UINT;
-                             pPixleFormatGUIDs: PWICPixelFormatGUID;
-                             var pcActual: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetPixelFormats(cFormats: UINT; pPixelFormatGUIDs: PWICPixelFormatGUID; pcActual: PUINT): HRESULT; stdcall;
 
-    function CreateInstance(out ppIConverter: IWICFormatConverter): HResult; stdcall;
+    function CreateInstance(out ppIConverter: IWICFormatConverter): HRESULT; stdcall;
   end;
   IID_IWICFormatConverterInfo = IWICFormatConverterInfo;
   {$EXTERNALSYM IID_IWICFormatConverterInfo}
@@ -2807,42 +2695,30 @@ type
   {$EXTERNALSYM IWICBitmapCodecInfo}
   IWICBitmapCodecInfo = interface(IWICComponentInfo)
   ['{E87A44C4-B76E-4c47-8B09-298EB12A2714}']
-    function GetContainerFormat(var pguidContainerFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetContainerFormat(pguidContainerFormat: PGUID): HRESULT; stdcall;
 
-    function GetPixelFormats(cFormats: UINT;
-                             var guidPixelFormats: PGuid;
-                             var pcActual: UINT): HResult; stdcall;
+    function GetPixelFormats(cFormats: UINT; pguidPixelFormats: PGUID; pcActual: PUINT): HRESULT; stdcall;
 
-    function GetColorManagementVersion(cchColorManagementVersion: UINT;
-                                       wzColorManagementVersion: PWCHAR;
-                                       var pcchActual: UINT): HResult; stdcall;
+    function GetColorManagementVersion(cchColorManagementVersion: UINT; wzColorManagementVersion: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetDeviceManufacturer(cchDeviceManufacturer: UINT;
-                                   wzDeviceManufacturer: PWCHAR;
-                                   var pcchActual: UINT): HResult; stdcall;
+    function GetDeviceManufacturer(cchDeviceManufacturer: UINT; wzDeviceManufacturer: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetDeviceModels(cchDeviceModels: UINT;
-                             wzDeviceModels: PWCHAR;
-                             var pcchActual: UINT): HResult; stdcall;
+    function GetDeviceModels(cchDeviceModels: UINT; wzDeviceModels: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetMimeTypes(cchMimeTypes: UINT;
-                          wzMimeTypes: PWCHAR;
-                          var pcchActual: UINT): HResult; stdcall;
+    function GetMimeTypes(cchMimeTypes: UINT; wzMimeTypes: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetFileExtensions(cchFileExtensions: UINT;
-                               wzFileExtensions: PWCHAR;
-                               var pcchActual: UINT): HResult; stdcall;
+    function GetFileExtensions(cchFileExtensions: UINT; wzFileExtensions: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function DoesSupportAnimation(var pfSupportAnimation: BOOL): HResult; stdcall;
+    function DoesSupportAnimation(pfSupportAnimation: PBOOL): HRESULT; stdcall;
 
-    function DoesSupportChromakey(var pfSupportChromakey: BOOL): HResult; stdcall;
+    function DoesSupportChromakey(pfSupportChromakey: PBOOL): HRESULT; stdcall;
 
-    function DoesSupportLossless(var pfSupportLossless: BOOL): HResult; stdcall;
+    function DoesSupportLossless(pfSupportLossless: PBOOL): HRESULT; stdcall;
 
-    function DoesSupportMultiframe(var pfSupportMultiframe: BOOL): HResult; stdcall;
+    function DoesSupportMultiframe(pfSupportMultiframe: PBOOL): HRESULT; stdcall;
 
-    function MatchesMimeType(wzMimeType: LPCWSTR;
-                             var pfMatches: BOOL): HResult; stdcall;
+    function MatchesMimeType(wzMimeType: PWideChar; pfMatches: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICBitmapCodecInfo = IWICBitmapCodecInfo;
   {$EXTERNALSYM IID_IWICBitmapCodecInfo}
@@ -2856,7 +2732,8 @@ type
   {$EXTERNALSYM IWICBitmapEncoderInfo}
   IWICBitmapEncoderInfo = interface(IWICBitmapCodecInfo)
   ['{94C9B4EE-A09F-4f92-8A1E-4A9BCE7E76FB}']
-    function CreateInstance(out ppIBitmapEncoder: IWICBitmapEncoder): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CreateInstance(out ppIBitmapEncoder: IWICBitmapEncoder): HRESULT; stdcall;
   end;
   IID_IWICBitmapEncoderInfo = IWICBitmapEncoderInfo;
   {$EXTERNALSYM IID_IWICBitmapEncoderInfo}
@@ -2869,15 +2746,12 @@ type
   {$EXTERNALSYM IWICBitmapDecoderInfo}
   IWICBitmapDecoderInfo = interface(IWICBitmapCodecInfo)
   ['{D8CD007F-D08F-4191-9BFC-236EA7F0E4B5}']
-    function GetPatterns(cbSizePatterns: UINT;
-                         pPatterns: PWICBitmapPattern;   // pointer to array
-                         var pcPatterns: UINT;
-                         var pcbPatternsActual: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetPatterns(cbSizePatterns: UINT; pPatterns: PWICBitmapPattern; pcPatterns: PUINT; pcbPatternsActual: PUINT): HRESULT; stdcall;
 
-    function MatchesPattern(pIStream: IStream;
-                            var pfMatches: BOOL): HResult; stdcall;
+    function MatchesPattern(pIStream: IStream; pfMatches: PBOOL): HRESULT; stdcall;
 
-    function CreateInstance(out ppIBitmapDecoder: IWICBitmapDecoder): HResult; stdcall;
+    function CreateInstance(out ppIBitmapDecoder: IWICBitmapDecoder): HRESULT; stdcall;
   end;
   IID_IWICBitmapDecoderInfo = IWICBitmapDecoderInfo;
   {$EXTERNALSYM IID_IWICBitmapDecoderInfo}
@@ -2890,18 +2764,16 @@ type
   {$EXTERNALSYM IWICPixelFormatInfo}
   IWICPixelFormatInfo = interface(IWICComponentInfo)
   ['{E8EDA601-3D48-431a-AB44-69059BE88BBE}']
-    function GetFormatGUID(var pFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetFormatGUID(pFormat: PGUID): HRESULT; stdcall;
 
-    function GetColorContext(out ppIColorContext: IWICColorContext): HResult; stdcall;
+    function GetColorContext(out ppIColorContext: IWICColorContext): HRESULT; stdcall;
 
-    function GetBitsPerPixel(var puiBitsPerPixel: UINT): HResult; stdcall;
+    function GetBitsPerPixel(puiBitsPerPixel: PUINT): HRESULT; stdcall;
 
-    function GetChannelCount(var puiChannelCount: UINT): HResult; stdcall;
+    function GetChannelCount(puiChannelCount: PUINT): HRESULT; stdcall;
 
-    function GetChannelMask(uiChannelIndex: UINT;
-                            cbMaskBuffer: UINT;
-                            pbMaskBuffer: PBYTE;
-                            var pcbActual: UINT): HResult; stdcall;
+    function GetChannelMask(uiChannelIndex: UINT; cbMaskBuffer: UINT; pbMaskBuffer: PByte; pcbActual: PUINT): HRESULT; stdcall;
   end;
   IID_IWICPixelFormatInfo = IWICPixelFormatInfo;
   {$EXTERNALSYM IID_IWICPixelFormatInfo}
@@ -2914,9 +2786,10 @@ type
   {$EXTERNALSYM IWICPixelFormatInfo2}
   IWICPixelFormatInfo2 = interface(IWICPixelFormatInfo)
   ['{A9DB33A2-AF5F-43C7-B679-74F5984B5AA4}']
-    function SupportsTransparency(var pfSupportsTransparency: BOOL): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function SupportsTransparency(pfSupportsTransparency: PBOOL): HRESULT; stdcall;
 
-    function GetNumericRepresentation(var pNumericRepresentation: WICPixelFormatNumericRepresentation): HResult; stdcall;
+    function GetNumericRepresentation(pNumericRepresentation: PWICPixelFormatNumericRepresentation): HRESULT; stdcall;
   end;
   IID_IWICPixelFormatInfo2 = IWICPixelFormatInfo2;
   {$EXTERNALSYM IID_IWICPixelFormatInfo2}
@@ -2929,99 +2802,56 @@ type
   {$EXTERNALSYM IWICImagingFactory}
   IWICImagingFactory = interface(IUnknown)
   ['{ec5ec8a9-c395-4314-9c77-54d7a935ff70}']
-    function CreateDecoderFromFilename(wzFilename: LPCWSTR;
-                                       const pguidVendor: TGuid;
-                                       dwDesiredAccess: DWORD;
-                                       metadataOptions: WICDecodeOptions;
-                                       out ppIDecoder: IWICBitmapDecoder): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CreateDecoderFromFilename(wzFilename: PWideChar; pguidVendor: PGUID; dwDesiredAccess: DWORD; metadataOptions: WICDecodeOptions; out ppIDecoder: IWICBitmapDecoder): HRESULT; stdcall;
 
-    function CreateDecoderFromStream(pIStream: IStream;
-                                     const pguidVendor: TGuid;
-                                     metadataOptions: WICDecodeOptions;
-                                     out ppIDecoder: IWICBitmapDecoder): HResult; stdcall;
+    function CreateDecoderFromStream(pIStream: IStream; pguidVendor: PGUID; metadataOptions: WICDecodeOptions; out ppIDecoder: IWICBitmapDecoder): HRESULT; stdcall;
 
-    function CreateDecoderFromFileHandle(hFile: ULONG_PTR;
-                                         const pguidVendor: TGuid;
-                                         metadataOptions: WICDecodeOptions;
-                                         out ppIDecoder: IWICBitmapDecoder): HResult; stdcall;
+    function CreateDecoderFromFileHandle(hFile: ULONG_PTR; pguidVendor: PGUID; metadataOptions: WICDecodeOptions; out ppIDecoder: IWICBitmapDecoder): HRESULT; stdcall;
 
-    function CreateComponentInfo(const clsidComponent: TGuid;
-                                 out ppIInfo: IWICComponentInfo): HResult; stdcall;
+    function CreateComponentInfo(const clsidComponent: TGUID; out ppIInfo: IWICComponentInfo): HRESULT; stdcall;
 
-    function CreateDecoder(const guidContainerFormat: TGuid;
-                           const pguidVendor: TGuid;
-                           out ppIDecoder: IWICBitmapDecoder): HResult; stdcall;
+    function CreateDecoder(const guidContainerFormat: TGUID; pguidVendor: PGUID; out ppIDecoder: IWICBitmapDecoder): HRESULT; stdcall;
 
-    function CreateEncoder(const guidContainerFormat: TGuid;
-                           const pguidVendor: TGuid;
-                           out ppIEncoder: IWICBitmapEncoder): HResult; stdcall;
+    function CreateEncoder(const guidContainerFormat: TGUID; pguidVendor: PGUID; out ppIEncoder: IWICBitmapEncoder): HRESULT; stdcall;
 
-    function CreatePalette(out ppIPalette: IWICPalette): HResult; stdcall;
+    function CreatePalette(out ppIPalette: IWICPalette): HRESULT; stdcall;
 
-    function CreateFormatConverter(out ppIFormatConverter: IWICFormatConverter): HResult; stdcall;
+    function CreateFormatConverter(out ppIFormatConverter: IWICFormatConverter): HRESULT; stdcall;
 
-    function CreateBitmapScaler(out ppIBitmapScaler: IWICBitmapScaler): HResult; stdcall;
+    function CreateBitmapScaler(out ppIBitmapScaler: IWICBitmapScaler): HRESULT; stdcall;
 
-    function CreateBitmapClipper(out ppIBitmapClipper: IWICBitmapClipper): HResult; stdcall;
+    function CreateBitmapClipper(out ppIBitmapClipper: IWICBitmapClipper): HRESULT; stdcall;
 
-    function CreateBitmapFlipRotator(out ppIBitmapFlipRotator: IWICBitmapFlipRotator): HResult; stdcall;
+    function CreateBitmapFlipRotator(out ppIBitmapFlipRotator: IWICBitmapFlipRotator): HRESULT; stdcall;
 
-    function CreateStream(out ppIWICStream: IWICStream): HResult; stdcall;
+    function CreateStream(out ppIWICStream: IWICStream): HRESULT; stdcall;
 
-    function CreateColorContext(out ppIWICColorContext: IWICColorContext): HResult; stdcall;
+    function CreateColorContext(out ppIWICColorContext: IWICColorContext): HRESULT; stdcall;
 
-    function CreateColorTransformer(out ppIWICColorTransform: IWICColorTransform): HResult; stdcall;
+    function CreateColorTransformer(out ppIWICColorTransform: IWICColorTransform): HRESULT; stdcall;
 
-    function CreateBitmap(uiWidth: UINT;
-                          uiHeight: UINT;
-                          const pixelFormat: REFWICPixelFormatGUID;
-                          option: WICBitmapCreateCacheOption;
-                          out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmap(uiWidth: UINT; uiHeight: UINT; const pixelFormat: WICPixelFormatGUID; option: WICBitmapCreateCacheOption; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateBitmapFromSource(pIBitmapSource: IWICBitmapSource;
-                                    option: WICBitmapCreateCacheOption;
-                                    out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmapFromSource(pIBitmapSource: IWICBitmapSource; option: WICBitmapCreateCacheOption; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateBitmapFromSourceRect(pIBitmapSource: IWICBitmapSource;
-                                        x: UINT;
-                                        y: UINT;
-                                        width: UINT;
-                                        height: UINT;
-                                        out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmapFromSourceRect(pIBitmapSource: IWICBitmapSource; x: UINT; y: UINT; width: UINT; height: UINT; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateBitmapFromMemory(uiWidth: UINT;
-                                    uiHeight: UINT;
-                                    const pixelFormat: WICPixelFormatGUID;
-                                    cbStride: UINT;
-                                    cbBufferSize: UINT;
-                                    pbBuffer: PByte;
-                                    out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmapFromMemory(uiWidth: UINT; uiHeight: UINT; const pixelFormat: WICPixelFormatGUID; cbStride: UINT; cbBufferSize: UINT; pbBuffer: PByte; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateBitmapFromHBITMAP(_hBitmap: HBITMAP;
-                                     _hPalette: HPALETTE;
-                                     options: WICBitmapAlphaChannelOption;
-                                     out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmapFromHBITMAP(hBitmap: HBITMAP; hPalette: HPALETTE; options: WICBitmapAlphaChannelOption; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateBitmapFromHICON(_hIcon: HICON;
-                                   out ppIBitmap: IWICBitmap): HResult; stdcall;
+    function CreateBitmapFromHICON(hIcon: HICON; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
 
-    function CreateComponentEnumerator(componentTypes: DWORD;
-                                       options: DWORD;
-                                       out ppIEnumUnknown: IEnumUnknown): HResult; stdcall;
+    function CreateComponentEnumerator(componentTypes: DWORD; options: DWORD; out ppIEnumUnknown: IEnumUnknown): HRESULT; stdcall;
 
-    function CreateFastMetadataEncoderFromDecoder(pDecoder: IWICBitmapDecoder;
-                                                  out ppIFastEncoder: IWICFastMetadataEncoder): HResult; stdcall;
+    function CreateFastMetadataEncoderFromDecoder(pIDecoder: IWICBitmapDecoder; out ppIFastEncoder: IWICFastMetadataEncoder): HRESULT; stdcall;
 
-    function CreateFastMetadataEncoderFromFrameDecode(pFrameDecoder: IWICBitmapFrameDecode;
-                                                      out ppIFastEncoder: IWICFastMetadataEncoder): HResult; stdcall;
+    function CreateFastMetadataEncoderFromFrameDecode(pIFrameDecoder: IWICBitmapFrameDecode; out ppIFastEncoder: IWICFastMetadataEncoder): HRESULT; stdcall;
 
-    function CreateQueryWriter(const guidMetadataFormat: TGuid;
-                               const pguidVendor: TGuid;
-                               out ppIQueryWriter: IWICMetadataQueryWriter): HResult; stdcall;
+    function CreateQueryWriter(const guidMetadataFormat: TGUID; pguidVendor: PGUID; out ppIQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
 
-    function CreateQueryWriterFromReader(pIQueryReader: IWICMetadataQueryReader;
-                                         const pguidVendor: TGuid;
-                                         out ppIQueryWriter: IWICMetadataQueryWriter): HResult; stdcall;
+    function CreateQueryWriterFromReader(pIQueryReader: IWICMetadataQueryReader; pguidVendor: PGUID; out ppIQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
   end;
   IID_IWICImagingFactory = IWICImagingFactory;
   {$EXTERNALSYM IID_IWICImagingFactory}
@@ -3036,8 +2866,8 @@ type
   {$EXTERNALSYM IWICImagingFactory2}
   IWICImagingFactory2 = interface(IWICImagingFactory)
   ['{7B816B45-1996-4476-B132-DE9E247C8AF0}']
-    function CreateImageEncoder(pD2DDevice: ID2D1Device;
-                                out ppWICImageEncoder: IWICImageEncoder): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CreateImageEncoder(pD2DDevice: ID2D1Device; out ppWICImageEncoder: IWICImageEncoder): HRESULT; stdcall;
   end;
   IID_IWICImagingFactory2 = IWICImagingFactory2;
   {$EXTERNALSYM IID_IWICImagingFactory2}
@@ -3049,58 +2879,35 @@ type
   {$EXTERNALSYM IWICImagingFactory3}
   IWICImagingFactory3 = interface(IWICImagingFactory2)
   ['{489b3d8b-624a-4258-b678-7eece70f299d}']
-    function CreateBitmapToneMapper(out ppToneMapper: IWICBitmapToneMapper): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CreateBitmapToneMapper(out ppToneMapper: IWICBitmapToneMapper): HRESULT; stdcall;
   end;
   IID_IWICImagingFactory3 = IWICImagingFactory3;
   {$EXTERNALSYM IID_IWICImagingFactory3}
 
 
 
-  function WICConvertBitmapSource(const dstFormat: WICPixelFormatGUID;  // Destination pixel format
-                                  pISrc: IWICBitmapSource;  // Source bitmap
-                                  out ppIDst: IWICBitmapSource  // Destination bitmap, a copy or addrefed source
-                                  ): HResult; stdcall;
+  function WICConvertBitmapSource(const dstFormat: WICPixelFormatGUID; pISrc: IWICBitmapSource; out ppIDst: IWICBitmapSource): HRESULT; stdcall;
   {$EXTERNALSYM WICConvertBitmapSource}
 
 
-  function WICCreateBitmapFromSection(width: UINT;
-                                      height: UINT;
-                                      const pixelFormat: WICPixelFormatGUID;
-                                      hSection: THandle;
-                                      stride: UINT;
-                                      offset: UINT;
-                                      out ppIBitmap: IWICBitmap): HResult; stdcall;
+  function WICCreateBitmapFromSection(width: UINT; height: UINT; const pixelFormat: WICPixelFormatGUID; hSection: THandle; stride: UINT; offset: UINT; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
   {$EXTERNALSYM WICCreateBitmapFromSection}
 
 
-  function WICCreateBitmapFromSectionEx(width: UINT;
-                                        height: UINT;
-                                        const pixelFormat: WICPixelFormatGUID;
-                                        hSection: THandle;
-                                        stride: UINT;
-                                        offset: UINT;
-                                        desiredAccessLevel: WICSectionAccessLevel;
-                                        out ppIBitmap: IWICBitmap): HResult; stdcall;
+  function WICCreateBitmapFromSectionEx(width: UINT; height: UINT; const pixelFormat: WICPixelFormatGUID; hSection: THandle; stride: UINT; offset: UINT; desiredAccessLevel: WICSectionAccessLevel; out ppIBitmap: IWICBitmap): HRESULT; stdcall;
   {$EXTERNALSYM WICCreateBitmapFromSectionEx}
 
 
-  function WICMapGuidToShortName(const guid: TGuid;
-                                 cchName: UINT;
-                                 wzName: PWCHAR;
-                                 var pcchActual: UINT): HResult; stdcall;
+  function WICMapGuidToShortName(const guid: TGUID; cchName: UINT; wzName: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
   {$EXTERNALSYM WICMapGuidToShortName}
 
 
-  function WICMapShortNameToGuid(wzName: PWCHAR;
-                                 var pguid: TGuid): HResult; stdcall;
+  function WICMapShortNameToGuid(wzName: PWideChar; pguid: PGUID): HRESULT; stdcall;
   {$EXTERNALSYM WICMapShortNameToGuid}
 
 
-  function WICMapSchemaToName(const guidMetadataFormat: TGuid;
-                              pwzSchema: LPWSTR;
-                              cchName: UINT;
-                              var wzName: WCHAR;
-                              var pcchActual: UINT): HResult; stdcall;
+  function WICMapSchemaToName(const guidMetadataFormat: TGUID; pwzSchema: PWideChar; cchName: UINT; wzName: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
   {$EXTERNALSYM WICMapSchemaToName}
 
 type
@@ -3135,7 +2942,8 @@ type
   {$EXTERNALSYM IWICDevelopRawNotificationCallback}
   IWICDevelopRawNotificationCallback = interface(IUnknown)
   ['{95c75a6e-3e8c-4ec2-85a8-aebcc551e59b}']
-    function Notify(NotificationMask: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function Notify(NotificationMask: UINT): HRESULT; stdcall;
   end;
   IID_IWICDevelopRawNotificationCallback = IWICDevelopRawNotificationCallback;
   {$EXTERNALSYM IID_IWICDevelopRawNotificationCallback}
@@ -3148,78 +2956,70 @@ type
   {$EXTERNALSYM IWICDevelopRaw}
   IWICDevelopRaw = interface(IWICBitmapFrameDecode)
   ['{fbec5e44-f7be-4b65-b7f8-c0c81fef026d}']
-    function QueryRawCapabilitiesInfo(var pInfo: WICRawCapabilitiesInfo): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function QueryRawCapabilitiesInfo(pInfo: PWICRawCapabilitiesInfo): HRESULT; stdcall;
 
-    function LoadParameterSet(ParameterSet: WICRawParameterSet): HResult; stdcall;
+    function LoadParameterSet(ParameterSet: WICRawParameterSet): HRESULT; stdcall;
 
-    function GetCurrentParameterSet(out ppCurrentParameterSet: IPropertyBag2): HResult; stdcall;
+    function GetCurrentParameterSet(out ppCurrentParameterSet: IPropertyBag2): HRESULT; stdcall;
 
-    function SetExposureCompensation(ev: Double): HResult; stdcall;
+    function SetExposureCompensation(ev: Double): HRESULT; stdcall;
 
-    function GetExposureCompensation(var pEV: Double): HResult; stdcall;
+    function GetExposureCompensation(pEV: PDouble): HRESULT; stdcall;
 
-    function SetWhitePointRGB(Red: UINT;
-                              Green: UINT;
-                              Blue: UINT): HResult; stdcall;
+    function SetWhitePointRGB(Red: UINT; Green: UINT; Blue: UINT): HRESULT; stdcall;
 
-    function GetWhitePointRGB(var pRed: UINT;
-                              var pGreen: UINT;
-                              var pBlue: UINT): HResult; stdcall;
+    function GetWhitePointRGB(pRed: PUINT; pGreen: PUINT; pBlue: PUINT): HRESULT; stdcall;
 
-    function SetNamedWhitePoint(WhitePoint: WICNamedWhitePoint): HResult; stdcall;
+    function SetNamedWhitePoint(WhitePoint: WICNamedWhitePoint): HRESULT; stdcall;
 
-    function GetNamedWhitePoint(var pWhitePoint: WICNamedWhitePoint): HResult; stdcall;
+    function GetNamedWhitePoint(pWhitePoint: PWICNamedWhitePoint): HRESULT; stdcall;
 
-    function SetWhitePointKelvin(WhitePointKelvin: UINT): HResult; stdcall;
+    function SetWhitePointKelvin(WhitePointKelvin: UINT): HRESULT; stdcall;
 
-    function GetWhitePointKelvin(var pWhitePointKelvin: UINT): HResult; stdcall;
+    function GetWhitePointKelvin(pWhitePointKelvin: PUINT): HRESULT; stdcall;
 
-    function GetKelvinRangeInfo(var pMinKelvinTemp: UINT;
-                                var pMaxKelvinTemp: UINT;
-                                var pKelvinTempStepValue: UINT): HResult; stdcall;
+    function GetKelvinRangeInfo(pMinKelvinTemp: PUINT; pMaxKelvinTemp: PUINT; pKelvinTempStepValue: PUINT): HRESULT; stdcall;
 
-    function SetContrast(Contrast: Double): HResult; stdcall;
+    function SetContrast(Contrast: Double): HRESULT; stdcall;
 
-    function GetContrast(var pContrast: Double): HResult; stdcall;
+    function GetContrast(pContrast: PDouble): HRESULT; stdcall;
 
-    function SetGamma(Gamma: Double): HResult; stdcall;
+    function SetGamma(Gamma: Double): HRESULT; stdcall;
 
-    function GetGamma(var pGamma: Double): HResult; stdcall;
+    function GetGamma(pGamma: PDouble): HRESULT; stdcall;
 
-    function SetSharpness(Sharpness: Double): HResult; stdcall;
+    function SetSharpness(Sharpness: Double): HRESULT; stdcall;
 
-    function GetSharpness(var pSharpness: Double): HResult; stdcall;
+    function GetSharpness(pSharpness: PDouble): HRESULT; stdcall;
 
-    function SetSaturation(Saturation: Double): HResult; stdcall;
+    function SetSaturation(Saturation: Double): HRESULT; stdcall;
 
-    function GetSaturation(var pSaturation: Double): HResult; stdcall;
+    function GetSaturation(pSaturation: PDouble): HRESULT; stdcall;
 
-    function SetTint(Tint: Double): HResult; stdcall;
+    function SetTint(Tint: Double): HRESULT; stdcall;
 
-    function GetTint(var pTint: Double): HResult; stdcall;
+    function GetTint(pTint: PDouble): HRESULT; stdcall;
 
-    function SetNoiseReduction(NoiseReduction: Double): HResult; stdcall;
+    function SetNoiseReduction(NoiseReduction: Double): HRESULT; stdcall;
 
-    function GetNoiseReduction(var pNoiseReduction: Double): HResult; stdcall;
+    function GetNoiseReduction(pNoiseReduction: PDouble): HRESULT; stdcall;
 
-    function SetDestinationColorContext(pColorContext: IWICColorContext): HResult; stdcall;
+    function SetDestinationColorContext(pColorContext: IWICColorContext): HRESULT; stdcall;
 
-    function SetToneCurve(cbToneCurveSize: UINT;
-                          pToneCurve: PWICRawToneCurve): HResult; stdcall;
+    function SetToneCurve(cbToneCurveSize: UINT; pToneCurve: PWICRawToneCurve): HRESULT; stdcall;
 
-    function GetToneCurve(cbToneCurveBufferSize: UINT;
-                          pToneCurve: PWICRawToneCurve;
-                          var pcbActualToneCurveBufferSize: UINT): HResult; stdcall;
+    function GetToneCurve(cbToneCurveBufferSize: UINT; pToneCurve: PWICRawToneCurve; pcbActualToneCurveBufferSize: PUINT): HRESULT; stdcall;
 
-    function SetRotation(Rotation: Double): HResult; stdcall;
+    function SetRotation(Rotation: Double): HRESULT; stdcall;
 
-    function GetRotation(var pRotation: Double): HResult; stdcall;
+    function GetRotation(pRotation: PDouble): HRESULT; stdcall;
 
-    function SetRenderMode(RenderMode: WICRawRenderMode): HResult; stdcall;
+    function SetRenderMode(RenderMode: WICRawRenderMode): HRESULT; stdcall;
 
-    function GetRenderMode(var pRenderMode: WICRawRenderMode): HResult; stdcall;
+    function GetRenderMode(pRenderMode: PWICRawRenderMode): HRESULT; stdcall;
 
-    function SetNotificationCallback(pCallback: IWICDevelopRawNotificationCallback): HResult; stdcall;
+    function SetNotificationCallback(pCallback: IWICDevelopRawNotificationCallback): HRESULT; stdcall;
   end;
   IID_IWICDevelopRaw = IWICDevelopRaw;
   {$EXTERNALSYM IID_IWICDevelopRaw}
@@ -3247,12 +3047,10 @@ type
   {$EXTERNALSYM IWICDdsDecoder}
   IWICDdsDecoder = interface(IUnknown)
   ['{409cd537-8532-40cb-9774-e2feb2df4e9c}']
-    function GetParameters(out pParameters: WICDdsParameters): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetParameters(pParameters: PWICDdsParameters): HRESULT; stdcall;
 
-    function GetFrame(arrayIndex: UINT;
-                      mipLevel: UINT;
-                      sliceIndex: UINT;
-                      var ppIBitmapFrame: IWICBitmapFrameDecode): HResult; stdcall;
+    function GetFrame(arrayIndex: UINT; mipLevel: UINT; sliceIndex: UINT; out ppIBitmapFrame: IWICBitmapFrameDecode): HRESULT; stdcall;
   end;
   IID_IWICDdsDecoder = IWICDdsDecoder;
   {$EXTERNALSYM IID_IWICDdsDecoder}
@@ -3266,14 +3064,12 @@ type
   {$EXTERNALSYM IWICDdsEncoder}
   IWICDdsEncoder = interface(IUnknown)
   ['{5cacdb4c-407e-41b3-b936-d0f010cd6732}']
-    function SetParameters(pParameters: WICDdsParameters): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function SetParameters(pParameters: PWICDdsParameters): HRESULT; stdcall;
 
-    function GetParameters(out pParameters: WICDdsParameters): HResult; stdcall;
+    function GetParameters(pParameters: PWICDdsParameters): HRESULT; stdcall;
 
-    function CreateNewFrame(ppIFrameEncode: IWICBitmapFrameEncode;
-                            out pArrayIndex: UINT;
-                            out pMipLevel: UINT;
-                            out pSliceIndex: UINT): HResult; stdcall;
+    function CreateNewFrame(out ppIFrameEncode: IWICBitmapFrameEncode; pArrayIndex: PUINT; pMipLevel: PUINT; pSliceIndex: PUINT): HRESULT; stdcall;
   end;
   IID_IWICDdsEncoder = IWICDdsEncoder;
   {$EXTERNALSYM IID_IWICDdsEncoder}
@@ -3298,15 +3094,12 @@ type
   {$EXTERNALSYM IWICDdsFrameDecode}
   IWICDdsFrameDecode = interface(IUnknown)
   ['{3d4c0c61-18a4-41e4-bd80-481a4fc9f464}']
-    function GetSizeInBlocks(out pWidthInBlocks: UINT;
-                             out pHeightInBlocks: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetSizeInBlocks(pWidthInBlocks: PUINT; pHeightInBlocks: PUINT): HRESULT; stdcall;
 
-    function GetFormatInfo(var pFormatInfo: WICDdsFormatInfo): HResult; stdcall;
+    function GetFormatInfo(pFormatInfo: PWICDdsFormatInfo): HRESULT; stdcall;
 
-    function CopyBlocks(const prcBoundsInBlocks: WICRect;
-                        cbStride: UINT;
-                        cbBufferSize: UINT;
-                        out pbBuffer: PByte): HResult; stdcall;
+    function CopyBlocks(prcBoundsInBlocks: PWICRect; cbStride: UINT; cbBufferSize: UINT; pbBuffer: PByte): HRESULT; stdcall;
   end;
   IID_IWICDdsFrameDecode = IWICDdsFrameDecode;
   {$EXTERNALSYM IID_IWICDdsFrameDecode}
@@ -3319,40 +3112,26 @@ type
   {$EXTERNALSYM IWICJpegFrameDecode}
   IWICJpegFrameDecode = interface(IUnknown)
   ['{8939F66E-C46A-4c21-A9D1-98B327CE1679}']
-    function DoesSupportIndexing(out pfIndexingSupported: BOOL): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function DoesSupportIndexing(pfIndexingSupported: PBOOL): HRESULT; stdcall;
 
-    function SetIndexing(options: WICJpegIndexingOptions;
-                         horizontalIntervalSize: UINT): HResult; stdcall;
+    function SetIndexing(options: WICJpegIndexingOptions; horizontalIntervalSize: UINT): HRESULT; stdcall;
 
-    function ClearIndexing(): HResult; stdcall;
+    function ClearIndexing(): HRESULT; stdcall;
 
-    function GetAcHuffmanTable(scanIndex: UINT;
-                               tableIndex: UINT;
-                               var pAcHuffmanTable: DXGI_JPEG_AC_HUFFMAN_TABLE): HResult; stdcall;
+    function GetAcHuffmanTable(scanIndex: UINT; tableIndex: UINT; pAcHuffmanTable: PDXGI_JPEG_AC_HUFFMAN_TABLE): HRESULT; stdcall;
 
-    function GetDcHuffmanTable(scanIndex: UINT;
-                               tableIndex: UINT;
-                               var pDcHuffmanTable: DXGI_JPEG_DC_HUFFMAN_TABLE): HResult; stdcall;
+    function GetDcHuffmanTable(scanIndex: UINT; tableIndex: UINT; pDcHuffmanTable: PDXGI_JPEG_DC_HUFFMAN_TABLE): HRESULT; stdcall;
 
-    function GetQuantizationTable(scanIndex: UINT;
-                                  tableIndex: UINT;
-                                  var pQuantizationTable: DXGI_JPEG_QUANTIZATION_TABLE): HResult; stdcall;
+    function GetQuantizationTable(scanIndex: UINT; tableIndex: UINT; pQuantizationTable: PDXGI_JPEG_QUANTIZATION_TABLE): HRESULT; stdcall;
 
-    function GetFrameHeader(out pFrameHeader: WICJpegFrameHeader): HResult; stdcall;
+    function GetFrameHeader(pFrameHeader: PWICJpegFrameHeader): HRESULT; stdcall;
 
-    function GetScanHeader(scanIndex: UINT;
-                           var pScanHeader: PWICJpegScanHeader): HResult; stdcall;
+    function GetScanHeader(scanIndex: UINT; pScanHeader: PWICJpegScanHeader): HRESULT; stdcall;
 
-    function CopyScan(scanIndex: UINT;
-                      scanOffset: UINT;
-                      cbScanData: UINT;
-                      out pbScanData: PByte;
-                      out pcbScanDataActual: UINT): HResult; stdcall;
+    function CopyScan(scanIndex: UINT; scanOffset: UINT; cbScanData: UINT; pbScanData: PByte; pcbScanDataActual: PUINT): HRESULT; stdcall;
 
-    function CopyMinimalStream(streamOffset: UINT;
-                               cbStreamData: UINT;
-                               out pbStreamData: PByte;
-                               out pcbStreamDataActual: UINT): HResult; stdcall;
+    function CopyMinimalStream(streamOffset: UINT; cbStreamData: UINT; pbStreamData: PByte; pcbStreamDataActual: PUINT): HRESULT; stdcall;
   end;
   IID_IWICJpegFrameDecode = IWICJpegFrameDecode;
   {$EXTERNALSYM IID_IWICJpegFrameDecode}
@@ -3365,20 +3144,14 @@ type
   {$EXTERNALSYM IWICJpegFrameEncode}
   IWICJpegFrameEncode = interface(IUnknown)
   ['{2F0C601F-D2C6-468C-ABFA-49495D983ED1}']
-    function GetAcHuffmanTable(scanIndex: UINT;
-                               tableIndex: UINT;
-                               var pAcHuffmanTable: DXGI_JPEG_AC_HUFFMAN_TABLE): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetAcHuffmanTable(scanIndex: UINT; tableIndex: UINT; pAcHuffmanTable: PDXGI_JPEG_AC_HUFFMAN_TABLE): HRESULT; stdcall;
 
-    function GetDcHuffmanTable(scanIndex: UINT;
-                               tableIndex: UINT;
-                               var pDcHuffmanTable: DXGI_JPEG_DC_HUFFMAN_TABLE): HResult; stdcall;
+    function GetDcHuffmanTable(scanIndex: UINT; tableIndex: UINT; pDcHuffmanTable: PDXGI_JPEG_DC_HUFFMAN_TABLE): HRESULT; stdcall;
 
-    function GetQuantizationTable(scanIndex: UINT;
-                                  tableIndex: UINT;
-                                  var pQuantizationTable: DXGI_JPEG_QUANTIZATION_TABLE): HResult; stdcall;
+    function GetQuantizationTable(scanIndex: UINT; tableIndex: UINT; pQuantizationTable: PDXGI_JPEG_QUANTIZATION_TABLE): HRESULT; stdcall;
 
-    function WriteScan(cbScanData: UINT;
-                       pbScanData: PByte): HResult; stdcall;
+    function WriteScan(cbScanData: UINT; pbScanData: PByte): HRESULT; stdcall;
   end;
   IID_IWICJpegFrameEncode = IWICJpegFrameEncode;
   {$EXTERNALSYM IID_IWICJpegFrameEncode}
@@ -3396,6 +3169,15 @@ type
 
   //* end of Additional Prototypes *//
 
+
+
+type
+  IWICBitmapSourceTransform2 = interface(IWICBitmapSourceTransform)
+  ['{C3373FDF-6D39-4E5F-8E79-BF40C0B7ED77}']
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetColorContextsForPixelFormat(pPixelFormat: PWICPixelFormatGUID; cCount: UINT; ppIColorContexts: PIWICColorContext; pcActualCount: PUINT): HRESULT; stdcall;
+  end;
+  IID_IWICBitmapSourceTransform2 = IWICBitmapSourceTransform2;
 
 implementation
 

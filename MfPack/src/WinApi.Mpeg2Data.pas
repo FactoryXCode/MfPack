@@ -10,7 +10,7 @@
 // Release date: 15-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Main Mpeg2Data Library Definition, and interface definitions for
 //              the MPEG-2 Section and Table acquisition functionality
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,11 +73,7 @@ uses
 
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
+  {$ALIGN 1} // SDK #pragma pack(1) applies on Win32 and Win64.
 
   {$I 'WinApiTypes.inc'}
 
@@ -94,8 +90,7 @@ const
   {$EXTERNALSYM CLSID_Mpeg2Data}
 
 
-// pragma(1)  We don't, because Win64 requires an 8-bit alignment.
-//            For Win32 however it should be 1. See above.
+// MPEG2 records retain the SDK one-byte packing on all Windows targets.
 
 const
 
@@ -269,7 +264,7 @@ type
 
   PMpeg2TableSampleHdr = ^Mpeg2TableSampleHdr;
   {$EXTERNALSYM Mpeg2TableSampleHdr}
-  Mpeg2TableSampleHdr = record
+  Mpeg2TableSampleHdr = packed record
     SectionCount: Byte;
     Reserved: array[0..2] of Byte;
     SectionOffsets: array[0..0] of LONG;
@@ -317,7 +312,8 @@ type
                         pMpeg2Data: IMpeg2Data;
                         pContext: PMPEG_CONTEXT;
                         pid: PID;
-                        tid: TID; pFilter: PMPEG2_FILTER;
+                        tid: TID;
+                        pFilter: PMPEG2_FILTER;
                         timeout: DWORD;
                         hDoneEvent: THANDLE): HResult; stdcall;
 

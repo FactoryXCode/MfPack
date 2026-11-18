@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -70,6 +70,7 @@ uses
   {WinApi}
   WinApi.Windows,
   {WinApi.DirectX}
+  WinApi.DirectX.DCommon,
   WinApi.DirectX.D2D1,
   WinApi.DirectX.D2D1_1,
   WinApi.DirectX.D2D1Effects_1,
@@ -111,6 +112,7 @@ type
   {$EXTERNALSYM ID2D1GeometryRealization}
   ID2D1GeometryRealization = interface(ID2D1Resource)
   ['{a16907d7-bc02-4801-99e8-8cf7f485f774}']
+    // SDK native virtual methods.
 
   end;
   IID_ID2D1GeometryRealization = ID2D1GeometryRealization;
@@ -126,20 +128,12 @@ type
   {$EXTERNALSYM ID2D1DeviceContext1}
   ID2D1DeviceContext1 = interface(ID2D1DeviceContext)
   ['{d37f57e4-6908-459f-a199-e72f24f79987}']
+    // SDK native virtual methods.
+    function CreateFilledGeometryRealization(geometry: ID2D1Geometry; flatteningTolerance: Single; out geometryRealization: ID2D1GeometryRealization): HRESULT; stdcall; overload;
 
-    function CreateFilledGeometryRealization(geometry: ID2D1Geometry;
-                                             flatteningTolerance: Single;
-                                             out geometryRealization: ID2D1GeometryRealization): HResult; stdcall;
+    function CreateStrokedGeometryRealization(geometry: ID2D1Geometry; flatteningTolerance: Single; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle; out geometryRealization: ID2D1GeometryRealization): HRESULT; stdcall; overload;
 
-    function CreateStrokedGeometryRealization(geometry: ID2D1Geometry;
-                                              flatteningTolerance: Single;
-                                              strokeWidth: Single;
-                                              {in_opt} strokeStyle: ID2D1StrokeStyle;
-                                              out geometryRealization: ID2D1GeometryRealization): HResult; stdcall;
-
-    procedure DrawGeometryRealization(geometryRealization: ID2D1GeometryRealization;
-                                      brush: ID2D1Brush) stdcall;
-
+    procedure DrawGeometryRealization(geometryRealization: ID2D1GeometryRealization; brush: ID2D1Brush); stdcall; overload;
   end;
   IID_ID2D1DeviceContext1 = ID2D1DeviceContext1;
   {$EXTERNALSYM IID_ID2D1DeviceContext1}
@@ -155,20 +149,12 @@ type
   {$EXTERNALSYM ID2D1Device1}
   ID2D1Device1 = interface(ID2D1Device)
   ['{d21768e1-23a4-4823-a14b-7c3eba85d658}']
+    // SDK native virtual methods.
+    function GetRenderingPriority(): D2D1_RENDERING_PRIORITY; stdcall; overload;
 
+    procedure SetRenderingPriority(renderingPriority: D2D1_RENDERING_PRIORITY); stdcall; overload;
 
-    // Retrieves the rendering priority currently set on the device.
-    function GetRenderingPriority(): D2D1_RENDERING_PRIORITY; stdcall;
-
-
-    // Sets the rendering priority of the device.
-    procedure SetRenderingPriority(renderingPriority: D2D1_RENDERING_PRIORITY); stdcall;
-
-
-    // Creates a new device context with no initially assigned target.
-    function CreateDeviceContext(options: D2D1_DEVICE_CONTEXT_OPTIONS;
-                                 out deviceContext1: ID2D1DeviceContext1): HResult; stdcall;
-
+    function CreateDeviceContext(options: D2D1_DEVICE_CONTEXT_OPTIONS; out deviceContext1: ID2D1DeviceContext1): HRESULT; stdcall; overload;
   end;
   IID_ID2D1Device1 = ID2D1Device1;
   {$EXTERNALSYM IID_ID2D1Device1}
@@ -183,11 +169,8 @@ type
   {$EXTERNALSYM ID2D1Factory2}
   ID2D1Factory2 = interface(ID2D1Factory1)
   ['{94f81a73-9212-4376-9c58-b16a3a0d3992}']
-
-    // This creates a new Direct2D device from the given IDXGIDevice.
-    function CreateDevice(dxgiDevice: IDXGIDevice;
-                          out d2dDevice1: ID2D1Device1): HResult; stdcall;
-
+    // SDK native virtual methods.
+    function CreateDevice(dxgiDevice: IDXGIDevice; out d2dDevice1: ID2D1Device1): HRESULT; stdcall; overload;
   end;
   IID_ID2D1Factory2 = ID2D1Factory2;
   {$EXTERNALSYM IID_ID2D1Factory2}
@@ -203,11 +186,8 @@ type
   {$EXTERNALSYM ID2D1CommandSink1}
   ID2D1CommandSink1 = interface(ID2D1CommandSink)
   ['{9eb767fd-4269-4467-b8c2-eb30cb305743}']
-
-    // This method is called if primitiveBlend value was added after Windows 8.
-    // SetPrimitiveBlend method is used for Win8 values (_SOURCE_OVER and _COPY).
-    function SetPrimitiveBlend1(primitiveBlend: D2D1_PRIMITIVE_BLEND): HResult; stdcall;
-
+    // SDK native virtual methods.
+    function SetPrimitiveBlend1(primitiveBlend: D2D1_PRIMITIVE_BLEND): HRESULT; stdcall; overload;
   end;
   IID_ID2D1CommandSink1 = ID2D1CommandSink1;
   {$EXTERNALSYM IID_ID2D1CommandSink1}
@@ -217,7 +197,7 @@ type
 
   // Computes the maximum factor by which a given transform can stretch any vector.
   // See: https://docs.microsoft.com/en-us/windows/desktop/api/d2d1_2/nf-d2d1_2-d2d1computemaximumscalefactor
-  function D2D1ComputeMaximumScaleFactor(matrix: D2D1_MATRIX_3X2_F): Single; stdcall;
+  function D2D1ComputeMaximumScaleFactor(const matrix: D2D1_MATRIX_3X2_F): Single; stdcall;
   {$EXTERNALSYM D2D1ComputeMaximumScaleFactor}
 
 //#endif // #if NTDDI_VERSION >= NTDDI_WINBLUE

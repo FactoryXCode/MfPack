@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: D3D11On12 is a mapping layer, which maps graphics commands from D3D11 to D3D12.
 //              D3D11On12 is not an implementation of the D3D11 API,
 //              but is instead an implementation of the D3D11 usermode DDI (device driver interface).
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -75,6 +75,7 @@ uses
   {WinApi}
   Winapi.Windows,
   {DirectX}
+  WinApi.WinApiTypes,
   Winapi.DirectX.D3DCommon,
   Winapi.DirectX.D3D11,
   Winapi.DirectX.D3D12;
@@ -136,16 +137,28 @@ uses
   //
   //////////////////////////////////////////////////////////////////////////////
 
+  type
+  PFN_D3D11ON12_CREATE_DEVICE = function(pDevice: IUnknown;
+                                         Flags: UINT;
+                                         pFeatureLevels: PD3D_FEATURE_LEVEL;
+                                         FeatureLevels: UINT;
+                                         ppCommandQueues: PPointer;
+                                         NumQueues: UINT;
+                                         NodeMask: UINT;
+                                         ppDevice: PID3D11Device;
+                                         ppImmediateContext: PID3D11DeviceContext;
+                                         pChosenFeatureLevel: PD3D_FEATURE_LEVEL): HRESULT; stdcall;
+
   function D3D11On12CreateDevice(pDevice: IUnknown;
-                                 Flags: UINT;
-                                 const pFeatureLevels: PD3D_FEATURE_LEVEL;
-                                 FeatureLevels: PUINT;
-                                 ppCommandQueues: IUnknown;
-                                 NumQueues: UINT;
-                                 NodeMask: UINT;
-                                 ppDevice: PID3D11Device;
-                                 ppImmediateContext: PID3D11DeviceContext;
-                                 out pChosenFeatureLevel: D3D_FEATURE_LEVEL): HRESULT; stdcall;
+                               Flags: UINT;
+                               pFeatureLevels: PD3D_FEATURE_LEVEL;
+                               FeatureLevels: UINT;
+                               ppCommandQueues: PPointer;
+                               NumQueues: UINT;
+                               NodeMask: UINT;
+                               ppDevice: PID3D11Device;
+                               ppImmediateContext: PID3D11DeviceContext;
+                               pChosenFeatureLevel: PD3D_FEATURE_LEVEL): HRESULT; stdcall;
   {$EXTERNALSYM D3D11On12CreateDevice}
 
 
@@ -172,7 +185,7 @@ type
     ['{85611E73-70A9-490E-9614-A9E302777904}']
 
     function CreateWrappedResource(pResource12: IUnknown;
-                                   const pFlags11: PD3D11_RESOURCE_FLAGS;
+                                   pFlags11: PD3D11_RESOURCE_FLAGS;
                                    InState: D3D12_RESOURCE_STATES;
                                    OutState: D3D12_RESOURCE_STATES;
                                    const riid: TGUID;
@@ -183,10 +196,42 @@ type
 
     procedure AcquireWrappedResources(ppResources: PID3D11Resource;
                                       NumResources: UINT); stdcall;
-
   end;
   IID_ID3D11On12Device = ID3D11On12Device;
   {$EXTERNALSYM IID_ID3D11On12Device}
+
+
+  // Interface ID3D11On12Device1
+  // ===========================
+  //
+  ID3D11On12Device1 = interface(ID3D11On12Device)
+    ['{BDB64DF4-EA2F-4C70-B861-AAAB1258BB5D}']
+
+    function GetD3D12Device(const riid: TGUID;
+                            ppvDevice: PPointer): HRESULT; stdcall;
+
+  end;
+  IID_ID3D11On12Device1 = ID3D11On12Device1;
+
+
+  // Interface ID3D11On12Device2
+  // ===========================
+  //
+  ID3D11On12Device2 = interface(ID3D11On12Device1)
+    ['{DC90F331-4740-43FA-866E-67F12CB58223}']
+
+    function UnwrapUnderlyingResource(pResource11: ID3D11Resource;
+                                      pCommandQueue: ID3D12CommandQueue;
+                                      const riid: TGUID;
+                                      ppvResource12: PPointer): HRESULT; stdcall;
+
+    function ReturnUnderlyingResource(pResource11: ID3D11Resource;
+                                      NumSync: UINT;
+                                      pSignalValues: PUINT64;
+                                      ppFences: PID3D12Fence): HRESULT; stdcall;
+
+  end;
+  IID_ID3D11On12Device2 = ID3D11On12Device2;
 
 
   // Additional Prototypes for ALL interfaces
@@ -199,7 +244,7 @@ implementation
 
 
 const
-  D3D11on12lib = 'd3d11on12.dll';
+  D3D11on12lib = 'd3d11.dll';
 
 {$WARN SYMBOL_PLATFORM OFF}
 

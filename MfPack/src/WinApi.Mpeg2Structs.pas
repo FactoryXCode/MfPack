@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Definitions for the common structures used in WinApi.Mpeg2Data.pas
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -64,16 +64,15 @@ unit WinApi.Mpeg2Structs;
 interface
 
 uses
+
+  {WinApi}
   WinApi.WinApiTypes,
+  {MPeg2}
   WinApi.Mpeg2Bits;
 
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
+  {$ALIGN 1} // SDK #pragma pack(1) applies on Win32 and Win64.
 
   {$I 'WinApiTypes.inc'}
 
@@ -107,9 +106,9 @@ type
 type
 
   PMPEG_CURRENT_NEXT_BIT = ^MPEG_CURRENT_NEXT_BIT;
-  MPEG_CURRENT_NEXT_BIT     = (
-    MPEG_SECTION_IS_NEXT    = 0,
-    MPEG_SECTION_IS_CURRENT = 1);
+  MPEG_CURRENT_NEXT_BIT = (MPEG_SECTION_IS_NEXT = 0,
+                           MPEG_SECTION_IS_CURRENT = 1
+                          );
   {$EXTERNALSYM MPEG_CURRENT_NEXT_BIT}
 
 //
@@ -118,7 +117,7 @@ type
 
   PTID_EXTENSION = ^TID_EXTENSION;
   {$EXTERNALSYM PTID_EXTENSION}
-  TID_EXTENSION = record
+  TID_EXTENSION = packed record
     wTidExt: WORD;
     wCount: WORD;
   end;
@@ -133,14 +132,14 @@ type
 
   PSECTION = ^SECTION;
   {$EXTERNALSYM PSECTION}
-  SECTION = record
+  SECTION = packed record
     TableId: TID;
     Header: record
     case integer of
       0: (S: MPEG_HEADER_BITS_MIDL);
       1: (W: WORD);
     end;
-    SectionData: PByte;  // Array size is Header.S.SectionLength
+    SectionData: array[0..0] of Byte;  // Array size is Header.S.SectionLength
   end;
   {$EXTERNALSYM SECTION}
 
@@ -153,7 +152,7 @@ type
 
   PLONG_SECTION = ^LONG_SECTION;
   {$EXTERNALSYM PLONG_SECTION}
-  LONG_SECTION  = record
+  LONG_SECTION  = packed record
 
     TableId: TID;
     header: record
@@ -171,7 +170,7 @@ type
 
     SectionNumber: Byte;
     LastSectionNumber: Byte;
-    RemainingData: PByte;    // Array size is Header.S.SectionLength - 5
+    RemainingData: array[0..0] of Byte;    // Array size is Header.S.SectionLength - 5
   end;
   {$EXTERNALSYM LONG_SECTION}
 
@@ -184,7 +183,7 @@ type
 
   PDSMCC_SECTION = ^DSMCC_SECTION;
   {$EXTERNALSYM PDSMCC_SECTION}
-  DSMCC_SECTION = record
+  DSMCC_SECTION = packed record
     TableId: TID;
     Header: record
     case integer of
@@ -208,7 +207,7 @@ type
     Reserved: Byte;
     AdaptationLength: Byte;
     MessageLength: WORD;
-    RemainingData: PByte;
+    RemainingData: array[0..0] of Byte;
   end;
   {$EXTERNALSYM DSMCC_SECTION}
 
@@ -221,7 +220,7 @@ type
 
   PMPEG_RQST_PACKET = ^MPEG_RQST_PACKET;
   {$EXTERNALSYM PMPEG_RQST_PACKET}
-  MPEG_RQST_PACKET = record
+  MPEG_RQST_PACKET = packed record
     dwLength: DWORD;
     pSection: PSECTION;
   end;
@@ -229,9 +228,9 @@ type
 
   {$EXTERNALSYM PMPEG_PACKET_LIST}
   PMPEG_PACKET_LIST = ^MPEG_PACKET_LIST;
-  MPEG_PACKET_LIST = record
+  MPEG_PACKET_LIST = packed record
     wPacketCount: WORD;
-    PacketList: PMPEG_RQST_PACKET;  // pointer to array of MPEG_RQST_PACKET
+    PacketList: array[0..0] of PMPEG_RQST_PACKET;  // pointer to array of MPEG_RQST_PACKET
   end;
   {$EXTERNALSYM MPEG_PACKET_LIST}
 
@@ -244,7 +243,7 @@ type
 type
 
   PDSMCC_FILTER_OPTIONS = ^DSMCC_FILTER_OPTIONS;
-  DSMCC_FILTER_OPTIONS = record
+  DSMCC_FILTER_OPTIONS = packed record
     fSpecifyProtocol: BOOL;          // If True, Protocol should be set to desired value
     Protocol: Byte;
     fSpecifyType: BOOL;              // If True, Type should be set to desired value
@@ -276,7 +275,7 @@ type
 type
 
   PATSC_FILTER_OPTIONS = ^ATSC_FILTER_OPTIONS;
-  ATSC_FILTER_OPTIONS = record
+  ATSC_FILTER_OPTIONS = packed record
     fSpecifyEtmId: BOOL;            // If True, EtmId should be set to desired value
     EtmId: DWORD;
   end; // 8 BYTES
@@ -290,7 +289,7 @@ type
 type
 
   PDVB_EIT_FILTER_OPTIONS = ^DVB_EIT_FILTER_OPTIONS;
-  DVB_EIT_FILTER_OPTIONS = record
+  DVB_EIT_FILTER_OPTIONS = packed record
     fSpecifySegment: BOOL;          // If True, bSegment should be set to desired value
     bSegment: Byte;
   end; // 5 BYTES
@@ -305,7 +304,7 @@ type
 
   PMPEG2_FILTER = ^MPEG2_FILTER;
   {$EXTERNALSYM PMPEG2_FILTER}
-  MPEG2_FILTER = record
+  MPEG2_FILTER = packed record
     bVersionNumber: Byte;             // Must be set to 1 or more to match filter definition
     wFilterSize: WORD;                // Size of total filter structure. Version 1 filter is 73 bytes.
     fUseRawFilteringBits: BOOL;       // If True, Filter and Mask fields should be set to desired value, all other
@@ -331,7 +330,7 @@ type
 
   PMPEG2_FILTER2 = ^MPEG2_FILTER2;
   {$EXTERNALSYM PMPEG2_FILTER2}
-  MPEG2_FILTER2 = record
+  MPEG2_FILTER2 = packed record
     case integer of
 
       0: (  bVersionNumber: Byte;
@@ -382,7 +381,7 @@ type
 
   PMPEG_STREAM_BUFFER = ^MPEG_STREAM_BUFFER;
   {$EXTERNALSYM PMPEG_STREAM_BUFFER}
-  MPEG_STREAM_BUFFER = record
+  MPEG_STREAM_BUFFER = packed record
     hr: HResult;
     dwDataBufferSize: DWORD;
     dwSizeOfDataRead: DWORD;
@@ -398,7 +397,7 @@ type
 
 type
   PMPEG_TIME = ^MPEG_TIME;
-  MPEG_TIME = record
+  MPEG_TIME = packed record
     Hours: Byte;                    // Legal Range: 0 to 23
     Minutes: Byte;                  // Legal Range: 0 to 59
     Seconds: Byte;                  // Legal Range: 0 to 59
@@ -410,7 +409,7 @@ type
   {$EXTERNALSYM MPEG_DURATION}
 
   PMPEG_DATE = ^MPEG_DATE;
-  MPEG_DATE = record
+  MPEG_DATE = packed record
     Date: Byte;                     // Legal Range: 1 to 31
     Month: Byte;                    // Legal Range: 1 to 12
     Year: WORD;                     // Legal Range: 1900 to 2100
@@ -418,7 +417,7 @@ type
   {$EXTERNALSYM MPEG_DATE}
 
   PMPEG_DATE_AND_TIME = ^MPEG_DATE_AND_TIME;
-  MPEG_DATE_AND_TIME = record
+  MPEG_DATE_AND_TIME = packed record
     D: MPEG_DATE;
     T: MPEG_TIME;
   end;
@@ -432,27 +431,26 @@ type
 type
 
   PMPEG_CONTEXT_TYPE = ^MPEG_CONTEXT_TYPE;
-  MPEG_CONTEXT_TYPE = (
-    MPEG_CONTEXT_BCS_DEMUX,
-    MPEG_CONTEXT_WINSOCK
+  MPEG_CONTEXT_TYPE = (MPEG_CONTEXT_BCS_DEMUX = 0,
+                       MPEG_CONTEXT_WINSOCK = 1
                       );
   {$EXTERNALSYM MPEG_CONTEXT_TYPE}
 
   PMPEG_BCS_DEMUX = ^MPEG_BCS_DEMUX;
-  MPEG_BCS_DEMUX = record
+  MPEG_BCS_DEMUX = packed record
     AVMGraphId: DWORD;
   end;
   {$EXTERNALSYM MPEG_BCS_DEMUX}
 
   PMPEG_WINSOCK = ^MPEG_WINSOCK;
-  MPEG_WINSOCK = record
+  MPEG_WINSOCK = packed record
     AVMGraphId: DWORD;
   end;
   {$EXTERNALSYM MPEG_WINSOCK}
 
 
   PMPEG_CONTEXT = ^MPEG_CONTEXT;
-  MPEG_CONTEXT = record
+  MPEG_CONTEXT = packed record
 
     _Type: MPEG_CONTEXT_TYPE;
     U: record
@@ -486,7 +484,7 @@ type
 
   PMPEG_SERVICE_REQUEST = ^MPEG_SERVICE_REQUEST;
   {$EXTERNALSYM PMPEG_SERVICE_REQUEST}
-  MPEG_SERVICE_REQUEST = record
+  MPEG_SERVICE_REQUEST = packed record
     _Type: MPEG_REQUEST_TYPE;
     Context: MPEG_CONTEXT;
     Pid: PID;
@@ -498,7 +496,7 @@ type
 
   PMPEG_SERVICE_RESPONSE = ^MPEG_SERVICE_RESPONSE;
   {$EXTERNALSYM PMPEG_SERVICE_RESPONSE}
-  MPEG_SERVICE_RESPONSE = record
+  MPEG_SERVICE_RESPONSE = packed record
     IPAddress: DWORD;
     Port: WORD;
   end;
@@ -515,7 +513,7 @@ type
   {$EXTERNALSYM PDSMCC_ELEMENT}
   P_DSMCC_ELEMENT = PDSMCC_ELEMENT;
   {$EXTERNALSYM P_DSMCC_ELEMENT}
-  _DSMCC_ELEMENT = record
+  _DSMCC_ELEMENT = packed record
     pid: PID;
     bComponentTag: Byte;
     dwCarouselId: DWORD;
@@ -531,7 +529,7 @@ type
   {$EXTERNALSYM PMPE_ELEMENT}
   P_MPE_ELEMENT = PMPE_ELEMENT;
   {$EXTERNALSYM P_MPE_ELEMENT}
-  _MPE_ELEMENT = record
+  _MPE_ELEMENT = packed record
     pid: PID;
     bComponentTag: Byte;
     pNext: P_MPE_ELEMENT;
@@ -547,7 +545,7 @@ type
 
 type
   PMPEG_STREAM_FILTER = ^_MPEG_STREAM_FILTER;
-  _MPEG_STREAM_FILTER = record
+  _MPEG_STREAM_FILTER = packed record
     wPidValue: WORD;                    // PID value
     dwFilterSize: DWORD;                // size of filter in bits
     fCrcEnabled: BOOL;                  // enable/disable CRC check
@@ -555,7 +553,7 @@ type
     rgchMask: array[0..15] of Byte;    // filter mask
   end;
   {$EXTERNALSYM _MPEG_STREAM_FILTER}
-  MPEG_STREAM_FILTER = ^_MPEG_STREAM_FILTER;
+  MPEG_STREAM_FILTER = _MPEG_STREAM_FILTER;
   {$EXTERNALSYM MPEG_STREAM_FILTER}
 
 //#undef BIG_ENDIAN_MACHINE

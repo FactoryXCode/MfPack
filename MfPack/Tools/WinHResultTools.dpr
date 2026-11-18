@@ -2,6 +2,10 @@ program WinHResultTools;
 
 uses
   Vcl.Forms,
+  System.SysUtils,
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
+  WinApi.MediaFoundationApi.MfApi,
   HrDlg in 'HrDlg.pas' {dlgHrTools},
   Tools in 'Tools.pas',
   WinApi.Dbg.D3DError in '..\src\debug\WinApi.Dbg.D3DError.pas',
@@ -18,9 +22,28 @@ uses
 {$R *.res}
 
 begin
-  Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TdlgHrTools, dlgHrTools);
-  Application.CreateForm(TdlgMediaTransformTool, dlgMediaTransformTool);
-  Application.Run;
+  if CoInitializeEx(nil,COINIT_APARTMENTTHREADED) < 0 then raise Exception.Create('COM initialization failed.');
+  try
+    if MFStartup(MF_VERSION,MFSTARTUP_FULL) < 0 then raise Exception.Create('Media Foundation initialization failed.');
+    try
+      Application.Initialize;
+      Application.MainFormOnTaskbar := True;
+      Application.CreateForm(TdlgHrTools,dlgHrTools);
+      if (ParamCount = 1) and (ParamStr(1) = '--smoke') then
+        begin
+          dlgHrTools.cbxAutoPaste.Checked := False;
+          dlgHrTools.rbHLD.Checked := True;
+          dlgHrTools.edHrHex.Text := '$80004005';
+          dlgHrTools.butSearchClick(nil);
+          if Pos('E_FAIL',UnicodeString(dlgHrTools.mmoDescription.Text)) = 0 then
+            raise Exception.Create('Lookup initialization check failed.');
+        end
+      else
+        Application.Run;
+    finally
+      FreeAndNil(dlgMediaTransformTool);
+      FreeAndNil(dlgHrTools);
+      MFShutdown;
+    end;
+  finally CoUninitialize;end;
 end.

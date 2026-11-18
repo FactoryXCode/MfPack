@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Return ccde definitions of the Win32 HResults.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -102,6 +102,14 @@ begin
   Reference[0] := 'https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/705fb797-2175-4a90-b5a3-3918024b10b8';
 
   case aHResult of
+    0: begin
+         HrStr := 'S_OK';
+         HrDescr := 'The operation completed successfully.';
+       end;
+    1: begin
+         HrStr := 'S_FALSE';
+         HrDescr := 'The operation completed with a false result.';
+       end;
     LongInt($00030200)          : begin
                                     HrStr := 'STG_S_CONVERTED';
                                     HrDescr := 'The underlying file was converted to compound file format.';
@@ -732,7 +740,7 @@ begin
                                     HrStr := 'NS_I_MANUAL_PROXY';
                                     HrDescr := 'The proxy setting is manual.';
                                   end;
-    LongInt($40262009)          : begin
+    LongInt($C0262009)          : begin
                                     HrStr := 'ERROR_GRAPHICS_DRIVER_MISMATCH';
                                     HrDescr := 'The kernel driver detected a version mismatch between it and the user mode driver.';
                                   end;
@@ -5308,11 +5316,11 @@ begin
                                                'Save your work and reboot the system to restore full display functionality.' +
                                                'The next time you reboot the machine a dialog will be displayed giving you a chance to report this failure to Microsoft.';
                                   end;
-    LongInt($80261001)          : begin
+    LongInt($261001)          : begin
                                     HrStr := 'ERROR_MONITOR_NO_DESCRIPTOR';
                                     HrDescr := 'Monitor descriptor could not be obtained.';
                                   end;
-    LongInt($80261002)          : begin
+    LongInt($261002)          : begin
                                     HrStr := 'ERROR_MONITOR_UNKNOWN_DESCRIPTOR_FORMAT';
                                     HrDescr := 'Format of the obtained monitor descriptor is not supported by this release.';
                                   end;
@@ -6216,9 +6224,8 @@ begin
                                     HrDescr := 'The volume cannot be encrypted because the file system is not supported.';
                                   end;
     LongInt($80310014)          : begin
-                                    HrStr := 'FVE_E_FAILED_BAD_FS';
-                                    HrDescr := 'The file system is inconsistent.' +
-                                               'Run CHKDSK.';
+                                    HrStr := 'FVE_E_BAD_PARTITION_SIZE';
+                                    HrDescr := 'The file system size exceeds the partition size. Reformat the partition before using BitLocker.';
                                   end;
     LongInt($80310015)          : begin
                                     HrStr := 'FVE_E_NOT_SUPPORTED';
@@ -6431,8 +6438,8 @@ begin
                                     HrDescr := 'The object is built in and, therefore, cannot be deleted.';
                                   end;
     LongInt($80320018)          : begin
-                                    HrStr := 'FWP_E_TOO_MANY_BOOTTIME_FILTERS';
-                                    HrDescr := 'The maximum number of boot-time filters has been reached.';
+                                    HrStr := 'FWP_E_TOO_MANY_CALLOUTS';
+                                    HrDescr := 'The maximum number of callouts has been reached.';
                                   end;
     LongInt($80320019)          : begin
                                     HrStr := 'FWP_E_NOTIFICATION_DROPPED';
@@ -6559,12 +6566,12 @@ begin
                                     HrDescr := 'The notification function for a callout returned an error.';
                                   end;
     LongInt($80320038)          : begin
-                                    HrStr := 'FWP_E_INCOMPATIBLE_AUTH_CONFIG';
-                                    HrDescr := 'The IPsec authentication configuration is not compatible with the authentication type.';
+                                    HrStr := 'FWP_E_INVALID_AUTH_TRANSFORM';
+                                    HrDescr := 'The IPsec authentication transform is not valid.';
                                   end;
     LongInt($80320039)          : begin
-                                    HrStr := 'FWP_E_INCOMPATIBLE_CIPHER_CONFIG';
-                                    HrDescr := 'The IPsec cipher configuration is not compatible with the cipher type.';
+                                    HrStr := 'FWP_E_INVALID_CIPHER_TRANSFORM';
+                                    HrDescr := 'The IPsec cipher transform is not valid.';
                                   end;
     LongInt($80340002)          : begin
                                     HrStr := 'ERROR_NDIS_INTERFACE_CLOSING';
@@ -12266,13 +12273,13 @@ begin
                                     HrStr := 'ERROR_GRAPHICS_OPM_ALL_HDCP_HARDWARE_ALREADY_IN_USE';
                                     HrDescr := 'IOPMVideoOutput''s Configure() method cannot enable HDCP because the display adapter''s HDCP hardware is already being used by other physical outputs.';
                                   end;
-    LongInt($C0262519)          : begin
+    LongInt($C026251A)          : begin
                                     HrStr := 'ERROR_GRAPHICS_OPM_VIDEO_OUTPUT_NO_LONGER_EXISTS';
                                     HrDescr := 'The operating system asynchronously destroyed this OPM video output because the operating system''s state changed.' +
                                                'This error typically occurs because the monitor physical device object (PDO) associated with this video output was removed,' +
                                                'the monitor PDO associated with this video output was stopped, the video output''s session became a nonconsole session or the video output''s desktop became an inactive desktop.';
                                   end;
-    LongInt($C026251A)          : begin
+    LongInt($C026251B)          : begin
                                     HrStr := 'ERROR_GRAPHICS_OPM_SESSION_TYPE_CHANGE_IN_PROGRESS';
                                     HrDescr := 'IOPMVideoOutput''s methods cannot be called when a session is changing its type.' +
                                                'There are currently three types of sessions: console, disconnected and remote (remote desktop protocol [RDP] or Independent Computing Architecture [ICA]).';
@@ -12377,8 +12384,7 @@ begin
         HrStr := 'Unknown identifier.';
         HrDescr := 'Unknown HResult code.';
         HeaderFile := 'Unknown.';
-        FWinHResultCracker.ClearResults();
-        hr := ERROR_NOT_FOUND;
+        hr := HResult($80070490);
       end;
   end;
   Result := hr;
@@ -12395,9 +12401,7 @@ begin
   hr := S_OK;
 
   // Get the regioncode
-  s := IntToHex(aHResult, 8);
-  s := '$' + RightStr(s, 4);
-  li := StrToInt(s);
+  li := DWORD(aHResult) and $FFFF;
 
   // Find the region.
   if (li <= 499) then
@@ -12424,7 +12428,7 @@ begin
     aRegion := 'Graphics error.'
   else
     begin
-      hr := ERROR_NOT_FOUND;
+      hr := HResult($80070490);
       aRegion := 'Unknown Region error.';
     end;
   Result := hr;

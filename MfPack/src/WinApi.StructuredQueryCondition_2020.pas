@@ -10,7 +10,7 @@
 // Release date: 06-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This header is used by Windows Search.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This is the newest WinApi.StructuredQueryCondition.pas
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -153,18 +153,21 @@ const
 
 type
 
+  PPWideChar = ^PWideChar;
+
   // Interface IRichChunk
   // ====================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRichChunk);'}
   {$EXTERNALSYM IRichChunk}
+  PIRichChunk = ^IRichChunk;
   IRichChunk = interface(IUnknown)
   ['{4FDEF69C-DBC9-454e-9910-B34F3C64B510}']
 
-    function GetData(var pFirstPos: ULONG;
-                     var pLength: ULONG;
-                     var ppsz: PWideChar;
-                     var pValue: PROPVARIANT): HResult; stdcall;
+    function GetData(pFirstPos: PULONG;
+                     pLength: PULONG;
+                     ppsz: PPWideChar;
+                     pValue: PPROPVARIANT): HResult; stdcall;
   end;
   IID_IRichChunk = IRichChunk;
   {$EXTERNALSYM IID_IRichChunk}
@@ -190,9 +193,9 @@ type
     // If this is a negation node, then if riid is IID_ICondition, *ppv will be set to a single ICondition, otherwise an enumeration of one.
     // If this is a conjunction or a disjunction, *ppv will be set to an enumeration of the subconditions.
 
-    function GetComparisonInfo(var ppszPropertyName: PWideChar;
-                               var pcop: CONDITION_OPERATION;
-                               var ppropvar: PROPVARIANT): HResult; stdcall;
+    function GetComparisonInfo(ppszPropertyName: PPWideChar;
+                               pcop: PConditionOperation;
+                               ppropvar: PPROPVARIANT): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // Retrieve the property name, operation and value from the leaf node.
     // Any one of ppszPropertyName, pcop and ppropvar may be NULL.
@@ -208,9 +211,9 @@ type
     // character-normalized form of the value.
     // Otherwise, ppszNormalization will be set to some (character-normalized) string representation of the value.
 
-    function GetInputTerms(out ppPropertyTerm: IRichChunk;
-                           out ppOperationTerm: IRichChunk;
-                           out ppValueTerm: IRichChunk): HResult; stdcall;
+    function GetInputTerms(ppPropertyTerm: PIRichChunk;
+                           ppOperationTerm: PIRichChunk;
+                           ppValueTerm: PIRichChunk): HResult; stdcall;
     // Return information about what parts of the input produced the property, the operation and the value.
     // Any one of ppPropertyTerm, ppOperationTerm and ppValueTerm may be NIL.
     // For a leaf node returned by the parser, the position information of each IRichChunk identifies the tokens that
@@ -238,9 +241,9 @@ type
     // ppszLocaleName will be set to the locale name of the value,
     // which may be NIL.
 
-    function GetLeafConditionInfo(var ppropkey: PROPVARIANT;
-                                  var pcop: CONDITION_OPERATION;
-                                  var ppropvar: PROPVARIANT): HResult; stdcall;
+    function GetLeafConditionInfo(ppropkey: PPROPERTYKEY;
+                                  pcop: PConditionOperation;
+                                  ppropvar: PPROPVARIANT): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // Retrieve the property key, operation and value from the leaf node.
     // Any one of ppropkey, pcop and ppropvar may be NIL.

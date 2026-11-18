@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 13-02-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Variant and PropVariant helpers.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -885,19 +885,15 @@ type
   {$EXTERNALSYM IEnumSTATDATA}
   IEnumSTATDATA = interface(IUnknown)
   ['{00000105-0000-0000-C000-000000000046}']
-    function Next(celt: ULONG;   // The number of items to be retrieved.
-                  out elt: PSTATDATA;  // array of STATDATA
-                  pceltFetched: PDWORD): HResult; stdcall; // The number of items that were retrieved.
-                                                           // This parameter is always less than or equal to
-                                                           // the number of items requested.
-                                                           // This parameter can be Nil if celt is 1.
 
-    function Skip(celt: DWORD): HResult; stdcall;
+    // SDK native virtual methods. Pointer parameters preserve optional buffers and arrays.
+    function Next(celt: ULONG; rgelt: PSTATDATA; pceltFetched: PULONG): HRESULT; stdcall;
 
-    function Reset(): HResult; stdcall;
+    function Skip(celt: ULONG): HRESULT; stdcall;
 
-    function Clone(out Enum: IEnumStatData): HResult; stdcall;
+    function Reset(): HRESULT; stdcall;
 
+    function Clone(out ppenum: IEnumSTATDATA): HRESULT; stdcall;
   end;
   IID_IEnumSTATDATA = IEnumSTATDATA;
   {$EXTERNALSYM IID_IEnumSTATDATA}
@@ -1736,7 +1732,7 @@ type
                                dwDestContext: DWORD;
                  {in Reserved} pvDestContext: Pointer; // must be nil
                                mshlflags: DWORD;
-                               out pSize: PDWORD): HResult; stdcall;
+                               out pSize: DWORD): HResult; stdcall;
 
     function MarshalInterface(pStm: IStream;
                               const riid: REFIID;

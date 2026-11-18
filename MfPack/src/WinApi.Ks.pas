@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Windows Driver Model/Connection and Streaming Architecture (WDM-CSA)
 // ions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1340,18 +1340,18 @@ type
   //
   PKS_FRAMING_ITEM = ^KS_FRAMING_ITEM;
   KS_FRAMING_ITEM = record
-  case integer of
-    0: (MemoryType       : TGUID;
-        BusType          : TGUID;
-        MemoryFlags      : ULONG;
-        BusFlags         : ULONG;
-        Flags            : ULONG;
-        Frames           : ULONG; // total number of allowable outstanding frames
-        MemoryTypeWeight : ULONG; // this memory type Weight pin-wide
-        PhysicalRange    : KS_FRAMING_RANGE;
-        FramingRange     : KS_FRAMING_RANGE_WEIGHTED);
-    1: (FileAlignment    : ULONG;
-        FramePitch       : LONG);  // When KSALLOCATOR_FLAG_2D_BUFFER_REQUIRED is set this field specifies the required 2d pitch for the buffer i.e. the width + stride
+    MemoryType: TGUID;
+    BusType: TGUID;
+    MemoryFlags: ULONG;
+    BusFlags: ULONG;
+    Flags: ULONG;
+    Frames: ULONG;
+    case Integer of
+      0: (FileAlignment: ULONG;
+          MemoryTypeWeight: ULONG;
+          PhysicalRange: KS_FRAMING_RANGE;
+          FramingRange: KS_FRAMING_RANGE_WEIGHTED);
+      1: (FramePitch: LONG);
   end;
   {$EXTERNALSYM KS_FRAMING_ITEM}
 
@@ -1361,7 +1361,7 @@ type
     PinFlags          : ULONG;
     OutputCompression : KS_COMPRESSION;
     PinWeight         : ULONG;          // this pin framing's Weight graph-wide
-    FramingItem       : array [0..High(Integer) div SizeOf(KS_FRAMING_ITEM) - 1] of KS_FRAMING_ITEM;
+    FramingItem       : array[0..0] of KS_FRAMING_ITEM;
   end;
   {$EXTERNALSYM KSALLOCATOR_FRAMING_EX}
 

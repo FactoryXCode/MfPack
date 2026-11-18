@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MFPack - WIC
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Used by Windows Imaging Component (WIC) API.
 //              This module contains interfaces used by codec and metadata handler authors.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,7 +31,7 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -363,6 +363,7 @@ const
 // Enums =======================================================================
 
 type
+  PULARGE_INTEGER = ^ULARGE_INTEGER;
   PWICMetadataCreationOptions = ^WICMetadataCreationOptions;
   WICMetadataCreationOptions = DWord;
   {$EXTERNALSYM WICMetadataCreationOptions}
@@ -419,14 +420,14 @@ type
   {$EXTERNALSYM IWICMetadataBlockReader}
   IWICMetadataBlockReader = interface (IUnknown)
   ['{FEAA2A8D-B3F3-43E4-B25C-D1DE990A1AE1}']
-    function GetContainerFormat(out pguidContainerFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetContainerFormat(pguidContainerFormat: PGUID): HRESULT; stdcall;
 
-    function GetCount(out pcCount: UINT): HResult; stdcall;
+    function GetCount(pcCount: PUINT): HRESULT; stdcall;
 
-    function GetReaderByIndex(nIndex: UINT;
-                              out ppIMetadataReader: IWICMetadataReader): HResult; stdcall;
+    function GetReaderByIndex(nIndex: UINT; out ppIMetadataReader: IWICMetadataReader): HRESULT; stdcall;
 
-    function GetEnumerator(out ppIEnumMetadata: IEnumUnknown): HResult; stdcall;
+    function GetEnumerator(out ppIEnumMetadata: IEnumUnknown): HRESULT; stdcall;
   end;
   IID_IWICMetadataBlockReader = IWICMetadataBlockReader;
   {$EXTERNALSYM IID_IWICMetadataBlockReader}
@@ -439,17 +440,16 @@ type
   {$EXTERNALSYM IWICMetadataBlockWriter}
   IWICMetadataBlockWriter = interface(IWICMetadataBlockReader)
   ['{08FB9676-B444-41E8-8DBE-6A53A542BFF1}']
-    function InitializeFromBlockReader(pIMDBlockReader: IWICMetadataBlockReader): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function InitializeFromBlockReader(pIMDBlockReader: IWICMetadataBlockReader): HRESULT; stdcall;
 
-    function GetWriterByIndex(nIndex: UINT;
-                              out ppIMetadataWriter: IWICMetadataWriter): HResult; stdcall;
+    function GetWriterByIndex(nIndex: UINT; out ppIMetadataWriter: IWICMetadataWriter): HRESULT; stdcall;
 
-    function AddWriter(pIMetadataWriter: IWICMetadataWriter): HResult; stdcall;
+    function AddWriter(pIMetadataWriter: IWICMetadataWriter): HRESULT; stdcall;
 
-    function SetWriterByIndex(nIndex: UINT;
-                              pIMetadataWriter: IWICMetadataWriter): HResult; stdcall;
+    function SetWriterByIndex(nIndex: UINT; pIMetadataWriter: IWICMetadataWriter): HRESULT; stdcall;
 
-    function RemoveWriterByIndex(nIndex: UINT): HResult; stdcall;
+    function RemoveWriterByIndex(nIndex: UINT): HRESULT; stdcall;
   end;
   IID_IWICMetadataBlockWriter = IWICMetadataBlockWriter;
   {$EXTERNALSYM IID_IWICMetadataBlockWriter}
@@ -462,22 +462,18 @@ type
   {$EXTERNALSYM IWICMetadataReader}
   IWICMetadataReader = interface (IUnknown)
   ['{9204FE99-D8FC-4FD5-A001-9536B067A899}']
-    function GetMetadataFormat(out pguidMetadataFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetMetadataFormat(pguidMetadataFormat: PGUID): HRESULT; stdcall;
 
-    function GetMetadataHandlerInfo(out ppIHandler: IWICMetadataHandlerInfo): HResult; stdcall;
+    function GetMetadataHandlerInfo(out ppIHandler: IWICMetadataHandlerInfo): HRESULT; stdcall;
 
-    function GetCount(out pcCount: UINT): HResult; stdcall;
+    function GetCount(pcCount: PUINT): HRESULT; stdcall;
 
-    function GetValueByIndex(nIndex: UINT;
-                             var pvarSchema: PROPVARIANT;
-                             var pvarId: PROPVARIANT;
-                             var pvarValue: PROPVARIANT): HResult; stdcall;
+    function GetValueByIndex(nIndex: UINT; pvarSchema: PPROPVARIANT; pvarId: PPROPVARIANT; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function GetValue(const pvarSchema: PROPVARIANT;
-                      const pvarId: PROPVARIANT;
-                      var pvarValue: PROPVARIANT): HResult; stdcall;
+    function GetValue(pvarSchema: PPROPVARIANT; pvarId: PPROPVARIANT; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function GetEnumerator(out ppIEnumMetadata: IWICEnumMetadataItem): HResult; stdcall;
+    function GetEnumerator(out ppIEnumMetadata: IWICEnumMetadataItem): HRESULT; stdcall;
   end;
   IID_IWICMetadataReader = IWICMetadataReader;
   {$EXTERNALSYM IID_IWICMetadataReader}
@@ -491,18 +487,14 @@ type
   {$EXTERNALSYM IWICMetadataWriter}
   IWICMetadataWriter = interface (IWICMetadataReader)
   ['{F7836E16-3BE0-470B-86BB-160D0AECD7DE}']
-    function SetValue(const pvarSchema: PROPVARIANT;
-                      const pvarId: PROPVARIANT;
-                      const pvarValue: PROPVARIANT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function SetValue(pvarSchema: PPROPVARIANT; pvarId: PPROPVARIANT; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function SetValueByIndex(const pvarSchema: PROPVARIANT;
-                             const pvarId: PROPVARIANT;
-                             const pvarValue: PROPVARIANT): HResult; stdcall;
+    function SetValueByIndex(nIndex: UINT; pvarSchema: PPROPVARIANT; pvarId: PPROPVARIANT; pvarValue: PPROPVARIANT): HRESULT; stdcall;
 
-    function RemoveValue(const pvarSchema: PROPVARIANT;
-                         const pvarId: PROPVARIANT): HResult; stdcall;
+    function RemoveValue(pvarSchema: PPROPVARIANT; pvarId: PPROPVARIANT): HRESULT; stdcall;
 
-    function RemoveValueByIndex(nIndex: UINT): HResult; stdcall;
+    function RemoveValueByIndex(nIndex: UINT): HRESULT; stdcall;
   end;
   IID_IWICMetadataWriter = IWICMetadataWriter;
   {$EXTERNALSYM IID_IWICMetadataWriter}
@@ -516,13 +508,14 @@ type
   {$EXTERNALSYM IWICStreamProvider}
   IWICStreamProvider = interface (IUnknown)
   ['{449494BC-B468-4927-96D7-BA90D31AB505}']
-    function GetStream(out ppIStream: IStream): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetStream(out ppIStream: IStream): HRESULT; stdcall;
 
-    function GetPersistOptions(out pdwPersistOptions: DWORD): HResult; stdcall;
+    function GetPersistOptions(pdwPersistOptions: PDWORD): HRESULT; stdcall;
 
-    function GetPreferredVendorGUID(out pguidPreferredVendor: TGuid): HResult; stdcall;
+    function GetPreferredVendorGUID(pguidPreferredVendor: PGUID): HRESULT; stdcall;
 
-    function RefreshStream(): HResult; stdcall;
+    function RefreshStream(): HRESULT; stdcall;
   end;
   IID_IWICStreamProvider = IWICStreamProvider;
   {$EXTERNALSYM IID_IWICStreamProvider}
@@ -536,13 +529,10 @@ type
   {$EXTERNALSYM IWICPersistStream}
   IWICPersistStream = interface(IPersistStream)
   ['{00675040-6908-45F8-86A3-49C7DFD6D9AD}']
-    function LoadEx(pIStream: IStream;
-                    const pguidPreferredVendor: TGuid;
-                    dwPersistOptions: DWORD): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function LoadEx(pIStream: IStream; pguidPreferredVendor: PGUID; dwPersistOptions: DWORD): HRESULT; stdcall;
 
-    function SaveEx(pIStream: IStream;
-                    dwPersistOptions: DWORD;
-                    fClearDirty: BOOL): HResult; stdcall;
+    function SaveEx(pIStream: IStream; dwPersistOptions: DWORD; fClearDirty: BOOL): HRESULT; stdcall;
   end;
   IID_IWICPersistStream = IWICPersistStream;
   {$EXTERNALSYM IID_IWICPersistStream}
@@ -555,26 +545,20 @@ type
   {$EXTERNALSYM IWICMetadataHandlerInfo}
   IWICMetadataHandlerInfo = interface(IWICComponentInfo)
   ['{ABA958BF-C672-44D1-8D61-CE6DF2E682C2}']
-    function GetMetadataFormat(out pguidMetadataFormat: TGuid): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetMetadataFormat(pguidMetadataFormat: PGUID): HRESULT; stdcall;
 
-    function GetContainerFormats(cContainerFormats: UINT;  //The size of the pguidContainerFormats array.
-                                 var pguidContainerFormats: PGuid;  // pointer to array of Guids
-                                 out pcchActual: UINT  // The actual number of GUIDs added to the array.
-                                 ): HResult; stdcall;
+    function GetContainerFormats(cContainerFormats: UINT; pguidContainerFormats: PGUID; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetDeviceManufacturer(cchDeviceManufacturer: UINT;
-                                   var wzDeviceManufacturer: PWideChar;
-                                   out pcchActual: UINT): HResult; stdcall;
+    function GetDeviceManufacturer(cchDeviceManufacturer: UINT; wzDeviceManufacturer: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function GetDeviceModels(cchDeviceModels: UINT;
-                             var wzDeviceModels: PWideChar;
-                             out pcchActual: UINT): HResult; stdcall;
+    function GetDeviceModels(cchDeviceModels: UINT; wzDeviceModels: PWideChar; pcchActual: PUINT): HRESULT; stdcall;
 
-    function DoesRequireFullStream(out pfRequiresFullStream: BOOL): HResult; stdcall;
+    function DoesRequireFullStream(pfRequiresFullStream: PBOOL): HRESULT; stdcall;
 
-    function DoesSupportPadding(out pfSupportsPadding: BOOL): HResult; stdcall;
+    function DoesSupportPadding(pfSupportsPadding: PBOOL): HRESULT; stdcall;
 
-    function DoesRequireFixedSize(out pfFixedSize: BOOL): HResult; stdcall;
+    function DoesRequireFixedSize(pfFixedSize: PBOOL): HRESULT; stdcall;
   end;
   IID_IWICMetadataHandlerInfo = IWICMetadataHandlerInfo;
   {$EXTERNALSYM IID_IWICMetadataHandlerInfo}
@@ -598,17 +582,12 @@ type
   {$EXTERNALSYM IWICMetadataReaderInfo}
   IWICMetadataReaderInfo = interface(IWICMetadataHandlerInfo)
   ['{EEBF1F5B-07C1-4447-A3AB-22ACAF78A804}']
-    function GetPatterns(guidContainerFormat: TGUID;
-                         cbSize: UINT;
-                         var  pPattern: PWICMetadataPattern;
-                         out pcCount: UINT;
-                         out pcbActual: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetPatterns(const guidContainerFormat: TGUID; cbSize: UINT; pPattern: PWICMetadataPattern; pcCount: PUINT; pcbActual: PUINT): HRESULT; stdcall;
 
-    function MatchesPattern(guidContainerFormat: TGUID;
-                            pIStream: IStream;
-                            out pfMatches: BOOL): HResult; stdcall;
+    function MatchesPattern(const guidContainerFormat: TGUID; pIStream: IStream; pfMatches: PBOOL): HRESULT; stdcall;
 
-    function CreateInstance(out ppIReader: IWICMetadataReader): HResult; stdcall;
+    function CreateInstance(out ppIReader: IWICMetadataReader): HRESULT; stdcall;
   end;
   IID_IWICMetadataReaderInfo = IWICMetadataReaderInfo;
   {$EXTERNALSYM IID_IWICMetadataReaderInfo}
@@ -632,12 +611,10 @@ type
   {$EXTERNALSYM IWICMetadataWriterInfo}
   IWICMetadataWriterInfo = interface(IWICMetadataHandlerInfo)
   ['{B22E3FBA-3925-4323-B5C1-9EBFC430F236}']
-    function GetHeader(const guidContainerFormat: TGUID;
-                       cbSize: UINT;
-                       var pHeader: WICMetadataHeader;
-                       var pcbActual: UINT): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function GetHeader(const guidContainerFormat: TGUID; cbSize: UINT; pHeader: PWICMetadataHeader; pcbActual: PUINT): HRESULT; stdcall;
 
-    function CreateInstance(out ppIWriter: IWICMetadataWriter): HResult; stdcall;
+    function CreateInstance(out ppIWriter: IWICMetadataWriter): HRESULT; stdcall;
   end;
   IID_IWICMetadataWriterInfo = IWICMetadataWriterInfo;
   {$EXTERNALSYM IID_IWICMetadataWriterInfo}
@@ -650,57 +627,33 @@ type
   {$EXTERNALSYM IWICComponentFactory}
   IWICComponentFactory = interface(IWICImagingFactory)
   ['{412D0C3A-9650-44FA-AF5B-DD2A06C8E8FB}']
-    function CreateMetadataReader(const guidMetadataFormat: TGUID;
-                                  const pguidVendor: TGUID;
-                                  dwOptions: DWORD;
-                                  pIStream: IStream;
-                                  out ppIReader: IWICMetadataReader): HResult; stdcall;
+    // SDK native virtual methods; optional buffers and arrays use pointer parameters.
+    function CreateMetadataReader(const guidMetadataFormat: TGUID; pguidVendor: PGUID; dwOptions: DWORD; pIStream: IStream; out ppIReader: IWICMetadataReader): HRESULT; stdcall;
 
-    function CreateMetadataReaderFromContainer(const guidContainerFormat: TGUID;
-                                               const pguidVendor: TGUID;
-                                               dwOptions: DWORD;
-                                               pIStream: IStream;
-                                               out ppIReader: IWICMetadataReader): HResult; stdcall;
+    function CreateMetadataReaderFromContainer(const guidContainerFormat: TGUID; pguidVendor: PGUID; dwOptions: DWORD; pIStream: IStream; out ppIReader: IWICMetadataReader): HRESULT; stdcall;
 
-    function CreateMetadataWriter(const guidMetadataFormat: TGUID;
-                                  const pguidVendor: TGUID;
-                                  dwMetadataOptions: DWORD;
-                                  out ppIWriter: IWICMetadataWriter): HResult; stdcall;
+    function CreateMetadataWriter(const guidMetadataFormat: TGUID; pguidVendor: PGUID; dwMetadataOptions: DWORD; out ppIWriter: IWICMetadataWriter): HRESULT; stdcall;
 
-    function CreateMetadataWriterFromReader(pIReader: IWICMetadataReader;
-                                            const pguidVendor: TGuid;
-                                            out ppIWriter: IWICMetadataWriter): HResult; stdcall;
+    function CreateMetadataWriterFromReader(pIReader: IWICMetadataReader; pguidVendor: PGUID; out ppIWriter: IWICMetadataWriter): HRESULT; stdcall;
 
-    function CreateQueryReaderFromBlockReader(pIBlockReader: IWICMetadataBlockReader;
-                                              out ppIQueryReader: IWICMetadataQueryReader): HResult; stdcall;
+    function CreateQueryReaderFromBlockReader(pIBlockReader: IWICMetadataBlockReader; out ppIQueryReader: IWICMetadataQueryReader): HRESULT; stdcall;
 
-    function CreateQueryWriterFromBlockWriter(pIBlockWriter: IWICMetadataBlockWriter;
-                                              out ppIQueryWriter: IWICMetadataQueryWriter): HResult; stdcall;
+    function CreateQueryWriterFromBlockWriter(pIBlockWriter: IWICMetadataBlockWriter; out ppIQueryWriter: IWICMetadataQueryWriter): HRESULT; stdcall;
 
-    function CreateEncoderPropertyBag(ppropOptions: PPROPBAG2;
-                                      cCount: UINT;
-                                      out ppIPropertyBag: IPropertyBag2): HResult; stdcall;
+    function CreateEncoderPropertyBag(ppropOptions: PPROPBAG2; cCount: UINT; out ppIPropertyBag: IPropertyBag2): HRESULT; stdcall;
   end;
   IID_IWICComponentFactory = IWICComponentFactory;
   {$EXTERNALSYM IID_IWICComponentFactory}
 
 
 
-  function WICMatchMetadataContent(const guidContainerFormat: TGUID;
-                                   const pguidVendor: TGUID;
-                                   pIStream: IStream;
-                                   out pguidMetadataFormat: TGUID): HResult; stdcall;
+  function WICMatchMetadataContent(const guidContainerFormat: TGUID; pguidVendor: PGUID; pIStream: IStream; pguidMetadataFormat: PGUID): HRESULT; stdcall;
   {$EXTERNALSYM WICMatchMetadataContent}
 
-  function WICSerializeMetadataContent(const guidContainerFormat: TGUID;
-                                       pIWriter: IWICMetadataWriter;
-                                       dwPersistOptions: DWORD;
-                                       pIStream: IStream): HResult; stdcall;
+  function WICSerializeMetadataContent(const guidContainerFormat: TGUID; pIWriter: IWICMetadataWriter; dwPersistOptions: DWORD; pIStream: IStream): HRESULT; stdcall;
   {$EXTERNALSYM WICSerializeMetadataContent}
 
-  function WICGetMetadataContentSize(const guidContainerFormat: TGUID;
-                                     pIWriter: IWICMetadataWriter;
-                                     out pcbSize: ULARGE_INTEGER): HResult; stdcall;
+  function WICGetMetadataContentSize(const guidContainerFormat: TGUID; pIWriter: IWICMetadataWriter; pcbSize: PULARGE_INTEGER): HRESULT; stdcall;
   {$EXTERNALSYM WICGetMetadataContentSize}
 
 

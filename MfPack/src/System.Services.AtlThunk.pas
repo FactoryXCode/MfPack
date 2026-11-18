@@ -10,7 +10,7 @@
 // Release date: 15/01/2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:  This header is part of the System Services API.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -91,7 +91,7 @@ type
 
 
   // Allocates space in memory for an ATL thunk.
-  procedure AtlThunk_AllocateData(); stdcall;
+  function AtlThunk_AllocateData(): PAtlThunkData_t; stdcall;
   {$EXTERNALSYM AtlThunk_AllocateData}
 
   // Initializes an ATL thunk.
@@ -101,7 +101,7 @@ type
   {$EXTERNALSYM AtlThunk_InitData}
 
   // Returns an executable function corresponding to the AtlThunkData_t parameter.
-  procedure AtlThunk_DataToCode(unnamedParam1: PAtlThunkData_t); stdcall;
+  function AtlThunk_DataToCode(unnamedParam1: PAtlThunkData_t): Pointer; stdcall;
   {$EXTERNALSYM AtlThunk_DataToCode}
 
   // Frees memory associated with an ATL thunk.
@@ -122,9 +122,9 @@ const
 
 
 {$WARN SYMBOL_PLATFORM OFF}
-  procedure AtlThunk_AllocateData; external AtlthunkLib name 'AtlThunk_AllocateData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AtlThunk_AllocateData; external AtlthunkLib name 'AtlThunk_AllocateData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   procedure AtlThunk_InitData; external AtlthunkLib name 'AtlThunk_InitData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  procedure AtlThunk_DataToCode; external AtlthunkLib name 'AtlThunk_DataToCode' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AtlThunk_DataToCode; external AtlthunkLib name 'AtlThunk_DataToCode' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   procedure AtlThunk_FreeData; external AtlthunkLib name 'AtlThunk_FreeData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
 

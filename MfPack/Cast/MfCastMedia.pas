@@ -23,7 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/09/2026 All                 Report audio decoder availability per track.
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -144,37 +144,37 @@ type
 
 implementation
 
-
-function MfCastCountSourceReaderStreams(
-  const AReader: IMFSourceReader): DWORD;
+function MfCastCountSourceReaderStreams(const AReader: IMFSourceReader): DWORD;
 const
   // Protect against media handlers which never report an invalid stream.
   MAX_SOURCE_READER_STREAMS = 1024;
+  
 var
   StreamIndex: DWORD;
   MediaType: IMFMediaType;
   Status: HRESULT;
+  
 begin
+
   Result := 0;
   if not Assigned(AReader) then
     Exit;
-
   StreamIndex := 0;
-  while StreamIndex < MAX_SOURCE_READER_STREAMS do
+  
+  while (StreamIndex < MAX_SOURCE_READER_STREAMS) do
     begin
       MediaType := nil;
       Status := AReader.GetNativeMediaType(StreamIndex,
                                            0,
                                            @MediaType);
+                                           
       // Probe the same native media types the inspector consumes below. This
       // avoids GetStreamSelection, which can block in the Windows MKV source
       // when called from the cast worker's MTA apartment.
-      if Status <> S_OK then
+      if (Status <> S_OK) then
         Break;
-
       Inc(StreamIndex);
     end;
-
   Result := StreamIndex;
 end;
 
@@ -183,12 +183,13 @@ procedure MfCastAppendTrack(var ATracks: TMfCastTrackInfoArray;
                             const ATrack: TMfCastTrackInfo);
 var
   Index: Integer;
-
+  
 begin
-
+ 
   Index := Length(ATracks);
   SetLength(ATracks,
             Index + 1);
+            
   ATracks[Index] := ATrack;
 end;
 
@@ -198,17 +199,18 @@ function MfCastGetStreamString(const AReader: IMFSourceReader;
                                const AKey: TGUID): string;
 var
   Value: PROPVARIANT;
-
+  
 begin
 
   Result := '';
   PropVariantInit(Value);
+  
   try
     if FAILED(AReader.GetPresentationAttribute(AStreamIndex,
                                                AKey,
                                                Value)) then
       Exit;
-
+      
     case Value.vt of
       VT_LPWSTR: if Assigned(Value.pwszVal) then
                    Result := Value.pwszVal;
@@ -217,6 +219,7 @@ begin
       VT_LPSTR:  if Assigned(Value.pszVal) then
                    Result := string(AnsiString(Value.pszVal));
     end;
+    
   finally
     PropVariantClear(Value);
   end;
@@ -231,14 +234,14 @@ var
   RequestedType: IMFMediaType;
   Channels: UINT32;
   SamplesPerSecond: UINT32;
-
+  
 begin
 
   Result := False;
   Reader := nil;
   RequestedType := nil;
   CurrentType := nil;
-
+ 
   // Use a fresh reader for every probe. A source reader which has rejected one
   // compressed stream can retain a pending media-type transition and produce
   // misleading results for the next stream in some Matroska handlers.
@@ -246,40 +249,50 @@ begin
                                         nil,
                                         Reader)) then
     Exit;
+    
   if FAILED(Reader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
                                       False)) then
     Exit;
+    
   if FAILED(Reader.SetStreamSelection(AStreamIndex,
                                       True)) then
     Exit;
-
+    
   if FAILED(MFCreateMediaType(RequestedType)) then
     Exit;
+    
   if FAILED(RequestedType.SetGUID(MF_MT_MAJOR_TYPE,
                                   MFMediaType_Audio)) then
     Exit;
+    
   if FAILED(RequestedType.SetGUID(MF_MT_SUBTYPE,
                                   MFAudioFormat_PCM)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
                                     16)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
                                     48000)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
                                     2)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK,
                                     $00000003)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
                                     4)) then
     Exit;
+    
   if FAILED(RequestedType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                     192000)) then
     Exit;
-
+    
   // SetCurrentMediaType asks Media Foundation to resolve and instantiate the
   // decoder. It succeeds for a compatible registered third-party MFT as well
   // as for an in-box decoder.
@@ -287,17 +300,20 @@ begin
                                        0,
                                        RequestedType)) then
     Exit;
+    
   if FAILED(Reader.GetCurrentMediaType(AStreamIndex,
                                        @CurrentType)) then
     Exit;
+    
   if FAILED(CurrentType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
                                   Channels)) or (Channels = 0) then
     Exit;
+    
   if FAILED(CurrentType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
                                   SamplesPerSecond)) or
      (SamplesPerSecond = 0) then
     Exit;
-
+    
   Result := True;
 end;
 
@@ -319,18 +335,16 @@ end;
 function MfCastSourcePath(const ASourceName: string): string;
 var
   DelimiterPos: Integer;
-
+  
 begin
 
   Result := ASourceName;
-
   DelimiterPos := Pos('?',
                       Result);
   if (DelimiterPos > 0) then
     Delete(Result,
            DelimiterPos,
            MaxInt);
-
   DelimiterPos := Pos('#',
                       Result);
   if (DelimiterPos > 0) then
@@ -567,82 +581,84 @@ begin
                          [DWORD(Result)]));
     if SUCCEEDED(Result) then
       begin
-      ActualVideo := False;
-      ActualAudio := False;
-      StreamCount := MfCastCountSourceReaderStreams(Reader);
-      if Assigned(FLogger) then
-        FLogger.Log(cllDebug,
-                    'MediaInspector',
-                    Format('Source reader exposes %d stream(s).',
-                           [StreamCount]));
+        ActualVideo := False;
+        ActualAudio := False;
+        StreamCount := MfCastCountSourceReaderStreams(Reader);
+        
+        if Assigned(FLogger) then
+          FLogger.Log(cllDebug,
+                      'MediaInspector',
+                      Format('Source reader exposes %d stream(s).',
+                             [StreamCount]));
 
-      if (StreamCount > 0) then
-      for StreamIndex := 0 to StreamCount - 1 do
-        begin
-          MediaType := nil;
-          if FAILED(Reader.GetNativeMediaType(StreamIndex,
-                                              0,
-                                              @MediaType)) or
-             (not Assigned(MediaType)) or
-             FAILED(MediaType.GetGUID(MF_MT_MAJOR_TYPE,
-                                      MajorType)) or
-             FAILED(MediaType.GetGUID(MF_MT_SUBTYPE,
-                                      Subtype)) then
-            Continue;
-
-          if IsEqualGUID(MajorType,
-                         MFMediaType_Video) and (not ActualVideo) then
+        if (StreamCount > 0) then
+          for StreamIndex := 0 to StreamCount - 1 do
             begin
-              ActualVideo := True;
-              AMediaInfo.VideoSubtype := Subtype;
-
-              MFGetAttributeSize(MediaType,
-                                 MF_MT_FRAME_SIZE,
-                                 AMediaInfo.VideoWidth,
-                                 AMediaInfo.VideoHeight);
-
-              MFGetAttributeRatio(MediaType,
-                                  MF_MT_FRAME_RATE,
-                                  AMediaInfo.FrameRateNumerator,
-                                  AMediaInfo.FrameRateDenominator);
-
-              Value := 0;
-              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AVG_BITRATE,
-                                               Value)) then
-                AMediaInfo.VideoBitrate := Value;
-            end
-          else
+              MediaType := nil;
+              
+              if FAILED(Reader.GetNativeMediaType(StreamIndex,
+                                                  0,
+                                                  @MediaType)) or
+               (not Assigned(MediaType)) or
+               FAILED(MediaType.GetGUID(MF_MT_MAJOR_TYPE,
+                                        MajorType)) or
+               FAILED(MediaType.GetGUID(MF_MT_SUBTYPE,
+                                        Subtype)) then
+                 Continue;
+                 
             if IsEqualGUID(MajorType,
-                           MFMediaType_Audio) and (not ActualAudio) then
-            begin
-              ActualAudio := True;
-              AMediaInfo.AudioSubtype := Subtype;
-              Value := 0;
+                           MFMediaType_Video) and (not ActualVideo) then
+              begin
+                ActualVideo := True;
+                AMediaInfo.VideoSubtype := Subtype;
+                MFGetAttributeSize(MediaType,
+                                   MF_MT_FRAME_SIZE,
+                                   AMediaInfo.VideoWidth,
+                                   AMediaInfo.VideoHeight);
+                                   
+                MFGetAttributeRatio(MediaType,
+                                    MF_MT_FRAME_RATE,
+                                    AMediaInfo.FrameRateNumerator,
+                                    AMediaInfo.FrameRateDenominator);
+                Value := 0;
+                
+                if SUCCEEDED(MediaType.GetUINT32(MF_MT_AVG_BITRATE,
+                                                 Value)) then
+                  AMediaInfo.VideoBitrate := Value;
+              end
+            else
+              if IsEqualGUID(MajorType,
+                             MFMediaType_Audio) and (not ActualAudio) then
+                begin
+                  ActualAudio := True;
+                  AMediaInfo.AudioSubtype := Subtype;
+                  Value := 0;
 
-              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                                               Value)) then
-                AMediaInfo.AudioSampleRate := Value;
-
-              Value := 0;
-
-              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
-                                               Value)) then
-                AMediaInfo.AudioChannels := Value;
-
-              Value := 0;
-
-              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                                               Value)) then
-                AMediaInfo.AudioBitrate := Value * 8;
-            end;
-        end;
-
+                  if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                                   Value)) then
+                    AMediaInfo.AudioSampleRate := Value;
+                    
+                  Value := 0;
+              
+                  if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                                   Value)) then
+                    AMediaInfo.AudioChannels := Value;
+                  
+                  Value := 0;
+              
+                  if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                                   Value)) then
+                    AMediaInfo.AudioBitrate := Value * 8;
+                end;
+          end;
+          
         if ActualVideo or ActualAudio then
           begin
             AMediaInfo.HasVideo := ActualVideo;
             AMediaInfo.HasAudio := ActualAudio;
           end;
       end;
+      
   except
     on E: Exception do
       if Assigned(FLogger) then
@@ -651,10 +667,9 @@ begin
                     'Optional Media Foundation metadata enrichment failed: ' +
                     E.Message);
   end;
-
+  
   MediaType := nil;
   Reader := nil;
-
   // Source-reader enrichment is optional. Extension-based inspection above
   // remains sufficient for choosing the safe transcode route.
   Result := S_OK;
@@ -697,13 +712,10 @@ end;
 
 procedure TMfCastMediaPlanner.SetLogger(const ALogger: IMfCastLogger);
 begin
-
   FLogger := ALogger;
-
   if Assigned(FCapabilityResolver) then
     FCapabilityResolver.SetLogger(ALogger);
 end;
-
 
 function TMfCastMediaInspector.EnumerateTracks(const ASourceName: string;
                                                out ATracks: TMfCastTrackInfoArray): HRESULT;
@@ -717,38 +729,37 @@ var
   I: Integer;
   Hr: HRESULT;
   Subtype: TGUID;
-  IsSelected: Boolean;
-
+  IsSelected: BOOL;
+  
 begin
-
+  
   SetLength(ATracks,
             0);
-
   if (Trim(ASourceName) = '') then
     begin
       Result := E_INVALIDARG;
       Exit;
     end;
-
+    
   Reader := nil;
   Result := MFCreateSourceReaderFromURL(PWideChar(WideString(ASourceName)),
                                         nil,
                                         Reader);
   if FAILED(Result) then
     Exit;
-
   StreamIndex := 0;
-
+ 
   while (StreamIndex < 256) do
     begin
       MediaType := nil;
+      
       Hr := Reader.GetNativeMediaType(StreamIndex,
                                       0,
                                       @MediaType);
-
+                                      
       if Hr = MF_E_INVALIDSTREAMNUMBER then
         Break;
-
+        
       if SUCCEEDED(Hr) and Assigned(MediaType) and
          SUCCEEDED(MediaType.GetGUID(MF_MT_MAJOR_TYPE,
                                      MajorType)) then
@@ -757,19 +768,17 @@ begin
           Track.Source := ctsMediaFoundation;
           Track.StreamIndex := StreamIndex;
           Track.Supported := True;
-
           Track.Language := MfCastGetStreamString(Reader,
                                                    StreamIndex,
                                                    MF_SD_LANGUAGE);
-
           Track.Name := MfCastGetStreamString(Reader,
                                                StreamIndex,
                                                MF_SD_STREAM_NAME);
-
           IsSelected := False;
           if SUCCEEDED(Reader.GetStreamSelection(StreamIndex,
                                                  IsSelected)) then
             Track.Selected := IsSelected;
+
           if SUCCEEDED(MediaType.GetGUID(MF_MT_SUBTYPE,
                                          Subtype)) then
             Track.SubType := GUIDToString(Subtype);
@@ -804,6 +813,7 @@ begin
                                 Track);
             end;
         end;
+
       Inc(StreamIndex);
     end;
 
@@ -821,7 +831,6 @@ begin
           Track.Source := ctsMatroska
         else
           Track.Source := ctsMediaFoundation;
-
         Track.StreamIndex := EmbeddedTracks[I].StreamIndex;
         Track.Supported := EmbeddedTracks[I].Supported;
         Track.TrackType := 'TEXT';
@@ -834,7 +843,6 @@ begin
         MfCastAppendTrack(ATracks,
                           Track);
       end;
-
   Result := S_OK;
 end;
 
@@ -856,7 +864,6 @@ begin
 
   ASelectedMediaMode := ARequestedMediaMode;
   ASelectedSubtitleMode := ARequestedSubtitleMode;
-
   // Cast Audio receivers need a presentation without a video track. Decode
   // the selected source audio and publish it as an AAC elementary stream.
   if MfCastDeviceIsAudioOnly(ADevice) and AMediaInfo.HasVideo then
@@ -866,13 +873,11 @@ begin
           Result := MF_E_INVALIDMEDIATYPE;
           Exit;
         end;
-
       ASelectedMediaMode := cmmTranscodeAudioOnly;
       ASelectedSubtitleMode := csmNone;
       Result := S_OK;
       Exit;
     end;
-
   if (ARequestedMediaMode <> cmmAutomatic) then
     begin
       Result := S_OK;
@@ -902,7 +907,6 @@ begin
                                    Profile.AllowedAudioSubtypes) or
                   (Profile.AllowUnknownFormats and
                    (Length(Profile.AllowedAudioSubtypes) = 0));
-
   RemuxCompatible := SameText(AMediaInfo.ContainerName,
                               'Matroska') and
                      AMediaInfo.HasVideo and
@@ -999,4 +1003,3 @@ begin
 end;
 
 end.
-

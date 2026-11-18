@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This unit allows Windows Mixed Reality apps to use Direct3D 12
 //              See: https://learn.microsoft.com/en-us/windows/win32/api/_direct3d12/
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //          OS: Windows 10 NTDDI_WIN10_RS2 and above.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -90,6 +90,17 @@ uses
 
 type
 
+  // HolographicSpace factory interop from HolographicSpaceInterop.h.
+  IHolographicSpaceInterop = interface(IInspectable)
+    ['{5C4EE536-6A98-4B86-A170-587013D6FD4B}']
+
+    function CreateForWindow(window: HWND;
+                             const riid: TGUID;
+                             out holographicSpace): HRESULT; stdcall;
+
+  end;
+  IID_IHolographicSpaceInterop = IHolographicSpaceInterop;
+
   // Interface IHolographicCameraInterop
   // ====================================
   // Extends HolographicCamera to allow 2D texture resources to be created and used as content buffers for apps using Direct3D 12.
@@ -112,7 +123,7 @@ type
                                                 // and respond appropriately to any differences from what was specified.
                                                 pTexture2DDesc: PD3D12_RESOURCE_DESC;
                                                 // If successful, the Direct3D 12 2D texture resource for use as a content buffer. Otherwise null.
-                                                out ppCreatedTexture2DResource: PID3D12Resource): HRESULT; stdcall;
+                                                out ppCreatedTexture2DResource: ID3D12Resource): HRESULT; stdcall;
 
     // Creates a D3D12 resource for use as a content buffer for the camera with optional hardware protection.
     // Behavior is the same as CreateDirect3D12BackBufferResource but accepts an optional ID3D12ProtectedResourceSession.
@@ -124,12 +135,12 @@ type
                                                                  // The API will make a best effort to respect the values in this descriptor. The app
                                                                  // should inspect the descriptor for the texture returned by ppCreatedTexture2DResource
                                                                  // and respond appropriately to any differences from what was specified.
-                                                                 pTexture2DDesc: D3D12_RESOURCE_DESC;
+                                                                 pTexture2DDesc: PD3D12_RESOURCE_DESC;
                                                                  // An optional D3D12 protected resource session. Passing a protected session will attempt to create
                                                                  // A D3D12 hardware protected resource.
                                                                  pProtectedResourceSession: ID3D12ProtectedResourceSession;
                                                                  // If successful, the Direct3D 12 2D texture resource for use as a content buffer. Otherwise null.
-                                                                 out ppCreatedTexture2DResource: PID3D12Resource): HRESULT; stdcall;
+                                                                 out ppCreatedTexture2DResource: ID3D12Resource): HRESULT; stdcall;
 
     // Acquires a Direct3D12 buffer resource.
     // After committing a resource to a HolographicFrame by calling
@@ -234,9 +245,9 @@ type
                                                    // The API will make a best effort to respect the values in this descriptor. The app
                                                    // should inspect the descriptor for the texture returned by ppCreatedTexture2DResource
                                                    // and respond appropriately to any differences from what was specified.
-                                                   pTexture2DDesc: D3D12_RESOURCE_DESC;
+                                                   pTexture2DDesc: PD3D12_RESOURCE_DESC;
                                                    // If successful, the Direct3D 12 2D texture resource for use as a content buffer. Otherwise null.
-                                                   out ppTexture2DResource: PID3D12Resource): HRESULT; stdcall;
+                                                   out ppTexture2DResource: ID3D12Resource): HRESULT; stdcall;
 
     //  Creates a D3D12 resource for use as a content buffer for the camera with optional hardware protection.
     // Behavior is the same as CreateDirect3D12ContentBufferResource but accepts an optional ID3D12ProtectedResourceSession.
@@ -247,12 +258,12 @@ type
                                                                     // The API will make a best effort to respect the values in this descriptor. The app
                                                                     // should inspect the descriptor for the texture returned by ppCreatedTexture2DResource
                                                                     // and respond appropriately to any differences from what was specified.
-                                                                    pTexture2DDesc: D3D12_RESOURCE_DESC;
+                                                                    pTexture2DDesc: PD3D12_RESOURCE_DESC;
                                                                     // An optional D3D12 protected resource session. Passing a protected session will attempt to create
                                                                     // A D3D12 hardware protected resource.
                                                                     pProtectedResourceSession: ID3D12ProtectedResourceSession;
                                                                     // If successful, the Direct3D 12 2D texture resource for use as a content buffer. Otherwise null.
-                                                                    out ppCreatedTexture2DResource: PID3D12Resource): HRESULT; stdcall;
+                                                                    out ppCreatedTexture2DResource: ID3D12Resource): HRESULT; stdcall;
 
     // Acquires a Direct3D12 buffer resource.
     // After committing a resource to a HolographicFrame by calling

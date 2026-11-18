@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: MFT eq for bass and treble.
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1194,7 +1194,8 @@ begin
 
   ZeroMemory(@pStreamInfo,
              SizeOf(pStreamInfo));
-  pStreamInfo.dwFlags := MFT_OUTPUT_STREAM_WHOLE_SAMPLES or
+  pStreamInfo.dwFlags := MFT_OUTPUT_STREAM_PROVIDES_SAMPLES or
+                         MFT_OUTPUT_STREAM_WHOLE_SAMPLES or
                          MFT_OUTPUT_STREAM_SINGLE_SAMPLE_PER_BUFFER or
                          MFT_OUTPUT_STREAM_FIXED_SAMPLE_SIZE;
   Result := S_OK;
@@ -1625,8 +1626,11 @@ begin
   if (pOutputSamples = nil) then
     Exit(E_POINTER);
 
-  if (cOutputBufferCount < 1) then
+  if (cOutputBufferCount <> 1) or (dwFlags <> 0) then
     Exit(E_INVALIDARG);
+
+  if pOutputSamples^.dwStreamID <> 0 then Exit(MF_E_INVALIDSTREAMNUMBER);
+  if pOutputSamples^.pSample <> nil then Exit(E_INVALIDARG);
 
   FLock.Enter();
 
@@ -1688,8 +1692,7 @@ begin
   end;
 
   // IMPORTANT: clear the OUTPUT STRUCT.
-  ZeroMemory(pOutputSamples,
-             SizeOf(pOutputSamples^));
+  pOutputSamples^.pEvents := nil;
 
   pOutputSamples^.pSample := outSample;
   pOutputSamples^.dwStatus := 0;

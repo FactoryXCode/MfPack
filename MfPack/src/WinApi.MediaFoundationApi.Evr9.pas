@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: The enhanced video renderer (EVR) is a component that displays video on the user's
 //              monitor.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -110,25 +110,16 @@ type
   end;
   {$EXTERNALSYM MFVideoAlphaBitmapParams}
 
-  PtMFPackSource = ^tMFPackSource;
-  tMFPackSource = record
-    hdc:                HDC;
-    pDDS:               IDirect3DSurface9;
-  end;
-  {$EXTERNALSYM tMFPackSource}
-
   PMFVideoAlphaBitmap = ^MFVideoAlphaBitmap;
   MFVideoAlphaBitmap = record
     GetBitmapFromDC: BOOL;
-    Source: tMFPackSource;
-    bitmap : record     //union part
-       case byte of
-         0: (hdc: HDC;
-             params: MFVideoAlphaBitmapParams);
-         1: (pDDS: PIDirect3DSurface9);
-       end;
+    bitmap: record
+      case Byte of
+        0: (hdc: HDC);
+        1: (pDDS: Pointer); // Non-owning IDirect3DSurface9 pointer, as in the SDK union.
+    end;
+    params: MFVideoAlphaBitmapParams;
   end;
-  {$EXTERNALSYM MFVideoAlphaBitmap}
 
 type
   PMFVideoAlphaBitmapFlags = ^MFVideoAlphaBitmapFlags;
@@ -181,12 +172,12 @@ type
   ['{6AB0000C-FECE-4d1f-A2AC-A9573530656E}']
 
     function GetAvailableVideoProcessorModes(lpdwNumProcessingModes: PUINT;
-                                             out ppVideoProcessingModes: PPTGUID): HResult; stdcall;
+                                             out ppVideoProcessingModes: PGUID): HResult; stdcall;
 
     function GetVideoProcessorCaps(const lpVideoProcessorMode: LPGUID;
                                    out lpVideoProcessorCaps: DXVA2_VideoProcessorCaps): HResult; stdcall;
 
-    function GetVideoProcessorMode(out lpMode: LPGUID): HResult; stdcall;
+    function GetVideoProcessorMode(out lpMode: TGUID): HResult; stdcall;
 
     function SetVideoProcessorMode(const lpMode: LPGUID): HResult; stdcall;
 
@@ -196,7 +187,7 @@ type
     function GetProcAmpValues(dwFlags: DWORD;
                               out Values: DXVA2_ProcAmpValues): HResult; stdcall;
 
-    function SetProcAmpValues(pValues: DXVA2_ProcAmpValues): HResult; stdcall;
+    function SetProcAmpValues(dwFlags: DWORD; const pValues: DXVA2_ProcAmpValues): HResult; stdcall;
 
     function GetFilteringRange(dwProperty: DWORD;
                                out pPropRange: DXVA2_ValueRange): HResult; stdcall;
@@ -204,7 +195,7 @@ type
     function GetFilteringValue(dwProperty: DWORD;
                                out pValue: DXVA2_Fixed32): HResult; stdcall;
 
-    function SetFilteringValue(pValue: DXVA2_Fixed32): HResult; stdcall;
+    function SetFilteringValue(dwProperty: DWORD; pValue: PDXVA2_Fixed32): HResult; stdcall;
 
     function GetBackgroundColor(out lpClrBkg: COLORREF): HResult; stdcall;
 

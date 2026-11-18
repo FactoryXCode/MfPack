@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -29,7 +29,7 @@
 // 
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -90,7 +90,7 @@ const
   {$EXTERNALSYM HRTF_MAX_GAIN_LIMIT}
   HRTF_MIN_GAIN_LIMIT                 = -96.0;
   {$EXTERNALSYM HRTF_MIN_GAIN_LIMIT}
-  HRTF_MIN_UNITY_GAIN_DISTANCE        = 0.5;
+  HRTF_MIN_UNITY_GAIN_DISTANCE        = 0.05;
   {$EXTERNALSYM HRTF_MIN_UNITY_GAIN_DISTANCE}
   HRTF_DEFAULT_UNITY_GAIN_DISTANCE    = 1.0;
   {$EXTERNALSYM HRTF_DEFAULT_UNITY_GAIN_DISTANCE}
@@ -236,9 +236,9 @@ type
   PHrtfApoInit = ^HrtfApoInit;
   HrtfApoInit = record
     //! The decay type. If you pass in nullptr, the default value will be used. The default is natural decay.
-    distanceDecay: HrtfDistanceDecay;
+    distanceDecay: PHrtfDistanceDecay;
     //! The directivity type. If you pass in nullptr, the default value will be used. The default directivity is omni-directional.
-    directivity: HrtfDirectivity;
+    directivity: PHrtfDirectivity;
   end;
   {$EXTERNALSYM HrtfApoInit}
 
@@ -250,8 +250,8 @@ type
   //! Returns:
   //!     S_OK for success, any other value indicates failure.
   //!     Returns E_NOTIMPL on unsupported platforms.
-  function CreateHrtfApo(init: HrtfApoInit; //! Pointer to an HrtfApoInit struct. Specifies parameters for XAPO interface initialization.
-                         out xApo: IXAPO): HRESULT; stdcall;
+  function CreateHrtfApo(init: PHrtfApoInit; //! Pointer to an HrtfApoInit struct. Specifies parameters for XAPO interface initialization.
+                         xApo: PPointer): HRESULT; stdcall;
   {$EXTERNALSYM CreateHrtfApo}
 
 
@@ -268,10 +268,10 @@ type
 
     // HRTF params
     //! The position of the sound relative to the listener.
-    function SetSourcePosition(position: HrtfPosition): HRESULT; stdcall;
+    function SetSourcePosition(position: PHrtfPosition): HRESULT; stdcall;
 
     //! The rotation matrix for the source orientation, with respect to the listener's frame of reference (the listener's coordinate system).
-    function SetSourceOrientation(orientation: HrtfOrientation): HRESULT; stdcall;
+    function SetSourceOrientation(orientation: PHrtfOrientation): HRESULT; stdcall;
 
     //! The custom direct path gain value for the current source position. Valid only for sounds played with the HrtfDistanceDecayType. Custom decay type.
     function SetSourceGain(gain: Single): HRESULT; stdcall;

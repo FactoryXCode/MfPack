@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -130,9 +130,13 @@ type
     constructor Create(const AEnableTranscoding: Boolean = False);
     destructor Destroy(); override;
 
-    function Discover(): HRESULT;
+    // Browse all receivers for the configured window, or finish early once
+    // the specified receiver supplies a complete fresh discovery response.
+    function Discover(): HRESULT; overload;
+    function Discover(const ADevice: TMfCastDevice): HRESULT; overload;
     function StopDiscovery(): HRESULT;
-    function RefreshDiscovery(): HRESULT;
+    function RefreshDiscovery(): HRESULT; overload;
+    function RefreshDiscovery(const ADevice: TMfCastDevice): HRESULT; overload;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
 
     function GetMediaTracks(const ASource: string;
@@ -412,6 +416,17 @@ begin
 end;
 
 
+function TMfCast.Discover(const ADevice: TMfCastDevice): HRESULT;
+var
+  Targeted: IMfCastTargetedDiscovery;
+begin
+  if Supports(FController, IMfCastTargetedDiscovery, Targeted) then
+    Result := Targeted.DiscoverDevice(ADevice)
+  else
+    Result := FController.RefreshDiscovery();
+end;
+
+
 function TMfCast.StopDiscovery(): HRESULT;
 begin
 
@@ -423,6 +438,12 @@ function TMfCast.RefreshDiscovery(): HRESULT;
 begin
 
   Result := FController.RefreshDiscovery();
+end;
+
+
+function TMfCast.RefreshDiscovery(const ADevice: TMfCastDevice): HRESULT;
+begin
+  Result := Discover(ADevice);
 end;
 
 
@@ -917,7 +938,7 @@ begin
   Text := Format('[MfCast][%s][%s] %s',
                  [MfCastLogLevelToString(ALevel), ASource, AMessage]);
 
-  OutputDebugString(PChar(Text));
+  OutputDebugString(PChar(MfCastFormatLogLine(Text, Now)));
 
   if Assigned(FOnLog) then
     FOnLog(Self,

@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 23-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Contains interface definitions for DirectX Video Acceleration for HD API.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -486,7 +486,7 @@ type
     property RGB_Range: Integer index $0101 read ReadBits write WriteBits;    // 1 bit at offset 1
     property YCbCr_Matrix: Integer index $0201 read ReadBits write WriteBits; // 1 bit at offset 2
     property YCbCr_xvYCC: Integer index $0301 read ReadBits write WriteBits;  // 1 bit at offset 3
-    property Reserved: Integer index $0428 read ReadBits write WriteBits;     // 28 bits at offset 4
+    property Reserved: Integer index $041C read ReadBits write WriteBits;     // 28 bits at offset 4
   end;
   {$EXTERNALSYM DXVAHD_BLT_STATE_OUTPUT_COLOR_SPACE_DATA}
   DXVAHD_BLT_STATE_OUTPUT_COLOR_SPACE_DATA = _DXVAHD_BLT_STATE_OUTPUT_COLOR_SPACE_DATA;
@@ -565,7 +565,7 @@ type
     property RGB_Range: Integer index $0101 read ReadBits write WriteBits;    // 1 bit at offset 1
     property YCbCr_Matrix: Integer index $0201 read ReadBits write WriteBits; // 1 bit at offset 2
     property YCbCr_xvYCC: Integer index $0301 read ReadBits write WriteBits;  // 1 bit at offset 3
-    property Reserved: Integer index $0428 read ReadBits write WriteBits;     // 28 bits at offset 4
+    property Reserved: Integer index $041C read ReadBits write WriteBits;     // 28 bits at offset 4
   end;
   {$EXTERNALSYM DXVAHD_STREAM_STATE_INPUT_COLOR_SPACE_DATA}
   DXVAHD_STREAM_STATE_INPUT_COLOR_SPACE_DATA = _DXVAHD_STREAM_STATE_INPUT_COLOR_SPACE_DATA;
@@ -665,7 +665,7 @@ type
     PastFrames: UINT;
     FutureFrames: UINT;
     ppPastSurfaces: ^IDirect3DSurface9;
-    pInputSurface: ^IDirect3DSurface9;
+    pInputSurface: IDirect3DSurface9;
     ppFutureSurfaces: ^IDirect3DSurface9;
   end;
   {$EXTERNALSYM DXVAHD_STREAM_DATA}

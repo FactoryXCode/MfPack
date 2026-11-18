@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WDM-CSA Multimedia Definitions.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -144,7 +144,7 @@ type
                               id: USHORT);
   {$EXTERNALSYM INIT_USB_TERMINAL}
 
-  procedure EXTRACT_USB_TERMINAL(var guid: TGUID);
+  function EXTRACT_USB_TERMINAL(const guid: TGUID): USHORT;
   {$EXTERNALSYM EXTRACT_USB_TERMINAL}
 
   function DEFINE_USB_TERMINAL_GUID(id: USHORT): TGuid;
@@ -447,7 +447,7 @@ type
   // Convenient wrapper structure for the case in which the WaveFormatEx is
   // known not to contain extra data.
   PKSDATAFORMAT_WAVEFORMATEX = ^KSDATAFORMAT_WAVEFORMATEX;
-  KSDATAFORMAT_WAVEFORMATEX = record
+  KSDATAFORMAT_WAVEFORMATEX = packed record
     DataFormat   : KSDATAFORMAT;
     _WaveFormatEx : WAVEFORMATEX;
   end;
@@ -465,7 +465,7 @@ type
 
   PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
   {$EXTERNALSYM PWAVEFORMATEXTENSIBLE}  
-  WAVEFORMATEXTENSIBLE = record
+  WAVEFORMATEXTENSIBLE = packed record
     Format: WAVEFORMATEX;
     samples: record                        // union part
       case integer of
@@ -494,7 +494,7 @@ type
   // known not to contain extra data.
 
   PKSDATAFORMAT_WAVEFORMATEXTENSIBLE = ^KSDATAFORMAT_WAVEFORMATEXTENSIBLE;
-  KSDATAFORMAT_WAVEFORMATEXTENSIBLE = record
+  KSDATAFORMAT_WAVEFORMATEXTENSIBLE = packed record
     DataFormat: KSDATAFORMAT;
     WaveFormatExt: WAVEFORMATEXTENSIBLE;
   end;
@@ -503,7 +503,7 @@ type
 
   // DirectSound buffer description
   PKSDSOUND_BUFFERDESC = ^KSDSOUND_BUFFERDESC;
-  KSDSOUND_BUFFERDESC = record
+  KSDSOUND_BUFFERDESC = packed record
     Flags        : ULONG;
     Control      : ULONG;
     WaveFormatEx : WAVEFORMATEX;
@@ -512,7 +512,7 @@ type
 
   // DirectSound format
   PKSDATAFORMAT_DSOUND = ^KSDATAFORMAT_DSOUND;
-  KSDATAFORMAT_DSOUND = record
+  KSDATAFORMAT_DSOUND = packed record
     DataFormat : KSDATAFORMAT;
     BufferDesc : KSDSOUND_BUFFERDESC;
   end;
@@ -706,7 +706,7 @@ type
     usNumberOfMicrophones: USHORT;                               // Count of microphone
                                                                  // coordinate structures
                                                                  // to follow.
-    KsMicCoord: array of KSAUDIO_MICROPHONE_COORDINATES;         // Array of Microphone
+    KsMicCoord: array[0..0] of KSAUDIO_MICROPHONE_COORDINATES;         // Array of Microphone
                                                                  // Coordinate structures
   end;
   {$EXTERNALSYM KSAUDIO_MIC_ARRAY_GEOMETRY}
@@ -718,14 +718,14 @@ type
 
   PDS3DVECTOR = ^_DS3DVECTOR;
   _DS3DVECTOR = record
-    case integer of
+    case Integer of
       0: (x: Single;
-          dvX: Single);
-      1: (y: Single;
-          dvY: Single);
-      2: (z: Single;
+          y: Single;
+          z: Single);
+      1: (dvX: Single;
+          dvY: Single;
           dvZ: Single);
-    end;
+  end;
   {$EXTERNALSYM _DS3DVECTOR}
   DS3DVECTOR = _DS3DVECTOR;
   {$EXTERNALSYM DS3DVECTOR}
@@ -1660,10 +1660,12 @@ type
 
   PKSAUDIO_MIX_CAPS = ^KSAUDIO_MIX_CAPS;
   KSAUDIO_MIX_CAPS = record
-    Mute    : Boolean;
-    Minimum : longint;
-    Maximum : longint;
-    Reset   : longint;
+    Mute: BOOL;
+    Minimum: LONG;
+    Maximum: LONG;
+    case Integer of
+      0: (Resolution: LONG);
+      1: (Reset: LONG);
   end;
   {$EXTERNALSYM KSAUDIO_MIX_CAPS}
 
@@ -1673,7 +1675,7 @@ type
   KSAUDIO_MIXCAP_TABLE = record
     InputChannels  : ULONG;
     OutputChannels : ULONG;
-    Capabilities   : array of KSAUDIO_MIX_CAPS;
+    Capabilities: array[0..0] of KSAUDIO_MIX_CAPS;
   end;
   {$EXTERNALSYM KSAUDIO_MIXCAP_TABLE}
 
@@ -2330,13 +2332,15 @@ type
     DeviceInfo: ULONG;
     Length: ULONG;
   end;
+  PKSNODEPROPERTY_AUDIO_DEV_SPECIFIC = ^KSNODEPROPERTY_AUDIO_DEV_SPECIFIC;
+  KSNODEPROPERTY_AUDIO_DEV_SPECIFIC = KSNODEPROPERTY_AUDIO_DEV_S;
   {$EXTERNALSYM KSNODEPROPERTY_AUDIO_DEV_S}
 
   PKSNODEPROPERTY_AUDIO_3D_LISTENER = ^KSNODEPROPERTY_AUDIO_3D_LISTENER;
   KSNODEPROPERTY_AUDIO_3D_LISTENER = record
     NodeProperty: KSNODEPROPERTY;
     ListenerId: Pointer;
-{$ifndef _WIN64}
+{$ifndef WIN64}
     Reserved: ULONG;
 {$endif} // _WIN64
   end;
@@ -2348,7 +2352,7 @@ type
     NodeProperty: KSNODEPROPERTY;
     AppContext: Pointer;
     Length: ULONG;
-{$ifndef _WIN64}
+{$ifndef WIN64}
     Reserved: ULONG;
 {$endif} // _WIN64
   end;
@@ -3029,20 +3033,21 @@ type
   {$EXTERNALSYM KSPROPERTY_SPPAL}
 
 
-{$ALIGN 1}
-
-  PKS_COLCON = ^KS_COLCON;
+PKS_COLCON = ^KS_COLCON;
   _KS_COLCON = record
-    case Integer of
-      0: (emph1col : UCHAR;  //:4;
-          backcol  : UCHAR;  //:4;
-          emph1con : UCHAR;  //:4;
-          backcon  : UCHAR); //:4;
-
-      1: (emph2col : UCHAR;  //:4;
-          patcol   : UCHAR;  //:4;
-          emph2con : UCHAR;  //:4;
-          patcon   : UCHAR); //:4;
+    private
+      FData: array[0..3] of UCHAR;
+      function GetNibble(Index: Integer): UCHAR;
+      procedure SetNibble(Index: Integer;Value: UCHAR);
+    public
+      property emph1col: UCHAR index 0 read GetNibble write SetNibble;
+      property emph2col: UCHAR index 1 read GetNibble write SetNibble;
+      property backcol: UCHAR index 2 read GetNibble write SetNibble;
+      property patcol: UCHAR index 3 read GetNibble write SetNibble;
+      property emph1con: UCHAR index 4 read GetNibble write SetNibble;
+      property emph2con: UCHAR index 5 read GetNibble write SetNibble;
+      property backcon: UCHAR index 6 read GetNibble write SetNibble;
+      property patcon: UCHAR index 7 read GetNibble write SetNibble;
   end;
   {$EXTERNALSYM _KS_COLCON}
   KS_COLCON = _KS_COLCON;
@@ -3058,7 +3063,7 @@ type
     StartY   : WORD;
     StopX    : WORD;
     StopY    : WORD;
-    ColCon   : PKS_COLCON; // color contrast description (4 bytes as given in HLI)
+    ColCon: KS_COLCON; // color contrast description (4 bytes as given in HLI)
   end;
   {$EXTERNALSYM _KSPROPERTY_SPHLI}
   KSPROPERTY_SPHLI = _KSPROPERTY_SPHLI;
@@ -3104,7 +3109,7 @@ type
   PKS_DVDCOPY_BUSKEY = ^KS_DVDCOPY_BUSKEY;
   _KS_DVDCOPY_BUSKEY = record
     BusKey   : array[0..4] of BYTE;
-    Reserved : array of BYTE;
+    Reserved: array[0..0] of BYTE;
   end;
   {$EXTERNALSYM _KS_DVDCOPY_BUSKEY}
   KS_DVDCOPY_BUSKEY = _KS_DVDCOPY_BUSKEY;
@@ -3498,7 +3503,7 @@ const
   KS_VBISAMPLINGRATE_5X_NABTS  = longint(5 * KS_VBIDATARATE_NABTS);
   {$EXTERNALSYM KS_VBISAMPLINGRATE_5X_NABTS}
 
-  KS_47NABTS_SCALER = KS_VBISAMPLINGRATE_47X_NABTS/KS_VBIDATARATE_NABTS;
+  KS_47NABTS_SCALER = KS_VBISAMPLINGRATE_47X_NABTS div KS_VBIDATARATE_NABTS;
   {$EXTERNALSYM KS_47NABTS_SCALER}
 
 
@@ -3664,20 +3669,20 @@ type
 
   PKS_VIDEOINFOHEADER2 = ^KS_VIDEOINFOHEADER2;
   tagKS_VIDEOINFOHEADER2 = record
-    rcSource           : TRECT;
-    rcTarget           : TRECT;
-    dwBitRate          : DWORD;
-    dwBitErrorRate     : DWORD;
-    AvgTimePerFrame    : LONGLONG;
-    dwInterlaceFlags   : DWORD; // use AMINTERLACE_* defines. Reject connection if undefined bits are not 0
-    dwCopyProtectFlags : DWORD; // use AMCOPYPROTECT_* defines. Reject connection if undefined bits are not 0
-    dwPictAspectRatioX : DWORD; // X dimension of picture aspect ratio, e.g. 16 for 16x9 display
-    dwPictAspectRatioY : DWORD; // Y dimension of picture aspect ratio, e.g.  9 for 16x9 display
-    case integer of
-      0: (dwControlFlags : DWORD;
-          dwReserved1 : DWORD); // use KS_AMCONTROL_* defines, use this from now on
-      1: (dwReserved2 : DWORD;  // must be 0; reject connection otherwise
-          bmiHeader : KS_BITMAPINFOHEADER);  // for backward compatiblity (was "must be 0";  connection rejected otherwise)
+    rcSource: TRECT;
+    rcTarget: TRECT;
+    dwBitRate: DWORD;
+    dwBitErrorRate: DWORD;
+    AvgTimePerFrame: LONGLONG;
+    dwInterlaceFlags: DWORD;
+    dwCopyProtectFlags: DWORD;
+    dwPictAspectRatioX: DWORD;
+    dwPictAspectRatioY: DWORD;
+    case Integer of
+      0: (dwControlFlags: DWORD;
+          dwReserved2: DWORD;
+          bmiHeader: KS_BITMAPINFOHEADER);
+      1: (dwReserved1: DWORD);
   end;
   {$EXTERNALSYM tagKS_VIDEOINFOHEADER2}
   KS_VIDEOINFOHEADER2 = tagKS_VIDEOINFOHEADER2;
@@ -3686,7 +3691,7 @@ type
 
   PKS_MPEG1VIDEOINFO = ^KS_MPEG1VIDEOINFO;
   tagKS_MPEG1VIDEOINFO = record
-    hdr              : KS_BITMAPINFOHEADER ; // Compatible with VIDEOINFO
+    hdr: KS_VIDEOINFOHEADER ; // Compatible with VIDEOINFO
     dwStartTimeCode  : DWORD ;               // 25-bit Group of pictures time code at start of data
     cbSequenceHeader : DWORD ;               // Length in bytes of bSequenceHeader
     bSequenceHeader: array [0..0] of Byte;   // Sequence header including quantization matrices if any
@@ -4172,8 +4177,7 @@ const
 
 
 type
-{$ALIGN 1}
-  PNABTSFEC_BUFFER = ^NABTSFEC_BUFFER;
+PNABTSFEC_BUFFER = ^NABTSFEC_BUFFER;
   _NABTSFEC_BUFFER = record
     dataSize : ULONG;
     groupID  : USHORT;
@@ -4302,7 +4306,7 @@ type
 
 {$ALIGN 1}
   PNABTS_BUFFER_LINE = ^_NABTS_BUFFER_LINE;
-  _NABTS_BUFFER_LINE = record
+  _NABTS_BUFFER_LINE = packed record
     Confidence : BYTE;
     Bytes      : array[0..NABTS_BYTES_PER_LINE - 1] of BYTE;
   end;
@@ -4318,7 +4322,7 @@ const
 type
 
   PNABTS_BUFFER = ^_NABTS_BUFFER;
-  _NABTS_BUFFER = record
+  _NABTS_BUFFER = packed record
     ScanlinesRequested : VBICODECFILTERING_SCANLINES;
     PictureNumber      : Int64;
     NabtsLines         : array[0..MAX_NABTS_VBI_LINES_PER_FIELD - 1] of NABTS_BUFFER_LINE;
@@ -4431,7 +4435,7 @@ type
 
   PVBICODECFILTERING_STATISTICS_NABTS_PIN = ^_VBICODECFILTERING_STATISTICS_NABTS_PIN;
   _VBICODECFILTERING_STATISTICS_NABTS_PIN = record
-    Common: VBICODECFILTERING_STATISTICS_NABTS; // Generic VBI pin statistics
+    Common: VBICODECFILTERING_STATISTICS_COMMON_PIN; // Generic VBI pin statistics
   end;
   {$EXTERNALSYM _VBICODECFILTERING_STATISTICS_NABTS_PIN}
   VBICODECFILTERING_STATISTICS_NABTS_PIN = _VBICODECFILTERING_STATISTICS_NABTS_PIN;
@@ -4763,23 +4767,22 @@ type
 
   PKS_FRAME_INFO = ^tagKS_FRAME_INFO;
   tagKS_FRAME_INFO = record
-    ExtendedHeaderSize : ULONG; // Size of this extended header
-    dwFrameFlags       : DWORD; // Field1, Field2, or Frame
-    PictureNumber      : LONGLONG;
-    DropCount          : LONGLONG;
-
-     // The following are only set when using OverlayMixer
-    hDirectDraw        : THandle; // user mode DDraw handle
-    hSurfaceHandle     : THandle; // user mode surface handle
-    DirectDrawRect     : TRECT;   // portion of surface locked
-
-    case integer  of
-      0 : (lSurfacePitch: LONG); // Contains surface pitch a.k.a stride
-      1 : (Reserved1: DWORD);
-      2 : (Reserved2: DWORD);
-      3 : (Reserved3: DWORD;
-           Reserved4: DWORD);
-      4 : (FrameCompletionNumber: ULONGLONG; );
+    ExtendedHeaderSize: ULONG;
+    dwFrameFlags: DWORD;
+    PictureNumber: LONGLONG;
+    DropCount: LONGLONG;
+    hDirectDraw: THandle;
+    hSurfaceHandle: THandle;
+    DirectDrawRect: TRECT;
+    case Integer of
+      0: (lSurfacePitch: LONG;
+          Reserved2: DWORD;
+          Reserved3: DWORD;
+          Reserved4: DWORD);
+      1: (Reserved1: DWORD);
+      2: (_PitchPadding: DWORD;
+          _Reserved2Padding: DWORD;
+          FrameCompletionNumber: ULONGLONG);
   end;
   {$EXTERNALSYM tagKS_FRAME_INFO}
   KS_FRAME_INFO = tagKS_FRAME_INFO;
@@ -5662,13 +5665,13 @@ type
 
   PKSPROPERTY_CAMERACONTROL_REGION_OF_INTEREST_S = ^KSPROPERTY_CAMERACONTROL_REGION_OF_INTEREST_S;
   KSPROPERTY_CAMERACONTROL_REGION_OF_INTEREST_S = record
-  case integer of
-  0: (FocusRect: TRECT;
-      AutoFocusLock: BOOL;
-      AutoExposureLock: BOOL;
-      AutoWhitebalanceLock: BOOL);
-  1: (Capabilities: ULONG;
-      Configuration: ULONG);
+    FocusRect: TRECT;
+    AutoFocusLock: BOOL;
+    AutoExposureLock: BOOL;
+    AutoWhitebalanceLock: BOOL;
+    case Integer of
+      0: (Capabilities: ULONG);
+      1: (Configuration: ULONG);
   end;
   {$EXTERNALSYM KSPROPERTY_CAMERACONTROL_REGION_OF_INTEREST_S}
 
@@ -6108,15 +6111,23 @@ type
 
   PKSCAMERA_EXTENDEDPROP_VALUE = ^tagKSCAMERA_EXTENDEDPROP_VALUE;
   tagKSCAMERA_EXTENDEDPROP_VALUE = record
-    case integer of
-    0: (Value: Integer);
-    1: (dbl: Double;
-        ull: ULONGLONG;
-        ul: ULONG;
-        ratio: ULARGE_INTEGER;
-        l: LONG;
-        ll: LONGLONG);
-    end;
+    case Integer of
+      0: (Value: record
+            case Integer of
+              0: (dbl: Double);
+              1: (ull: ULONGLONG);
+              2: (ul: ULONG);
+              3: (ratio: ULARGE_INTEGER);
+              4: (l: LONG);
+              5: (ll: LONGLONG);
+          end);
+      1: (dbl: Double);
+      2: (ull: ULONGLONG);
+      3: (ul: ULONG);
+      4: (ratio: ULARGE_INTEGER);
+      5: (l: LONG);
+      6: (ll: LONGLONG);
+  end;
   {$EXTERNALSYM tagKSCAMERA_EXTENDEDPROP_VALUE}
   KSCAMERA_EXTENDEDPROP_VALUE = tagKSCAMERA_EXTENDEDPROP_VALUE;
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_VALUE}
@@ -6925,11 +6936,11 @@ type
 
   _KSCAMERA_PROFILE_PININFO = record
     PinCategory: TGUID;
-    MediaInfoCount: UINT32;
-    MediaInfos: PKSCAMERA_PROFILE_MEDIAINFO;
-    case integer of
+    case Integer of
       0: (PinIndex: USHORT;
-          ProfileSensorType: USHORT);
+          ProfileSensorType: USHORT;
+          MediaInfoCount: UINT32;
+          MediaInfos: PKSCAMERA_PROFILE_MEDIAINFO);
       1: (Reserved: UINT32);
   end;
   {$EXTERNALSYM _KSCAMERA_PROFILE_PININFO}
@@ -6965,17 +6976,15 @@ type
 
 
   _KSDEVICE_PROFILE_INFO = record
-  case integer of
-    0: (_Type: UINT32;
-        Size: UINT32);
-    1: (Camera : record
-          Info: KSCAMERA_PROFILE_INFO;
-          Reserved: UINT32;
-          ConcurrencyCount: UINT32;
-          Concurrency: PKSCAMERA_PROFILE_CONCURRENCYINFO;
-        end);
-     // Add other device type specific "profiles" here.
+    _Type: UINT32;
+    Size: UINT32;
+    Camera: record
+      Info: KSCAMERA_PROFILE_INFO;
+      Reserved: UINT32;
+      ConcurrencyCount: UINT32;
+      Concurrency: PKSCAMERA_PROFILE_CONCURRENCYINFO;
     end;
+  end;
   {$EXTERNALSYM _KSDEVICE_PROFILE_INFO}
   KSDEVICE_PROFILE_INFO = _KSDEVICE_PROFILE_INFO;
   {$EXTERNALSYM KSDEVICE_PROFILE_INFO}
@@ -7124,13 +7133,21 @@ type
 
 
   KSPROPERTY_EXTDEVICE_S = record
-    case integer of
-      0:  (_Property: KSPROPERTY);
-      1:  (Capabilities: DEVCAPS;                             // Device capabilities
-           DevPort: ULONG;                                    // 1394, USB, etc.
-           PowerState: ULONG;                                 // On, standby or off
-           pawchString: array [0..MAX_PATH - 1] of WideChar;  // Version
-           NodeUniqueID: array [0..1] of DWORD);              // Unique NodeID
+    _Property: KSPROPERTY;
+    case Integer of
+      0: (u: record
+            case Integer of
+              0: (Capabilities: DEVCAPS);
+              1: (DevPort: ULONG);
+              2: (PowerState: ULONG);
+              3: (pawchString: array[0..MAX_PATH - 1] of WideChar);
+              4: (NodeUniqueID: array[0..1] of DWORD);
+          end);
+      1: (Capabilities: DEVCAPS);
+      2: (DevPort: ULONG);
+      3: (PowerState: ULONG);
+      4: (pawchString: array[0..MAX_PATH - 1] of WideChar);
+      5: (NodeUniqueID: array[0..1] of DWORD);
   end;
   {$EXTERNALSYM KSPROPERTY_EXTDEVICE_S}
   PKSPROPERTY_EXTDEVICE_S = ^KSPROPERTY_EXTDEVICE_S;
@@ -7205,7 +7222,7 @@ type
     ServoRef: LONG;
     WarnGenlock: LONG;
     SetTracking: LONG;
-    VolumeName: array[0..39] of CHAR;
+    VolumeName: array[0..39] of WideChar;
     Ballistic: array[0..19] of LONG;
     Speed: LONG;
     CounterFormat: LONG;
@@ -7270,22 +7287,44 @@ type
 
   KSPROPERTY_EXTXPORT_S = record
     _Property: KSPROPERTY;
-    case integer of
-    0:  (Capabilities: ULONG;
-         SignalMode: ULONG;
-         LoadMedium: ULONG;
-         MediumInfo: MEDIUM_INFO;
-         XPrtState: TRANSPORT_STATE);
-    1:  (Timecode : record
-           frame: Byte;
-           second: Byte;
-           minute: Byte;
-           hour: Byte;
-         end);
-    2:  (RawAVC : record
-           PayloadSize: ULONG;
-           Payload: array [0..511] of Byte;
-         end);
+    case Integer of
+      0: (u: record
+            case Integer of
+              0: (Capabilities: ULONG);
+              1: (SignalMode: ULONG);
+              2: (LoadMedium: ULONG);
+              3: (MediumInfo: MEDIUM_INFO);
+              4: (XPrtState: TRANSPORT_STATE);
+              5: (Timecode: record
+                    frame: Byte;
+                    second: Byte;
+                    minute: Byte;
+                    hour: Byte;
+                  end);
+              6: (dwTimecode: DWORD);
+              7: (dwAbsTrackNumber: DWORD);
+              8: (RawAVC: record
+                    PayloadSize: ULONG;
+                    Payload: array[0..511] of Byte;
+                  end);
+          end);
+      1: (Capabilities: ULONG);
+      2: (SignalMode: ULONG);
+      3: (LoadMedium: ULONG);
+      4: (MediumInfo: MEDIUM_INFO);
+      5: (XPrtState: TRANSPORT_STATE);
+      6: (Timecode: record
+            frame: Byte;
+            second: Byte;
+            minute: Byte;
+            hour: Byte;
+          end);
+      7: (dwTimecode: DWORD);
+      8: (dwAbsTrackNumber: DWORD);
+      9: (RawAVC: record
+            PayloadSize: ULONG;
+            Payload: array[0..511] of Byte;
+          end);
   end;
   {$EXTERNALSYM KSPROPERTY_EXTXPORT_S}
   PKSPROPERTY_EXTXPORT_S = ^KSPROPERTY_EXTXPORT_S;
@@ -7294,27 +7333,44 @@ type
 
   KSPROPERTY_EXTXPORT_NODE_S = record
     NodeProperty: KSP_NODE;
-    case integer of
-      0:  (Capabilities: ULONG;
-           SignalMode: ULONG;
-           LoadMedium: ULONG;
-           MediumInfo: MEDIUM_INFO;
-           XPrtState: TRANSPORT_STATE);
-
-       1: (Timecode : record
-             frame: Byte;
-             second: Byte;
-             minute: Byte;
-             hour: Byte;
-           end);
-
-        2: (dwTimecode: DWORD;
-            dwAbsTrackNumber: DWORD);
-
-        3: (RawAVC : record
-              PayloadSize: ULONG;
-              Payload: array [0..511] of Byte;
-            end);
+    case Integer of
+      0: (u: record
+            case Integer of
+              0: (Capabilities: ULONG);
+              1: (SignalMode: ULONG);
+              2: (LoadMedium: ULONG);
+              3: (MediumInfo: MEDIUM_INFO);
+              4: (XPrtState: TRANSPORT_STATE);
+              5: (Timecode: record
+                    frame: Byte;
+                    second: Byte;
+                    minute: Byte;
+                    hour: Byte;
+                  end);
+              6: (dwTimecode: DWORD);
+              7: (dwAbsTrackNumber: DWORD);
+              8: (RawAVC: record
+                    PayloadSize: ULONG;
+                    Payload: array[0..511] of Byte;
+                  end);
+          end);
+      1: (Capabilities: ULONG);
+      2: (SignalMode: ULONG);
+      3: (LoadMedium: ULONG);
+      4: (MediumInfo: MEDIUM_INFO);
+      5: (XPrtState: TRANSPORT_STATE);
+      6: (Timecode: record
+            frame: Byte;
+            second: Byte;
+            minute: Byte;
+            hour: Byte;
+          end);
+      7: (dwTimecode: DWORD);
+      8: (dwAbsTrackNumber: DWORD);
+      9: (RawAVC: record
+            PayloadSize: ULONG;
+            Payload: array[0..511] of Byte;
+          end);
   end;
   {$EXTERNALSYM KSPROPERTY_EXTXPORT_NODE_S}
   PKSPROPERTY_EXTXPORT_NODE_S = ^KSPROPERTY_EXTXPORT_NODE_S;
@@ -7341,9 +7397,11 @@ type
 {$ifndef TIMECODE_DEFINED}
 {$define TIMECODE_DEFINED}
   _timecode = record
-    wFrameRate  : Word;
-    wFrameFract : Word;
-    dwFrames    : DWORD;
+    case Integer of
+      0: (wFrameRate: Word;
+          wFrameFract: Word;
+          dwFrames: DWORD);
+      1: (qw: DWORDLONG);
   end;
   {$EXTERNALSYM _timecode}
   TIMECODE = _timecode;
@@ -7675,7 +7733,7 @@ type
     PelsWidth  : ULONG;
     PelsHeight : ULONG;
     BitsPerPel : ULONG;
-    DeviceID   : array [0..254] of WideChar;
+    DeviceID: array[0..0] of WideChar;
   end;
   {$EXTERNALSYM KSDISPLAYCHANGE}
   PKSDISPLAYCHANGE = ^KSDISPLAYCHANGE;
@@ -7950,24 +8008,26 @@ const
 type
 
   _DDPIXELFORMAT = record
-    dwSize: DWORD;                        // size of structure
-    dwFlags: DWORD;                       // pixel format flags
-    dwFourCC: DWORD;                      // (FOURCC code)
+    dwSize: DWORD;
+    dwFlags: DWORD;
+    dwFourCC: DWORD;
     case Integer of
-      1: (dwRGBBitCount : DWORD;          // how many bits per pixel (BD_1,2,4,8,16,24,32)
-          dwYUVBitCount : DWORD;          // how many bits per pixel (BD_4,8,16,24,32)
-          dwZBufferBitDepth : DWORD;      // how many bits for z buffers (BD_8,16,24,32)
-          dwAlphaBitDepth : DWORD);       // how many bits for alpha channels (BD_1,2,4,8)
-      2: (dwRBitMask : DWORD;             // mask for red bit
-          dwYBitMask : DWORD);            // mask for Y bits
-      3: (dwGBitMask : DWORD;             // mask for green bits
-          dwUBitMask : DWORD);            // mask for U bits
-      4: (dwBBitMask : DWORD;             // mask for blue bits
-          dwVBitMask : DWORD);            // mask for V bits
-      5: (dwRGBAlphaBitMask : DWORD;      // mask for alpha channel
-          dwYUVAlphaBitMask : DWORD;      // mask for alpha channel
-          dwRGBZBitMask : DWORD;          // mask for Z channel
-          dwYUVZBitMask : DWORD;);        // mask for Z channel
+      0: (dwRGBBitCount: DWORD;
+          dwRBitMask: DWORD;
+          dwGBitMask: DWORD;
+          dwBBitMask: DWORD;
+          dwRGBAlphaBitMask: DWORD);
+      1: (dwYUVBitCount: DWORD;
+          dwYBitMask: DWORD;
+          dwUBitMask: DWORD;
+          dwVBitMask: DWORD;
+          dwYUVAlphaBitMask: DWORD);
+      2: (dwZBufferBitDepth: DWORD);
+      3: (dwAlphaBitDepth: DWORD);
+      4: (_RGBZPadding: array[0..3] of DWORD;
+          dwRGBZBitMask: DWORD);
+      5: (_YUVZPadding: array[0..3] of DWORD;
+          dwYUVZBitMask: DWORD);
   end;
   {$EXTERNALSYM _DDPIXELFORMAT}
   DDPIXELFORMAT = _DDPIXELFORMAT;
@@ -8185,7 +8245,7 @@ type
     sc        : ULONG;
     reserved1 : ULONG;
     cFields   : BYTE;
-    l21Data   : array[0..2] of CHAR;
+    l21Data: array[0..2] of AnsiChar;
   end;
   {$EXTERNALSYM _KSGOP_USERDATA}
   KSGOP_USERDATA = _KSGOP_USERDATA;
@@ -8898,14 +8958,14 @@ type
 
   PKSAUDIOMODULE_NOTIFICATION = ^KSAUDIOMODULE_NOTIFICATION;
   _KSAUDIOMODULE_NOTIFICATION = record
-    ProviderId: record
-      DeviceId: TGUID;
-      ClassId: TGUID;
-      InstanceId: ULONG;
-      Reserved: ULONG;
-    end;
-  {$EXTERNALSYM _KSAUDIOMODULE_NOTIFICATION}
-    Alignment: LONGLONG;
+    case Integer of
+      0: (ProviderId: record
+            DeviceId: TGUID;
+            ClassId: TGUID;
+            InstanceId: ULONG;
+            Reserved: ULONG;
+          end);
+      1: (Alignment: LONGLONG);
   end;
   KSAUDIOMODULE_NOTIFICATION = _KSAUDIOMODULE_NOTIFICATION;
   {$EXTERNALSYM KSAUDIOMODULE_NOTIFICATION}
@@ -8919,6 +8979,24 @@ type
   // end of Additional Prototypes
 
 implementation
+
+function _KS_COLCON.GetNibble(Index: Integer): UCHAR;
+begin
+  Result := (FData[Index shr 1] shr ((Index and 1) * 4)) and $0F;
+end;
+
+
+procedure _KS_COLCON.SetNibble(Index: Integer;Value: UCHAR);
+var
+  Shift: Integer;
+begin
+  Shift := (Index and 1) * 4;
+  FData[Index shr 1] := (FData[Index shr 1] and ($FF xor ($0F shl Shift))) or
+                        ((Value and $0F) shl Shift);
+end;
+
+
+
 
   // Implement Additional Prototypes here.
 
@@ -8996,8 +9074,8 @@ procedure INIT_USBAUDIO_PRODUCT_NAME(var guid: TGuid;
                                      strIndex: USHORT);
 begin
   guid.D1 := $FC575048 + vid;
-  guid.D2 := $2E08     + pid;
-  guid.D3 := $463B     + strIndex;
+  guid.D2 := USHORT((DWORD($2E08) + pid) and $FFFF);
+  guid.D3 := USHORT((DWORD($463B) + strIndex) and $FFFF);
   guid.D4[0] := $A7;
   guid.D4[1] := $2F;
   guid.D4[2] := $A5;
@@ -9028,9 +9106,9 @@ begin
 end;
 
 
-procedure EXTRACT_USB_TERMINAL(var guid: TGUID);
+function EXTRACT_USB_TERMINAL(const guid: TGUID): USHORT;
 begin
-  guid.d1 := USHORT(guid.d1) - $DFF219E0;
+  Result := USHORT((UInt64(guid.D1) + $100000000 - $DFF219E0) and $FFFF);
 end;
 
 

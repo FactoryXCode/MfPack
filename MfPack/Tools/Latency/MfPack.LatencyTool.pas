@@ -9,7 +9,7 @@
 // Release date: 29-05-2024
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   Latency measuring tool for Windows.
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (22H2) or later.
@@ -73,9 +73,13 @@ unit MfPack.LatencyTool;
 interface
 
 uses
+
+  {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  System.Classes;
+  {System}
+  System.Classes,
+  System.SysUtils;
 
 
 type
@@ -90,12 +94,18 @@ type
     // Other vars.
     prCurrentExecutionTime: Single;
     prTotalExecutionTime: Single;
-    prFreqFactor: Single;
-    prExecutionCount: ULONG;
+    prFreqFactor: Double;
+    prTotalMicroseconds: Double;
+    prExecutionCount: UInt64;
     prDoMeasure: Boolean;
+    prRunning: Boolean;
+    prThreadHandle: THandle;
+    prPreviousAffinity: DWORD_PTR;
 
     //
     prStartP: TLargeInteger;
+
+    procedure RestoreAffinity;
 
   public
 
@@ -110,8 +120,9 @@ type
     // Make sure that Initialize() has been called once before.
     // Params:
     //   pStart: Variable := 0
-    //   pCpu: Set this value to run at first CPU by default.
-    //         If running on another CPU we get rescheduled immediately.
+    //   pCPU: Affinity mask for this measurement; 0 leaves affinity unchanged.
+    //         The default is CPU 0. Stop restores the previous affinity.
+    //         Use each instance on one thread; do not share overlapping scopes.
     procedure Start(var pStart: TLargeInteger;
                     pCPU: DWORD_PTR = 1);
 
@@ -119,6 +130,7 @@ type
     // Run the code to be measured inbetween start and stop.
     //--------------------------------------------------------------------------
 
+    // pEnd and pLatency are QPC ticks; statistics are microseconds.
     procedure Stop(var pEnd: TLargeInteger;
                    out pLatency: TLargeInteger);
 
@@ -136,110 +148,137 @@ implementation
 constructor TLatencyTool.Create();
 begin
   inherited Create();
-
 end;
 
 
 destructor TLatencyTool.Destroy();
 begin
+  try
+    RestoreAffinity;
+  finally
+    inherited Destroy();
+  end;
+end;
 
-  inherited Destroy();
+
+procedure TLatencyTool.RestoreAffinity;
+var
+  ErrorCode: DWORD;
+begin
+  prRunning := False;
+  prStartP := 0;
+  if prThreadHandle = 0 then
+    Exit;
+  ErrorCode := 0;
+  try
+    if (prPreviousAffinity <> 0) and
+       (SetThreadAffinityMask(prThreadHandle,prPreviousAffinity) = 0) then
+      ErrorCode := GetLastError;
+  finally
+    CloseHandle(prThreadHandle);
+    prThreadHandle := 0;
+    prPreviousAffinity := 0;
+  end;
+  if ErrorCode <> 0 then
+    RaiseLastOSError(ErrorCode);
 end;
 
 
 function TLatencyTool.Initialize(): Boolean;
 var
-  perfFrequency: TLargeInteger;
-
+  PerfFrequency: TLargeInteger;
 begin
-  Result := False;
-  prStartP := 0;
+  RestoreAffinity;
   prCurrentExecutionTime := 0;
   prExecutionCount := 0;
   prMinExecutionTime := 0;
   prMaxExecutionTime := 0;
   prAverageExecutionTime := 0;
   prTotalExecutionTime := 0;
+  prTotalMicroseconds := 0;
+  prFreqFactor := 0;
   prDoMeasure := False;
-
-  // Get performance frequency in counts per second.
-  if (QueryPerformanceFrequency(perfFrequency) <> True) then
+  PerfFrequency := 0;
+  Result := QueryPerformanceFrequency(PerfFrequency) and (PerfFrequency > 0);
+  if Result then
     begin
-      // Something went wrong, measuring will not work.
-      prFreqFactor := 0;
-    end
-  else
-    begin
-      // The freqFactor is the amount of microseconds of a single performance count.
-      prFreqFactor := 1000000 / perfFrequency;
+      prFreqFactor := 1000000.0 / PerfFrequency;
       prDoMeasure := True;
-      Result := True;
     end;
 end;
 
 
 procedure TLatencyTool.UpdateStats(pElapsed: LONGLONG);
 var
-  TotExecutionTime: Int64;
-  CurExecutionTime: Int64;
-
+  ElapsedMicroseconds: Double;
 begin
-  // Calculated elapsed execution time in microseconds.
-  prCurrentExecutionTime := pElapsed * prFreqFactor;
-
-  // Update minimum execution time.
-  if ((prCurrentExecutionTime < prMinExecutionTime) or (prMinExecutionTime = 0)) then
+  if not prDoMeasure or (pElapsed < 0) then
+    Exit;
+  ElapsedMicroseconds := pElapsed * prFreqFactor;
+  prCurrentExecutionTime := ElapsedMicroseconds;
+  if (prExecutionCount = 0) or (prCurrentExecutionTime < prMinExecutionTime) then
     prMinExecutionTime := prCurrentExecutionTime;
-
-  // Update maximum execution time.
-  if (prCurrentExecutionTime > prMaxExecutionTime) then
+  if prCurrentExecutionTime > prMaxExecutionTime then
     prMaxExecutionTime := prCurrentExecutionTime;
-
-  // Increase number of successful measurings.
   Inc(prExecutionCount);
-
-  TotExecutionTime := Trunc(prTotalExecutionTime);
-  CurExecutionTime := Trunc(prCurrentExecutionTime);
-
-  // Update total and average.
-  Inc(TotExecutionTime,
-      CurExecutionTime);
-
-  prAverageExecutionTime := TotExecutionTime / prExecutionCount;
+  prTotalMicroseconds := prTotalMicroseconds + ElapsedMicroseconds;
+  prTotalExecutionTime := prTotalMicroseconds;
+  prAverageExecutionTime := prTotalMicroseconds / prExecutionCount;
 end;
 
 
-procedure TLatencyTool.Start(var pStart: Int64;
-                             pCPU: DWORD_PTR = 1);
+procedure TLatencyTool.Start(var pStart: TLargeInteger;
+                              pCPU: DWORD_PTR = 1);
 begin
-
-  if (prDoMeasure = True) then
-    begin
-      SetThreadAffinityMask(GetCurrentThread(), pCPU);
-
-      // Get the performance time stamp at the beginning of your code.
-      QueryPerformanceCounter(pStart);
-      // Remember.
-      prStartP := pStart;
-    end;
+  pStart := 0;
+  RestoreAffinity;
+  if not prDoMeasure then
+    Exit;
+  try
+    if pCPU <> 0 then
+      begin
+        if not DuplicateHandle(GetCurrentProcess,GetCurrentThread,GetCurrentProcess,
+                                @prThreadHandle,0,False,DUPLICATE_SAME_ACCESS) then
+          RaiseLastOSError;
+        prPreviousAffinity := SetThreadAffinityMask(prThreadHandle,pCPU);
+        if prPreviousAffinity = 0 then
+          RaiseLastOSError;
+      end;
+    if QueryPerformanceCounter(pStart) then
+      begin
+        prStartP := pStart;
+        prRunning := True;
+      end
+    else
+      pStart := 0;
+  finally
+    if not prRunning then
+      RestoreAffinity;
+  end;
 end;
 
 
 procedure TLatencyTool.Stop(var pEnd: TLargeInteger;
-                            out pLatency: TLargeInteger);
+                             out pLatency: TLargeInteger);
 begin
-  // Get the performance time stamp at the end of your code and update our data.
-  if (prDoMeasure = True) then
-    begin
-      QueryPerformanceCounter(pEnd);
-
-      if ((prStartP > 0) and (pEnd > 0)) then
-        UpdateStats(pEnd - prStartP);
-
-      // minExecutionTime, maxExecutionTime and averageExecutionTime are now filled
-      // with useful data representing execution times in microseconds.
-    end;
+  pEnd := 0;
+  pLatency := 0;
+  if not prDoMeasure or not prRunning then
+    Exit;
+  try
+    if QueryPerformanceCounter(pEnd) then
+      begin
+        if pEnd >= prStartP then
+          begin
+            pLatency := pEnd - prStartP;
+            UpdateStats(pLatency);
+          end;
+      end
+    else
+      pEnd := 0;
+  finally
+    RestoreAffinity;
+  end;
 end;
-
 
 end.

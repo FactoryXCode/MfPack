@@ -10,7 +10,7 @@
 // Release date: 22-12-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WMI structure definitions
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -237,9 +237,9 @@ type
     // then OffsetInstanceDataAndLength
     // is an array of OFFSETINSTANCEDATAANDLENGTH that specifies the
     // offsets and lengths of the data blocks for each instance.
-    case Integer of
-      0 : (FixedInstanceSize : ULONG);
-      1 : (OffsetInstanceDataAndLength : POFFSETINSTANCEDATAANDLENGTH);
+    FixedInstanceSize: ULONG;
+    function GetOffsetInstanceDataAndLength: POFFSETINSTANCEDATAANDLENGTH; inline;
+    property OffsetInstanceDataAndLength: POFFSETINSTANCEDATAANDLENGTH read GetOffsetInstanceDataAndLength;
       //  /* [InstanceCount] */
 
     // padding so that first data block begins on a 8 byte boundry
@@ -264,7 +264,8 @@ type
     InstanceIndex   : ULONG;    // (Static Instance Names)
     DataBlockOffset : ULONG;    // offset from beginning of WNODE to data block
     SizeDataBlock   : ULONG;    // Size of data block for instance
-    VariableData    : PUCHAR;
+    function GetVariableData: PUCHAR; inline;
+    property VariableData: PUCHAR read GetVariableData;
                                 // instance names and padding so data block begins on 8 byte boundry
                                 // data block
   end;
@@ -287,7 +288,8 @@ type
     ItemId          : ULONG;    // Item Id for data item being set
     DataBlockOffset : ULONG;    // offset from WNODE begin to data item value
     SizeDataItem    : ULONG;    // Size of data item
-    VariableData    : PUCHAR;
+    function GetVariableData: PUCHAR; inline;
+    property VariableData: PUCHAR read GetVariableData;
     // instance names and padding so data value begins on 8 byte boundry
 
     // data item value
@@ -316,7 +318,8 @@ type
                               //           data
                               // On Return: Size of output data, 0 if no output
                               //            data
-    VariableData    : PUCHAR;
+    function GetVariableData: PUCHAR; inline;
+    property VariableData: PUCHAR read GetVariableData;
     // instance names and padding so data value begins on 8 byte boundry
 
     // data item value
@@ -351,9 +354,9 @@ type
     TargetGuid  : TGUID;
     TargetDataBlockSize : ULONG;
 
-    case Integer of
-      0 : (TargetInstanceIndex : ULONG);
-      1 : (TargetInstanceName  : PWCHAR);
+    TargetInstanceIndex: ULONG;
+    function GetTargetInstanceName: PWCHAR; inline;
+    property TargetInstanceName: PWCHAR read GetTargetInstanceName;
   end;
   {$EXTERNALSYM tagWNODE_EVENT_REFERENCE}
   WNODE_EVENT_REFERENCE = tagWNODE_EVENT_REFERENCE;
@@ -487,10 +490,15 @@ type
 
     // Count of WMIREGGUID structures immediately following
 
-    GuidCount: ULONG;
-    WmiRegGuid: PWMIREGGUIDW;  // array of GuidCount WMIREGGUID structures
+
+    // The flexible trailing array starts at the next 8-byte boundary.
+    function GetWmiRegGuid: PWMIREGGUIDW; inline;
+    property WmiRegGuid: PWMIREGGUIDW read GetWmiRegGuid;  // array of GuidCount WMIREGGUID structures
     // Variable length data including :
     //     Instance Names
+    case Boolean of
+      False: (Alignment: UInt64);
+      True: (GuidCount: ULONG);
   end;
   {$EXTERNALSYM WMIREGINFOW}
   WMIREGINFO = WMIREGINFOW;
@@ -632,6 +640,37 @@ const
   // End of Additional Prototypes
 
 implementation
+
+function tagWNODE_SINGLE_INSTANCE.GetVariableData: PUCHAR;
+begin
+  Result := PUCHAR(NativeUInt(@Self) + 64);
+end;
+
+function tagWNODE_SINGLE_ITEM.GetVariableData: PUCHAR;
+begin
+  Result := PUCHAR(NativeUInt(@Self) + 68);
+end;
+
+function tagWNODE_METHOD_ITEM.GetVariableData: PUCHAR;
+begin
+  Result := PUCHAR(NativeUInt(@Self) + 68);
+end;
+
+function tagWNODE_ALL_DATA.GetOffsetInstanceDataAndLength: POFFSETINSTANCEDATAANDLENGTH;
+begin
+  Result := @FixedInstanceSize;
+end;
+
+function tagWNODE_EVENT_REFERENCE.GetTargetInstanceName: PWCHAR;
+begin
+  Result := PWCHAR(@TargetInstanceIndex);
+end;
+
+function WMIREGINFOW.GetWmiRegGuid: PWMIREGGUIDW;
+begin
+  Result := PWMIREGGUIDW(NativeUInt(@Self) + 24);
+end;
+
 
   // Implement Additional functions here.
 

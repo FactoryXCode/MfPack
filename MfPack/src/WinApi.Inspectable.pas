@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Media Foundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Provides functionality required for all Windows Runtime classes.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -38,7 +38,7 @@
 //          All Windows Runtime classes must implement the IInspectable sinterface.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -78,7 +78,8 @@ interface
 
 uses
   {WinApi}
-  WinApi.Windows;
+  WinApi.Windows,
+  WinApi.WinApiTypes;
 
   {$MINENUMSIZE 4}
 
@@ -92,7 +93,6 @@ uses
 type
 
   PINSPECTABLE = ^IInspectable;
-  LPINSPECTABLE = ^IInspectable;
 
   PTrustLevel = ^TrustLevel;
   TrustLevel = (
@@ -114,12 +114,14 @@ type
     function GetIids(out iidCount: ULONG;
                      out iids: PGuid): HRESULT; stdcall;
 
-    function GetRuntimeClassName(out className: string): HRESULT; stdcall;
+    function GetRuntimeClassName(out className: WinApi.WinApiTypes.HSTRING): HRESULT; stdcall;
 
     function GetTrustLevel(out _trustLevel: TrustLevel): HRESULT; stdcall;
 
   end;
   IID_IInspectable = IInspectable;
+  // C IInspectable* is a Pascal interface reference, not a pointer to its storage.
+  LPINSPECTABLE = IInspectable;
   {$EXTERNALSYM IID_IInspectable}
 
 

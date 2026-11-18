@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 20-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Public Interfaces for DXVA2.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -326,7 +326,7 @@ type
     property VideoTransferMatrix: Integer index $0f03 read ReadBits write WriteBits;     // 3 bits at offset 15
     property VideoLighting: Integer index $1204 read ReadBits write WriteBits;           // 4 bits at offset 18
     property VideoPrimaries: Integer index $1605 read ReadBits write WriteBits;          // 5 bits at offset 22
-    property VideoTransferFunction: Integer index $1b01 read ReadBits write WriteBits;   // 5 bits at offset 27
+    property VideoTransferFunction: Integer index $1b05 read ReadBits write WriteBits;   // 5 bits at offset 27
   end;
   {$EXTERNALSYM DXVA2_ExtendedFormat}
 
@@ -757,7 +757,7 @@ type
     rtStart: REFERENCE_TIME;
     rtEnd: REFERENCE_TIME;
     SampleFormat: DXVA2_ExtendedFormat;
-    SrcSurface: ^IDirect3DSurface9;
+    SrcSurface: IDirect3DSurface9;
     SrcRect: TRect;
     DstRect: TRect;
     Pal: array[0..15] of DXVA2_AYUVSample8;  // Palette used with AI44 surface types
@@ -1015,7 +1015,7 @@ type
     function TestDevice(const hDevice: THANDLE): HResult; stdcall;
 
     function LockDevice(const hDevice: THANDLE;
-                        out ppDevice: PIDirect3DDevice9;
+                        out ppDevice: IDirect3DDevice9;
                         const fBlock: BOOL): HResult; stdcall;
 
     function UnlockDevice(const hDevice: THANDLE;
@@ -1043,8 +1043,8 @@ type
                            const Pool: D3DPOOL;
                            const Usage: DWORD;
                            const DxvaType: DWORD;
-                           out ppSurface: PIDirect3DSurface9;
-                           var pSharedHandle: THANDLE): HResult; stdcall;
+                           ppSurface: PIDirect3DSurface9;
+                           pSharedHandle: PHANDLE): HResult; stdcall;
 
   end;
   IID_IDirectXVideoAccelerationService = IDirectXVideoAccelerationService;
@@ -1057,7 +1057,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirectXVideoDecoderService);'}
   {$EXTERNALSYM IDirectXVideoDecoderService}
-  IDirectXVideoDecoderService = interface(IUnknown)
+  IDirectXVideoDecoderService = interface(IDirectXVideoAccelerationService)
   ['{fc51a551-d5e7-11d9-af55-00054e43ff02}']
     function GetDecoderDeviceGuids(out pCount: UINT;
                                    out pGuids: PGUID): HResult; stdcall;
@@ -1067,17 +1067,17 @@ type
                                      out pFormats: PD3DFORMAT): HResult; stdcall;
 
     function GetDecoderConfigurations(const Guid: TGuid;
-                                      pVideoDesc: DXVA2_VideoDesc;
+                                      const pVideoDesc: DXVA2_VideoDesc;
                                       pReserved: Pointer;
                                       out pCount: UINT;
                                       out ppConfigs: PDXVA2_ConfigPictureDecode): HResult; stdcall;
 
     function CreateVideoDecoder(const Guid: TGuid;
-                                pVideoDesc: DXVA2_VideoDesc;
-                                pConfig: DXVA2_ConfigPictureDecode;
+                                const pVideoDesc: DXVA2_VideoDesc;
+                                const pConfig: DXVA2_ConfigPictureDecode;
                                 ppDecoderRenderTargets: PIDirect3DSurface9;
                                 NumRenderTargets: UINT;
-                                out ppDecode: PIDirectXVideoDecoder): HResult; stdcall;
+                                out ppDecode: IDirectXVideoDecoder): HResult; stdcall;
   end;
   IID_IDirectXVideoDecoderService = IDirectXVideoDecoderService;
   {$EXTERNALSYM IID_IDirectXVideoDecoderService}
@@ -1094,43 +1094,43 @@ type
 
     function RegisterVideoProcessorSoftwareDevice(const pCallbacks: Pointer): HResult; stdcall;
 
-    function GetVideoProcessorDeviceGuids(pVideoDesc: DXVA2_VideoDesc;
+    function GetVideoProcessorDeviceGuids(const pVideoDesc: DXVA2_VideoDesc;
                                           out pCount: UINT;
                                           out pGuids: PGUID): HResult; stdcall;
 
     function GetVideoProcessorRenderTargets(const VideoProcDeviceGuid: TGuid;
-                                            pVideoDesc: DXVA2_VideoDesc;
+                                            const pVideoDesc: DXVA2_VideoDesc;
                                             out pCount: UINT;
                                             out pFormats: PD3DFORMAT): HResult; stdcall;
 
     function GetVideoProcessorSubStreamFormats(const VideoProcDeviceGuid: TGuid;
-                                               pVideoDesc: DXVA2_VideoDesc;
+                                               const pVideoDesc: DXVA2_VideoDesc;
                                                RenderTargetFormat: D3DFORMAT;
                                                out pCount: UINT;
                                                out pFormats: PD3DFORMAT): HResult; stdcall;
 
     function GetVideoProcessorCaps(const VideoProcDeviceGuid: TGuid;
-                                   pVideoDesc: DXVA2_VideoDesc;
+                                   const pVideoDesc: DXVA2_VideoDesc;
                                    RenderTargetFormat: D3DFORMAT;
                                    out pCaps: DXVA2_VideoProcessorCaps): HResult; stdcall;
 
     function GetProcAmpRange(const VideoProcDeviceGuid: TGuid;
-                             pVideoDesc: DXVA2_VideoDesc;
+                             const pVideoDesc: DXVA2_VideoDesc;
                              RenderTargetFormat: D3DFORMAT;
                              ProcAmpCap: UINT;
                              out pRange: DXVA2_ValueRange): HResult; stdcall;
 
     function GetFilterPropertyRange(const VideoProcDeviceGuid: TGuid;
-                                    pVideoDesc: DXVA2_VideoDesc;
+                                    const pVideoDesc: DXVA2_VideoDesc;
                                     RenderTargetFormat: D3DFORMAT;
                                     FilterSetting: UINT;
                                     out pRange: DXVA2_ValueRange): HResult; stdcall;
 
     function CreateVideoProcessor(const VideoProcDeviceGuid: TGuid;
-                                  pVideoDesc: DXVA2_VideoDesc;
+                                  const pVideoDesc: DXVA2_VideoDesc;
                                   RenderTargetFormat: D3DFORMAT;
                                   MaxNumSubStreams: UINT;
-                                  out ppVidProcess: PIDirectXVideoProcessor): HResult; stdcall;
+                                  out ppVidProcess: IDirectXVideoProcessor): HResult; stdcall;
   end;
   IID_IDirectXVideoProcessorService = IDirectXVideoProcessorService;
   {$EXTERNALSYM IID_IDirectXVideoProcessorService}
@@ -1144,12 +1144,12 @@ type
   IDirectXVideoDecoder = interface(IUnknown)
   ['{f2b0810a-fd00-43c9-918c-df94e2d8ef7d}']
 
-    function GetVideoDecoderService(out ppService: PIDirectXVideoDecoderService): HResult; stdcall;
+    function GetVideoDecoderService(out ppService: IDirectXVideoDecoderService): HResult; stdcall;
 
     function GetCreationParameters(out pDeviceGuid: TGUID;
                                    out pVideoDesc: DXVA2_VideoDesc;
                                    out pConfig: DXVA2_ConfigPictureDecode;
-                                   out pDecoderRenderTargets: PIDirect3DSurface9;
+                                   out pDecoderRenderTargets: PPointer;
                                    out pNumSurfaces: UINT): HResult; stdcall;
 
     function GetBuffer(BufferType: UINT;
@@ -1161,9 +1161,9 @@ type
     function BeginFrame(pRenderTarget: IDirect3DSurface9;
                         pvPVPData: Pointer): HResult; stdcall;
 
-    function EndFrame(out pHandleComplete: THandle): HResult; stdcall;
+    function EndFrame(pHandleComplete: PHANDLE): HResult; stdcall;
 
-    function Execute(pExecuteParams: DXVA2_DecodeExecuteParams): HResult; stdcall;
+    function Execute(pExecuteParams: PDXVA2DecodeExecuteParams): HResult; stdcall;
 
   end;
   IID_IDirectXVideoDecoder = IDirectXVideoDecoder;
@@ -1178,7 +1178,7 @@ type
   IDirectXVideoProcessor = interface(IUnknown)
   ['{8c3a39f0-916e-4690-804f-4c8001355d25}']
 
-    function GetVideoProcessorService(out ppService: PIDirectXVideoProcessorService): HResult; stdcall;
+    function GetVideoProcessorService(out ppService: IDirectXVideoProcessorService): HResult; stdcall;
 
     function GetCreationParameters(out pDeviceGuid: TGuid;
                                    out pVideoDesc: DXVA2_VideoDesc;
@@ -1191,13 +1191,13 @@ type
                              out pRange: DXVA2_ValueRange): HResult; stdcall;
 
     function GetFilterPropertyRange(FilterSetting: UINT;
-                                    out DXVA2_ValueRange): HResult; stdcall;
+                                    out pRange: DXVA2_ValueRange): HResult; stdcall;
 
     function VideoProcessBlt(pRenderTarget: IDirect3DSurface9;
-                             pBltParams: DXVA2_VideoProcessBltParams;
-                             pSamples: DXVA2_VideoSample;
+                             const pBltParams: DXVA2_VideoProcessBltParams;
+                             pSamples: PDXVA2VideoSample;
                              NumSamples: UINT;
-                             out pHandleComplete: THANDLE): HResult; stdcall;
+                             pHandleComplete: PHANDLE): HResult; stdcall;
 
   end;
   IID_IDirectXVideoProcessor = IDirectXVideoProcessor;
@@ -1283,7 +1283,7 @@ type
 
 
   function DXVA2CreateDirect3DDeviceManager9(out pResetToken: UINT;
-                                             out ppDeviceManager: PIDirect3DDeviceManager9): HResult; stdcall;
+                                             out ppDeviceManager: IDirect3DDeviceManager9): HResult; stdcall;
   {$EXTERNALSYM DXVA2CreateDirect3DDeviceManager9}
   // Parameters
   //  pResetToken [out]
@@ -1359,11 +1359,11 @@ type
                                    pDesc: PDXVA2VideoDesc): HRESULT;
 
   procedure GetDXVA2ExtendedFormatFromMFMediaType(pType: IMFAttributes;
-                                                  pFormat: DXVA2_ExtendedFormat);
+                                                  out pFormat: DXVA2_ExtendedFormat);
 
   function CreateD3DDeviceManager(pDevice: IDirect3DDevice9;
                                   out pReset: UINT;
-                                  out ppManager: PIDirect3DDeviceManager9): HRESULT;
+                                  out ppManager: IDirect3DDeviceManager9): HRESULT;
 
   // End of Additional Prototypes
 
@@ -1478,172 +1478,59 @@ end;
 /// Helpers ///
 
 // Fills in the DXVA2_ExtendedFormat structure.
-procedure GetDXVA2ExtendedFormatFromMFMediaType(pType: ImfAttributes;
-                                                pFormat: DXVA2_ExtendedFormat);
-var
-  interlace: UINT32;
-  RetVal: UINT32;
-
-begin     //
-  // Get the interlace mode. An example from M$ that didn't work :-)
-  interlace := MFGetAttributeUINT32(pType,
-                                    MF_MT_INTERLACE_MODE,
-                                    ord(MFVideoInterlace_Unknown));
-  // The values for interlace mode translate directly, except for mixed
-  // interlace or progressive mode.
-
-  if (interlace = UINT(MFVideoInterlace_MixedInterlaceOrProgressive)) then
-    // Default to interleaved fields.
-    pFormat.SampleFormat := UINT(DXVA2_SampleFieldInterleavedEvenFirst)
-  else
-    pFormat.SampleFormat := UINT(interlace);
-
-  // The remaining values translate directly.
-  // Use the "no-fail" attribute functions and default to "unknown."
-  // Same Issue
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_VIDEO_CHROMA_SITING,
-                                 ord(MFVideoChromaSubsampling_Unknown));
-  if not (FAILED(RetVal)) then
-    pFormat.VideoChromaSubsampling := RetVal
-  else
-    Abort;
-
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_VIDEO_NOMINAL_RANGE,
-                                 ord(MFNominalRange_Unknown));
-  if not (FAILED(RetVal)) then
-    pFormat.NominalRange := RetVal
-  else
-    Abort;
-
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_YUV_MATRIX,
-                                 ord(MFVideoTransferMatrix_Unknown));
-  if not (FAILED(RetVal)) then
-     pFormat.VideoTransferMatrix := RetVal
-  else
-    Abort;
-
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_VIDEO_LIGHTING,
-                                 ord(MFVideoLighting_Unknown));
-  if not (FAILED(RetVal)) then
-    pFormat.VideoLighting := RetVal
-  else
-    Abort;
-
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_VIDEO_PRIMARIES,
-                                 ord(MFVideoPrimaries_Unknown));
-  if not (FAILED(RetVal)) then
-    pFormat.VideoPrimaries := RetVal
-  else
-    Abort;
-
-  RetVal := MFGetAttributeUINT32(pType,
-                                 MF_MT_TRANSFER_FUNCTION,
-                                 ord(MFVideoTransFunc_Unknown));
-  if not (FAILED(RetVal)) then
-    pFormat.VideoTransferFunction := RetVal
-  else
-    Abort;
+procedure GetDXVA2ExtendedFormatFromMFMediaType(pType: IMFAttributes;
+                                                out pFormat: DXVA2_ExtendedFormat);
+var Interlace: UINT32;
+begin
+  pFormat.Value := 0;
+  Interlace := MFGetAttributeUINT32(pType, MF_MT_INTERLACE_MODE, Ord(MFVideoInterlace_Unknown));
+  if Interlace = UINT(MFVideoInterlace_MixedInterlaceOrProgressive) then
+    Interlace := UINT(DXVA2_SampleFieldInterleavedEvenFirst);
+  pFormat.SampleFormat := Interlace;
+  pFormat.VideoChromaSubsampling := MFGetAttributeUINT32(pType, MF_MT_VIDEO_CHROMA_SITING, 0);
+  pFormat.NominalRange := MFGetAttributeUINT32(pType, MF_MT_VIDEO_NOMINAL_RANGE, 0);
+  pFormat.VideoTransferMatrix := MFGetAttributeUINT32(pType, MF_MT_YUV_MATRIX, 0);
+  pFormat.VideoLighting := MFGetAttributeUINT32(pType, MF_MT_VIDEO_LIGHTING, 0);
+  pFormat.VideoPrimaries := MFGetAttributeUINT32(pType, MF_MT_VIDEO_PRIMARIES, 0);
+  pFormat.VideoTransferFunction := MFGetAttributeUINT32(pType, MF_MT_TRANSFER_FUNCTION, 0);
 end;
-
 
 // helper ConvertMFTypeToDXVAType
 //===============================
-function ConvertMFTypeToDXVAType(pType: IMFAttributes;
-                                 pDesc: PDXVA2VideoDesc): HRESULT;
-var
-  subtype: TGuid;
-  width: UINT32;
-  height: UINT32;
-  fpsNumerator: UINT32;
-  fpsDenominator: UINT32;
-  hr: HRESULT;
-
+function ConvertMFTypeToDXVAType(pType: IMFAttributes; pDesc: PDXVA2VideoDesc): HRESULT;
+var Subtype: TGUID; Width, Height, Numerator, Denominator: UINT32;
 begin
-  subtype:= GUID_NULL;
-  width := 0;
-  height := 0;
-  fpsNumerator := 0;
-  fpsDenominator := 0;
-  hr := 0;
-  ZeroMemory(pDesc, sizeof(pDesc));
-try
-  // The D3D format is the first DWORD of the subtype GUID.
-  hr:= pType.GetGUID(MF_MT_SUBTYPE, subtype);
-  if (FAILED(hr)) then
-    Abort;
-
-  pDesc.Format := subtype.D1;
-
-  // Frame size.
-  hr:= MFGetAttributeSize(pType, MF_MT_FRAME_SIZE, width, height);
-  if (FAILED(hr)) then
-    Abort;
-
-  pDesc.SampleWidth := width;
-  pDesc.SampleHeight := height;
-
-  // Frame rate.
-  hr:= MFGetAttributeRatio(pType, MF_MT_FRAME_RATE, fpsNumerator, fpsDenominator);
-  if (FAILED(hr)) then
-    Abort;
-
-  pDesc.InputSampleFreq.Numerator := fpsNumerator;
-  pDesc.InputSampleFreq.Denominator := fpsDenominator;
-
-  // Extended format information.
+  if (pType = nil) or (pDesc = nil) then begin Result := E_POINTER; Exit; end;
+  ZeroMemory(pDesc, SizeOf(pDesc^));
+  Result := pType.GetGUID(MF_MT_SUBTYPE, Subtype);
+  if Failed(Result) then Exit;
+  pDesc.Format := D3DFORMAT(Subtype.D1);
+  Result := MFGetAttributeSize(pType, MF_MT_FRAME_SIZE, Width, Height);
+  if Failed(Result) then Exit;
+  pDesc.SampleWidth := Width; pDesc.SampleHeight := Height;
+  Result := MFGetAttributeRatio(pType, MF_MT_FRAME_RATE, Numerator, Denominator);
+  if Failed(Result) then Exit;
+  pDesc.InputSampleFreq.Numerator := Numerator;
+  pDesc.InputSampleFreq.Denominator := Denominator;
   GetDXVA2ExtendedFormatFromMFMediaType(pType, pDesc.SampleFormat);
-
-  // For progressive or single-field types, the output frequency is the same as
-  // the input frequency. For interleaved-field types, the output frequency is
-  // twice the input frequency.
-  pDesc.OutputFrameFreq:= pDesc.InputSampleFreq;
-
-  if (pDesc.SampleFormat.SampleFormat = ord(DXVA2_SampleFieldInterleavedEvenFirst)) or
-     (pDesc.SampleFormat.SampleFormat = ord(DXVA2_SampleFieldInterleavedOddFirst)) then
-    pDesc.OutputFrameFreq.Numerator := 2;
-
-finally
-    Result:= hr;
+  pDesc.OutputFrameFreq := pDesc.InputSampleFreq;
+  if (pDesc.SampleFormat.SampleFormat = Ord(DXVA2_SampleFieldInterleavedEvenFirst)) or
+     (pDesc.SampleFormat.SampleFormat = Ord(DXVA2_SampleFieldInterleavedOddFirst)) then
+    pDesc.OutputFrameFreq.Numerator := 2 * Numerator;
 end;
-end;
-
 
 function CreateD3DDeviceManager(pDevice: IDirect3DDevice9;
                                 out pReset: UINT;
-                                out ppManager: PIDirect3DDeviceManager9): HRESULT;
-var
-  resetToken: UINT;
-  PD3DManager: PIDirect3DDeviceManager9;
-
-  hr: HRESULT;
-  label Done;
-
+                                out ppManager: IDirect3DDeviceManager9): HRESULT;
+var Manager: IDirect3DDeviceManager9; Token: UINT;
 begin
-    resetToken:= 0;
-    PD3DManager:= Nil;
-
-    hr:= DXVA2CreateDirect3DDeviceManager9(resetToken, PD3DManager);
-    if (FAILED(hr)) then
-      goto done;
-
-    hr:= PD3DManager.ResetDevice(pDevice, resetToken);
-    if (FAILED(hr)) then
-      goto Done;
-
-    ppManager:= PD3DManager;
-    pReset:= resetToken;
-
-    goto Done;
-
-Done:
-  PD3DManager := Nil;
-  Result:= hr;
+  pReset := 0; ppManager := nil;
+  if pDevice = nil then begin Result := E_POINTER; Exit; end;
+  Result := DXVA2CreateDirect3DDeviceManager9(Token, Manager);
+  if Failed(Result) then Exit;
+  Result := Manager.ResetDevice(pDevice, Token);
+  if Failed(Result) then Exit;
+  pReset := Token; ppManager := Manager;
 end;
-
 
 end.

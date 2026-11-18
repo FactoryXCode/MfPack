@@ -23,12 +23,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 10/08/2026 All                 Extracted reusable Windows UI support.
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfCast.pas, MfCastTypes.pas
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -36,7 +37,7 @@
 //
 // Todo: -
 //
-// =============================================================================
+//==============================================================================
 // Source: -
 //==============================================================================
 //
@@ -180,6 +181,7 @@ type
   TMfCastUiLogMessage = class
   public
     Text: string;
+    CreatedAt: TDateTime;
 
     constructor Create(const AText: string);
   end;
@@ -242,7 +244,7 @@ begin
 
     PostMessage(FTargetWindow,
                 WM_MFCAST_DISCONNECT_FINISHED,
-                WPARAM(Hr),
+                WPARAM(DWORD(Hr)),
                 0);
   end;
 end;
@@ -433,6 +435,7 @@ begin
 
   inherited Create();
 
+  CreatedAt := Now;
   Text := AText;
 end;
 

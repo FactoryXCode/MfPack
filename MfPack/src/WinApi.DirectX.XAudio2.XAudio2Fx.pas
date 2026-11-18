@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Declarations for the audio effects included with XAudio2.
 //              Windows 8 XAudio 2.8 or later
 //
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -71,7 +71,7 @@ uses
   System.Classes,
   {System}
   System.Math,
-  WinApi.MediaFoundationApi.MfUtils;
+  WinApi.WinApiTypes;
 
   {$MINENUMSIZE 4}
 
@@ -116,13 +116,15 @@ const
   **************************************************************************)
 
 
-  function CreateAudioVolumeMeter(out ppApo: IInterface): HRESULT; stdcall;
+  function CreateAudioVolumeMeter(ppApo: PPointer): HRESULT; stdcall;
   {$EXTERNALSYM CreateAudioVolumeMeter}
-  function CreateAudioReverb(out ppApo: IInterface): HRESULT; stdcall;
+  function CreateAudioReverb(ppApo: PPointer): HRESULT; stdcall;
   {$EXTERNALSYM CreateAudioReverb}
 
   // Note:
-  // Because XAudio2CreateVolumeMeter calls CoCreateInstance on Windows,
+  // The current SDK wrappers delegate directly to CreateAudioVolumeMeter/Reverb.
+  // The legacy COM activation notes below are retained for historical context.
+  // Historically, XAudio2CreateVolumeMeter called CoCreateInstance on Windows,
   // the application must have called the CoInitializeEx method before calling XAudio2CreateVolumeMeter.
   // XAudio2Create has the same requirement, which means CoInitializeEx typically will be
   // called long before XAudio2CreateVolumeMeter is called.
@@ -151,12 +153,12 @@ const
   *)
 
   // Inline functions.
-  function XAudio2CreateVolumeMeter(out ppApo: IInterface;
+  function XAudio2CreateVolumeMeter(out ppApo: IUnknown;
                                     Flags: UINT32 = 0): HRESULT; inline;
   {$EXTERNALSYM XAudio2CreateVolumeMeter}
 
 
-  function XAudio2CreateReverb(out ppApo: IInterface;
+  function XAudio2CreateReverb(out ppApo: IUnknown;
                                Flags: UINT32 = 0): HRESULT; inline;
   {$EXTERNALSYM XAudio2CreateReverb}
 
@@ -224,7 +226,7 @@ type
     ReflectionsDelay: UINT32;        // [0, 300] in ms
     ReverbDelay: Byte;               // [0, 85] in ms
     RearDelay: Byte;                 // 7.1: [0, 20] in ms, all other: [0, 5] in ms
-{$IFDEF _WIN32_WINNT_WIN10}
+{$IFDEF _WINNT_WIN10}
     SideDelay: Byte;                 // 7.1: [0, 5] in ms, all other: not used, but still validated
 {$ENDIF}
 // Indexed parameters
@@ -418,8 +420,8 @@ type
 
   // ReverbConvertI3DL2ToNative: Utility function to map from I3DL2 to native parameters
 
-  procedure ReverbConvertI3DL2ToNative(pI3DL2: XAUDIO2FX_REVERB_I3DL2_PARAMETERS;
-                                       out pNative: XAUDIO2FX_REVERB_PARAMETERS
+  procedure ReverbConvertI3DL2ToNative(pI3DL2: PXAUDIO2FX_REVERB_I3DL2_PARAMETERS;
+                                       pNative: PXAUDIO2FX_REVERB_PARAMETERS
                                        {$IFDEF _WINNT_WIN10}
                                        ; sevenDotOneReverb: BOOL = TRUE
                                        {$ENDIF});
@@ -904,7 +906,7 @@ const
 
   /// <summary>Compares kXAudio2NativeReverb parameters for Min and Max, adjusting it if it's outside the specified range.</summary>
   procedure CheckXAudio2NativeReverbParams(var params: XAUDIO2FX_REVERB_PARAMETERS;
-                                          sevenDotOneReverb: Boolean); inline;
+                                           sevenDotOneReverb: Boolean); inline;
 
   /// <summary>Compares XAudio2I3DL2Reverb parameters for Min and Max, adjusting it if it's outside the specified range.</summary>
   procedure CheckXAudio2I3DL2ReverbParams(var params: XAUDIO2FX_REVERB_I3DL2_PARAMETERS); inline;
@@ -919,13 +921,13 @@ implementation
 function XAudio2CreateVolumeMeter(out ppApo: IUnknown;
                                   Flags: UINT32 = 0): HRESULT; inline;
 begin
-  Result:= CreateAudioVolumeMeter(ppApo);
+  Result:= CreateAudioVolumeMeter(@ppApo);
 end;
 
 function XAudio2CreateReverb(out ppApo: IUnknown;
                              Flags: UINT32 = 0): HRESULT; inline;
 begin
-  Result:= CreateAudioReverb(ppApo);
+  Result:= CreateAudioReverb(@ppApo);
 end;
 
 
@@ -935,8 +937,8 @@ function CreateAudioReverb; external XAudio2_DLL name 'CreateAudioReverb' {$IF C
 {$WARN SYMBOL_PLATFORM ON}
 
 
-procedure ReverbConvertI3DL2ToNative(pI3DL2: XAUDIO2FX_REVERB_I3DL2_PARAMETERS;
-                                     out pNative: XAUDIO2FX_REVERB_PARAMETERS
+procedure ReverbConvertI3DL2ToNative(pI3DL2: PXAUDIO2FX_REVERB_I3DL2_PARAMETERS;
+                                     pNative: PXAUDIO2FX_REVERB_PARAMETERS
                                      {$IFDEF _WINNT_WIN10}
                                      ; sevenDotOneReverb: BOOL = True
                                      {$ENDIF});
@@ -944,74 +946,76 @@ var
   reflectionsDelay: Single;
   reverbDelay: Single;
   index: INT32;
+  diffusionScaled: Single;
+  decayRatio: Double;
 
 begin
-  // Check if native params are inboundaries.
-  pI3DL2.CheckBoundaries();
+  // Match the SDK conversion; callers may clamp explicitly before conversion.
 
   // RoomRolloffFactor is ignored
 
   // These parameters have no equivalent in I3DL2
-{$IFDEF _WIN32_WINNT_WIN10}
+{$IFDEF _WINNT_WIN10}
   if (sevenDotOneReverb = True) then
     begin
-      pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_REAR_DELAY; // 20
+      pNative^.RearDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_REAR_DELAY; // 20
     end
   else
     begin
-      pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
+      pNative^.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
     end;
 
-    pNative.SideDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_SIDE_DELAY; // 5
+    pNative^.SideDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_SIDE_DELAY; // 5
 {$ELSE}
-    pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
+    pNative^.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
 {$ENDIF}
 
-    pNative.PositionLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
-    pNative.PositionRight := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
-    pNative.PositionMatrixLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
-    pNative.PositionMatrixRight := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
-    pNative.RoomSize := XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE; // 100
-    pNative.LowEQCutoff := 4;
-    pNative.HighEQCutoff := 6;
+    pNative^.PositionLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
+    pNative^.PositionRight := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
+    pNative^.PositionMatrixLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
+    pNative^.PositionMatrixRight := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
+    pNative^.RoomSize := XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE; // 100
+    pNative^.LowEQCutoff := 4;
+    pNative^.HighEQCutoff := 6;
 
     // The rest of the I3DL2 parameters map to the native property set
-    pNative.RoomFilterMain := (pI3DL2.Room / 100.0);
-    pNative.RoomFilterHF := (pI3DL2.RoomHF / 100);
+    pNative^.RoomFilterMain := (pI3DL2^.Room / 100.0);
+    pNative^.RoomFilterHF := (pI3DL2^.RoomHF / 100);
 
-    if (pI3DL2.DecayHFRatio >= 1.0) then
+    decayRatio := pI3DL2^.DecayHFRatio;
+    if (pI3DL2^.DecayHFRatio >= 1.0) then
       begin
-        index := Trunc(-4.0 * log10(pI3DL2.DecayHFRatio));
+        index := Trunc(-4.0 * log10(decayRatio));
 
         if (index < -8) then
           index := -8;
 
         if (index < 0) then
-            pNative.LowEQGain := index + 8
+            pNative^.LowEQGain := index + 8
         else
-            pNative.LowEQGain := 8;
+            pNative^.LowEQGain := 8;
 
-        pNative.HighEQGain:= 8;
-        pNative.DecayTime := (pI3DL2.DecayTime * pI3DL2.DecayHFRatio);
+        pNative^.HighEQGain:= 8;
+        pNative^.DecayTime := (pI3DL2^.DecayTime * pI3DL2^.DecayHFRatio);
       end
     else
       begin
-        index := Trunc(4.0 * log10(pI3DL2.DecayHFRatio));
+        index := Trunc(4.0 * log10(decayRatio));
 
         if (index < -8) then
           index := -8;
 
-        pNative.LowEQGain := 8;
+        pNative^.LowEQGain := 8;
 
         if (index < 0) then
-            pNative.HighEQGain := index + 8
+            pNative^.HighEQGain := index + 8
         else
-            pNative.HighEQGain := 8;
+            pNative^.HighEQGain := 8;
 
-        pNative.DecayTime := ConstrainValue(pI3DL2.DecayTime, 0.1, Infinity);
+        pNative^.DecayTime := pI3DL2^.DecayTime;
      end;
 
-    reflectionsDelay := pI3DL2.ReflectionsDelay * 1000.0;
+    reflectionsDelay := pI3DL2^.ReflectionsDelay * 1000.0;
 
     if (reflectionsDelay >= XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY) then // 300
       begin
@@ -1022,28 +1026,29 @@ begin
         reflectionsDelay := 1;
       end;
 
-    pNative.ReflectionsDelay:= Trunc(reflectionsDelay);
+    pNative^.ReflectionsDelay:= Trunc(reflectionsDelay);
 
-    reverbDelay:= (pI3DL2.ReverbDelay * 1000.0);
+    reverbDelay:= (pI3DL2^.ReverbDelay * 1000.0);
     if (reverbDelay >= XAUDIO2FX_REVERB_MAX_REVERB_DELAY) then // 85
       begin
         reverbDelay := (XAUDIO2FX_REVERB_MAX_REVERB_DELAY - 1);
       end;
 
     // Implemented a rangechecker here.
-    pNative.ReverbDelay := ClipByteValue(Round(reverbDelay));
+    pNative^.ReverbDelay := Byte(Trunc(reverbDelay));
 
-    pNative.ReflectionsGain := (pI3DL2.Reflections / 100.0);
-    pNative.ReverbGain := (pI3DL2.Reverb / 100.0);
-    pNative.EarlyDiffusion:= Trunc(15.0 * (pI3DL2.Diffusion / 100.0));
-    pNative.LateDiffusion := pNative.EarlyDiffusion;
-    pNative.Density := pI3DL2.Density;
-    pNative.RoomFilterFreq := pI3DL2.HFReference;
+    pNative^.ReflectionsGain := (pI3DL2^.Reflections / 100.0);
+    pNative^.ReverbGain := (pI3DL2^.Reverb / 100.0);
+    diffusionScaled := 15.0 * pI3DL2^.Diffusion;
+    diffusionScaled := diffusionScaled / 100.0;
+    pNative^.EarlyDiffusion := Trunc(diffusionScaled);
+    pNative^.LateDiffusion := pNative^.EarlyDiffusion;
+    pNative^.Density := pI3DL2^.Density;
+    pNative^.RoomFilterFreq := pI3DL2^.HFReference;
 
-    pNative.WetDryMix := pI3DL2.WetDryMix;
-    pNative.DisableLateField := FALSE;
-    // Check if native params are inboundaries.
-    pNative.CheckBoundaries(sevenDotOneReverb);
+    pNative^.WetDryMix := pI3DL2^.WetDryMix;
+    pNative^.DisableLateField := FALSE;
+
 end;
 
 
@@ -1063,50 +1068,50 @@ procedure CheckXAudio2NativeReverbParams(var params: XAUDIO2FX_REVERB_PARAMETERS
 begin
 
   // Ratio of wet (processed) signal to dry (original) signal.
-  params.WetDryMix := ConstrainValue(params.WetDryMix, 0, 100);
+  params.WetDryMix := EnsureRange(params.WetDryMix, 0, 100);
 
   // Delay times
-  params.ReflectionsDelay := ConstrainValue(params.ReflectionsDelay, 0, 300);
-  params.ReverbDelay := ConstrainValue(params.ReverbDelay, 0, 85);
+  params.ReflectionsDelay := EnsureRange(params.ReflectionsDelay, 0, 300);
+  params.ReverbDelay := EnsureRange(params.ReverbDelay, 0, 85);
 
   if sevenDotOneReverb then
     begin
-      params.RearDelay := ConstrainValue(params.RearDelay, 0, 20);
-      {$IFDEF _WIN32_WINNT_WIN10}
-      params.SideDelay := ConstrainValue(params.SideDelay, 0, 5);
+      params.RearDelay := EnsureRange(params.RearDelay, 0, 20);
+      {$IFDEF _WINNT_WIN10}
+      params.SideDelay := EnsureRange(params.SideDelay, 0, 5);
       {$ENDIF}
     end
   else
     begin
-      params.RearDelay := ConstrainValue(params.RearDelay, 0, 5);
-      {$IFDEF _WIN32_WINNT_WIN10}
-      params.SideDelay := ConstrainValue(params.SideDelay, 0, 0);
+      params.RearDelay := EnsureRange(params.RearDelay, 0, 5);
+      {$IFDEF _WINNT_WIN10}
+      params.SideDelay := EnsureRange(params.SideDelay, 0, 5);
       {$ENDIF}
     end;
 
   // Indexed parameters
-  params.PositionLeft := ConstrainValue(params.PositionLeft, 0, 30);
-  params.PositionRight := ConstrainValue(params.PositionRight, 0, 30);
-  params.PositionMatrixLeft := ConstrainValue(params.PositionMatrixLeft, 0, 30);
-  params.PositionMatrixRight := ConstrainValue(params.PositionMatrixRight, 0, 30);
-  params.EarlyDiffusion := ConstrainValue(params.EarlyDiffusion, 0, 15);
-  params.LateDiffusion := ConstrainValue(params.LateDiffusion, 0, 15);
-  params.LowEQGain := ConstrainValue(params.LowEQGain, 0, 12);
-  params.LowEQCutoff := ConstrainValue(params.LowEQCutoff, 0, 9);
-  params.HighEQGain := ConstrainValue(params.HighEQGain, 0, 8);
-  params.HighEQCutoff := ConstrainValue(params.HighEQCutoff, 0, 14);
-  params.LowEQGain := ConstrainValue(params.LowEQGain, 0, 12);
-  params.LowEQGain := ConstrainValue(params.LowEQGain, 0, 12);
+  params.PositionLeft := EnsureRange(params.PositionLeft, 0, 30);
+  params.PositionRight := EnsureRange(params.PositionRight, 0, 30);
+  params.PositionMatrixLeft := EnsureRange(params.PositionMatrixLeft, 0, 30);
+  params.PositionMatrixRight := EnsureRange(params.PositionMatrixRight, 0, 30);
+  params.EarlyDiffusion := EnsureRange(params.EarlyDiffusion, 0, 15);
+  params.LateDiffusion := EnsureRange(params.LateDiffusion, 0, 15);
+  params.LowEQGain := EnsureRange(params.LowEQGain, 0, 12);
+  params.LowEQCutoff := EnsureRange(params.LowEQCutoff, 0, 9);
+  params.HighEQGain := EnsureRange(params.HighEQGain, 0, 8);
+  params.HighEQCutoff := EnsureRange(params.HighEQCutoff, 0, 14);
+  params.LowEQGain := EnsureRange(params.LowEQGain, 0, 12);
+  params.LowEQGain := EnsureRange(params.LowEQGain, 0, 12);
 
   // Direct parameters
-  params.RoomFilterFreq := ConstrainValue(params.RoomFilterFreq, 20.0, 20000.0);
-  params.RoomFilterMain := ConstrainValue(params.RoomFilterMain, -100.0, 0.0);
-  params.RoomFilterHF := ConstrainValue(params.RoomFilterHF, -100.0, 0.0);
-  params.ReflectionsGain := ConstrainValue(params.ReflectionsGain, -100.0, 20.0);
-  params.ReverbGain := ConstrainValue(params.ReverbGain, -100.0, 20.0);
-  params.DecayTime := ConstrainValue(params.DecayTime, 0.1, Infinity);
-  params.Density := ConstrainValue(params.Density, 0.0, 100.0);
-  params.RoomSize := ConstrainValue(params.RoomSize, 1.0, 100.0);
+  params.RoomFilterFreq := EnsureRange(params.RoomFilterFreq, 20.0, 20000.0);
+  params.RoomFilterMain := EnsureRange(params.RoomFilterMain, -100.0, 0.0);
+  params.RoomFilterHF := EnsureRange(params.RoomFilterHF, -100.0, 0.0);
+  params.ReflectionsGain := EnsureRange(params.ReflectionsGain, -100.0, 20.0);
+  params.ReverbGain := EnsureRange(params.ReverbGain, -100.0, 20.0);
+  params.DecayTime := EnsureRange(params.DecayTime, 0.1, Infinity);
+  params.Density := EnsureRange(params.Density, 0.0, 100.0);
+  params.RoomSize := EnsureRange(params.RoomSize, 0.0, 100.0);
 
   // component control
   params.DisableLateField := params.DisableLateField;
@@ -1117,48 +1122,48 @@ end;
 procedure XAUDIO2FX_REVERB_PARAMETERS.CheckBoundaries(sevenDotOneReverb: Boolean);
 begin
   // Ratio of wet (processed) signal to dry (original) signal.
-  WetDryMix := ConstrainValue(WetDryMix, 0, 100);
+  WetDryMix := EnsureRange(WetDryMix, 0, 100);
 
   // Delay times
-  ReflectionsDelay := ConstrainValue(ReflectionsDelay, 0, 300);
-  ReverbDelay := ConstrainValue(ReverbDelay, 0, 85);
+  ReflectionsDelay := EnsureRange(ReflectionsDelay, 0, 300);
+  ReverbDelay := EnsureRange(ReverbDelay, 0, 85);
 
   if sevenDotOneReverb then
     begin
-      RearDelay := ConstrainValue(RearDelay, 0, 20);
-      {$IFDEF _WIN32_WINNT_WIN10}
-      SideDelay := ConstrainValue(SideDelay, 0, 5);
+      RearDelay := EnsureRange(RearDelay, 0, 20);
+      {$IFDEF _WINNT_WIN10}
+      SideDelay := EnsureRange(SideDelay, 0, 5);
       {$ENDIF}
     end
   else
     begin
-      RearDelay := ConstrainValue(RearDelay, 0, 5);
-      {$IFDEF _WIN32_WINNT_WIN10}
-      SideDelay := ConstrainValue(SideDelay, 0, 0);
+      RearDelay := EnsureRange(RearDelay, 0, 5);
+      {$IFDEF _WINNT_WIN10}
+      SideDelay := EnsureRange(SideDelay, 0, 5);
       {$ENDIF}
     end;
 
   // Indexed parameters
-  PositionLeft := ConstrainValue(PositionLeft, 0, 30);
-  PositionRight := ConstrainValue(PositionRight, 0, 30);
-  PositionMatrixLeft := ConstrainValue(PositionMatrixLeft, 0, 30);
-  PositionMatrixRight := ConstrainValue(PositionMatrixRight, 0, 30);
-  EarlyDiffusion := ConstrainValue(EarlyDiffusion, 0, 15);
-  LateDiffusion := ConstrainValue(LateDiffusion, 0, 15);
-  LowEQGain := ConstrainValue(LowEQGain, 0, 12);
-  LowEQCutoff := ConstrainValue(LowEQCutoff, 0, 9);
-  HighEQGain := ConstrainValue(HighEQGain, 0, 8);
-  HighEQCutoff := ConstrainValue(HighEQCutoff, 0, 14);
+  PositionLeft := EnsureRange(PositionLeft, 0, 30);
+  PositionRight := EnsureRange(PositionRight, 0, 30);
+  PositionMatrixLeft := EnsureRange(PositionMatrixLeft, 0, 30);
+  PositionMatrixRight := EnsureRange(PositionMatrixRight, 0, 30);
+  EarlyDiffusion := EnsureRange(EarlyDiffusion, 0, 15);
+  LateDiffusion := EnsureRange(LateDiffusion, 0, 15);
+  LowEQGain := EnsureRange(LowEQGain, 0, 12);
+  LowEQCutoff := EnsureRange(LowEQCutoff, 0, 9);
+  HighEQGain := EnsureRange(HighEQGain, 0, 8);
+  HighEQCutoff := EnsureRange(HighEQCutoff, 0, 14);
 
   // Direct parameters
-  RoomFilterFreq := ConstrainValue(RoomFilterFreq, 20.0, 20000.0);
-  RoomFilterMain := ConstrainValue(RoomFilterMain, -100.0, 0.0);
-  RoomFilterHF := ConstrainValue(RoomFilterHF, -100.0, 0.0);
-  ReflectionsGain := ConstrainValue(ReflectionsGain, -100.0, 20.0);
-  ReverbGain := ConstrainValue(ReverbGain, -100.0, 20.0);
-  DecayTime := ConstrainValue(DecayTime, 0.1, Infinity);
-  Density := ConstrainValue(Density, 0.0, 100.0);
-  RoomSize := ConstrainValue(RoomSize, 1.0, 100.0);
+  RoomFilterFreq := EnsureRange(RoomFilterFreq, 20.0, 20000.0);
+  RoomFilterMain := EnsureRange(RoomFilterMain, -100.0, 0.0);
+  RoomFilterHF := EnsureRange(RoomFilterHF, -100.0, 0.0);
+  ReflectionsGain := EnsureRange(ReflectionsGain, -100.0, 20.0);
+  ReverbGain := EnsureRange(ReverbGain, -100.0, 20.0);
+  DecayTime := EnsureRange(DecayTime, 0.1, Infinity);
+  Density := EnsureRange(Density, 0.0, 100.0);
+  RoomSize := EnsureRange(RoomSize, 0.0, 100.0);
 
   // component control
   DisableLateField := DisableLateField;
@@ -1168,44 +1173,44 @@ end;
 procedure XAUDIO2FX_REVERB_I3DL2_PARAMETERS.CheckBoundaries();
 begin
   // Ratio of wet (processed) signal to dry (original) signal.
-  WetDryMix := ConstrainValue(WetDryMix, 0.0, 100.0);
+  WetDryMix := EnsureRange(WetDryMix, 0.0, 100.0);
 
   // Standard I3DL2 parameters.
-  Room := ConstrainValue(Room, -10000, 0);
-  RoomHF := ConstrainValue(RoomHF, -10000, 0);
+  Room := EnsureRange(Room, -10000, 0);
+  RoomHF := EnsureRange(RoomHF, -10000, 0);
 
-  RoomRolloffFactor := ConstrainValue(RoomRolloffFactor, 0.0, 10.0);
-  DecayTime := ConstrainValue(DecayTime, 0.0, 20.0);
-  DecayHFRatio := ConstrainValue(DecayHFRatio, 0.1, 2.0);
-  Reflections := ConstrainValue(Reflections, -10000, 1000);
-  ReflectionsDelay := ConstrainValue(ReflectionsDelay, 0.0, 0.3);
-  Reverb := ConstrainValue(Reverb, -10000, 1000);
-  ReverbDelay := ConstrainValue(ReverbDelay, 0.0, 0.1);
-  Diffusion := ConstrainValue(Diffusion, 0.0, 100.0);
-  Density := ConstrainValue(Density, 0.0, 100.0);
-  HFReference := ConstrainValue(HFReference, 20.0, 20000.0);
+  RoomRolloffFactor := EnsureRange(RoomRolloffFactor, 0.0, 10.0);
+  DecayTime := EnsureRange(DecayTime, 0.1, 20.0);
+  DecayHFRatio := EnsureRange(DecayHFRatio, 0.1, 2.0);
+  Reflections := EnsureRange(Reflections, -10000, 1000);
+  ReflectionsDelay := EnsureRange(ReflectionsDelay, 0.0, 0.3);
+  Reverb := EnsureRange(Reverb, -10000, 2000);
+  ReverbDelay := EnsureRange(ReverbDelay, 0.0, 0.1);
+  Diffusion := EnsureRange(Diffusion, 0.0, 100.0);
+  Density := EnsureRange(Density, 0.0, 100.0);
+  HFReference := EnsureRange(HFReference, 20.0, 20000.0);
 end;
 
 
 procedure CheckXAudio2I3DL2ReverbParams(var params: XAUDIO2FX_REVERB_I3DL2_PARAMETERS); inline;
 begin
   // Ratio of wet (processed) signal to dry (original) signal.
-  params.WetDryMix := ConstrainValue(params.WetDryMix, 0.0, 100.0);
+  params.WetDryMix := EnsureRange(params.WetDryMix, 0.0, 100.0);
 
   // Standard I3DL2 parameters.
-  params.Room := ConstrainValue(params.Room, -10000, 0);
-  params.RoomHF := ConstrainValue(params.RoomHF, -10000, 0);
+  params.Room := EnsureRange(params.Room, -10000, 0);
+  params.RoomHF := EnsureRange(params.RoomHF, -10000, 0);
 
-  params.RoomRolloffFactor := ConstrainValue(params.RoomRolloffFactor, 0.0, 10.0);
-  params.DecayTime := ConstrainValue(params.DecayTime, 0.0, 20.0);
-  params.DecayHFRatio := ConstrainValue(params.DecayHFRatio, 0.1, 2.0);
-  params.Reflections := ConstrainValue(params.Reflections, -10000, 1000);
-  params.ReflectionsDelay := ConstrainValue(params.ReflectionsDelay, 0.0, 0.3);
-  params.Reverb := ConstrainValue(params.Reverb, -10000, 1000);
-  params.ReverbDelay := ConstrainValue(params.ReverbDelay, 0.0, 0.1);
-  params.Diffusion := ConstrainValue(params.Diffusion, 0.0, 100.0);
-  params.Density := ConstrainValue(params.Density, 0.0, 100.0);
-  params.HFReference := ConstrainValue(params.HFReference, 20.0, 20000.0);
+  params.RoomRolloffFactor := EnsureRange(params.RoomRolloffFactor, 0.0, 10.0);
+  params.DecayTime := EnsureRange(params.DecayTime, 0.1, 20.0);
+  params.DecayHFRatio := EnsureRange(params.DecayHFRatio, 0.1, 2.0);
+  params.Reflections := EnsureRange(params.Reflections, -10000, 1000);
+  params.ReflectionsDelay := EnsureRange(params.ReflectionsDelay, 0.0, 0.3);
+  params.Reverb := EnsureRange(params.Reverb, -10000, 2000);
+  params.ReverbDelay := EnsureRange(params.ReverbDelay, 0.0, 0.1);
+  params.Diffusion := EnsureRange(params.Diffusion, 0.0, 100.0);
+  params.Density := EnsureRange(params.Density, 0.0, 100.0);
+  params.HFReference := EnsureRange(params.HFReference, 20.0, 20000.0);
 end;
 
 

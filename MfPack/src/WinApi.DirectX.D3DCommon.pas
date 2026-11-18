@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: D3D-version-neutral runtime information.
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //            New apps should use the latest Direct3D API
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -815,29 +815,24 @@ type
   //----------------------------------------------------------------------------
 
 
-  // Delph Note: In the header this is declared as interface without IUnknown implementation.
-  //             However, in delphi it's not possible to declare an interface like that.
-  //             So, we implement IInterface
+  // Borrowed native include handler: two slots, no IUnknown/refcounting.
+  ID3DInclude = ^TD3DInclude;
   PD3DINCLUDE = ^ID3DInclude;
-  LPD3DINCLUDE = ^ID3DInclude;
-
-  // Interface ID3DInclude
-  // =====================
-  //
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3DInclude);'}
-  {$EXTERNALSYM ID3DInclude}
-  ID3DInclude = interface(IInterface)
-    function Open(IncludeType: D3D_INCLUDE_TYPE;
-                  pFileName: LPCSTR;
-                  pParentData: Pointer {LPVOID};
-                  out ppData: Pointer {LPVOID};
-                  var pBytes: UINT): HResult; stdcall;
-
-    function Close(pData: Pointer): HResult; stdcall;
-
+  LPD3DINCLUDE = ID3DInclude;
+  PD3DIncludeVTable = ^TD3DIncludeVTable;
+  TD3DIncludeVTable = record
+    Open: function(This: ID3DInclude; IncludeType:D3D_INCLUDE_TYPE; pFileName:LPCSTR;
+      pParentData:Pointer; out ppData:Pointer; out pBytes:UINT):HRESULT; stdcall;
+    Close: function(This:ID3DInclude; pData:Pointer):HRESULT; stdcall;
   end;
-  IID_ID3DInclude = ID3DInclude;
-  {$EXTERNALSYM IID_ID3DInclude}
+  TD3DInclude = record
+    VTable:PD3DIncludeVTable;
+    function Open(IncludeType:D3D_INCLUDE_TYPE; pFileName:LPCSTR; pParentData:Pointer;
+      out ppData:Pointer; out pBytes:UINT):HRESULT; stdcall;
+    function Close(pData:Pointer):HRESULT; stdcall;
+  end;
+  // ID3DInclude has no IID and must stay alive throughout compiler calls.
+  
 
 
 
@@ -1649,6 +1644,11 @@ type
   // End of Additional Prototypes
 
 implementation
+function TD3DInclude.Open(IncludeType:D3D_INCLUDE_TYPE; pFileName:LPCSTR; pParentData:Pointer;
+ out ppData:Pointer; out pBytes:UINT):HRESULT;
+begin Result:=VTable.Open(@Self,IncludeType,pFileName,pParentData,ppData,pBytes);end;
+function TD3DInclude.Close(pData:Pointer):HRESULT;
+begin Result:=VTable.Close(@Self,pData);end;
 
   // Implement Additional Prototypes here.
 

@@ -10,7 +10,7 @@
 // Release date: 28-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: MFPlay is a Microsoft Media Foundation API for creating media
 //              playback applications.
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -32,7 +32,7 @@
 //          Applications should use the Media Session for playback.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -172,13 +172,12 @@ const
 
 type
   PMFP_MEDIAPLAYER_STATE = ^MFP_MEDIAPLAYER_STATE;
-  MFP_MEDIAPLAYER_STATE            = (
-    MFP_MEDIAPLAYER_STATE_EMPTY    = 0,
-    MFP_MEDIAPLAYER_STATE_STOPPED  = $1,
-    MFP_MEDIAPLAYER_STATE_PLAYING  = $2,
-    MFP_MEDIAPLAYER_STATE_PAUSED   = $3,
-    MFP_MEDIAPLAYER_STATE_SHUTDOWN = $4
-  );
+  MFP_MEDIAPLAYER_STATE            = (MFP_MEDIAPLAYER_STATE_EMPTY    = 0,
+                                      MFP_MEDIAPLAYER_STATE_STOPPED  = $1,
+                                      MFP_MEDIAPLAYER_STATE_PLAYING  = $2,
+                                      MFP_MEDIAPLAYER_STATE_PAUSED   = $3,
+                                      MFP_MEDIAPLAYER_STATE_SHUTDOWN = $4
+                                     );
   {$EXTERNALSYM MFP_MEDIAPLAYER_STATE}
 
 
@@ -227,21 +226,20 @@ type
 
 
   PMFP_EVENT_TYPE = ^MFP_EVENT_TYPE;
-  MFP_EVENT_TYPE = (
-    MFP_EVENT_TYPE_PLAY                    = 0,
-    MFP_EVENT_TYPE_PAUSE                   = 1,
-    MFP_EVENT_TYPE_STOP                    = 2,
-    MFP_EVENT_TYPE_POSITION_SET            = 3,
-    MFP_EVENT_TYPE_RATE_SET                = 4,
-    MFP_EVENT_TYPE_MEDIAITEM_CREATED       = 5,
-    MFP_EVENT_TYPE_MEDIAITEM_SET           = 6,
-    MFP_EVENT_TYPE_FRAME_STEP              = 7,
-    MFP_EVENT_TYPE_MEDIAITEM_CLEARED       = 8,
-    MFP_EVENT_TYPE_MF                      = 9,
-    MFP_EVENT_TYPE_ERROR                   = 10,
-    MFP_EVENT_TYPE_PLAYBACK_ENDED          = 11,
-    MFP_EVENT_TYPE_ACQUIRE_USER_CREDENTIAL = 12
-  );
+  MFP_EVENT_TYPE = (MFP_EVENT_TYPE_PLAY                    = 0,
+                    MFP_EVENT_TYPE_PAUSE                   = 1,
+                    MFP_EVENT_TYPE_STOP                    = 2,
+                    MFP_EVENT_TYPE_POSITION_SET            = 3,
+                    MFP_EVENT_TYPE_RATE_SET                = 4,
+                    MFP_EVENT_TYPE_MEDIAITEM_CREATED       = 5,
+                    MFP_EVENT_TYPE_MEDIAITEM_SET           = 6,
+                    MFP_EVENT_TYPE_FRAME_STEP              = 7,
+                    MFP_EVENT_TYPE_MEDIAITEM_CLEARED       = 8,
+                    MFP_EVENT_TYPE_MF                      = 9,
+                    MFP_EVENT_TYPE_ERROR                   = 10,
+                    MFP_EVENT_TYPE_PLAYBACK_ENDED          = 11,
+                    MFP_EVENT_TYPE_ACQUIRE_USER_CREDENTIAL = 12
+                   );
   {$EXTERNALSYM MFP_EVENT_TYPE}
 
 
@@ -401,13 +399,13 @@ type
     // Position controls
     //
 
-    function SetPosition(guidPositionType: REFGUID;
-                         pvPositionValue: PROPVARIANT): HResult; stdcall;
+    function SetPosition(const guidPositionType: TGUID;
+                         const pvPositionValue: PROPVARIANT): HResult; stdcall;
 
-    function GetPosition(guidPositionType: REFGUID;
+    function GetPosition(const guidPositionType: TGUID;
                          out pvPositionValue: PROPVARIANT): HResult; stdcall;
 
-    function GetDuration(guidPositionType: REFGUID;
+    function GetDuration(const guidPositionType: TGUID;
                          out pvDurationValue: PROPVARIANT): HResult; stdcall;
 
     //
@@ -418,7 +416,7 @@ type
 
     function GetRate(out pflRate: Single): HResult; stdcall;
 
-    function GetSupportedRates(fForwardDirection: Boolean;
+    function GetSupportedRates(fForwardDirection: BOOL;
                                out pflSlowestRate: Single;
                                out pflFastestRate: Single): HResult; stdcall;
 
@@ -452,13 +450,13 @@ type
     // Audio controls
     //
 
-    function GetVolume(out pflVolume: FLOAT): HResult; stdcall;
+    function GetVolume(out pflVolume: Single): HResult; stdcall;
 
-    function SetVolume(const flVolume: FLOAT): HResult; stdcall;
+    function SetVolume(flVolume: Single): HResult; stdcall;
 
-    function GetBalance(out pflBalance: FLOAT): HResult; stdcall;
+    function GetBalance(out pflBalance: Single): HResult; stdcall;
 
-    function SetBalance(const flBalance: FLOAT): HResult; stdcall;
+    function SetBalance(flBalance: Single): HResult; stdcall;
 
     function GetMute(out pfMute: BOOL): HResult; stdcall; //  4 bytes, BOOL;
 
@@ -468,25 +466,25 @@ type
     // Video controls
     //
 
-    function GetNativeVideoSize(out pszVideo: SIZE;
-                                out pszARVideo: SIZE): HResult; stdcall;
+    function GetNativeVideoSize(pszVideo: PSIZE;
+                                pszARVideo: PSIZE): HResult; stdcall;
 
-    function GetIdealVideoSize(out pszMin: SIZE;
-                               out pszMax: SIZE): HResult; stdcall;
+    function GetIdealVideoSize(pszMin: PSIZE;
+                               pszMax: PSIZE): HResult; stdcall;
 
-    function SetVideoSourceRect(pnrcSource: MFVideoNormalizedRect): HResult; stdcall;
+    function SetVideoSourceRect(const pnrcSource: MFVideoNormalizedRect): HResult; stdcall;
 
     function GetVideoSourceRect(out pnrcSource: MFVideoNormalizedRect): HResult; stdcall;
 
-    function SetAspectRatioMode(dwAspectRatioMode: DWord): HResult; stdcall;
+    function SetAspectRatioMode(dwAspectRatioMode: DWORD): HResult; stdcall;
 
-    function GetAspectRatioMode(out pdwAspectRatioMode: DWord): HResult; stdcall;
+    function GetAspectRatioMode(out pdwAspectRatioMode: DWORD): HResult; stdcall;
 
     function GetVideoWindow(out phwndVideo: HWND): HResult; stdcall;
 
     function UpdateVideo(): HResult; stdcall;
 
-    function SetBorderColor(const Clr: COLORREF): HResult; stdcall;
+    function SetBorderColor(Clr: COLORREF): HResult; stdcall;
 
     function GetBorderColor(out pClr: COLORREF): HResult; stdcall;
 
@@ -495,7 +493,7 @@ type
     //
 
     function InsertEffect(pEffect: IUnknown;
-                          fOptional: Boolean): HResult; stdcall;
+                          fOptional: BOOL): HResult; stdcall;
 
     function RemoveEffect(pEffect: IUnknown): HResult; stdcall;
 
@@ -539,47 +537,47 @@ type
 
     function GetUserData(out pdwUserData: DWORD_PTR): HResult; stdcall;
 
-    function SetUserData(const dwUserData: DWORD_PTR): HResult; stdcall;
+    function SetUserData(dwUserData: DWORD_PTR): HResult; stdcall;
 
-    function GetStartStopPosition(out pguidStartPositionType: TGuid;
-                                  out pvStartValue: PROPVARIANT;
-                                  out pguidStopPositionType: TGuid;
-                                  out pvStopValue: PROPVARIANT): HResult; stdcall;
+    function GetStartStopPosition(pguidStartPositionType: PGUID;
+                                  pvStartValue: PPROPVARIANT;
+                                  pguidStopPositionType: PGUID;
+                                  pvStopValue: PPROPVARIANT): HResult; stdcall;
 
-    function SetStartStopPosition(pguidStartPositionType: TGuid;
-                                  pvStartValue: PROPVARIANT;
-                                  pguidStopPositionType: TGuid;
-                                  pvStopValue: PROPVARIANT): HResult; stdcall;
+    function SetStartStopPosition(pguidStartPositionType: PGUID;
+                                  pvStartValue: PPROPVARIANT;
+                                  pguidStopPositionType: PGUID;
+                                  pvStopValue: PPROPVARIANT): HResult; stdcall;
 
-    function HasVideo(out pfHasVideo: BOOL;
-                      out pfSelected: BOOL): HResult; stdcall;
+    function HasVideo(pfHasVideo: PBOOL;
+                      pfSelected: PBOOL): HResult; stdcall;
 
-    function HasAudio(out pfHasAudio: BOOL;
-                      out pfSelected: BOOL): HResult; stdcall;
+    function HasAudio(pfHasAudio: PBOOL;
+                      pfSelected: PBOOL): HResult; stdcall;
 
     function IsProtected(out pfProtected: BOOL): HResult; stdcall;
 
-    function GetDuration(guidPositionType: REFGUID;
+    function GetDuration(const guidPositionType: TGUID;
                          out pvDurationValue: PROPVARIANT): HResult; stdcall;
 
-    function GetNumberOfStreams(out pdwStreamCount: DWord): HResult; stdcall;
+    function GetNumberOfStreams(out pdwStreamCount: DWORD): HResult; stdcall;
 
-    function GetStreamSelection(dwStreamIndex: DWord;
+    function GetStreamSelection(dwStreamIndex: DWORD;
                                 out pfEnabled: BOOL): HResult; stdcall;
 
-    function SetStreamSelection(dwStreamIndex: DWord;
+    function SetStreamSelection(dwStreamIndex: DWORD;
                                 fEnabled: BOOL): HResult; stdcall;
 
-    function GetStreamAttribute(const dwStreamIndex: DWord;
-                                guidMFAttribute: REFGUID;
+    function GetStreamAttribute(dwStreamIndex: DWORD;
+                                const guidMFAttribute: TGUID;
                                 out pvValue: PROPVARIANT): HResult; stdcall;
 
-    function GetPresentationAttribute(const guidMFAttribute: REFGUID;
+    function GetPresentationAttribute(const guidMFAttribute: TGUID;
                                       out pvValue: PROPVARIANT): HResult; stdcall;
 
     function GetCharacteristics(out pCharacteristics: MFP_MEDIAITEM_CHARACTERISTICS): HResult; stdcall;
 
-    function SetStreamSink(dwStreamIndex: DWord;
+    function SetStreamSink(dwStreamIndex: DWORD;
                            pMediaSink: IUnknown): HResult; stdcall;
 
     function GetMetadata(out ppMetadataStore: IPropertyStore): HResult; stdcall;
@@ -617,12 +615,12 @@ type
    Applications should use the Media Session for playback.
    Creates a new instance of the MFPlay player object.
   }
-  function MFPCreateMediaPlayer(const pwszURL: LPCWSTR;
+  function MFPCreateMediaPlayer(pwszURL: LPCWSTR;
                                 fStartPlayback: BOOL;
                                 creationOptions: MFP_CREATION_OPTIONS;
                                 pCallback: IMFPMediaPlayerCallback;
                                 hWnd: HWND;
-                                out ppMediaPlayer: IMFPMediaPlayer): HResult; stdcall; deprecated;
+                                ppMediaPlayer: PIMFPMediaPlayer): HResult; stdcall; deprecated;
   {$EXTERNALSYM MFPCreateMediaPlayer}
 
 

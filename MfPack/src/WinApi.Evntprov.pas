@@ -10,7 +10,7 @@
 // Release date: 18-12-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This defines the unified provider side user mode API.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -430,7 +430,7 @@ type
 
   PEVENT_FILTER_EVENT_ID = ^EVENT_FILTER_EVENT_ID;
   _EVENT_FILTER_EVENT_ID = record
-    FilterIn : BOOL;
+    FilterIn : BOOLEAN;
     Reserved : UCHAR;
     Count    : USHORT;
     Events   : array [0..ANYSIZE_ARRAY - 1] of USHORT;
@@ -460,7 +460,7 @@ type
     MatchAnyKeyword : ULONGLONG;
     MatchAllKeyword : ULONGLONG;
     Level           : UCHAR;
-    FilterIn        : BOOL;
+    FilterIn        : BOOLEAN;
     NameCount       : USHORT;
     Names           : array [0..ANYSIZE_ARRAY - 1] of UCHAR;  // utf-8
   end;
@@ -485,7 +485,7 @@ type
     MatchAnyKeyword : ULONGLONG;
     MatchAllKeyword : ULONGLONG;
     Level           : UCHAR;
-    FilterIn        : BOOL;
+    FilterIn        : BOOLEAN;
   end;
   {$EXTERNALSYM _EVENT_FILTER_LEVEL_KW}
   EVENT_FILTER_LEVEL_KW = _EVENT_FILTER_LEVEL_KW;
@@ -621,10 +621,10 @@ type
   // attempts to invoke the provider's callback after the has unloaded.
 
 
-  function EventRegister(const ProviderId: TGUID;
+  function EventRegister(ProviderId: PGUID;
                          EnableCallback: PENABLECALLBACK;
                          CallbackContext: Pointer;
-                         out RegHandle: REGHANDLE): ULONG; stdcall;
+                         RegHandle: PREGHANDLE): ULONG; stdcall;
   {$EXTERNALSYM EventRegister}
 
 
@@ -645,10 +645,10 @@ type
   // Refer to the documentation of the EVENT_INFO_CLASS for more information.
 
 
-  function EventSetInformation(const RegHandle: REGHANDLE;
-                               const InformationClass: EVENT_INFO_CLASS;
-                               const EventInformation: Pointer;
-                               const InformationLength: ULONG): ULONG; stdcall;
+  function EventSetInformation(RegHandle: REGHANDLE;
+                               InformationClass: EVENT_INFO_CLASS;
+                               EventInformation: Pointer;
+                               InformationLength: ULONG): ULONG; stdcall;
   {$EXTERNALSYM EventSetInformation}
 
 
@@ -687,7 +687,7 @@ type
 
 
   function EventEnabled(RegHandle: REGHANDLE;
-                        const EventDescriptor: PCEVENT_DESCRIPTOR): BOOLEAN; stdcall;
+                        EventDescriptor: PCEVENT_DESCRIPTOR): BOOLEAN; stdcall;
   {$EXTERNALSYM EventEnabled}
 
 
@@ -751,7 +751,7 @@ type
 
 
   function EventWrite(RegHandle: REGHANDLE;
-                      const EventDescriptor: PCEVENT_DESCRIPTOR;
+                      EventDescriptor: PCEVENT_DESCRIPTOR;
                       UserDataCount: ULONG;
                       UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWrite}
@@ -774,10 +774,12 @@ type
   // EventWriteEx(regHandle, &eventDesc, 0, 0, pAI, pRAI, cData, pData).
 
 
+  {_In_opt_}
+  {_In_opt_}
   function EventWriteTransfer(RegHandle: REGHANDLE;
-                              const EventDescriptor: PCEVENT_DESCRIPTOR;
-                              {_In_opt_} const ActivityId: LPCGUID;
-                              {_In_opt_} const RelatedActivityId: LPCGUID;
+                              EventDescriptor: PCEVENT_DESCRIPTOR;
+                              ActivityId: PGUID;
+                              RelatedActivityId: PGUID;
                               UserDataCount: ULONG;
                               UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWriteTransfer}
@@ -806,12 +808,14 @@ type
   // EventWriteEx(regHandle, &eventDesc, 0, 0, pAI, pRAI, cData, pData).
 
 
+  {_In_opt_}
+  {_In_opt_}
   function EventWriteEx(RegHandle: REGHANDLE;
-                        const EventDescriptor: PCEVENT_DESCRIPTOR;
+                        EventDescriptor: PCEVENT_DESCRIPTOR;
                         Filter: ULONG64;
                         Flags: ULONG;
-                        {_In_opt_} const ActivityId: LPCGUID;
-                        {_In_opt_} const RelatedActivityId: LPCGUID;
+                        ActivityId: PGUID;
+                        RelatedActivityId: PGUID;
                         UserDataCount: ULONG;
                         UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWriteEx}
@@ -825,7 +829,7 @@ type
   function EventWriteString(RegHandle: REGHANDLE;
                             Level: UCHAR;
                             Keyword: ULONGLONG;
-                            const _String: LPCWSTR): ULONG; stdcall;
+                            _String: PWideChar): ULONG; stdcall;
   {$EXTERNALSYM EventWriteString}
 
 
@@ -847,7 +851,7 @@ type
   // session.
 
   function EventActivityIdControl(ControlCode: ULONG;
-                                  var ActivityId: TGUID): ULONG; stdcall;
+                                  ActivityId: PGUID): ULONG; stdcall;
   {$EXTERNALSYM EventActivityIdControl}
 
 
@@ -900,29 +904,29 @@ type
   // Macros to set info into an Event Descriptor
   // ===========================================
 
-  function EventDescSetId(EventDescriptor: EVENT_DESCRIPTOR;
-                          Id: USHORT): EVENT_DESCRIPTOR; inline;
+  function EventDescSetId(EventDescriptor: PEVENT_DESCRIPTOR;
+                          Id: USHORT): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetVersion(EventDescriptor: EVENT_DESCRIPTOR;
-                               Version: UCHAR): EVENT_DESCRIPTOR; inline;
+  function EventDescSetVersion(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Version: UCHAR): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetTask(EventDescriptor: EVENT_DESCRIPTOR;
-                            Task: USHORT): EVENT_DESCRIPTOR; inline;
+  function EventDescSetTask(EventDescriptor: PEVENT_DESCRIPTOR;
+                            Task: USHORT): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetOpcode(EventDescriptor: EVENT_DESCRIPTOR;
-                              Opcode: UCHAR): EVENT_DESCRIPTOR; inline;
+  function EventDescSetOpcode(EventDescriptor: PEVENT_DESCRIPTOR;
+                              Opcode: UCHAR): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetLevel(EventDescriptor: EVENT_DESCRIPTOR;
-                             Level: UCHAR): EVENT_DESCRIPTOR; inline;
+  function EventDescSetLevel(EventDescriptor: PEVENT_DESCRIPTOR;
+                             Level: UCHAR): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetChannel(EventDescriptor: EVENT_DESCRIPTOR;
-                               Channel: UCHAR): EVENT_DESCRIPTOR; inline;
+  function EventDescSetChannel(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Channel: UCHAR): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescSetKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                               Keyword: ULONGLONG): EVENT_DESCRIPTOR; inline;
+  function EventDescSetKeyword(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Keyword: ULONGLONG): PEVENT_DESCRIPTOR; inline;
 
-  function EventDescOrKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                              Keyword: ULONGLONG): EVENT_DESCRIPTOR; inline;
+  function EventDescOrKeyword(EventDescriptor: PEVENT_DESCRIPTOR;
+                              Keyword: ULONGLONG): PEVENT_DESCRIPTOR; inline;
 
 
   //Additional Prototypes for ALL interfaces
@@ -1041,66 +1045,66 @@ const
 
 
 
-  function EventDescSetId(EventDescriptor: EVENT_DESCRIPTOR;
-                          Id: USHORT): EVENT_DESCRIPTOR;
+  function EventDescSetId(EventDescriptor: PEVENT_DESCRIPTOR;
+                          Id: USHORT): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Id := Id;
+    EventDescriptor^.Id := Id;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetVersion(EventDescriptor: EVENT_DESCRIPTOR;
-                               Version: UCHAR): EVENT_DESCRIPTOR;
+  function EventDescSetVersion(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Version: UCHAR): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Version := Version;
+    EventDescriptor^.Version := Version;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetTask(EventDescriptor: EVENT_DESCRIPTOR;
-                            Task: USHORT): EVENT_DESCRIPTOR;
+  function EventDescSetTask(EventDescriptor: PEVENT_DESCRIPTOR;
+                            Task: USHORT): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Task := Task;
+    EventDescriptor^.Task := Task;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetOpcode(EventDescriptor: EVENT_DESCRIPTOR;
-                              Opcode: UCHAR): EVENT_DESCRIPTOR;
+  function EventDescSetOpcode(EventDescriptor: PEVENT_DESCRIPTOR;
+                              Opcode: UCHAR): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Opcode := Opcode;
+    EventDescriptor^.Opcode := Opcode;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetLevel(EventDescriptor: EVENT_DESCRIPTOR;
-                             Level: UCHAR): EVENT_DESCRIPTOR;
+  function EventDescSetLevel(EventDescriptor: PEVENT_DESCRIPTOR;
+                             Level: UCHAR): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Level := Level;
+    EventDescriptor^.Level := Level;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetChannel(EventDescriptor: EVENT_DESCRIPTOR;
-                               Channel: UCHAR) : EVENT_DESCRIPTOR;
+  function EventDescSetChannel(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Channel: UCHAR) : PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Channel := Channel;
+    EventDescriptor^.Channel := Channel;
     result := EventDescriptor;
   end;
 
 
-  function EventDescSetKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                               Keyword: ULONGLONG): EVENT_DESCRIPTOR;
+  function EventDescSetKeyword(EventDescriptor: PEVENT_DESCRIPTOR;
+                               Keyword: ULONGLONG): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Keyword := Keyword;
+    EventDescriptor^.Keyword := Keyword;
     result := EventDescriptor;
   end;
 
 
-  function EventDescOrKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                              Keyword: ULONGLONG): EVENT_DESCRIPTOR;
+  function EventDescOrKeyword(EventDescriptor: PEVENT_DESCRIPTOR;
+                              Keyword: ULONGLONG): PEVENT_DESCRIPTOR;
   begin
-    EventDescriptor.Keyword := EventDescriptor.Keyword or Keyword;
+    EventDescriptor^.Keyword := EventDescriptor^.Keyword or Keyword;
     result := EventDescriptor;
   end;
 

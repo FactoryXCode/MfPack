@@ -10,7 +10,7 @@
 // Release date: 24-07-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Shell API error code values.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Errors code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -99,9 +99,9 @@ const
                                                                         // on the users behalf.
 
   COPYENGINE_S_PROGRESS_PAUSE         = HRESULT($0027000F);
-  {$EXTERNALSYM COPYENGINE_S_PENDING_DELETE}
+  {$EXTERNALSYM COPYENGINE_S_PROGRESS_PAUSE}
   COPYENGINE_S_PENDING_DELETE         = HRESULT($00270010);  // Returned by initiating async delete operation. It's different
-  {$EXTERNALSYM COPYENGINE_S_PROGRESS_PAUSE}                            // from COPYENGINE_S_PENDING which is used for operation queued due to error.
+  {$EXTERNALSYM COPYENGINE_S_PENDING_DELETE}                            // from COPYENGINE_S_PENDING which is used for operation queued due to error.
   COPYENGINE_S_PENDING_BATCH_COPY     = HRESULT($00270011);  // Returned by initiating batch copy operation. Like COPYENGINE_S_PENDING_DELETE,
   {$EXTERNALSYM COPYENGINE_S_PENDING_BATCH_COPY}                        // it indicates a non-error queued retry of the operation.
 

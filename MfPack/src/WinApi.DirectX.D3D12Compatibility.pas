@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12Compatibility is outdated!
 //          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -101,11 +101,10 @@ const
 type
 
   PD3D12_REFLECT_SHARED_PROPERTY = ^D3D12_REFLECT_SHARED_PROPERTY;
-  D3D12_REFLECT_SHARED_PROPERTY = (
-    D3D12_REFLECT_SHARED_PROPERTY_D3D11_RESOURCE_FLAGS,        // D3D11_RESOURCE_FLAGS
-    D3D12_REFELCT_SHARED_PROPERTY_COMPATIBILITY_SHARED_FLAGS,  // D3D12_COMPATIBILITY_SHARED_FLAGS
-    D3D12_REFLECT_SHARED_PROPERTY_NON_NT_SHARED_HANDLE         // HANDLE
-  );
+  D3D12_REFLECT_SHARED_PROPERTY = (D3D12_REFLECT_SHARED_PROPERTY_D3D11_RESOURCE_FLAGS,        // D3D11_RESOURCE_FLAGS
+                                   D3D12_REFELCT_SHARED_PROPERTY_COMPATIBILITY_SHARED_FLAGS,  // D3D12_COMPATIBILITY_SHARED_FLAGS
+                                   D3D12_REFLECT_SHARED_PROPERTY_NON_NT_SHARED_HANDLE         // HANDLE
+                                  );
   {$EXTERNALSYM D3D12_REFLECT_SHARED_PROPERTY}
 
 
@@ -114,31 +113,30 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12CompatibilityDevice);'}
   {$EXTERNALSYM ID3D12CompatibilityDevice}
-  ID3D12CompatibilityDevice = Interface(IUnknown)
-    ['{8f1c0e3c-fae3-4a82-b098-bfe1708207ff}']
+  ID3D12CompatibilityDevice = interface(IUnknown)
+    ['{8F1C0E3C-FAE3-4A82-B098-BFE1708207FF}']
 
-    function CreateSharedResource(pHeapProperties: D3D12_HEAP_PROPERTIES;
+    function CreateSharedResource(pHeapProperties: PD3D12_HEAP_PROPERTIES;
                                   HeapFlags: D3D12_HEAP_FLAGS;
-                                  pDesc: D3D12_RESOURCE_DESC;
+                                  pDesc: PD3D12_RESOURCE_DESC;
                                   InitialResourceState: D3D12_RESOURCE_STATES;
                                   pOptimizedClearValue: PD3D12_CLEAR_VALUE;
                                   pFlags11: PD3D11_RESOURCE_FLAGS;
                                   CompatibilityFlags: D3D12_COMPATIBILITY_SHARED_FLAGS;
                                   pLifetimeTracker: ID3D12LifetimeTracker;
                                   pOwningSwapchain: ID3D12SwapChainAssistant;
-                                  const riid: REFIID;
-                                  out ppResource): HRESULT; stdcall;
+                                  const riid: TGUID;
+                                  ppResource: PPointer): HRESULT; stdcall;
 
-    function CreateSharedHeap(pHeapDesc: D3D12_HEAP_DESC;
+    function CreateSharedHeap(pHeapDesc: PD3D12_HEAP_DESC;
                               CompatibilityFlags: D3D12_COMPATIBILITY_SHARED_FLAGS;
-                              const riid: REFIID;
-                              out ppHeap): HRESULT; stdcall;
+                              const riid: TGUID;
+                              ppHeap: PPointer): HRESULT; stdcall;
 
     function ReflectSharedProperties(pHeapOrResource: ID3D12Object;
                                      ReflectType: D3D12_REFLECT_SHARED_PROPERTY;
-                                     out pData: Pointer;
+                                     pData: Pointer;
                                      DataSize: UINT): HRESULT; stdcall;
-
   end;
   IID_ID3D12CompatibilityDevice = ID3D12CompatibilityDevice;
   {$EXTERNALSYM IID_ID3D12CompatibilityDevice}
@@ -149,9 +147,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(D3D11On12CreatorID);'}
   {$EXTERNALSYM D3D11On12CreatorID}
-  D3D11On12CreatorID = Interface(IUnknown)
-    ['{edbf5678-2960-4e81-8429-99d4b2630c4e}']
-
+  D3D11On12CreatorID = interface(IUnknown)
+    ['{EDBF5678-2960-4E81-8429-99D4B2630C4E}']
   end;
   IID_D3D11On12CreatorID = D3D11On12CreatorID;
   {$EXTERNALSYM IID_D3D11On12CreatorID}
@@ -162,9 +159,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(D3D9On12CreatorID);'}
   {$EXTERNALSYM D3D9On12CreatorID}
-  D3D9On12CreatorID = Interface(IUnknown)
-    ['{fffcbb7f-15d3-42a2-841e-9d8d32f37ddd}']
-
+  D3D9On12CreatorID = interface(IUnknown)
+    ['{FFFCBB7F-15D3-42A2-841E-9D8D32F37DDD}']
   end;
   IID_D3D9On12CreatorID = D3D9On12CreatorID;
   {$EXTERNALSYM IID_D3D9On12CreatorID}
@@ -175,9 +171,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(OpenGLOn12CreatorID);'}
   {$EXTERNALSYM OpenGLOn12CreatorID}
-  OpenGLOn12CreatorID = Interface(IUnknown)
-    ['{6bb3cd34-0d19-45ab-97ed-d720ba3dfc80}']
-
+  OpenGLOn12CreatorID = interface(IUnknown)
+    ['{6BB3CD34-0D19-45AB-97ED-D720BA3DFC80}']
   end;
   IID_OpenGLOn12CreatorID = OpenGLOn12CreatorID;
   {$EXTERNALSYM IID_OpenGLOn12CreatorID}
@@ -188,9 +183,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(OpenCLOn12CreatorID);'}
   {$EXTERNALSYM OpenCLOn12CreatorID}
-  OpenCLOn12CreatorID = Interface(IUnknown)
-    ['{3f76bb74-91b5-4a88-b126-20ca0331cd60}']
-
+  OpenCLOn12CreatorID = interface(IUnknown)
+    ['{3F76BB74-91B5-4A88-B126-20CA0331CD60}']
   end;
   IID_OpenCLOn12CreatorID = OpenCLOn12CreatorID;
   {$EXTERNALSYM IID_OpenCLOn12CreatorID}
@@ -202,9 +196,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(VulkanOn12CreatorID);'}
   {$EXTERNALSYM VulkanOn12CreatorID}
-  VulkanOn12CreatorID = Interface(IUnknown)
-    ['{bc806e01-3052-406c-a3e8-9fc07f048f98}']
-
+  VulkanOn12CreatorID = interface(IUnknown)
+    ['{BC806E01-3052-406C-A3E8-9FC07F048F98}']
   end;
   IID_VulkanOn12CreatorID = VulkanOn12CreatorID;
   {$EXTERNALSYM IID_VulkanOn12CreatorID}
@@ -216,9 +209,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(DirectMLTensorFlowCreatorID);'}
   {$EXTERNALSYM DirectMLTensorFlowCreatorID}
-  DirectMLTensorFlowCreatorID = Interface(IUnknown)
-    ['{cb7490ac-8a0f-44ec-9b7b-6f4cafe8e9ab}']
-
+  DirectMLTensorFlowCreatorID = interface(IUnknown)
+    ['{CB7490AC-8A0F-44EC-9B7B-6F4CAFE8E9AB}']
   end;
   IID_DirectMLTensorFlowCreatorID = DirectMLTensorFlowCreatorID;
   {$EXTERNALSYM IID_DirectMLTensorFlowCreatorID}
@@ -229,9 +221,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(DirectMLPyTorchCreatorID);'}
   {$EXTERNALSYM DirectMLPyTorchCreatorID}
-  DirectMLPyTorchCreatorID = Interface(IUnknown)
-    ['{af029192-fba1-4b05-9116-235e06560354}']
-
+  DirectMLPyTorchCreatorID = interface(IUnknown)
+    ['{AF029192-FBA1-4B05-9116-235E06560354}']
   end;
   IID_DirectMLPyTorchCreatorID = DirectMLPyTorchCreatorID;
   {$EXTERNALSYM IID_DirectMLPyTorchCreatorID}
@@ -241,7 +232,7 @@ type
   // =================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(DirectMLWebNNCreatorID);'}
   {$EXTERNALSYM DirectMLWebNNCreatorID}
-  DirectMLWebNNCreatorID = Interface(IUnknown)
+  DirectMLWebNNCreatorID = interface(IUnknown)
     ['{FDF01A76-1E11-450F-902B-74F04EA08094}']
   end;
   IID_DirectMLWebNNCreatorID = DirectMLWebNNCreatorID;

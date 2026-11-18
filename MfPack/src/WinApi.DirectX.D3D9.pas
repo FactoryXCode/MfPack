@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 14-01-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Direct3D include file
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: New apps should use the latest Direct3D API
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1686,30 +1686,16 @@ type
   {$EXTERNALSYM IDirect3D9Ex}
   IDirect3D9Ex = interface(IDirect3D9)
   ['{02177241-69FC-400C-8FF1-93A44DF6861D}']
-    //*** IDirect3D9Ex methods ***//
-    function CreateDeviceEx(Adapter: UINT;
-                            DeviceType: D3DDEVTYPE;
-                            hFocusWindow: HWND;
-                            BehaviorFlags: DWORD;
-                            var pPresentationParameters: D3DPRESENT_PARAMETERS;
-                            var pFullscreenDisplayMode: D3DDISPLAYMODEEX;
-                            out ppReturnedDeviceInterface: PIDirect3DDevice9Ex): HResult; stdcall;
-
-    function EnumAdapterModesEx(Adapter: UINT;
-                                const pFilter: D3DDISPLAYMODEFILTER;
-                                Mode: UINT;
-                                out pMode: D3DDISPLAYMODEEX): HResult; stdcall;
-
-    function GetAdapterDisplayModeEx(Adapter: UINT;
-                                     var pMode: D3DDISPLAYMODEEX;
-                                     var pRotation: D3DDISPLAYROTATION): HResult; stdcall;
-
-    function GetAdapterLUID(Adapter: UINT;
-                            pLUID: LUID): HResult; stdcall;
-
-    function GetAdapterModeCountEx(Adapter: UINT;
-                                   const pFilter: D3DDISPLAYMODEFILTER): UINT; stdcall;
-
+    function GetAdapterModeCountEx(Adapter: UINT; const pFilter: D3DDISPLAYMODEFILTER): UINT; stdcall;
+    function EnumAdapterModesEx(Adapter: UINT; const pFilter: D3DDISPLAYMODEFILTER;
+      Mode: UINT; var pMode: D3DDISPLAYMODEEX): HResult; stdcall;
+    function GetAdapterDisplayModeEx(Adapter: UINT; var pMode: D3DDISPLAYMODEEX;
+      pRotation: PD3DDISPLAYROTATION): HResult; stdcall;
+    function CreateDeviceEx(Adapter: UINT; DeviceType: D3DDEVTYPE; hFocusWindow: HWND;
+      BehaviorFlags: DWORD; var pPresentationParameters: D3DPRESENT_PARAMETERS;
+      pFullscreenDisplayMode: PD3DDISPLAYMODEEX;
+      out ppReturnedDeviceInterface: IDirect3DDevice9Ex): HResult; stdcall;
+    function GetAdapterLUID(Adapter: UINT; out pLUID: LUID): HResult; stdcall;
   end;
   IID_IDirect3D9Ex = IDirect3D9Ex;
   {$EXTERNALSYM IID_IDirect3D9Ex}
@@ -1722,80 +1708,34 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3DDevice9Ex);'}
   {$EXTERNALSYM IDirect3DDevice9Ex}
   IDirect3DDevice9Ex = interface(IDirect3DDevice9)
-  ['{02177241-69FC-400C-8FF1-93A44DF6861D}']
-    //*** IDirect3DDevice9Ex methods ***//
-    function CheckDeviceState(hWindow: HWND): HResult; stdcall;
-
-    function CheckResourceResidency(pResourceArray: IDirect3DResource9;
-                                    NumResources: UINT32): HResult; stdcall;
-
-    function ComposeRects(pSource: IDirect3DSurface9;
-                          pDestination: IDirect3DSurface9;
-                          pSrcRectDescriptors: IDirect3DVertexBuffer9;
-                          NumRects: UINT;
-                          pDstRectDescriptors: IDirect3DVertexBuffer9;
-                          Operation: D3DCOMPOSERECTSOP;
-                          XOffset: Integer;
-                          YOffset: Integer): HResult; stdcall;
-
-    function CreateDepthStencilSurfaceEx(Width: UINT;
-                                         Height: UINT;
-                                         Format: D3DFORMAT;
-                                         MultiSample: D3DMULTISAMPLE_TYPE;
-                                         MultisampleQuality: DWORD;
-                                         Discard: BOOL;
-                                         out ppSurface: IDirect3DSurface9;
-                                         pSharedHandle: THandle;
-                                         Usage: DWORD): HResult; stdcall;
-
-    function CreateOffscreenPlainSurfaceEx(Width: UINT;
-                                           Height: UINT;
-                                           Format: D3DFORMAT;
-                                           Pool: D3DPOOL;
-                                           var ppSurface: IDirect3DSurface9;
-                                           var pSharedHandle: THandle;
-                                           Usage: DWORD): HResult; stdcall;
-
-    function CreateRenderTargetEx(Width: UINT;
-                                  Height: UINT;
-                                  Format: D3DFORMAT;
-                                  MultiSample: D3DMULTISAMPLE_TYPE;
-                                  MultisampleQuality: DWORD;
-                                  Lockable: BOOL;
-                                  var ppSurface: IDirect3DSurface9;
-                                  var pSharedHandle: THandle;
-                                  Usage: DWORD): HResult; stdcall;
-
-    function GetDisplayModeEx(iSwapChain: UINT;
-                              out pMode: D3DDISPLAYMODEEX;
-                              out pRotation: D3DDISPLAYROTATION): HResult; stdcall;
-
-    function GetGPUThreadPriority(pPriority: Integer): HResult; stdcall;
-
-    function GetMaximumFrameLatency(out pMaxLatency: UINT): HResult; stdcall;
-
-    function PresentEx(pSourceRect: TRect;
-                       pDestRect: TRect;
-                       hDestWindowOverride: HWND;
-                       pDirtyRegion: RGNDATA;
-                       dwFlags: DWORD): HResult; stdcall;
-
-    function ResetEx(var pPresentationParameters: D3DPRESENT_PARAMETERS;
-                     var pFullscreenDisplayMode: D3DDISPLAYMODEEX): HResult; stdcall;
-
-    function SetConvolutionMonoKernel(Width: UINT;
-                                      Height: UINT;
-                                      RowWeights: Single;
-                                      ColumnWeights: Single): HResult; stdcall;
-
+  ['{B18B10CE-2649-405A-870F-95F777D4313A}']
+    function SetConvolutionMonoKernel(Width, Height: UINT; RowWeights, ColumnWeights: PSingle): HResult; stdcall;
+    function ComposeRects(pSource, pDestination: IDirect3DSurface9;
+      pSrcRectDescriptors: IDirect3DVertexBuffer9; NumRects: UINT;
+      pDstRectDescriptors: IDirect3DVertexBuffer9; Operation: D3DCOMPOSERECTSOP;
+      XOffset, YOffset: Integer): HResult; stdcall;
+    function PresentEx(pSourceRect, pDestRect: PRect; hDestWindowOverride: HWND;
+      pDirtyRegion: PRGNDATA; dwFlags: DWORD): HResult; stdcall;
+    function GetGPUThreadPriority(out pPriority: Integer): HResult; stdcall;
     function SetGPUThreadPriority(pPriority: Integer): HResult; stdcall;
-
-    function SetMaximumFrameLatency(pMaxLatency: UINT): HResult; stdcall;
-
-    function TestCooperativeLevel(): HResult; stdcall;
-
     function WaitForVBlank(SwapChainIndex: UINT): HResult; stdcall;
-
+    function CheckResourceResidency(pResourceArray: PIDirect3DResource9; NumResources: UINT32): HResult; stdcall;
+    function SetMaximumFrameLatency(pMaxLatency: UINT): HResult; stdcall;
+    function GetMaximumFrameLatency(out pMaxLatency: UINT): HResult; stdcall;
+    function CheckDeviceState(hWindow: HWND): HResult; stdcall;
+    function CreateRenderTargetEx(Width, Height: UINT; Format: D3DFORMAT;
+      MultiSample: D3DMULTISAMPLE_TYPE; MultisampleQuality: DWORD; Lockable: BOOL;
+      out ppSurface: IDirect3DSurface9; pSharedHandle: PHandle; Usage: DWORD): HResult; stdcall;
+    function CreateOffscreenPlainSurfaceEx(Width, Height: UINT; Format: D3DFORMAT;
+      Pool: D3DPOOL; out ppSurface: IDirect3DSurface9; pSharedHandle: PHandle;
+      Usage: DWORD): HResult; stdcall;
+    function CreateDepthStencilSurfaceEx(Width, Height: UINT; Format: D3DFORMAT;
+      MultiSample: D3DMULTISAMPLE_TYPE; MultisampleQuality: DWORD; Discard: BOOL;
+      out ppSurface: IDirect3DSurface9; pSharedHandle: PHandle; Usage: DWORD): HResult; stdcall;
+    function ResetEx(var pPresentationParameters: D3DPRESENT_PARAMETERS;
+      pFullscreenDisplayMode: PD3DDISPLAYMODEEX): HResult; stdcall;
+    function GetDisplayModeEx(iSwapChain: UINT; var pMode: D3DDISPLAYMODEEX;
+      pRotation: PD3DDISPLAYROTATION): HResult; stdcall;
   end;
   IID_IDirect3DDevice9Ex = IDirect3DDevice9Ex;
   {$EXTERNALSYM IID_IDirect3DDevice9Ex}
@@ -1807,15 +1747,11 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3DSwapChain9Ex);'}
   {$EXTERNALSYM IDirect3DSwapChain9Ex}
   IDirect3DSwapChain9Ex = interface(IDirect3DSwapChain9)
-  ['{91886CAF-1C3D-4d2e-A0AB-3E4C7D8D3303}']
-    //*** IDirect3DSwapChain9Ex methods ***//
-    function GetDisplayModeEx(out pMode: D3DDISPLAYMODEEX;
-                              out pRotation: D3DDISPLAYROTATION): HResult; stdcall;
-
+  ['{91886CAF-1C3D-4D2E-A0AB-3E4C7D8D3303}']
     function GetLastPresentCount(out pLastPresentCount: UINT): HResult; stdcall;
-
-    function GetPresentStatistics(out pPresentationStatistics: D3DPRESENTSTATS): HResult; stdcall;
-
+    function GetPresentStats(out pPresentationStatistics: D3DPRESENTSTATS): HResult; stdcall;
+    function GetDisplayModeEx(var pMode: D3DDISPLAYMODEEX;
+      pRotation: PD3DDISPLAYROTATION): HResult; stdcall;
   end;
   IID_IDirect3DSwapChain9Ex = IDirect3DSwapChain9Ex;
   {$EXTERNALSYM IID_IDirect3DSwapChain9Ex}
@@ -1851,21 +1787,14 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3DDevice9Video);'}
   {$EXTERNALSYM IDirect3DDevice9Video}
   IDirect3DDevice9Video = interface(IUnknown)
-  ['{26dc4561-a1ee-4ae7-96da-118a36c0ec95}']
-    //*** IDirect3DDevice9Video methods ***//
+  ['{26DC4561-A1EE-4AE7-96DA-118A36C0EC95}']
+    function GetContentProtectionCaps(pCryptoType, pDecodeProfile: PGUID;
+      out pCaps: D3DCONTENTPROTECTIONCAPS): HResult; stdcall;
     function CreateAuthenticatedChannel(ChannelType: D3DAUTHENTICATEDCHANNELTYPE;
-                                        out ppAuthenticatedChannel: IDirect3DAuthenticatedChannel9;
-                                        out pChannelHandle: THandle): HResult; stdcall;
-
-    function CreateCryptoSession(pCryptoType: TGuid;
-                                 pDecodeProfile: TGuid;
-                                 out ppCryptoSession: IDirect3DCryptoSession9;
-                                 out pCryptoHandle: THandle): HResult; stdcall;
-
-    function GetContentProtectionCaps(pCryptoType: TGuid;
-                                      pDecodeProfile: TGuid;
-                                      out pCaps: D3DCONTENTPROTECTIONCAPS): HResult; stdcall;
-
+      out ppAuthenticatedChannel: IDirect3DAuthenticatedChannel9;
+      out pChannelHandle: THandle): HResult; stdcall;
+    function CreateCryptoSession(pCryptoType, pDecodeProfile: PGUID;
+      out ppCryptoSession: IDirect3DCryptoSession9; out pCryptoHandle: THandle): HResult; stdcall;
   end;
   IID_IDirect3DDevice9Video = IDirect3DDevice9Video;
   {$EXTERNALSYM IID_IDirect3DDevice9Video}
@@ -1878,21 +1807,13 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3DAuthenticatedChannel9);'}
   {$EXTERNALSYM IDirect3DAuthenticatedChannel9}
   IDirect3DAuthenticatedChannel9 = interface(IUnknown)
-  ['{ff24beee-da21-4beb-98b5-d2f899f98af9}']
-    //*** IDirect3DAuthenticatedChannel9 methods ***//
-
+  ['{FF24BEEE-DA21-4BEB-98B5-D2F899F98AF9}']
     function GetCertificateSize(out pCertificateSize: UINT): HResult; stdcall;
-
-    function GetCertificate(CertifacteSize: UINT;
-                            out ppCertificate: PByte): HResult; stdcall;
-
-    function NegotiateKeyExchange(DataSize: UINT;
-                                  var pData): HResult; stdcall;
-
-    function Query(InputSize: UINT;
-                   var pInput;
-                   OutputSize: UINT;
-                   var pOutput): HResult; stdcall;
+    function GetCertificate(CertificateSize: UINT; pCertificate: PByte): HResult; stdcall;
+    function NegotiateKeyExchange(DataSize: UINT; pData: Pointer): HResult; stdcall;
+    function Query(InputSize: UINT; pInput: Pointer; OutputSize: UINT; pOutput: Pointer): HResult; stdcall;
+    function Configure(InputSize: UINT; pInput: Pointer;
+      out pOutput: D3DAUTHENTICATEDCHANNEL_CONFIGURE_OUTPUT): HResult; stdcall;
   end;
   IID_IDirect3DAuthenticatedChannel9 = IDirect3DAuthenticatedChannel9;
   {$EXTERNALSYM IID_IDirect3DAuthenticatedChannel9}
@@ -1905,29 +1826,19 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3DCryptoSession9);'}
   {$EXTERNALSYM IDirect3DCryptoSession9}
   IDirect3DCryptoSession9 = interface(IUnknown)
-  ['{fa0ab799-7a9c-48ca-8c5b-237e71a54434}']
-    //*** IDirect3DCryptoSession9 methods ***//
-    function EncryptionBlt(pSrcSurface: IDirect3DSurface9;
-                           out pDstSurface: IDirect3DSurface9;
-                           DstSurfaceSize: UINT;
-                           var pIV): HResult; stdcall;
-
-    function FinishSessionKeyRefresh(): HResult; stdcall;
-
-    function GetCertificate(CertifacteSize: UINT;
-                            out ppCertificate: PByte): HResult; stdcall;
-
+  ['{FA0AB799-7A9C-48CA-8C5B-237E71A54434}']
     function GetCertificateSize(out pCertificateSize: UINT): HResult; stdcall;
-
-    function GetEncryptionBltKey(out pReadbackKey; KeySize: UINT): HResult; stdcall;
-
-    function GetSurfacePitch(pSrcSurface: IDirect3DSurface9;
-                             out pSurfacePitch: UINT): HResult; stdcall;
-
-    function NegotiateKeyExchange(DataSize: UINT;
-                                  out pData): HResult; cdecl;
-
-    function StartSessionKeyRefresh(out pRandomNumber; RandomNumberSize: UINT): HResult; stdcall;
+    function GetCertificate(CertificateSize: UINT; pCertificate: PByte): HResult; stdcall;
+    function NegotiateKeyExchange(DataSize: UINT; pData: Pointer): HResult; stdcall;
+    function EncryptionBlt(pSrcSurface, pDstSurface: IDirect3DSurface9;
+      DstSurfaceSize: UINT; pIV: Pointer): HResult; stdcall;
+    function DecryptionBlt(pSrcSurface, pDstSurface: IDirect3DSurface9;
+      SrcSurfaceSize: UINT; pEncryptedBlockInfo: PD3DENCRYPTED_BLOCK_INFO;
+      pContentKey, pIV: Pointer): HResult; stdcall;
+    function GetSurfacePitch(pSrcSurface: IDirect3DSurface9; out pSurfacePitch: UINT): HResult; stdcall;
+    function StartSessionKeyRefresh(pRandomNumber: Pointer; RandomNumberSize: UINT): HResult; stdcall;
+    function FinishSessionKeyRefresh: HResult; stdcall;
+    function GetEncryptionBltKey(pReadbackKey: Pointer; KeySize: UINT): HResult; stdcall;
   end;
   IID_IDirect3DCryptoSession9 = IDirect3DCryptoSession9;
   {$EXTERNALSYM IID_IDirect3DCryptoSession9}
@@ -1935,7 +1846,7 @@ type
 
 
   function Direct3DCreate9Ex(SDKVersion: UINT;
-                             out ppD3D: PIDirect3D9Ex): HResult; stdcall;
+                             out ppD3D: IDirect3D9Ex): HResult; stdcall;
   {$EXTERNALSYM Direct3DCreate9Ex}
 
 

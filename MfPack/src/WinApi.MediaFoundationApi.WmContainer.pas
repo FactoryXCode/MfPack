@@ -10,7 +10,7 @@
 // Release date: 23-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -342,8 +342,11 @@ type
 
   PASF_INDEX_IDENTIFIER = ^ASF_INDEX_IDENTIFIER;
   _ASF_INDEX_IDENTIFIER = record
-    guidIndexType: TGUID;
-    wStreamNumber: WORD;
+    // Preserve SDK DWORD alignment when the Delphi RTL TGUID is packed.
+    case Integer of
+      0: (guidIndexType: TGUID;
+          wStreamNumber: WORD);
+      1: (_SdkAlignment: DWORD);
   end;
   {$EXTERNALSYM _ASF_INDEX_IDENTIFIER}
   ASF_INDEX_IDENTIFIER = _ASF_INDEX_IDENTIFIER;
@@ -441,9 +444,9 @@ type
                            out cbHeaderSize: QWORD): HResult; stdcall;
 
     function ParseHeader(pIHeaderBuffer: IMFMediaBuffer;
-                         const cbOffsetWithinHeader: QWORD): HResult; stdcall;
+                         cbOffsetWithinHeader: QWORD): HResult; stdcall;
 
-    function GenerateHeader(var pIHeader: IMFMediaBuffer;
+    function GenerateHeader(pIHeader: IMFMediaBuffer;
                             out pcbHeader: DWORD): HResult; stdcall;
 
     function GetProfile(out ppIProfile: IMFASFProfile): HResult; stdcall;
@@ -452,7 +455,7 @@ type
 
     function GeneratePresentationDescriptor(out ppIPresentationDescriptor: IMFPresentationDescriptor): HResult; stdcall;
 
-    function GetEncodingConfigurationPropertyStore(const wStreamNumber: WORD;
+    function GetEncodingConfigurationPropertyStore(wStreamNumber: WORD;
                                                    out ppIStore: IPropertyStore): HResult; stdcall;
   end;
   IID_IMFASFContentInfo = IMFASFContentInfo;
@@ -469,28 +472,28 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFASFProfile);'}
   {$EXTERNALSYM IMFASFProfile}
-  IMFASFProfile = interface(IUnknown)
-  ['{D267BF6A-028B-4e0d-903D-43F0EF82D0D4}']
+  IMFASFProfile = interface(IMFAttributes)
+  ['{D267BF6A-028B-4E0D-903D-43F0EF82D0D4}']
 
     function GetStreamCount(out pcStreams: DWORD): HResult; stdcall;
 
-    function GetStream(const dwStreamIndex: DWORD;
+    function GetStream(dwStreamIndex: DWORD;
                        out pwStreamNumber: WORD;
                        out ppIStream: IMFASFStreamConfig): HResult; stdcall;
 
-    function GetStreamByNumber(const wStreamNumber: WORD;
+    function GetStreamByNumber(wStreamNumber: WORD;
                                out ppIStream: IMFASFStreamConfig): HResult; stdcall;
 
     function SetStream(pIStream: IMFASFStreamConfig): HResult; stdcall;
 
-    function RemoveStream(const wStreamNumber: WORD): HResult; stdcall;
+    function RemoveStream(wStreamNumber: WORD): HResult; stdcall;
 
     function CreateStream(pIMediaType: IMFMediaType;
                           out ppIStream: IMFASFStreamConfig): HResult; stdcall;
 
     function GetMutualExclusionCount(out pcMutexs: DWORD): HResult; stdcall;
 
-    function GetMutualExclusion(const dwMutexIndex: DWORD;
+    function GetMutualExclusion(dwMutexIndex: DWORD;
                                 out ppIMutex: IMFASFMutualExclusion): HResult; stdcall;
 
     function AddMutualExclusion(pIMutex: IMFASFMutualExclusion): HResult; stdcall;
@@ -529,7 +532,7 @@ type
 
     function GetStreamNumber(): WORD; stdcall;
 
-    function SetStreamNumber(const wStreamNum: WORD): HResult; stdcall;
+    function SetStreamNumber(wStreamNum: WORD): HResult; stdcall;
 
     function GetMediaType(out ppIMediaType: IMFMediaType): HResult; stdcall;
 
@@ -540,10 +543,10 @@ type
     function GetPayloadExtension(wPayloadExtensionNumber: WORD;
                                  out pguidExtensionSystemID: TGUID;
                                  out pcbExtensionDataSize: WORD;
-                                 out pbExtensionSystemInfo: PByte;
+                                 pbExtensionSystemInfo: PByte;
                                  var pcbExtensionSystemInfo: DWORD): HResult; stdcall;
 
-    function AddPayloadExtension(const guidExtensionSystemID: TGUID;
+    function AddPayloadExtension(guidExtensionSystemID: TGUID;
                                  cbExtensionDataSize: WORD;
                                  pbExtensionSystemInfo: PByte;
                                  cbExtensionSystemInfo: DWORD): HResult; stdcall;
@@ -571,16 +574,16 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFASFMutualExclusion);'}
   {$EXTERNALSYM IMFASFMutualExclusion}
   IMFASFMutualExclusion = interface(IUnknown)
-  ['{9E8AE8D2-DBBD-4200-9ACA-06E6DF484913}']
+  ['{12558291-E399-11D5-BC2A-00B0D0F3F4AB}']
 
     function GetType(out pguidType: TGUID): HResult; stdcall;
 
-    function SetType(const guidType: REFGUID): HResult; stdcall;
+    function SetType(const guidType: TGUID): HResult; stdcall;
 
     function GetRecordCount(out pdwRecordCount: DWORD): HResult; stdcall;
 
     function GetStreamsForRecord(dwRecordNumber: DWORD;
-                                 out pwStreamNumArray: WORD;
+                                 pwStreamNumArray: PWORD;
                                  var pcStreams: DWORD): HResult; stdcall;
 
     function AddStreamForRecord(dwRecordNumber: DWORD;
@@ -614,7 +617,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFASFStreamPrioritization);'}
   {$EXTERNALSYM IMFASFStreamPrioritization}
   IMFASFStreamPrioritization = interface(IUnknown)
-  ['{699bdc27-bbaf-49ff-8e38-9c39c9b5e088}']
+  ['{699BDC27-BBAF-49FF-8E38-9C39C9B5E088}']
 
     function GetStreamCount(out pdwStreamCount: DWORD): HResult; stdcall;
 
@@ -647,14 +650,14 @@ type
 
     function Initialize(pIContentInfo: IMFASFContentInfo): HResult; stdcall;
 
-    function SetFlags(const dwFlags: DWORD): HResult; stdcall;
+    function SetFlags(dwFlags: DWORD): HResult; stdcall;
 
-    function GetFlags(pdwFlags: DWORD): HResult; stdcall;
+    function GetFlags(out pdwFlags: DWORD): HResult; stdcall;
 
-    function SelectStreams(pwStreamNumbers: WORD;
+    function SelectStreams(pwStreamNumbers: PWORD;
                            wNumStreams: WORD): HResult; stdcall;
 
-    function GetSelectedStreams(out pwStreamNumbers: WORD;
+    function GetSelectedStreams(pwStreamNumbers: PWORD;
                                 var pwNumStreams: WORD): HResult; stdcall;
 
     function ParseData(pIBuffer: IMFMediaBuffer;
@@ -667,7 +670,7 @@ type
 
     function Flush(): HResult; stdcall;
 
-    function GetLastSendTime(pdwLastSendTime: DWORD): HResult; stdcall;
+    function GetLastSendTime(out pdwLastSendTime: DWORD): HResult; stdcall;
 
   end;
   IID_IMFASFSplitter = IMFASFSplitter;
@@ -701,7 +704,7 @@ type
 
     function Flush(): HResult; stdcall;
 
-    function _End(var pIContentInfo: IMFASFContentInfo): HResult; stdcall;
+    function _End(pIContentInfo: IMFASFContentInfo): HResult; stdcall;
 
     function GetStatistics(wStreamNumber: WORD;
                            out pMuxStats: ASF_MUX_STATISTICS): HResult; stdcall;
@@ -734,21 +737,21 @@ type
                               out pcbIndexOffset: QWORD): HResult; stdcall;
 
     function SetIndexByteStreams(ppIByteStreams: PIMFByteStream;
-                                 const cByteStreams: DWORD): HResult; stdcall;
+                                 cByteStreams: DWORD): HResult; stdcall;
 
     function GetIndexByteStreamCount(out pcByteStreams: DWORD): HResult; stdcall;
 
-    function GetIndexStatus(pIndexIdentifier: ASF_INDEX_IDENTIFIER;
+    function GetIndexStatus(const pIndexIdentifier: ASF_INDEX_IDENTIFIER;
                             out pfIsIndexed: BOOL;
-                            out pbIndexDescriptor: PByte;
+                            pbIndexDescriptor: PByte;
                             var pcbIndexDescriptor: DWORD): HResult; stdcall;
 
     function SetIndexStatus(pbIndexDescriptor: PByte;
                             cbIndexDescriptor: DWORD;
                             fGenerateIndex: BOOL): HResult; stdcall;
 
-    function GetSeekPositionForValue(pvarValue: PROPVARIANT;
-                                     pIndexIdentifier: ASF_INDEX_IDENTIFIER;
+    function GetSeekPositionForValue(const pvarValue: PROPVARIANT;
+                                     const pIndexIdentifier: ASF_INDEX_IDENTIFIER;
                                      out pcbOffsetWithinData: QWORD;
                                      out phnsApproxTime: MFTIME;
                                      out pdwPayloadNumberOfStreamWithinPacket: DWORD): HResult; stdcall;
@@ -776,7 +779,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFASFStreamSelector);'}
   {$EXTERNALSYM IMFASFStreamSelector}
   IMFASFStreamSelector = interface(IUnknown)
-  ['{d01bad4a-4fa0-4a60-9349-c27e62da9d41}']
+  ['{D01BAD4A-4FA0-4A60-9349-C27E62DA9D41}']
 
     function GetStreamCount(out pcStreams: DWORD): HResult; stdcall;
 
@@ -786,7 +789,7 @@ type
                                   out pcStreams: DWORD): HResult; stdcall;
 
     function GetOutputStreamNumbers(dwOutputNum: DWORD;
-                                    out rgwStreamNumbers: WORD): HResult; stdcall;
+                                    rgwStreamNumbers: PWORD): HResult; stdcall;
 
     function GetOutputFromStream(wStreamNum: WORD;
                                  out pdwOutput: DWORD): HResult; stdcall;
@@ -812,8 +815,8 @@ type
 
     function GetBandwidthStep(dwStepNum: DWORD;
                               out pdwBitrate: DWORD;
-                              out rgwStreamNumbers: WORD;
-                              out rgSelections: ASF_SELECTION_STATUS): HResult; stdcall;
+                              rgwStreamNumbers: PWORD;
+                              rgSelections: PASF_SELECTION_STATUS): HResult; stdcall;
 
     function BitrateToStepNumber(dwBitrate: DWORD;
                                  out pdwStepNum: DWORD): HResult; stdcall;
@@ -856,11 +859,11 @@ type
   {$EXTERNALSYM MFCreateASFProfile}
 
   function MFCreateASFProfileFromPresentationDescriptor(pIPD: IMFPresentationDescriptor;
-                                                        out ppIProfile: IMFASFProfile): HResult; stdcall;
+                                                          out ppIProfile: IMFASFProfile): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFProfileFromPresentationDescriptor}
 
   function MFCreatePresentationDescriptorFromASFProfile(pIProfile: IMFASFProfile;
-                                                        out ppIPD: IMFPresentationDescriptor): HResult; stdcall;
+                                                          out ppIPD: IMFPresentationDescriptor): HResult; stdcall;
   {$EXTERNALSYM MFCreatePresentationDescriptorFromASFProfile}
 
   function MFCreateASFMultiplexer(out ppIMultiplexer: IMFASFMultiplexer): HResult; stdcall;
@@ -870,40 +873,40 @@ type
   {$EXTERNALSYM MFCreateASFIndexer}
 
   function MFCreateASFIndexerByteStream(pIContentByteStream: IMFByteStream;
-                                        cbIndexStartOffset: QWORD;
-                                        out pIIndexByteStream: IMFByteStream): HResult; stdcall;
+                                          cbIndexStartOffset: QWORD;
+                                          out pIIndexByteStream: IMFByteStream): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFIndexerByteStream}
 
   function MFCreateASFStreamSelector(pIASFProfile: IMFASFProfile;
-                                     out ppSelector: IMFASFStreamSelector): HResult; stdcall;
+                                       out ppSelector: IMFASFStreamSelector): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFStreamSelector}
 
-  function MFCreateASFMediaSink(var pIByteStream: IMFByteStream;
-                                var ppIMediaSink: IMFMediaSink): HResult; stdcall;
+  function MFCreateASFMediaSink(pIByteStream: IMFByteStream;
+                                  out ppIMediaSink: IMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFMediaSink}
 
   function MFCreateASFMediaSinkActivate(pwszFileName: PWideChar;
-                                        var pContentInfo: IMFASFContentInfo;
-                                        var ppIActivate: IMFActivate): HResult; stdcall;
+                                          pContentInfo: IMFASFContentInfo;
+                                          out ppIActivate: IMFActivate): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFMediaSinkActivate}
 
-  function MFCreateWMVEncoderActivate(var pMediaType: IMFMediaType;
-                                      var pEncodingConfigurationProperties: IPropertyStore;
-                                      var ppActivate: IMFActivate): HResult; stdcall;
+  function MFCreateWMVEncoderActivate(pMediaType: IMFMediaType;
+                                        pEncodingConfigurationProperties: IPropertyStore;
+                                        out ppActivate: IMFActivate): HResult; stdcall;
   {$EXTERNALSYM MFCreateWMVEncoderActivate}
 
-  function MFCreateWMAEncoderActivate(var pMediaType: IMFMediaType;
-                                      var pEncodingConfigurationProperties: IPropertyStore;
-                                      var ppActivate: IMFActivate): HResult; stdcall;
+  function MFCreateWMAEncoderActivate(pMediaType: IMFMediaType;
+                                        pEncodingConfigurationProperties: IPropertyStore;
+                                        out ppActivate: IMFActivate): HResult; stdcall;
   {$EXTERNALSYM MFCreateWMAEncoderActivate}
 
-  function MFCreateASFStreamingMediaSink(var pIByteStream: IMFByteStream;
-                                         var ppIMediaSink: IMFMediaSink): HResult; stdcall;
+  function MFCreateASFStreamingMediaSink(pIByteStream: IMFByteStream;
+                                           out ppIMediaSink: IMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFStreamingMediaSink}
 
-  function MFCreateASFStreamingMediaSinkActivate(var pByteStreamActivate: IMFActivate;
-                                                 var pContentInfo: IMFASFContentInfo;
-                                                 var ppIActivate: IMFActivate): HResult; stdcall;
+  function MFCreateASFStreamingMediaSinkActivate(pByteStreamActivate: IMFActivate;
+                                                   pContentInfo: IMFASFContentInfo;
+                                                   out ppIActivate: IMFActivate): HResult; stdcall;
   {$EXTERNALSYM MFCreateASFStreamingMediaSinkActivate}
 
   function MFCreateASFSplitter(out ppISplitter: IMFASFSplitter): HResult; stdcall;
@@ -913,6 +916,10 @@ type
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
+
+const
+  CLSID_WMDRMSystemID: TGUID = '{8948BB22-11BD-4796-93E3-974D1B575678}';
+  {$EXTERNALSYM CLSID_WMDRMSystemID}
 
 implementation
 
@@ -929,7 +936,7 @@ const
   function MFCreateASFIndexerByteStream; external WmContainerLib name 'MFCreateASFIndexerByteStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateASFStreamSelector; external WmContainerLib name 'MFCreateASFStreamSelector' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateASFMediaSink; external WmContainerLib name 'MFCreateASFMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateASFMediaSinkActivate; external WmContainerLib name 'MFCreateASFMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateASFMediaSinkActivate; external WmContainerLib name 'MFCreateASFMediaSinkActivate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateWMVEncoderActivate; external WmContainerLib name 'MFCreateWMVEncoderActivate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateWMAEncoderActivate; external WmContainerLib name 'MFCreateWMAEncoderActivate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateASFStreamingMediaSink; external WmContainerLib name 'MFCreateASFStreamingMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

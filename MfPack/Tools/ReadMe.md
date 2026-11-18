@@ -2,7 +2,7 @@
 
 &#x20; 
 
-Version 4.0.0
+Version 4.1.0
 
 &#x20; 
 
@@ -22,31 +22,29 @@ When you need a version > 6.4.5, that is allready present, copy this tool
 to ..\\MfPack\\Tools\\MicrosoftErrorLookupTool and adjust the WIN\_ERROR\_LOOKUP\_TOOL constant in  
 the WinApi.Dbg.WinHResultTools.pas unit.  
 
-To build the tools application, you have to add ..\\MfPack\\src\\dbg to your project's Searchpath.  
+To build the tools application, you have to add ..\\MfPack\\src\\debug to your project's Searchpath.  
 
 &#x20; 
 
 NOTES:  
 
-* This release is updated for compiler version 17 up to 34.
+* This release is updated for compiler version 3.2.2.
 * SDK version 10.0.28000.2705 (Windows 11)
 * Requires Windows 10 build 20348 or later.
-* Minimum supported MfPack version: 3.1.5
+* Minimum supported MfPack version: 4.1.0
 
 &#x20; 
 
-Project: Media Foundation - MFPack - Tools
+Project: Media Foundation - MFPack
 
 &#x20; 
-Project location: https://github.com/FactoryXCode/MfPack  
-https://sourceforge.net/projects/MFPack  
+Project location: https://github.com/FactoryXCode/MfPack-FPC  
 
 &#x20; 
 
 First release date: 09/07/2023  
-Final release date: 05/05/2026  
+Final release date: 17/11/2026  
 
 &#x20; 
 
 Copyright © FactoryX. All rights reserved.
-

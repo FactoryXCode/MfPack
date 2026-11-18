@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Unit for MFTrace debugging purposes.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -77,7 +77,20 @@ implementation
 function EventName(met: MediaEventType): string;
 begin
   case met of
-    MeError: Result := 'MEExtendedType';
+    MEUnknown: Result := 'MEUnknown';
+    MENonFatalError: Result := 'MENonFatalError';
+    MESessionUnknown: Result := 'MESessionUnknown';
+    MESourceUnknown: Result := 'MESourceUnknown';
+    MESinkUnknown: Result := 'MESinkUnknown';
+    MECaptureAudioSessionVolumeChanged: Result := 'MECaptureAudioSessionVolumeChanged';
+    MECaptureAudioSessionDeviceRemoved: Result := 'MECaptureAudioSessionDeviceRemoved';
+    MECaptureAudioSessionFormatChanged: Result := 'MECaptureAudioSessionFormatChanged';
+    MECaptureAudioSessionDisconnected: Result := 'MECaptureAudioSessionDisconnected';
+    MECaptureAudioSessionExclusiveModeOverride: Result := 'MECaptureAudioSessionExclusiveModeOverride';
+    MECaptureAudioSessionServerShutdown: Result := 'MECaptureAudioSessionServerShutdown';
+    METrustUnknown: Result := 'METrustUnknown';
+    MEReservedMax: Result := 'MEReservedMax';
+    MEError: Result := 'MEError';
     MEExtendedType: Result := 'MEExtendedType';
     MESessionTopologySet: Result := 'MESessionTopologySet';
     MESessionTopologiesCleared: Result := 'MESessionTopologiesCleared';

@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Declarations for the XAudio2 game audio API.
 //              Windows 10 XAudio2.9 or later
 //
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
@@ -29,7 +29,7 @@
 //          that target Windows 7. See https://aka.ms/xaudio2redist.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -373,7 +373,7 @@ const
 
  (**************************************************************************
   *
-  * Forward declarations for the XAudio2 interfaces (and classes).
+  * Forward declarations for COM engines and native record pointers.
   *
   **************************************************************************)
 type
@@ -386,23 +386,25 @@ type
   IXAudio2Extension = interface;
 {$ENDIF}
 
+  // Native voices/callbacks have no IUnknown prefix. Keep pointer handles;
+  // destroy voices with DestroyVoice and retain callback storage until detached.
   PIXAudio2Voice = ^IXAudio2Voice;
-  IXAudio2Voice = class;
+  PPIXAudio2Voice = ^PIXAudio2Voice;
 
   PIXAudio2SourceVoice = ^IXAudio2SourceVoice;
-  IXAudio2SourceVoice = class;
+  PPIXAudio2SourceVoice = ^PIXAudio2SourceVoice;
 
   PIXAudio2SubmixVoice = ^IXAudio2SubmixVoice;
-  IXAudio2SubmixVoice = class;
+  PPIXAudio2SubmixVoice = ^PIXAudio2SubmixVoice;
 
   PIXAudio2MasteringVoice = ^IXAudio2MasteringVoice;
-  IXAudio2MasteringVoice = class;
+  PPIXAudio2MasteringVoice = ^PIXAudio2MasteringVoice;
 
   PIXAudio2EngineCallback = ^IXAudio2EngineCallback;
-  IXAudio2EngineCallback = class;
+  PPIXAudio2EngineCallback = ^PIXAudio2EngineCallback;
 
   PIXAudio2VoiceCallback = ^IXAudio2VoiceCallback;
-  IXAudio2VoiceCallback = class;
+  PPIXAudio2VoiceCallback = ^PIXAudio2VoiceCallback;
 
 
 
@@ -420,7 +422,7 @@ type
   PXAUDIO2_SEND_DESCRIPTOR = ^XAUDIO2_SEND_DESCRIPTOR;
   XAUDIO2_SEND_DESCRIPTOR = record
     Flags: UINT32;                   // Either 0 or XAUDIO2_SEND_USEFILTER.
-    pOutputVoice: IXAudio2Voice;     // This send's destination voice.
+    pOutputVoice: PIXAudio2Voice;     // This send's destination voice.
   end;
   {$EXTERNALSYM XAUDIO2_SEND_DESCRIPTOR}
 
@@ -436,7 +438,7 @@ type
   // Used in XAUDIO2_EFFECT_CHAIN below
   PXAUDIO2_EFFECT_DESCRIPTOR = ^XAUDIO2_EFFECT_DESCRIPTOR;
   XAUDIO2_EFFECT_DESCRIPTOR = record
-    pEffect: IUnknown;              // Pointer to the effect object's IUnknown interface.
+    pEffect: Pointer;              // Borrowed effect IUnknown; keep its owner alive.
     InitialState: BOOL;             // TRUE if the effect should begin in the enabled state.
     OutputChannels: UINT32;         // How many output channels the effect should produce.
   end;
@@ -589,7 +591,7 @@ type
     // ARGUMENTS:
     //  pCallback - Callback interface to be called during each processing pass.
     //
-    function RegisterForCallbacks(pCallback: IXAudio2EngineCallback): HRESULT; stdcall;
+    function RegisterForCallbacks(pCallback: PIXAudio2EngineCallback): HRESULT; stdcall;
 
     // NAME: IXAudio2.UnregisterForCallbacks
     // DESCRIPTION: Removes an existing receiver of XAudio2 engine callbacks.
@@ -597,7 +599,7 @@ type
     // ARGUMENTS:
     //  pCallback - Previously registered callback interface to be removed.
     //
-    procedure UnregisterForCallbacks(pCallback: IXAudio2EngineCallback); stdcall;
+    procedure UnregisterForCallbacks(pCallback: PIXAudio2EngineCallback); stdcall;
 
     // NAME: IXAudio2.CreateSourceVoice
     // DESCRIPTION: Creates and configures a source voice.
@@ -612,12 +614,12 @@ type
     //  pSendList - Optional list of voices this voice should send audio to.
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
-    function CreateSourceVoice({out} ppSourceVoice: PIXAudio2SourceVoice;
+    function CreateSourceVoice(ppSourceVoice: PPIXAudio2SourceVoice;
                                pSourceFormat: PWAVEFORMATEX;
-                               Flags: UINT32;
+                               Flags: UINT32 = 0;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
-                               pCallback: IXAudio2VoiceCallback = nil;
-                               {in/out} pSendList: PXAUDIO2_VOICE_SENDS = nil;
+                               pCallback: PIXAudio2VoiceCallback = nil;
+                               pSendList: PXAUDIO2_VOICE_SENDS = nil;
                                pEffectChain: PXAUDIO2_EFFECT_CHAIN = nil): HRESULT; stdcall;
 
     // NAME: IXAudio2.CreateSubmixVoice
@@ -632,12 +634,12 @@ type
     //  pSendList - Optional list of voices this voice should send audio to.
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
-    function CreateSubmixVoice({out} ppSubmixVoice: PIXAudio2SubmixVoice;
+    function CreateSubmixVoice(ppSubmixVoice: PPIXAudio2SubmixVoice;
                                InputChannels: UINT32;
                                InputSampleRate: UINT32;
                                Flags: UINT32 = 0;
                                ProcessingStage: UINT32 = 0;
-                               {in/out} pSendList: PXAUDIO2_VOICE_SENDS = nil;
+                               pSendList: PXAUDIO2_VOICE_SENDS = nil;
                                pEffectChain: PXAUDIO2_EFFECT_CHAIN = nil): HRESULT; stdcall;
 
 
@@ -653,7 +655,7 @@ type
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //  StreamCategory - The audio stream category to use for this mastering voice
     //
-    function CreateMasteringVoice({out} ppMasteringVoice: PIXAudio2MasteringVoice;
+    function CreateMasteringVoice(ppMasteringVoice: PPIXAudio2MasteringVoice;
                                   InputChannels: UINT32 = XAUDIO2_DEFAULT_CHANNELS;
                                   InputSampleRate: UINT32 = XAUDIO2_DEFAULT_SAMPLERATE;
                                   Flags: UINT32 = 0;
@@ -678,7 +680,7 @@ type
     // ARGUMENTS:
     //  OperationSet - Identifier of the set of operations to be applied.
     //
-    function CommitChanges(OperationSet: UINT32 = XAUDIO2_COMMIT_ALL): HRESULT; stdcall;
+    function CommitChanges(OperationSet: UINT32): HRESULT; stdcall;
 
     // NAME: IXAudio2.GetPerformanceData
     // DESCRIPTION: Returns current resource usage details: memory, CPU, etc.
@@ -686,7 +688,7 @@ type
     // ARGUMENTS:
     //  pPerfData - Returns the performance data structure.
     //
-    procedure GetPerformanceData(out pPerfData: XAUDIO2_PERFORMANCE_DATA); stdcall;
+    procedure GetPerformanceData(pPerfData: PXAUDIO2_PERFORMANCE_DATA); stdcall;
 
     // NAME: IXAudio2.SetDebugConfiguration
     // DESCRIPTION: Configures XAudio2's debug output (in debug builds only).
@@ -724,8 +726,8 @@ type
     //  quantumNumerator - Quantum numerator
     //  quantumDenominator - Quantum denominator
     //
-    procedure GetProcessingQuantum(quantumNumerator: UINT32;
-                                   quantumDenominator: UINT32); stdcall;
+    procedure GetProcessingQuantum(quantumNumerator: PUINT32;
+                                   quantumDenominator: PUINT32); stdcall;
 
     // NAME: IXAudio2.GetProcessor
     // DESCRIPTION: Returns the number of the processor used by XAudio2
@@ -733,7 +735,7 @@ type
     // ARGUMENTS:
     //  processor - Non-zero Processor number
     //
-    procedure GetProcessor(processor: XAUDIO2_PROCESSOR);
+    procedure GetProcessor(processor: PXAUDIO2_PROCESSOR); stdcall;
 
   end;
   IID_IXAudio2Extension = IXAudio2Extension;
@@ -754,14 +756,15 @@ type
   //               note that this class contains virtual methods.
   //               The class must be defined as class(TInterfacedObject).
 
-  IXAudio2Voice = class(TInterfacedObject)
+  IXAudio2Voice = record
+    lpVtbl: Pointer;
 
     // NAME: IXAudio2Voice.GetVoiceDetails
     // DESCRIPTION: Returns the basic characteristics of this voice.
     //
     // ARGUMENTS:
     //  pVoiceDetails - Returns the voice's details.
-    procedure GetVoiceDetails(out pVoiceDetails: XAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
+    procedure GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
 
     // NAME: IXAudio2Voice.SetOutputVoices
     // DESCRIPTION: Replaces the set of submix/mastering voices that receive
@@ -769,14 +772,14 @@ type
     //
     // ARGUMENTS:
     //  pSendList - Optional list of voices this voice should send audio to.
-    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; virtual; stdcall; abstract;
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
 
     // NAME: IXAudio2Voice.SetEffectChain
     // DESCRIPTION: Replaces this voice's current effect chain with a new one.
     //
     // ARGUMENTS:
     //  pEffectChain - Structure describing the new effect chain to be used.
-    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; virtual; stdcall; abstract;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
 
     // NAME: IXAudio2Voice.EnableEffect
     // DESCRIPTION: Enables an effect in this voice's effect chain.
@@ -785,7 +788,7 @@ type
     //  EffectIndex - Index of an effect within this voice's effect chain.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function EnableEffect(EffectIndex: UINT32;
-                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.DisableEffect
     // DESCRIPTION: Disables an effect in this voice's effect chain.
@@ -794,7 +797,7 @@ type
     //  EffectIndex - Index of an effect within this voice's effect chain.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function DisableEffect(EffectIndex: UINT32;
-                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetEffectState
     // DESCRIPTION: Returns the running state of an effect.
@@ -803,7 +806,7 @@ type
     //  EffectIndex - Index of an effect within this voice's effect chain.
     //  pEnabled - Returns the enabled/disabled state of the given effect.
     procedure GetEffectState(EffectIndex: UINT32;
-                             out pEnabled: BOOL); virtual; stdcall; abstract;
+                             pEnabled: PBOOL);
 
     // NAME: IXAudio2Voice.SetEffectParameters
     // DESCRIPTION: Sets effect-specific parameters.
@@ -821,7 +824,7 @@ type
     function SetEffectParameters(EffectIndex: UINT32;
                                  pParameters: Pointer;
                                  ParametersByteSize: UINT32;
-                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetEffectParameters
     // DESCRIPTION: Obtains the current effect-specific parameters.
@@ -831,8 +834,8 @@ type
     //  pParameters - Returns the current values of the effect-specific parameters.
     //  ParametersByteSize - Size of the pParameters array in bytes.
     function GetEffectParameters(EffectIndex: UINT32;
-                                 out pParameters: Pointer;
-                                 out ParametersByteSize: UINT32): HRESULT; virtual; stdcall; abstract;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32): HRESULT;
 
     // NAME: IXAudio2Voice.SetFilterParameters
     // DESCRIPTION: Sets this voice's filter parameters.
@@ -841,14 +844,14 @@ type
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
-                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetFilterParameters
     // DESCRIPTION: Returns this voice's current filter parameters.
     //
     // ARGUMENTS:
     //  pParameters - Returns the filter parameters.
-    procedure GetFilterParameters(out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+    procedure GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
 
     // NAME: IXAudio2Voice.SetOutputFilterParameters
     // DESCRIPTION: Sets the filter parameters on one of this voice's sends.
@@ -857,9 +860,9 @@ type
     //  pDestinationVoice - Destination voice of the send whose filter parameters will be set.
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
-    function SetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                       pParameters: XAUDIO2_FILTER_PARAMETERS;
-                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+    function SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetOutputFilterParameters
     // DESCRIPTION: Returns the filter parameters from one of this voice's sends.
@@ -867,8 +870,8 @@ type
     // ARGUMENTS:
     //  pDestinationVoice - Destination voice of the send whose filter parameters will be read.
     //  pParameters - Returns the filter parameters.
-    procedure GetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                        out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+    procedure GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
 
     // NAME: IXAudio2Voice.SetVolume
     // DESCRIPTION: Sets this voice's overall volume level.
@@ -877,14 +880,14 @@ type
     //  Volume - New overall volume level to be used, as an amplitude factor.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetVolume(Volume: Single;
-                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetVolume
     // DESCRIPTION: Obtains this voice's current overall volume level.
     //
     // ARGUMENTS:
     //  pVolume: Returns the voice's current overall volume level.
-    procedure GetVolume(out pVolume: Single); virtual; stdcall; abstract;
+    procedure GetVolume(pVolume: PSingle);
 
     // NAME: IXAudio2Voice.SetChannelVolumes
     // DESCRIPTION: Sets this voice's per-channel volume levels.
@@ -895,7 +898,7 @@ type
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetChannelVolumes(Channels: UINT32;
                                pVolumes: PSingle;
-                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetChannelVolumes
     // DESCRIPTION: Returns this voice's current per-channel volume levels.
@@ -904,7 +907,7 @@ type
     //  Channels - Used to confirm the voice's channel count.
     //  pVolumes - Returns an array of the current per-channel volume levels.
     procedure GetChannelVolumes(Channels: UINT32;
-                                {out} pVolumes: PSingle); virtual; stdcall; abstract;
+                                pVolumes: PSingle);
 
     // NAME: IXAudio2Voice.SetOutputMatrix
     // DESCRIPTION: Sets the volume levels used to mix from each channel of this
@@ -934,11 +937,11 @@ type
     //  Note  The left and right input are fully mapped to the output left and right channels; 80 percent of the
     //  left and right input is mapped to the rear left and right channels.
     //  OperationSet - Used to identify this call as part of a deferred batch.
-    function SetOutputMatrix(pDestinationVoice: IXAudio2Voice;
+    function SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
                              SourceChannels: UINT32;
                              DestinationChannels: UINT32;
                              pLevelMatrix: PSingle;
-                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2Voice.GetOutputMatrix
     // DESCRIPTION: Obtains the volume levels used to send each channel of this
@@ -951,15 +954,15 @@ type
     //   (the number of channels produced by the last effect in the chain).
     //  DestinationChannels - Confirms the destination voice's input channels.
     //  pLevelMatrix - Array of send levels, as above.
-    procedure GetOutputMatrix(pDestinationVoice: IXAudio2Voice;
+    procedure GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
                               SourceChannels: UINT32;
                               DestinationChannels: UINT32;
-                              {out} pLevelMatrix: PSingle); virtual; stdcall; abstract;
+                              pLevelMatrix: PSingle);
 
     // NAME: IXAudio2Voice.DestroyVoice
     // DESCRIPTION: Destroys this voice, stopping it if necessary and removing
     //              it from the XAudio2 graph.
-    procedure DestroyVoice(); virtual; stdcall; abstract;
+    procedure DestroyVoice();
 
   end;
   {$EXTERNALSYM IXAudio2Voice}
@@ -978,7 +981,51 @@ type
   //               Note that this class contains virtual methods.
   //               The class must be defined as class(TInterfacedObject).
 
-  IXAudio2SourceVoice = class(IXAudio2Voice)
+  IXAudio2SourceVoice = record
+    lpVtbl: Pointer;
+    // Native IXAudio2Voice prefix, shared by every voice v-table.
+    procedure GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+    function EnableEffect(EffectIndex: UINT32;
+                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function DisableEffect(EffectIndex: UINT32;
+                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetEffectState(EffectIndex: UINT32;
+                             pEnabled: PBOOL);
+    function SetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function GetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32): HRESULT;
+    function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetVolume(Volume: Single;
+                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetVolume(pVolume: PSingle);
+    function SetChannelVolumes(Channels: UINT32;
+                               pVolumes: PSingle;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetChannelVolumes(Channels: UINT32;
+                                pVolumes: PSingle);
+    function SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                             SourceChannels: UINT32;
+                             DestinationChannels: UINT32;
+                             pLevelMatrix: PSingle;
+                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle);
+    procedure DestroyVoice();
 
     // Methods from IXAudio2Voice base interface
 
@@ -991,7 +1038,7 @@ type
     //  Flags - Flags controlling how the voice should be started.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function Start(Flags: UINT32 = 0;
-                   OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                   OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2SourceVoice.Stop
     // DESCRIPTION: Makes this voice stop consuming audio.
@@ -1001,7 +1048,7 @@ type
     //  OperationSet - Used to identify this call as part of a deferred batch.
     //
     function Stop(Flags: UINT32 = 0;
-                  OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                  OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2SourceVoice.SubmitSourceBuffer
     // DESCRIPTION: Adds a new audio buffer to this voice's input queue.
@@ -1011,19 +1058,19 @@ type
     //  pBufferWMA - Additional structure used only when submitting XWMA data.
     //
     function SubmitSourceBuffer(pBuffer: PXAUDIO2_BUFFER;
-                                pBufferWMA: PXAUDIO2_BUFFER_WMA = nil): HRESULT; virtual; stdcall; abstract;
+                                pBufferWMA: PXAUDIO2_BUFFER_WMA = nil): HRESULT;
 
     // NAME: IXAudio2SourceVoice.FlushSourceBuffers
     // DESCRIPTION: Removes all pending audio buffers from this voice's queue.
     //
-    function FlushSourceBuffers(): HRESULT; virtual; stdcall; abstract;
+    function FlushSourceBuffers(): HRESULT;
 
     // NAME: IXAudio2SourceVoice.Discontinuity
     // DESCRIPTION: Notifies the voice of an intentional break in the stream of
     //              audio buffers (e.g. the end of a sound), to prevent XAudio2
     //              from interpreting an empty buffer queue as a glitch.
     //
-    function Discontinuity(): HRESULT; virtual; stdcall; abstract;
+    function Discontinuity(): HRESULT;
 
     // NAME: IXAudio2SourceVoice.ExitLoop
     // DESCRIPTION: Breaks out of the current loop when its end is reached.
@@ -1031,7 +1078,7 @@ type
     // ARGUMENTS:
     //  OperationSet - Used to identify this call as part of a deferred batch.
     //
-    function ExitLoop(OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+    function ExitLoop(OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2SourceVoice.GetState
     // DESCRIPTION: Returns the number of buffers currently queued on this voice,
@@ -1042,8 +1089,8 @@ type
     //  pVoiceState - Returns the state information.
     //  Flags - Flags controlling what voice state is returned.
     //
-    procedure GetState(out pVoiceState: XAUDIO2_VOICE_STATE;
-                       Flags: UINT32 = 0); virtual; stdcall; abstract;
+    procedure GetState(pVoiceState: PXAUDIO2_VOICE_STATE;
+                       Flags: UINT32 = 0);
 
     // NAME: IXAudio2SourceVoice.SetFrequencyRatio
     // DESCRIPTION: Sets this voice's frequency adjustment, i.e. its pitch.
@@ -1053,7 +1100,7 @@ type
     //  OperationSet - Used to identify this call as part of a deferred batch.
     //
     function SetFrequencyRatio(Ratio: Single;
-                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
 
     // NAME: IXAudio2SourceVoice.GetFrequencyRatio
     // DESCRIPTION: Returns this voice's current frequency adjustment ratio.
@@ -1061,7 +1108,7 @@ type
     // ARGUMENTS:
     //  pRatio - Returns the frequency adjustment.
     //
-    procedure GetFrequencyRatio(out pRatio: Single); virtual; stdcall; abstract;
+    procedure GetFrequencyRatio(pRatio: PSingle);
 
     // NAME: IXAudio2SourceVoice.SetSourceSampleRate
     // DESCRIPTION: Reconfigures this voice to treat its source data as being
@@ -1071,7 +1118,7 @@ type
     // ARGUMENTS:
     //  UINT32 - The intended sample rate of further submitted source data.
     //
-    function SetSourceSampleRate(NewSourceSampleRate: UINT32): HRESULT; virtual; stdcall; abstract;
+    function SetSourceSampleRate(NewSourceSampleRate: UINT32): HRESULT;
 
   end;
   {$EXTERNALSYM IXAudio2SourceVoice}
@@ -1088,7 +1135,51 @@ type
   //               interface and NOT derived from IUnknown!
   //               Note that this class contains virtual methods.
 
-  IXAudio2SubmixVoice = class(IXAudio2Voice)
+  IXAudio2SubmixVoice = record
+    lpVtbl: Pointer;
+    // Native IXAudio2Voice prefix, shared by every voice v-table.
+    procedure GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+    function EnableEffect(EffectIndex: UINT32;
+                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function DisableEffect(EffectIndex: UINT32;
+                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetEffectState(EffectIndex: UINT32;
+                             pEnabled: PBOOL);
+    function SetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function GetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32): HRESULT;
+    function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetVolume(Volume: Single;
+                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetVolume(pVolume: PSingle);
+    function SetChannelVolumes(Channels: UINT32;
+                               pVolumes: PSingle;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetChannelVolumes(Channels: UINT32;
+                                pVolumes: PSingle);
+    function SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                             SourceChannels: UINT32;
+                             DestinationChannels: UINT32;
+                             pLevelMatrix: PSingle;
+                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle);
+    procedure DestroyVoice();
     // Methods from IXAudio2Voice base interface
 
     // Declare IXAudio2Voice Methods here
@@ -1110,7 +1201,51 @@ type
   //               interface and NOT derived from IUnknown!
   //               Note that this class contains virtual methods.
 
-  IXAudio2MasteringVoice = class(IXAudio2Voice)
+  IXAudio2MasteringVoice = record
+    lpVtbl: Pointer;
+    // Native IXAudio2Voice prefix, shared by every voice v-table.
+    procedure GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+    function EnableEffect(EffectIndex: UINT32;
+                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function DisableEffect(EffectIndex: UINT32;
+                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetEffectState(EffectIndex: UINT32;
+                             pEnabled: PBOOL);
+    function SetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    function GetEffectParameters(EffectIndex: UINT32;
+                                 pParameters: Pointer;
+                                 ParametersByteSize: UINT32): HRESULT;
+    function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
+    function SetVolume(Volume: Single;
+                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetVolume(pVolume: PSingle);
+    function SetChannelVolumes(Channels: UINT32;
+                               pVolumes: PSingle;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetChannelVolumes(Channels: UINT32;
+                                pVolumes: PSingle);
+    function SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                             SourceChannels: UINT32;
+                             DestinationChannels: UINT32;
+                             pLevelMatrix: PSingle;
+                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT;
+    procedure GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle);
+    procedure DestroyVoice();
     // Methods from IXAudio2Voice base interface
     // Declare_IXAudio2Voice_Methods();
 
@@ -1121,7 +1256,7 @@ type
     //  pChannelMask - returns the channel mask for this voice.  This corresponds
     //                 to the dwChannelMask member of WAVEFORMATEXTENSIBLE.
     //
-    function GetChannelMask(Out pChannelmask: DWORD): HRESULT; virtual; stdcall; abstract;
+    function GetChannelMask(pChannelmask: PDWORD): HRESULT;
 
   end;
   {$EXTERNALSYM IXAudio2MasteringVoice}
@@ -1145,17 +1280,18 @@ type
   *
   **************************************************************************)
 
-  IXAudio2EngineCallback = class(TInterfacedObject)
+  IXAudio2EngineCallback = record
+    lpVtbl: Pointer;
 
     // Called by XAudio2 just before an audio processing pass begins.
-    procedure OnProcessingPassStart(); virtual; stdcall; abstract;
+    procedure OnProcessingPassStart();
 
     // Called just after an audio processing pass ends.
-    procedure OnProcessingPassEnd(); virtual; stdcall; abstract;
+    procedure OnProcessingPassEnd();
 
     // Called in the event of a critical system error which requires XAudio2
     // to be closed down and restarted.  The error code is given in Error.
-    procedure OnCriticalError(Error: HRESULT); virtual; stdcall; abstract;
+    procedure OnCriticalError(Error: HRESULT);
 
   end;
   {$EXTERNALSYM IXAudio2EngineCallback}
@@ -1178,27 +1314,28 @@ type
   *
   **************************************************************************)
 
-  IXAudio2VoiceCallback = class(TInterfacedObject)
+  IXAudio2VoiceCallback = record
+    lpVtbl: Pointer;
 
     // Called just before this voice's processing pass begins.
-    procedure OnVoiceProcessingPassStart(BytesRequired: UINT32); virtual; stdcall; abstract;
+    procedure OnVoiceProcessingPassStart(BytesRequired: UINT32);
 
     // Called just after this voice's processing pass ends.
-    procedure OnVoiceProcessingPassEnd(); virtual; stdcall; abstract;
+    procedure OnVoiceProcessingPassEnd();
 
     // Called when this voice has just finished playing a buffer stream
     // (as marked with the XAUDIO2_END_OF_STREAM flag on the last buffer).
-    procedure OnStreamEnd(); virtual; stdcall; abstract;
+    procedure OnStreamEnd();
 
     // Called when this voice is about to start processing a new buffer.
-    procedure OnBufferStart(pBufferContext: Pointer); virtual; stdcall; abstract;
+    procedure OnBufferStart(pBufferContext: Pointer);
 
     // Called when this voice has just finished processing a buffer.
     // The buffer can now be reused or destroyed.
-    procedure OnBufferEnd(pBufferContext: Pointer); virtual; stdcall; abstract;
+    procedure OnBufferEnd(pBufferContext: Pointer);
 
     // Called when this voice has just reached the end position of a loop.
-    procedure OnLoopEnd(pBufferContext: Pointer); virtual; stdcall; abstract;
+    procedure OnLoopEnd(pBufferContext: Pointer);
 
     // Called in the event of a critical error during voice processing,
     // such as a failing xAPO or an error from the hardware XMA decoder.
@@ -1206,7 +1343,7 @@ type
     // the error.  The callback arguments report which buffer was being
     // processed when the error occurred, and its HRESULT code.
     procedure OnVoiceError(pBufferContext: Pointer;
-                           Error: HRESULT); virtual; stdcall; abstract;
+                           Error: HRESULT);
 
   end;
   {$EXTERNALSYM IXAudio2VoiceCallback}
@@ -1280,6 +1417,313 @@ type
   {$EXTERNALSYM XAudio2CutoffFrequencyToOnePoleCoefficient}
 
 
+type
+  PIXAudio2VoiceVTable = ^IXAudio2VoiceVTable;
+  IXAudio2VoiceVTable = record
+    GetVoiceDetails: procedure(This: Pointer;
+                               pVoiceDetails: PXAUDIO2_VOICE_DETAILS); stdcall;
+    SetOutputVoices: function(This: Pointer;
+                              pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; stdcall;
+    SetEffectChain: function(This: Pointer;
+                             pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; stdcall;
+    EnableEffect: function(This: Pointer;
+                           EffectIndex: UINT32;
+                           OperationSet: UINT32): HRESULT; stdcall;
+    DisableEffect: function(This: Pointer;
+                            EffectIndex: UINT32;
+                            OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectState: procedure(This: Pointer;
+                              EffectIndex: UINT32;
+                              pEnabled: PBOOL); stdcall;
+    SetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32): HRESULT; stdcall;
+    SetFilterParameters: function(This: Pointer;
+                                  pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetFilterParameters: procedure(This: Pointer;
+                                   pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetOutputFilterParameters: function(This: Pointer;
+                                        pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                        OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputFilterParameters: procedure(This: Pointer;
+                                         pDestinationVoice: PIXAudio2Voice;
+                                         pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetVolume: function(This: Pointer;
+                        Volume: Single;
+                        OperationSet: UINT32): HRESULT; stdcall;
+    GetVolume: procedure(This: Pointer;
+                         pVolume: PSingle); stdcall;
+    SetChannelVolumes: function(This: Pointer;
+                                Channels: UINT32;
+                                pVolumes: PSingle;
+                                OperationSet: UINT32): HRESULT; stdcall;
+    GetChannelVolumes: procedure(This: Pointer;
+                                 Channels: UINT32;
+                                 pVolumes: PSingle); stdcall;
+    SetOutputMatrix: function(This: Pointer;
+                              pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle;
+                              OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputMatrix: procedure(This: Pointer;
+                               pDestinationVoice: PIXAudio2Voice;
+                               SourceChannels: UINT32;
+                               DestinationChannels: UINT32;
+                               pLevelMatrix: PSingle); stdcall;
+    DestroyVoice: procedure(This: Pointer); stdcall;
+  end;
+
+  PIXAudio2SourceVoiceVTable = ^IXAudio2SourceVoiceVTable;
+  IXAudio2SourceVoiceVTable = record
+    GetVoiceDetails: procedure(This: Pointer;
+                               pVoiceDetails: PXAUDIO2_VOICE_DETAILS); stdcall;
+    SetOutputVoices: function(This: Pointer;
+                              pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; stdcall;
+    SetEffectChain: function(This: Pointer;
+                             pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; stdcall;
+    EnableEffect: function(This: Pointer;
+                           EffectIndex: UINT32;
+                           OperationSet: UINT32): HRESULT; stdcall;
+    DisableEffect: function(This: Pointer;
+                            EffectIndex: UINT32;
+                            OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectState: procedure(This: Pointer;
+                              EffectIndex: UINT32;
+                              pEnabled: PBOOL); stdcall;
+    SetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32): HRESULT; stdcall;
+    SetFilterParameters: function(This: Pointer;
+                                  pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetFilterParameters: procedure(This: Pointer;
+                                   pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetOutputFilterParameters: function(This: Pointer;
+                                        pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                        OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputFilterParameters: procedure(This: Pointer;
+                                         pDestinationVoice: PIXAudio2Voice;
+                                         pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetVolume: function(This: Pointer;
+                        Volume: Single;
+                        OperationSet: UINT32): HRESULT; stdcall;
+    GetVolume: procedure(This: Pointer;
+                         pVolume: PSingle); stdcall;
+    SetChannelVolumes: function(This: Pointer;
+                                Channels: UINT32;
+                                pVolumes: PSingle;
+                                OperationSet: UINT32): HRESULT; stdcall;
+    GetChannelVolumes: procedure(This: Pointer;
+                                 Channels: UINT32;
+                                 pVolumes: PSingle); stdcall;
+    SetOutputMatrix: function(This: Pointer;
+                              pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle;
+                              OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputMatrix: procedure(This: Pointer;
+                               pDestinationVoice: PIXAudio2Voice;
+                               SourceChannels: UINT32;
+                               DestinationChannels: UINT32;
+                               pLevelMatrix: PSingle); stdcall;
+    DestroyVoice: procedure(This: Pointer); stdcall;
+    Start: function(This: Pointer;
+                    Flags: UINT32;
+                    OperationSet: UINT32): HRESULT; stdcall;
+    Stop: function(This: Pointer;
+                   Flags: UINT32;
+                   OperationSet: UINT32): HRESULT; stdcall;
+    SubmitSourceBuffer: function(This: Pointer;
+                                 pBuffer: PXAUDIO2_BUFFER;
+                                 pBufferWMA: PXAUDIO2_BUFFER_WMA): HRESULT; stdcall;
+    FlushSourceBuffers: function(This: Pointer): HRESULT; stdcall;
+    Discontinuity: function(This: Pointer): HRESULT; stdcall;
+    ExitLoop: function(This: Pointer;
+                       OperationSet: UINT32): HRESULT; stdcall;
+    GetState: procedure(This: Pointer;
+                        pVoiceState: PXAUDIO2_VOICE_STATE;
+                        Flags: UINT32); stdcall;
+    SetFrequencyRatio: function(This: Pointer;
+                                Ratio: Single;
+                                OperationSet: UINT32): HRESULT; stdcall;
+    GetFrequencyRatio: procedure(This: Pointer;
+                                 pRatio: PSingle); stdcall;
+    SetSourceSampleRate: function(This: Pointer;
+                                  NewSourceSampleRate: UINT32): HRESULT; stdcall;
+  end;
+
+  PIXAudio2SubmixVoiceVTable = ^IXAudio2SubmixVoiceVTable;
+  IXAudio2SubmixVoiceVTable = record
+    GetVoiceDetails: procedure(This: Pointer;
+                               pVoiceDetails: PXAUDIO2_VOICE_DETAILS); stdcall;
+    SetOutputVoices: function(This: Pointer;
+                              pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; stdcall;
+    SetEffectChain: function(This: Pointer;
+                             pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; stdcall;
+    EnableEffect: function(This: Pointer;
+                           EffectIndex: UINT32;
+                           OperationSet: UINT32): HRESULT; stdcall;
+    DisableEffect: function(This: Pointer;
+                            EffectIndex: UINT32;
+                            OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectState: procedure(This: Pointer;
+                              EffectIndex: UINT32;
+                              pEnabled: PBOOL); stdcall;
+    SetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32): HRESULT; stdcall;
+    SetFilterParameters: function(This: Pointer;
+                                  pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetFilterParameters: procedure(This: Pointer;
+                                   pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetOutputFilterParameters: function(This: Pointer;
+                                        pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                        OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputFilterParameters: procedure(This: Pointer;
+                                         pDestinationVoice: PIXAudio2Voice;
+                                         pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetVolume: function(This: Pointer;
+                        Volume: Single;
+                        OperationSet: UINT32): HRESULT; stdcall;
+    GetVolume: procedure(This: Pointer;
+                         pVolume: PSingle); stdcall;
+    SetChannelVolumes: function(This: Pointer;
+                                Channels: UINT32;
+                                pVolumes: PSingle;
+                                OperationSet: UINT32): HRESULT; stdcall;
+    GetChannelVolumes: procedure(This: Pointer;
+                                 Channels: UINT32;
+                                 pVolumes: PSingle); stdcall;
+    SetOutputMatrix: function(This: Pointer;
+                              pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle;
+                              OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputMatrix: procedure(This: Pointer;
+                               pDestinationVoice: PIXAudio2Voice;
+                               SourceChannels: UINT32;
+                               DestinationChannels: UINT32;
+                               pLevelMatrix: PSingle); stdcall;
+    DestroyVoice: procedure(This: Pointer); stdcall;
+  end;
+
+  PIXAudio2MasteringVoiceVTable = ^IXAudio2MasteringVoiceVTable;
+  IXAudio2MasteringVoiceVTable = record
+    GetVoiceDetails: procedure(This: Pointer;
+                               pVoiceDetails: PXAUDIO2_VOICE_DETAILS); stdcall;
+    SetOutputVoices: function(This: Pointer;
+                              pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; stdcall;
+    SetEffectChain: function(This: Pointer;
+                             pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; stdcall;
+    EnableEffect: function(This: Pointer;
+                           EffectIndex: UINT32;
+                           OperationSet: UINT32): HRESULT; stdcall;
+    DisableEffect: function(This: Pointer;
+                            EffectIndex: UINT32;
+                            OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectState: procedure(This: Pointer;
+                              EffectIndex: UINT32;
+                              pEnabled: PBOOL); stdcall;
+    SetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetEffectParameters: function(This: Pointer;
+                                  EffectIndex: UINT32;
+                                  pParameters: Pointer;
+                                  ParametersByteSize: UINT32): HRESULT; stdcall;
+    SetFilterParameters: function(This: Pointer;
+                                  pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                  OperationSet: UINT32): HRESULT; stdcall;
+    GetFilterParameters: procedure(This: Pointer;
+                                   pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetOutputFilterParameters: function(This: Pointer;
+                                        pDestinationVoice: PIXAudio2Voice;
+                                        pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                        OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputFilterParameters: procedure(This: Pointer;
+                                         pDestinationVoice: PIXAudio2Voice;
+                                         pParameters: PXAUDIO2_FILTER_PARAMETERS); stdcall;
+    SetVolume: function(This: Pointer;
+                        Volume: Single;
+                        OperationSet: UINT32): HRESULT; stdcall;
+    GetVolume: procedure(This: Pointer;
+                         pVolume: PSingle); stdcall;
+    SetChannelVolumes: function(This: Pointer;
+                                Channels: UINT32;
+                                pVolumes: PSingle;
+                                OperationSet: UINT32): HRESULT; stdcall;
+    GetChannelVolumes: procedure(This: Pointer;
+                                 Channels: UINT32;
+                                 pVolumes: PSingle); stdcall;
+    SetOutputMatrix: function(This: Pointer;
+                              pDestinationVoice: PIXAudio2Voice;
+                              SourceChannels: UINT32;
+                              DestinationChannels: UINT32;
+                              pLevelMatrix: PSingle;
+                              OperationSet: UINT32): HRESULT; stdcall;
+    GetOutputMatrix: procedure(This: Pointer;
+                               pDestinationVoice: PIXAudio2Voice;
+                               SourceChannels: UINT32;
+                               DestinationChannels: UINT32;
+                               pLevelMatrix: PSingle); stdcall;
+    DestroyVoice: procedure(This: Pointer); stdcall;
+    GetChannelMask: function(This: Pointer;
+                             pChannelmask: PDWORD): HRESULT; stdcall;
+  end;
+
+  PIXAudio2EngineCallbackVTable = ^IXAudio2EngineCallbackVTable;
+  IXAudio2EngineCallbackVTable = record
+    OnProcessingPassStart: procedure(This: Pointer); stdcall;
+    OnProcessingPassEnd: procedure(This: Pointer); stdcall;
+    OnCriticalError: procedure(This: Pointer;
+                               Error: HRESULT); stdcall;
+  end;
+
+  PIXAudio2VoiceCallbackVTable = ^IXAudio2VoiceCallbackVTable;
+  IXAudio2VoiceCallbackVTable = record
+    OnVoiceProcessingPassStart: procedure(This: Pointer;
+                                          BytesRequired: UINT32); stdcall;
+    OnVoiceProcessingPassEnd: procedure(This: Pointer); stdcall;
+    OnStreamEnd: procedure(This: Pointer); stdcall;
+    OnBufferStart: procedure(This: Pointer;
+                             pBufferContext: Pointer); stdcall;
+    OnBufferEnd: procedure(This: Pointer;
+                           pBufferContext: Pointer); stdcall;
+    OnLoopEnd: procedure(This: Pointer;
+                         pBufferContext: Pointer); stdcall;
+    OnVoiceError: procedure(This: Pointer;
+                            pBufferContext: Pointer;
+                            Error: HRESULT); stdcall;
+  end;
+
   // Undo the #pragma pack(push, 1) directive at the top of this file
   //#pragma pack(pop)
   //set back to default
@@ -1313,6 +1757,589 @@ uses
 {$WARN SYMBOL_PLATFORM ON}
 
 
+
+procedure IXAudio2Voice.GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetVoiceDetails(@Self, pVoiceDetails);
+end;
+
+function IXAudio2Voice.SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetOutputVoices(@Self, pSendList);
+end;
+
+function IXAudio2Voice.SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetEffectChain(@Self, pEffectChain);
+end;
+
+function IXAudio2Voice.EnableEffect(EffectIndex: UINT32;
+                                    OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.EnableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+function IXAudio2Voice.DisableEffect(EffectIndex: UINT32;
+                                     OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.DisableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetEffectState(EffectIndex: UINT32;
+                                       pEnabled: PBOOL);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetEffectState(@Self, EffectIndex, pEnabled);
+end;
+
+function IXAudio2Voice.SetEffectParameters(EffectIndex: UINT32;
+                                           pParameters: Pointer;
+                                           ParametersByteSize: UINT32;
+                                           OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize, OperationSet);
+end;
+
+function IXAudio2Voice.GetEffectParameters(EffectIndex: UINT32;
+                                           pParameters: Pointer;
+                                           ParametersByteSize: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.GetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize);
+end;
+
+function IXAudio2Voice.SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                           OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetFilterParameters(@Self, pParameters, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetFilterParameters(@Self, pParameters);
+end;
+
+function IXAudio2Voice.SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                 pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetOutputFilterParameters(@Self, pDestinationVoice, pParameters, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                  pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetOutputFilterParameters(@Self, pDestinationVoice, pParameters);
+end;
+
+function IXAudio2Voice.SetVolume(Volume: Single;
+                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetVolume(@Self, Volume, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetVolume(pVolume: PSingle);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetVolume(@Self, pVolume);
+end;
+
+function IXAudio2Voice.SetChannelVolumes(Channels: UINT32;
+                                         pVolumes: PSingle;
+                                         OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetChannelVolumes(@Self, Channels, pVolumes, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetChannelVolumes(Channels: UINT32;
+                                          pVolumes: PSingle);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetChannelVolumes(@Self, Channels, pVolumes);
+end;
+
+function IXAudio2Voice.SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                       SourceChannels: UINT32;
+                                       DestinationChannels: UINT32;
+                                       pLevelMatrix: PSingle;
+                                       OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2VoiceVTable(lpVtbl)^.SetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix, OperationSet);
+end;
+
+procedure IXAudio2Voice.GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                        SourceChannels: UINT32;
+                                        DestinationChannels: UINT32;
+                                        pLevelMatrix: PSingle);
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.GetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix);
+end;
+
+procedure IXAudio2Voice.DestroyVoice();
+begin
+  PIXAudio2VoiceVTable(lpVtbl)^.DestroyVoice(@Self);
+end;
+
+procedure IXAudio2SourceVoice.GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetVoiceDetails(@Self, pVoiceDetails);
+end;
+
+function IXAudio2SourceVoice.SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetOutputVoices(@Self, pSendList);
+end;
+
+function IXAudio2SourceVoice.SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetEffectChain(@Self, pEffectChain);
+end;
+
+function IXAudio2SourceVoice.EnableEffect(EffectIndex: UINT32;
+                                          OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.EnableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+function IXAudio2SourceVoice.DisableEffect(EffectIndex: UINT32;
+                                           OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.DisableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetEffectState(EffectIndex: UINT32;
+                                             pEnabled: PBOOL);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetEffectState(@Self, EffectIndex, pEnabled);
+end;
+
+function IXAudio2SourceVoice.SetEffectParameters(EffectIndex: UINT32;
+                                                 pParameters: Pointer;
+                                                 ParametersByteSize: UINT32;
+                                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize, OperationSet);
+end;
+
+function IXAudio2SourceVoice.GetEffectParameters(EffectIndex: UINT32;
+                                                 pParameters: Pointer;
+                                                 ParametersByteSize: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.GetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize);
+end;
+
+function IXAudio2SourceVoice.SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetFilterParameters(@Self, pParameters, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetFilterParameters(@Self, pParameters);
+end;
+
+function IXAudio2SourceVoice.SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                       OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetOutputFilterParameters(@Self, pDestinationVoice, pParameters, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetOutputFilterParameters(@Self, pDestinationVoice, pParameters);
+end;
+
+function IXAudio2SourceVoice.SetVolume(Volume: Single;
+                                       OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetVolume(@Self, Volume, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetVolume(pVolume: PSingle);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetVolume(@Self, pVolume);
+end;
+
+function IXAudio2SourceVoice.SetChannelVolumes(Channels: UINT32;
+                                               pVolumes: PSingle;
+                                               OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetChannelVolumes(@Self, Channels, pVolumes, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetChannelVolumes(Channels: UINT32;
+                                                pVolumes: PSingle);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetChannelVolumes(@Self, Channels, pVolumes);
+end;
+
+function IXAudio2SourceVoice.SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                             SourceChannels: UINT32;
+                                             DestinationChannels: UINT32;
+                                             pLevelMatrix: PSingle;
+                                             OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                              SourceChannels: UINT32;
+                                              DestinationChannels: UINT32;
+                                              pLevelMatrix: PSingle);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix);
+end;
+
+procedure IXAudio2SourceVoice.DestroyVoice();
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.DestroyVoice(@Self);
+end;
+
+function IXAudio2SourceVoice.Start(Flags: UINT32;
+                                   OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.Start(@Self, Flags, OperationSet);
+end;
+
+function IXAudio2SourceVoice.Stop(Flags: UINT32;
+                                  OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.Stop(@Self, Flags, OperationSet);
+end;
+
+function IXAudio2SourceVoice.SubmitSourceBuffer(pBuffer: PXAUDIO2_BUFFER;
+                                                pBufferWMA: PXAUDIO2_BUFFER_WMA): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SubmitSourceBuffer(@Self, pBuffer, pBufferWMA);
+end;
+
+function IXAudio2SourceVoice.FlushSourceBuffers(): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.FlushSourceBuffers(@Self);
+end;
+
+function IXAudio2SourceVoice.Discontinuity(): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.Discontinuity(@Self);
+end;
+
+function IXAudio2SourceVoice.ExitLoop(OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.ExitLoop(@Self, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetState(pVoiceState: PXAUDIO2_VOICE_STATE;
+                                       Flags: UINT32);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetState(@Self, pVoiceState, Flags);
+end;
+
+function IXAudio2SourceVoice.SetFrequencyRatio(Ratio: Single;
+                                               OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetFrequencyRatio(@Self, Ratio, OperationSet);
+end;
+
+procedure IXAudio2SourceVoice.GetFrequencyRatio(pRatio: PSingle);
+begin
+  PIXAudio2SourceVoiceVTable(lpVtbl)^.GetFrequencyRatio(@Self, pRatio);
+end;
+
+function IXAudio2SourceVoice.SetSourceSampleRate(NewSourceSampleRate: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SourceVoiceVTable(lpVtbl)^.SetSourceSampleRate(@Self, NewSourceSampleRate);
+end;
+
+procedure IXAudio2SubmixVoice.GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetVoiceDetails(@Self, pVoiceDetails);
+end;
+
+function IXAudio2SubmixVoice.SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetOutputVoices(@Self, pSendList);
+end;
+
+function IXAudio2SubmixVoice.SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetEffectChain(@Self, pEffectChain);
+end;
+
+function IXAudio2SubmixVoice.EnableEffect(EffectIndex: UINT32;
+                                          OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.EnableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+function IXAudio2SubmixVoice.DisableEffect(EffectIndex: UINT32;
+                                           OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.DisableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetEffectState(EffectIndex: UINT32;
+                                             pEnabled: PBOOL);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetEffectState(@Self, EffectIndex, pEnabled);
+end;
+
+function IXAudio2SubmixVoice.SetEffectParameters(EffectIndex: UINT32;
+                                                 pParameters: Pointer;
+                                                 ParametersByteSize: UINT32;
+                                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize, OperationSet);
+end;
+
+function IXAudio2SubmixVoice.GetEffectParameters(EffectIndex: UINT32;
+                                                 pParameters: Pointer;
+                                                 ParametersByteSize: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize);
+end;
+
+function IXAudio2SubmixVoice.SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                 OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetFilterParameters(@Self, pParameters, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetFilterParameters(@Self, pParameters);
+end;
+
+function IXAudio2SubmixVoice.SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                       OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetOutputFilterParameters(@Self, pDestinationVoice, pParameters, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                        pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetOutputFilterParameters(@Self, pDestinationVoice, pParameters);
+end;
+
+function IXAudio2SubmixVoice.SetVolume(Volume: Single;
+                                       OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetVolume(@Self, Volume, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetVolume(pVolume: PSingle);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetVolume(@Self, pVolume);
+end;
+
+function IXAudio2SubmixVoice.SetChannelVolumes(Channels: UINT32;
+                                               pVolumes: PSingle;
+                                               OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetChannelVolumes(@Self, Channels, pVolumes, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetChannelVolumes(Channels: UINT32;
+                                                pVolumes: PSingle);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetChannelVolumes(@Self, Channels, pVolumes);
+end;
+
+function IXAudio2SubmixVoice.SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                             SourceChannels: UINT32;
+                                             DestinationChannels: UINT32;
+                                             pLevelMatrix: PSingle;
+                                             OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2SubmixVoiceVTable(lpVtbl)^.SetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix, OperationSet);
+end;
+
+procedure IXAudio2SubmixVoice.GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                              SourceChannels: UINT32;
+                                              DestinationChannels: UINT32;
+                                              pLevelMatrix: PSingle);
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.GetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix);
+end;
+
+procedure IXAudio2SubmixVoice.DestroyVoice();
+begin
+  PIXAudio2SubmixVoiceVTable(lpVtbl)^.DestroyVoice(@Self);
+end;
+
+procedure IXAudio2MasteringVoice.GetVoiceDetails(pVoiceDetails: PXAUDIO2_VOICE_DETAILS);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetVoiceDetails(@Self, pVoiceDetails);
+end;
+
+function IXAudio2MasteringVoice.SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetOutputVoices(@Self, pSendList);
+end;
+
+function IXAudio2MasteringVoice.SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetEffectChain(@Self, pEffectChain);
+end;
+
+function IXAudio2MasteringVoice.EnableEffect(EffectIndex: UINT32;
+                                             OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.EnableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+function IXAudio2MasteringVoice.DisableEffect(EffectIndex: UINT32;
+                                              OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.DisableEffect(@Self, EffectIndex, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetEffectState(EffectIndex: UINT32;
+                                                pEnabled: PBOOL);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetEffectState(@Self, EffectIndex, pEnabled);
+end;
+
+function IXAudio2MasteringVoice.SetEffectParameters(EffectIndex: UINT32;
+                                                    pParameters: Pointer;
+                                                    ParametersByteSize: UINT32;
+                                                    OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize, OperationSet);
+end;
+
+function IXAudio2MasteringVoice.GetEffectParameters(EffectIndex: UINT32;
+                                                    pParameters: Pointer;
+                                                    ParametersByteSize: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetEffectParameters(@Self, EffectIndex, pParameters, ParametersByteSize);
+end;
+
+function IXAudio2MasteringVoice.SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                    OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetFilterParameters(@Self, pParameters, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetFilterParameters(@Self, pParameters);
+end;
+
+function IXAudio2MasteringVoice.SetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                          pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                                          OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetOutputFilterParameters(@Self, pDestinationVoice, pParameters, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetOutputFilterParameters(pDestinationVoice: PIXAudio2Voice;
+                                                           pParameters: PXAUDIO2_FILTER_PARAMETERS);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetOutputFilterParameters(@Self, pDestinationVoice, pParameters);
+end;
+
+function IXAudio2MasteringVoice.SetVolume(Volume: Single;
+                                          OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetVolume(@Self, Volume, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetVolume(pVolume: PSingle);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetVolume(@Self, pVolume);
+end;
+
+function IXAudio2MasteringVoice.SetChannelVolumes(Channels: UINT32;
+                                                  pVolumes: PSingle;
+                                                  OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetChannelVolumes(@Self, Channels, pVolumes, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetChannelVolumes(Channels: UINT32;
+                                                   pVolumes: PSingle);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetChannelVolumes(@Self, Channels, pVolumes);
+end;
+
+function IXAudio2MasteringVoice.SetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                                SourceChannels: UINT32;
+                                                DestinationChannels: UINT32;
+                                                pLevelMatrix: PSingle;
+                                                OperationSet: UINT32): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.SetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix, OperationSet);
+end;
+
+procedure IXAudio2MasteringVoice.GetOutputMatrix(pDestinationVoice: PIXAudio2Voice;
+                                                 SourceChannels: UINT32;
+                                                 DestinationChannels: UINT32;
+                                                 pLevelMatrix: PSingle);
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetOutputMatrix(@Self, pDestinationVoice, SourceChannels, DestinationChannels, pLevelMatrix);
+end;
+
+procedure IXAudio2MasteringVoice.DestroyVoice();
+begin
+  PIXAudio2MasteringVoiceVTable(lpVtbl)^.DestroyVoice(@Self);
+end;
+
+function IXAudio2MasteringVoice.GetChannelMask(pChannelmask: PDWORD): HRESULT;
+begin
+  Result := PIXAudio2MasteringVoiceVTable(lpVtbl)^.GetChannelMask(@Self, pChannelmask);
+end;
+
+procedure IXAudio2EngineCallback.OnProcessingPassStart();
+begin
+  PIXAudio2EngineCallbackVTable(lpVtbl)^.OnProcessingPassStart(@Self);
+end;
+
+procedure IXAudio2EngineCallback.OnProcessingPassEnd();
+begin
+  PIXAudio2EngineCallbackVTable(lpVtbl)^.OnProcessingPassEnd(@Self);
+end;
+
+procedure IXAudio2EngineCallback.OnCriticalError(Error: HRESULT);
+begin
+  PIXAudio2EngineCallbackVTable(lpVtbl)^.OnCriticalError(@Self, Error);
+end;
+
+procedure IXAudio2VoiceCallback.OnVoiceProcessingPassStart(BytesRequired: UINT32);
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnVoiceProcessingPassStart(@Self, BytesRequired);
+end;
+
+procedure IXAudio2VoiceCallback.OnVoiceProcessingPassEnd();
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnVoiceProcessingPassEnd(@Self);
+end;
+
+procedure IXAudio2VoiceCallback.OnStreamEnd();
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnStreamEnd(@Self);
+end;
+
+procedure IXAudio2VoiceCallback.OnBufferStart(pBufferContext: Pointer);
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnBufferStart(@Self, pBufferContext);
+end;
+
+procedure IXAudio2VoiceCallback.OnBufferEnd(pBufferContext: Pointer);
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnBufferEnd(@Self, pBufferContext);
+end;
+
+procedure IXAudio2VoiceCallback.OnLoopEnd(pBufferContext: Pointer);
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnLoopEnd(@Self, pBufferContext);
+end;
+
+procedure IXAudio2VoiceCallback.OnVoiceError(pBufferContext: Pointer;
+                                             Error: HRESULT);
+begin
+  PIXAudio2VoiceCallbackVTable(lpVtbl)^.OnVoiceError(@Self, pBufferContext, Error);
+end;
 
 // Calculate the argument to SetVolume from a decibel value
 function XAudio2DecibelsToAmplitudeRatio(Decibels: Single): Single; inline;
@@ -1359,7 +2386,7 @@ end;
 function XAudio2CutoffFrequencyToRadians(CutoffFrequency: Single;
                                          SampleRate: UINT32): Single; inline;
 begin
-  if Round(CutoffFrequency * 6.0) >= SampleRate then
+  if UINT32(Trunc(CutoffFrequency * 6.0)) >= SampleRate then
     begin
       Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end
@@ -1383,7 +2410,7 @@ end;
 function XAudio2CutoffFrequencyToOnePoleCoefficient(CutoffFrequency: Single;
                                                     SampleRate: UINT32): Single; inline;
 begin
-  if (Round(CutoffFrequency) >= SampleRate) then
+  if (UINT32(Trunc(CutoffFrequency)) >= SampleRate) then
     begin
       Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end

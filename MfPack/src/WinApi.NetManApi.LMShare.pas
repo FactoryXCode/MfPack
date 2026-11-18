@@ -8,7 +8,7 @@
 // Release date: 05-05-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This module defines the API function prototypes and data structures
 //              for the following groups of NT API functions:
 //                NetShare
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -310,7 +310,9 @@ type
   {$EXTERNALSYM LPSHARE_INFO_1501}
 
   _SHARE_INFO_1503 = record
-    shi1503_sharefilter: TGUID;
+    case Integer of
+      0: (shi1503_sharefilter: TGUID);
+      1: (_Alignment: DWORD); // Preserve SDK GUID alignment with Delphi packed TGUID.
   end;
   {$EXTERNALSYM _SHARE_INFO_1503}
   SHARE_INFO_1503 = _SHARE_INFO_1503;
@@ -484,6 +486,9 @@ const
   SHI1005_FLAGS_DISABLE_DIRECTORY_HANDLE_LEASING = $400000;
   {$EXTERNALSYM SHI1005_FLAGS_DISABLE_DIRECTORY_HANDLE_LEASING}
 
+  SHI1005_FLAGS_DISABLE_CLIENT_METADATA_CACHING = $800000;
+  {$EXTERNALSYM SHI1005_FLAGS_DISABLE_CLIENT_METADATA_CACHING}
+
   SHI1005_VALID_FLAGS_SET    = CSC_MASK or
                                SHI1005_FLAGS_RESTRICT_EXCLUSIVE_OPENS or
                                SHI1005_FLAGS_FORCE_SHARED_DELETE or
@@ -499,7 +504,8 @@ const
                                SHI1005_FLAGS_RESERVED or
                                SHI1005_FLAGS_COMPRESS_DATA or
                                SHI1005_FLAGS_ISOLATED_TRANSPORT or
-                               SHI1005_FLAGS_DISABLE_DIRECTORY_HANDLE_LEASING;
+                               SHI1005_FLAGS_DISABLE_DIRECTORY_HANDLE_LEASING or
+                               SHI1005_FLAGS_DISABLE_CLIENT_METADATA_CACHING;
   {$EXTERNALSYM SHI1005_VALID_FLAGS_SET}
 
   //

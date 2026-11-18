@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Audio Compression Manager Public Header File.
 //              This header is used by Windows Multimedia.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -196,7 +196,7 @@ type
   //
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  MMRESULT = type UINT;
+  MMRESULT = WinApi.WinMM.MMSysCom.MMRESULT;
   {$EXTERNALSYM MMRESULT}
 
 const
@@ -538,7 +538,7 @@ type
 
   PACMDRIVERDETAILSA = ^tACMDRIVERDETAILSA;
   {$EXTERNALSYM PACMDRIVERDETAILSA}
-  tACMDRIVERDETAILSA = record
+  tACMDRIVERDETAILSA = packed record
     cbStruct: DWORD;                 // number of valid bytes in structure
     fccType: FOURCC;                 // compressor type 'audc'
     fccComp: FOURCC;                 // sub-type (not used; reserved)
@@ -563,7 +563,7 @@ type
 
   PACMDRIVERDETAILSW = ^tACMDRIVERDETAILSW;
   {$EXTERNALSYM PACMDRIVERDETAILSW}
-  tACMDRIVERDETAILSW = record
+  tACMDRIVERDETAILSW = packed record
     cbStruct: DWORD;                 // number of valid bytes in structure
     fccType: FOURCC;                 // compressor type 'audc'
     fccComp: FOURCC;                 // sub-type (not used; reserved)
@@ -712,7 +712,7 @@ type
 
   PACMFORMATTAGDETAILSA = ^tACMFORMATTAGDETAILSA;
   {$EXTERNALSYM PACMFORMATTAGDETAILSA}
-  tACMFORMATTAGDETAILSA = record
+  tACMFORMATTAGDETAILSA = packed record
     cbStruct: DWORD;
     dwFormatTagIndex: DWORD;
     dwFormatTag: DWORD;
@@ -728,7 +728,7 @@ type
 
   PACMFORMATTAGDETAILSW = ^tACMFORMATTAGDETAILSW;
   {$EXTERNALSYM PACMFORMATTAGDETAILSW}
-  tACMFORMATTAGDETAILSW = record
+  tACMFORMATTAGDETAILSW = packed record
     cbStruct: DWORD;
     dwFormatTagIndex: DWORD;
     dwFormatTag: DWORD;
@@ -846,7 +846,7 @@ const
 
 type
 
-  tACMFORMATDETAILSA = record
+  tACMFORMATDETAILSA = packed record
     cbStruct: DWORD;
     dwFormatIndex: DWORD;
     dwFormatTag: DWORD;
@@ -862,7 +862,7 @@ type
   LPACMFORMATDETAILSA = ^tACMFORMATDETAILSA;
   {$EXTERNALSYM LPACMFORMATDETAILSA}
 
-  tACMFORMATDETAILSW = record
+  tACMFORMATDETAILSW = packed record
     cbStruct: DWORD;
     dwFormatIndex: DWORD;
     dwFormatTag: DWORD;
@@ -1091,7 +1091,7 @@ type
 
 type
 
-  tACMFORMATCHOOSEA = record
+  tACMFORMATCHOOSEA = packed record
     cbStruct: DWORD;                     // sizeof(ACMFORMATCHOOSE)
     fdwStyle: DWORD;                     // chooser style flags
     hwndOwner: HWND;                     // caller's window handle
@@ -1116,7 +1116,7 @@ type
   LPACMFORMATCHOOSEA = ^tACMFORMATCHOOSEA;
   {$EXTERNALSYM LPACMFORMATCHOOSEA}
 
-  tACMFORMATCHOOSEW = record
+  tACMFORMATCHOOSEW = packed record
     cbStruct: DWORD;                     // sizeof(ACMFORMATCHOOSE)
     fdwStyle: DWORD;                     // chooser style flags
     hwndOwner: HWND;                     // caller's window handle
@@ -1214,7 +1214,7 @@ type
 
   PACMFILTERTAGDETAILSA = ^tACMFILTERTAGDETAILSA;
   {$EXTERNALSYM PACMFILTERTAGDETAILSA}
-  tACMFILTERTAGDETAILSA = record
+  tACMFILTERTAGDETAILSA = packed record
     cbStruct: DWORD;
     dwFilterTagIndex: DWORD;
     dwFilterTag: DWORD;
@@ -1228,7 +1228,7 @@ type
   LPACMFILTERTAGDETAILSA = ^tACMFILTERTAGDETAILSA;
   {$EXTERNALSYM LPACMFILTERTAGDETAILSA}
 
-  tACMFILTERTAGDETAILSW = record
+  tACMFILTERTAGDETAILSW = packed record
     cbStruct: DWORD;
     dwFilterTagIndex: DWORD;
     dwFilterTag: DWORD;
@@ -1353,7 +1353,7 @@ type
 
   PACMFILTERDETAILSA = ^tACMFILTERDETAILSA;
   {$EXTERNALSYM PACMFILTERDETAILSA}
-  tACMFILTERDETAILSA = record
+  tACMFILTERDETAILSA = packed record
     cbStruct: DWORD;
     dwFilterIndex: DWORD;
     dwFilterTag: DWORD;
@@ -1369,7 +1369,7 @@ type
 
   PACMFILTERDETAILSW = ^tACMFILTERDETAILSW;
   {$EXTERNALSYM PACMFILTERDETAILSW}
-  tACMFILTERDETAILSW = record
+  tACMFILTERDETAILSW = packed record
     cbStruct: DWORD;
     dwFilterIndex: DWORD;
     dwFilterTag: DWORD;
@@ -1537,7 +1537,7 @@ type
 
   PACMFILTERCHOOSEA = ^tACMFILTERCHOOSEA;
   {$EXTERNALSYM PACMFILTERCHOOSEA}
-  tACMFILTERCHOOSEA = record
+  tACMFILTERCHOOSEA = packed record
     cbStruct: DWORD;                     // sizeof(ACMFILTERCHOOSE)
     fdwStyle: DWORD;                     // chooser style flags
     hwndOwner: HWND;                     // caller's window handle
@@ -1562,7 +1562,7 @@ type
 
   PACMFILTERCHOOSEW = ^tACMFILTERCHOOSEW;
   {$EXTERNALSYM PACMFILTERCHOOSEW}
-  tACMFILTERCHOOSEW = record
+  tACMFILTERCHOOSEW = packed record
     cbStruct: DWORD;                     // sizeof(ACMFILTERCHOOSE)
     fdwStyle: DWORD;                     // chooser style flags
     hwndOwner: HWND;                     // caller's window handle
@@ -1661,7 +1661,7 @@ const
 
 type
 
-  tACMSTREAMHEADER = record
+  tACMSTREAMHEADER = packed record
     cbStruct: DWORD;                                         // sizeof(ACMSTREAMHEADER)
     fdwStatus: DWORD;                                        // ACMSTREAMHEADER_STATUSF_*
     dwUser: DWORD_PTR;                                       // user instance data for hdr

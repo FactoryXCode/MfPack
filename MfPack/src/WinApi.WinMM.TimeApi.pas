@@ -10,7 +10,7 @@
 // Release date: 17-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: ApiSet Contract for api-ms-win-mm-time-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -118,14 +118,14 @@ type
 
   { timer function prototypes }
 
-  function timeGetSystemTime({_Out_} pmmt: LPMMTIME;
+  function timeGetSystemTime(pmmt: LPMMTIME;
                              cbmmt: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM timeGetSystemTime}
 
-  function timeGetTime(): MMRESULT; stdcall;
+  function timeGetTime(): DWORD; stdcall;
   {$EXTERNALSYM timeGetTime}
 
-  function timeGetDevCaps({_Out_} ptc: LPTIMECAPS;
+  function timeGetDevCaps(ptc: LPTIMECAPS;
                           cbtc: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM timeGetDevCaps}
 

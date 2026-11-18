@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: D3D12 Shader Types and APIs.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,8 +73,7 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   {DirectX}
-  WinApi.DirectX.D3DCommon,
-  WinApi.DirectX.D3D12;
+  WinApi.DirectX.D3DCommon;
 
   {$MINENUMSIZE 4}
 
@@ -440,39 +439,39 @@ type
   //////////////////////////////////////////////////////////////////////////////
 
   // forward declarations
-  ID3D12ShaderReflectionType = interface;
+  ID3D12ShaderReflectionType = ^TNativeID3D12ShaderReflectionType;
   PID3D12ShaderReflectionType = ^ID3D12ShaderReflectionType;
-  LPD3D12SHADERREFLECTIONTYPE = PID3D12ShaderReflectionType;
+  LPD3D12SHADERREFLECTIONTYPE = ID3D12ShaderReflectionType;
   {$EXTERNALSYM LPD3D12SHADERREFLECTIONTYPE}
 
-  ID3D12ShaderReflectionVariable = interface;
+  ID3D12ShaderReflectionVariable = ^TNativeID3D12ShaderReflectionVariable;
   PID3D12ShaderReflectionVariable = ^ID3D12ShaderReflectionVariable;
-  LPD3D12SHADERREFLECTIONVARIABLE = PID3D12ShaderReflectionVariable;
+  LPD3D12SHADERREFLECTIONVARIABLE = ID3D12ShaderReflectionVariable;
   {$EXTERNALSYM LPD3D12SHADERREFLECTIONVARIABLE}
 
-  ID3D12ShaderReflectionConstantBuffer = interface;
+  ID3D12ShaderReflectionConstantBuffer = ^TNativeID3D12ShaderReflectionConstantBuffer;
   PID3D12ShaderReflectionConstantBuffer = ^ID3D12ShaderReflectionConstantBuffer;
-  LPD3D12SHADERREFLECTIONCONSTANTBUFFER = PID3D12ShaderReflectionConstantBuffer;
+  LPD3D12SHADERREFLECTIONCONSTANTBUFFER = ID3D12ShaderReflectionConstantBuffer;
   {$EXTERNALSYM LPD3D12SHADERREFLECTIONCONSTANTBUFFER}
 
   ID3D12ShaderReflection = interface;
   PID3D12ShaderReflection = ^ID3D12ShaderReflection;
-  LPD3D12SHADERREFLECTION = PID3D12ShaderReflection;
+  LPD3D12SHADERREFLECTION = ID3D12ShaderReflection;
   {$EXTERNALSYM LPD3D12SHADERREFLECTION}
 
   ID3D12LibraryReflection = interface;
   PID3D12LibraryReflection = ^ID3D12LibraryReflection;
-  LPD3D12LIBRARYREFLECTION = PID3D12LibraryReflection;
+  LPD3D12LIBRARYREFLECTION = ID3D12LibraryReflection;
   {$EXTERNALSYM LPD3D12LIBRARYREFLECTION}
 
-  ID3D12FunctionReflection = interface;
+  ID3D12FunctionReflection = ^TNativeID3D12FunctionReflection;
   PID3D12FunctionReflection = ^ID3D12FunctionReflection;
-  LPD3D12FUNCTIONREFLECTION = PID3D12FunctionReflection;
+  LPD3D12FUNCTIONREFLECTION = ID3D12FunctionReflection;
   {$EXTERNALSYM LPD3D12FUNCTIONREFLECTION}
 
-  ID3D12FunctionParameterReflection = interface;
+  ID3D12FunctionParameterReflection = ^TNativeID3D12FunctionParameterReflection;
   PID3D12FunctionParameterReflection = ^ID3D12FunctionParameterReflection;
-  LPD3D12FUNCTIONPARAMETERREFLECTION = PID3D12FunctionParameterReflection;
+  LPD3D12FUNCTIONPARAMETERREFLECTION = ID3D12FunctionParameterReflection;
   {$EXTERNALSYM LPD3D12FUNCTIONPARAMETERREFLECTION}
 
 
@@ -483,33 +482,22 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ShaderReflectionType);'}
   {$EXTERNALSYM ID3D12ShaderReflectionType}
-  ID3D12ShaderReflectionType = Interface
-    ['{E913C351-783D-48CA-A1D1-4F306284AD56}']
-
+  TNativeID3D12ShaderReflectionType = record
+  private FVTable:Pointer;
+  public
     function GetDesc(out pDesc: D3D12_SHADER_TYPE_DESC): HRESULT; stdcall;
-
     function GetMemberTypeByIndex(Index: UINT): ID3D12ShaderReflectionType; stdcall;
-
     function GetMemberTypeByName(Name: LPCSTR): ID3D12ShaderReflectionType; stdcall;
-
     function GetMemberTypeName(Index: UINT): LPCSTR; stdcall;
-
     function IsEqual(pType: ID3D12ShaderReflectionType): HRESULT; stdcall;
-
     function GetSubType(): ID3D12ShaderReflectionType; stdcall;
-
     function GetBaseClass(): ID3D12ShaderReflectionType; stdcall;
-
     function GetNumInterfaces(): UINT; stdcall;
-
     function GetInterfaceByIndex(uIndex: UINT): ID3D12ShaderReflectionType; stdcall;
-
     function IsOfType(pType: ID3D12ShaderReflectionType): HRESULT; stdcall;
-
     function ImplementsInterface(pBase: ID3D12ShaderReflectionType): HRESULT; stdcall;
-
   end;
-  IID_ID3D12ShaderReflectionType = ID3D12ShaderReflectionType;
+  // IID_ID3D12ShaderReflectionType is a GUID constant below.
   {$EXTERNALSYM IID_ID3D12ShaderReflectionType}
 
 
@@ -520,19 +508,15 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ShaderReflectionVariable);'}
   {$EXTERNALSYM ID3D12ShaderReflectionVariable}
-  ID3D12ShaderReflectionVariable = Interface
-    ['{8337A8A6-A216-444A-B2F4-314733A73AEA}']
-
+  TNativeID3D12ShaderReflectionVariable = record
+  private FVTable:Pointer;
+  public
     function GetDesc(out pDesc: D3D12_SHADER_VARIABLE_DESC): HRESULT; stdcall;
-
-    function GetType: ID3D12ShaderReflectionType; stdcall;
-
-    function GetBuffer: ID3D12ShaderReflectionConstantBuffer; stdcall;
-
+    function GetType(): ID3D12ShaderReflectionType; stdcall;
+    function GetBuffer(): ID3D12ShaderReflectionConstantBuffer; stdcall;
     function GetInterfaceSlot(uArrayIndex: UINT): UINT; stdcall;
-
   end;
-  IID_ID3D12ShaderReflectionVariable = ID3D12ShaderReflectionVariable;
+  // IID_ID3D12ShaderReflectionVariable is a GUID constant below.
   {$EXTERNALSYM IID_ID3D12ShaderReflectionVariable}
 
 
@@ -541,17 +525,14 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ShaderReflectionConstantBuffer);'}
   {$EXTERNALSYM ID3D12ShaderReflectionConstantBuffer}
-  ID3D12ShaderReflectionConstantBuffer = Interface
-    ['{C59598B4-48B3-4869-B9B1-B1618B14A8B7}']
-
-    function GetDesc(pDesc: PD3D12_SHADER_BUFFER_DESC): HRESULT; stdcall;
-
+  TNativeID3D12ShaderReflectionConstantBuffer = record
+  private FVTable:Pointer;
+  public
+    function GetDesc(out pDesc: D3D12_SHADER_BUFFER_DESC): HRESULT; stdcall;
     function GetVariableByIndex(Index: UINT): ID3D12ShaderReflectionVariable; stdcall;
-
     function GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
-
   end;
-  IID_ID3D12ShaderReflectionConstantBuffer = ID3D12ShaderReflectionConstantBuffer;
+  // IID_ID3D12ShaderReflectionConstantBuffer is a GUID constant below.
   {$EXTERNALSYM IID_ID3D12ShaderReflectionConstantBuffer}
 
 
@@ -565,56 +546,28 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ShaderReflection);'}
   {$EXTERNALSYM ID3D12ShaderReflection}
-  ID3D12ShaderReflection = Interface(IUnknown)
-    ['{5A58797D-A72C-478D-8BA2-EFC6B0EFE88E}']
-
-    function GetDesc(out pDesc: D3D12_SHADER_DESC ): HRESULT; stdcall;
-
-    function GetConstantBufferByIndex(Index: UINT): ID3D12ShaderReflectionConstantBuffer; stdcall;
-
-    function GetConstantBufferByName(Name: LPCSTR): ID3D12ShaderReflectionConstantBuffer; stdcall;
-
-    function GetResourceBindingDesc(ResourceIndex: UINT;
-                                    out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
-
-    function GetInputParameterDesc(ParameterIndex: UINT;
-                                   out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
-
-    function GetOutputParameterDesc(ParameterIndex: UINT;
-                                    out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
-
-    function GetPatchConstantParameterDesc(ParameterIndex: UINT;
-                                           out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
-
-    function GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
-
-    function GetResourceBindingDescByName(Name: LPCSTR;
-                                          out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
-
-    function GetMovInstructionCount(): UINT; stdcall;
-
-    function GetMovcInstructionCount(): UINT; stdcall;
-
-    function GetConversionInstructionCount(): UINT; stdcall;
-
-    function GetBitwiseInstructionCount(): UINT; stdcall;
-
-    function GetGSInputPrimitive(): D3D_PRIMITIVE; stdcall;
-
-    function IsSampleFrequencyShader(): BOOL; stdcall;
-
-    function GetNumInterfaceSlots(): UINT; stdcall;
-
-    function GetMinFeatureLevel(out pLevel: D3D_FEATURE_LEVEL): HRESULT; stdcall;
-
-    function GetThreadGroupSize(pSizeX: UINT;  {Can be 0}
-                                pSizeY: UINT;  {Can be 0}
-                                pSizeZ: UINT {Can be 0}): UINT; stdcall;
-
-    function GetRequiresFlags(): UINT64; stdcall;
-
-
-  end;
+  ID3D12ShaderReflection=interface(IUnknown)
+['{5A58797D-A72C-478D-8BA2-EFC6B0EFE88E}']
+function GetDesc(out pDesc: D3D12_SHADER_DESC): HRESULT; stdcall;
+function GetConstantBufferByIndex(Index: UINT): ID3D12ShaderReflectionConstantBuffer; stdcall;
+function GetConstantBufferByName(Name: LPCSTR): ID3D12ShaderReflectionConstantBuffer; stdcall;
+function GetResourceBindingDesc(ResourceIndex: UINT; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
+function GetInputParameterDesc(ParameterIndex: UINT; out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
+function GetOutputParameterDesc(ParameterIndex: UINT; out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
+function GetPatchConstantParameterDesc(ParameterIndex: UINT; out pDesc: D3D12_SIGNATURE_PARAMETER_DESC): HRESULT; stdcall;
+function GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
+function GetResourceBindingDescByName(Name: LPCSTR; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
+function GetMovInstructionCount(): UINT; stdcall;
+function GetMovcInstructionCount(): UINT; stdcall;
+function GetConversionInstructionCount(): UINT; stdcall;
+function GetBitwiseInstructionCount(): UINT; stdcall;
+function GetGSInputPrimitive(): D3D_PRIMITIVE; stdcall;
+function IsSampleFrequencyShader(): BOOL; stdcall;
+function GetNumInterfaceSlots(): UINT; stdcall;
+function GetMinFeatureLevel(out pLevel: D3D_FEATURE_LEVEL): HRESULT; stdcall;
+function GetThreadGroupSize(pSizeX: PUINT; pSizeY: PUINT; pSizeZ: PUINT): UINT; stdcall;
+function GetRequiresFlags(): UINT64; stdcall;
+end;
   IID_ID3D12ShaderReflection = ID3D12ShaderReflection;
   {$EXTERNALSYM IID_ID3D12ShaderReflection}
 
@@ -624,18 +577,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12LibraryReflection);'}
   {$EXTERNALSYM ID3D12LibraryReflection}
-  ID3D12LibraryReflection = Interface(IUnknown)
-    ['{8E349D19-54DB-4A56-9DC9-119D87BDB804}']
-
-    //STDMETHOD(QueryInterface)(THIS_ _In_ REFIID iid, _Out_ LPVOID * ppv) PURE;
-    //STDMETHOD_(ULONG, AddRef)(THIS) PURE;
-    //STDMETHOD_(ULONG, Release)(THIS) PURE;
-
-    function GetDesc(out pDesc: D3D12_LIBRARY_DESC): HRESULT; stdcall;
-
-    function GetFunctionByIndex(FunctionIndex: INT32): ID3D12FunctionReflection; stdcall;
-
-  end;
+  ID3D12LibraryReflection=interface(IUnknown)
+['{8E349D19-54DB-4A56-9DC9-119D87BDB804}']
+function GetDesc(out pDesc: D3D12_LIBRARY_DESC): HRESULT; stdcall;
+function GetFunctionByIndex(FunctionIndex: INT): ID3D12FunctionReflection; stdcall;
+end;
   IID_ID3D12LibraryReflection = ID3D12LibraryReflection;
   {$EXTERNALSYM IID_ID3D12LibraryReflection}
 
@@ -645,29 +591,18 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12FunctionReflection);'}
   {$EXTERNALSYM ID3D12FunctionReflection}
-  ID3D12FunctionReflection = Interface
-    ['{1108795C-2772-4BA9-B2A8-D464DC7E2799}']
-
+  TNativeID3D12FunctionReflection = record
+  private FVTable:Pointer;
+  public
     function GetDesc(out pDesc: D3D12_FUNCTION_DESC): HRESULT; stdcall;
-
     function GetConstantBufferByIndex(BufferIndex: UINT): ID3D12ShaderReflectionConstantBuffer; stdcall;
-
     function GetConstantBufferByName(Name: LPCSTR): ID3D12ShaderReflectionConstantBuffer; stdcall;
-
-    function GetResourceBindingDesc(ResourceIndex: UINT;
-                                    out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
-
+    function GetResourceBindingDesc(ResourceIndex: UINT; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
     function GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
-
-    function GetResourceBindingDescByName(Name: LPCSTR;
-                                          out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
-
-    // Use D3D_RETURN_PARAMETER_INDEX to get description of the return value.
-    function GetFunctionParameter(ParameterIndex: INT32): ID3D12FunctionParameterReflection; stdcall;
-
-
+    function GetResourceBindingDescByName(Name: LPCSTR; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
+    function GetFunctionParameter(ParameterIndex: INT): ID3D12FunctionParameterReflection; stdcall;
   end;
-  IID_ID3D12FunctionReflection = ID3D12FunctionReflection;
+  // IID_ID3D12FunctionReflection is a GUID constant below.
   {$EXTERNALSYM IID_ID3D12FunctionReflection}
 
 
@@ -676,13 +611,12 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12FunctionParameterReflection);'}
   {$EXTERNALSYM ID3D12FunctionParameterReflection}
-  ID3D12FunctionParameterReflection = Interface
-    ['{EC25F42D-7006-4F2B-B33E-02CC3375733F}']
-
+  TNativeID3D12FunctionParameterReflection = record
+  private FVTable:Pointer;
+  public
     function GetDesc(out pDesc: D3D12_PARAMETER_DESC): HRESULT; stdcall;
-
   end;
-  IID_ID3D12FunctionParameterReflection = ID3D12FunctionParameterReflection;
+  // IID_ID3D12FunctionParameterReflection is a GUID constant below.
   {$EXTERNALSYM IID_ID3D12FunctionParameterReflection}
 
 
@@ -690,7 +624,176 @@ type
 
   // End of Additional Prototypes
 
+
+const
+  IID_ID3D12ShaderReflectionType:TGUID='{E913C351-783D-48CA-A1D1-4F306284AD56}';
+  IID_ID3D12ShaderReflectionVariable:TGUID='{8337A8A6-A216-444A-B2F4-314733A73AEA}';
+  IID_ID3D12ShaderReflectionConstantBuffer:TGUID='{C59598B4-48B3-4869-B9B1-B1618B14A8B7}';
+  IID_ID3D12FunctionReflection:TGUID='{1108795C-2772-4BA9-B2A8-D464DC7E2799}';
+  IID_ID3D12FunctionParameterReflection:TGUID='{EC25F42D-7006-4F2B-B33E-02CC3375733F}';
+
+const
+  D3D_SHADER_REQUIRES_ATOMIC_INT64_ON_TYPED_RESOURCE = 4194304;
+
 implementation
+type TShader12VTable=array[0..63]of Pointer;PShader12VTable=^TShader12VTable;
+
+function TNativeID3D12ShaderReflectionType.GetDesc(out pDesc: D3D12_SHADER_TYPE_DESC): HRESULT;
+type TCall=function(This:Pointer; out pDesc: D3D12_SHADER_TYPE_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[0])(@Self, pDesc);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetMemberTypeByIndex(Index: UINT): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer; Index: UINT): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[1])(@Self, Index);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetMemberTypeByName(Name: LPCSTR): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer; Name: LPCSTR): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[2])(@Self, Name);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetMemberTypeName(Index: UINT): LPCSTR;
+type TCall=function(This:Pointer; Index: UINT): LPCSTR; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[3])(@Self, Index);
+end;
+
+function TNativeID3D12ShaderReflectionType.IsEqual(pType: ID3D12ShaderReflectionType): HRESULT;
+type TCall=function(This:Pointer; pType: ID3D12ShaderReflectionType): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[4])(@Self, pType);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetSubType(): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[5])(@Self);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetBaseClass(): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[6])(@Self);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetNumInterfaces(): UINT;
+type TCall=function(This:Pointer): UINT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[7])(@Self);
+end;
+
+function TNativeID3D12ShaderReflectionType.GetInterfaceByIndex(uIndex: UINT): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer; uIndex: UINT): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[8])(@Self, uIndex);
+end;
+
+function TNativeID3D12ShaderReflectionType.IsOfType(pType: ID3D12ShaderReflectionType): HRESULT;
+type TCall=function(This:Pointer; pType: ID3D12ShaderReflectionType): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[9])(@Self, pType);
+end;
+
+function TNativeID3D12ShaderReflectionType.ImplementsInterface(pBase: ID3D12ShaderReflectionType): HRESULT;
+type TCall=function(This:Pointer; pBase: ID3D12ShaderReflectionType): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[10])(@Self, pBase);
+end;
+
+function TNativeID3D12ShaderReflectionVariable.GetDesc(out pDesc: D3D12_SHADER_VARIABLE_DESC): HRESULT;
+type TCall=function(This:Pointer; out pDesc: D3D12_SHADER_VARIABLE_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[0])(@Self, pDesc);
+end;
+
+function TNativeID3D12ShaderReflectionVariable.GetType(): ID3D12ShaderReflectionType;
+type TCall=function(This:Pointer): ID3D12ShaderReflectionType; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[1])(@Self);
+end;
+
+function TNativeID3D12ShaderReflectionVariable.GetBuffer(): ID3D12ShaderReflectionConstantBuffer;
+type TCall=function(This:Pointer): ID3D12ShaderReflectionConstantBuffer; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[2])(@Self);
+end;
+
+function TNativeID3D12ShaderReflectionVariable.GetInterfaceSlot(uArrayIndex: UINT): UINT;
+type TCall=function(This:Pointer; uArrayIndex: UINT): UINT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[3])(@Self, uArrayIndex);
+end;
+
+function TNativeID3D12ShaderReflectionConstantBuffer.GetDesc(out pDesc: D3D12_SHADER_BUFFER_DESC): HRESULT;
+type TCall=function(This:Pointer; out pDesc: D3D12_SHADER_BUFFER_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[0])(@Self, pDesc);
+end;
+
+function TNativeID3D12ShaderReflectionConstantBuffer.GetVariableByIndex(Index: UINT): ID3D12ShaderReflectionVariable;
+type TCall=function(This:Pointer; Index: UINT): ID3D12ShaderReflectionVariable; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[1])(@Self, Index);
+end;
+
+function TNativeID3D12ShaderReflectionConstantBuffer.GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable;
+type TCall=function(This:Pointer; Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[2])(@Self, Name);
+end;
+
+function TNativeID3D12FunctionReflection.GetDesc(out pDesc: D3D12_FUNCTION_DESC): HRESULT;
+type TCall=function(This:Pointer; out pDesc: D3D12_FUNCTION_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[0])(@Self, pDesc);
+end;
+
+function TNativeID3D12FunctionReflection.GetConstantBufferByIndex(BufferIndex: UINT): ID3D12ShaderReflectionConstantBuffer;
+type TCall=function(This:Pointer; BufferIndex: UINT): ID3D12ShaderReflectionConstantBuffer; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[1])(@Self, BufferIndex);
+end;
+
+function TNativeID3D12FunctionReflection.GetConstantBufferByName(Name: LPCSTR): ID3D12ShaderReflectionConstantBuffer;
+type TCall=function(This:Pointer; Name: LPCSTR): ID3D12ShaderReflectionConstantBuffer; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[2])(@Self, Name);
+end;
+
+function TNativeID3D12FunctionReflection.GetResourceBindingDesc(ResourceIndex: UINT; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT;
+type TCall=function(This:Pointer; ResourceIndex: UINT; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[3])(@Self, ResourceIndex, pDesc);
+end;
+
+function TNativeID3D12FunctionReflection.GetVariableByName(Name: LPCSTR): ID3D12ShaderReflectionVariable;
+type TCall=function(This:Pointer; Name: LPCSTR): ID3D12ShaderReflectionVariable; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[4])(@Self, Name);
+end;
+
+function TNativeID3D12FunctionReflection.GetResourceBindingDescByName(Name: LPCSTR; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT;
+type TCall=function(This:Pointer; Name: LPCSTR; out pDesc: D3D12_SHADER_INPUT_BIND_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[5])(@Self, Name, pDesc);
+end;
+
+function TNativeID3D12FunctionReflection.GetFunctionParameter(ParameterIndex: INT): ID3D12FunctionParameterReflection;
+type TCall=function(This:Pointer; ParameterIndex: INT): ID3D12FunctionParameterReflection; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[6])(@Self, ParameterIndex);
+end;
+
+function TNativeID3D12FunctionParameterReflection.GetDesc(out pDesc: D3D12_PARAMETER_DESC): HRESULT;
+type TCall=function(This:Pointer; out pDesc: D3D12_PARAMETER_DESC): HRESULT; stdcall;
+begin
+ Result:=TCall(PShader12VTable(FVTable)^[0])(@Self, pDesc);
+end;
+
 
   // Implement Additional Prototypes here.
 

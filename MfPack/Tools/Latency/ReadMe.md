@@ -2,7 +2,7 @@
 
 &#x20;
 
-Version: 4.0.0
+Version: 4.1.0
 
 &#x20;
 
@@ -30,24 +30,21 @@ NOTES:
 * This release is updated for compiler version 17 up to 35.
 * SDK version 10.0.28000.2705 (Windows 11)
 * Requires Windows 10 22H2 or later.
-* Minimum supported MfPack version: 3.1.8
-
-
-
-Project: Media Foundation - MFPack - Tools
+* Minimum supported MfPack version: 4.1.0
 
 &#x20;
-Project location: https://github.com/FactoryXCode/MfPack  
-https://sourceforge.net/projects/MFPack
+
+Project: MFPack - Tools
+
+&#x20;
+
+Project location: https://github.com/FactoryXCode/MfPack 
 
 &#x20;
 
 First release date: 02/09/2024  
-Final release date: 05/05/2026
+Final release date: 17/11/2026
 
 &#x20;
 
-Copyright Â© FactoryX. All rights reserved.
-
-
-
+Copyright © FactoryX. All rights reserved.

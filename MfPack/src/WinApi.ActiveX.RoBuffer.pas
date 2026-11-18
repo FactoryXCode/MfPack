@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DXGI
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 03-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -67,13 +67,12 @@ unit WinApi.ActiveX.RoBuffer;
 interface
 
 uses
-  WinApi.ActiveX.ObjIdlbase,
   WinApi.ActiveX.ObjIdl;
 
 
   // Provides a standard IBuffer marshaler to implement the semantics
   // associated with the IBuffer interface when it is marshaled.
-  function RoGetBufferMarshaler(bufferMarshaler: IMarshal): HRESULT; stdcall;
+  function RoGetBufferMarshaler(out bufferMarshaler: IMarshal): HRESULT; stdcall;
   {$EXTERNALSYM RoGetBufferMarshaler}
 
 type

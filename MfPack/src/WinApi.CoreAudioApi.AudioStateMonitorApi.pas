@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Audio Session Types
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 28-09-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Provides methods that allow desktop apps and games to determine
 //              the time their audio streams' sound levels are modified by the system.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -32,7 +32,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -72,6 +72,7 @@ interface
 
 uses
   {WinApi}
+  WinApi.Windows,
   WinApi.WinApiTypes,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes,
@@ -94,9 +95,10 @@ type
 
   IAudioStateMonitor = interface;
 
-  PAudioStateMonitorCallback = ^AudioStateMonitorCallback;
-  AudioStateMonitorCallback = Reference to procedure({In} audioStateMonitor: IAudioStateMonitor;
-                                                     {In_opt} context: Pointer);
+  // A procedural type already stores the native function pointer.
+  AudioStateMonitorCallback = procedure(audioStateMonitor: IAudioStateMonitor;
+                                        context: Pointer); stdcall;
+  PAudioStateMonitorCallback = AudioStateMonitorCallback;
   {$EXTERNALSYM AudioStateMonitorCallback}
 
 
@@ -186,27 +188,117 @@ type
 
 implementation
 
-{$WARN SYMBOL_PLATFORM OFF}
-const
-  AudioStateMonitorApiLib = '';
+const AudioStateMonitorApiLib = 'Windows.Media.MediaControl.dll';
+type
+  TCreateMonitor = function(Monitor: PIAudioStateMonitor): HRESULT; stdcall;
+  TCreateMonitorForCategory = function(Category: AUDIO_STREAM_CATEGORY; Monitor: PIAudioStateMonitor): HRESULT; stdcall;
+  TCreateMonitorForCategoryAndDeviceRole = function(Category: AUDIO_STREAM_CATEGORY; Role: ERole; Monitor: PIAudioStateMonitor): HRESULT; stdcall;
+  TCreateMonitorForCategoryAndDeviceId = function(Category: AUDIO_STREAM_CATEGORY; DeviceId: PCWSTR; Monitor: PIAudioStateMonitor): HRESULT; stdcall;
+var
+  AudioStateMonitorModule: HMODULE;
+  AudioStateMonitorLock: TRTLCriticalSection;
 
-  function CreateRenderAudioStateMonitor; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function ResolveAudioStateMonitorProc(const Name: PAnsiChar): Pointer;
+var Buffer: array[0..MAX_PATH] of WideChar; Count: UINT; FullPath: UnicodeString;
+begin
+  Result := nil;
+  EnterCriticalSection(AudioStateMonitorLock);
+  try
+    if AudioStateMonitorModule = 0 then
+    begin
+      Count := GetSystemDirectoryW(@Buffer[0], Length(Buffer));
+      if (Count = 0) or (Count >= UINT(Length(Buffer))) then Exit;
+      FullPath := UnicodeString(PWideChar(@Buffer[0])) + '\' + AudioStateMonitorApiLib;
+      AudioStateMonitorModule := LoadLibraryW(PWideChar(FullPath));
+    end;
+    if AudioStateMonitorModule <> 0 then
+      Result := GetProcAddress(AudioStateMonitorModule, Name);
+  finally LeaveCriticalSection(AudioStateMonitorLock); end;
+end;
 
-  function CreateRenderAudioStateMonitorForCategory; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateRenderAudioStateMonitor(audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateRenderAudioStateMonitor');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitor(Proc)(audioStateMonitor);
+end;
 
-  function CreateRenderAudioStateMonitorForCategoryAndDeviceRole; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateRenderAudioStateMonitorForCategory(category: AUDIO_STREAM_CATEGORY; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateRenderAudioStateMonitorForCategory');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategory(Proc)(category, audioStateMonitor);
+end;
 
-  function CreateRenderAudioStateMonitorForCategoryAndDeviceId; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateRenderAudioStateMonitorForCategoryAndDeviceRole(category: AUDIO_STREAM_CATEGORY; role: ERole; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateRenderAudioStateMonitorForCategoryAndDeviceRole');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategoryAndDeviceRole(Proc)(category, role, audioStateMonitor);
+end;
 
-  function CreateCaptureAudioStateMonitor; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateRenderAudioStateMonitorForCategoryAndDeviceId(category: AUDIO_STREAM_CATEGORY; deviceId: PCWSTR; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateRenderAudioStateMonitorForCategoryAndDeviceId');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategoryAndDeviceId(Proc)(category, deviceId, audioStateMonitor);
+end;
 
-  function CreateCaptureAudioStateMonitorForCategory; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateCaptureAudioStateMonitor(audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateCaptureAudioStateMonitor');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitor(Proc)(audioStateMonitor);
+end;
 
-  function CreateCaptureAudioStateMonitorForCategoryAndDeviceRole; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateCaptureAudioStateMonitorForCategory(category: AUDIO_STREAM_CATEGORY; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateCaptureAudioStateMonitorForCategory');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategory(Proc)(category, audioStateMonitor);
+end;
 
-  function CreateCaptureAudioStateMonitorForCategoryAndDeviceId; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function CreateCaptureAudioStateMonitorForCategoryAndDeviceRole(category: AUDIO_STREAM_CATEGORY; role: ERole; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateCaptureAudioStateMonitorForCategoryAndDeviceRole');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategoryAndDeviceRole(Proc)(category, role, audioStateMonitor);
+end;
 
-{$WARN SYMBOL_PLATFORM ON}
-  // Implement Additional functions here.
+function CreateCaptureAudioStateMonitorForCategoryAndDeviceId(category: AUDIO_STREAM_CATEGORY; deviceId: PCWSTR; audioStateMonitor: PIAudioStateMonitor): HRESULT; stdcall;
+var Proc: Pointer;
+begin
+  if audioStateMonitor = nil then begin Result := HRESULT($80004003); Exit; end;
+  Pointer(audioStateMonitor^) := nil;
+  Proc := ResolveAudioStateMonitorProc('CreateCaptureAudioStateMonitorForCategoryAndDeviceId');
+  if Proc = nil then begin Result := HRESULT($80004001); Exit; end;
+  Result := TCreateMonitorForCategoryAndDeviceId(Proc)(category, deviceId, audioStateMonitor);
+end;
 
+initialization
+  InitializeCriticalSection(AudioStateMonitorLock);
+finalization
+  // Retain the module until process exit: native monitor objects/callbacks may outlive this unit.
+  DeleteCriticalSection(AudioStateMonitorLock);
 end.

@@ -10,7 +10,7 @@
 // Release date: 05-05-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Standard WINNET Header File for WIN32.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - This unit intentionally declares both ANSI and Unicode entry points.
@@ -29,7 +29,7 @@
 //          - The unsuffixed helper aliases at the bottom map to the Unicode versions.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -806,29 +806,29 @@ function MultinetGetConnectionPerformanceW(lpNetResource: LPNETRESOURCEW;
 { Unicode aliases }
 function WNetAddConnection(lpRemoteName: LPWSTR;
                            lpPassword: LPWSTR;
-                           lpLocalName: LPWSTR): DWORD; inline;
+                           lpLocalName: LPWSTR): DWORD; stdcall; inline;
 
 function WNetAddConnection2(lpNetResource: LPNETRESOURCEW;
                             lpPassword: LPWSTR;
                             lpUserName: LPWSTR;
-                            dwFlags: DWORD): DWORD; inline;
+                            dwFlags: DWORD): DWORD; stdcall; inline;
 
 function WNetAddConnection3(hwndOwner: HWND;
                             lpNetResource: LPNETRESOURCEW;
                             lpPassword: LPWSTR;
                             lpUserName: LPWSTR;
-                            dwFlags: DWORD): DWORD; inline;
+                            dwFlags: DWORD): DWORD; stdcall; inline;
 
 function WNetCancelConnection(lpName: LPWSTR;
-                              fForce: BOOL): DWORD; inline;
+                              fForce: BOOL): DWORD; stdcall; inline;
 
 function WNetCancelConnection2(lpName: LPWSTR;
                                dwFlags: DWORD;
-                               fForce: BOOL): DWORD; inline;
+                               fForce: BOOL): DWORD; stdcall; inline;
 
 function WNetGetConnection(lpLocalName: LPWSTR;
                            lpRemoteName: LPWSTR;
-                           var lpnLength: DWORD): DWORD; inline;
+                           var lpnLength: DWORD): DWORD; stdcall; inline;
 
 function WNetUseConnection(hwndOwner: HWND;
                            lpNetResource: LPNETRESOURCEW;
@@ -837,61 +837,80 @@ function WNetUseConnection(hwndOwner: HWND;
                            dwFlags: DWORD;
                            lpAccessName: LPWSTR;
                            var lpBufferSize: DWORD;
-                           lpResult: LPDWORD): DWORD; inline;
+                           lpResult: LPDWORD): DWORD; stdcall; inline;
 
-function WNetConnectionDialog1(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD; inline;
+function WNetConnectionDialog1(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD; stdcall; inline;
 
-function WNetDisconnectDialog1(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD; inline;
+function WNetDisconnectDialog1(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD; stdcall; inline;
 
 function WNetOpenEnum(dwScope: DWORD;
                       dwType: DWORD;
                       dwUsage: DWORD;
                       lpNetResource: LPNETRESOURCEW;
-                      var lphEnum: THandle): DWORD; inline;
+                      var lphEnum: THandle): DWORD; stdcall; inline;
 
 function WNetEnumResource(hEnum: THandle;
                           var lpcCount: DWORD;
                           lpBuffer: Pointer;
-                          var lpBufferSize: DWORD): DWORD; inline;
+                          var lpBufferSize: DWORD): DWORD; stdcall; inline;
 
 function WNetGetResourceParent(lpNetResource: LPNETRESOURCEW;
                                lpBuffer: Pointer;
-                               var lpcbBuffer: DWORD): DWORD; inline;
+                               var lpcbBuffer: DWORD): DWORD; stdcall; inline;
 
 function WNetGetResourceInformation(lpNetResource: LPNETRESOURCEW;
                                     lpBuffer: Pointer;
                                     var lpcbBuffer: DWORD;
-                                    var lplpSystem: LPWSTR): DWORD; inline;
+                                    var lplpSystem: LPWSTR): DWORD; stdcall; inline;
 
 function WNetGetUniversalName(lpLocalPath: LPWSTR;
                               dwInfoLevel: DWORD;
                               lpBuffer: Pointer;
-                              var lpBufferSize: DWORD): DWORD; inline;
+                              var lpBufferSize: DWORD): DWORD; stdcall; inline;
 
 function WNetGetUser(lpName: LPWSTR;
                      lpUserName: LPWSTR;
-                     var lpnLength: DWORD): DWORD; inline;
+                     var lpnLength: DWORD): DWORD; stdcall; inline;
 
 function WNetGetProviderName(dwNetType: DWORD;
                              lpProviderName: LPWSTR;
-                             var lpBufferSize: DWORD): DWORD; inline;
+                             var lpBufferSize: DWORD): DWORD; stdcall; inline;
 
 function WNetGetNetworkInformation(lpProvider: LPWSTR;
-                                   lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; inline;
+                                   lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; stdcall; inline;
 
 function WNetGetLastError(lpError: LPDWORD;
                           lpErrorBuf: LPWSTR;
                           nErrorBufSize: DWORD;
                           lpNameBuf: LPWSTR;
-                          nNameBufSize: DWORD): DWORD; inline;
+                          nNameBufSize: DWORD): DWORD; stdcall; inline;
 
 function MultinetGetConnectionPerformance(lpNetResource: LPNETRESOURCEW;
-                                          lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD; inline;
+                                          lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD; stdcall; inline;
 
 
   // Additional prototypes for ALL interfaces
 
   // End of additional prototypes
+
+function WNetAddConnection4(hwndOwner: HWND;
+                            lpNetResource: LPNETRESOURCEW;
+                            pAuthBuffer: Pointer;
+                            cbAuthBuffer: DWORD;
+                            dwFlags: DWORD;
+                            lpUseOptions: PByte;
+                            cbUseOptions: DWORD): DWORD; stdcall; inline;
+
+function WNetUseConnection4(hwndOwner: HWND;
+                            lpNetResource: LPNETRESOURCEW;
+                            pAuthBuffer: Pointer;
+                            cbAuthBuffer: DWORD;
+                            dwFlags: DWORD;
+                            lpUseOptions: PByte;
+                            cbUseOptions: DWORD;
+                            lpAccessName: LPWSTR;
+                            var lpBufferSize: DWORD;
+                            lpResult: LPDWORD): DWORD; stdcall; inline;
 
 implementation
 
@@ -900,7 +919,7 @@ implementation
 
 function WNetAddConnection(lpRemoteName: LPWSTR;
                            lpPassword: LPWSTR;
-                           lpLocalName: LPWSTR): DWORD;
+                           lpLocalName: LPWSTR): DWORD; stdcall;
 begin
 
   Result := WNetAddConnectionW(lpRemoteName,
@@ -912,7 +931,7 @@ end;
 function WNetAddConnection2(lpNetResource: LPNETRESOURCEW;
                             lpPassword: LPWSTR;
                             lpUserName: LPWSTR;
-                            dwFlags: DWORD): DWORD;
+                            dwFlags: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetAddConnection2W(lpNetResource,
@@ -926,7 +945,7 @@ function WNetAddConnection3(hwndOwner: HWND;
                             lpNetResource: LPNETRESOURCEW;
                             lpPassword: LPWSTR;
                             lpUserName: LPWSTR;
-                            dwFlags: DWORD): DWORD;
+                            dwFlags: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetAddConnection3W(hwndOwner,
@@ -938,7 +957,7 @@ end;
 
 
 function WNetCancelConnection(lpName: LPWSTR;
-                              fForce: BOOL): DWORD;
+                              fForce: BOOL): DWORD; stdcall;
 begin
 
   Result := WNetCancelConnectionW(lpName,
@@ -948,7 +967,7 @@ end;
 
 function WNetCancelConnection2(lpName: LPWSTR;
                                dwFlags: DWORD;
-                               fForce: BOOL): DWORD;
+                               fForce: BOOL): DWORD; stdcall;
 begin
 
   Result := WNetCancelConnection2W(lpName,
@@ -959,7 +978,7 @@ end;
 
 function WNetGetConnection(lpLocalName: LPWSTR;
                            lpRemoteName: LPWSTR;
-                           var lpnLength: DWORD): DWORD;
+                           var lpnLength: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetConnectionW(lpLocalName,
@@ -975,7 +994,7 @@ function WNetUseConnection(hwndOwner: HWND;
                            dwFlags: DWORD;
                            lpAccessName: LPWSTR;
                            var lpBufferSize: DWORD;
-                           lpResult: LPDWORD): DWORD;
+                           lpResult: LPDWORD): DWORD; stdcall;
 begin
 
   Result := WNetUseConnectionW(hwndOwner,
@@ -989,14 +1008,14 @@ begin
 end;
 
 
-function WNetConnectionDialog1(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD;
+function WNetConnectionDialog1(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD; stdcall;
 begin
 
   Result := WNetConnectionDialog1W(lpConnDlgStruct);
 end;
 
 
-function WNetDisconnectDialog1(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD;
+function WNetDisconnectDialog1(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD; stdcall;
 begin
 
   Result := WNetDisconnectDialog1W(lpConnDlgStruct);
@@ -1007,7 +1026,7 @@ function WNetOpenEnum(dwScope: DWORD;
                       dwType: DWORD;
                       dwUsage: DWORD;
                       lpNetResource: LPNETRESOURCEW;
-                      var lphEnum: THandle): DWORD;
+                      var lphEnum: THandle): DWORD; stdcall;
 begin
 
   Result := WNetOpenEnumW(dwScope,
@@ -1020,7 +1039,7 @@ end;
 function WNetEnumResource(hEnum: THandle;
                           var lpcCount: DWORD;
                           lpBuffer: Pointer;
-                          var lpBufferSize: DWORD): DWORD;
+                          var lpBufferSize: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetEnumResourceW(hEnum,
@@ -1032,7 +1051,7 @@ end;
 
 function WNetGetResourceParent(lpNetResource: LPNETRESOURCEW;
                                lpBuffer: Pointer;
-                               var lpcbBuffer: DWORD): DWORD;
+                               var lpcbBuffer: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetResourceParentW(lpNetResource,
@@ -1044,7 +1063,7 @@ end;
 function WNetGetResourceInformation(lpNetResource: LPNETRESOURCEW;
                                     lpBuffer: Pointer;
                                     var lpcbBuffer: DWORD;
-                                    var lplpSystem: LPWSTR): DWORD;
+                                    var lplpSystem: LPWSTR): DWORD; stdcall;
 begin
 
   Result := WNetGetResourceInformationW(lpNetResource,
@@ -1057,7 +1076,7 @@ end;
 function WNetGetUniversalName(lpLocalPath: LPWSTR;
                               dwInfoLevel: DWORD;
                               lpBuffer: Pointer;
-                              var lpBufferSize: DWORD): DWORD;
+                              var lpBufferSize: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetUniversalNameW(lpLocalPath,
@@ -1069,7 +1088,7 @@ end;
 
 function WNetGetUser(lpName: LPWSTR;
                      lpUserName: LPWSTR;
-                     var lpnLength: DWORD): DWORD;
+                     var lpnLength: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetUserW(lpName,
@@ -1080,7 +1099,7 @@ end;
 
 function WNetGetProviderName(dwNetType: DWORD;
                              lpProviderName: LPWSTR;
-                             var lpBufferSize: DWORD): DWORD;
+                             var lpBufferSize: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetProviderNameW(dwNetType,
@@ -1090,7 +1109,7 @@ end;
 
 
 function WNetGetNetworkInformation(lpProvider: LPWSTR;
-                                   lpNetInfoStruct: LPNETINFOSTRUCT): DWORD;
+                                   lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; stdcall;
 begin
 
   Result := WNetGetNetworkInformationW(lpProvider,
@@ -1102,7 +1121,7 @@ function WNetGetLastError(lpError: LPDWORD;
                           lpErrorBuf: LPWSTR;
                           nErrorBufSize: DWORD;
                           lpNameBuf: LPWSTR;
-                          nNameBufSize: DWORD): DWORD;
+                          nNameBufSize: DWORD): DWORD; stdcall;
 begin
 
   Result := WNetGetLastErrorW(lpError,
@@ -1114,7 +1133,7 @@ end;
 
 
 function MultinetGetConnectionPerformance(lpNetResource: LPNETRESOURCEW;
-                                          lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD;
+                                          lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD; stdcall;
 begin
 
   Result := MultinetGetConnectionPerformanceW(lpNetResource,
@@ -1143,7 +1162,31 @@ const
   function WNetGetConnectionW; external mprLib name 'WNetGetConnectionW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function WNetRestoreSingleConnectionW; external mprLib name 'WNetRestoreSingleConnectionW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function WNetRestoreConnectionW; external mprLib name 'WNetRestoreConnectionW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function WNetRestoreConnectionW(hWnd: HWND;
+                                lpDevice: LPWSTR): DWORD; stdcall;
+type
+  TLegacyRestore = function(hWnd: WinApi.Windows.HWND;
+                            lpDevice: LPWSTR): DWORD; stdcall;
+var
+  ModuleHandle: HMODULE;
+  Restore: TLegacyRestore;
+begin
+  ModuleHandle := LoadLibraryW(PWideChar(mprLib));
+  if ModuleHandle = 0 then
+    begin
+      Result := GetLastError;
+      Exit;
+    end;
+  try
+    Restore := TLegacyRestore(GetProcAddress(ModuleHandle,'WNetRestoreConnectionW'));
+    if Assigned(Restore) then
+      Result := Restore(hWnd,lpDevice)
+    else
+      Result := ERROR_CALL_NOT_IMPLEMENTED;
+  finally
+    FreeLibrary(ModuleHandle);
+  end;
+end;
 
   function WNetUseConnectionA; external mprLib name 'WNetUseConnectionA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function WNetUseConnectionW; external mprLib name 'WNetUseConnectionW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -1159,8 +1202,8 @@ const
 
   function WNetOpenEnumA; external mprLib name 'WNetOpenEnumA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function WNetOpenEnumW; external mprLib name 'WNetOpenEnumW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function WNetEnumResourceA; external mprLib name 'WNetEnumResourceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF}
-  function WNetEnumResourceW; external mprLib name 'WNetEnumResourceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF}
+  function WNetEnumResourceA; external mprLib name 'WNetEnumResourceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF} ;
+  function WNetEnumResourceW; external mprLib name 'WNetEnumResourceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF} ;
   function WNetCloseEnum; external mprLib name 'WNetCloseEnum' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function WNetGetResourceParentA; external mprLib name 'WNetGetResourceParentA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -1184,5 +1227,45 @@ const
   function MultinetGetConnectionPerformanceA; external mprLib name 'MultinetGetConnectionPerformanceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MultinetGetConnectionPerformanceW; external mprLib name 'MultinetGetConnectionPerformanceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
+
+function WNetAddConnection4(hwndOwner: HWND;
+                            lpNetResource: LPNETRESOURCEW;
+                            pAuthBuffer: Pointer;
+                            cbAuthBuffer: DWORD;
+                            dwFlags: DWORD;
+                            lpUseOptions: PByte;
+                            cbUseOptions: DWORD): DWORD; stdcall;
+begin
+  Result := WNetAddConnection4W(hwndOwner,
+                                lpNetResource,
+                                pAuthBuffer,
+                                cbAuthBuffer,
+                                dwFlags,
+                                lpUseOptions,
+                                cbUseOptions);
+end;
+
+function WNetUseConnection4(hwndOwner: HWND;
+                            lpNetResource: LPNETRESOURCEW;
+                            pAuthBuffer: Pointer;
+                            cbAuthBuffer: DWORD;
+                            dwFlags: DWORD;
+                            lpUseOptions: PByte;
+                            cbUseOptions: DWORD;
+                            lpAccessName: LPWSTR;
+                            var lpBufferSize: DWORD;
+                            lpResult: LPDWORD): DWORD; stdcall;
+begin
+  Result := WNetUseConnection4W(hwndOwner,
+                                lpNetResource,
+                                pAuthBuffer,
+                                cbAuthBuffer,
+                                dwFlags,
+                                lpUseOptions,
+                                cbUseOptions,
+                                lpAccessName,
+                                lpBufferSize,
+                                lpResult);
+end;
 
 end.

@@ -10,7 +10,7 @@
 // Release date: 27-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -31,7 +31,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -162,16 +162,16 @@ const
 
   // MPEG2 Other subtypes
   // e06d8022-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_MPEG2_PROGRAM : TGUID = (D1: $e06d8022;
-                                        D2: $db46;
-                                        D3: $11cf;
-                                        D4: ($b4, $d1, $00, $80, $05, $6c, $bb, $ea));
+  MEDIASUBTYPE_MPEG2_PROGRAM : TGUID = (D1: $E06D8022;
+                                        D2: $DB46;
+                                        D3: $11CF;
+                                        D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d8023-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_MPEG2_TRANSPORT : TGUID = (D1: $e06d8023;
-                                          D2: $db46;
-                                          D3: $11cf;
-                                          D4: ($b4, $d1, $00, $80, $05, $6c, $bb, $ea));
+  MEDIASUBTYPE_MPEG2_TRANSPORT : TGUID = (D1: $E06D8023;
+                                          D2: $DB46;
+                                          D3: $11CF;
+                                          D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // #if (NTDDI_VERSION >= NTDDI_WINXP)
 
@@ -203,42 +203,42 @@ const
 
 
   // e06d802b-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_MPEG2_AUDIO : TGUID = (D1: $e06d802b;
-                                      D2: $db46;
-                                      D3: $11c;
-                                      D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_MPEG2_AUDIO : TGUID = (D1: $E06D802B;
+                                      D2: $DB46;
+                                      D3: $11CF;
+                                      D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d802c-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DOLBY_AC3 : TGUID = (D1: $e06d802c;
-                                    D2: $db46;
-                                    D3: $11c;
-                                    D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_DOLBY_AC3 : TGUID = (D1: $E06D802C;
+                                    D2: $DB46;
+                                    D3: $11CF;
+                                    D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d802d-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DVD_SUBPICTURE : TGUID = (D1: $e06d802d;
-                                         D2: $db46;
-                                         D3: $11c;
-                                         D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_DVD_SUBPICTURE : TGUID = (D1: $E06D802D;
+                                         D2: $DB46;
+                                         D3: $11CF;
+                                         D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d8032-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DVD_LPCM_AUDIO : TGUID = (D1: $e06d8032;
-                                         D2: $db46;
-                                         D3: $11c;
-                                         D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_DVD_LPCM_AUDIO : TGUID = (D1: $E06D8032;
+                                         D2: $DB46;
+                                         D3: $11CF;
+                                         D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // #if (NTDDI_VERSION >= NTDDI_WINXP)
 
   // e06d8033-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DTS : TGUID = (D1: $e06d8033;
-                              D2: $db46;
-                              D3: $11c;
-                              D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_DTS : TGUID = (D1: $E06D8033;
+                              D2: $DB46;
+                              D3: $11CF;
+                              D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d8034-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_SDDS : TGUID = (D1: $e06d8034;
-                               D2: $db46;
-                               D3: $11c;
-                               D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_SDDS : TGUID = (D1: $E06D8034;
+                               D2: $DB46;
+                               D3: $11CF;
+                               D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // #endif
 
@@ -247,60 +247,67 @@ const
   // ======================
 
   // ED0B916A-044D-11d1-AA78-00C04FC31D60
-  MEDIATYPE_DVD_ENCRYPTED_PACK : TGUID = (D1: $ed0b916a;
-                                          D2: $044d;
-                                          D3: $11d1;
-                                          D4: ($aa, $78, $00, $c0, $04, $c3, $1d, $60));
+  MEDIATYPE_DVD_ENCRYPTED_PACK : TGUID = (D1: $ED0B916A;
+                                          D2: $044D;
+                                          D3: $11D1;
+                                          D4: ($AA, $78, $00, $C0, $4F, $C3, $1D, $60));
 
   // e06d802e-db46-11cf-b4d1-00805f6cbbea
-  MEDIATYPE_DVD_NAVIGATION : TGUID = (D1: $e06d802e;
-                                      D2: $db46;
-                                      D3: $11cf;
-                                      D4: ($b4, $d1, $00, $80, $05, $6c, $bb, $ea));
+  MEDIATYPE_DVD_NAVIGATION : TGUID = (D1: $E06D802E;
+                                      D2: $DB46;
+                                      D3: $11CF;
+                                      D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d802f-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DVD_NAVIGATION_PCI : TGUID = (D1: $e06d802f;
-                                             D2: $db46;
-                                             D3: $11cf;
-                                             D4: ($b4, $d1, $00, $80, $05, $6c, $bb, $ea));
+  MEDIASUBTYPE_DVD_NAVIGATION_PCI : TGUID = (D1: $E06D802F;
+                                             D2: $DB46;
+                                             D3: $11CF;
+                                             D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
-  MEDIASUBTYPE_DVD_NAVIGATION_DSI : TGUID = (D1: $e06d8030;
-                                             D2: $db46;
-                                             D3: $11cf;
-                                             D4: ($b4, $d1, $00, $80, $05, $6c, $bb, $ea));
+  MEDIASUBTYPE_DVD_NAVIGATION_DSI : TGUID = (D1: $E06D8030;
+                                             D2: $DB46;
+                                             D3: $11CF;
+                                             D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d8031-db46-11cf-b4d1-00805f6cbbea
-  MEDIASUBTYPE_DVD_NAVIGATION_PROVIDER : TGUID = (D1: $e06d8031;
-                                                  D2: $db46;
-                                                  D3: $11c;
-                                                  D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  MEDIASUBTYPE_DVD_NAVIGATION_PROVIDER : TGUID = (D1: $E06D8031;
+                                                  D2: $DB46;
+                                                  D3: $11CF;
+                                                  D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // DVD - MPEG2/AC3-related Formats
   // ===============================
 
   // e06d80e3-db46-11cf-b4d1-00805f6cbbea
-  FORMAT_MPEG2Vide : TGUID = (D1: $e06d80e3;
+  // Preserve the historical misspelling below as a compatibility alias.
+  FORMAT_MPEG2Video: TGUID = (D1: $e06d80e3;
                               D2: $db46;
-                              D3: $11c;
-                              D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+                              D3: $11cf;
+                              D4: ($b4,$d1,$00,$80,$5f,$6c,$bb,$ea));
+  {$EXTERNALSYM FORMAT_MPEG2Video}
+
+  FORMAT_MPEG2Vide : TGUID = (D1: $E06D80E3;
+                              D2: $DB46;
+                              D3: $11CF;
+                              D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d80e4-db46-11cf-b4d1-00805f6cbbea
-  FORMAT_DolbyAC3 : TGUID = (D1: $e06d80e4;
-                             D2: $db46;
-                             D3: $11c;
-                             D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  FORMAT_DolbyAC3 : TGUID = (D1: $E06D80E4;
+                             D2: $DB46;
+                             D3: $11CF;
+                             D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d80e5-db46-11cf-b4d1-00805f6cbbea
-  FORMAT_MPEG2Audio : TGUID = (D1: $e06d80e5;
-                               D2: $db46;
-                               D3: $11c;
-                               D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  FORMAT_MPEG2Audio : TGUID = (D1: $E06D80E5;
+                               D2: $DB46;
+                               D3: $11CF;
+                               D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // e06d80e6-db46-11cf-b4d1-00805f6cbbea
-  FORMAT_DVD_LPCMAudio : TGUID = (D1: $e06d80e6;
-                                  D2: $db46;
-                                  D3: $11c;
-                                  D4: ($b4, $d1, $00, $80, $05f, $6c, $bb, $ea));
+  FORMAT_DVD_LPCMAudio : TGUID = (D1: $E06D80E6;
+                                  D2: $DB46;
+                                  D3: $11CF;
+                                  D4: ($B4, $D1, $00, $80, $5F, $6C, $BB, $EA));
 
   // UVC 1.2 H.264 Video Format
   // ==========================

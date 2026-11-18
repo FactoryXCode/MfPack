@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: The main engine that acts as Chief In Command about everything in this sample.
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -184,6 +184,24 @@ type
 
 
   // Forwarded
+  TEngineNotificationKind = (enState,enError,enReady,enProcessed,enEnded);
+
+  TEngineNotification = record
+    Kind: TEngineNotificationKind;
+    State: TDeviceState;
+    Text: string;
+    Error: HRESULT;
+    Position: Int64;
+    RawPosition: UInt64;
+  end;
+
+  IMfEngineNotifications = interface(IInterface)
+  ['{E845BFA7-DA0A-41D5-8F87-E680D6DAF561}']
+    procedure Post(const Item: TEngineNotification);
+    procedure Detach;
+  end;
+
+
   TWasApiEngine = class;
 
   TWasApiEngineThread = class(TThread)
@@ -246,6 +264,7 @@ type
     FRequestPause: Boolean;
 
     // UI callbacks
+    FNotifications: IMfEngineNotifications;
     FOnStateChanged: TWasApiStateEvent;
     FOnError: TWasApiErrorEvent;
     FOnReady: TWasApiReadyEvent;
@@ -260,6 +279,7 @@ type
 
     pvBufferFrameCount: UINT32;
 
+    procedure DeliverNotification(const Item: TEngineNotification);
     procedure SetState(const NewState: TDeviceState);
     procedure RaiseError(const Msg: string; const Hr: HRESULT);
     procedure RaiseReady();
@@ -274,7 +294,7 @@ type
 
     procedure ResetAudioData(pFreeSourceStream: Boolean);
 
-    function LoadFileInternal(const audiofile: TFileName;
+    function LoadFileInternal(const audiofile: UnicodeString;
                               fileDuration: LONGLONG): HResult;
     function LoadData(bufferFrameCount: UINT32;
                       pData: PByte;
@@ -293,7 +313,7 @@ type
     destructor Destroy(); override;
 
     // Commands (threaded)
-    function OpenFile(const audiofile: TFileName;
+    function OpenFile(const audiofile: UnicodeString;
                       fileDuration100ns: LONGLONG): HRESULT;
     function Start(): HResult;
     function Stop(): HResult;
@@ -341,9 +361,7 @@ begin
   // IMPORTANT: Delphi does not guarantee record return values are zeroed.
   // If we only set Kind, other fields can contain garbage/stale values.
   // Always zero-initialize factory results.
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckLoadFile;
   Result.FileName := AFileName;
@@ -356,9 +374,7 @@ end;
 class function TEngineCommand.Play(): TEngineCommand;
 begin
 
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckPlay;
 end;
@@ -367,9 +383,7 @@ end;
 class function TEngineCommand.Pause(): TEngineCommand;
 begin
 
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckPause;
 end;
@@ -378,9 +392,7 @@ end;
 class function TEngineCommand.Stop(): TEngineCommand;
 begin
 
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckStop;
 end;
@@ -388,7 +400,7 @@ end;
 
 class function TEngineCommand.Seek(const APos100ns: Int64): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckSeek;
   Result.SeekPos100ns := APos100ns;
 end;
@@ -397,9 +409,7 @@ end;
 class function TEngineCommand.SetVolume(aLeft,
                                         aRight: Single): TEngineCommand;
 begin
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckSetVolume;
   Result.VolL := ALeft;
@@ -410,35 +420,35 @@ end;
 // EQ methods
 class function TEngineCommand.EQEnable(const AEnabled: Boolean): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckEQEnable;
   Result.EqEnabled := AEnabled;
 end;
 
 class function TEngineCommand.EQSetBassDb(const ABassDb: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckEQSetBassDb;
   Result.EqBassDb := ABassDb;
 end;
 
 class function TEngineCommand.EQSetTrebleDb(const ATrebleDb: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckEQSetTrebleDb;
   Result.EqTrebleDb := ATrebleDb;
 end;
 
 class function TEngineCommand.EQSetRampMode(const ARampMode: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckEQSetRampMode;
   Result.EqRampMode := ARampMode;
 end;
 
 class function TEngineCommand.EQSetRampTimeMs(const AMs: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  Result := Default(TEngineCommand);
   Result.Kind := ckEQSetRampTimeMs;
   Result.EqRampTimeMs := AMs;
 end;
@@ -448,9 +458,7 @@ end;
 class function TEngineCommand.Shutdown(): TEngineCommand;
 begin
 
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  Result := Default(TEngineCommand);
 
   Result.Kind := ckShutdown;
 end;
@@ -458,9 +466,25 @@ end;
 
 { TWasApiEngineThread }
 
+type
+  TMfEngineNotifications = class(TInterfacedObject,IMfEngineNotifications)
+  private
+    FOwner: TWasApiEngine;
+    FLock: TCriticalSection;
+    FItems: TQueue<TEngineNotification>;
+    FQueued: Boolean;
+    procedure DispatchQueued;
+  public
+    constructor Create(Owner: TWasApiEngine);
+    destructor Destroy; override;
+    procedure Post(const Item: TEngineNotification);
+    procedure Detach;
+  end;
+
+
 constructor TWasApiEngineThread.Create(AEngine: TWasApiEngine);
 begin
-  inherited Create(False);
+  inherited Create(True);
 
   FreeOnTerminate := False;
   FEngine := AEngine;
@@ -476,10 +500,15 @@ var
 
 begin
 
+  // Match the shared engine: native audio code requires masked FP exceptions.
+  SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,
+                    exOverflow,exUnderflow,exPrecision]);
+
   CoInitializeEx(nil,
                  COINIT_MULTITHREADED);
 
   try
+    try
 
     // This is done in Mainfrm in initialisation section, we could do it here,
     // but, remove the declaration from Mainfrm / initialisation section.
@@ -536,10 +565,22 @@ begin
             end;
         end;
       end;
+    except
+      on E: Exception do
+        begin
+          FEngine.SetState(dsError);
+          FEngine.RaiseError(E.ClassName + ': ' + E.Message,E_UNEXPECTED);
+        end;
+    end;
   finally
 
     //if mfStarted then  << See MainFrm finalization section.
     //  MFShutdown;
+    // Release WASAPI services on the worker that acquired them, before COM teardown.
+    FEngine.pvAudioStreamVolume := nil;
+    FEngine.pvRenderClient := nil;
+    FEngine.pvAudioClock := nil;
+    FEngine.pvAudioClient := nil;
     CoUninitialize();
   end;
 end;
@@ -550,6 +591,7 @@ end;
 constructor TWasApiEngine.Create();
 begin
   inherited Create;
+  FNotifications := TMfEngineNotifications.Create(Self);
 
   pvAudioClient := nil;
   pvAudioStreamVolume := nil;
@@ -591,14 +633,17 @@ begin
   // Start worker thread immediately (engine owner)
   FThread := TWasApiEngineThread.Create(Self);
   SetState(dsInitialized);
+  FThread.Start;
 end;
 
 
 destructor TWasApiEngine.Destroy();
 begin
+  if FNotifications <> nil then FNotifications.Detach;
 
   // Request thread shutdown
-  EnqueueCommand(TEngineCommand.Shutdown);
+  if Assigned(FCmdCS) and Assigned(FCmdQueue) then
+    EnqueueCommand(TEngineCommand.Shutdown);
   SetEvent(FCmdEvent);
   SetEvent(FTerminateEvent);
 
@@ -609,6 +654,7 @@ begin
       FreeAndNil(FThread);
     end;
 
+  FNotifications := nil;
   ResetAudioData(True);
 
   if (pvAudioSamplesReadyEvent <> 0) then
@@ -640,75 +686,189 @@ begin
 end;
 
 
-procedure TWasApiEngine.SetState(const NewState: TDeviceState);
+constructor TMfEngineNotifications.Create(Owner: TWasApiEngine);
 begin
-
-  pvDeviceState := NewState;
-  if Assigned(FOnStateChanged) then
-    TThread.Queue(nil,
-                  procedure
-                  begin
-
-                    if Assigned(FOnStateChanged) then
-                      FOnStateChanged(Self, NewState);
-                  end);
+  inherited Create;
+  FOwner := Owner;
+  FLock := TCriticalSection.Create;
+  FItems := TQueue<TEngineNotification>.Create;
 end;
 
 
-procedure TWasApiEngine.RaiseError(const Msg: string; const Hr: HRESULT);
+destructor TMfEngineNotifications.Destroy;
 begin
+  FItems.Free;
+  FLock.Free;
+  inherited Destroy;
+end;
 
+
+procedure TMfEngineNotifications.Post(const Item: TEngineNotification);
+var
+  KeepAlive: IInterface;
+  Schedule: Boolean;
+  Detached: Boolean;
+begin
+  KeepAlive := Self;
+  Schedule := False;
+  FLock.Enter;
+  try
+    if FOwner = nil then
+      Exit;
+    FItems.Enqueue(Item);
+    if not FQueued then
+      begin
+        FQueued := True;
+        Schedule := True;
+      end;
+  finally
+    FLock.Leave;
+  end;
+  if Schedule then
+    begin
+      // Queue can execute inline on the main thread. Never call a user handler
+      // while holding the lock needed by a worker that destructor must join.
+      TThread.Queue(nil,DispatchQueued);
+      FLock.Enter;
+      try
+        Detached := FOwner = nil;
+      finally
+        FLock.Leave;
+      end;
+      // KeepAlive also protects the scheduling/Detach race until cancellation.
+      if Detached then
+        TThread.RemoveQueuedEvents(nil,DispatchQueued);
+    end;
+end;
+
+
+procedure TMfEngineNotifications.Detach;
+begin
+  FLock.Enter;
+  try
+    FOwner := nil;
+    FItems.Clear;
+    FQueued := False;
+  finally
+    FLock.Leave;
+  end;
+  TThread.RemoveQueuedEvents(nil,DispatchQueued);
+end;
+
+
+procedure TMfEngineNotifications.DispatchQueued;
+var
+  KeepAlive: IInterface;
+  Owner: TWasApiEngine;
+  Item: TEngineNotification;
+begin
+  KeepAlive := Self;
+  while True do
+    begin
+      FLock.Enter;
+      try
+        if (FOwner = nil) or (FItems.Count = 0) then
+          begin
+            FQueued := False;
+            Exit;
+          end;
+        Owner := FOwner;
+        Item := FItems.Dequeue;
+      finally
+        FLock.Leave;
+      end;
+      // A handler may destroy Owner. Detach clears it; KeepAlive owns this dispatcher.
+      Owner.DeliverNotification(Item);
+    end;
+end;
+
+
+procedure TWasApiEngine.DeliverNotification(const Item: TEngineNotification);
+begin
+  case Item.Kind of
+    enState:
+      if Assigned(FOnStateChanged) then FOnStateChanged(Self,Item.State);
+    enError:
+      if Assigned(FOnError) then FOnError(Self,Item.Text,Item.Error);
+    enReady:
+      if Assigned(FOnReady) then FOnReady(Self);
+    enProcessed:
+      if Assigned(FOnProcessed) then FOnProcessed(Self,Item.Position,Item.RawPosition);
+    enEnded:
+      if Assigned(FOnEnded) then FOnEnded(Self);
+  end;
+end;
+
+
+procedure TWasApiEngine.SetState(const NewState: TDeviceState);
+var
+  Item: TEngineNotification;
+begin
+  pvDeviceState := NewState;
+  if Assigned(FOnStateChanged) then
+    begin
+      FillChar(Item,SizeOf(Item),0);
+      Item.Kind := enState;
+      Item.State := NewState;
+      FNotifications.Post(Item);
+    end;
+end;
+
+
+procedure TWasApiEngine.RaiseError(const Msg: string;const Hr: HRESULT);
+var
+  Item: TEngineNotification;
+begin
   pvErrStatus := Hr;
   if Assigned(FOnError) then
-    TThread.Queue(nil,
-                  procedure
-                  begin
-
-                    if Assigned(FOnError) then
-                      FOnError(Self, Msg, Hr);
-                  end);
+    begin
+      FillChar(Item,SizeOf(Item),0);
+      Item.Kind := enError;
+      Item.Text := Msg;
+      Item.Error := Hr;
+      FNotifications.Post(Item);
+    end;
 end;
 
 
 procedure TWasApiEngine.RaiseReady;
+var
+  Item: TEngineNotification;
 begin
-
   if Assigned(FOnReady) then
-    TThread.Queue(nil,
-                  procedure
-                  begin
-
-                    if Assigned(FOnReady) then
-                      FOnReady(Self);
-                  end);
+    begin
+      FillChar(Item,SizeOf(Item),0);
+      Item.Kind := enReady;
+      FNotifications.Post(Item);
+    end;
 end;
 
 
-procedure TWasApiEngine.RaiseProcessed(const Position100ns: Int64;
-                                       const RawPosition: UInt64);
+procedure TWasApiEngine.RaiseProcessed(const Position100ns: Int64;const RawPosition: UInt64);
+var
+  Item: TEngineNotification;
 begin
-
   if Assigned(FOnProcessed) then
-    TThread.Queue(nil,
-                  procedure
-                  begin
-
-                    if Assigned(FOnProcessed) then
-                      FOnProcessed(Self, Position100ns, RawPosition);
-                  end);
+    begin
+      FillChar(Item,SizeOf(Item),0);
+      Item.Kind := enProcessed;
+      Item.Position := Position100ns;
+      Item.RawPosition := RawPosition;
+      FNotifications.Post(Item);
+    end;
 end;
 
 
 procedure TWasApiEngine.RaiseEnded;
+var
+  Item: TEngineNotification;
 begin
   if Assigned(FOnEnded) then
-    TThread.Queue(nil,
-                  procedure
-                  begin
-
-                    if Assigned(FOnEnded) then
-                      FOnEnded(Self);
-                  end);
+    begin
+      FillChar(Item,SizeOf(Item),0);
+      Item.Kind := enEnded;
+      FNotifications.Post(Item);
+    end;
 end;
 
 
@@ -911,7 +1071,7 @@ begin
 end;
 
 
-function TWasApiEngine.OpenFile(const audiofile: TFileName;
+function TWasApiEngine.OpenFile(const audiofile: UnicodeString;
                                 fileDuration100ns: LONGLONG): HRESULT;
 begin
 
@@ -1090,7 +1250,6 @@ begin
   if (FOffset + bytesToCopy) > pvBytesLength then
     begin
       bytesToCopy := pvBytesLength - FOffset;
-      flags := AUDCLNT_BUFFERFLAGS_SILENT;
     end;
 
   if (bytesToCopy > 0) then
@@ -1113,7 +1272,7 @@ begin
 end;
 
 
-function TWasApiEngine.LoadFileInternal(const audiofile: TFileName;
+function TWasApiEngine.LoadFileInternal(const audiofile: UnicodeString;
                                         fileDuration: LONGLONG): HResult;
 var
   hr: HResult;
@@ -1723,6 +1882,18 @@ begin
             if FAILED(hr) then
               Break;
 
+            // Decoding completion precedes endpoint playback completion.
+            if FOffset >= pvBytesLength then
+              begin
+                if numFramesPadding = 0 then
+                  begin
+                    SetState(dsStop);
+                    RaiseEnded();
+                    Break;
+                  end;
+                Continue;
+              end;
+
             hr := pvAudioClient.GetBufferSize(numFramesAvailable);
             if FAILED(hr) then
               Break;
@@ -1792,14 +1963,7 @@ begin
                                  u64Position);
               end;
 
-            // End reached?
-            if (FOffset >= pvBytesLength) then
-              begin
-
-                SetState(dsStop);
-                RaiseEnded();
-                Break;
-              end;
+            // The next audio event checks that the endpoint has drained.
           end;
 
       else

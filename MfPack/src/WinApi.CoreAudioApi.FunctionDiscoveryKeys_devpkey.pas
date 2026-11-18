@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 04-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Defines property keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -36,7 +36,7 @@
 //          Copied Jim's version replaced "DEFINE_DEVPROPKEY(DEVPKEY_" with "PKEY_")
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -591,11 +591,7 @@ const
                                                          pid: 11);  // DEVPROP_TYPE_STRING_LIST
   {$EXTERNALSYM PKEY_Device_DriverCoInstallers}
 
-  PKEY_Device_ResourcePickerTags: PROPERTYKEY = (fmtid: (D1: $A8B865DD;
-                                                         D2: $2E3D;
-                                                         D3: 4094;
-                                                         D4: ($AD, $97, $E5, $93, $A7, $C, $75, $D6));
-                                                         pid: 12);  // DEVPROP_TYPE_STRING
+  PKEY_Device_ResourcePickerTags: PROPERTYKEY = (fmtid: (D1: $A8B865DD; D2: $2E3D; D3: $4094; D4: ($AD, $97, $E5, $93, $A7, $0C, $75, $D6)); pid: 12);  // DEVPROP_TYPE_STRING
   {$EXTERNALSYM PKEY_Device_ResourcePickerTags}
 
   PKEY_Device_ResourcePickerExceptions: PROPERTYKEY = (fmtid: (D1: $A8B865DD;
@@ -885,6 +881,13 @@ const
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
+
+// Additional key definitions from SDK 10.0.28000.0.
+const
+  PKEY_Device_SignalStrength: PROPERTYKEY = (fmtid: (D1: $80D81EA6; D2: $7473; D3: $4B0C; D4: ($82, $16, $EF, $C1, $1A, $2C, $4C, $8B)); pid: 6);
+  {$EXTERNALSYM PKEY_Device_SignalStrength}
+  PKEY_Device_IsAssociateableByUserAction: PROPERTYKEY = (fmtid: (D1: $80D81EA6; D2: $7473; D3: $4B0C; D4: ($82, $16, $EF, $C1, $1A, $2C, $4C, $8B)); pid: 7);
+  {$EXTERNALSYM PKEY_Device_IsAssociateableByUserAction}
 
 implementation
 

@@ -323,3 +323,13 @@ The public URL is `https://factoryxradio.asuscomm.com/radio/live.aac` once the
 updated server and configuration are deployed and RDJ audio radio is running.
 A successful HEOS Play URL response confirms command acceptance, not audible
 playback. Test the LAN audio endpoint first, then HTTPS and the receiver.
+  
+Project: Media Foundation - MFPack - Proxy Servers  
+  
+Project location: https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 06-02-2019  
+Final release date: 18/11/2026
+  
+Copyright © FactoryX. All rights reserved.

@@ -102,7 +102,7 @@ object dlgHrTools: TdlgHrTools
     Height = 14
     Alignment = taRightJustify
     AutoSize = False
-    Caption = 'Severety code'
+    Caption = 'Severity code'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -166,7 +166,7 @@ object dlgHrTools: TdlgHrTools
     Font.Height = -11
     Font.Name = 'Lucida Sans'
     Font.Style = []
-    MaxLength = 9
+    MaxLength = 10
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -204,7 +204,7 @@ object dlgHrTools: TdlgHrTools
     Font.Height = -11
     Font.Name = 'Lucida Sans'
     Font.Style = []
-    MaxLength = 9
+    MaxLength = 11
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -320,7 +320,7 @@ object dlgHrTools: TdlgHrTools
   end
   object rbHLD: TRadioButton
     Left = 10
-    Top = 4
+    Top = 6
     Width = 442
     Height = 17
     Caption = 'Use the Internal Error Lookup Tool.'
@@ -361,8 +361,8 @@ object dlgHrTools: TdlgHrTools
     Width = 456
     Height = 17
     Caption = 
-      'Use the localised System Error Messager Lookup Tool in a message' +
-      ' dialog.'
+      'Use the localised System Error Messenger Lookup Tool in a messag' +
+      'e dialog.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11

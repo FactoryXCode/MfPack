@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Media Foundation Windows Sonic
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Spatial Audio position is a standard Microsoft define metadata command which
 // represents volumetric coordinates about the listener in the standard model used by
 // SpatialAudioClient, where center of listeners head is 0,0,0 and distance fo 1.0 = 
@@ -25,13 +25,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -97,6 +97,11 @@ uses
   {$I 'WinApiTypes.inc'}
 
 
+const
+  SPATIAL_AUDIO_STANDARD_COMMANDS_START = 200;
+  SPATIAL_AUDIO_POSITION = SPATIAL_AUDIO_STANDARD_COMMANDS_START;
+  SPATIAL_AUDIO_POSITION_BYTE_COUNT = SizeOf(Single) * 3;
+
 type
   // Writer Overflow is defined as attempting to wri e more items into metadataBuffer than
   // maxItems specified when metadataBuffer was created
@@ -124,6 +129,7 @@ type
 
   // provides full set of data available on a SpatialAudioMetadataItems object
 
+  {$ALIGN 1} // SDK pack(push, 1) begins with SpatialAudioMetadataItemsInfo.
   PSpatialAudioMetadataItemsInfo = ^SpatialAudioMetadataItemsInfo;
   SpatialAudioMetadataItemsInfo = record
     FrameCount: UINT16;              // total frame count that defines valid item offsets
@@ -137,7 +143,7 @@ type
 
   PSpatialAudioObjectRenderStreamForMetadataActivationParams = ^SpatialAudioObjectRenderStreamForMetadataActivationParams;
   SpatialAudioObjectRenderStreamForMetadataActivationParams = record
-    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
     MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
@@ -145,14 +151,14 @@ type
     EventHandle: THandle;                    // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
     MetadataFormatId: TGUID;                 // Specifies the metadataFormat that for the currently active spatial rendering engine
     MaxMetadataItemCount: UINT16;            // Maximum number of metadata Items Per FrameCount
-    MetadataActivationParams: PROPVARIANT;
+    MetadataActivationParams: PPROPVARIANT;
     NotifyObject: ISpatialAudioObjectRenderStreamNotify;
   end;
   {$EXTERNALSYM SpatialAudioObjectRenderStreamForMetadataActivationParams}
 
   PSpatialAudioObjectRenderStreamForMetadataActivationParams2 = ^SpatialAudioObjectRenderStreamForMetadataActivationParams2;
   SpatialAudioObjectRenderStreamForMetadataActivationParams2 = record
-    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
     MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
@@ -160,7 +166,7 @@ type
     EventHandle: THandle;                    // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
     MetadataFormatId: TGUID;                 // Specifies the metadataFormat that for the currently active spatial rendering engine
     MaxMetadataItemCount: UINT32;            // Maximum number of metadata Items Per FrameCount
-    MetadataActivationParams: PROPVARIANT;
+    MetadataActivationParams: PPROPVARIANT;
     NotifyObject: ISpatialAudioObjectRenderStreamNotify;
     Options: SPATIAL_AUDIO_STREAM_OPTIONS;
   end;
@@ -312,7 +318,7 @@ type
     //     or ISpatialAudioMetadataCopier.
     // </param>
     
-    function ReadNextItem(commandCount: UINT8;
+    function ReadNextItem(out commandCount: UINT8;
                           out frameOffset: UINT16): HRESULT; stdcall;
     // <summary>
     //     The ReadNextItem() method is used to get the number of commands and the sample offset for the current item
@@ -329,7 +335,7 @@ type
     //  Must be called before ReadNextItemCommand.
     // </remarks>
     
-    function ReadNextItemCommand(out commandID: PByte;
+    function ReadNextItemCommand(out commandID: Byte;
                                  valueBuffer: Pointer;
                                  maxValueBufferLength: UINT32;
                                  out valueBufferLength: UINT32): HRESULT; stdcall;
@@ -481,6 +487,7 @@ type
 
   end;
   IID_ISpatialAudioMetadataItemsBuffer = ISpatialAudioMetadataItemsBuffer;
+  PISpatialAudioMetadataItemsBuffer = ^ISpatialAudioMetadataItemsBuffer;
   {$EXTERNALSYM IID_ISpatialAudioMetadataItemsBuffer}
 
 
@@ -504,7 +511,7 @@ type
 
     function ActivateSpatialAudioMetadataItems(maxItemCount: UINT16;
                                                frameCount: UINT16;
-                                               out metadataItemsBuffer: ISpatialAudioMetadataItemsBuffer;
+                                               metadataItemsBuffer: PISpatialAudioMetadataItemsBuffer;
                                                out metadataItems: ISpatialAudioMetadataItems): HRESULT; stdcall;
     // <summary>
     //     Creates a SpatialAudioMetadataItems object to contain metadata Items.

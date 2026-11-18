@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:  - Feed-forward compressor (peak detector, linked stereo)
 //               - Limiter with optional soft knee, lookahead, and selectable detector (Peak/RMS)
 //
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/WasApiPlayer/Example4
+// Related projects: MfPackX410/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -666,7 +666,14 @@ begin
       InterlockedExchange(FCompGRmDb,
                           Round((-LinToDb(FCompGain)) * 1000.0));
 
-      compApplied := (FCompGain * FCompMakeupLin);
+      if FSettings.CompEnabled then
+        compApplied := FCompGain * FCompMakeupLin
+      else
+        begin
+          FCompGain := 1.0;
+          InterlockedExchange(FCompGRmDb,0);
+          compApplied := 1.0;
+        end;
 
       // ---------------------------------------------------------
       // Post-compressor peak for limiter detector

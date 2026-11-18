@@ -10,7 +10,7 @@
 // Release date: 30-04-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Shell api.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -32,7 +32,7 @@
 //   the caller unless the original API documentation says otherwise.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -75,6 +75,7 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.WinApiTypes,
+  WinApi.WinError,
   WinApi.ComBaseApi,
   WinApi.Coml2Api,
   WinApi.WinShellApi.ObjectArray,
@@ -352,10 +353,12 @@ type
   {$EXTERNALSYM LPSHITEMID}
   LPCSHITEMID = ^SHITEMID;
   {$EXTERNALSYM LPCSHITEMID}
-  SHITEMID = record
+  {$ALIGN 1}
+  SHITEMID = packed record
     cb: USHORT;
     abID: array[0..0] of BYTE;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHITEMID}
 
   PITEMIDLIST = ^ITEMIDLIST;
@@ -366,9 +369,11 @@ type
   {$EXTERNALSYM PCITEMIDLIST}
   LPCITEMIDLIST = ^ITEMIDLIST;
   {$EXTERNALSYM LPCITEMIDLIST}
-  ITEMIDLIST = record
+  {$ALIGN 1}
+  ITEMIDLIST = packed record
     mkid: SHITEMID;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM ITEMIDLIST}
 
   PIDLIST_ABSOLUTE = PITEMIDLIST;
@@ -398,18 +403,21 @@ type
 
   LPSHChangeProductKeyAsIDList = ^SHChangeProductKeyAsIDList;
   {$EXTERNALSYM LPSHChangeProductKeyAsIDList}
-  SHChangeProductKeyAsIDList = record
+  {$ALIGN 1}
+  SHChangeProductKeyAsIDList = packed record
     cb: USHORT;
     wszProductKey: array[0..38] of WCHAR;
     cbZero: USHORT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHChangeProductKeyAsIDList}
 
   LPSHCOLUMNINFO = ^SHCOLUMNINFO;
   {$EXTERNALSYM LPSHCOLUMNINFO}
   LPCSHCOLUMNINFO = ^SHCOLUMNINFO;
   {$EXTERNALSYM LPCSHCOLUMNINFO}
-  SHCOLUMNINFO = record
+  {$ALIGN 1}
+  SHCOLUMNINFO = packed record
     scid: SHCOLUMNID;
     vt: VARTYPE;
     fmt: DWORD;
@@ -418,6 +426,7 @@ type
     wszTitle: array[0..MAX_COLUMN_NAME_LEN - 1] of WCHAR;
     wszDescription: array[0..MAX_COLUMN_DESC_LEN - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHCOLUMNINFO}
 
   LPSHCOLUMNINIT = ^SHCOLUMNINIT;
@@ -840,7 +849,7 @@ type
 procedure SHChangeNotifyRegisterThread(status: SCNRT_STATUS); stdcall;
 {$EXTERNALSYM SHChangeNotifyRegisterThread}
 
-function PathQualify(psz: PWSTR): HRESULT; stdcall;
+procedure PathQualify(psz: PWSTR); stdcall;
 {$EXTERNALSYM PathQualify}
 
 function PathIsSlowA(pszFile: LPCSTR;
@@ -956,7 +965,7 @@ type
   // complete interface before the implementation section.
   // imported from Mshtml.h
   IEnumPrivacyRecords = interface(IUnknown)
-    ['{3050F842-98B5-11CF-BB82-00AA00BDCE0B}']
+    ['{3050F844-98B5-11CF-BB82-00AA00BDCE0B}']
     function Reset: HRESULT; stdcall;
     function GetSize(out pSize: ULONG): HRESULT; stdcall;
     function GetPrivacyImpacted(out pState: BOOL): HRESULT; stdcall;
@@ -980,12 +989,13 @@ implementation
 
 const
   Shell32Lib = 'shell32.dll';
+  ShDocVwLib = 'shdocvw.dll';
 
 
 {$WARN SYMBOL_PLATFORM OFF}
 
 procedure SHChangeNotifyRegisterThread;   external Shell32Lib name 'SHChangeNotifyRegisterThread' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function PathQualify;                     external Shell32Lib name 'PathQualify' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+procedure PathQualify;                     external Shell32Lib name 'PathQualify' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function PathIsSlowA;                     external Shell32Lib name 'PathIsSlowA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function PathIsSlowW;                     external Shell32Lib name 'PathIsSlowW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
@@ -998,26 +1008,144 @@ function PathIsSlow;                      external Shell32Lib name 'PathIsSlowA'
 function GetFileNameFromBrowse;           external Shell32Lib name 'GetFileNameFromBrowse' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function DriveType;                       external Shell32Lib name 'DriveType' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreatePropSheetExtArray;       external Shell32Lib name 'SHCreatePropSheetExtArray' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHOpenPropSheetA;                external Shell32Lib name 'SHOpenPropSheetA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHOpenPropSheetW;                external Shell32Lib name 'SHOpenPropSheetW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$IFDEF UNICODE}
-function SHOpenPropSheet;                 external Shell32Lib name 'SHOpenPropSheetW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ELSE}
-function SHOpenPropSheet;                 external Shell32Lib name 'SHOpenPropSheetA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
 
 function SHShellFolderView_Message;       external Shell32Lib name 'SHShellFolderView_Message' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHMultiFileProperties;           external Shell32Lib name 'SHMultiFileProperties' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateQueryCancelAutoPlayMoniker; external Shell32Lib name 'SHCreateQueryCancelAutoPlayMoniker' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-procedure PerUserInit;                    external Shell32Lib name 'PerUserInit' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHRunControlPanel;               external Shell32Lib name 'SHRunControlPanel' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function ImportPrivacySettings;           external Shell32Lib name 'ImportPrivacySettings' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function DoPrivacyDlg;                    external Shell32Lib name 'DoPrivacyDlg' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function ImportPrivacySettings;           external ShDocVwLib name 'ImportPrivacySettings' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function DoPrivacyDlg;                    external ShDocVwLib name 'DoPrivacyDlg' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional Prototypes here.
+
+
+// Preserve nil, empty strings and integer resource identifiers when adapting
+// ANSI entry points that are absent from current Windows x64 Shell32.
+function AnsiShellStringToWide(Value: LPCSTR;
+                              out Storage: UnicodeString;
+                              out Text: LPCWSTR): HRESULT;
+var
+  Count: Integer;
+begin
+  Storage := '';
+  Text := nil;
+  if NativeUInt(Value) <= $FFFF then
+  begin
+    Text := LPCWSTR(Value);
+    Exit(S_OK);
+  end;
+  Count := MultiByteToWideChar(CP_ACP,0,Value,-1,nil,0);
+  if Count = 0 then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  SetLength(Storage,Count);
+  if MultiByteToWideChar(CP_ACP,0,Value,-1,PWideChar(Storage),Count) = 0 then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  SetLength(Storage,Count - 1);
+  Text := PWideChar(Storage);
+  Result := S_OK;
+end;
+
+function SHOpenPropSheetA(pszCaption: LPCSTR;
+                          ahkeys: PHKEY;
+                          ckeys: UINT;
+                          pclsidDefault: PCLSID;
+                          pdtobj: IDataObject;
+                          psb: IShellBrowser;
+                          pStartPage: LPCSTR): BOOL; stdcall;
+var
+  CaptionStorage: UnicodeString;
+  PageStorage: UnicodeString;
+  Caption: LPCWSTR;
+  Page: LPCWSTR;
+  Status: HRESULT;
+begin
+  Status := AnsiShellStringToWide(pszCaption,CaptionStorage,Caption);
+  if Status >= 0 then
+    Status := AnsiShellStringToWide(pStartPage,PageStorage,Page);
+  if Status < 0 then
+  begin
+    SetLastError(DWORD(Status) and $FFFF);
+    Exit(False);
+  end;
+  Result := SHOpenPropSheetW(Caption,ahkeys,ckeys,pclsidDefault,pdtobj,psb,Page);
+end;
+
+function SHOpenPropSheet(pszCaption: LPCTSTR;
+                         ahkeys: PHKEY;
+                         ckeys: UINT;
+                         pclsidDefault: PCLSID;
+                         pdtobj: IDataObject;
+                         psb: IShellBrowser;
+                         pStartPage: LPCTSTR): BOOL; stdcall;
+begin
+  {$IFDEF UNICODE}
+  Result := SHOpenPropSheetW(pszCaption,ahkeys,ckeys,pclsidDefault,pdtobj,psb,pStartPage);
+  {$ELSE}
+  Result := SHOpenPropSheetA(pszCaption,ahkeys,ckeys,pclsidDefault,pdtobj,psb,pStartPage);
+  {$ENDIF}
+end;
+
+// These obsolete exports are optional on current Windows. Keep their legacy
+// signatures and report unsupported calls through the Win32 last-error value.
+procedure PerUserInit; stdcall;
+type
+  TPerUserInit = procedure; stdcall;
+var
+  LibraryHandle: HMODULE;
+  Entry: TPerUserInit;
+  Status: DWORD;
+begin
+  LibraryHandle := LoadLibraryW(PWideChar(UnicodeString(Shell32Lib)));
+  Status := ERROR_CALL_NOT_IMPLEMENTED;
+  try
+    Entry := nil;
+    if LibraryHandle <> 0 then
+      Entry := TPerUserInit(GetProcAddress(LibraryHandle,'PerUserInit'));
+    if Assigned(Entry) then
+    begin
+      Entry;
+      Status := GetLastError;
+    end;
+  finally
+    if LibraryHandle <> 0 then
+      FreeLibrary(LibraryHandle);
+    SetLastError(Status);
+  end;
+end;
+
+function SHRunControlPanel(lpcszCmdLine: PCWSTR;
+                            hwndMsgParent: HWND): BOOL; stdcall;
+type
+  TRunControlPanel = function(CommandLine: PCWSTR;Parent: HWND): BOOL; stdcall;
+var
+  LibraryHandle: HMODULE;
+  Entry: TRunControlPanel;
+  Status: DWORD;
+begin
+  Result := False;
+  LibraryHandle := LoadLibraryW(PWideChar(UnicodeString(Shell32Lib)));
+  Status := ERROR_CALL_NOT_IMPLEMENTED;
+  try
+    Entry := nil;
+    if LibraryHandle <> 0 then
+      Entry := TRunControlPanel(GetProcAddress(LibraryHandle,'SHRunControlPanel'));
+    if Assigned(Entry) then
+    begin
+      Result := Entry(lpcszCmdLine,hwndMsgParent);
+      Status := GetLastError;
+    end;
+  finally
+    if LibraryHandle <> 0 then
+      FreeLibrary(LibraryHandle);
+    SetLastError(Status);
+  end;
+end;
 
 end.
 

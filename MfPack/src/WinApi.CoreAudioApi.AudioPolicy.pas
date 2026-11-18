@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,7 +33,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,7 +73,7 @@ interface
 
 uses
   {WinApi}
-  WinApi.PropSys,
+  WinApi.Windows,
   WinApi.WinApiTypes,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
@@ -112,7 +112,7 @@ type
   IAudioSessionEvents = interface(IUnknown)
   ['{24918ACC-64B3-37C1-8CA9-74A66E9957A8}']
     function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
-                                  const EventContext: TGUID): HResult; stdcall;
+                                  EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the display name of an AudioSession changes.
@@ -133,7 +133,7 @@ type
     //
 
     function OnIconPathChanged(NewIconPath: LPCWSTR;
-                               const EventContext: TGUID): HResult; stdcall;
+                               EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the icon path of an AudioSession changes.
@@ -155,7 +155,7 @@ type
 
     function OnSimpleVolumeChanged(NewVolume: FLOAT;
                                    NewMute: BOOL;
-                                   const EventContext: TGUID): HResult; stdcall;
+                                   EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the simple volume of an AudioSession changes.
@@ -180,7 +180,7 @@ type
     function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelArray: PFloat;
                                     ChangedChannel: UINT;
-                                    const EventContext: TGUID): HResult; stdcall;
+                                    EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the channel volume of an AudioSession changes.
@@ -206,7 +206,7 @@ type
     //
 
     function OnGroupingParamChanged(const NewGroupingParam: TGUID;
-                                    const EventContext: TGUID): HResult; stdcall;
+                                    EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //      Called when the grouping param of an Audio Session changes.
     //
@@ -274,7 +274,7 @@ type
   {$EXTERNALSYM IAudioSessionControl}
   IAudioSessionControl = interface(IUnknown)
   ['{F4B1A599-7266-4319-A8CA-E70ACB11E8CD}']
-    function GetState(out pRetVal: UINT): HResult; stdcall;
+    function GetState(out pRetVal: AudioSessionState): HResult; stdcall;
     // Description:
     //
     //  Retrieves the current AudioSession state.
@@ -299,7 +299,7 @@ type
     function GetDisplayName(out pRetVal: LPWSTR): HResult; stdcall; // pRetVal must be freed by CoTaskMemFree
 
     function SetDisplayName(Val: LPCWSTR;
-                            EventContext: TGUID): HResult; stdcall;
+                            EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Sets or retrieves the current display name of the AudioSession.
@@ -335,7 +335,7 @@ type
     function GetIconPath(out pRetVal: LPWSTR): HResult; stdcall;    // pRetVal must be freed by CoTaskMemFree
 
     function SetIconPath(Val: LPCWSTR;
-                         EventContext: TGUID): HResult; stdcall;
+                         EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Sets or retrieves an icon resource associated with the session.
@@ -370,7 +370,7 @@ type
     function GetGroupingParam(out pRetVal: TGUID): HResult; stdcall;
 
     function SetGroupingParam(const OverrideValue: TGUID;
-                              const EventContext: TGUID): HResult; stdcall;
+                              EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Gets or sets the current grouping param of the Audio Session.

@@ -10,7 +10,7 @@
 // Release date: 22-05-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Include file for Multimedia Device Development Kit.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -272,7 +272,7 @@ const
 type
 
   LPDRVM_IOCTL_DATA = ^DRVM_IOCTL_DATA;
-  DRVM_IOCTL_DATA = record
+  DRVM_IOCTL_DATA = packed record
     dwSize: DWORD;                   // size of this structure (inclusive)
     dwCmd: DWORD;                   // IOCTL command code, 0x80000000 and above reserved for system
   end;
@@ -297,7 +297,7 @@ type
   // PnP version of media device caps
 
   PMDEVICECAPSEX = ^MDEVICECAPSEX;
-  MDEVICECAPSEX = record
+  MDEVICECAPSEX = packed record
     cbSize: DWORD;
     pCaps: Pointer;
   end;
@@ -325,7 +325,7 @@ type
   // waveform input and output device open information structure
   LPWAVEOPENDESC = ^WAVEOPENDESC;
   Pwaveopendesc_tag = ^waveopendesc_tag;
-  waveopendesc_tag = record
+  waveopendesc_tag = packed record
     hWave: HWAVE;                    // handle
     lpFormat: PWAVEFORMAT;           // format of wave data
     dwCallback: DWORD_PTR;           // callback
@@ -464,7 +464,7 @@ const
 type
   PMIDIOPENSTRMID = ^MIDIOPENSTRMID;
   PMidiopenstrmid_tag = ^midiopenstrmid_tag;
-  midiopenstrmid_tag = record
+  midiopenstrmid_tag = packed record
     dwStreamID: DWORD;
     uDeviceID: UINT;
   end;
@@ -478,7 +478,7 @@ type
   LPMIDIOPENDESC = ^MIDIOPENDESC;
   {$EXTERNALSYM LPMIDIOPENDESC}
   PMIDIOPENDESC = ^MIDIOPENDESC;
-  midiopendesc_tag = record
+  midiopendesc_tag = packed record
     hMidi: HMIDI;                           // handle
     dwCallback: DWORD_PTR;                  // callback
     dwInstance: DWORD_PTR;                  // app's private instance information
@@ -610,7 +610,7 @@ type
   {$EXTERNALSYM PMIXEROPENDESC}
   LPMIXEROPENDESC = ^_tMIXEROPENDESC;
   {$EXTERNALSYM LPMIXEROPENDESC}
-  _tMIXEROPENDESC = record
+  _tMIXEROPENDESC = packed record
     hmx: HMIXER;                     // handle that will be used
     pReserved0: Pointer;             // reserved--driver should ignore
     dwCallback: DWORD_PTR;           // callback
@@ -664,7 +664,7 @@ const
   //type
   //  PTimerevent = ^TTimerevent;
   //  LPTIMEREVENT = ^TIMEREVENT;
-  //  timerevent_tag = record
+  //  timerevent_tag = packed record
   //    wDelay: WORD;                    // delay required
   //    wResolution: WORD;               // resolution required
   //    lpFunction: LPTIMECALLBACK;      // ptr to callback function
@@ -831,7 +831,7 @@ type
   LPJOYPOS = ^joypos_tag;
   {$EXTERNALSYM LPJOYPOS}
   PJoypos_tag = ^joypos_tag;
-  joypos_tag = record
+  joypos_tag = packed record
     dwX: DWORD;
     dwY: DWORD;
     dwZ: DWORD;
@@ -846,7 +846,7 @@ type
   // struct for storing ranges
   LPJOYRANGE = ^joyrange_tag;
   PJoyrange = ^TJoyrange;
-  joyrange_tag = record
+  joyrange_tag = packed record
     jpMin: JOYPOS;
     jpMax: JOYPOS;
     jpCenter: JOYPOS;
@@ -861,7 +861,7 @@ type
   LPJOYREGUSERVALUES = ^joyreguservalues_tag;
   {$EXTERNALSYM LPJOYREGUSERVALUES}
   PJoyreguservalues_tag = ^joyreguservalues_tag;
-  joyreguservalues_tag = record
+  joyreguservalues_tag = packed record
     dwTimeOut: DWORD;                // value at which to timeout joystick polling
     jrvRanges: JOYRANGE;             // range of values app wants returned for axes
     jpDeadZone: JOYPOS;              // area around center to be considered
@@ -876,7 +876,7 @@ type
   LPJOYHWSETTINGS = ^joyreghwsettings_tag;
   {$EXTERNALSYM LPJOYHWSETTINGS}
   PJoyreghwsettings_tag = ^joyreghwsettings_tag;
-  joyreghwsettings_tag = record
+  joyreghwsettings_tag = packed record
     dwFlags: DWORD;
     dwNumButtons: DWORD;            // number of buttons
   end;
@@ -888,7 +888,7 @@ type
 
   LPJOYREGHWVALUES = ^joyreghwvalues_tag;
   PJoyreghwvalues = ^TJoyreghwvalues;
-  joyreghwvalues_tag = record
+  joyreghwvalues_tag = packed record
     jrvHardware: JOYRANGE;                                 // values returned by hardware
     dwPOVValues: array[0..JOY_POV_NUMDIRS - 1] of DWORD;   // POV values returned by hardware
     dwCalFlags: DWORD;                                     // what has been calibrated
@@ -904,7 +904,7 @@ type
   LPJOYREGHWCONFIG = ^joyreghwconfig_tag;
   {$EXTERNALSYM LPJOYREGHWCONFIG}
   PJoyreghwconfig_tag = ^joyreghwconfig_tag;
-  joyreghwconfig_tag = record
+  joyreghwconfig_tag = packed record
     hws: JOYREGHWSETTINGS;           // hardware settings
     dwUsageSettings: DWORD;          // usage settings
     hwv: JOYREGHWVALUES;             // values returned by hardware
@@ -920,7 +920,7 @@ type
   LPJOYCALIBRATE = ^JOYCALIBRATE;
   {$EXTERNALSYM LPJOYCALIBRATE}
   PJoycalibrate_tag = ^joycalibrate_tag;
-  joycalibrate_tag = record
+  joycalibrate_tag = packed record
     wXbase: WORD;
     wXdelta: WORD;
     wYbase: WORD;
@@ -933,9 +933,12 @@ type
   {$EXTERNALSYM JOYCALIBRATE}
 
   // prototype for joystick message function
-  LPJOYDEVMSGPROC = ^JOYDEVMSGPROC;
+  JOYDEVMSGPROC = function(dwId: DWORD;
+                          uMsg: UINT;
+                          lParam1: LONG;
+                          lParam2: LONG): DWORD; cdecl;
+  LPJOYDEVMSGPROC = JOYDEVMSGPROC;
   {$EXTERNALSYM LPJOYDEVMSGPROC}
-  JOYDEVMSGPROC = DWORD;
   {$EXTERNALSYM JOYDEVMSGPROC}
 
 const
@@ -1036,7 +1039,7 @@ type
   PMCI_OPEN_DRIVER_PARMS = ^MCI_OPEN_DRIVER_PARMS;
   LPMCI_OPEN_DRIVER_PARMS = ^MCI_OPEN_DRIVER_PARMS;
   {$EXTERNALSYM LPMCI_OPEN_DRIVER_PARMS}
-  MCI_OPEN_DRIVER_PARMS = record
+  MCI_OPEN_DRIVER_PARMS = packed record
     wDeviceID: MCIDEVICEID;          // device ID
     lpstrParams: PWideChar;          // parameter string for entry in SYSTEM.INI
     wCustomCommandTable: UINT;       // custom command table ((-1) if none)
@@ -1097,7 +1100,7 @@ const
   MCI_HDC                             = 12;
   {$EXTERNALSYM MCI_HDC}
 
-{$ifdef _WIN64}
+{$IFDEF WIN64}
   MCI_INTEGER64                       = 13;
   {$EXTERNALSYM MCI_INTEGER64}
 {$endif} // _WIN64
@@ -1153,11 +1156,11 @@ const
 
 
   function MAKELRESULT(dwlow: WORD;
-                       dwhigh: WORD): DWORD; inline;
+                       dwhigh: WORD): LRESULT; inline;
   {$EXTERNALSYM MAKELRESULT}
 
   function MAKEMCIRESOURCE(wRet: WORD;
-                           wRes: WORD): WORD; inline;
+                           wRes: WORD): LRESULT; inline;
   {$EXTERNALSYM MAKEMCIRESOURCE}
 
 
@@ -1172,14 +1175,13 @@ const
 
 
 function MAKELRESULT(dwlow: WORD;
-                     dwhigh: WORD): DWORD; inline;
+                     dwhigh: WORD): LRESULT; inline;
 begin
-  Result := MAKELONG(dwlow,
-                     dwhigh);
+  Result := LRESULT(DWORD(dwlow) or (DWORD(dwhigh) shl 16));
 end;
 
 function MAKEMCIRESOURCE(wRet: WORD;
-                         wRes: WORD): WORD; inline;
+                         wRes: WORD): LRESULT; inline;
 begin
   Result := MAKELRESULT(wRet,
                         wRes);

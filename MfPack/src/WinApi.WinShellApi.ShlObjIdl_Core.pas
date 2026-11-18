@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Shell API.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -68,6 +68,7 @@ uses
 
 {WinApi}
   WinApi.Windows,
+  Winapi.CommCtrl,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   WinApi.WinShellApi.ShTypes,
@@ -834,7 +835,7 @@ const
   {$EXTERNALSYM SID_LaunchSourceViewSizePreference}
   SID_LaunchSourceAppUserModelId      : TGUID = '{2ce78010-74db-48bc-9c6a-10f372495723}';
   {$EXTERNALSYM SID_LaunchSourceAppUserModelId}
-  SID_HandlerInfo                     : TGUID = '{31cca04c-04d3-4ea9-90de-97b15e87a532}';
+  SID_HandlerInfo                     : TGUID = '{997706EF-F880-453B-8118-39E1A2D2655A}';
   {$EXTERNALSYM SID_HandlerInfo}
   SID_SHandlerActivationHost          : TGUID = '{35094a87-8bb1-4237-96c6-c417eebdb078}';
   {$EXTERNALSYM SID_SHandlerActivationHost}
@@ -1398,7 +1399,8 @@ const
 //  this is so that all the implementations still get the function pointer.
 //  and midl wont complain about the data type
 type
-  LPFNSVADDPROPSHEETPAGE = LPARAM;
+  LPFNSVADDPROPSHEETPAGE = function(hPage: HPROPSHEETPAGE;
+                                   lParam: LPARAM): BOOL; stdcall;
   {$EXTERNALSYM LPFNSVADDPROPSHEETPAGE}
 
 type
@@ -2973,8 +2975,8 @@ const
 
 type
   PLPTBBUTTONSB = ^LPTBBUTTONSB;
+  LPTBBUTTONSB = PTBBUTTON;
   {$EXTERNALSYM LPTBBUTTONSB}
-  LPTBBUTTONSB = LPARAM;
 
 
 
@@ -3072,9 +3074,13 @@ type
   // Record EXTRASEARCH
   // ==================
   EXTRASEARCH = record
-    guidSearch: TGUID;
-    wszFriendlyName: array[0..80 - 1] of WideChar;
-    wszUrl: array[0..2084 - 1] of WideChar;
+    case Byte of
+      0:(
+        guidSearch: TGUID;
+        wszFriendlyName: array[0..80 - 1] of WideChar;
+        wszUrl: array[0..2084 - 1] of WideChar
+        );
+      1:(_Alignment: DWORD);
   end;
   {$EXTERNALSYM EXTRASEARCH}
   PEXTRASEARCH = ^EXTRASEARCH;
@@ -3123,8 +3129,12 @@ type
   // Record SHELL_ITEM_RESOURCE
   // ==========================
   SHELL_ITEM_RESOURCE = record
-    guidType: TGUID;
-    szName: array[0..260 - 1] of WideChar;
+    case Byte of
+      0:(
+        guidType: TGUID;
+        szName: array[0..260 - 1] of WideChar
+        );
+      1:(_Alignment: DWORD);
   end;
   {$EXTERNALSYM SHELL_ITEM_RESOURCE}
   PSHELL_ITEM_RESOURCE = ^SHELL_ITEM_RESOURCE;
@@ -3279,12 +3289,14 @@ type
 
   // Record DELEGATEITEMID
   // =====================
-  DELEGATEITEMID = record
+  {$ALIGN 1}
+  DELEGATEITEMID = packed record
     cbSize: WORD;
     wOuter: WORD;
     cbInner: WORD;
     rgb: array[0..1 - 1] of BYTE;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM DELEGATEITEMID}
   PDELEGATEITEMID = ^DELEGATEITEMID;
   {$EXTERNALSYM PDELEGATEITEMID}
@@ -3400,6 +3412,11 @@ type
   PZZWSTR = PWideChar;
   {$EXTERNALSYM PZZWSTR}
 
+
+  {$POINTERMATH ON}
+  PPITEMID_CHILD = ^PITEMID_CHILD;
+  PPIDLIST_ABSOLUTE = ^PIDLIST_ABSOLUTE;
+  {$POINTERMATH OFF}
 
   IContextMenu = interface;
   IContextMenu2 = interface;
@@ -3786,7 +3803,7 @@ type
   IPersistFolder2 = interface(IPersistFolder)
     ['{1AC3D9F0-175C-11D1-95BE-00609797EA4F}']
 
-    function GetCurFolder(ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
+    function GetCurFolder(out ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
   end;
   IID_IPersistFolder2 = IPersistFolder2;
   {$EXTERNALSYM IID_IPersistFolder2}
@@ -3802,7 +3819,7 @@ type
 
     function InitializeEx(pbc: IBindCtx;
                           pidlRoot: PCIDLIST_ABSOLUTE;
-                    {out} ppfti: PERSIST_FOLDER_TARGET_INFO): HRESULT; stdcall;
+                          ppfti: PPERSIST_FOLDER_TARGET_INFO): HRESULT; stdcall;
 
     function GetFolderTargetInfo(ppfti: PPERSIST_FOLDER_TARGET_INFO): HRESULT; stdcall;
   end;
@@ -3820,7 +3837,7 @@ type
 
     function SetIDList(pidl: PCIDLIST_ABSOLUTE): HRESULT; stdcall;
 
-    function GetIDList(ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
+    function GetIDList(out ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
   end;
   IID_IPersistIDList = IPersistIDList;
   {$EXTERNALSYM IID_IPersistIDList}
@@ -3834,8 +3851,8 @@ type
     ['{000214F2-0000-0000-C000-000000000046}']
 
     function Next(celt: ULONG;
-                     rgelt: PITEMID_CHILD;
-                     pceltFetched: PULONG): HRESULT; stdcall;
+                  rgelt: PPITEMID_CHILD;
+                  pceltFetched: PULONG): HRESULT; stdcall;
 
     function Skip(celt: ULONG): HRESULT; stdcall;
 
@@ -3855,8 +3872,8 @@ type
     ['{D0191542-7954-4908-BC06-B2360BBE45BA}']
 
     function Next(celt: ULONG;
-                     rgelt: PIDLIST_ABSOLUTE;
-                     pceltFetched: PULONG): HRESULT; stdcall;
+                  rgelt: PPIDLIST_ABSOLUTE;
+                  pceltFetched: PULONG): HRESULT; stdcall;
 
     function Skip(celt: ULONG): HRESULT; stdcall;
 
@@ -3877,7 +3894,7 @@ type
 
     function Merge(localFilePath: LPCWSTR;
                    serverFilePath: LPCWSTR;
-             {out} updateStatus: MERGE_UPDATE_STATUS): HRESULT; stdcall;
+                   out updateStatus: MERGE_UPDATE_STATUS): HRESULT; stdcall;
 
     function ShowResolveConflictUIAsync(localFilePath: LPCWSTR;
                                         monitorToDisplayOn: HMONITOR): HRESULT; stdcall;
@@ -3895,7 +3912,7 @@ type
 
     function SetMode(feMode: FOLDER_ENUM_MODE): HRESULT; stdcall;
 
-    function GetMode(pfeMode: FOLDER_ENUM_MODE): HRESULT; stdcall;
+    function GetMode(out pfeMode: FOLDER_ENUM_MODE): HRESULT; stdcall;
   end;
   IID_IObjectWithFolderEnumMode = IObjectWithFolderEnumMode;
   {$EXTERNALSYM IID_IObjectWithFolderEnumMode}
@@ -4013,11 +4030,6 @@ type
                        uFlags: SHGDNF;
                        out ppidlOut: PITEMID_CHILD): HRESULT; stdcall;
 
-    function RemoteSetNameOf(hwnd: HWND;
-                             pidl: PCUITEMID_CHILD;
-                             pszName: LPCWSTR;
-                             uFlags: SHGDNF;
-                             out ppidlOut: PITEMID_CHILD): HRESULT; stdcall;
   end;
   IID_IShellFolder = IShellFolder;
   {$EXTERNALSYM IID_IShellFolder}
@@ -4054,8 +4066,8 @@ type
     ['{0E700BE1-9DB6-11D1-A1CE-00C04FD75D13}']
 
     function Next(celt: ULONG;
-                  out rgelt: EXTRASEARCH;
-                  pceltFetched: ULONG): HRESULT; stdcall;
+                  rgelt: PEXTRASEARCH;
+                  pceltFetched: PULONG): HRESULT; stdcall;
 
     function Skip(celt: ULONG): HRESULT; stdcall;
 
@@ -4179,7 +4191,7 @@ type
   IFolderView = interface(IUnknown)
     ['{CDE725B0-CCC9-4519-917E-325D72FAB4CE}']
 
-    function GetCurrentViewMode(pViewMode: UINT): HRESULT; stdcall;
+    function GetCurrentViewMode(out pViewMode: UINT): HRESULT; stdcall;
 
     function SetCurrentViewMode(ViewMode: UINT): HRESULT; stdcall;
 
@@ -4187,7 +4199,7 @@ type
                        out ppv: Pointer): HRESULT; stdcall;
 
     function Item(iItemIndex: Integer;
-                     ppidl: PITEMID_CHILD): HRESULT; stdcall;
+                  out ppidl: PITEMID_CHILD): HRESULT; stdcall;
 
     function ItemCount(uFlags: UINT;
                        out pcItems: int): HRESULT; stdcall;
@@ -4196,14 +4208,14 @@ type
                    const riid: REFIID;
                    out ppv: Pointer): HRESULT; stdcall;
 
-    function GetSelectionMarkedItem(piItem: int): HRESULT; stdcall;
+    function GetSelectionMarkedItem(out piItem: Integer): HRESULT; stdcall;
 
-    function GetFocusedItem(piItem: int): HRESULT; stdcall;
+    function GetFocusedItem(out piItem: Integer): HRESULT; stdcall;
 
     function GetItemPosition(pidl: PCUITEMID_CHILD;
                              out ppt: POINT): HRESULT; stdcall;
 
-    function GetSpacing(ppt: POINT): HRESULT; stdcall;
+    function GetSpacing(ppt: PPoint): HRESULT; stdcall;
 
     function GetDefaultSpacing(out ppt: POINT): HRESULT; stdcall;
 
@@ -4214,7 +4226,7 @@ type
 
     function SelectAndPositionItems(cidl: UINT;
                                     apidl: PCUITEMID_CHILD_ARRAY;
-                                    apt: POINT;
+                                    apt: PPoint;
                                     dwFlags: DWORD): HRESULT; stdcall;
   end;
   IID_IFolderView = IFolderView;
@@ -4235,8 +4247,6 @@ type
     function GetGroupBy(out pkey: PROPERTYKEY;
                         pfAscending: PBOOL): HRESULT; stdcall;
 
-    function RemoteGetGroupBy(out pkey: PROPERTYKEY;
-                              pfAscending: PBOOL): HRESULT; stdcall;
 
     // Setting and Getting per item view properties is not possible for Libraries or Search results views.
     // Consider using existing item properties instead.
@@ -4404,7 +4414,7 @@ type
 
     function SetBackgroundColor(color: COLORREF): HRESULT; stdcall;
 
-    function SetFont(plf: LOGFONTW): HRESULT; stdcall;
+    function SetFont(plf: PLOGFONTW): HRESULT; stdcall;
 
     function SetTextColor(color: COLORREF): HRESULT; stdcall;
   end;
@@ -5517,7 +5527,7 @@ type
     ['{000214E8-0000-0000-C000-000000000046}']
 
     function Initialize(pidlFolder: PCIDLIST_ABSOLUTE;
-                        pdtobj: PIDataObject;
+                        pdtobj: IDataObject;
                         hkeyProgID: HKEY): HRESULT; stdcall;
   end;
   IID_IShellExtInit = IShellExtInit;
@@ -5622,8 +5632,8 @@ type
   IItemNameLimits = interface(IUnknown)
     ['{1DF0D7F1-B267-4D28-8B10-12E23202A5C4}']
 
-    function GetValidCharacters(ppwszValidChars: LPWSTR;
-                                ppwszInvalidChars: LPWSTR): HRESULT; stdcall;
+    function GetValidCharacters(out ppwszValidChars: LPWSTR;
+                                out ppwszInvalidChars: LPWSTR): HRESULT; stdcall;
 
     function GetMaxLength(pszName: LPCWSTR;
                           out piMaxNameLen: Int): HRESULT; stdcall;
@@ -6205,7 +6215,7 @@ type
                   pnswcb: INamespaceWalkCB): HRESULT; stdcall;
 
     function GetIDArrayResult(out pcItems: UINT;
-                              out prgpidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
+                              out prgpidl: PPIDLIST_ABSOLUTE): HRESULT; stdcall;
   end;
   IID_INamespaceWalk = INamespaceWalk;
   {$EXTERNALSYM IID_INamespaceWalk}
@@ -6319,9 +6329,9 @@ type
   IDeskBar = interface(IOleWindow)
     ['{EB0FE173-1A3A-11D0-89B3-00A0C90A90AC}']
 
-    function SetClient(punkClient: PIUnknown): HRESULT; stdcall;
+    function SetClient(punkClient: IUnknown): HRESULT; stdcall;
 
-    function GetClient(out ppunkClient: PIUnknown): HRESULT; stdcall;
+    function GetClient(out ppunkClient: IUnknown): HRESULT; stdcall;
 
     function OnPosRectChangeDB(prc: PRECT): HRESULT; stdcall;
   end;
@@ -6873,7 +6883,7 @@ type
                      hwnd: HWND;
                      dwFlags: DWORD): HRESULT; stdcall;
 
-    function GetMenu(phmenu: HMENU;
+    function GetMenu(out phmenu: HMENU;
                      phwnd: PHWND;
                      pdwFlags: PDWORD): HRESULT; stdcall;
 
@@ -7107,7 +7117,7 @@ type
   IDestinationStreamFactory = interface(IUnknown)
     ['{8A87781B-39A7-4A1F-AAB3-A39B9C34A7D9}']
 
-    function GetDestinationStream(out ppstm: PIStream): HRESULT; stdcall;
+    function GetDestinationStream(out ppstm: IStream): HRESULT; stdcall;
   end;
   IID_IDestinationStreamFactory = IDestinationStreamFactory;
   {$EXTERNALSYM IID_IDestinationStreamFactory}
@@ -7384,11 +7394,11 @@ type
     ['{3409E930-5A39-11D1-83FA-00A0C90DC849}']
 
     function CallBack(psf: IShellFolder;
-                     hwndOwner: HWND;
-                     pdtobj: PIDataObject;
-                     uMsg: UINT;
-                     wParam: WPARAM;
-                     lParam: LPARAM): HRESULT; stdcall;
+                      hwndOwner: HWND;
+                      pdtobj: IDataObject;
+                      uMsg: UINT;
+                      wParam: WPARAM;
+                      lParam: LPARAM): HRESULT; stdcall;
   end;
   IID_IContextMenuCB = IContextMenuCB;
   {$EXTERNALSYM IID_IContextMenuCB}
@@ -7496,7 +7506,7 @@ type
     ['{A88826F8-186F-4987-AADE-EA0CEF8FBFE8}']
 
     function Next(celt: ULONG;
-                  pUICommand: IExplorerCommand;
+                  pUICommand: PIExplorerCommand;
                   pceltFetched: PULONG): HRESULT; stdcall;
 
     function Skip(celt: ULONG): HRESULT; stdcall;
@@ -7668,7 +7678,7 @@ type
 
     function SetAppID(pszAppID: LPCWSTR): HRESULT; stdcall;
 
-    function GetAppID(ppszAppID: LPWSTR): HRESULT; stdcall;
+    function GetAppID(out ppszAppID: LPWSTR): HRESULT; stdcall;
   end;
   IID_IObjectWithAppUserModelID = IObjectWithAppUserModelID;
   {$EXTERNALSYM IID_IObjectWithAppUserModelID}
@@ -7682,7 +7692,7 @@ type
   IObjectWithPackageFullName = interface(IUnknown)
     ['{ED2AA515-602F-469C-A130-CE69FD0FA878}']
 
-    function GetPackageFullName(packageFullName: LPWSTR): HRESULT; stdcall;
+    function GetPackageFullName(out packageFullName: LPWSTR): HRESULT; stdcall;
   end;
   IID_IObjectWithPackageFullName = IObjectWithPackageFullName;
   {$EXTERNALSYM IID_IObjectWithPackageFullName}
@@ -7698,7 +7708,7 @@ type
 
     function SetProgID(pszProgID: LPCWSTR): HRESULT; stdcall;
 
-    function GetProgID(ppszProgID: LPWSTR): HRESULT; stdcall;
+    function GetProgID(out ppszProgID: LPWSTR): HRESULT; stdcall;
   end;
   IID_IObjectWithProgID = IObjectWithProgID;
   {$EXTERNALSYM IID_IObjectWithProgID}
@@ -7712,9 +7722,9 @@ type
   IUpdateIDList = interface(IUnknown)
     ['{6589B6D2-5F8D-4B9E-B7E0-23CDD9717D8C}']
 
-    function Update(pbc: PIBindCtx;
+    function Update(pbc: IBindCtx;
                     pidlIn: PCUITEMID_CHILD;
-                    ppidlOut: PITEMID_CHILD): HRESULT; stdcall;
+                    out ppidlOut: PITEMID_CHILD): HRESULT; stdcall;
   end;
   IID_IUpdateIDList = IUpdateIDList;
   {$EXTERNALSYM IID_IUpdateIDList}
@@ -7985,21 +7995,21 @@ type
   IAssocHandler = interface(IUnknown)
     ['{F04061AC-1659-4A3F-A954-775AA57FC083}']
 
-    function GetName(ppsz: LPWSTR): HRESULT; stdcall;
+    function GetName(out ppsz: LPWSTR): HRESULT; stdcall;
 
-    function GetUIName(ppsz: LPWSTR): HRESULT; stdcall;
+    function GetUIName(out ppsz: LPWSTR): HRESULT; stdcall;
 
-    function GetIconLocation(ppszPath: LPWSTR;
-                     pIndex: PInteger): HRESULT; stdcall;
+    function GetIconLocation(out ppszPath: LPWSTR;
+                             pIndex: PInteger): HRESULT; stdcall;
 
     function IsRecommended: HRESULT; stdcall;
 
     function MakeDefault(pszDescription: LPCWSTR): HRESULT; stdcall;
 
-    function Invoke(pdo: PIDataObject): HRESULT; stdcall;
+    function Invoke(pdo: IDataObject): HRESULT; stdcall;
 
-    function CreateInvoker(pdo: PIDataObject;
-                     out ppInvoker: IAssocHandlerInvoker): HRESULT; stdcall;
+    function CreateInvoker(pdo: IDataObject;
+                           out ppInvoker: IAssocHandlerInvoker): HRESULT; stdcall;
   end;
   IID_IAssocHandler = IAssocHandler;
   {$EXTERNALSYM IID_IAssocHandler}
@@ -8178,7 +8188,7 @@ type
     function EnumerateBackgroundTasks(packageFullName: LPCWSTR;
                                       out taskCount: ULONG;
                                       out taskIds: LPCGUID;
-                                      out taskNames: LPCWSTR): HRESULT; stdcall;
+                                      out taskNames: PPWideChar): HRESULT; stdcall;
 
     function ActivateBackgroundTask(taskId: LPCGUID): HRESULT; stdcall;
 
@@ -8618,7 +8628,7 @@ function SHCreateItemFromIDList(pidl: PCIDLIST_ABSOLUTE;
 {$EXTERNALSYM SHCreateItemFromIDList}
 
 function SHCreateItemFromParsingName(pszPath: LPCWSTR;
-                                     pbc: PIBindCtx;
+                                     pbc: IBindCtx;
                                      const riid: REFIID;
                                      out ppv): HRESULT; stdcall;
 {$EXTERNALSYM SHCreateItemFromParsingName}
@@ -8632,7 +8642,7 @@ function SHCreateItemWithParent(pidlParent: PCIDLIST_ABSOLUTE;
 
 function SHCreateItemFromRelativeName(psiParent: IShellItem;
                                       pszName: LPCWSTR;
-                                      pbc: PIBindCtx;
+                                      pbc: IBindCtx;
                                       const riid: REFIID;
                                       out ppv): HRESULT; stdcall;
 {$EXTERNALSYM SHCreateItemFromRelativeName}
@@ -8645,7 +8655,7 @@ function SHCreateItemInKnownFolder(kfid: REFKNOWNFOLDERID;
 {$EXTERNALSYM SHCreateItemInKnownFolder}
 
 function SHGetIDListFromObject(punk: IUnknown;
-                               ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
+                               out ppidl: PIDLIST_ABSOLUTE): HRESULT; stdcall;
 {$EXTERNALSYM SHGetIDListFromObject}
 
 function SHGetItemFromObject(punk: IUnknown;
@@ -8660,7 +8670,7 @@ function SHGetPropertyStoreFromIDList(pidl: PCIDLIST_ABSOLUTE;
 {$EXTERNALSYM SHGetPropertyStoreFromIDList}
 
 function SHGetPropertyStoreFromParsingName(pszPath: LPCWSTR;
-                                           pbc: PIBindCtx;
+                                           pbc: IBindCtx;
                                            flags: GETPROPERTYSTOREFLAGS;
                                            const riid: REFIID;
                                            out ppv): HRESULT; stdcall;
@@ -8668,7 +8678,7 @@ function SHGetPropertyStoreFromParsingName(pszPath: LPCWSTR;
 
 function SHGetNameFromIDList(pidl: PCIDLIST_ABSOLUTE;
                              sigdnName: SIGDN;
-                             ppszName: LPWSTR): HRESULT; stdcall;
+                             out ppszName: LPWSTR): HRESULT; stdcall;
 {$EXTERNALSYM SHGetNameFromIDList}
 
 function SHGetItemFromDataObject(pdtobj: IDataObject;
@@ -8694,10 +8704,12 @@ function SHCreateShellItemArrayFromIDLists(cidl: UINT;
                                            out ppsiItemArray: IShellItemArray): HRESULT; stdcall;
 {$EXTERNALSYM SHCreateShellItemArrayFromIDLists}
 
-function SHCreateShellItemArrayFromShellItem(psi: IShellItem; riid: REFIID; out ppv: Pointer): HRESULT; stdcall;
+function SHCreateShellItemArrayFromShellItem(psi: IShellItem;
+                                             const riid: REFIID;
+                                             out ppv: Pointer): HRESULT; stdcall;
 {$EXTERNALSYM SHCreateShellItemArrayFromShellItem}
 
-function SHCreateAssociationRegistration(riid: REFIID; out ppv: Pointer): HRESULT; stdcall;
+function SHCreateAssociationRegistration(const riid: REFIID;out ppv: Pointer): HRESULT; stdcall;
 {$EXTERNALSYM SHCreateAssociationRegistration}
 
 function SHCreateDefaultExtractIcon(const riid: REFIID;
@@ -8707,16 +8719,16 @@ function SHCreateDefaultExtractIcon(const riid: REFIID;
 function SetCurrentProcessExplicitAppUserModelID(AppID: LPCWSTR): HRESULT; stdcall;
 {$EXTERNALSYM SetCurrentProcessExplicitAppUserModelID}
 
-function GetCurrentProcessExplicitAppUserModelID(AppID: LPWSTR): HRESULT; stdcall;
+function GetCurrentProcessExplicitAppUserModelID(out AppID: LPWSTR): HRESULT; stdcall;
 {$EXTERNALSYM GetCurrentProcessExplicitAppUserModelID}
 
 function SHGetTemporaryPropertyForItem(psi: IShellItem;
-                                       propkey: REFPROPERTYKEY;
-                                       ppropvar: PROPVARIANT): HRESULT; stdcall;
+                                       const propkey: REFPROPERTYKEY;
+                                       out ppropvar: PROPVARIANT): HRESULT; stdcall;
 {$EXTERNALSYM SHGetTemporaryPropertyForItem}
 
 function SHSetTemporaryPropertyForItem(psi: IShellItem;
-                                       propkey: REFPROPERTYKEY;
+                                       const propkey: REFPROPERTYKEY;
                                        propvar: REFPROPVARIANT): HRESULT; stdcall;
 {$EXTERNALSYM SHSetTemporaryPropertyForItem}
 
@@ -8811,7 +8823,7 @@ function SHCreateShellItemArray;            external Shell32Lib name 'SHCreateSh
 function SHCreateShellItemArrayFromDataObject; external Shell32Lib name 'SHCreateShellItemArrayFromDataObject' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateShellItemArrayFromIDLists; external Shell32Lib name 'SHCreateShellItemArrayFromIDLists' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateShellItemArrayFromShellItem; external Shell32Lib name 'SHCreateShellItemArrayFromShellItem' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHCreateAssociationRegistration;   external ExplorerFrameLib name 'SHCreateAssociationRegistration' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function SHCreateAssociationRegistration;   external Shell32Lib name 'SHCreateAssociationRegistration' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateDefaultExtractIcon;        external Shell32Lib name 'SHCreateDefaultExtractIcon' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SetCurrentProcessExplicitAppUserModelID; external Shell32Lib name 'SetCurrentProcessExplicitAppUserModelID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function GetCurrentProcessExplicitAppUserModelID; external Shell32Lib name 'GetCurrentProcessExplicitAppUserModelID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

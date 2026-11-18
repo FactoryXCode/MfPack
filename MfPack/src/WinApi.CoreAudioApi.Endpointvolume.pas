@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - EndpointVolume
 // Project location: https://sourceforge.net/projects/MfPack
@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Audio Endpoint Volume API
 //              Provides Volume and muting control for an audio endpoint,
 //              either per-channel or total volume.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 03/04/2026 Tony                Fixed cwAUDIO_VOLUME_NOTIFICATION_DATA
 //------------------------------------------------------------------------------
 //
@@ -38,7 +38,7 @@
 //          Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -212,7 +212,7 @@ type
                                          out fLevel: Single): HRESULT; stdcall;
 
     function SetMute(const bMute: INT {BOOL};  // See BOOL comments in WinApiTypes.pas (See for a workaround Components/example MfAudioEndPoint)
-                     const pguidEventContext: TGUID): HRESULT; stdcall;
+                     const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
     function GetMute(out pbMute: INT {BOOL}): HRESULT; stdcall; // See BOOL comments in WinApi.WinApiTypes.pas (See for a workaround Components/example MfAudioEndPoint)
 
@@ -223,7 +223,7 @@ type
 
     function VolumeStepDown(const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
-    function QueryHardwareSupport(pdwHardwareSupportMask: DWord): HRESULT; stdcall;
+    function QueryHardwareSupport(out pdwHardwareSupportMask: DWORD): HRESULT; stdcall;
 
     function GetVolumeRange(out pflVolumeMindB: Single;
                             out pflVolumeMaxdB: Single;

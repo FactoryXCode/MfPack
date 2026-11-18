@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -69,7 +69,7 @@ interface
 uses
 
   {WinApi}
-  WinApi.ActiveX,
+  WinApi.ActiveX.ObjIdlbase,
   WinApi.Windows,
   {DirectX}
   WinApi.DirectX.D2D1,
@@ -171,33 +171,22 @@ type
 type
   // Specifies a value for the SVG stroke-linecap property.
   PD2D1_SVG_LINE_CAP = ^D2D1_SVG_LINE_CAP;
-  D2D1_SVG_LINE_CAP = (
-    // The property is set to SVG's 'butt' value.
-    D2D1_SVG_LINE_CAP_BUTT    = D2D1_CAP_STYLE_FLAT,
-    // The property is set to SVG's 'square' value.
-    D2D1_SVG_LINE_CAP_SQUARE   = D2D1_CAP_STYLE_SQUARE,
-    // The property is set to SVG's 'round' value.
-    D2D1_SVG_LINE_CAP_ROUND    = D2D1_CAP_STYLE_ROUND
-    //D2D1_SVG_LINE_CAP_FORCE_DWORD = FORCEDWORD
-  );
+  D2D1_SVG_LINE_CAP = DWord;
+const
+  D2D1_SVG_LINE_CAP_BUTT = D2D1_SVG_LINE_CAP(0);
+  D2D1_SVG_LINE_CAP_SQUARE = D2D1_SVG_LINE_CAP(1);
+  D2D1_SVG_LINE_CAP_ROUND = D2D1_SVG_LINE_CAP(2);
   {$EXTERNALSYM D2D1_SVG_LINE_CAP}
 
 
 type
   // Specifies a value for the SVG stroke-linejoin property.
   PD2D1_SVG_LINE_JOIN = ^D2D1_SVG_LINE_JOIN;
-  D2D1_SVG_LINE_JOIN = (
-    // The property is set to SVG's 'bevel' value.
-    D2D1_SVG_LINE_JOIN_BEVEL     = D2D1_LINE_JOIN_BEVEL,
-
-    // The property is set to SVG's 'miter' value. Note that this is equivalent to
-    // D2D1_LINE_JOIN_MITER_OR_BEVEL); not D2D1_LINE_JOIN_MITER.
-    D2D1_SVG_LINE_JOIN_MITER     = D2D1_LINE_JOIN_MITER_OR_BEVEL,
-
-    // The property is set to SVG's 'round' value.
-    D2D1_SVG_LINE_JOIN_ROUND     = D2D1_LINE_JOIN_ROUND
-    //D2D1_SVG_LINE_JOIN_FORCE_DWORD = FORCEDWORD
-  );
+  D2D1_SVG_LINE_JOIN = DWord;
+const
+  D2D1_SVG_LINE_JOIN_BEVEL = D2D1_SVG_LINE_JOIN(1);
+  D2D1_SVG_LINE_JOIN_MITER = D2D1_SVG_LINE_JOIN(3);
+  D2D1_SVG_LINE_JOIN_ROUND = D2D1_SVG_LINE_JOIN(2);
   {$EXTERNALSYM D2D1_SVG_LINE_JOIN}
 
 
@@ -493,14 +482,10 @@ type
   {$EXTERNALSYM ID2D1SvgAttribute}
   ID2D1SvgAttribute = interface(ID2D1Resource)
   ['{c9cdb0dd-f8c9-4e70-b7c2-301c80292c5e}']
+    // Native virtual slots; C++ inline helpers are not entries.
+    procedure GetElement(out element: ID2D1SvgElement); stdcall;
+    function Clone(out attribute: ID2D1SvgAttribute): HRESULT; stdcall;
 
-    // Returns the element on which this attribute is set. Returns null if the
-    // attribute is not set on any element.
-   procedure GetElement(out element: ID2D1SvgElement); stdcall;
-
-    // Creates a clone of this attribute value. On creation, the cloned attribute is
-    // not set on any element.
-    function Clone(out attribute: ID2D1SvgAttribute): HResult; stdcall;
 
   end;
   IID_ID2D1SvgAttribute = ID2D1SvgAttribute;
@@ -515,34 +500,15 @@ type
   {$EXTERNALSYM ID2D1SvgPaint}
   ID2D1SvgPaint = interface(ID2D1SvgAttribute)
   ['{d59bab0a-68a2-455b-a5dc-9eb2854e2490}']
-
-    // Sets the paint type.
-    function SetPaintType(paintType: D2D1_SVG_PAINT_TYPE): HResult; stdcall;
-
-    // Gets the paint type.
+    // Native virtual slots; C++ inline helpers are not entries.
+    function SetPaintType(paintType: D2D1_SVG_PAINT_TYPE): HRESULT; stdcall;
     function GetPaintType(): D2D1_SVG_PAINT_TYPE; stdcall;
-
-    // Sets the paint color that is used if the paint type is
-    // D2D1_SVG_PAINT_TYPE_COLOR.
-    function SetColor(const color: D2D1_COLOR_F): HResult; stdcall;
-
-    // Gets the paint color that is used if the paint type is
-    // D2D1_SVG_PAINT_TYPE_COLOR.
+    function SetColor(const color: D2D1_COLOR_F): HRESULT; stdcall;
     procedure GetColor(out color: D2D1_COLOR_F); stdcall;
-
-    // Sets the element id which acts as the paint server. This id is used if the paint
-    // type is D2D1_SVG_PAINT_TYPE_URI.
-    function SetId(id: LPCWSTR): HResult; stdcall;
-
-    // Gets the element id which acts as the paint server. This id is used if the paint
-    // type is D2D1_SVG_PAINT_TYPE_URI.
-    function GetId(out id: PWideChar;
-                   idCount: UINT32): HResult; stdcall;
-
-    // Gets the string length of the element id which acts as the paint server. This id
-    // is used if the paint type is D2D1_SVG_PAINT_TYPE_URI. The returned string length
-    // does not include room for the null terminator.
+    function SetId(id: PWideChar): HRESULT; stdcall;
+    function GetId(id: PWideChar; idCount: UINT32): HRESULT; stdcall;
     function GetIdLength(): UINT32; stdcall;
+
 
   end;
   IID_ID2D1SvgPaint = ID2D1SvgPaint;
@@ -557,53 +523,14 @@ type
   {$EXTERNALSYM ID2D1SvgStrokeDashArray}
   ID2D1SvgStrokeDashArray = interface(ID2D1SvgAttribute)
   ['{f1c0ca52-92a3-4f00-b4ce-f35691efd9d9}']
-
-    // Removes dashes from the end of the array.
-    // <param name="dashesCount">Specifies how many dashes to remove.</param>
-    function RemoveDashesAtEnd(dashesCount: UINT32): HResult; stdcall;
-
-    // Updates the array. Existing dashes not updated by this method are preserved. The
-    // array is resized larger if necessary to accomodate the new dashes.
-
-    // <param name="dashes">The dashes array.</param>
-    // <param name="dashesCount">The number of dashes to update.</param>
-    // <param name="startIndex">The index at which to begin updating dashes. Must be
-    // less than or equal to the size of the array.</param>
-    function UpdateDashes(dashes: PSingle;
-                          dashesCount: UINT32;
-                          startIndex: UINT32 = 0): HResult; overload; stdcall;
-
-    // Updates the array. Existing dashes not updated by this method are preserved. The
-    // array is resized larger if necessary to accomodate the new dashes.
-
-    // <param name="dashes">The dashes array.</param>
-    // <param name="dashesCount">The number of dashes to update.</param>
-    // <param name="startIndex">The index at which to begin updating dashes. Must be
-    // less than or equal to the size of the array.</param>
-    function UpdateDashes(dashes: PD2D1_SVG_LENGTH;
-                          dashesCount: UINT32;
-                          startIndex: UINT32 = 0): HResult; overload; stdcall;
-
-    // Gets dashes from the array.
-
-    // <param name="dashes">Buffer to contain the dashes.</param>
-    // <param name="dashesCount">The element count of buffer.</param>
-    // <param name="startIndex">The index of the first dash to retrieve.</param>
-    function GetDashes(out dashes: PSingle;
-                       dashesCount: UINT32;
-                       startIndex: UINT32 = 0): HResult; overload; stdcall;
-
-    // Gets dashes from the array.
-
-    // <param name="dashes">Pointer to buffer to contain the dashes.</param>
-    // <param name="dashesCount">The element count of buffer.</param>
-    // <param name="startIndex">The index of the first dash to retrieve.</param>
-    function GetDashes(out dashes: PD2D1_SVG_LENGTH;
-                       dashesCount: UINT32;
-                       startIndex: UINT32 = 0): HResult; overload; stdcall;
-
-    // Gets the number of the dashes in the array.
+    // Native virtual slots; C++ inline helpers are not entries.
+    function RemoveDashesAtEnd(dashesCount: UINT32): HRESULT; stdcall;
+    function UpdateDashes(dashes: PD2D1_SVG_LENGTH; dashesCount: UINT32; startIndex: UINT32): HRESULT; stdcall; overload;
+    function UpdateDashes(dashes: PSingle; dashesCount: UINT32; startIndex: UINT32): HRESULT; stdcall; overload;
+    function GetDashes(dashes: PD2D1_SVG_LENGTH; dashesCount: UINT32; startIndex: UINT32): HRESULT; stdcall; overload;
+    function GetDashes(dashes: PSingle; dashesCount: UINT32; startIndex: UINT32): HRESULT; stdcall; overload;
     function GetDashesCount(): UINT32; stdcall;
+
 
   end;
   IID_ID2D1SvgStrokeDashArray = ID2D1SvgStrokeDashArray;
@@ -618,35 +545,12 @@ type
   {$EXTERNALSYM ID2D1SvgPointCollection}
   ID2D1SvgPointCollection = interface(ID2D1SvgAttribute)
    ['{9dbe4c0d-3572-4dd9-9825-5530813bb712}']
+    // Native virtual slots; C++ inline helpers are not entries.
+    function RemovePointsAtEnd(pointsCount: UINT32): HRESULT; stdcall;
+    function UpdatePoints(points: PD2D1_POINT_2F; pointsCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
+    function GetPoints(points: PD2D1_POINT_2F; pointsCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
+    function GetPointsCount(): UINT32; stdcall;
 
-    // Removes points from the end of the array.
-    // <param name="pointsCount">Specifies how many points to remove.</param>
-    function RemovePointsAtEnd(pointsCount: UINT32): HResult; stdcall;
-
-    // Updates the points array. Existing points not updated by this method are
-    // preserved. The array is resized larger if necessary to accomodate the new
-    // points.
-
-    // <param name="points">The points array.</param>
-    // <param name="pointsCount">The number of points to update.</param>
-    // <param name="startIndex">The index at which to begin updating points. Must be
-    // less than or equal to the size of the array.</param>
-    function UpdatePoints(points: PD2D1_POINT_2F;
-                          pointsCount: UINT32;
-                          startIndex: UINT32 = 0): HResult; stdcall;
-
-
-    // Gets points from the points array.
-
-    // <param name="points">Buffer to contain the points.</param>
-    // <param name="pointsCount">The element count of the buffer.</param>
-    // <param name="startIndex">The index of the first point to retrieve.</param>
-    function GetPoints(out points: D2D1_POINT_2F;
-                       pointsCount: UINT32;
-                       startIndex: UINT32 = 0): HResult; stdcall;
-
-    // Gets the number of points in the array.
-    function GetPointsCount(): UINT32;
 
   end; // interface ID2D1SvgPointCollection
   IID_ID2D1SvgPointCollection = ID2D1SvgPointCollection;
@@ -670,66 +574,17 @@ type
   {$EXTERNALSYM ID2D1SvgPathData}
   ID2D1SvgPathData = interface(ID2D1SvgAttribute)
    ['{c095e4f4-bb98-43d6-9745-4d1b84ec9888}']
-
-    // Removes data from the end of the segment data array.
-    // <param name="dataCount">Specifies how much data to remove.</param>
-    function RemoveSegmentDataAtEnd(dataCount: UINT32): HResult; stdcall;
-
-    // Updates the segment data array. Existing segment data not updated by this method
-    // are preserved. The array is resized larger if necessary to accomodate the new
-    // segment data.
-
-    // <param name="data">The data array.</param>
-    // <param name="dataCount">The number of data to update.</param>
-    // <param name="startIndex">The index at which to begin updating segment data. Must
-    // be less than or equal to the size of the segment data array.</param>
-    function UpdateSegmentData(data: PSingle;
-                               dataCount: UINT32;
-                               startIndex: UINT32 = 0): HResult; stdcall;
-
-    // Gets data from the segment data array.
-    // <param name="data">Buffer to contain the segment data array.</param>
-    // <param name="dataCount">The element count of the buffer.</param>
-    // <param name="startIndex">The index of the first segment data to retrieve.
-    // </param>
-    function GetSegmentData(out data: PSingle;
-                            dataCount: UINT32;
-                            startIndex: UINT32 = 0): HResult; stdcall;
-
-    // Gets the size of the segment data array.
+    // Native virtual slots; C++ inline helpers are not entries.
+    function RemoveSegmentDataAtEnd(dataCount: UINT32): HRESULT; stdcall;
+    function UpdateSegmentData(data: PSingle; dataCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
+    function GetSegmentData(data: PSingle; dataCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
     function GetSegmentDataCount(): UINT32; stdcall;
-
-    // Removes commands from the end of the commands array.
-    // <param name="commandsCount">Specifies how many commands to remove.</param>
-    function RemoveCommandsAtEnd(commandsCount: UINT32): HResult; stdcall;
-
-    // Updates the commands array. Existing commands not updated by this method are
-    // preserved. The array is resized larger if necessary to accomodate the new
-    // commands.
-
-    // <param name="commands">The commands array.</param>
-    // <param name="commandsCount">The number of commands to update.</param>
-    // <param name="startIndex">The index at which to begin updating commands. Must be
-    // less than or equal to the size of the commands array.</param>
-    function UpdateCommands(commands: PD2D1_SVG_PATH_COMMAND;
-                            commandsCount: UINT32;
-                            startIndex: UINT32 = 0): HResult; stdcall;
-
-    // Gets commands from the commands array.
-
-    // <param name="commands">Buffer to contain the commands</param>
-    // <param name="commandsCount">The element count of the buffer.</param>
-    // <param name="startIndex">The index of the first commands to retrieve.</param>
-    function GetCommands(out commands: PD2D1_SVG_PATH_COMMAND;
-                         commandsCount: UINT32;
-                         startIndex: UINT32 = 0): HResult; stdcall;
-
-    // Gets the size of the commands array.
+    function RemoveCommandsAtEnd(commandsCount: UINT32): HRESULT; stdcall;
+    function UpdateCommands(commands: PD2D1_SVG_PATH_COMMAND; commandsCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
+    function GetCommands(commands: PD2D1_SVG_PATH_COMMAND; commandsCount: UINT32; startIndex: UINT32): HRESULT; stdcall;
     function GetCommandsCount(): UINT32; stdcall;
+    function CreatePathGeometry(fillMode: D2D1_FILL_MODE; out pathGeometry: ID2D1PathGeometry1): HRESULT; stdcall;
 
-    // Creates a path geometry object representing the path data.
-    function CreatePathGeometry(fillMode: D2D1_FILL_MODE;
-                                out pathGeometry: ID2D1PathGeometry1): HResult; stdcall;
 
   end;
   IID_ID2D1SvgPathData = ID2D1SvgPathData;
@@ -744,217 +599,38 @@ type
   {$EXTERNALSYM ID2D1SvgElement}
   ID2D1SvgElement = interface(ID2D1Resource)
    ['{ac7b67a6-183e-49c1-a823-0ebe40b0db29}']
-
-    // Gets the document that contains this element. Returns null if the element has
-    // been removed from the tree.
-    procedure GetDocument(document: ID2D1SvgDocument); stdcall;
-
-    // Gets the tag name.
-    function GetTagName(name: PWideChar;
-                        nameCount: UINT32): HResult; stdcall;
-
-    // Gets the string length of the tag name. The returned string length does not
-    // include room for the null terminator.
+    // Native virtual slots; C++ inline helpers are not entries.
+    procedure GetDocument(out document: ID2D1SvgDocument); stdcall;
+    function GetTagName(name: PWideChar; nameCount: UINT32): HRESULT; stdcall;
     function GetTagNameLength(): UINT32; stdcall;
-
-    // Returns TRUE if this element represents text content, e.g. the content of a
-    // 'title' or 'desc' element. Text content does not have a tag name.
     function IsTextContent(): BOOL; stdcall;
-
-    // Gets the parent element.
     procedure GetParent(out parent: ID2D1SvgElement); stdcall;
-
-    // Returns whether this element has children.
     function HasChildren(): BOOL; stdcall;
-
-    // Gets the first child of this element.
     procedure GetFirstChild(out child: ID2D1SvgElement); stdcall;
-
-    // Gets the last child of this element.
     procedure GetLastChild(out child: ID2D1SvgElement); stdcall;
-
-    // Gets the previous sibling of the referenceChild element.
-    // <param name="referenceChild">The referenceChild must be an immediate child of
-    // this element.</param>
-    // <param name="previousChild">The output previousChild element will be non-nil if
-    // the referenceChild has a previous sibling. If the referenceChild is the first
-    // child, the output is nil.</param>
-    function GetPreviousChild(const referenceChild: ID2D1SvgElement;
-                              out previousChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Gets the next sibling of the referenceChild element.
-    // <param name="referenceChild">The referenceChild must be an immediate child of
-    // this element.</param>
-    // <param name="nextChild">The output nextChild element will be non-nil if the
-    // referenceChild has a next sibling. If the referenceChild is the last child, the
-    // output is nil.</param>
-    function GetNextChild(const referenceChild: ID2D1SvgElement;
-                          out nextChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Inserts newChild as a child of this element, before the referenceChild element.
-    // If the newChild element already has a parent, it is removed from this parent as
-    // part of the insertion. Returns an error if this element cannot accept children
-    // of the type of newChild. Returns an error if the newChild is an ancestor of this
-    // element.
-    // <param name="newChild">The element to be inserted.</param>
-    // <param name="referenceChild">The element that the child should be inserted
-    // before. If referenceChild is nil, the newChild is placed as the last child. If
-    // referenceChild is non-nil, it must be an immediate child of this element.
-    // </param>
-    function InsertChildBefore(newChild: ID2D1SvgElement;
-                               {In_opt} referenceChild: PID2D1SvgElement = Nil): HResult; stdcall;
-
-    // Appends newChild to the list of children. If the newChild element already has a
-    // parent, it is removed from this parent as part of the append operation. Returns
-    // an error if this element cannot accept children of the type of newChild. Returns
-    // an error if the newChild is an ancestor of this element.
-    // <param name="newChild">The element to be appended.</param>
-    function AppendChild(newChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Replaces the oldChild element with the newChild. This operation removes the
-    // oldChild from the tree. If the newChild element already has a parent, it is
-    // removed from this parent as part of the replace operation. Returns an error if
-    // this element cannot accept children of the type of newChild. Returns an error if
-    // the newChild is an ancestor of this element.
-    // <param name="newChild">The element to be inserted.</param>
-    // <param name="oldChild">The child element to be replaced. The oldChild element
-    // must be an immediate child of this element.</param>
-    function ReplaceChild(newChild: ID2D1SvgElement;
-                          oldChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Removes the oldChild from the tree. Children of oldChild remain children of
-    // oldChild.
-    // <param name="oldChild">The child element to be removed. The oldChild element
-    // must be an immediate child of this element.</param>
-    function RemoveChild(oldChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Creates an element from a tag name. The element is appended to the list of
-    // children. Returns an error if this element cannot accept children of the
-    // specified type.
-    // <param name="tagName">The tag name of the new child. An empty string is
-    // interpreted to be a text content element.</param>
-    // <param name="newChild">The new child element.</param>
-    function CreateChild(tagName: LPWSTR;
-                         out newChild: ID2D1SvgElement): HResult; stdcall;
-
-    // Returns True if the attribute is explicitly set on the element or if it is
-    // present within an inline style. Returns FALSE if the attribute is not a valid
-    // attribute on this element.
-    // <param name="name">The name of the attribute.</param>
-    // <param name="inherited">Outputs whether the attribute is set to the 'inherit'
-    // value.</param>
-    function IsAttributeSpecified(name: LPWSTR;
-                                  _inherited: PBOOL = Nil): BOOL; stdcall;
-
-    // Returns the number of specified attributes on this element. Attributes are only
-    // considered specified if they are explicitly set on the element or present within
-    // an inline style. Properties that receive their value through CSS inheritance are
-    // not considered specified. An attribute can become specified if it is set through
-    // a method call. It can become unspecified if it is removed via RemoveAttribute.
+    function GetPreviousChild(referenceChild: ID2D1SvgElement; out previousChild: ID2D1SvgElement): HRESULT; stdcall;
+    function GetNextChild(referenceChild: ID2D1SvgElement; out nextChild: ID2D1SvgElement): HRESULT; stdcall;
+    function InsertChildBefore(newChild: ID2D1SvgElement; referenceChild: ID2D1SvgElement): HRESULT; stdcall;
+    function AppendChild(newChild: ID2D1SvgElement): HRESULT; stdcall;
+    function ReplaceChild(newChild: ID2D1SvgElement; oldChild: ID2D1SvgElement): HRESULT; stdcall;
+    function RemoveChild(oldChild: ID2D1SvgElement): HRESULT; stdcall;
+    function CreateChild(tagName: PWideChar; out newChild: ID2D1SvgElement): HRESULT; stdcall;
+    function IsAttributeSpecified(name: PWideChar; _inherited: PBOOL): BOOL; stdcall;
     function GetSpecifiedAttributeCount(): UINT32; stdcall;
-
-    // Gets the name of the specified attribute at the given index.
-    // <param name="index">The specified index of the attribute.</param>
-    // <param name="name">Outputs the name of the attribute.</param>
-    // <param name="inherited">Outputs whether the attribute is set to the 'inherit'
-    // value.</param>
-    function GetSpecifiedAttributeName(index: UINT32;
-                                       out name: PWideChar;
-                                       nameCount: UINT32;
-                                       _inherited: PBOOL = Nil): HResult; stdcall;
-
-    // Gets the string length of the name of the specified attribute at the given
-    // index. The output string length does not include room for the null terminator.
-    // <param name="index">The specified index of the attribute.</param>
-    // <param name="nameLength">Outputs the string length of the name of the specified
-    // attribute.</param>
-    // <param name="inherited">Outputs whether the attribute is set to the 'inherit'
-    // value.</param>
-    function GetSpecifiedAttributeNameLength(index: UINT32;
-                                             out nameLength: UINT32;
-                                             {out} _inherited: PBOOL = Nil): HResult; stdcall;
-
-    // Removes the attribute from this element. Also removes this attribute from within
-    // an inline style if present. Returns an error if the attribute name is not valid
-    // on this element.
-    function RemoveAttribute(name: LPWSTR): HResult; stdcall;
-
-    // Sets the value of a text content element.
-    function SetTextValue(name: PWideChar;
-                          nameCount: UINT32): HResult; stdcall;
-
-    // Gets the value of a text content element.
-    function GetTextValue(out name: PWideChar;
-                          nameCount: UINT32): HResult; stdcall;
-
-    // Gets the length of the text content value. The returned string length does not
-    // include room for the null terminator.
+    function GetSpecifiedAttributeName(index: UINT32; name: PWideChar; nameCount: UINT32; _inherited: PBOOL): HRESULT; stdcall;
+    function GetSpecifiedAttributeNameLength(index: UINT32; out nameLength: UINT32; _inherited: PBOOL): HRESULT; stdcall;
+    function RemoveAttribute(name: PWideChar): HRESULT; stdcall;
+    function SetTextValue(name: PWideChar; nameCount: UINT32): HRESULT; stdcall;
+    function GetTextValue(name: PWideChar; nameCount: UINT32): HRESULT; stdcall;
     function GetTextValueLength(): UINT32; stdcall;
+    function SetAttributeValue(name: PWideChar; value: ID2D1SvgAttribute): HRESULT; stdcall; overload;
+    function SetAttributeValue(name: PWideChar; _type: D2D1_SVG_ATTRIBUTE_POD_TYPE; value: Pointer; valueSizeInBytes: UINT32): HRESULT; stdcall; overload;
+    function SetAttributeValue(name: PWideChar; _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE; value: PWideChar): HRESULT; stdcall; overload;
+    function GetAttributeValue(name: PWideChar; const riid: TGUID; out value): HRESULT; stdcall; overload;
+    function GetAttributeValue(name: PWideChar; _type: D2D1_SVG_ATTRIBUTE_POD_TYPE; value: Pointer; valueSizeInBytes: UINT32): HRESULT; stdcall; overload;
+    function GetAttributeValue(name: PWideChar; _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE; value: PWideChar; valueCount: UINT32): HRESULT; stdcall; overload;
+    function GetAttributeValueLength(name: PWideChar; _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE; out valueLength: UINT32): HRESULT; stdcall;
 
-    //==========================================================================
-    // From here the sequence of the implemented interface methods differs from
-    // the C-header file. This has been issued to Microsoft and Idera.
-    //==========================================================================
-
-    // Sets an attribute of this element using an interface. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified interface type. Returns an error if the
-    // attribute object is already set on an element. A given attribute object may only
-    // be set on one element in one attribute location at a time.
-    function SetAttributeValue(name: LPWSTR;
-                               value: ID2D1SvgAttribute): HResult; overload; stdcall;
-
-    // Sets an attribute of this element using a POD type. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified type.
-    function SetAttributeValue(name: LPWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
-
-    // Sets an attribute of this element using a string. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified type.
-    function SetAttributeValue(name: LPWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                               value: LPWSTR): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as an interface type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified interface type.
-    // <param name="riid">The interface ID of the attribute value.</param>
-    function GetAttributeValue(name: LPWSTR;
-                               const riid: TGUID;    // The interface ID of the attribute value.
-                               out value {IUnknown}  // The value of the attribute = interface
-                               ): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as a POD type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified POD type.
-    function GetAttributeValue(name: LPWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as a string. Returns an error if the attribute
-    // is not specified. Returns an error if the attribute name is not valid on this
-    // element. Returns an error if the attribute cannot be expressed as the specified
-    // string type.
-    function GetAttributeValue(name: LPWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                               out value: PWideChar;
-                               valueCount: UINT32): HResult; overload; stdcall;
-
-    // Gets the string length of an attribute of this element. The returned string
-    // length does not include room for the null terminator. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified string type.
-    function GetAttributeValueLength(name: LPWSTR;
-                                     _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                                     out valueLength: UINT32): HResult; stdcall;
 
   end;
   IID_ID2D1SvgElement = ID2D1SvgElement;
@@ -968,73 +644,19 @@ type
   {$EXTERNALSYM ID2D1SvgDocument}
   ID2D1SvgDocument = interface(ID2D1Resource)
    ['{86b88e4d-afa4-4d7b-88e4-68a51c4a0aec}']
-
-    // Sets the size of the initial viewport.
-    function SetViewportSize(viewportSize: D2D1_SIZE_F): HResult; stdcall;
-
-    // Returns the size of the initial viewport.
+    // Native virtual slots; C++ inline helpers are not entries.
+    function SetViewportSize(viewportSize: D2D1_SIZE_F): HRESULT; stdcall;
     procedure GetViewportSize(out size: D2D1_SIZE_F); stdcall;
-
-    // Sets the root element of the document. The root element must be an 'svg'
-    // element. If the element already exists within an svg tree, it is first removed.
-    function SetRoot({In_opt} root: ID2D1SvgElement): HResult; stdcall;
-
-    // Gets the root element of the document.
+    function SetRoot(root: ID2D1SvgElement): HRESULT; stdcall;
     procedure GetRoot(out root: ID2D1SvgElement); stdcall;
+    function FindElementById(id: PWideChar; out svgElement: ID2D1SvgElement): HRESULT; stdcall;
+    function Serialize(outputXmlStream: IStream; subtree: ID2D1SvgElement): HRESULT; stdcall;
+    function Deserialize(inputXmlStream: IStream; out subtree: ID2D1SvgElement): HRESULT; stdcall;
+    function CreatePaint(paintType: D2D1_SVG_PAINT_TYPE; color: PD2D1_COLOR_F; id: PWideChar; out paint: ID2D1SvgPaint): HRESULT; stdcall;
+    function CreateStrokeDashArray(dashes: PD2D1_SVG_LENGTH; dashesCount: UINT32; out strokeDashArray: ID2D1SvgStrokeDashArray): HRESULT; stdcall;
+    function CreatePointCollection(points: PD2D1_POINT_2F; pointsCount: UINT32; out pointCollection: ID2D1SvgPointCollection): HRESULT; stdcall;
+    function CreatePathData(segmentData: PSingle; segmentDataCount: UINT32; commands: PD2D1_SVG_PATH_COMMAND; commandsCount: UINT32; out pathData: ID2D1SvgPathData): HRESULT; stdcall;
 
-    // Gets the SVG element with the specified ID. If the element cannot be found, the
-    // returned element will be Nil.
-    function FindElementById(id: PWideChar;
-                             out svgElement: ID2D1SvgElement): HResult; stdcall;
-
-    // Serializes an element and its subtree to XML. The output XML is encoded as
-    // UTF-8.
-    // <param name="outputXmlStream">An output stream to contain the SVG XML subtree.
-    // </param>
-    // <param name="subtree">The root of the subtree. If null, the entire document is
-    // serialized.</param>
-    function Serialize(outputXmlStream: IStream;
-                       {in_opt} subtree: ID2D1SvgElement = nil): HResult; stdcall;
-
-    // Deserializes a subtree from the stream. The stream must have only one root
-    // element, but that root element need not be an 'svg' element. The output element
-    // is not inserted into this document tree.
-    // <param name="inputXmlStream">An input stream containing the SVG XML subtree.
-    // </param>
-    // <param name="subtree">The root of the subtree.</param>
-    function Deserialize(inputXmlStream: IStream;
-                         out subtree: ID2D1SvgElement): HResult; stdcall;
-
-    // Creates a paint object which can be used to set the 'fill' or 'stroke'
-    // properties.
-    // <param name="color">The color used if the paintType is
-    // D2D1_SVG_PAINT_TYPE_COLOR.</param>
-    // <param name="id">The element id which acts as the paint server. This id is used
-    // if the paint type is D2D1_SVG_PAINT_TYPE_URI.</param>
-    function CreatePaint(paintType: D2D1_SVG_PAINT_TYPE;
-                         {in_opt} color: PD2D1_COLOR_F;
-                         {in_opt} id: PWideChar;
-                         out paint: ID2D1SvgPaint): HResult; stdcall;
-
-    // Creates a dash array object which can be used to set the 'stroke-dasharray'
-    // property.
-    function CreateStrokeDashArray(dashes: PD2D1_SVG_LENGTH;
-                                   dashesCount: UINT32;
-                                   out strokeDashArray: ID2D1SvgStrokeDashArray): HResult; stdcall;
-
-    // Creates a points object which can be used to set a 'points' attribute on a
-    // 'polygon' or 'polyline' element.
-    function CreatePointCollection(points: PD2D1_POINT_2F;
-                                   pointsCount: UINT32;
-                                   out pointCollection: ID2D1SvgPointCollection): HResult; stdcall;
-
-    // Creates a path data object which can be used to set a 'd' attribute on a 'path'
-    // element.
-    function CreatePathData(segmentData: PSingle;
-                            segmentDataCount: UINT32;
-                            commands: PD2D1_SVG_PATH_COMMAND;
-                            commandsCount: UINT32;
-                            out pathData: ID2D1SvgPathData): HResult; stdcall;
 
   end;
   IID_ID2D1SvgDocument = ID2D1SvgDocument;

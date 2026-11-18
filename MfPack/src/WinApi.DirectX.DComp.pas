@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -271,36 +271,22 @@ type
     function GetFrameStatistics(out statistics: DCOMPOSITION_FRAME_STATISTICS): HResult; stdcall;
 
     // Creates a composition target bound to a window represented by an HWND.
-    function CreateTargetForHwnd(_hwnd: HWND;
-                                 topmost: BOOL;
-                                 out target: IDCompositionTarget): HResult; stdcall;
+    function CreateTargetForHwnd(_hwnd: HWND; topmost: BOOL; out target: IDCompositionTarget): HResult; stdcall;
 
     // Creates a new visual object.
     function CreateVisual(out visual: IDCompositionVisual): HResult; stdcall;
 
     // Creates a DirectComposition surface object
-    function CreateSurface(width: UINT;
-                           height: UINT;
-                           pixelFormat: DXGI_FORMAT;
-                           alphaMode: DXGI_ALPHA_MODE;
-                           out surface: IDCompositionSurface): HResult; stdcall;
+    function CreateSurface(width: UINT; height: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out surface: IDCompositionSurface): HResult; stdcall;
 
     // Creates a DirectComposition virtual surface object
-    function CreateVirtualSurface(initialWidth: UINT;
-                                  initialHeight: UINT;
-                                  pixelFormat: DXGI_FORMAT;
-                                  alphaMode: DXGI_ALPHA_MODE;
-                                  out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
+    function CreateVirtualSurface(initialWidth: UINT; initialHeight: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
 
     // Creates a surface wrapper around a pre-existing surface that can be associated with one or more visuals for composition.
-    function CreateSurfaceFromHandle(_handle: THandle;
-                                     out surface: IUnknown  // Pass this parameter as IUnknown(interface)
-                                    ): HResult; stdcall;
+    function CreateSurfaceFromHandle(_handle: THandle; out surface: IUnknown): HResult; stdcall;
 
     // Creates a wrapper object that represents the rasterization of a layered window and which can be associated with a visual for composition.
-    function CreateSurfaceFromHwnd(_hwnd: HWND;
-                                   out surface: IUnknown // Pass this parameter as IUnknown(interface)
-                                  ): HResult; stdcall;
+    function CreateSurfaceFromHwnd(_hwnd: HWND; out surface: IUnknown): HResult; stdcall;
 
     // Creates a 2D translation transform object.
     function CreateTranslateTransform(out translateTransform: IDCompositionTranslateTransform): HResult; stdcall;
@@ -318,9 +304,7 @@ type
     function CreateMatrixTransform(out matrixTransform: IDCompositionMatrixTransform): HResult; stdcall;
 
     // Creates a 2D transform object that holds an array of 2D transform objects.
-    function CreateTransformGroup(transforms: PIDCompositionTransform;
-                                  elements: UINT;
-                                  out transformGroup: IDCompositionTransform): HResult; stdcall;
+    function CreateTransformGroup(transforms: PIDCompositionTransform; elements: UINT; out transformGroup: IDCompositionTransform): HResult; stdcall;
 
     // Creates a 3D translation transform object.
     function CreateTranslateTransform3D(out translateTransform3D: IDCompositionTranslateTransform3D): HResult; stdcall;
@@ -335,9 +319,7 @@ type
     function CreateMatrixTransform3D(out matrixTransform3D: IDCompositionMatrixTransform3D): HResult; stdcall;
 
     // Creates a 3D transform object that holds an array of 3D transform objects.
-    function CreateTransform3DGroup(transforms3D: IDCompositionTransform3D;
-                                    elements: UINT;
-                                    out transform3DGroup: IDCompositionTransform3D): HResult; stdcall;
+    function CreateTransform3DGroup(transforms3D: PIDCompositionTransform3D; elements: UINT; out transform3DGroup: IDCompositionTransform3D): HResult; stdcall;
 
     // Creates an effect group
     function CreateEffectGroup(out effectGroup: IDCompositionEffectGroup): HResult; stdcall;
@@ -372,7 +354,7 @@ type
   IDCompositionTarget = interface(IUnknown)
   ['{eacdd04c-117e-4e17-88f4-d1b12b0e3d89}']
     // Sets the root visual
-    function SetRoot({In_opt} visual: IDCompositionVisual = Nil): HResult; stdcall;
+    function SetRoot(visual: IDCompositionVisual = Nil): HResult; stdcall;
 
   end;
   IID_IDCompositionTarget = IDCompositionTarget;
@@ -408,18 +390,18 @@ type
     // Changes the value of OffsetY property
     function SetOffsetY(offsetY: Single): HResult; stdcall;
 
-    // Sets the matrix that modifies the coordinate system of this visual.
-    function SetTransform(matrix: D2D_MATRIX_3X2_F): HResult; stdcall;
-
     // Sets the transformation object that modifies the coordinate system of this visual.
-    function _SetTransform({In_opt} transform: IDCompositionTransform = Nil): HResult; stdcall;
+    function _SetTransform(transform: IDCompositionTransform = Nil): HResult; stdcall;
+
+    // Sets the matrix that modifies the coordinate system of this visual.
+    function SetTransform(const matrix: D2D_MATRIX_3X2_F): HResult; stdcall;
 
     // Sets the visual that should act as this visual's parent for the
     // purpose of establishing a base coordinate system.
-    function SetTransformParent({In_opt} visual: IDCompositionVisual = Nil): HResult; stdcall;
+    function SetTransformParent(visual: IDCompositionVisual = Nil): HResult; stdcall;
 
     // Sets the effect object that is applied during the rendering of this visual
-    function SetEffect({In_opt} effect: IDCompositionEffect = Nil): HResult; stdcall;
+    function SetEffect(effect: IDCompositionEffect = Nil): HResult; stdcall;
 
     // Sets the mode to use when interpolating pixels from bitmaps drawn not
     // exactly at scale and axis-aligned.
@@ -429,20 +411,17 @@ type
     // exactly axis-aligned and at precise pixel boundaries.
     function SetBorderMode(borderMode: DCOMPOSITION_BORDER_MODE): HResult; stdcall;
 
-    // Sets the clip object that restricts the rendering of this visual to a D2D rectangle.
-    function SetClip(_rect: D2D_RECT_F): HResult; stdcall;
-
     // Sets the clip object that restricts the rendering of this visual to a rectangle.
-    function _SetClip({In_opt} clip: IDCompositionClip = Nil): HResult; stdcall;
+    function _SetClip(clip: IDCompositionClip = Nil): HResult; stdcall;
+
+    // Sets the clip object that restricts the rendering of this visual to a D2D rectangle.
+    function SetClip(const _rect: D2D_RECT_F): HResult; stdcall;
 
     // Associates a bitmap with a visual
-    function SetContent({In_opt} content: IUnknown = Nil// Pass this parameter as IUnknown(interface)
-                       ): HResult; stdcall;
+    function SetContent(content: IUnknown = Nil): HResult; stdcall;
 
     // Adds a visual to the children list of another visual.
-    function AddVisual(visual: IDCompositionVisual;
-                       insertAbove: BOOL;
-                       {In_opt} referenceVisual: IDCompositionVisual = Nil): HResult; stdcall;
+    function AddVisual(visual: IDCompositionVisual; insertAbove: BOOL; referenceVisual: IDCompositionVisual = Nil): HResult; stdcall;
 
     // Removes a visual from the children list of another visual.
     function RemoveVisual(visual: IDCompositionVisual): HResult; stdcall;
@@ -531,17 +510,17 @@ type
   IDCompositionTranslateTransform = interface(IDCompositionTransform)
   ['{06791122-C6F0-417d-8323-269E987F5954}']
 
-    // Changes the value of the OffsetX property.
-    function SetOffsetX(offsetX: Single): HResult; stdcall;
-
     // Animates the value of the OffsetX property.
     function _SetOffsetX(animation: IDCompositionAnimation): HResult; stdcall;
 
-   // Changes the value of the OffsetY property.
-    function SetOffsetY(offsetY: Single): HResult; stdcall;
+    // Changes the value of the OffsetX property.
+    function SetOffsetX(offsetX: Single): HResult; stdcall;
 
     // Animates the value of the OffsetY property.
     function _SetOffsetY(animation: IDCompositionAnimation): HResult; stdcall;
+
+   // Changes the value of the OffsetY property.
+    function SetOffsetY(offsetY: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionTranslateTransform = IDCompositionTranslateTransform;
@@ -563,29 +542,29 @@ type
   {$EXTERNALSYM IDCompositionScaleTransform}
   IDCompositionScaleTransform = interface(IDCompositionTransform)
   ['{71FDE914-40EF-45ef-BD51-68B037C339F9}']
-    // Changes the value of the ScaleX property.
-    function SetScaleX(scaleX: Single): HResult; stdcall;
 
     // Animates the value of the ScaleX property.
     function _SetScaleX(animation: IDCompositionAnimation): HResult; stdcall;
-
-    // Changes the value of the ScaleY property.
-    function SetScaleY(scaleY: Single): HResult; stdcall;
+    // Changes the value of the ScaleX property.
+    function SetScaleX(scaleX: Single): HResult; stdcall;
 
     // Animates the value of the ScaleY property.
     function _SetScaleY(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the CenterX property.
-    function SetCenterX(centerX: Single): HResult; stdcall;
+    // Changes the value of the ScaleY property.
+    function SetScaleY(scaleY: Single): HResult; stdcall;
 
     // Animates the value of the CenterX property.
     function _SetCenterX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the CenterY property.
-    function SetCenterY(centerY: Single): HResult; stdcall;
+    // Changes the value of the CenterX property.
+    function SetCenterX(centerX: Single): HResult; stdcall;
 
     // Animates the value of the CenterY property.
     function _SetCenterY(animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes the value of the CenterY property.
+    function SetCenterY(centerY: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionScaleTransform = IDCompositionScaleTransform;
@@ -607,23 +586,23 @@ type
   {$EXTERNALSYM IDCompositionRotateTransform}
   IDCompositionRotateTransform = interface(IDCompositionTransform)
   ['{641ED83C-AE96-46c5-90DC-32774CC5C6D5}']
-    // Changes the value of the Angle property.
-    function SetAngle(angle: Single): HResult; stdcall;
 
     // Animates the value of the Angle property.
     function _SetAngle(animation: IDCompositionAnimation): HResult; stdcall;
-
-    // Changes the value of the CenterX property.
-    function SetCenterX(centerX: Single): HResult; stdcall;
+    // Changes the value of the Angle property.
+    function SetAngle(angle: Single): HResult; stdcall;
 
     // Animates the value of the CenterX property.
     function _SetCenterX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the CenterY property.
-    function SetCenterY(centerY: Single): HResult; stdcall;
+    // Changes the value of the CenterX property.
+    function SetCenterX(centerX: Single): HResult; stdcall;
 
     // Animates the value of the CenterY property.
     function _SetCenterY(animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes the value of the CenterY property.
+    function SetCenterY(centerY: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionRotateTransform = IDCompositionRotateTransform;
@@ -645,29 +624,29 @@ type
   {$EXTERNALSYM IDCompositionSkewTransform}
   IDCompositionSkewTransform = interface(IDCompositionTransform)
   ['{E57AA735-DCDB-4c72-9C61-0591F58889EE}']
-    // Changes the value of the AngleX property.
-    function SetAngleX(angleX: Single): HResult; stdcall;
 
     // Animates the value of the AngleX property.
     function _SetAngleX(animation: IDCompositionAnimation): HResult; stdcall;
-
-    // Changes the value of the AngleY property.
-    function SetAngleY(angleY: Single): HResult; stdcall;
+    // Changes the value of the AngleX property.
+    function SetAngleX(angleX: Single): HResult; stdcall;
 
     // Animates the value of the AngleY property.
     function _SetAngleY(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the CenterX property.
-    function SetCenterX(centerX: Single): HResult; stdcall;
+    // Changes the value of the AngleY property.
+    function SetAngleY(angleY: Single): HResult; stdcall;
 
     // Animates the value of the CenterX property.
     function _SetCenterX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the CenterY property.
-    function SetCenterY(centerY: Single): HResult; stdcall;
+    // Changes the value of the CenterX property.
+    function SetCenterX(centerX: Single): HResult; stdcall;
 
     // Animates the value of the CenterY property.
     function _SetCenterY(animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes the value of the CenterY property.
+    function SetCenterY(centerY: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionSkewTransform = IDCompositionSkewTransform;
@@ -690,17 +669,13 @@ type
   ['{16CDFF07-C503-419c-83F2-0965C7AF1FA6}']
 
     // Changes all values of the matrix of this transform.
-    function SetMatrix(matrix: D2D_MATRIX_3X2_F): HResult; stdcall;
-
-    // Changes a single element of the matrix of this transform.
-    function SetMatrixElement(row: Integer;
-                              column: Integer;
-                              value: Single): HResult; stdcall;
+    function SetMatrix(const matrix: D2D_MATRIX_3X2_F): HResult; stdcall;
 
     // Animates a single element of the matrix of this transform.
-    function _SetMatrixElement(row: Integer;
-                               column: Integer;
-                               animation: IDCompositionAnimation): HResult; stdcall;
+    function _SetMatrixElement(row: Integer; column: Integer; animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes a single element of the matrix of this transform.
+    function SetMatrixElement(row: Integer; column: Integer; value: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionMatrixTransform = IDCompositionMatrixTransform;
@@ -722,14 +697,14 @@ type
   IDCompositionEffectGroup = interface(IDCompositionEffect)
   ['{A7929A74-E6B2-4bd6-8B95-4040119CA34D}']
 
-    // Changes the opacity property.
-    function SetOpacity(opacity: Single): HResult; stdcall;
-
     // Animates the opacity property
     function _SetOpacity(animation: IDCompositionAnimation): HResult; stdcall;
 
+    // Changes the opacity property.
+    function SetOpacity(opacity: Single): HResult; stdcall;
+
     // Sets the 3D transform
-    function SetTransform3D({opt} transform3D: IDCompositionTransform3D = Nil): HResult; stdcall;
+    function SetTransform3D(transform3D: IDCompositionTransform3D = Nil): HResult; stdcall;
 
   end;
   IID_IDCompositionEffectGroup = IDCompositionEffectGroup;
@@ -751,23 +726,23 @@ type
   IDCompositionTranslateTransform3D = interface(IDCompositionTransform3D)
   ['{91636D4B-9BA1-4532-AAF7-E3344994D788}']
 
-    // Changes the value of the OffsetX property.
-    function SetOffsetX(offsetX: Single): HResult; overload; stdcall;
-
     // Animates the value of the OffsetX property.
     function SetOffsetX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-   // Changes the value of the OffsetY property.
-    function SetOffsetY(offsetY: Single): HResult; overload; stdcall;
+    // Changes the value of the OffsetX property.
+    function SetOffsetX(offsetX: Single): HResult; overload; stdcall;
 
     // Animates the value of the OffsetY property.
     function SetOffsetY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the OffsetZ property.
-    function SetOffsetZ(offsetZ: Single): HResult; overload; stdcall;
+   // Changes the value of the OffsetY property.
+    function SetOffsetY(offsetY: Single): HResult; overload; stdcall;
 
     // Animates the value of the OffsetZ property.
     function SetOffsetZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    // Changes the value of the OffsetZ property.
+    function SetOffsetZ(offsetZ: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionTranslateTransform3D = IDCompositionTranslateTransform3D;
@@ -790,41 +765,41 @@ type
   IDCompositionScaleTransform3D = interface(IDCompositionTransform3D)
   ['{2A9E9EAD-364B-4b15-A7C4-A1997F78B389}']
 
-    // Changes the value of the ScaleX property.
-    function SetScaleX(scaleX: Single): HResult; overload; stdcall;
-
     // Animates the value of the ScaleX property.
     function SetScaleX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the ScaleY property.
-    function SetScaleY(scaleY: Single): HResult; overload; stdcall;
+    // Changes the value of the ScaleX property.
+    function SetScaleX(scaleX: Single): HResult; overload; stdcall;
 
     // Animates the value of the ScaleY property.
     function SetScaleY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the ScaleZ property.
-    function SetScaleZ(scaleZ: Single): HResult; overload; stdcall;
+    // Changes the value of the ScaleY property.
+    function SetScaleY(scaleY: Single): HResult; overload; stdcall;
 
     // Animates the value of the ScaleZ property.
     function SetScaleZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterX property.
-    function SetCenterX(centerX: Single): HResult; overload; stdcall;
+    // Changes the value of the ScaleZ property.
+    function SetScaleZ(scaleZ: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterX property.
     function SetCenterX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterY property.
-    function SetCenterY(centerY: Single): HResult; overload; stdcall;
+    // Changes the value of the CenterX property.
+    function SetCenterX(centerX: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterY property.
     function SetCenterY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterZ property.
-    function SetCenterZ(centerZ: Single): HResult; overload; stdcall;
+    // Changes the value of the CenterY property.
+    function SetCenterY(centerY: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterZ property.
     function SetCenterZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    // Changes the value of the CenterZ property.
+    function SetCenterZ(centerZ: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionScaleTransform3D = IDCompositionScaleTransform3D;
@@ -847,47 +822,47 @@ type
   IDCompositionRotateTransform3D = interface(IDCompositionTransform3D)
   ['{D8F5B23F-D429-4a91-B55A-D2F45FD75B18}']
 
-    // Changes the value of the Angle property.
-    function SetAngle(angle: Single): HResult; overload; stdcall;
-
     // Animates the value of the Angle property.
     function SetAngle(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the AxisX property.
-    function SetAxisX(axisX: Single): HResult; overload; stdcall;
+    // Changes the value of the Angle property.
+    function SetAngle(angle: Single): HResult; overload; stdcall;
 
     // Animates the value of the AxisX property.
     function SetAxisX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the AxisY property.
-    function SetAxisY(axisY: Single): HResult; overload; stdcall;
+    // Changes the value of the AxisX property.
+    function SetAxisX(axisX: Single): HResult; overload; stdcall;
 
     // Animates the value of the AxisY property.
     function SetAxisY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the AxisZ property.
-    function SetAxisZ(axisZ: Single): HResult; overload; stdcall;
+    // Changes the value of the AxisY property.
+    function SetAxisY(axisY: Single): HResult; overload; stdcall;
 
     // Animates the value of the AxisZ property.
     function SetAxisZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterX property.
-    function SetCenterX(centerX: Single): HResult; overload; stdcall;
+    // Changes the value of the AxisZ property.
+    function SetAxisZ(axisZ: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterX property.
     function SetCenterX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterY property.
-    function SetCenterY(centerY: Single): HResult; overload; stdcall;
+    // Changes the value of the CenterX property.
+    function SetCenterX(centerX: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterY property.
     function SetCenterY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the CenterZ property.
-    function SetCenterZ(centerZ: Single): HResult; overload; stdcall;
+    // Changes the value of the CenterY property.
+    function SetCenterY(centerY: Single): HResult; overload; stdcall;
 
     // Animates the value of the CenterZ property.
     function SetCenterZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    // Changes the value of the CenterZ property.
+    function SetCenterZ(centerZ: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionRotateTransform3D = IDCompositionRotateTransform3D;
@@ -914,17 +889,13 @@ type
   ['{4B3363F0-643B-41b7-B6E0-CCF22D34467C}']
 
     // Changes all values of the matrix of this transform.
-    function SetMatrix(matrix: D3DMATRIX): HResult; stdcall;
-
-    // Changes a Single element of the matrix of this transform.
-    function SetMatrixElement(row: Integer;
-                              column: Integer;
-                              value: Single): HResult; overload; stdcall;
+    function SetMatrix(const matrix: D3DMATRIX): HResult; stdcall;
 
     // Animates a Single element of the matrix of this transform.
-    function SetMatrixElement(row: Integer;
-                              column: Integer;
-                              animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetMatrixElement(row: Integer; column: Integer; animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    // Changes a Single element of the matrix of this transform.
+    function SetMatrixElement(row: Integer; column: Integer; value: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionMatrixTransform3D = IDCompositionMatrixTransform3D;
@@ -967,93 +938,93 @@ type
   IDCompositionRectangleClip = interface(IDCompositionClip)
   ['{9842AD7D-D9CF-4908-AED7-48B51DA5E7C2}']
 
-    // Changes the value of the Left property.
-    function SetLeft(left: Single): HResult; stdcall;
-
     // Animates the value of the Left property.
     function _SetLeft(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the Top property.
-    function SetTop(top: Single): HResult; stdcall;
+    // Changes the value of the Left property.
+    function SetLeft(left: Single): HResult; stdcall;
 
     // Animates the value of the Top property.
     function _SetTop(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the Right property.
-    function SetRight(right: Single): HResult; stdcall;
+    // Changes the value of the Top property.
+    function SetTop(top: Single): HResult; stdcall;
 
     // Animates the value of the Right property.
     function _SetRight(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the Bottom property.
-    function SetBottom(bottom: Single): HResult; stdcall;
+    // Changes the value of the Right property.
+    function SetRight(right: Single): HResult; stdcall;
 
     // Animates the value of the Bottom property.
     function _SetBottom(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the x radius of the ellipse that rounds the
-    // top-left corner of the clip.
-    function SetTopLeftRadiusX(radius: Single): HResult; stdcall;
+    // Changes the value of the Bottom property.
+    function SetBottom(bottom: Single): HResult; stdcall;
 
     // Animates the value of the x radius of the ellipse that rounds the
     // top-left corner of the clip.
     function _SetTopLeftRadiusX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the y radius of the ellipse that rounds the
+    // Changes the value of the x radius of the ellipse that rounds the
     // top-left corner of the clip.
-    function SetTopLeftRadiusY(radius: Single): HResult; stdcall;
+    function SetTopLeftRadiusX(radius: Single): HResult; stdcall;
 
     // Animates the value of the y radius of the ellipse that rounds the
     // top-left corner of the clip.
     function _SetTopLeftRadiusY(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the x radius of the ellipse that rounds the
-    // top-right corner of the clip.
-    function SetTopRightRadiusX(radius: Single): HResult; stdcall;
+    // Changes the value of the y radius of the ellipse that rounds the
+    // top-left corner of the clip.
+    function SetTopLeftRadiusY(radius: Single): HResult; stdcall;
 
     // Animates the value of the x radius of the ellipse that rounds the
     // top-right corner of the clip.
     function _SetTopRightRadiusX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the y radius of the ellipse that rounds the
+    // Changes the value of the x radius of the ellipse that rounds the
     // top-right corner of the clip.
-    function SetTopRightRadiusY(radius: Single): HResult; stdcall;
+    function SetTopRightRadiusX(radius: Single): HResult; stdcall;
 
     // Animates the value of the y radius of the ellipse that rounds the
     // top-right corner of the clip.
     function _SetTopRightRadiusY(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the x radius of the ellipse that rounds the
-    // bottom-left corner of the clip.
-    function SetBottomLeftRadiusX(radius: Single): HResult; stdcall;
+    // Changes the value of the y radius of the ellipse that rounds the
+    // top-right corner of the clip.
+    function SetTopRightRadiusY(radius: Single): HResult; stdcall;
 
     // Animates the value of the x radius of the ellipse that rounds the
     // bottom-left corner of the clip.
     function _SetBottomLeftRadiusX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the y radius of the ellipse that rounds the
+    // Changes the value of the x radius of the ellipse that rounds the
     // bottom-left corner of the clip.
-    function SetBottomLeftRadiusY(radius: Single): HResult; stdcall;
+    function SetBottomLeftRadiusX(radius: Single): HResult; stdcall;
 
     // Animates the value of the y radius of the ellipse that rounds the
     // bottom-left corner of the clip.
     function _SetBottomLeftRadiusY(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the x radius of the ellipse that rounds the
-    // bottom-right corner of the clip.
-    function SetBottomRightRadiusX(radius: Single): HResult; stdcall;
+    // Changes the value of the y radius of the ellipse that rounds the
+    // bottom-left corner of the clip.
+    function SetBottomLeftRadiusY(radius: Single): HResult; stdcall;
 
     // Animates the value of the x radius of the ellipse that rounds the
     // bottom-right corner of the clip.
     function _SetBottomRightRadiusX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of the y radius of the ellipse that rounds the
+    // Changes the value of the x radius of the ellipse that rounds the
     // bottom-right corner of the clip.
-    function SetBottomRightRadiusY(radius: Single): HResult; stdcall;
+    function SetBottomRightRadiusX(radius: Single): HResult; stdcall;
 
     // Animates the value of the y radius of the ellipse that rounds the
     // bottom-right corner of the clip.
     function _SetBottomRightRadiusY(animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes the value of the y radius of the ellipse that rounds the
+    // bottom-right corner of the clip.
+    function SetBottomRightRadiusY(radius: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionRectangleClip = IDCompositionRectangleClip;
@@ -1075,10 +1046,7 @@ type
   IDCompositionSurface = interface(IUnknown)
   ['{BB8A4953-2C99-4F5A-96F5-4819027FA3AC}']
 
-    function BeginDraw({opt} updateRect: PRect;
-                       const iid: REFIID;
-                       updateObject: Pointer;
-                       out updateOffset: TPoint): HResult; stdcall;
+    function BeginDraw(updateRect: PRect; const iid: REFIID; out updateObject; out updateOffset: TPoint): HResult; stdcall;
 
     function EndDraw(): HResult; stdcall;
 
@@ -1086,10 +1054,7 @@ type
 
     function ResumeDraw(): HResult; stdcall;
 
-    function Scroll({opt} scrollRect: PRect;
-                    {opt} clipRect: PRect;
-                    offsetX: Integer;
-                    offsetY: Integer): HResult; stdcall;
+    function Scroll(scrollRect: PRect; clipRect: PRect; offsetX: Integer; offsetY: Integer): HResult; stdcall;
 
   end;
   IID_IDCompositionSurface = IDCompositionSurface;
@@ -1111,11 +1076,9 @@ type
   IDCompositionVirtualSurface = interface(IDCompositionSurface)
   ['{AE471C51-5F53-4A24-8D3E-D0C39C30B3F0}']
 
-    function Resize(_width: UINT;
-                    _height: UINT): HResult; stdcall;
+    function Resize(_width: UINT; _height: UINT): HResult; stdcall;
 
-    function Trim(rectangles: PRECT;
-                  count: UINT): HResult; stdcall;
+    function Trim(rectangles: PRect; count: UINT): HResult; stdcall;
 
   end;
   IID_IDCompositionVirtualSurface = IDCompositionVirtualSurface;
@@ -1170,22 +1133,13 @@ type
     function CreateVisual(out visual: IDCompositionVisual2): HResult; stdcall;
 
     // Creates a factory for surface objects
-    function CreateSurfaceFactory(renderingDevice: IUnknown;
-                                  out surfaceFactory: IDCompositionSurfaceFactory): HResult; stdcall;
+    function CreateSurfaceFactory(renderingDevice: IUnknown; out surfaceFactory: IDCompositionSurfaceFactory): HResult; stdcall;
 
     // Creates a DirectComposition surface object
-    function CreateSurface(_width: UINT;
-                           _height: UINT;
-                           pixelFormat: DXGI_FORMAT;
-                           alphaMode: DXGI_ALPHA_MODE;
-                           out surface: IDCompositionSurface): HResult; stdcall;
+    function CreateSurface(_width: UINT; _height: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out surface: IDCompositionSurface): HResult; stdcall;
 
     // Creates a DirectComposition virtual surface object
-    function CreateVirtualSurface(initialWidth: UINT;
-                                  initialHeight: UINT;
-                                  pixelFormat: DXGI_FORMAT;
-                                  alphaMode: DXGI_ALPHA_MODE;
-                                  out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
+    function CreateVirtualSurface(initialWidth: UINT; initialHeight: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
 
     // Creates a 2D translation transform object.
     function CreateTranslateTransform(out translateTransform: IDCompositionTranslateTransform): HResult; stdcall;
@@ -1203,9 +1157,7 @@ type
     function CreateMatrixTransform(out matrixTransform: IDCompositionMatrixTransform): HResult; stdcall;
 
     // Creates a 2D transform object that holds an array of 2D transform objects.
-    function CreateTransformGroup(transforms: IDCompositionTransform;
-                                  elements: UINT;
-                                  out transformGroup: IDCompositionTransform): HResult; stdcall;
+    function CreateTransformGroup(transforms: PIDCompositionTransform; elements: UINT; out transformGroup: IDCompositionTransform): HResult; stdcall;
 
     // Creates a 3D translation transform object.
     function CreateTranslateTransform3D(out translateTransform3D: IDCompositionTranslateTransform3D): HResult; stdcall;
@@ -1220,9 +1172,7 @@ type
     function CreateMatrixTransform3D(out matrixTransform3D: IDCompositionMatrixTransform3D): HResult; stdcall;
 
     // Creates a 3D transform object that holds an array of 3D transform objects.
-    function CreateTransform3DGroup(transforms3D: IDCompositionTransform3D;
-                                    elements: UINT;
-                                    out transform3DGroup: IDCompositionTransform3D): HResult; stdcall;
+    function CreateTransform3DGroup(transforms3D: PIDCompositionTransform3D; elements: UINT; out transform3DGroup: IDCompositionTransform3D): HResult; stdcall;
 
     // Creates an effect group
     function CreateEffectGroup(out effectGroup: IDCompositionEffectGroup): HResult; stdcall;
@@ -1253,17 +1203,13 @@ type
   IDCompositionDesktopDevice = interface(IDCompositionDevice2)
   ['{5F4633FE-1E08-4CB8-8C75-CE24333F5602}']
 
-    function CreateTargetForHwnd(_hwnd: HWND;
-                                 topmost: BOOL;
-                                 out target: IDCompositionTarget): HResult; stdcall;
+    function CreateTargetForHwnd(_hwnd: HWND; topmost: BOOL; out target: IDCompositionTarget): HResult; stdcall;
 
     // Creates a surface wrapper around a pre-existing surface that can be associated with one or more visuals for composition.
-    function CreateSurfaceFromHandle(_handle: THandle;
-                                     out surface: IUnknown): HResult; stdcall;
+    function CreateSurfaceFromHandle(_handle: THandle; out surface: IUnknown): HResult; stdcall;
 
     // Creates a wrapper object that represents the rasterization of a layered window and which can be associated with a visual for composition.
-    function CreateSurfaceFromHwnd(_hwnd: HWND;
-                                   out surface: IUnknown): HResult; stdcall;
+    function CreateSurfaceFromHwnd(_hwnd: HWND; out surface: IUnknown): HResult; stdcall;
 
   end;
   IID_IDCompositionDesktopDevice = IDCompositionDesktopDevice;
@@ -1311,18 +1257,10 @@ type
   ['{E334BC12-3937-4E02-85EB-FCF4EB30D2C8}']
 
     // Creates a DirectComposition surface object
-    function CreateSurface(_width: UINT;
-                           _height: UINT;
-                           pixelFormat: DXGI_FORMAT;
-                           alphaMode: DXGI_ALPHA_MODE;
-                           out surface: IDCompositionSurface): HResult; stdcall;
+    function CreateSurface(_width: UINT; _height: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out surface: IDCompositionSurface): HResult; stdcall;
 
     // Creates a DirectComposition virtual surface object
-    function CreateVirtualSurface(initialWidth: UINT;
-                                  initialHeight: UINT;
-                                  pixelFormat: DXGI_FORMAT;
-                                  alphaMode: DXGI_ALPHA_MODE;
-                                  out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
+    function CreateVirtualSurface(initialWidth: UINT; initialHeight: UINT; pixelFormat: DXGI_FORMAT; alphaMode: DXGI_ALPHA_MODE; out virtualSurface: IDCompositionVirtualSurface): HResult; stdcall;
 
   end;
   IID_IDCompositionSurfaceFactory = IDCompositionSurfaceFactory;
@@ -1369,7 +1307,7 @@ type
   ['{FED2B808-5EB4-43A0-AEA3-35F65280F91B}']
 
     // Enable heat map
-    function EnableHeatMap(color: D2D1_COLOR_F): HResult; stdcall;
+    function EnableHeatMap(const color: D2D1_COLOR_F): HResult; stdcall;
 
     // Disable heat map
     function DisableHeatMap(): HResult; stdcall;
@@ -1413,23 +1351,23 @@ type
     // Sets depth mode property associated with this visual
     function SetDepthMode(mode: DCOMPOSITION_DEPTH_MODE): HResult; stdcall;
 
-    // Changes the value of OffsetZ property.
-    function SetOffsetZ(offsetZ: Single): HResult; overload; stdcall;
-
     // Animates the value of the OffsetZ property.
     function SetOffsetZ(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Changes the value of the Opacity property.
-    function SetOpacity(opacity: Single): HResult; overload; stdcall;
+    // Changes the value of OffsetZ property.
+    function SetOffsetZ(offsetZ: Single): HResult; overload; stdcall;
 
     // Animates the value of the Opacity property.
     function SetOpacity(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    // Sets the matrix that modifies the coordinate system of this visual.
-    function SetTransform(matrix: D2D_MATRIX_4X4_F): HResult; overload; stdcall;
+    // Changes the value of the Opacity property.
+    function SetOpacity(opacity: Single): HResult; overload; stdcall;
 
     // Sets the transformation object that modifies the coordinate system of this visual.
-    function SetTransform({opt} transform: IDCompositionTransform3D = Nil): HResult; overload; stdcall;
+    function SetTransform(transform: IDCompositionTransform3D = Nil): HResult; overload; stdcall;
+
+    // Sets the matrix that modifies the coordinate system of this visual.
+    function SetTransform(const matrix: D2D_MATRIX_4X4_F): HResult; overload; stdcall;
 
     // Changes the value of the Visible property
     function SetVisible(visible: BOOL): HResult; stdcall;
@@ -1501,9 +1439,7 @@ type
   ['{30C421D5-8CB2-4E9F-B133-37BE270D4AC2}']
 
     // Sets the input at the given index to the filterEffect (Nil will use source visual, unless flagged otherwise)
-    function SetInput(index: UINT;
-                      {opt} input: IUnknown;
-                      flags: UINT): HResult; stdcall;
+    function SetInput(index: UINT; input: IUnknown; flags: UINT): HResult; stdcall;
 
   end;
   IID_IDCompositionFilterEffect = IDCompositionFilterEffect;
@@ -1524,10 +1460,10 @@ type
   IDCompositionGaussianBlurEffect = interface(IDCompositionFilterEffect)
   ['{45D4D0B7-1BD4-454E-8894-2BFA68443033}']
 
+    function SetStandardDeviation(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
     //Changes the amount of blur to be applied.
     function SetStandardDeviation(amount: Single): HResult; overload; stdcall;
-
-    function SetStandardDeviation(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
     //Changes border mode (see D2D1_GAUSSIANBLUR)
     function SetBorderMode(mode: D2D1_BORDER_MODE): HResult; stdcall;
@@ -1552,30 +1488,30 @@ type
   ['{6027496E-CB3A-49AB-934F-D798DA4F7DA6}']
 
     // Changes the value of white point property.
-    function SetWhitePoint(whitePoint: D2D1_VECTOR_2F): HResult; stdcall;
+    function SetWhitePoint(whitePoint: PD2D_VECTOR_2F): HResult; stdcall;
 
     // Changes the value of black point property
-    function SetBlackPoint(blackPoint: D2D1_VECTOR_2F): HResult; stdcall;
+    function SetBlackPoint(blackPoint: PD2D_VECTOR_2F): HResult; stdcall;
+
+    function SetWhitePointX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
     // Changes the X value of the white point property.
     function SetWhitePointX(whitePointX: Single): HResult; overload; stdcall;
 
-    function SetWhitePointX(animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetWhitePointY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
     // Changes the Y value of the white point property.
     function SetWhitePointY(whitePointY: Single): HResult; overload; stdcall;
 
-    function SetWhitePointY(animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetBlackPointX(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
     // Changes the X value of the black point property.
     function SetBlackPointX(blackPointX: Single): HResult; overload; stdcall;
 
-    function SetBlackPointX(animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetBlackPointY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
     // Changes the Y value of the black point property.
     function SetBlackPointY(blackPointY: Single): HResult; overload; stdcall;
-
-    function SetBlackPointY(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionBrightnessEffect = IDCompositionBrightnessEffect;
@@ -1597,17 +1533,13 @@ type
   ['{C1170A22-3CE2-4966-90D4-55408BFC84C4}']
 
     // Changes all values of the matrix for a color transform
-    function SetMatrix(matrix: D2D1_MATRIX_5X4_F): HResult; stdcall;
-
-    // Changes a Single element of the matrix of this color transform.
-    function SetMatrixElement(row: Integer;
-                              column: Integer;
-                              value: Single): HResult; overload; stdcall;
+    function SetMatrix(const matrix: D2D1_MATRIX_5X4_F): HResult; stdcall;
 
     // Animates a single element of the matrix of this color transform.
-    function SetMatrixElement(row: Integer;
-                               column: Integer;
-                               animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetMatrixElement(row: Integer; column: Integer; animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    // Changes a Single element of the matrix of this color transform.
+    function SetMatrixElement(row: Integer; column: Integer; value: Single): HResult; overload; stdcall;
 
     // Changes the alpha mode
     function SetAlphaMode(mode: D2D1_COLORMATRIX_ALPHA_MODE): HResult; stdcall;
@@ -1634,30 +1566,30 @@ type
   IDCompositionShadowEffect = interface(IDCompositionFilterEffect)
   ['{4AD18AC0-CFD2-4C2F-BB62-96E54FDB6879}']
 
+    function _SetStandardDeviation(animation: IDCompositionAnimation): HResult; stdcall;
+
     // Changes the amount of blur to be applied.
     function SetStandardDeviation(amount: Single): HResult; stdcall;
 
-    function _SetStandardDeviation(animation: IDCompositionAnimation): HResult; stdcall;
-
     // Changes shadow color
-    function SetColor(color: D2D1_VECTOR_4F): HResult; stdcall;
-
-    function SetRed(amount: Single): HResult; overload; stdcall;
+    function SetColor(const color: D2D1_VECTOR_4F): HResult; stdcall;
 
     function SetRed(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetGreen(amount: Single): HResult; overload; stdcall;
+    function SetRed(amount: Single): HResult; overload; stdcall;
 
     function SetGreen(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetBlue(amount: Single): HResult; overload; stdcall;
+    function SetGreen(amount: Single): HResult; overload; stdcall;
 
     function SetBlue(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetAlpha(amount: Single): HResult; stdcall;
+    function SetBlue(amount: Single): HResult; overload; stdcall;
 
 
     function _SetAlpha(animation: IDCompositionAnimation): HResult; stdcall;
+
+    function SetAlpha(amount: Single): HResult; stdcall;
 
   end;
   IID_IDCompositionShadowEffect = IDCompositionShadowEffect;
@@ -1678,10 +1610,10 @@ type
   IDCompositionHueRotationEffect = interface(IDCompositionFilterEffect)
   ['{6DB9F920-0770-4781-B0C6-381912F9D167}']
 
+    function SetAngle(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
     // Changes the angle of rotation
     function SetAngle(amountDegrees: Single): HResult; overload; stdcall;
-
-    function SetAngle(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionHueRotationEffect = IDCompositionHueRotationEffect;
@@ -1702,10 +1634,10 @@ type
   IDCompositionSaturationEffect = interface(IDCompositionFilterEffect)
   ['{A08DEBDA-3258-4FA4-9F16-9174D3FE93B1}']
 
+    function SetSaturation(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
     // Changes the amount of saturation to be applied.
     function SetSaturation(ratio: Single): HResult; overload; stdcall;
-
-    function SetSaturation(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionSaturationEffect = IDCompositionSaturationEffect;
@@ -1727,13 +1659,13 @@ type
   ['{A6A55BDA-C09C-49F3-9193-A41922C89715}']
 
     // Changes the starting offset of the turbulence
-    function SetOffset(offset: D2D1_VECTOR_2F): HResult; stdcall;
+    function SetOffset(offset: PD2D_VECTOR_2F): HResult; stdcall;
 
     // Changes the base frequency of the turbulence
-    function SetBaseFrequency(frequency: D2D1_VECTOR_2F): HResult; stdcall;
+    function SetBaseFrequency(frequency: PD2D_VECTOR_2F): HResult; stdcall;
 
     // Changes the output size of the turbulence
-    function SetSize(size: D2D1_VECTOR_2F): HResult; stdcall;
+    function SetSize(size: PD2D_VECTOR_2F): HResult; stdcall;
 
     // Sets the number of octaves
     function SetNumOctaves(numOctaves: UINT): HResult; stdcall;
@@ -1766,43 +1698,43 @@ type
   IDCompositionLinearTransferEffect = interface(IDCompositionFilterEffect)
   ['{4305EE5B-C4A0-4C88-9385-67124E017683}']
 
-    function SetRedYIntercept(redYIntercept: Single): HResult; overload; stdcall;
-
     function SetRedYIntercept(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetRedSlope(redSlope: Single): HResult; overload; stdcall;
+    function SetRedYIntercept(redYIntercept: Single): HResult; overload; stdcall;
 
     function SetRedSlope(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetRedDisable(redDisable: BOOL): HResult; stdcall;
+    function SetRedSlope(redSlope: Single): HResult; overload; stdcall;
 
-    function SetGreenYIntercept(greenYIntercept: Single): HResult; overload; stdcall;
+    function SetRedDisable(redDisable: BOOL): HResult; stdcall;
 
     function SetGreenYIntercept(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetGreenSlope(greenSlope: Single): HResult; overload; stdcall;
+    function SetGreenYIntercept(greenYIntercept: Single): HResult; overload; stdcall;
 
     function SetGreenSlope(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetGreenDisable(greenDisable: BOOL): HResult; stdcall;
+    function SetGreenSlope(greenSlope: Single): HResult; overload; stdcall;
 
-    function SetBlueYIntercept(blueYIntercept: Single): HResult; overload; stdcall;
+    function SetGreenDisable(greenDisable: BOOL): HResult; stdcall;
 
     function SetBlueYIntercept(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetBlueSlope(blueSlope: Single): HResult; overload; stdcall;
+    function SetBlueYIntercept(blueYIntercept: Single): HResult; overload; stdcall;
 
     function SetBlueSlope(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetBlueDisable(blueDisable: BOOL): HResult; stdcall;
+    function SetBlueSlope(blueSlope: Single): HResult; overload; stdcall;
 
-    function SetAlphaYIntercept(alphaYIntercept: Single): HResult; overload; stdcall;
+    function SetBlueDisable(blueDisable: BOOL): HResult; stdcall;
 
     function SetAlphaYIntercept(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetAlphaSlope(alphaSlope: Single): HResult; overload; stdcall;
+    function SetAlphaYIntercept(alphaYIntercept: Single): HResult; overload; stdcall;
 
     function SetAlphaSlope(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    function SetAlphaSlope(alphaSlope: Single): HResult; overload; stdcall;
 
     function SetAlphaDisable(alphaDisable: BOOL): HResult; stdcall;
 
@@ -1827,17 +1759,13 @@ type
   IDCompositionTableTransferEffect = interface(IDCompositionFilterEffect)
   ['{9B7E82E2-69C5-4EB4-A5F5-A7033F5132CD}']
 
-    function SetRedTable(tableValues: Single;
-                         count: UINT): HResult; stdcall;
+    function SetRedTable(tableValues: PSingle; count: UINT): HResult; stdcall;
 
-    function SetGreenTable(tableValues: Single;
-                           count: UINT): HResult; stdcall;
+    function SetGreenTable(tableValues: PSingle; count: UINT): HResult; stdcall;
 
-    function SetBlueTable(tableValues: Single;
-                          count: UINT): HResult; stdcall;
+    function SetBlueTable(tableValues: PSingle; count: UINT): HResult; stdcall;
 
-    function SetAlphaTable(tableValues: Single;
-                           count: UINT): HResult; stdcall;
+    function SetAlphaTable(tableValues: PSingle; count: UINT): HResult; stdcall;
 
     function SetRedDisable(redDisable: BOOL): HResult; stdcall;
 
@@ -1849,31 +1777,23 @@ type
 
     function SetClampOutput(clampOutput: BOOL): HResult; stdcall;
 
+    function SetRedTableValue(index: UINT; animation: IDCompositionAnimation): HResult; overload; stdcall;
+
     //Note:  To set individual values, the table must have already been initialized
     //       with a buffer of values of the appropriate size, or these calls will fail
-    function SetRedTableValue(index: UINT;
-                              value: Single): HResult; overload; stdcall;
+    function SetRedTableValue(index: UINT; value: Single): HResult; overload; stdcall;
 
-    function SetRedTableValue(index: UINT;
-                              animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetGreenTableValue(index: UINT; animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetGreenTableValue(index: UINT;
-                                value: Single): HResult; overload; stdcall;
+    function SetGreenTableValue(index: UINT; value: Single): HResult; overload; stdcall;
 
-    function SetGreenTableValue(index: UINT;
-                                animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetBlueTableValue(index: UINT; animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetBlueTableValue(index: UINT;
-                               value: Single): HResult; overload; stdcall;
+    function SetBlueTableValue(index: UINT; value: Single): HResult; overload; stdcall;
 
-    function SetBlueTableValue(index: UINT;
-                               animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetAlphaTableValue(index: UINT; animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetAlphaTableValue(index: UINT;
-                                value: Single): HResult; overload; stdcall;
-
-    function SetAlphaTableValue(index: UINT;
-                                animation: IDCompositionAnimation): HResult; overload; stdcall;
+    function SetAlphaTableValue(index: UINT; value: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionTableTransferEffect = IDCompositionTableTransferEffect;
@@ -1937,25 +1857,25 @@ type
   IDCompositionArithmeticCompositeEffect = interface(IDCompositionFilterEffect)
   ['{3B67DFA8-E3DD-4E61-B640-46C2F3D739DC}']
 
-    function SetCoefficients(coefficients: D2D1_VECTOR_4F): HResult; stdcall;
+    function SetCoefficients(const coefficients: D2D1_VECTOR_4F): HResult; stdcall;
 
     function SetClampOutput(clampoutput: BOOL): HResult; stdcall;
 
-    function SetCoefficient1(Coeffcient1: Single): HResult; overload; stdcall;
-
     function SetCoefficient1(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetCoefficient2(Coefficient2: Single): HResult; overload; stdcall;
+    function SetCoefficient1(Coeffcient1: Single): HResult; overload; stdcall;
 
     function SetCoefficient2(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetCoefficient3(Coefficient3: Single): HResult; overload; stdcall;
+    function SetCoefficient2(Coefficient2: Single): HResult; overload; stdcall;
 
     function SetCoefficient3(animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetCoefficient4(Coefficient4: Single): HResult; overload; stdcall;
+    function SetCoefficient3(Coefficient3: Single): HResult; overload; stdcall;
 
     function SetCoefficient4(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    function SetCoefficient4(Coefficient4: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionArithmeticCompositeEffect = IDCompositionArithmeticCompositeEffect;
@@ -1980,19 +1900,15 @@ type
 
     function SetBorderMode(borderMode: D2D1_BORDER_MODE): HResult; stdcall;
 
-    function SetTransformMatrix(transformMatrix: D2D1_MATRIX_3X2_F): HResult; stdcall;
+    function SetTransformMatrix(const transformMatrix: D2D1_MATRIX_3X2_F): HResult; stdcall;
 
-    function SetTransformMatrixElement(row: Integer;
-                                       column: Integer;
-                                       value: Single): HResult; overload; stdcall;
+    function SetTransformMatrixElement(row: Integer; column: Integer; animation: IDCompositionAnimation): HResult; overload; stdcall;
 
-    function SetTransformMatrixElement(row: Integer;
-                                       column: Integer;
-                                       animation: IDCompositionAnimation): HResult; overload; stdcall;
-
-    function SetSharpness(sharpness: Single): HResult; overload; stdcall;
+    function SetTransformMatrixElement(row: Integer; column: Integer; value: Single): HResult; overload; stdcall;
 
     function SetSharpness(animation: IDCompositionAnimation): HResult; overload; stdcall;
+
+    function SetSharpness(sharpness: Single): HResult; overload; stdcall;
 
   end;
   IID_IDCompositionAffineTransform2DEffect = IDCompositionAffineTransform2DEffect;
@@ -2014,9 +1930,7 @@ type
   //     other DirectComposition objects.
   //
   //----------------------------------------------------------------------------
-  function DCompositionCreateDevice({In_opt} dxgiDevice: IDXGIDevice;
-                                    const iid: REFIID;
-                                    {out} dcompositionDevice: pointer ): HResult; stdcall;
+  function DCompositionCreateDevice(dxgiDevice: IDXGIDevice; const iid: REFIID; out dcompositionDevice): HResult; stdcall;
   {$EXTERNALSYM DCompositionCreateDevice}
 
 //#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
@@ -2031,9 +1945,7 @@ type
   //     other DirectComposition objects.
   //
   //----------------------------------------------------------------------------
-  function DCompositionCreateDevice2({In_opt} renderingDevice: IUnknown;
-                                     const iid: REFIID;
-                                     {out} dcompositionDevice: Pointer ): HResult; stdcall;
+  function DCompositionCreateDevice2(renderingDevice: IUnknown; const iid: REFIID; out dcompositionDevice): HResult; stdcall;
   {$EXTERNALSYM DCompositionCreateDevice2}
 
 //#endif  //(_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
@@ -2050,9 +1962,7 @@ type
   //     other DirectComposition objects.
   //
   //----------------------------------------------------------------------------
-  function DCompositionCreateDevice3({In_opt} renderingDevice: IUnknown;
-                                     const iid: REFIID;
-                                     {out} dcompositionDevice: Pointer): HResult; stdcall;
+  function DCompositionCreateDevice3(renderingDevice: IUnknown; const iid: REFIID; out dcompositionDevice): HResult; stdcall;
   {$EXTERNALSYM DCompositionCreateDevice3}
 
 //  #endif  //(_WIN32_WINNT >= _WIN32_WINNT_WINTHRESHOLD)
@@ -2069,9 +1979,7 @@ type
   //     with a visual.
   //
   //----------------------------------------------------------------------------
-  function DCompositionCreateSurfaceHandle(desiredAccess: DWORD;
-                                           {In_opt} securityAttributes: SECURITY_ATTRIBUTES;
-                                           out surfaceHandle: THandle): HResult; stdcall;
+  function DCompositionCreateSurfaceHandle(desiredAccess: DWORD; securityAttributes: PSecurityAttributes; out surfaceHandle: THandle): HResult; stdcall;
   {$EXTERNALSYM DCompositionCreateSurfaceHandle}
 
   //+---------------------------------------------------------------------------
@@ -2085,9 +1993,7 @@ type
   //     be committed.
   //
   //----------------------------------------------------------------------------
-  function DCompositionAttachMouseWheelToHwnd(visual: IDCompositionVisual;
-                                              _hwnd: HWND;
-                                              enable: BOOL): HResult; stdcall;
+  function DCompositionAttachMouseWheelToHwnd(visual: IDCompositionVisual; _hwnd: HWND; enable: BOOL): HResult; stdcall;
   {$EXTERNALSYM DCompositionAttachMouseWheelToHwnd}
 
   //+---------------------------------------------------------------------------
@@ -2103,9 +2009,7 @@ type
   //     API, the device owning the visual must be committed.
   //
   //----------------------------------------------------------------------------
-  function DCompositionAttachMouseDragToHwnd(visual: IDCompositionVisual;
-                                             _hwnd: HWND;
-                                             enable: LongBool): HResult; stdcall;
+  function DCompositionAttachMouseDragToHwnd(visual: IDCompositionVisual; _hwnd: HWND; enable: BOOL): HResult; stdcall;
   {$EXTERNALSYM DCompositionAttachMouseDragToHwnd}
 
 
@@ -2121,8 +2025,7 @@ type
   //      Returns the frameId of the most recently started composition frame.
   //
   //------------------------------------------------------------------------------
-  function DCompositionGetFrameId(frameIdType: COMPOSITION_FRAME_ID_TYPE;
-                                  out frameId: COMPOSITION_FRAME_ID): HResult; stdcall;
+  function DCompositionGetFrameId(frameIdType: COMPOSITION_FRAME_ID_TYPE; out frameId: COMPOSITION_FRAME_ID): HResult; stdcall;
   {$EXTERNALSYM DCompositionGetFrameId}
 
   //+-----------------------------------------------------------------------------
@@ -2135,11 +2038,7 @@ type
   //      of all target ids that existed at that time.
   //
   //------------------------------------------------------------------------------
-  function DCompositionGetStatistics(frameId: COMPOSITION_FRAME_ID;
-                                     Out frameStats: COMPOSITION_FRAME_STATS;
-                                     targetIdCount: UINT;
-                                     {out} targetIds: PCOMPOSITION_TARGET_ID;
-                                     {out} actualTargetIdCount: PUINT): HResult; stdcall;
+  function DCompositionGetStatistics(frameId: COMPOSITION_FRAME_ID; out frameStats: COMPOSITION_FRAME_STATS; targetIdCount: UINT; targetIds: PCOMPOSITION_TARGET_ID; actualTargetIdCount: PUINT): HResult; stdcall;
   {$EXTERNALSYM DCompositionGetStatistics}
 
   //+-----------------------------------------------------------------------------
@@ -2151,9 +2050,7 @@ type
   //      Returns compositor target statistics for the requested frame.
   //
   //------------------------------------------------------------------------------
-  function DCompositionGetTargetStatistics(frameId: COMPOSITION_FRAME_ID;
-                                           const targetId: COMPOSITION_TARGET_ID;
-                                           out targetStats: COMPOSITION_TARGET_STATS): HResult; stdcall;
+  function DCompositionGetTargetStatistics(frameId: COMPOSITION_FRAME_ID; targetId: PCOMPOSITION_TARGET_ID; out targetStats: COMPOSITION_TARGET_STATS): HResult; stdcall;
   {$EXTERNALSYM DCompositionGetTargetStatistics}
 
   //+-----------------------------------------------------------------------------
@@ -2212,20 +2109,14 @@ type
   ['{C2448E9B-547D-4057-8CF5-8144EDE1C2DA}']
 
     // Returns a generation id to be used when removing points later
-    function AddTrailPoints(inkPoints: PDCompositionInkTrailPoint;
-                            inkPointsCount: UINT;
-                            out generationId: UINT): HResult; stdcall;
+    function AddTrailPoints(inkPoints: PDCompositionInkTrailPoint; inkPointsCount: UINT; out generationId: UINT): HResult; stdcall;
 
     // Returns a generation id to be used when removing points later
-    function AddTrailPointsWithPrediction(inkPoints: PDCompositionInkTrailPoint;
-        inkPointsCount: UINT;
-        predictedInkPoints: PDCompositionInkTrailPoint;
-        predictedInkPointsCount: UINT;
-        Out generationId: UINT): HResult; stdcall;
+    function AddTrailPointsWithPrediction(inkPoints: PDCompositionInkTrailPoint; inkPointsCount: UINT; predictedInkPoints: PDCompositionInkTrailPoint; predictedInkPointsCount: UINT; out generationId: UINT): HResult; stdcall;
 
     function RemoveTrailPoints(generationId: UINT): HResult; stdcall;
 
-    function StartNewTrail(color: D2D1_COLOR_F): HResult; stdcall;
+    function StartNewTrail(const color: D2D1_COLOR_F): HResult; stdcall;
 
   end;
   IID_IDCompositionDelegatedInkTrail = IDCompositionDelegatedInkTrail;
@@ -2247,10 +2138,9 @@ type
   IDCompositionInkTrailDevice = interface(IUnknown)
   ['{DF0C7CEC-CDEB-4D4A-B91C-721BF22F4E6C}']
 
-    function CreateDelegatedInkTrail(out inkTrail: PIDCompositionDelegatedInkTrail): HResult; stdcall;
+    function CreateDelegatedInkTrail(out inkTrail: IDCompositionDelegatedInkTrail): HResult; stdcall;
 
-    function CreateDelegatedInkTrailForSwapChain(swapChain: IUnknown;
-                                                 out inkTrail: PIDCompositionDelegatedInkTrail): HResult; stdcall;
+    function CreateDelegatedInkTrailForSwapChain(swapChain: IUnknown; out inkTrail: IDCompositionDelegatedInkTrail): HResult; stdcall;
 
   end;
   IID_IDCompositionInkTrailDevice = IDCompositionInkTrailDevice;
@@ -2275,15 +2165,13 @@ type
   IDCompositionTexture = interface(IUnknown)
   ['{929BB1AA-725F-433B-ABD7-273075A835F2}']
 
-    function SetSourceRect(sourceRect: D2D_RECT_U): HResult; stdcall;
+    function SetSourceRect(const sourceRect: D2D_RECT_U): HResult; stdcall;
 
     function SetColorSpace(colorSpace: DXGI_COLOR_SPACE_TYPE): HResult; stdcall;
 
     function SetAlphaMode(alphaMode: DXGI_ALPHA_MODE): HResult; stdcall;
 
-    function GetAvailableFence(out fenceValue: UINT64;
-                               const iid: REFIID;
-                               {out} availableFence: Pointer): HResult; stdcall;
+    function GetAvailableFence(out fenceValue: UINT64; const iid: REFIID; out availableFence): HResult; stdcall;
 
   end;
   {$EXTERNALSYM IDCompositionTexture}
@@ -2307,12 +2195,10 @@ type
   ['{85FC5CCA-2DA6-494C-86B6-4A775C049B8A}']
 
     // Determine whether or not the backing D3D device Supports composition textures.
-    function CheckCompositionTextureSupport(renderingDevice: IUnknown;
-                                            out supportsCompositionTextures: BOOL): HResult; stdcall;
+    function CheckCompositionTextureSupport(renderingDevice: IUnknown; out supportsCompositionTextures: BOOL): HResult; stdcall;
 
     // Call to create a composition texture referencing the passed D3D texture.
-    function CreateCompositionTexture(d3dTexture: IUnknown;
-                                      {out} compositionTexture: PIDCompositionTexture): HResult; stdcall;
+    function CreateCompositionTexture(d3dTexture: IUnknown; out compositionTexture: IDCompositionTexture): HResult; stdcall;
 
   end;
   {$EXTERNALSYM IDCompositionDevice4}
@@ -2335,8 +2221,6 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionDynamicTexture);'}
   IDCompositionDynamicTexture = interface(IUnknown)
   ['{A1DE1D3F-6405-447F-8E95-1383A34B0277}']
-    // Set current texture, assuming that every pixel has changed.
-    function SetTexture(pTexture: IDCompositionTexture): HResult; stdcall;
 
     // Set current texture, assuming that only pixels inside the provided rects have changed.
     //
@@ -2348,9 +2232,9 @@ type
     //
     // If provided with an empty array or empty rects, this method will treat the texture as identical
     // to the previous one so that DWM may choose not to redraw it.
-    function _SetTexture(pTexture: IDCompositionTexture;
-                         const pRects: PD2D_RECT_L;
-                         rectCount: size_t): HResult; stdcall;
+    function _SetTexture(pTexture: IDCompositionTexture; pRects: PD2D_RECT_L; rectCount: NativeUInt): HResult; stdcall;
+    // Set current texture, assuming that every pixel has changed.
+    function SetTexture(pTexture: IDCompositionTexture): HResult; stdcall;
   end;
   {$EXTERNALSYM IDCompositionDynamicTexture}
   IID_IDCompositionDynamicTexture = IDCompositionDynamicTexture;
@@ -2371,7 +2255,7 @@ type
   IDCompositionDevice5 = interface(IDCompositionDevice4)
   ['{2C6BEBFE-A603-472F-AF34-D2443356E61B}']
     {$EXTERNALSYM IDCompositionDynamicTexture}
-    function CreateDynamicTexture(out compositionDynamicTexture: PIDCompositionDynamicTexture): HResult; stdcall;
+    function CreateDynamicTexture(out compositionDynamicTexture: IDCompositionDynamicTexture): HResult; stdcall;
 
   end;
   {$EXTERNALSYM IDCompositionDevice5}

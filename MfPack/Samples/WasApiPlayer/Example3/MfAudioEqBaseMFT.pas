@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   Minimal synchronous Audio MFT base class:
@@ -29,14 +29,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/WasApiPlayer/Example3
+// Related projects: MfPackX410/Samples/WasApiPlayer/Example3
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -177,6 +177,7 @@ type
     FSampleRate: Cardinal;
     FChannels: Cardinal;
     FBitsPerSample: Cardinal;
+    FIsFloat: Boolean;
     FBlockAlign: Cardinal;
 
     // derived DSP hooks (called under FLock).
@@ -299,8 +300,8 @@ begin
                           sub)) then
     Exit;
 
-  if not IsEqualGUID(sub,
-                     MFAudioFormat_PCM) then
+  if not IsEqualGUID(sub,MFAudioFormat_PCM) and
+     not IsEqualGUID(sub,MFAudioFormat_Float) then
     Exit;
 
   bits := 0;
@@ -308,12 +309,13 @@ begin
   pType.GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
                   bits);
 
-  Result := (bits = 16) or (bits = 32);
+  Result := ((bits = 16) and IsEqualGUID(sub,MFAudioFormat_PCM)) or (bits = 32);
 end;
 
 
 function TMfAudioEqBaseMFT.ReadAudioFormatFromType(const pType: IMFMediaType): HRESULT;
 var
+  Subtype: TGUID;
   sr,
   ch,
   bps,
@@ -347,6 +349,8 @@ begin
                             ba)) then
     ba := (ch * (bps div 8));
 
+  if Failed(pType.GetGUID(MF_MT_SUBTYPE,Subtype)) then Exit(E_INVALIDARG);
+  FIsFloat := IsEqualGUID(Subtype,MFAudioFormat_Float);
   FSampleRate := sr;
   FChannels := ch;
   FBitsPerSample := bps;

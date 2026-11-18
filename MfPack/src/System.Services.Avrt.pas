@@ -10,7 +10,7 @@
 // Release date: 24-10-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This module contains the multimedia class scheduler APIs and any public data
 //              structures needed to call these APIs.
 //              This header is part of the System Services API.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please take notice of ANSI or Unicode versions of the included function.
@@ -32,7 +32,7 @@
 //          For more information, see https://docs.microsoft.com/en-us/windows/win32/intl/conventions-for-function-prototypes.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -87,12 +87,12 @@ type
   // AvRt Priorities
   //
 
-  _AVRT_PRIORITY = (
-    AVRT_PRIORITY_VERYLOW = -2,
-    AVRT_PRIORITY_LOW = -1,
-    AVRT_PRIORITY_NORMAL = 0,
-    AVRT_PRIORITY_HIGH = 1,
-    AVRT_PRIORITY_CRITICAL = 2);
+  _AVRT_PRIORITY = (AVRT_PRIORITY_VERYLOW = -2,
+                    AVRT_PRIORITY_LOW = -1,
+                    AVRT_PRIORITY_NORMAL = 0,
+                    AVRT_PRIORITY_HIGH = 1,
+                    AVRT_PRIORITY_CRITICAL = 2
+                   );
   {$EXTERNALSYM _AVRT_PRIORITY}
   AVRT_PRIORITY = _AVRT_PRIORITY;
   {$EXTERNALSYM AVRT_PRIORITY}
@@ -152,38 +152,38 @@ const
   {$EXTERNALSYM AvSetMmThreadPriority}
 
   // Returns False if failed
-  function AvRtCreateThreadOrderingGroup({_Out_} out Context: PHandle;
-                                         {_In_} Period: LARGE_INTEGER;
+  function AvRtCreateThreadOrderingGroup({_Out_} out Context: THandle;
+                                         {_In_} Period: PLargeInteger;
                                          {_Inout_} ThreadOrderingGuid: PGUID;
                                          {_In_opt_} Timeout: PLargeInteger ): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroup}
 
   // Returns False if failed
-  function AvRtCreateThreadOrderingGroupExA({_Out_} out Context: PHandle;
-                                            {_In_} Period: LARGE_INTEGER;
+  function AvRtCreateThreadOrderingGroupExA({_Out_} out Context: THandle;
+                                            {_In_} Period: PLargeInteger;
                                             {_Inout_} ThreadOrderingGuid: PGUID;
                                             {_In_opt_} Timeout: PLargeInteger;
                                             {_In_} TaskName: PAnsiChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupExA}
 
   // Returns False if failed
-  function AvRtCreateThreadOrderingGroupExW({_Out_} out Context: PHandle;
-                                            {_In_} Period: LARGE_INTEGER;
+  function AvRtCreateThreadOrderingGroupExW({_Out_} out Context: THandle;
+                                            {_In_} Period: PLargeInteger;
                                             {_Inout_} ThreadOrderingGuid: PGUID;
-                                            {_In_opt_} Timeout: LARGE_INTEGER;
+                                            {_In_opt_} Timeout: PLargeInteger;
                                             {_In_} TaskName: PWideChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupExW}
 
   // Returns False if failed
-  function AvRtCreateThreadOrderingGroupEx({_Out_} out Context: PHandle;
-                                           {_In_} Period: LARGE_INTEGER;
+  function AvRtCreateThreadOrderingGroupEx({_Out_} out Context: THandle;
+                                           {_In_} Period: PLargeInteger;
                                            {_Inout_} ThreadOrderingGuid: PGUID;
-                                           {_In_opt_} Timeout: LARGE_INTEGER;
+                                           {_In_opt_} Timeout: PLargeInteger;
                                            {_In_} TaskName: PWideChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupEx}
 
   // Returns False if failed
-  function AvRtJoinThreadOrderingGroup({_Out_} out Context: PHandle;
+  function AvRtJoinThreadOrderingGroup({_Out_} out Context: THandle;
                                        {_In_} const ThreadOrderingGuid: TGUID;
                                        {_In_} Before: BOOL): Bool; stdcall;
   {$EXTERNALSYM AvRtJoinThreadOrderingGroup}
@@ -202,7 +202,7 @@ const
 
   // Returns False if failed
   function AvQuerySystemResponsiveness({_In_} Context: THandle;
-                                       {_Out_} SystemResponsivenessValue: ULONG): Bool; stdcall;
+                                       {_Out_} out SystemResponsivenessValue: ULONG): Bool; stdcall;
   {$EXTERNALSYM AvQuerySystemResponsiveness}
 
 

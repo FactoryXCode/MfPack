@@ -10,7 +10,7 @@
 // Release date: 23-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -175,11 +175,10 @@ type
   //  OPMGetVideoOutputFromIDirect3DDevice9Object().
   //
   POPM_VIDEO_OUTPUT_SEMANTICS = ^OPM_VIDEO_OUTPUT_SEMANTICS;
-  _OPM_VIDEO_OUTPUT_SEMANTICS = (
-    OPM_VOS_COPP_SEMANTICS        = 0,
-    OPM_VOS_OPM_SEMANTICS	        = 1,
-    OPM_VOS_OPM_INDIRECT_DISPLAY	= 2
-  );
+  _OPM_VIDEO_OUTPUT_SEMANTICS = (OPM_VOS_COPP_SEMANTICS        = 0,
+                                 OPM_VOS_OPM_SEMANTICS	        = 1,
+                                 OPM_VOS_OPM_INDIRECT_DISPLAY	= 2
+                                );
   {$EXTERNALSYM _OPM_VIDEO_OUTPUT_SEMANTICS}
   OPM_VIDEO_OUTPUT_SEMANTICS = _OPM_VIDEO_OUTPUT_SEMANTICS;
   {$EXTERNALSYM OPM_VIDEO_OUTPUT_SEMANTICS}
@@ -431,6 +430,7 @@ type
   //  Structures used by several functions
   //
 
+  {$ALIGN 1} // SDK pack(push, 1) for OPM records.
   POPM_RANDOM_NUMBER = ^OPM_RANDOM_NUMBER;
   _OPM_RANDOM_NUMBER = record
     abRandomNumber: array[0..15] of Byte;
@@ -694,25 +694,26 @@ type
   //  establish a protected communications channel with an output, get
   //  information from an output and configure an output.
   //
+  {$IFDEF WIN32}{$ALIGN 1}{$ELSE}{$ALIGN 8}{$ENDIF}
   PIOPMVideoOutput = ^IOPMVideoOutput;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IOPMVideoOutput);'}
   {$EXTERNALSYM IOPMVideoOutput}
   IOPMVideoOutput = interface(IUnknown)
   ['{0A15159D-41C7-4456-93E1-284CD61D4E8D}']
 
-    function StartInitialization(prnRandomNumber: OPM_RANDOM_NUMBER;
+    function StartInitialization(out prnRandomNumber: OPM_RANDOM_NUMBER;
                                  out ppbCertificate: PByte;
                                  out pulCertificateLength: ULONG): HResult; stdcall;
 
-    function FinishInitialization(pParameters: OPM_ENCRYPTED_INITIALIZATION_PARAMETERS): HResult; stdcall;
+    function FinishInitialization(const pParameters: OPM_ENCRYPTED_INITIALIZATION_PARAMETERS): HResult; stdcall;
 
-    function GetInformation(pParameters: OPM_GET_INFO_PARAMETERS;
+    function GetInformation(const pParameters: OPM_GET_INFO_PARAMETERS;
                             out pRequestedInformation: OPM_REQUESTED_INFORMATION): HResult; stdcall;
 
-    function COPPCompatibleGetInformation(pParameters: OPM_COPP_COMPATIBLE_GET_INFO_PARAMETERS;
+    function COPPCompatibleGetInformation(const pParameters: OPM_COPP_COMPATIBLE_GET_INFO_PARAMETERS;
                                           out pRequestedInformation: OPM_REQUESTED_INFORMATION): HResult; stdcall;
 
-    function Configure(pParameters: OPM_CONFIGURE_PARAMETERS;
+    function Configure(const pParameters: OPM_CONFIGURE_PARAMETERS;
                        ulAdditionalParametersSize: ULONG;
                        pbAdditionalParameters: PByte): HResult; stdcall;
 
@@ -736,16 +737,15 @@ const
 type
 
   PKSMETHOD_OPMVIDEOOUTPUT = ^KSMETHOD_OPMVIDEOOUTPUT;
-  cwKSMETHOD_OPMVIDEOOUTPUT                      = (
-    // Output is OPM_RANDOM_NUMBER followed by certifiate
-    KSMETHOD_OPMVIDEOOUTPUT_STARTINITIALIZATION  = 0,
-    // Input OPM_ENCRYPTED_INITIALIZATION_PARAMETERS
-    // Output OPM_STANDARD_INFORMATION
-    KSMETHOD_OPMVIDEOOUTPUT_FINISHINITIALIZATION = 1,
-    // Input is OPM_GET_INFO_PARAMETERS, output is OPM_REQUESTED_INFORMATION
-    // Use KsMethod - both input and output in the buffer (not after the KSMETHOD structure)
-    KSMETHOD_OPMVIDEOOUTPUT_GETINFORMATION       = 2
-  );
+  // Output is OPM_RANDOM_NUMBER followed by certifiate
+  // Input OPM_ENCRYPTED_INITIALIZATION_PARAMETERS
+  // Output OPM_STANDARD_INFORMATION
+  // Input is OPM_GET_INFO_PARAMETERS, output is OPM_REQUESTED_INFORMATION
+  // Use KsMethod - both input and output in the buffer (not after the KSMETHOD structure)
+  cwKSMETHOD_OPMVIDEOOUTPUT                      = (KSMETHOD_OPMVIDEOOUTPUT_STARTINITIALIZATION  = 0,
+                                                    KSMETHOD_OPMVIDEOOUTPUT_FINISHINITIALIZATION = 1,
+                                                    KSMETHOD_OPMVIDEOOUTPUT_GETINFORMATION       = 2
+                                                   );
   {$EXTERNALSYM cwKSMETHOD_OPMVIDEOOUTPUT}
   KSMETHOD_OPMVIDEOOUTPUT = cwKSMETHOD_OPMVIDEOOUTPUT;
   {$EXTERNALSYM KSMETHOD_OPMVIDEOOUTPUT}
@@ -767,7 +767,7 @@ type
   function OPMGetVideoOutputForTarget(var pAdapterLuid: LUID;
                                       VidPnTarget: ULONG;
                                       vos: OPM_VIDEO_OUTPUT_SEMANTICS;
-                                      var ppOPMVideoOutput: IOPMVideoOutput): HResult; stdcall;
+                                      out ppOPMVideoOutput: IOPMVideoOutput): HResult; stdcall;
   {$EXTERNALSYM OPMGetVideoOutputForTarget}
 
 
@@ -776,7 +776,7 @@ type
   function OPMGetVideoOutputsFromIDirect3DDevice9Object(pDirect3DDevice9: IDirect3DDevice9;
                                                         vos: OPM_VIDEO_OUTPUT_SEMANTICS;
                                                         out pulNumVideoOutputs: ULONG;
-                                                        out pppOPMVideoOutputArray: IOPMVideoOutput): HResult; stdcall;
+                                                        out pppOPMVideoOutputArray: PIOPMVideoOutput): HResult; stdcall;
   {$EXTERNALSYM OPMGetVideoOutputsFromIDirect3DDevice9Object}
 {$ENDIF} // DO_NOT_USE_DIRECTX_OR_DXVA2
 
@@ -799,6 +799,46 @@ type
 
   // End of Additional Prototypes
 
+// Additional SDK declarations; legacy spellings remain available.
+type
+  POPM_OUTPUT_HARDWARE_PROTECTION = ^OPM_OUTPUT_HARDWARE_PROTECTION;
+  OPM_OUTPUT_HARDWARE_PROTECTION = ULONG;
+  {$EXTERNALSYM OPM_OUTPUT_HARDWARE_PROTECTION}
+
+  POPM_TYPE_ENFORCEMENT_HDCP_PROTECTION_LEVEL = ^OPM_TYPE_ENFORCEMENT_HDCP_PROTECTION_LEVEL;
+  OPM_TYPE_ENFORCEMENT_HDCP_PROTECTION_LEVEL = ULONG;
+  {$EXTERNALSYM OPM_TYPE_ENFORCEMENT_HDCP_PROTECTION_LEVEL}
+const
+  OPM_OUTPUT_HARDWARE_PROTECTION_NOT_SUPPORTED = ULONG($0);
+  {$EXTERNALSYM OPM_OUTPUT_HARDWARE_PROTECTION_NOT_SUPPORTED}
+
+  OPM_OUTPUT_HARDWARE_PROTECTION_SUPPORTED = ULONG($1);
+  {$EXTERNALSYM OPM_OUTPUT_HARDWARE_PROTECTION_SUPPORTED}
+
+  OPM_DPCP_FORCE_ULONG = ULONG($7FFFFFFF);
+  {$EXTERNALSYM OPM_DPCP_FORCE_ULONG}
+
+  OPM_HDCP_FORCE_ULONG = ULONG($7FFFFFFF);
+  {$EXTERNALSYM OPM_HDCP_FORCE_ULONG}
+
+  OPM_TYPE_ENFORCEMENT_HDCP_OFF = ULONG($0);
+  {$EXTERNALSYM OPM_TYPE_ENFORCEMENT_HDCP_OFF}
+
+  OPM_TYPE_ENFORCEMENT_HDCP_ON_WITH_NO_TYPE_RESTRICTION = ULONG($1);
+  {$EXTERNALSYM OPM_TYPE_ENFORCEMENT_HDCP_ON_WITH_NO_TYPE_RESTRICTION}
+
+  OPM_TYPE_ENFORCEMENT_HDCP_ON_WITH_TYPE1_RESTRICTION = ULONG($2);
+  {$EXTERNALSYM OPM_TYPE_ENFORCEMENT_HDCP_ON_WITH_TYPE1_RESTRICTION}
+
+  OPM_TYPE_ENFORCEMENT_HDCP_FORCE_ULONG = ULONG($7FFFFFFF);
+  {$EXTERNALSYM OPM_TYPE_ENFORCEMENT_HDCP_FORCE_ULONG}
+
+  OPM_ACP_FORCE_ULONG = ULONG($7FFFFFFF);
+  {$EXTERNALSYM OPM_ACP_FORCE_ULONG}
+
+  OPM_ASPECT_RATIO_FORCE_ULONG = ULONG($7FFFFFFF);
+  {$EXTERNALSYM OPM_ASPECT_RATIO_FORCE_ULONG}
+
 implementation
 
 const
@@ -806,7 +846,7 @@ const
 
 {$WARN SYMBOL_PLATFORM OFF}
   function OPMGetVideoOutputsFromHMONITOR; external OpmApiLib name 'OPMGetVideoOutputsFromHMONITOR' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function OPMGetVideoOutputForTarget; external OpmApiLib name 'OPMGetVideoOutputsFromHMONITOR' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OPMGetVideoOutputForTarget; external OpmApiLib name 'OPMGetVideoOutputForTarget' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function OPMGetVideoOutputsFromIDirect3DDevice9Object; external OpmApiLib name 'OPMGetVideoOutputsFromIDirect3DDevice9Object' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
 
@@ -819,7 +859,7 @@ end;
 
 function GetBusImplementation(ulBusTypeAndImplementation: ULONG): ULONG;
 begin
-  Result:= ulBusTypeAndImplementation and Ord(OPM_BUS_IMPLEMENTATION_MODIFIER_MASK) shr 16;
+  Result:= (ulBusTypeAndImplementation and Ord(OPM_BUS_IMPLEMENTATION_MODIFIER_MASK)) shr 16;
 end;
 
 function IsNonStandardBusImplementation(ulBusTypeAndImplementation: ULONG): ULONG;

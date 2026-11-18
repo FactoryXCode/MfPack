@@ -10,7 +10,7 @@
 // Release date: 11-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: See: Remarks
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //          The interfaces in this header are deprecated. New applications should not use them.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -124,7 +124,7 @@ const
 
 type
 
-	PAPCFUNC = procedure(dwParam: DWORD); stdcall;
+	PAPCFUNC = procedure(dwParam: DWORD_PTR); stdcall;
 	{$EXTERNALSYM PAPCFUNC}
 
 	PStreamTime = ^STREAM_TIME;
@@ -250,7 +250,7 @@ type
   {$EXTERNALSYM IMediaStream}
   IMediaStream = interface(IUnknown)
 	['{B502D1BD-9A57-11d0-8FDE-00C04FD9189D}']
-		function GetMultiMediaStream(var ppMultiMediaStream: IMultiMediaStream): HResult; stdcall;
+		function GetMultiMediaStream(out ppMultiMediaStream: IMultiMediaStream): HResult; stdcall;
 
     function GetInformation(out pPurposeId: MSPID;
                             out pType: STREAM_TYPE): HResult; stdcall;
@@ -280,14 +280,14 @@ type
   {$EXTERNALSYM IStreamSample}
 	IStreamSample = interface(IUnknown)
   ['{B502D1BE-9A57-11d0-8FDE-00C04FD9189D}']
-		function GetMediaStream(ppMediaStream: IMediaStream): HResult; stdcall;
+		function GetMediaStream(out ppMediaStream: IMediaStream): HResult; stdcall;
 
 		function GetSampleTimes(out pStartTime: STREAM_TIME;
                             out pEndTime: STREAM_TIME;
                             out pCurrentTime: STREAM_TIME): HResult; stdcall;
 
-		function SetSampleTimes(pStartTime: STREAM_TIME;
-                            pEndTime: STREAM_TIME): HResult; stdcall;
+		function SetSampleTimes(pStartTime: PStreamTime;
+                            pEndTime: PStreamTime): HResult; stdcall;
 
 		function Update(dwFlags: DWORD;  // Flag that specifies whether the update is synchronous or asynchronous. The SSUPDATE_ASYNC flag specifies an asynchronous update, which you can set if both hEvent and pfnAPC are nil. Use SSUPDATE_CONTINUOUS to continuously update the sample until you call the IStreamSample.CompletionStatus method.
                     hEvent: THANDLE;
@@ -311,14 +311,14 @@ implementation
 
 function MS_ERROR_CODE(x: Cardinal): Cardinal;
 begin
-	// MakeResult = Synonym for MAKE_HRESULT macro
-	Result := MakeResult(1, FACILITY_ITF, x + $400);
+	// Match MAKE_HRESULT with unsigned wrapping for the error offset.
+	Result := $80040000 or DWORD((UInt64(x) + $400) and $FFFFFFFF);
 end;
 
 function MS_SUCCESS_CODE(x: Cardinal): Cardinal;
 begin
-	// MakeResult = Synonym for MAKE_HRESULT macro
-	Result := MakeResult(0, FACILITY_ITF, x);
+	// Match the complete DWORD code bit pattern used by MAKE_HRESULT.
+	Result := $00040000 or x;
 end;
 
   // Implement Additional Prototypes here.

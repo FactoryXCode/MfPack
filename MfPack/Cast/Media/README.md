@@ -1,12 +1,12 @@
 # MfPack Cast media support
   
-Version: 4.0.1
+Version: 4.1.0
   
 **NOTES:**  
 This release is updated for compiler version 17 up to 35.  
 SDK version 10.0.28000.2705 (Win 11)  
 Requires Windows 10 or later.  
-Minimum supported MfPack version: 4.0.0
+Minimum supported MfPack version: 4.1.0
   
 The units in `Cast/Media` provide subtitle readers, timed-text storage,
 composition, frame pumping, and the direct and transcoded preview implementations.
@@ -44,8 +44,11 @@ Metadata strings decode as UTF-8 with replacement for invalid byte sequences,
 so malformed metadata does not raise a first-chance encoding exception in XE7.
   
 Project: Media Foundation - MFPack - Samples  
+  
 Project location: https://github.com/FactoryXCode/MfPack  
-https://sourceforge.net/projects/MFPack
+https://sourceforge.net/projects/MFPack  
+  
 First release date: 06-02-2019  
-Final release date: 15/09/2026
+Final release date: 18/11/2026
+  
 Copyright © FactoryX. All rights reserved.

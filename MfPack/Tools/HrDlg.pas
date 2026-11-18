@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: WinApi - Shared
@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Visual interface to explore the Windows HResult codes.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -63,6 +63,7 @@ unit HrDlg;
 interface
 
 uses
+
   {WinApi}
   Winapi.Windows,
   Winapi.Messages,
@@ -76,6 +77,7 @@ uses
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
+  Vcl.Menus,
   Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.StdCtrls,
@@ -120,19 +122,23 @@ type
     procedure butTransToDecClick(Sender: TObject);
     procedure butSearchClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormCloseQuery(Sender: TObject;
+                             var CanClose: Boolean);
     procedure cbxFormStyleClick(Sender: TObject);
     procedure AppOnActivate(Sender: TObject);
     procedure lbxReferenceClick(Sender: TObject);
     procedure butCloseClick(Sender: TObject);
-    procedure butSearchMouseMove(Sender: TObject; Shift: TShiftState; X,
+    procedure butSearchMouseMove(Sender: TObject;
+                                 Shift: TShiftState;
+                                 X,
       Y: Integer);
     procedure butMakeHResultClick(Sender: TObject);
 
   private
     { Private declarations }
   public
-    { Public declarations }
+    destructor Destroy; override;
+    procedure ShowTransforms(Sender: TObject);
   end;
 
 var
@@ -140,199 +146,206 @@ var
 
 implementation
 
+uses MediaTransformToolDlg;
+
 {$R *.dfm}
+
+
+function UiText(const Text: UnicodeString): string;
+begin
+  Result := {$IFDEF FPC}UTF8Encode(Text){$ELSE}Text{$ENDIF};
+end;
+
+
+function UiValue(const Text: string): UnicodeString;
+begin
+  Result := {$IFDEF FPC}UTF8Decode(Text){$ELSE}Text{$ENDIF};
+end;
 
 
 procedure TdlgHrTools.AppOnActivate(Sender: TObject);
 var
- s1: string;
- s2: string;
-
+  Value: HResult;
+  HexText: UnicodeString;
+  DecText: UnicodeString;
 begin
-  if cbxAutoPaste.Checked then
+  if cbxAutoPaste.Checked and TryParseHResult(UiValue(Clipboard.AsText),Value) then
     begin
-      if Clipboard.HasFormat(CF_TEXT) then
-        begin
-          // We do a little workaround to prevent error e2197.
-          s1 := edHrHex.Text;
-          s2 := edHrDec.Text;
-          // Convert to a hex- or decimal value.
-          OxValToHexVal(Clipboard.AsText,
-                        s1,
-                        s2);
-          // ..and back again.
-          edHrHex.Text := s1;
-          edHrDec.Text := s2;
-        end;
+      OxValToHexVal(UiValue(Clipboard.AsText),HexText,DecText);
+      edHrHex.Text := UiText(HexText);
+      edHrDec.Text := UiText(DecText);
     end;
 end;
 
 
 procedure TdlgHrTools.butCloseClick(Sender: TObject);
 begin
-  Close();
+  Close;
 end;
 
 
 procedure TdlgHrTools.butMakeHResultClick(Sender: TObject);
+var
+  Severity: HResult;
+  Facility: HResult;
+  Code: HResult;
 begin
-
-  edHResult.Text :=  Format('%d', [MAKE_HRESULT(StrToIntDef(edSeverity.Text, SEVERITY_ERROR),
-                                                StrToIntDef(edFacility.Text, FACILITY_WIN32),
-                                                StrToIntDef(edErrCode.Text, S_OK))]);
+  edHResult.Clear;
+  if not TryParseHResult(UiValue(edSeverity.Text),Severity) or
+     not TryParseHResult(UiValue(edFacility.Text),Facility) or
+     not TryParseHResult(UiValue(edErrCode.Text),Code) or
+     (Severity < 0) or (Severity > 1) or
+     (Facility < 0) or (Facility > $1FFF) or
+     (Code < 0) or (Code > $FFFF) then
+    begin
+      mmoDescription.Text := 'Use severity 0..1, facility 0..8191 and code 0..65535.';
+      Exit;
+    end;
+  edHResult.Text := UiText(UnicodeString(IntToStr(MAKE_HRESULT(Severity,Facility,Code))));
 end;
 
 
 procedure TdlgHrTools.butSearchClick(Sender: TObject);
 var
-  s: string;
-  cmdLine: string;
-  workDir: string;
-  i: Integer;
+  Text: UnicodeString;
+  Command: UnicodeString;
+  WorkDir: UnicodeString;
+  ToolPath: UnicodeString;
+  I: Integer;
   HrCode: HResult;
-  hr: HResult;
-
 begin
-  HrCode := 0;
   mmoDescription.Clear;
-
-  if (edHrHex.Text = '') and (edHrDec.Text = '') then
+  lbxReference.Clear;
+  Text := UiValue(edHrHex.Text);
+  if Text = '' then Text := UiValue(edHrDec.Text);
+  if not TryParseHResult(Text,HrCode) then
     begin
-      mmoDescription.Text:= 'Please, enter a valid resultcode.';
+      mmoDescription.Text := 'Please enter a valid 32-bit HRESULT value.';
       Exit;
     end;
-
-  if (edHrHex.Text <> '') then
-    HrCode := StrToInt64(edHrHex.Text)
-  else if (edHrDec.Text <> '') then
-    HrCode := StrToInt64(edHrDec.Text);
-
-  // Use Internal Error Lookup Tool.
   if rbHLD.Checked then
     begin
-     // Walk through the tables...
-     hr := FWinHResultCracker.GetHResultDetails(HrCode);
-     if SUCCEEDED(hr) then
-       begin
-         s :=     Format('HResult:              %s', [FWinHResultCracker.HResultAsString]) + CRLF ;
-         s := s + Format('Description:          %s', [FWinHResultCracker.HResultDescription]) + CRLF;
-         s := s + Format('Region:               %s', [FWinHResultCracker.HResultRegion]) + CRLF + CRLF;
-
-         s := s + Format('Facility Tag:         %s', [FWinHResultCracker.FacilityTagAsString]) + CRLF;
-         s := s + Format('Facility Description: %s', [FWinHResultCracker.FacilityDescription]) + CRLF + CRLF;
-
-         s := s + Format('Severety Tag:         %s', [FWinHResultCracker.SeveretyValue]) + CRLF;
-         s := s + Format('Severety Description: %s', [FWinHResultCracker.SeveretyDescription]) + CRLF + CRLF;
-
-         s := s + Format('Header file:          %s', [FWinHResultCracker.HeaderFile]) + CRLF;
-         mmoDescription.Text := s;
-
-         // Add references (url's)
-         lbxReference.Clear();
-         for i := 0 to Length(FWinHResultCracker.ReferenceUrls) - 1 do
-           begin
-             if (Length(FWinHResultCracker.ReferenceUrls[i]) > 0) then
-               if (FWinHResultCracker.ReferenceUrls[i] <> '') then
-                 lbxReference.Items.Append(FWinHResultCracker.ReferenceUrls[i]);
-           end;
-
-         if (lbxReference.Items.Count = 0) then
-           lbxReference.Items.Append('https://learn.microsoft.com');
-
-       end
-     else
-       mmoDescription.Text := Format('Unknown HResult value. (%d)', [HrCode]);
+      if SUCCEEDED(FWinHResultCracker.GetHResultDetails(HrCode)) then
+        begin
+          Text := 'HResult:              ' + FWinHResultCracker.HResultAsString + CRLF +
+                  'Description:          ' + FWinHResultCracker.HResultDescription + CRLF +
+                  'Region:               ' + FWinHResultCracker.HResultRegion + CRLF + CRLF +
+                  'Facility Tag:         ' + FWinHResultCracker.FacilityTagAsString + CRLF +
+                  'Facility Description: ' + FWinHResultCracker.FacilityDescription + CRLF + CRLF +
+                  'Severity Tag:         ' + FWinHResultCracker.SeveretyValue + CRLF +
+                  'Severity Description: ' + FWinHResultCracker.SeveretyDescription + CRLF + CRLF +
+                  'Header file:          ' + FWinHResultCracker.HeaderFile + CRLF;
+          mmoDescription.Text := UiText(Text);
+          for I := 0 to Length(FWinHResultCracker.ReferenceUrls) - 1 do
+            if FWinHResultCracker.ReferenceUrls[I] <> '' then
+              lbxReference.Items.Add(UiText(FWinHResultCracker.ReferenceUrls[I]));
+        end
+      else
+        mmoDescription.Text := UiText('Unknown HRESULT value (' + UnicodeString(IntToStr(HrCode)) + ').');
     end
-
-  // Use Microsoft Error Lookup Tool Command line to string (hides the command line window).
   else if rbMSELTDESC.Checked then
     begin
-      {$IFDEF DEBUG}
-      cmdLine := ExpandFileName(ExtractFileDir(Application.ExeName) + '\..\..\MicrosoftErrorLookupTool\' + WIN_ERROR_LOOKUP_TOOL);
-      workDir := ExpandFileName(ExtractFileDir(Application.ExeName) + '\..\..\MicrosoftErrorLookupTool\');
-      {$ELSE}
-      cmdLine := ExpandFileName(ExtractFileDir(Application.ExeName) + 'MicrosoftErrorLookupTool\' + WIN_ERROR_LOOKUP_TOOL);
-      workDir := ExpandFileName(ExtractFileDir(Application.ExeName) + 'MicrosoftErrorLookupTool\');
-      {$ENDIF}
-
-      mmoDescription.Text := FWinHResultCracker.RunWinErrorTool(Format('%s %d', [cmdLine, HrCode]),
-                                                                workDir);
-
+      WorkDir := IncludeTrailingPathDelimiter(UiValue(ExtractFilePath(Application.ExeName))) + 'MicrosoftErrorLookupTool';
+      ToolPath := WorkDir + PathDelim + WIN_ERROR_LOOKUP_TOOL;
+      if not FileExists(UiText(ToolPath)) then
+        begin
+          WorkDir := UiValue(ExpandFileName(ExtractFilePath(Application.ExeName) + '..' + PathDelim + 'MicrosoftErrorLookupTool'));
+          ToolPath := WorkDir + PathDelim + WIN_ERROR_LOOKUP_TOOL;
+        end;
+      if not FileExists(UiText(ToolPath)) then
+        begin
+          mmoDescription.Text := UiText('Microsoft Error Lookup Tool was not found: ' + ToolPath);
+          Exit;
+        end;
+      Command := '"' + ToolPath + '" ' + UnicodeString(IntToStr(HrCode));
+      try
+        mmoDescription.Text := UiText(FWinHResultCracker.RunWinErrorTool(Command,WorkDir));
+      except
+        on E: Exception do mmoDescription.Text := E.Message;
+      end;
     end
-  // Use System Error Messager Lookup Tool.
-  // This function will return the HResult text in the native language.
   else if rbSEMLTDLG.Checked then
-    begin
-      mmoDescription.Text := FWinHResultCracker.GetSysErrorMessage(HrCode);
-    end;
+    mmoDescription.Text := UiText(FWinHResultCracker.GetSysErrorMessage(HrCode));
 end;
 
 
-procedure TdlgHrTools.butSearchMouseMove(Sender: TObject; Shift: TShiftState; X,
-                                         Y: Integer);
+procedure TdlgHrTools.butSearchMouseMove(Sender: TObject;
+                                         Shift: TShiftState;
+                                         X,Y: Integer);
 begin
-   AppOnActivate(Self);
+  AppOnActivate(Self);
 end;
 
 
 procedure TdlgHrTools.butTransToDecClick(Sender: TObject);
+var
+  Value: HResult;
 begin
-  if (Length(edHrHex.Text) > 0) then
-    edHrDec.Text := IntToStr(StrToInt(edHrHex.Text));
+  if TryParseHResult(UiValue(edHrHex.Text),Value) then
+    edHrDec.Text := UiText(UnicodeString(IntToStr(Value)));
 end;
 
 
 procedure TdlgHrTools.butTransToHexClick(Sender: TObject);
 begin
-  if (Length(edHrDec.Text) > 0) then
-    begin
-      edHrHex.Text := DecimalToHex(edHrDec.Text);
-    end;
+  edHrHex.Text := UiText(DecimalToHex(UiValue(edHrDec.Text)));
 end;
 
 
 procedure TdlgHrTools.cbxFormStyleClick(Sender: TObject);
 begin
-  if cbxFormStyle.Checked then
-    FormStyle := fsStayOnTop
-  else
-    FormStyle := fsNormal;
+  if cbxFormStyle.Checked then FormStyle := fsStayOnTop else FormStyle := fsNormal;
 end;
 
 
-procedure TdlgHrTools.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TdlgHrTools.FormCloseQuery(Sender: TObject;
+                                     var CanClose: Boolean);
 begin
-  if Assigned(FWinHResultCracker) then
-    FWinHResultCracker.Free;
-    FWinHResultCracker := nil;
+  CanClose := True;
 end;
 
 
 procedure TdlgHrTools.FormCreate(Sender: TObject);
+var
+  ToolsMenu: TMenuItem;
+  TransformItem: TMenuItem;
 begin
-  FWinHResultCracker := TWinHResultCracker.Create();
-  Application.OnActivate := AppOnActivate;
+  Menu := TMainMenu.Create(Self);
+  ToolsMenu := TMenuItem.Create(Self);
+  ToolsMenu.Caption := 'Tools';
+  Menu.Items.Add(ToolsMenu);
+  TransformItem := TMenuItem.Create(Self);
+  TransformItem.Caption := 'Media Foundation transforms...';
+  TransformItem.OnClick := ShowTransforms;
+  ToolsMenu.Add(TransformItem);
+  if not Assigned(FWinHResultCracker) then FWinHResultCracker := TWinHResultCracker.Create;
+  OnActivate := AppOnActivate;
   cbxFormStyle.Checked := True;
+  Caption := UiText('HRESULT Lookup Tool (Windows SDK ' + SDK_API_VERSION + ')');
+end;
 
+
+destructor TdlgHrTools.Destroy;
+begin
+  if dlgHrTools = Self then dlgHrTools := nil;
+  FreeAndNil(FWinHResultCracker);
+  inherited;
 end;
 
 
 procedure TdlgHrTools.lbxReferenceClick(Sender: TObject);
 var
-  Url: string;
-
+  Url: UnicodeString;
 begin
-  if (lbxReference.ItemIndex < 0) or (lbxReference.Items.Count = 0) then
-    Exit;
+  if (lbxReference.ItemIndex < 0) or (lbxReference.Items.Count = 0) then Exit;
+  Url := UiValue(lbxReference.Items[lbxReference.ItemIndex]);
+  ShellExecuteW(Handle,'open',PWideChar(Url),nil,nil,SW_SHOWNORMAL);
+end;
 
-  Url := lbxReference.Items.Strings[lbxReference.ItemIndex];
-
-  ShellExecute(Handle,
-               'open',
-               LPWSTR(Url),
-               nil,
-               nil,
-               SW_SHOWNORMAL);
+procedure TdlgHrTools.ShowTransforms(Sender: TObject);
+begin
+  if not Assigned(dlgMediaTransformTool) then Application.CreateForm(TdlgMediaTransformTool,dlgMediaTransformTool);
+  dlgMediaTransformTool.Show;
 end;
 
 end.

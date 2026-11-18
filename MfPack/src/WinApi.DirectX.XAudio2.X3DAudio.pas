@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: X3DAudio is an API used with XAudio2 to position sound in 3D space
 //              to create the illusion of sound coming from a point in space
 //              relative to the position of the camera.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -67,7 +67,7 @@
 //          applications that target Windows 7 and earlier versions.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -291,6 +291,7 @@ type
 
 
   // instance handle of precalculated constants
+  PX3DAUDIO_HANDLE = ^X3DAUDIO_HANDLE;
   X3DAUDIO_HANDLE = array[0..X3DAUDIO_HANDLE_BYTESIZE - 1] of Byte;
   {$EXTERNALSYM X3DAUDIO_HANDLE}
 
@@ -375,8 +376,8 @@ const
                                                     OuterAngle: X3DAUDIO_PI;
                                                     InnerVolume: 1.0;
                                                     OuterVolume: 0.708;
-                                                    InnerLPF: 1.0;
-                                                    OuterLPF: 0.75;
+                                                    InnerLPF: 0.0;
+                                                    OuterLPF: 0.25;
                                                     InnerReverb: 0.708;
                                                     OuterReverb: 1.0 );
   {$EXTERNALSYM X3DAudioDefault_DirectionalCone}
@@ -486,15 +487,15 @@ type
   // initializes instance handle
   function X3DAudioInitialize(SpeakerChannelMask: UINT32;
                               SpeedOfSound: FLOAT32;
-                              out Instance: X3DAUDIO_HANDLE): HRESULT; stdcall;
+                              Instance: PX3DAUDIO_HANDLE): HRESULT; cdecl;
   {$EXTERNALSYM X3DAudioInitialize}
 
   // calculates DSP settings with respect to 3D parameters
-  procedure X3DAudioCalculate(const Instance: X3DAUDIO_HANDLE;
-                              pListener: X3DAUDIO_LISTENER;
-                              pEmitter: X3DAUDIO_EMITTER;
+  procedure X3DAudioCalculate(Instance: PX3DAUDIO_HANDLE;
+                              pListener: PX3DAUDIO_LISTENER;
+                              pEmitter: PX3DAUDIO_EMITTER;
                               Flags: UINT32;
-                              var pDSPSettings: X3DAUDIO_DSP_SETTINGS); stdcall;
+                              pDSPSettings: PX3DAUDIO_DSP_SETTINGS); cdecl;
   {$EXTERNALSYM X3DAudioCalculate}
 
 

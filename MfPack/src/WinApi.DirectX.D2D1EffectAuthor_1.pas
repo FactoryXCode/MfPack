@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
 //              bitmaps, and text.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -68,8 +68,7 @@ unit WinApi.DirectX.D2D1EffectAuthor_1;
 interface
 
 uses
-
-  {WinApi.DirectX}
+  Windows,
   WinApi.DirectX.D2D1EffectAuthor,
   WinApi.DirectX.D2D1_1,
   WinApi.DirectX.D2D1_3,
@@ -97,15 +96,9 @@ type
   {$EXTERNALSYM ID2D1EffectContext1}
   ID2D1EffectContext1 = interface(ID2D1EffectContext)
   ['{84ab595a-fc81-4546-bacd-e8ef4d8abe7a}']
-    // Creates a 3D lookup table for mapping a 3-channel input to a 3-channel output.
-    // The table data must be provided in 4-channel format.
+    // SDK native virtual methods.
+    function CreateLookupTable3D(precision: D2D1_BUFFER_PRECISION; extents: PUINT32; data: PByte; dataCount: UINT32; strides: PUINT32; out lookupTable: ID2D1LookupTable3D): HRESULT; stdcall;
 
-    function CreateLookupTable3D(precision: D2D1_BUFFER_PRECISION;
-                                 extents: UINT32;
-                                 data: PByte;
-                                 dataCount: UINT32;
-                                 strides: UINT32;
-                                 out lookupTable: ID2D1LookupTable3D): HResult; stdcall;
 
   end;
   IID_ID2D1EffectContext1 = ID2D1EffectContext1;
@@ -125,15 +118,10 @@ type
   {$EXTERNALSYM ID2D1EffectContext2}
   ID2D1EffectContext2 = interface(ID2D1EffectContext1)
   ['{577ad2a0-9fc7-4dda-8b18-dab810140052}']
-    // Creates a color context from a DXGI color space type. It is only valid to use
-    // this with the Color Management Effect in 'Best' mode.
-    function CreateColorContextFromDxgiColorSpace(colorSpace: DXGI_COLOR_SPACE_TYPE;
-                                                  out colorContext: ID2D1ColorContext1): HResult; stdcall;
+    // SDK native virtual methods.
+    function CreateColorContextFromDxgiColorSpace(colorSpace: DXGI_COLOR_SPACE_TYPE; out colorContext: ID2D1ColorContext1): HRESULT; stdcall;
+    function CreateColorContextFromSimpleColorProfile(simpleProfile: PD2D1_SIMPLE_COLOR_PROFILE; out colorContext: ID2D1ColorContext1): HRESULT; stdcall;
 
-    // Creates a color context from a simple color profile. It is only valid to use
-    // this with the Color Management Effect in 'Best' mode.
-    function CreateColorContextFromSimpleColorProfile(simpleProfile: D2D1_SIMPLE_COLOR_PROFILE;
-                                                      out colorContext: ID2D1ColorContext1): HResult; stdcall;
 
   end;
   IID_ID2D1EffectContext2 = ID2D1EffectContext2;

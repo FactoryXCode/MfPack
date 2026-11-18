@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectWrite
 // Project location: https://sourceforge.net/projects/MfPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1055,7 +1055,7 @@ type
     // </returns>
     function GetFilePathFromKey(fontFileReferenceKey: Pointer;
                                 fontFileReferenceKeySize: UINT32;
-                                out filePath: PWideChar;
+                                filePath: PWideChar;
                                 filePathSize: UINT32): HResult; stdcall;
 
     // Obtains the last write time of the file from the font file reference key.
@@ -1096,7 +1096,7 @@ type
     // IMPORTANT: ReadFileFragment() implementations must check whether the requested file fragment
     // is within the file bounds. Otherwise, an error should be returned from ReadFileFragment.
     // </remarks>
-    function ReadFileFragment(fragmentStart: Pointer;
+    function ReadFileFragment(out fragmentStart: Pointer;
                               fileOffset: UINT64;
                               fragmentSize: UINT64;
                               out fragmentContext: Pointer): HResult; stdcall;
@@ -1116,7 +1116,7 @@ type
     // either require complete font file to be loaded (e.g., copying a font file) or need to make
     // decisions based on the value of the file size (e.g., validation against a persisted file size).
     // </remarks>
-    function GetFileSize(out fileSize: UINT64): HResult; stdcall;
+    function GetFileSize(out fileSize: UINT64): HResult; stdcall; overload;
 
     // Obtains the last modified time of the file. The last modified time is used by DirectWrite font selection algorithms
     // to determine whether one font resource is more up to date than another one.
@@ -1150,7 +1150,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetReferenceKey(fontFileReferenceKey: Pointer;
+    function GetReferenceKey(out fontFileReferenceKey: Pointer;
                              out fontFileReferenceKeySize: UINT32): HResult; stdcall;
 
     // Obtains the file loader associated with a font file object.
@@ -1218,21 +1218,21 @@ type
 
     // Gets the gamma value used for gamma correction. Valid values must be
     // greater than zero and cannot exceed 256.
-    function GetGamma(): Single;
+    function GetGamma(): Single; stdcall;
 
     // Gets the amount of contrast enhancement. Valid values are greater than
     // or equal to zero.
-    function GetEnhancedContrast(): Single;
+    function GetEnhancedContrast(): Single; stdcall;
 
     // Gets the ClearType level. Valid values range from 0.0 (no ClearType)
     // to 1.0 (full ClearType).
-    function GetClearTypeLevel(): Single;
+    function GetClearTypeLevel(): Single; stdcall;
 
     // Gets the pixel geometry.
-    function GetPixelGeometry(): DWRITE_PIXEL_GEOMETRY;
+    function GetPixelGeometry(): DWRITE_PIXEL_GEOMETRY; stdcall;
 
     // Gets the rendering mode.
-    function GetRenderingMode(): DWRITE_RENDERING_MODE;
+    function GetRenderingMode(): DWRITE_RENDERING_MODE; stdcall;
 
   end;
   // Interface IDWriteRenderingParams
@@ -1253,7 +1253,7 @@ type
   ['{5f49804d-7024-4d43-bfa9-d25984f53849}']
 
     // Obtains the file format type of a font face.
-    function GetType(): DWRITE_FONT_FACE_TYPE;
+    function GetType(): DWRITE_FONT_FACE_TYPE; stdcall;
 
     // Obtains the font files representing a font face.
     // <param name="numberOfFiles">The number of files representing the font face.</param>
@@ -1272,7 +1272,7 @@ type
     function GetIndex(): UINT32; stdcall;
 
     // Obtains the algorithmic style simulation flags of a font face.
-    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall;
+    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall; overload;
 
     // Determines whether the font is a symbol font.
     function IsSymbolFont(): BOOL; stdcall;
@@ -1281,10 +1281,10 @@ type
     // These metrics are applicable to all the glyphs within a fontface and are used by applications for layout calculations.
     // <param name="fontFaceMetrics">Points to a DWRITE_FONT_METRICS structure to fill in.
     // The metrics returned by this function are in font design units.</param>
-    procedure GetMetrics(out fontFaceMetrics: DWRITE_FONT_METRICS); stdcall;
+    procedure GetMetrics(out fontFaceMetrics: DWRITE_FONT_METRICS); stdcall; overload;
 
     // Obtains the number of glyphs in the font face.
-    function GetGlyphCount(): UINT16;
+    function GetGlyphCount(): UINT16; stdcall;
 
     // Obtains ideal glyph metrics in font design units. Design glyphs metrics are used for glyph positioning.
     // <param name="glyphIndices">An array of glyph indices to compute the metrics for.</param>
@@ -1298,7 +1298,7 @@ type
     // Standard HRESULT error code. If any of the input glyph indices are outside of the valid glyph index range
     // for the current font face, E_INVALIDARG will be returned.
     // </returns>
-    function GetDesignGlyphMetrics(glyphIndices: UINT16;
+    function GetDesignGlyphMetrics(glyphIndices: PWORD;
                                    glyphCount: UINT32;
                                    out glyphMetrics: DWRITE_GLYPH_METRICS;
                                    isSideways: BOOL = False): HResult; stdcall;
@@ -1315,7 +1315,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetGlyphIndices(codePoints: UINT32;
+    function GetGlyphIndices(codePoints: PUINT32;
                              codePointCount: UINT32;
                              out glyphIndices: UINT16): HResult; stdcall;
 
@@ -1376,14 +1376,15 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    //function GetGlyphRunOutline(emSize: Single;
-    //                            glyphIndices: UINT16;
-    //                            glyphAdvances: Single;
-    //                            glyphOffsets: PDWRITE_GLYPH_OFFSET;
-    //                            glyphCount: UINT32;
-    //                            isSideways: BOOL;
-    //                            isRightToLeft: BOOL;
-    //                            geometrySink: IDWriteGeometrySink): HResult; stdcall;
+    // geometrySink must point to ID2D1SimplifiedGeometrySink (IDWriteGeometrySink).
+    function GetGlyphRunOutline(emSize: Single;
+                                glyphIndices: PWORD;
+                                glyphAdvances: PSingle;
+                                glyphOffsets: PDWRITE_GLYPH_OFFSET;
+                                glyphCount: UINT32;
+                                isSideways: BOOL;
+                                isRightToLeft: BOOL;
+                                geometrySink: Pointer): HResult; stdcall;
 
     // Determines the recommended rendering mode for the font given the specified size and rendering parameters.
     // <param name="emSize">Logical size of the font in DIP units. A DIP ("device-independent pixel") equals 1/96 inch.</param>
@@ -1406,7 +1407,7 @@ type
                                          pixelsPerDip: Single;
                                          measuringMode: DWRITE_MEASURING_MODE;
                                          renderingParams: IDWriteRenderingParams;
-                                         out renderingMode: DWRITE_RENDERING_MODE): HResult; stdcall;
+                                         out renderingMode: DWRITE_RENDERING_MODE): HResult; stdcall; overload;
 
     // Obtains design units and common metrics for the font face.
     // These metrics are applicable to all the glyphs within a fontface and are used by applications for layout calculations.
@@ -1420,7 +1421,7 @@ type
     function GetGdiCompatibleMetrics(emSize: Single;
                                      pixelsPerDip: Single;
                                      transform: PDWRITE_MATRIX;
-                                     out fontFaceMetrics: DWRITE_FONT_METRICS): HResult; stdcall;
+                                     out fontFaceMetrics: DWRITE_FONT_METRICS): HResult; stdcall; overload;
 
     // Obtains glyph metrics in font design units with the return values compatible with what GDI would produce.
     // Glyphs metrics are used for positioning of individual glyphs.
@@ -1449,7 +1450,7 @@ type
                                           pixelsPerDip: Single;
                                           transform: PDWRITE_MATRIX;
                                           useGdiNatural: BOOL;
-                                          glyphIndices: UINT16;
+                                          glyphIndices: PWORD;
                                           glyphCount: UINT32;
                                           out glyphMetrics: DWRITE_GLYPH_METRICS;
                                           isSideways: BOOL = False): HResult; stdcall;
@@ -1536,7 +1537,7 @@ type
   ['{08256209-099a-4b34-b86d-c22b110e7771}']
 
     // Gets the number of language/string pairs.
-    function GetCount(): UINT32; stdcall;
+    function GetCount(): UINT32; stdcall; overload;
 
     // Gets the index of the item with the specified locale name.
     // <param name="localeName">Locale name to look for.</param>
@@ -1557,7 +1558,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetLocaleNameLength(index: UINT32;
-                                 out length: UINT32): HResult; stdcall;
+                                 out length: UINT32): HResult; stdcall; overload;
 
     // Copies the locale name with the specified index to the specified array.
     // <param name="index">Zero-based index of the locale name.</param>
@@ -1568,8 +1569,8 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetLocaleName(index: UINT32;
-                           out localeName: PWideChar;
-                           size: UINT32): HResult; stdcall;
+                           localeName: PWideChar;
+                           size: UINT32): HResult; stdcall; overload;
 
     // Gets the length in characters (not including the null terminator) of the string with the specified index.
     // <param name="index">Zero-based index of the string.</param>
@@ -1578,7 +1579,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetStringLength(index: UINT32;
-                             out length: UINT32): HResult; stdcall;
+                             out length: UINT32): HResult; stdcall; overload;
 
     // Copies the string with the specified index to the specified array.
     // <param name="index">Zero-based index of the string.</param>
@@ -1589,8 +1590,8 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetString(index: UINT32;
-                       out stringBuffer: PWideChar;
-                       size: UINT32): HResult; stdcall;
+                       stringBuffer: PWideChar;
+                       size: UINT32): HResult; stdcall; overload;
 
   end;
   IID_IDWriteLocalizedStrings = IDWriteLocalizedStrings;
@@ -1616,7 +1617,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetFontFamily(index: UINT32;
-                           out fontFamily: IDWriteFontFamily): HResult; stdcall;
+                           out fontFamily: IDWriteFontFamily): HResult; stdcall; overload;
 
     // Finds the font family with the specified family name.
     // <param name="familyName">Name of the font family. The name is not case-sensitive but must otherwise exactly match a family name in the collection.</param>
@@ -1661,7 +1662,7 @@ type
     function GetFontCollection(out fontCollection: IDWriteFontCollection): HResult; stdcall;
 
     // Gets the number of fonts in the font list.
-    function GetFontCount(): UINT32; stdcall;
+    function GetFontCount(): UINT32; stdcall; overload;
 
     // Gets a font given its zero-based index.
     // <param name="index">Zero-based index of the font in the font list.</param>
@@ -1670,7 +1671,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetFont(index: UINT32;
-                     out font: IDWriteFont): HResult; stdcall;
+                     out font: IDWriteFont): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFontList = IDWriteFontList;
@@ -1692,7 +1693,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetFamilyNames(out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetFamilyNames(out names: IDWriteLocalizedStrings): HResult; stdcall; overload;
 
     // Gets the font that best matches the specified properties.
     // <param name="weight">Requested font weight.</param>
@@ -1718,7 +1719,7 @@ type
     function GetMatchingFonts(weight: DWRITE_FONT_WEIGHT;
                               stretch: DWRITE_FONT_STRETCH;
                               style: DWRITE_FONT_STYLE;
-                              out matchingFonts: IDWriteFontList): HResult; stdcall;
+                              out matchingFonts: IDWriteFontList): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFontFamily = IDWriteFontFamily;
@@ -1739,16 +1740,16 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetFontFamily(out fontFamily: IDWriteFontFamily): HResult; stdcall;
+    function GetFontFamily(out fontFamily: IDWriteFontFamily): HResult; stdcall; overload;
 
     // Gets the weight of the specified font.
-    function GetWeight(): DWRITE_FONT_WEIGHT; stdcall;
+    function GetWeight(): DWRITE_FONT_WEIGHT; stdcall; overload;
 
     // Gets the stretch (aka. width) of the specified font.
-    function GetStretch(): DWRITE_FONT_STRETCH; stdcall;
+    function GetStretch(): DWRITE_FONT_STRETCH; stdcall; overload;
 
     // Gets the style (aka. slope) of the specified font.
-    function GetStyle(): DWRITE_FONT_STYLE; stdcall;
+    function GetStyle(): DWRITE_FONT_STYLE; stdcall; overload;
 
     // Returns TRUE if the font is a symbol font or FALSE if not.
     function IsSymbolFont(): BOOL; stdcall;
@@ -1758,7 +1759,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetFaceNames(out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetFaceNames(out names: IDWriteLocalizedStrings): HResult; stdcall; overload;
 
     // Gets a localized strings collection containing the specified informational strings, indexed by locale name.
     // <param name="informationalStringID">Identifies the string to get.</param>
@@ -1770,14 +1771,14 @@ type
     // </returns>
     function GetInformationalStrings(informationalStringID: DWRITE_INFORMATIONAL_STRING_ID;
                                      out informationalStrings: IDWriteLocalizedStrings;
-                                     out exists: BOOL): HResult; stdcall;
+                                     out exists: BOOL): HResult; stdcall; overload;
 
     // Gets a value that indicates what simulation are applied to the specified font.
-    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall;
+    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall; overload;
 
     // Gets the metrics for the font.
     // <param name="fontMetrics">Receives the font metrics.</param>
-    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS); stdcall;
+    procedure GetMetrics(out fontMetrics: DWRITE_FONT_METRICS); stdcall; overload;
 
     // Determines whether the font supports the specified character.
     // <param name="unicodeValue">Unicode (UCS-4) character value.</param>
@@ -1786,14 +1787,14 @@ type
     // Standard HRESULT error code.
     // </returns>
     function HasCharacter(unicodeValue: UINT32;
-                          out exists: BOOL): HResult; stdcall;
+                          out exists: BOOL): HResult; stdcall; overload;
 
     // Creates a font face object for the font.
     // <param name="fontFace">Receives a pointer to the newly created font face object.</param>
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function CreateFontFace(out fontFace: IDWriteFontFace): HResult; stdcall;
+    function CreateFontFace(out fontFace: IDWriteFontFace): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFont = IDWriteFont;
@@ -1830,10 +1831,11 @@ type
   // Defines a set of typographic features to be applied during shaping.
   // Notice the character range which this feature list spans is specified
   // as a separate parameter to GetGlyphs.
+  PPDWRITE_TYPOGRAPHIC_FEATURES = ^PDWRITE_TYPOGRAPHIC_FEATURES;
   PDWRITE_TYPOGRAPHIC_FEATURES = ^DWRITE_TYPOGRAPHIC_FEATURES;
   DWRITE_TYPOGRAPHIC_FEATURES = record
     // Array of font features.
-    features: DWRITE_FONT_FEATURE;
+    features: PDWRITE_FONT_FEATURE;
     // The number of features.
     featureCount: UINT32;
   end;
@@ -1931,7 +1933,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function SetTrimming(trimmingOptions: DWRITE_TRIMMING;
+    function SetTrimming(trimmingOptions: PDWRITE_TRIMMING;
                          trimmingSign: IDWriteInlineObject): HResult; stdcall;
 
     // Set line spacing.
@@ -1947,7 +1949,7 @@ type
     // </returns>
     function SetLineSpacing(lineSpacingMethod: DWRITE_LINE_SPACING_METHOD;
                             lineSpacing: Single;
-                            baseline: Single): HResult; stdcall;
+                            baseline: Single): HResult; stdcall; overload;
 
     // Get alignment option of text relative to layout box's leading and trailing edge.
     function GetTextAlignment(): DWRITE_TEXT_ALIGNMENT; stdcall;
@@ -1985,17 +1987,17 @@ type
     // </returns>
     function GetLineSpacing(out lineSpacingMethod: DWRITE_LINE_SPACING_METHOD;
                             out lineSpacing: Single;
-                            out baseline: Single): HResult; stdcall;
+                            out baseline: Single): HResult; stdcall; overload;
 
     // Get the font collection.
     // <param name="fontCollection">The current font collection.</param>
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetFontCollection(out fontCollection: IDWriteFontCollection): HResult; stdcall;
+    function GetFontCollection(out fontCollection: IDWriteFontCollection): HResult; stdcall; overload;
 
     // Get the length of the font family name, in characters, not including the terminating NULL character.
-    function GetFontFamilyNameLength(): UINT32; stdcall;
+    function GetFontFamilyNameLength(): UINT32; stdcall; overload;
 
     // Get a copy of the font family name.
     // <param name="fontFamilyName">Character array that receives the current font family name</param>
@@ -2003,23 +2005,23 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetFontFamilyName(out fontFamilyName: PWideChar;
-                               nameSize: UINT32): HResult; stdcall;
+    function GetFontFamilyName(fontFamilyName: PWideChar;
+                               nameSize: UINT32): HResult; stdcall; overload;
 
     // Get the font weight.
-    function GetFontWeight(): DWRITE_FONT_WEIGHT; stdcall;
+    function GetFontWeight(): DWRITE_FONT_WEIGHT; stdcall; overload;
 
     // Get the font style.
-    function GetFontStyle(): DWRITE_FONT_STYLE; stdcall;
+    function GetFontStyle(): DWRITE_FONT_STYLE; stdcall; overload;
 
     // Get the font stretch.
-    function GetFontStretch(): DWRITE_FONT_STRETCH; stdcall;
+    function GetFontStretch(): DWRITE_FONT_STRETCH; stdcall; overload;
 
     // Get the font em height.
-    function GetFontSize(): Single; stdcall;
+    function GetFontSize(): Single; stdcall; overload;
 
     // Get the length of the locale name, in characters, not including the terminating NULL character.
-    function GetLocaleNameLength(): UINT32; stdcall;
+    function GetLocaleNameLength(): UINT32; stdcall; overload;
 
     // Get a copy of the locale name.
     // <param name="localeName">Character array that receives the current locale name</param>
@@ -2027,8 +2029,8 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetLocaleName(out localeName: PWideChar;
-                           nameSize: UINT32): HResult; stdcall;
+    function GetLocaleName(localeName: PWideChar;
+                           nameSize: UINT32): HResult; stdcall; overload;
 
   end;
   IID_IDWriteTextFormat = IDWriteTextFormat;
@@ -2139,15 +2141,15 @@ type
     public
       // This character can be shaped independently from the others
       // (usually set for the space character). [1]
-      property isShapedAlone: UINT16 Index $00000001 read GetUINT16 write SetUINT16;        // mask $0001, offset 0
+      property isShapedAlone: UINT16 Index $0001 read GetUINT16 write SetUINT16;        // mask $0001, offset 0
       // Reserved for use by shaping engine. [1]
-      property reserved1: UINT16 Index $00010001 read GetUINT16 write SetUINT16;            // mask $0001, offset 1
+      property reserved1: UINT16 Index $0101 read GetUINT16 write SetUINT16;            // mask $0001, offset 1
       // Glyph shaping can be cut after this point without affecting shaping
       // before or after it. Otherwise, splitting a call to GetGlyphs would
       // cause a reflow of glyph advances and shapes. [1]
-      property canBreakShapingAfter: UINT16 Index $00020001 read GetUINT16 write SetUINT16; // mask $0001, offset 2
+      property canBreakShapingAfter: UINT16 Index $0201 read GetUINT16 write SetUINT16; // mask $0001, offset 2
       // Reserved for use by shaping engine. [13]
-      property reserved: UINT16      Index $0003000D read GetUINT16 write SetUINT16;        // mask $000D, offset 3
+      property reserved: UINT16      Index $030D read GetUINT16 write SetUINT16;        // mask $000D, offset 3
   end;
   {$EXTERNALSYM DWRITE_SHAPING_TEXT_PROPERTIES}
 
@@ -2169,16 +2171,16 @@ type
       // Justification class, whether to use spacing, kashidas, or
       // another method. This exists for backwards compatibility
       // with Uniscribe's SCRIPT_JUSTIFY enum.      [4]
-      property justification: UINT16    index $0000000F read GetUINT16 write SetUINT16; // mask $000F, offset 0
+      property justification: UINT16    index $0004 read GetUINT16 write SetUINT16; // mask $000F, offset 0
       // Indicates glyph is the first of a cluster. [1]
-      property isClusterStart: UINT16   index $00040001 read GetUINT16 write SetUINT16; // mask $0001, offset 4
+      property isClusterStart: UINT16   index $0401 read GetUINT16 write SetUINT16; // mask $0001, offset 4
       // Glyph is a diacritic.                      [1]
-      property isDiacritic: UINT16      index $00050001 read GetUINT16 write SetUINT16; // mask $0001, offset 5
+      property isDiacritic: UINT16      index $0501 read GetUINT16 write SetUINT16; // mask $0001, offset 5
       // Glyph has no width, mark, ZWJ, ZWNJ, ZWSP, LRM etc.
       // This flag is not limited to just U+200B.   [1]
-      property isZeroWidthSpace: UINT16 index $00060001 read GetUINT16 write SetUINT16; // mask $0001, offset 6
+      property isZeroWidthSpace: UINT16 index $0601 read GetUINT16 write SetUINT16; // mask $0001, offset 6
       // Reserved for use by shaping engine.        [9]
-      property reserved: UINT16         index $00070009 read GetUINT16 write SetUINT16; // mask $0009, offset 7
+      property reserved: UINT16         index $0709 read GetUINT16 write SetUINT16; // mask $0009, offset 7
   end;
   {$EXTERNALSYM DWRITE_SHAPING_GLYPH_PROPERTIES}
 
@@ -2264,7 +2266,7 @@ type
     // </remarks>
     function GetLocaleName(textPosition: UINT32;
                            out textLength: UINT32;
-                           out localeName: PWideChar): HResult; stdcall;
+                           out localeName: PWideChar): HResult; stdcall; overload;
 
     // Get number substitution on the range affected by it.
     // <param name="textPosition">Position to get the number substitution of.</param>
@@ -2279,7 +2281,7 @@ type
     // the sink callback may hold onto it after that.
     // </remarks>
     function GetNumberSubstitution(textPosition: UINT32;
-                                   out textLength: PUINT32;
+                                   out textLength: UINT32;
                                    out numberSubstitution: IDWriteNumberSubstitution): HResult; stdcall;
 
   end;
@@ -2513,11 +2515,11 @@ type
                        fontFace: IDWriteFontFace;
                        isSideways: BOOL;
                        isRightToLeft: BOOL;
-                       scriptAnalysis: DWRITE_SCRIPT_ANALYSIS;
+                       scriptAnalysis: PDWRITE_SCRIPT_ANALYSIS;
                        localeName: PWideChar;
                        numberSubstitution: IDWriteNumberSubstitution;
-                       features: DWRITE_TYPOGRAPHIC_FEATURES;
-                       featureRangeLengths: UINT32;
+                       features: PPDWRITE_TYPOGRAPHIC_FEATURES;
+                       featureRangeLengths: PUINT32;
                        featureRanges: UINT32;
                        maxGlyphCount: UINT32;
                        out clusterMap: UINT16;
@@ -2557,20 +2559,20 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetGlyphPlacements(textString: PWideChar;
-                                clusterMap: UINT16;
+                                clusterMap: PWORD;
                                 out textProps: DWRITE_SHAPING_TEXT_PROPERTIES;
                                 textLength: UINT32;
-                                glyphIndices: UINT16;
-                                glyphProps: DWRITE_SHAPING_GLYPH_PROPERTIES;
+                                glyphIndices: PWORD;
+                                glyphProps: PDWRITE_SHAPING_GLYPH_PROPERTIES;
                                 glyphCount: UINT32;
                                 fontFace: IDWriteFontFace;
                                 fontEmSize: Single;
                                 isSideways: BOOL;
                                 isRightToLeft: BOOL;
-                                scriptAnalysis: DWRITE_SCRIPT_ANALYSIS;
+                                scriptAnalysis: PDWRITE_SCRIPT_ANALYSIS;
                                 localeName: PWideChar;
-                                features: DWRITE_TYPOGRAPHIC_FEATURES;
-                                featureRangeLengths: UINT32;
+                                features: PPDWRITE_TYPOGRAPHIC_FEATURES;
+                                featureRangeLengths: PUINT32;
                                 featureRanges: UINT32;
                                 out glyphAdvances: Single;
                                 out glyphOffsets: DWRITE_GLYPH_OFFSET): HResult; stdcall;
@@ -2615,23 +2617,23 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetGdiCompatibleGlyphPlacements(textString: PWideChar;
-                                             clusterMap: UINT16;
-                                             textProps: DWRITE_SHAPING_TEXT_PROPERTIES;
+                                             clusterMap: PWORD;
+                                             textProps: PDWRITE_SHAPING_TEXT_PROPERTIES;
                                              textLength: UINT32;
-                                             glyphIndices: UINT16;
-                                             glyphProps: DWRITE_SHAPING_GLYPH_PROPERTIES;
+                                             glyphIndices: PWORD;
+                                             glyphProps: PDWRITE_SHAPING_GLYPH_PROPERTIES;
                                              glyphCount: UINT32;
                                              fontFace: IDWriteFontFace;
                                              fontEmSize: Single;
                                              pixelsPerDip: Single;
-                                             transform: DWRITE_MATRIX;
+                                             transform: PDWRITE_MATRIX;
                                              useGdiNatural: BOOL;
                                              isSideways: BOOL;
                                              isRightToLeft: BOOL;
                                              scriptAnalysis: PDWRITE_SCRIPT_ANALYSIS;
                                              localeName: PWideChar;
-                                             features: DWRITE_TYPOGRAPHIC_FEATURES;
-                                             featureRangeLengths: UINT32;
+                                             features: PPDWRITE_TYPOGRAPHIC_FEATURES;
+                                             featureRangeLengths: PUINT32;
                                              featureRanges: UINT32;
                                              out glyphAdvances: Single;
                                              out glyphOffsets: DWRITE_GLYPH_OFFSET): HResult; stdcall;
@@ -2652,11 +2654,11 @@ type
     // The number of glyphs.
     glyphCount: UINT32;
     // The indices to render.
-    glyphIndices: UINT16;
+    glyphIndices: PWORD;
     // Glyph advance widths.
-    glyphAdvances: Single;
+    glyphAdvances: PSingle;
     // Glyph offsets.
-    glyphOffsets: DWRITE_GLYPH_OFFSET;
+    glyphOffsets: PDWRITE_GLYPH_OFFSET;
     // If True, specifies that glyphs are rotated 90 degrees to the left and
     // vertical metrics are used. Vertical writing is achieved by specifying
     // isSideways = True and rotating the entire run 90 degrees to the right
@@ -2685,7 +2687,7 @@ type
     stringLength: UINT32;
     // An array of indices to the glyph indices array, of the first glyphs of
     // all the glyph clusters of the glyphs to render.
-    clusterMap: UINT16;
+    clusterMap: PWORD;
     // Corresponding text position in the original string
     // this glyph run came from.
     textPosition: UINT32;
@@ -2807,15 +2809,15 @@ type
     // Indicate whether line can be broken right after the cluster. [1]
     property canWrapLineAfter: WORD index $0001 read GetUINT16 write SetUINT16; // mask $0001, offset 0
     // Indicate whether the cluster corresponds to whitespace character. [1]
-    property isWhitespace: WORD index $1001 read GetUINT16 write SetUINT16;     // mask $0001, offset 1
+    property isWhitespace: WORD index $0101 read GetUINT16 write SetUINT16;     // mask $0001, offset 1
     // Indicate whether the cluster corresponds to a newline character. [1]
-    property isNewline: WORD index $2001 read GetUINT16 write SetUINT16;        // mask $0001, offset 2
+    property isNewline: WORD index $0201 read GetUINT16 write SetUINT16;        // mask $0001, offset 2
     // Indicate whether the cluster corresponds to soft hyphen character. [1]
-    property isSoftHyphen: WORD index $3001 read GetUINT16 write SetUINT16;     // mask $0001, offset 3
+    property isSoftHyphen: WORD index $0301 read GetUINT16 write SetUINT16;     // mask $0001, offset 3
     // Indicate whether the cluster is read from right to left. [1]
-    property isRightToLeft: WORD index $4001 read GetUINT16 write SetUINT16;    // mask $0001, offset 4
+    property isRightToLeft: WORD index $0401 read GetUINT16 write SetUINT16;    // mask $0001, offset 4
     // Padding bits [11]
-    property padding: WORD index $500B read GetUINT16 write SetUINT16;          // mask $000B, offset 5
+    property padding: WORD index $050B read GetUINT16 write SetUINT16;          // mask $000B, offset 5
   end;
   {$EXTERNALSYM DWRITE_CLUSTER_METRICS}
 
@@ -2958,7 +2960,7 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function GetMetrics(out metrics: DWRITE_INLINE_OBJECT_METRICS): HResult; stdcall;
+    function GetMetrics(out metrics: DWRITE_INLINE_OBJECT_METRICS): HResult; stdcall; overload;
 
     // TextLayout calls this callback function to get the visible extents (in DIPs) of the inline object.
     // In the case of a simple bitmap, with no padding and no overhang, all the overhangs will
@@ -3072,9 +3074,9 @@ type
                           baselineOriginX: Single;
                           baselineOriginY: Single;
                           measuringMode: DWRITE_MEASURING_MODE;
-                          glyphRun: DWRITE_GLYPH_RUN;
-                          glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
-                          clientDrawingEffect: IUnknown): HResult; stdcall;
+                          glyphRun: PDWRITE_GLYPH_RUN;
+                          glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION;
+                          clientDrawingEffect: IUnknown): HResult; stdcall; overload;
 
     // IDWriteTextLayout::Draw calls this function to instruct the client to draw
     // an underline.
@@ -3104,8 +3106,8 @@ type
     function DrawUnderline(clientDrawingContext: Pointer;
                            baselineOriginX: Single;
                            baselineOriginY: Single;
-                           underline: DWRITE_UNDERLINE;
-                           clientDrawingEffect: IUnknown): HResult; stdcall;
+                           underline: PDWRITE_UNDERLINE;
+                           clientDrawingEffect: IUnknown): HResult; stdcall; overload;
 
     // IDWriteTextLayout.Draw calls this function to instruct the client to draw
     // a strikethrough.
@@ -3131,8 +3133,8 @@ type
     function DrawStrikethrough(clientDrawingContext: Pointer;
                                baselineOriginX: Single;
                                baselineOriginY: Single;
-                               strikethrough: DWRITE_STRIKETHROUGH;
-                               clientDrawingEffect: IUnknown): HResult; stdcall;
+                               strikethrough: PDWRITE_STRIKETHROUGH;
+                               clientDrawingEffect: IUnknown): HResult; stdcall; overload;
 
     // IDWriteTextLayout.Draw calls this application callback when it needs to
     // draw an inline object.
@@ -3158,7 +3160,7 @@ type
                               inlineObject: IDWriteInlineObject;
                               isSideways: BOOL;
                               isRightToLeft: BOOL;
-                              clientDrawingEffect: IUnknown): HResult; stdcall;
+                              clientDrawingEffect: IUnknown): HResult; stdcall; overload;
 
   end;
   IID_IDWriteTextRenderer = IDWriteTextRenderer;
@@ -3322,7 +3324,7 @@ type
     // </returns>
     function GetFontCollection(currentPosition: UINT32;
                                out fontCollection: IDWriteFontCollection;
-                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the length of the font family name where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3332,8 +3334,8 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetFontFamilyNameLength(currentPosition: UINT32;
-                                     out nameLength: PUINT32;
-                                     textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                                     out nameLength: UINT32;
+                                     textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Copy the font family name where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3344,9 +3346,9 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetFontFamilyName(currentPosition: UINT32;
-                               out fontFamilyName: PWideChar;
+                               fontFamilyName: PWideChar;
                                nameSize: UINT32;
-                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the font weight where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3357,7 +3359,7 @@ type
     // </returns>
     function GetFontWeight(currentPosition: UINT32;
                            out fontWeight: DWRITE_FONT_WEIGHT;
-                           textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                           textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the font style where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3368,7 +3370,7 @@ type
     // </returns>
     function GetFontStyle(currentPosition: UINT32;
                           out fontStyle: DWRITE_FONT_STYLE;
-                          textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                          textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the font stretch where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3379,7 +3381,7 @@ type
     // </returns>
     function GetFontStretch(currentPosition: UINT32;
                             out fontStretch: DWRITE_FONT_STRETCH;
-                            textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                            textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the font em height where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3390,7 +3392,7 @@ type
     // </returns>
     function GetFontSize(currentPosition: UINT32;
                          out fontSize: Single;
-                         textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                         textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the underline presence where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3400,7 +3402,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetUnderline(currentPosition: UINT32;
-                          out hasUnderline: PBOOL;
+                          out hasUnderline: BOOL;
                           textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
 
     // Get the strikethrough presence where the current position is at.
@@ -3411,7 +3413,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetStrikethrough(currentPosition: UINT32;
-                              out hasStrikethrough: PBOOL;
+                              out hasStrikethrough: BOOL;
                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
 
     // Get the application-defined drawing effect where the current position is at.
@@ -3456,7 +3458,7 @@ type
     // </returns>
     function GetLocaleNameLength(currentPosition: UINT32;
                                  out nameLength: UINT32;
-                                 textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                                 textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Get the locale name where the current position is at.
     // <param name="currentPosition">The current text position.</param>
@@ -3467,9 +3469,9 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetLocaleName(currentPosition: UINT32;
-                           out localeName: PWideChar;
+                           localeName: PWideChar;
                            nameSize: UINT32;
-                           textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+                           textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall; overload;
 
     // Initiate drawing of the text.
     // <param name="clientDrawingContext">An application defined value
@@ -3502,7 +3504,7 @@ type
     // </remarks>
     function GetLineMetrics(lineMetrics: PDWRITE_LINE_METRICS;
                             maxLineCount: UINT32;
-                            out actualLineCount: UINT32): HResult; stdcall;
+                            out actualLineCount: UINT32): HResult; stdcall; overload;
 
     // GetMetrics retrieves overall metrics for the formatted string.
     // <param name="textMetrics">The returned metrics.</param>
@@ -3515,7 +3517,7 @@ type
     // line heights. Additionally, visible swashes and other graphic
     // adornments may extend outside the returned width and height.
     // </remarks>
-    function GetMetrics(out textMetrics: DWRITE_TEXT_METRICS): HResult; stdcall;
+    function GetMetrics(out textMetrics: DWRITE_TEXT_METRICS): HResult; stdcall; overload;
 
     // GetOverhangMetrics returns the overhangs (in DIPs) of the layout and all
     // objects contained in it, including text glyphs and inline objects.
@@ -3691,10 +3693,10 @@ type
     function DrawGlyphRun(baselineOriginX: Single;
                           baselineOriginY: Single;
                           measuringMode: DWRITE_MEASURING_MODE;
-                          glyphRun: DWRITE_GLYPH_RUN;
+                          glyphRun: PDWRITE_GLYPH_RUN;
                           renderingParams: IDWriteRenderingParams;
                           textColor: COLORREF;
-                          blackBoxRect: PRECT = Nil): HResult; stdcall;
+                          blackBoxRect: PRECT = Nil): HResult; stdcall; overload;
 
     // Gets a handle to the memory device context.
     // <returns>
@@ -3777,8 +3779,8 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function CreateFontFromLOGFONT(logFont: LOGFONTW;
-                                   out font: IDWriteFont): HResult; stdcall;
+    function CreateFontFromLOGFONT(logFont: PLOGFONTW;
+                                   out font: IDWriteFont): HResult; stdcall; overload;
 
     // Initializes a LOGFONT structure based on the GDI-compatible properties of the specified font.
     // <param name="font">Specifies a font.</param>
@@ -3846,7 +3848,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetAlphaTextureBounds(textureType: DWRITE_TEXTURE_TYPE;
-                                   out textureBounds: TRECT): HResult; stdcall;
+                                   out textureBounds: TRect): HResult; stdcall;
 
     // Creates an alpha texture of the specified type.
     // <param name="textureType">Specifies the type of texture requested. If a bi-level texture is requested, the
@@ -3860,8 +3862,8 @@ type
     // Standard HRESULT error code.
     // </returns>
     function CreateAlphaTexture(textureType: DWRITE_TEXTURE_TYPE;
-                                textureBounds: TRECT;
-                                out alphaValues: PByte;
+                                textureBounds: PRect;
+                                alphaValues: PByte;
                                 bufferSize: UINT32): HResult; stdcall;
 
     // Gets properties required for ClearType blending.
@@ -3901,7 +3903,7 @@ type
     // Standard HRESULT error code.
     // </returns>
     function GetSystemFontCollection(out fontCollection: IDWriteFontCollection;
-                                     checkForUpdates: BOOL = False): HResult; stdcall;
+                                     checkForUpdates: BOOL = False): HResult; stdcall; overload;
 
     // Creates a font collection using a custom font collection loader.
     // <param name="collectionLoader">Application-defined font collection loader, which must have been previously
@@ -3985,7 +3987,7 @@ type
                             fontFiles: PIDWriteFontFile; // pointer to array of fontFiles
                             faceIndex: UINT32;
                             fontFaceSimulationFlags: DWRITE_FONT_SIMULATIONS;
-                            out fontFace: IDWriteFontFace): HResult; stdcall;
+                            out fontFace: IDWriteFontFace): HResult; stdcall; overload;
 
     // Creates a rendering parameters object with default settings for the primary monitor.
     // <param name="renderingParams">Holds the newly created rendering parameters object, or NULL in case of failure.</param>
@@ -4018,7 +4020,7 @@ type
                                          clearTypeLevel: Single;
                                          pixelGeometry: DWRITE_PIXEL_GEOMETRY;
                                          renderingMode: DWRITE_RENDERING_MODE;
-                                         out renderingParams: IDWriteRenderingParams): HResult; stdcall;
+                                         out renderingParams: IDWriteRenderingParams): HResult; stdcall; overload;
 
     // Registers a font file loader with DirectWrite.
     // <param name="fontFileLoader">Pointer to the implementation of the IDWriteFontFileLoader for a particular file resource type.</param>
@@ -4080,7 +4082,7 @@ type
                               fontStretch: DWRITE_FONT_STRETCH;
                               fontSize: Single;
                               localeName: PWideChar;
-                              out textFormat: IDWriteTextFormat): HResult; stdcall;
+                              out textFormat: IDWriteTextFormat): HResult; stdcall; overload;
 
     // Create a typography object used in conjunction with text format for text layout.
     // <param name="typography">Contains newly created typography object, or NULL in case of failure.</param>
@@ -4193,14 +4195,14 @@ type
     // <returns>
     // Standard HRESULT error code.
     // </returns>
-    function CreateGlyphRunAnalysis(glyphRun: DWRITE_GLYPH_RUN;
+    function CreateGlyphRunAnalysis(glyphRun: PDWRITE_GLYPH_RUN;
                                     pixelsPerDip: Single;
                                     transform: PDWRITE_MATRIX;
                                     renderingMode: DWRITE_RENDERING_MODE;
                                     measuringMode: DWRITE_MEASURING_MODE;
                                     baselineOriginX: Single;
                                     baselineOriginY: Single;
-                                    out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall;
+                                    out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall; overload;
   end; // interface IDWriteFactory
   IID_IDWriteFactory = IDWriteFactory;
   {$EXTERNALSYM IID_IDWriteFactory}
@@ -4515,8 +4517,8 @@ procedure SetByteBits(var data: Byte;
                       const index: Integer;
                       const value: Integer);
 begin
-  data := (data AND (Not ((index AND $FF) shl (index shr 8)))) or
-          ((value AND index AND $FF) shl (index shr 8));
+  data := (data and not (((1 shl Byte(index)) - 1) shl (index shr 8))) or
+          ((value and ((1 shl Byte(index)) - 1)) shl (index shr 8));
 end;
 
 end.

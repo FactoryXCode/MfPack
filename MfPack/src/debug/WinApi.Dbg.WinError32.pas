@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Returns code definitions of the WinError32 errors.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -4776,7 +4776,7 @@ begin
                             HrDescr := 'This operation cannot be performed on the print destination in its current state.';
                           end;
     LongInt($00000873)  : begin
-                            HrStr := 'NERR_QinvalidState' ;
+                            HrStr := 'NERR_QInvalidState' ;
                             HrDescr := 'This operation cannot be performed on the print queue in its current state.';
                           end;
     LongInt($00000874)  : begin
@@ -10169,7 +10169,7 @@ begin
                             HrDescr := 'The main mode filter is pending deletion.';
                           end;
     LongInt($000032DB)  : begin
-                            HrStr := 'ERROR_IPSEC_TRANSPORT_FILTER_ENDING_DELETION' ;
+                            HrStr := 'ERROR_IPSEC_TRANSPORT_FILTER_PENDING_DELETION' ;
                             HrDescr := 'The transport filter is pending deletion.';
                           end;
     LongInt($000032DC)  : begin
@@ -10177,7 +10177,7 @@ begin
                             HrDescr := 'The tunnel filter is pending deletion.';
                           end;
     LongInt($000032DD)  : begin
-                            HrStr := 'ERROR_IPSEC_MM_POLICY_PENDING_ELETION' ;
+                            HrStr := 'ERROR_IPSEC_MM_POLICY_PENDING_DELETION' ;
                             HrDescr := 'The main mode policy is pending deletion.';
                           end;
     LongInt($000032DE)  : begin
@@ -10554,7 +10554,7 @@ begin
                             HrDescr := 'Received unexpected message ID.';
                           end;
     LongInt($00003641)  : begin
-                            HrStr := 'ERROR_IPSEC_IKE_INVALID_UMATTS' ;
+                            HrStr := 'ERROR_IPSEC_IKE_INVALID_AUTH_PAYLOAD' ;
                             HrDescr := 'Received invalid AuthIP user mode attributes.';
                           end;
     LongInt($00003642)  : begin
@@ -10651,7 +10651,7 @@ begin
                             HrDescr := 'The manifest contains a reference to an invalid URI.';
                           end;
     LongInt($000036BF)  : begin
-                            HrStr := 'ERROR_SXS_ROOT_MANIFEST_DEPENDENCY_OT_INSTALLED' ;
+                            HrStr := 'ERROR_SXS_ROOT_MANIFEST_DEPENDENCY_NOT_INSTALLED' ;
                             HrDescr := 'The application manifest contains a reference to a dependent assembly that is not installed.';
                           end;
     LongInt($000036C0)  : begin
@@ -10891,7 +10891,7 @@ begin
                             HrDescr := 'Assembly Protection Error: Unable to recover the specified assembly.';
                           end;
     LongInt($000036FB)  : begin
-                            HrStr := 'ERROR_SXS_PROTECTION_PUBLIC_KEY_OO_SHORT' ;
+                            HrStr := 'ERROR_SXS_PROTECTION_PUBLIC_KEY_TOO_SHORT' ;
                             HrDescr := 'Assembly Protection Error: The public key for an assembly was too short to be allowed.';
                           end;
     LongInt($000036FC)  : begin
@@ -10943,7 +10943,7 @@ begin
                             HrDescr := 'A component used by the isolation facility has requested to terminate the process.';
                           end;
     LongInt($00003708)  : begin
-                            HrStr := 'ERROR_SXS_RELEASE_ACTIVATION_ONTEXT' ;
+                            HrStr := 'ERROR_SXS_RELEASE_ACTIVATION_CONTEXT' ;
                             HrDescr := 'A kernel mode component is releasing a reference on an activation context.';
                           end;
     LongInt($00003709)  : begin
@@ -10973,7 +10973,7 @@ begin
                                        'Either a dollar sign ($) was followed by something other than a left parenthesis or another dollar sign, or a substitution''s right parenthesis was not found.';
                           end;
     LongInt($0000370F)  : begin
-                            HrStr := 'ERROR_SXS_INCORRECT_PUBLIC_KEY_OKEN' ;
+                            HrStr := 'ERROR_SXS_INCORRECT_PUBLIC_KEY_TOKEN' ;
                             HrDescr := 'The public key token does not correspond to the public key specified.';
                           end;
     LongInt($00003710)  : begin
@@ -11158,7 +11158,7 @@ begin
                             HrDescr := 'The maximum number of replacements has been reached.';
                           end;
     LongInt($00003AB8)  : begin
-                            HrStr := 'ERROR_EVT_EVENT_DEFINITION_NOT_OUND' ;
+                            HrStr := 'ERROR_EVT_EVENT_DEFINITION_NOT_FOUND' ;
                             HrDescr := 'The event definition could not be found for the event ID (%1).';
                           end;
     LongInt($00003AB9)  : begin
@@ -11276,8 +11276,7 @@ begin
         HrStr := 'Unknown identifier.';
         HrDescr := 'Unknown HResult code.';
         HeaderFile := 'Unknown.';
-        FWinHResultCracker.ClearResults();
-        hr := aHResult;
+        hr := HResult($80070490);
       end;
   end;
   Result := hr;
@@ -11295,9 +11294,7 @@ begin
   hr := S_OK;
 
   // Get the regioncode
-  s := IntToHex(aHResult, 8);
-  s := '$' + RightStr(s, 4);
-  li := StrToInt(s);
+  li := DWORD(aHResult) and $FFFF;
 
   // Find the region.
   if (li >= 0) and (li <= 499) then
@@ -11324,7 +11321,7 @@ begin
     aRegion := 'Graphics error.'
   else
     begin
-      hr := ERROR_NOT_FOUND;
+      hr := HResult($80070490);
       aRegion := 'Unknown Region error.';
     end;
   Result := hr;

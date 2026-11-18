@@ -10,7 +10,7 @@
 // Release date: 12-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Build 22000 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -70,8 +70,6 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.DevPropDef,
-  {ActiveX}
-  WinApi.ActiveX,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfIdl;
@@ -98,7 +96,7 @@ const
   // be set to DEVPROP_TRUE.  If this property is missing
   // applications must assume the camera is a non-virtual
   // camera.
-  DEVPKEY_DeviceInterface_IsVirtualCamera                  :   PROPERTYKEY  = (fmtid: (D1: $6EDC630D;
+  DEVPKEY_DeviceInterface_IsVirtualCamera                  :   DEVPROPKEY  = (fmtid: (D1: $6EDC630D;
                                                                                        D2: $C2E3;
                                                                                        D3: $43B7;
                                                                                        D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
@@ -114,11 +112,19 @@ const
   //
   // Type:  DEVPROP_BOOLEAN
   // {6EDC630D-C2E3-43B7-B2D1-20525A1AF120}, 4")
-  DEVPKEY_DeviceInterface_IsWindowsCameraEffectAvailable     :  PROPERTYKEY = (fmtid: (D1: $6EDC630D;
+  DEVPKEY_DeviceInterface_IsWindowsCameraEffectAvailable     :  DEVPROPKEY = (fmtid: (D1: $6EDC630D;
                                                                                        D2: $C2E3;
                                                                                        D3: $43B7;
                                                                                        D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
                                                                                        Pid: 4);
+
+  // Device-interface multi-string list of associated physical cameras.
+  DEVPKEY_DeviceInterface_VirtualCameraAssociatedCameras : DEVPROPKEY = (fmtid: (D1: $6EDC630D;
+                                                                            D2: $C2E3;
+                                                                            D3: $43B7;
+                                                                            D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
+                                                                            pid: 5);
+  {$EXTERNALSYM DEVPKEY_DeviceInterface_VirtualCameraAssociatedCameras}
 
   // 28A5531A-57DD-4FD5-AAA7-385ABF57D785
   //
@@ -191,28 +197,25 @@ const
 
 type
 
-  MFVirtualCameraType = (
-    MFVirtualCameraType_SoftwareCameraSource
-  );
-  {$EXTERNALSYM MFVirtualCameraType}
   PMFVirtualCameraType = ^MFVirtualCameraType;
   {$EXTERNALSYM PMFVirtualCameraType}
+  MFVirtualCameraType = (MFVirtualCameraType_SoftwareCameraSource = 0
+                        );
+  {$EXTERNALSYM MFVirtualCameraType}
 
-  MFVirtualCameraLifetime = (
-    MFVirtualCameraLifetime_Session,
-    MFVirtualCameraLifetime_System
-  );
-  {$EXTERNALSYM MFVirtualCameraLifetime}
   PMFVirtualCameraLifetime = ^MFVirtualCameraLifetime;
   {$EXTERNALSYM PMFVirtualCameraLifetime}
+  MFVirtualCameraLifetime = (MFVirtualCameraLifetime_Session = 0,
+                             MFVirtualCameraLifetime_System = 1
+                            );
+  {$EXTERNALSYM MFVirtualCameraLifetime}
 
-  MFVirtualCameraAccess = (
-    MFVirtualCameraAccess_CurrentUser,
-    MFVirtualCameraAccess_AllUsers
-  );
-  {$EXTERNALSYM MFVirtualCameraAccess}
   PMFVirtualCameraAccess = ^MFVirtualCameraAccess;
   {$EXTERNALSYM PMFVirtualCameraAccess}
+  MFVirtualCameraAccess = (MFVirtualCameraAccess_CurrentUser = 0,
+                           MFVirtualCameraAccess_AllUsers = 1
+                          );
+  {$EXTERNALSYM MFVirtualCameraAccess}
 
 
 
@@ -330,7 +333,7 @@ type
                                 propertyPayloadLength: ULONG;
                                 data: Pointer;
                                 dataLength: ULONG;
-                                out dataWritten: PULONG): HResult; stdcall;
+                                out dataWritten: ULONG): HResult; stdcall;
 
     // <summary>
     //     Create a sync object wrapping the KSEVENT event handle.
@@ -400,9 +403,14 @@ type
                                  out virtualCamera: IMFVirtualCamera): HResult; stdcall;
    {$EXTERNALSYM MFCreateVirtualCamera}
 
-  function IsVirtualCameraTypeSupported(_type: MFVirtualCameraType;
+  function MFIsVirtualCameraTypeSupported(_type: MFVirtualCameraType;
                                         out supported: BOOL): HResult; stdcall;
-   {$EXTERNALSYM IsVirtualCameraTypeSupported}
+  {$EXTERNALSYM MFIsVirtualCameraTypeSupported}
+
+  // Compatibility name retained for existing MfPack callers.
+  function IsVirtualCameraTypeSupported(_type: MFVirtualCameraType;
+                                      out supported: BOOL): HResult; stdcall;
+  {$EXTERNALSYM IsVirtualCameraTypeSupported}
 
 
 {END WINVER >= NTDDI_WIN10_CO}
@@ -420,7 +428,8 @@ const
 
 {$WARN SYMBOL_PLATFORM OFF}
   function MFCreateVirtualCamera;            external MfVirtualCameraLib name 'MFCreateVirtualCamera' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function IsVirtualCameraTypeSupported;     external MfVirtualCameraLib name 'IsVirtualCameraTypeSupported' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFIsVirtualCameraTypeSupported;   external MfVirtualCameraLib name 'MFIsVirtualCameraTypeSupported' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function IsVirtualCameraTypeSupported;     external MfVirtualCameraLib name 'MFIsVirtualCameraTypeSupported' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.

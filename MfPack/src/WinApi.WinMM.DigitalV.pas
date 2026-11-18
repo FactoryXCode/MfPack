@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Include file for the MCI Digital Video Command Set.
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Date            Modification
@@ -31,7 +31,7 @@
 //          Aug 19, 1992    Version 1.0 Release
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -706,10 +706,10 @@ const
  }
 
   function SEND_DGVSIGNAL(dwFlags: DWord;
-                          dwCallback: DWord;
+                          dwCallback: DWORD_PTR;
                           hDriver: Thandle;
-                          wDeviceID: Word;
-                          dwUser: DWord;
+                          wDeviceID: MCIDEVICEID;
+                          dwUser: DWORD_PTR;
                           dwPos: DWord): BOOL;
   {$EXTERNALSYM SEND_DGVSIGNAL}
 
@@ -887,7 +887,7 @@ const
 type
 
   PMCI_DGV_RECT_PARMS = ^MCI_DGV_RECT_PARMS;
-  MCI_DGV_RECT_PARMS = record
+  MCI_DGV_RECT_PARMS = packed record
     dwCallback: DWORD_PTR;
     rc: TRect;
   end;
@@ -898,7 +898,7 @@ type
   { parameter block for MCI_CAPTURE command message }
 
   PMCI_DGV_CAPTURE_PARMSA = ^MCI_DGV_CAPTURE_PARMSA;
-  MCI_DGV_CAPTURE_PARMSA = record
+  MCI_DGV_CAPTURE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PAnsiChar;
     rc: TRect;
@@ -909,7 +909,7 @@ type
 
 
   PMCI_DGV_CAPTURE_PARMSW = ^MCI_DGV_CAPTURE_PARMSW;
-  MCI_DGV_CAPTURE_PARMSW = record
+  MCI_DGV_CAPTURE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PWideChar;
     rc: TRect;
@@ -935,7 +935,7 @@ type
   { parameter block for MCI_COPY command message }
 
   PMCI_DGV_COPY_PARMS = ^MCI_DGV_COPY_PARMS;
-  MCI_DGV_COPY_PARMS = record
+  MCI_DGV_COPY_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -950,7 +950,7 @@ type
   { parameter block for MCI_CUE command message }
 
   PMCI_DGV_CUE_PARMS = ^MCI_DGV_CUE_PARMS;
-  MCI_DGV_CUE_PARMS = record
+  MCI_DGV_CUE_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTo: DWORD;
   end;
@@ -962,7 +962,7 @@ type
   { parameter block for MCI_CUT command message }
 
   PMCI_DGV_CUT_PARMS = ^MCI_DGV_CUT_PARMS;
-  MCI_DGV_CUT_PARMS = record
+  MCI_DGV_CUT_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -977,7 +977,7 @@ type
   { parameter block for MCI_DELETE command message }
 
   PMCI_DGV_DELETE_PARMS = ^MCI_DGV_DELETE_PARMS;
-  MCI_DGV_DELETE_PARMS = record
+  MCI_DGV_DELETE_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1001,7 +1001,7 @@ type
   { parameter block for MCI_INFO command message }
 
   PMCI_DGV_INFO_PARMSA = ^MCI_DGV_INFO_PARMSA;
-  MCI_DGV_INFO_PARMSA = record
+  MCI_DGV_INFO_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PAnsiChar;
     dwRetSize: DWORD;
@@ -1012,7 +1012,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_INFO_PARMSA}
 
   PMCI_DGV_INFO_PARMSW = ^MCI_DGV_INFO_PARMSW;
-  MCI_DGV_INFO_PARMSW = record
+  MCI_DGV_INFO_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PWideChar;
     dwRetSize: DWORD;
@@ -1031,7 +1031,7 @@ type
   { parameter block for MCI_LIST command message }
 
   PMCI_DGV_LIST_PARMSA = ^ MCI_DGV_LIST_PARMSA;
-  MCI_DGV_LIST_PARMSA = record
+  MCI_DGV_LIST_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PAnsiChar;
     dwLength: DWORD;
@@ -1044,7 +1044,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_LIST_PARMSA}
 
   PMCI_DGV_LIST_PARMSW = ^MCI_DGV_LIST_PARMSW;
-  MCI_DGV_LIST_PARMSW = record
+  MCI_DGV_LIST_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PWideChar;
     dwLength: DWORD;
@@ -1072,7 +1072,7 @@ type
   { parameter block for MCI_MONITOR command message }
 
   PMCI_DGV_MONITOR_PARMS = ^MCI_DGV_MONITOR_PARMS;
-  MCI_DGV_MONITOR_PARMS = record
+  MCI_DGV_MONITOR_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwSource: DWORD;
     dwMethod: DWORD;
@@ -1084,7 +1084,7 @@ type
   { parameter block for MCI_OPEN command message }
 
   PMCI_DGV_OPEN_PARMSA = ^MCI_DGV_OPEN_PARMSA;
-  MCI_DGV_OPEN_PARMSA = record
+  MCI_DGV_OPEN_PARMSA = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: UINT;
     lpstrDeviceType: PAnsiChar;
@@ -1098,7 +1098,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_OPEN_PARMSA}
 
   PMCI_DGV_OPEN_PARMSW = ^MCI_DGV_OPEN_PARMSW;
-  MCI_DGV_OPEN_PARMSW = record
+  MCI_DGV_OPEN_PARMSW = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: UINT;
     lpstrDeviceType: PWideChar;
@@ -1127,7 +1127,7 @@ type
 
   { parameter block for MCI_PASTE command message }
   PMCI_DGV_PASTE_PARMS = ^MCI_DGV_PASTE_PARMS;
-  MCI_DGV_PASTE_PARMS = record
+  MCI_DGV_PASTE_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTo: DWORD;
     rc: TRect;
@@ -1158,7 +1158,7 @@ type
   { parameter block for MCI_QUALITY command message }
 
   PMCI_DGV_QUALITY_PARMSA = ^MCI_DGV_QUALITY_PARMSA;
-  MCI_DGV_QUALITY_PARMSA = record
+  MCI_DGV_QUALITY_PARMSA = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     lpstrName: PAnsiChar;
@@ -1170,7 +1170,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_QUALITY_PARMSA}
 
   PMCI_DGV_QUALITY_PARMSW = ^MCI_DGV_QUALITY_PARMSW;
-  MCI_DGV_QUALITY_PARMSW = record
+  MCI_DGV_QUALITY_PARMSW = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     lpstrName: PWideChar;
@@ -1196,7 +1196,7 @@ type
   { parameter block for MCI_RECORD command message }
 
   PMCI_DGV_RECORD_PARMS = ^MCI_DGV_RECORD_PARMS;
-  MCI_DGV_RECORD_PARMS = record
+  MCI_DGV_RECORD_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1210,7 +1210,7 @@ type
   { parameter block for MCI_RESERVE command message }
 
   PMCI_DGV_RESERVE_PARMSA = ^MCI_DGV_RESERVE_PARMSA;
-  MCI_DGV_RESERVE_PARMSA = record
+  MCI_DGV_RESERVE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrPath: PAnsiChar;
     dwSize: DWORD;
@@ -1219,7 +1219,7 @@ type
   LPMCI_DGV_RESERVE_PARMSA = ^MCI_DGV_RESERVE_PARMSA;
 
   PMCI_DGV_RESERVE_PARMSW = ^MCI_DGV_RESERVE_PARMSW;
-  MCI_DGV_RESERVE_PARMSW = record
+  MCI_DGV_RESERVE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrPath: PWideChar;
     dwSize: DWORD;
@@ -1238,7 +1238,7 @@ type
   { parameter block for MCI_RESTORE command message }
 
   PMCI_DGV_RESTORE_PARMSA = ^MCI_DGV_RESTORE_PARMSA;
-  MCI_DGV_RESTORE_PARMSA = record
+  MCI_DGV_RESTORE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PAnsiChar;
     rc: TRect;
@@ -1248,7 +1248,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_RESTORE_PARMSA}
 
   PMCI_DGV_RESTORE_PARMSW = ^MCI_DGV_RESTORE_PARMSW;
-  MCI_DGV_RESTORE_PARMSW = record
+  MCI_DGV_RESTORE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PWideChar;
     rc: TRect;
@@ -1274,7 +1274,7 @@ type
   { parameter block for MCI_SAVE command message }
 
   PMCI_DGV_SAVE_PARMSA = ^MCI_DGV_SAVE_PARMSA;
-  MCI_DGV_SAVE_PARMSA = record
+  MCI_DGV_SAVE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PAnsiChar;
     rc: TRect;
@@ -1284,7 +1284,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_SAVE_PARMSA}
 
   PMCI_DGV_SAVE_PARMSW = ^MCI_DGV_SAVE_PARMSW;
-  MCI_DGV_SAVE_PARMSW = record
+  MCI_DGV_SAVE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrFileName: PWideChar;
     rc: TRect;
@@ -1302,7 +1302,7 @@ type
   { parameter block for MCI_SET command message }
 
   PMCI_DGV_SET_PARMS = ^MCI_DGV_SET_PARMS;
-  MCI_DGV_SET_PARMS = record
+  MCI_DGV_SET_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTimeFormat: DWORD;
     dwAudio: DWORD;
@@ -1317,7 +1317,7 @@ type
   { parameter block for MCI_SETAUDIO command message }
 
   PMCI_DGV_SETAUDIO_PARMSA = ^MCI_DGV_SETAUDIO_PARMSA;
-  MCI_DGV_SETAUDIO_PARMSA = record
+  MCI_DGV_SETAUDIO_PARMSA = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     dwValue: DWORD;
@@ -1329,7 +1329,7 @@ type
   LPMCI_DGV_SETAUDIO_PARMSA = ^MCI_DGV_SETAUDIO_PARMSA;
 
   PMCI_DGV_SETAUDIO_PARMSW = ^MCI_DGV_SETAUDIO_PARMSW;
-  MCI_DGV_SETAUDIO_PARMSW = record
+  MCI_DGV_SETAUDIO_PARMSW = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     dwValue: DWORD;
@@ -1349,7 +1349,7 @@ type
   { parameter block for MCI_SIGNAL command message }
 
   PMCI_DGV_SIGNAL_PARMS = ^MCI_DGV_SIGNAL_PARMS;
-  MCI_DGV_SIGNAL_PARMS = record
+  MCI_DGV_SIGNAL_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwPosition: DWORD;
     dwPeriod: DWORD;
@@ -1363,7 +1363,7 @@ type
   { parameter block for MCI_SETVIDEO command message }
 
   PMCI_DGV_SETVIDEO_PARMSA = ^MCI_DGV_SETVIDEO_PARMSA;
-  MCI_DGV_SETVIDEO_PARMSA = record
+  MCI_DGV_SETVIDEO_PARMSA = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     dwValue: DWORD;
@@ -1377,7 +1377,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_SETVIDEO_PARMSA}
 
   PMCI_DGV_SETVIDEO_PARMSW = ^MCI_DGV_SETVIDEO_PARMSW;
-  MCI_DGV_SETVIDEO_PARMSW = record
+  MCI_DGV_SETVIDEO_PARMSW = packed record
     dwCallback: DWORD_PTR;
     dwItem: DWORD;
     dwValue: DWORD;
@@ -1399,7 +1399,7 @@ type
   { parameter block for MCI_STATUS command message }
 
   PMCI_DGV_STATUS_PARMSA = ^MCI_DGV_STATUS_PARMSA;
-  MCI_DGV_STATUS_PARMSA = record
+  MCI_DGV_STATUS_PARMSA = packed record
     dwCallback: DWORD_PTR;
     dwReturn: DWORD_PTR;
     dwItem: DWORD;
@@ -1412,7 +1412,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_STATUS_PARMSA}
 
   PMCI_DGV_STATUS_PARMSW = ^MCI_DGV_STATUS_PARMSW;
-  MCI_DGV_STATUS_PARMSW = record
+  MCI_DGV_STATUS_PARMSW = packed record
     dwCallback: DWORD_PTR;
     dwReturn: DWORD_PTR;
     dwItem: DWORD;
@@ -1433,7 +1433,7 @@ type
   { parameter block for MCI_STEP command message }
 
   PMCI_DGV_STEP_PARMS = ^MCI_DGV_STEP_PARMS;
-  MCI_DGV_STEP_PARMS = record
+  MCI_DGV_STEP_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrames: DWORD;
   end;
@@ -1461,7 +1461,7 @@ type
   { parameter block for MCI_UPDATE command message }
 
   PMCI_DGV_UPDATE_PARMS = ^MCI_DGV_UPDATE_PARMS;
-  MCI_DGV_UPDATE_PARMS = record
+  MCI_DGV_UPDATE_PARMS = packed record
     dwCallback: DWORD_PTR;
     rc: Trect;
     hDC: HDC;
@@ -1482,7 +1482,7 @@ type
   { parameter block for MCI_WINDOW command message }
 
   PMCI_DGV_WINDOW_PARMSA = ^MCI_DGV_WINDOW_PARMSA;
-  MCI_DGV_WINDOW_PARMSA = record
+  MCI_DGV_WINDOW_PARMSA = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1493,7 +1493,7 @@ type
   {$EXTERNALSYM LPMCI_DGV_WINDOW_PARMSA}
 
   PMCI_DGV_WINDOW_PARMSW = ^MCI_DGV_WINDOW_PARMSW;
-  MCI_DGV_WINDOW_PARMSW = record
+  MCI_DGV_WINDOW_PARMSW = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1511,10 +1511,10 @@ implementation
 
 
 function SEND_DGVSIGNAL(dwFlags: DWord;
-                        dwCallback: DWord;
+                        dwCallback: DWORD_PTR;
                         hDriver: Thandle;
-                        wDeviceID: Word;
-                        dwUser: DWord;
+                        wDeviceID: MCIDEVICEID;
+                        dwUser: DWORD_PTR;
                         dwPos: DWord): BOOL;
 var
   dwParam1: DWORD_PTR;
@@ -1522,7 +1522,7 @@ var
 
 begin
 
-  if (dwFlags = MCI_DGV_SIGNAL_POSITION) then
+  if (dwFlags and MCI_DGV_SIGNAL_POSITION) <> 0 then
     begin
       dwParam1 := dwPos;
       dwParam2 := dwUser;

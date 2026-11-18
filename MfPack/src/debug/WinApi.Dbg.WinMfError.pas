@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Error codes from Media Foundation.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -123,7 +123,7 @@ begin
       begin
         FacilityTag := 'UNKNOWN';
         FacilityDescr := FACILITYSOURCE + ' unknown.';
-        hr := ERROR_NOT_FOUND;
+        hr := HResult($80070490);
       end;
   end;
   Result := hr;
@@ -845,11 +845,11 @@ begin
                                       HrStr := 'MF_E_SINK_NO_STREAMS';
                                       HrDescr := 'No streams are selected in sink presentation descriptor.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4A42)  : begin
+    _HRESULT_TYPEDEF_($D4A42)  : begin
                                       HrStr := 'MF_S_SINK_NOT_FINALIZED';
                                       HrDescr := 'The sink has not been finalized before shut down. This may cause sink generate a corrupted content.';
                                     end;
-    _HRESULT_TYPEDEF_($000D4A43)  : begin
+    _HRESULT_TYPEDEF_($C00D4A43)  : begin
                                       HrStr := 'MF_E_METADATA_TOO_LONG';
                                       HrDescr := 'A metadata item was too long to write to the output container.';
                                     end;
@@ -965,7 +965,7 @@ begin
                                       HrStr := 'MF_E_SEQUENCER_UNKNOWN_SEGMENT_ID';
                                       HrDescr := 'The sequencer cannot find a segment with the given ID.\n.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D61AD)  : begin
+    _HRESULT_TYPEDEF_($D61AD)  : begin
                                       HrStr := 'MF_S_SEQUENCER_CONTEXT_CANCELED';
                                       HrDescr := 'The context was canceled.\n.';
                                     end;
@@ -973,7 +973,7 @@ begin
                                       HrStr := 'MF_E_NO_SOURCE_IN_CACHE';
                                       HrDescr := 'Cannot find source in source cache.\n.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D61AF)  : begin
+    _HRESULT_TYPEDEF_($D61AF)  : begin
                                       HrStr := 'MF_S_SEQUENCER_SEGMENT_AT_END_OF_STREAM';
                                       HrDescr := 'Cannot update topology flags.\n.';
                                     end;
@@ -1057,11 +1057,11 @@ begin
                                       HrStr := 'MF_E_TRANSFORM_CANNOT_CHANGE_MEDIATYPE_WHILE_PROCESSING';
                                       HrDescr := 'The transform cannot accept mediatype changes in the middle of processing.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D6D75)  : begin
+    _HRESULT_TYPEDEF_($D6D75)  : begin
                                       HrStr := 'MF_S_TRANSFORM_DO_NOT_PROPAGATE_EVENT';
                                       HrDescr := 'The caller should not propagate this event to downstream components.';
                                     end;
-    _HRESULT_TYPEDEF_($000D6D76)  : begin
+    _HRESULT_TYPEDEF_($C00D6D76)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_D3D_TYPE';
                                       HrDescr := 'The input type is not supported for D3D device.';
                                     end;
@@ -1205,7 +1205,7 @@ begin
                                       HrStr := 'MF_E_REBOOT_REQUIRED';
                                       HrDescr := 'We need to reboot the machine.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D7168)  : begin
+    _HRESULT_TYPEDEF_($D7168)  : begin
                                       HrStr := 'MF_S_WAIT_FOR_POLICY_SET';
                                       HrDescr := 'Protection for this stream is not guaranteed to be enforced until the MEPolicySet event is fired.';
                                     end;
@@ -1245,11 +1245,11 @@ begin
                                       HrStr := 'MF_E_GRL_ABSENT';
                                       HrDescr := 'The GRL is absent.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D7173)  : begin
+    _HRESULT_TYPEDEF_($D7173)  : begin
                                       HrStr := 'MF_S_PE_TRUSTED';
                                       HrDescr := 'The Protected Environment is trusted.';
                                     end;
-    _HRESULT_TYPEDEF_($000D7174)  : begin
+    _HRESULT_TYPEDEF_($C00D7174)  : begin
                                       HrStr := 'MF_E_PE_UNTRUSTED';
                                       HrDescr := 'The Protected Environment is untrusted.';
                                     end;
@@ -1525,8 +1525,7 @@ begin
         HrStr := 'Unknown identifier.';
         HrDescr := 'Unknown HResult code.';
         HeaderFile := 'Unknown.';
-        FWinHResultCracker.ClearResults();
-        Result := aHResult;
+        Result := HResult($80070490);
         Exit;
       end;
   end;
@@ -1548,9 +1547,7 @@ begin
   hr := S_OK;
 
   // Get the regioncode
-  s := IntToHex(aHResult, 8);
-  s := '$' + RightStr(s, 4);
-  li := StrToInt(s);
+  li := DWORD(aHResult) and $FFFF;
 
   // Find the error region.
   if (li >= 14000) and (li <= 14999) then
@@ -1593,7 +1590,7 @@ begin
     aRegion := MF + 'MediaExtensions via appService API.'
   else
     begin
-      hr := ERROR_NOT_FOUND;
+      hr := HResult($80070490);
       aRegion := MF + 'Unknown Region.';
     end;
   Result := hr;

@@ -78,8 +78,6 @@ object frmMain: TfrmMain
     BorderStyle = sbsSingle
     Caption = 'Open an audio file'
     TabOrder = 3
-    ExplicitTop = 287
-    ExplicitWidth = 608
   end
   object Panel2: TPanel
     Left = 0
@@ -128,8 +126,6 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     ShowCaption = False
     TabOrder = 5
-    ExplicitLeft = 1
-    ExplicitTop = 2
     object Bevel1: TBevel
       Left = 132
       Top = 21
@@ -267,14 +263,14 @@ object frmMain: TfrmMain
       Left = 5
       Top = 194
       Width = 94
-      Height = 16
+      Height = 15
       Caption = 'Duration: 00:00:00'
     end
     object lblPlayed: TLabel
       Left = 16
       Top = 210
       Width = 83
-      Height = 16
+      Height = 15
       Caption = 'Played: 00:00:00'
     end
     object chkEQ: TCheckBox
@@ -475,7 +471,7 @@ object frmMain: TfrmMain
       ParentDoubleBuffered = False
       TabOrder = 13
     end
-    object Panel1: TPanel
+    object pnlSpectrumAnalyser: TPanel
       Left = 139
       Top = 26
       Width = 186
@@ -484,7 +480,7 @@ object frmMain: TfrmMain
       ParentBackground = False
       TabOrder = 14
       object imgSpectrumAnalizer: TImage
-        Left = 4
+        Left = 5
         Top = 5
         Width = 178
         Height = 54

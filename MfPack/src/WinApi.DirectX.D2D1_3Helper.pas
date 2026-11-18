@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -265,18 +265,18 @@ begin
   newPatch.point20 := point10;
   newPatch.point10 := point11;
 
-  D2D1GetGradientMeshInteriorPointsFromCoonsPatch(point0,
-                                                  point1,
-                                                  point2,
-                                                  point3,
-                                                  point4,
-                                                  point5,
-                                                  point6,
-                                                  point7,
-                                                  point8,
-                                                  point9,
-                                                  point10,
-                                                  point11,
+  D2D1GetGradientMeshInteriorPointsFromCoonsPatch(@point0,
+                                                  @point1,
+                                                  @point2,
+                                                  @point3,
+                                                  @point4,
+                                                  @point5,
+                                                  @point6,
+                                                  @point7,
+                                                  @point8,
+                                                  @point9,
+                                                  @point10,
+                                                  @point11,
                                                   newPatch.point11,
                                                   newPatch.point12,
                                                   newPatch.point21,
@@ -344,8 +344,8 @@ var
 begin
   rect.left := 0;
   rect.top := 0;
-  rect.right := $7FFFFFFF;
-  rect.bottom := $7FFFFFFF;
+  rect.right := $FFFFFFFF;
+  rect.bottom := $FFFFFFFF;
 
   Result := rect;
 end;

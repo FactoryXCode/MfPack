@@ -10,7 +10,7 @@
 // Release date: 25-06-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Audio Compression Manager Public Header File for Drivers.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -180,7 +180,7 @@ type
 
   PACMDRVOPENDESCA = ^tACMDRVOPENDESCA;
   {$EXTERNALSYM PACMDRVOPENDESCA}
-  tACMDRVOPENDESCA = record
+  tACMDRVOPENDESCA = packed record
     cbStruct: DWORD;                 // sizeof(ACMDRVOPENDESC)
     fccType: FOURCC;                 // 'audc'
     fccComp: FOURCC;                 // sub-type (not used--must be 0)
@@ -199,7 +199,7 @@ type
 
   PACMDRVOPENDESCW = ^tACMDRVOPENDESCW;
   {$EXTERNALSYM PACMDRVOPENDESCW}
-  tACMDRVOPENDESCW = record
+  tACMDRVOPENDESCW = packed record
     cbStruct: DWORD;                 // sizeof(ACMDRVOPENDESC)
     fccType: FOURCC;                 // 'audc'
     fccComp: FOURCC;                 // sub-type (not used--must be 0)
@@ -231,7 +231,7 @@ type
   //
   PACMDRVSTREAMINSTANCE = ^tACMDRVSTREAMINSTANCE;
   {$EXTERNALSYM PACMDRVSTREAMINSTANCE}
-  tACMDRVSTREAMINSTANCE = record
+  tACMDRVSTREAMINSTANCE = packed record
     cbStruct: DWORD;
     pwfxSrc: LPWAVEFORMATEX;
     pwfxDst: LPWAVEFORMATEX;
@@ -260,7 +260,7 @@ type
   PACMDRVSTREAMHEADER = ^tACMDRVSTREAMHEADER;
   {$EXTERNALSYM PACMDRVSTREAMHEADER}
 
-  tACMDRVSTREAMHEADER = record
+  tACMDRVSTREAMHEADER = packed record
     cbStruct: DWORD;
     fdwStatus: DWORD;
     dwUser: DWORD_PTR;
@@ -300,7 +300,7 @@ type
   //
   PACMDRVSTREAMSIZE = ^tACMDRVSTREAMSIZE;
   {$EXTERNALSYM PACMDRVSTREAMSIZE}
-  tACMDRVSTREAMSIZE = record
+  tACMDRVSTREAMSIZE = packed record
     cbStruct: DWORD;
     fdwSize: DWORD;
     cbSrcLength: DWORD;
@@ -320,7 +320,7 @@ type
   //
   PACMDRVFORMATSUGGEST = ^tACMDRVFORMATSUGGEST;
   {$EXTERNALSYM PACMDRVFORMATSUGGEST}
-  tACMDRVFORMATSUGGEST = record
+  tACMDRVFORMATSUGGEST = packed record
     cbStruct: DWORD;                 // sizeof(ACMDRVFORMATSUGGEST)
     fdwSuggest: DWORD;               // Suggest flags
     pwfxSrc: LPWAVEFORMATEX;         // Source Format
@@ -391,9 +391,9 @@ function MAKE_ACM_VERSION(mjr: LONG;
                           mnr: LONG;
                           bld: LONG): LONG; inline;
 begin
-  Result := (LONG(mjr) shr 24) or
-            (LONG(mnr) shr 16) or
-            (LONG(bld));
+  Result := LONG((DWORD(mjr) shl 24) or
+                 (DWORD(mnr) shl 16) or
+                 DWORD(bld));
 end;
 
 end.

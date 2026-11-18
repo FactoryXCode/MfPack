@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Cross-platform Audio Processing Objects
 // Declarations for the audio effects included with XAudio2.
 //
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8, XBox one and later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -100,6 +100,11 @@ const
   {$EXTERNALSYM IID_FXEcho}
 
 
+  CLSID_FXEQ : TGUID = '{F5E01117-D6C4-485A-A3F5-695196F3DBFA}';
+  CLSID_FXMasteringLimiter : TGUID = '{C4137916-2BE1-46FD-8599-441536F49856}';
+  CLSID_FXReverb : TGUID = '{7D9ACA56-CB68-4807-B632-B137352E8596}';
+  CLSID_FXEcho : TGUID = '{5039D740-F736-449A-84D3-A56202557B87}';
+
   // EQ parameter bounds (inclusive), used with FXEQ:
   FXEQ_MIN_FRAMERATE                  = 22000;
   {$EXTERNALSYM FXEQ_MIN_FRAMERATE}
@@ -158,7 +163,7 @@ const
   FXREVERB_DEFAULT_DIFFUSION          = 0.9;
   {$EXTERNALSYM FXREVERB_DEFAULT_DIFFUSION}
 
-  FXREVERB_MIN_ROOMSIZE               = 0.1;
+  FXREVERB_MIN_ROOMSIZE               = 0.0001;
   {$EXTERNALSYM FXREVERB_MIN_ROOMSIZE}
   FXREVERB_MAX_ROOMSIZE               = 1.0;
   {$EXTERNALSYM FXREVERB_MAX_ROOMSIZE}
@@ -278,9 +283,9 @@ type
   //  to XAudio2 to allow XAudio2 to dispose of the XAPO when it is no longer needed.
   //  Use IXAudio2.CreateSourceVoice or IXAudio2Voice.SetEffectChain to pass an XAPO to XAudio2.
   function CreateFX(const clsid: TGuid;
-                    out pEffect: IInterface;
-                    const pInitData: Pointer = nil;
-                    InitDataByteSize: UINT32 = 0): HRESULT; stdcall;
+                    pEffect: PPointer;
+                    pInitData: Pointer = nil;
+                    InitDataByteSize: UINT32 = 0): HRESULT; cdecl;
   {$EXTERNALSYM CreateFX}
 
 

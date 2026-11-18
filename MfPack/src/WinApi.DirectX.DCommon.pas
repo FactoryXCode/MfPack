@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Public API definitions shared by DWrite, D2D, and DImage.
 //
@@ -23,14 +23,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -102,7 +102,7 @@ const
   {$EXTERNALSYM DWRITE_MEASURING_MODE_GDI_CLASSIC}
   // Text is measured using the same glyph display metrics as text measured by GDI using a font
   // created with CLEARTYPE_NATURAL_QUALITY.
-  DWRITE_MEASURING_MODE_GDI_NATURAL = DWRITE_MEASURING_MODE(3);
+  DWRITE_MEASURING_MODE_GDI_NATURAL = DWRITE_MEASURING_MODE(2);
   {$EXTERNALSYM DWRITE_MEASURING_MODE_GDI_NATURAL}
 
 
@@ -117,6 +117,8 @@ type
   {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS}
 const
   // Indicates no data is available for this glyph.
+  DWRITE_GLYPH_IMAGE_FORMATS_COLR_PAINT_TREE = DWRITE_GLYPH_IMAGE_FORMATS($00000100);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_COLR_PAINT_TREE}
   DWRITE_GLYPH_IMAGE_FORMATS_NONE                   = DWRITE_GLYPH_IMAGE_FORMATS($00000000);
   {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_NONE}
   // The glyph has TrueType outlines.

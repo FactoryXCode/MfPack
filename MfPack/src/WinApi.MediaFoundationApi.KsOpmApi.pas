@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Definitions for kernel mode code OPM communication.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -92,16 +92,15 @@ const
 type
 
   PKsmethodOpmvideooutput = ^KSMETHOD_OPMVIDEOOUTPUT;
-  KSMETHOD_OPMVIDEOOUTPUT                        = (
-    //  Output is OPM_RANDOM_NUMBER followed by certifiate
-    KSMETHOD_OPMVIDEOOUTPUT_STARTINITIALIZATION  = 0,
-    //  Input OPM_ENCRYPTED_INITIALIZATION_PARAMETERS
-    //  Output OPM_STANDARD_INFORMATION
-    KSMETHOD_OPMVIDEOOUTPUT_FINISHINITIALIZATION = 1,
-    //  Input is OPM_GET_INFO_PARAMETERS, output is OPM_REQUESTED_INFORMATION
-    //  Use KsMethod - both input and output in the buffer (not after the KSMETHOD structure)
-    KSMETHOD_OPMVIDEOOUTPUT_GETINFORMATION       = 2
-  );
+  //  Output is OPM_RANDOM_NUMBER followed by certifiate
+  //  Input OPM_ENCRYPTED_INITIALIZATION_PARAMETERS
+  //  Output OPM_STANDARD_INFORMATION
+  //  Input is OPM_GET_INFO_PARAMETERS, output is OPM_REQUESTED_INFORMATION
+  //  Use KsMethod - both input and output in the buffer (not after the KSMETHOD structure)
+  KSMETHOD_OPMVIDEOOUTPUT                        = (KSMETHOD_OPMVIDEOOUTPUT_STARTINITIALIZATION  = 0,
+                                                    KSMETHOD_OPMVIDEOOUTPUT_FINISHINITIALIZATION = 1,
+                                                    KSMETHOD_OPMVIDEOOUTPUT_GETINFORMATION       = 2
+                                                   );
   {$EXTERNALSYM KSMETHOD_OPMVIDEOOUTPUT}
 
 const
@@ -221,6 +220,11 @@ type
 
   // End of Additional Prototypes
 
+
+// Additional SDK declarations; legacy spellings remain available.
+const
+  OPM_GET_CODEC_INFO: TGUID = '{4F374491-8F5F-4445-9DBA-95588F6B58B4}';
+  {$EXTERNALSYM OPM_GET_CODEC_INFO}
 
 implementation
 

@@ -10,7 +10,7 @@
 // Release date: 18-06-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Equates for WM_DEVICECHANGE and BroadcastSystemMessage
 //              This header is part of the System Services API.
 //              For more information, see: https://docs.microsoft.com/en-us/windows/win32/api/_base/
@@ -23,14 +23,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 // 
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -480,7 +480,7 @@ type
   {$EXTERNALSYM DEV_BROADCAST_PORT_W}
 
 
-{$IFDEF DEFINE_UNICODE}
+{$IFDEF UNICODE}
   PDEV_BROADCAST_PORT = PDEV_BROADCAST_PORT_W;
   DEV_BROADCAST_PORT = DEV_BROADCAST_PORT_W;
   {$EXTERNALSYM DEV_BROADCAST_PORT}

@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,20 +21,19 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Here we use Objects as records in place for records to make inheritance possible.
-//          Note: Objects are placed on the heap instead of stack.
+// Remarks: Matrix record helpers operate on caller-owned value records.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
 //
-// Todo: Test if the concept of objects works.
+// Todo: -
 //
 //==============================================================================
 // Source: d2d1_1helper.h
@@ -133,12 +132,12 @@ type
 
     //
     // Functions for convertion from the base D2D1_MATRIX_4X4_f to
-    // this type without making a copy
+    // this type by value (the returned record is a copy)
     //
 
     function ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): D2D_MATRIX_4X4_F;
 
-    function Determinant(pUnion: Word): Single; inline;
+    function Determinant(pUnion: Word = 0): Single; inline;
 
     function IsIdentity(): Boolean; inline;
 
@@ -490,8 +489,8 @@ begin
   sinAngle := 0.0;
   cosAngle := 0.0;
   D2D1SinCos(angleInRadian,
-             sinAngle,
-             cosAngle);
+             @sinAngle,
+             @cosAngle);
 
   struct._11 := 1;
   struct._12 := 0;
@@ -550,8 +549,8 @@ begin
   sinAngle := 0.0;
   cosAngle := 0.0;
   D2D1SinCos(angleInRadian,
-             sinAngle,
-             cosAngle);
+             @sinAngle,
+             @cosAngle);
 
   struct._11 := cosAngle;
   struct._12 := sinAngle;
@@ -623,8 +622,8 @@ begin
   sinAngle := 0.0;
   cosAngle := 0.0;
   D2D1SinCos(angleInRadian,
-             sinAngle,
-             cosAngle);
+             @sinAngle,
+             @cosAngle);
 
   oneMinusCosAngle := 1 - cosAngle;
 
@@ -634,7 +633,7 @@ begin
   struct._14 := 0;
 
   struct._21 := -z * sinAngle + oneMinusCosAngle * y * x;
-  struct._22 := 1 + oneMinusCosAngle * y * y - 1;
+  struct._22 := 1 + oneMinusCosAngle * (y * y - 1);
   struct._23 := x * sinAngle + oneMinusCosAngle * y * z;
   struct._24 := 0;
 
@@ -907,8 +906,8 @@ begin
   sinAngle := 0.0;
   cosAngle := 0.0;
   D2D1SinCos(angleInRadian,
-             sinAngle,
-             cosAngle);
+             @sinAngle,
+             @cosAngle);
 
   struct._11 := cosAngle;
   struct._12 := 0;
@@ -966,67 +965,50 @@ begin
   if (pUnion = 0) then
     begin
       minor1 := struct._41 * (struct._12 * (struct._23 * struct._34 - struct._33 * struct._24) - struct._13 * (struct._22 * struct._34 - struct._24 * struct._32) + struct._14 * (struct._22 * struct._33 - struct._23 * struct._32));
-      minor2 := struct._42 * (struct._11 * (struct._21 * struct._34 - struct._31 * struct._24) - struct._13 * (struct._21 * struct._34 - struct._24 * struct._31) + struct._14 * (struct._21 * struct._33 - struct._23 * struct._31));
+      minor2 := struct._42 * (struct._11 * (struct._23 * struct._34 - struct._33 * struct._24) - struct._13 * (struct._21 * struct._34 - struct._24 * struct._31) + struct._14 * (struct._21 * struct._33 - struct._23 * struct._31));
       minor3 := struct._43 * (struct._11 * (struct._22 * struct._34 - struct._32 * struct._24) - struct._12 * (struct._21 * struct._34 - struct._24 * struct._31) + struct._14 * (struct._21 * struct._32 - struct._22 * struct._31));
       minor4 := struct._44 * (struct._11 * (struct._22 * struct._33 - struct._32 * struct._23) - struct._12 * (struct._21 * struct._33 - struct._23 * struct._31) + struct._13 * (struct._21 * struct._32 - struct._22 * struct._31));
     end
   else
     begin
       minor1 := m[3,0] * (m[0,1] * (m[1,2] * m[2,3] - m[2,2] * m[1,3]) - m[0,2] * (m[1,1] * m[2,3] - m[1,3] * m[2,1]) + m[0,3] * (m[1,1] * m[2,2] - m[1,2] * m[2,1]));
-      minor2 := m[3,1] * (m[0,1] * (m[1,0] * m[2,3] - m[2,0] * m[1,3]) - m[0,2] * (m[1,0] * m[2,3] - m[1,3] * m[2,0]) + m[0,3] * (m[1,0] * m[2,2] - m[1,2] * m[2,0]));
+      minor2 := m[3,1] * (m[0,0] * (m[1,2] * m[2,3] - m[2,2] * m[1,3]) - m[0,2] * (m[1,0] * m[2,3] - m[1,3] * m[2,0]) + m[0,3] * (m[1,0] * m[2,2] - m[1,2] * m[2,0]));
       minor3 := m[3,2] * (m[0,0] * (m[1,1] * m[2,3] - m[2,1] * m[1,3]) - m[0,1] * (m[1,0] * m[2,3] - m[1,3] * m[2,0]) + m[0,3] * (m[1,0] * m[2,1] - m[1,1] * m[2,0]));
       minor4 := m[3,3] * (m[0,0] * (m[1,1] * m[2,2] - m[2,1] * m[1,2]) - m[0,1] * (m[1,0] * m[2,2] - m[1,2] * m[2,0]) + m[0,2] * (m[1,0] * m[2,1] - m[1,1] * m[2,0]));
     end;
 
-  Result := (minor1 - minor2) + (minor3 - minor4);
+  Result := -minor1 + minor2 - minor3 + minor4;
 
 end;
 
 
 procedure Matrix4x4f.SetProduct(var a: D2D_MATRIX_4X4_F;
                                 var b: D2D_MATRIX_4X4_F);
+var
+  value: D2D_MATRIX_4X4_F;
 begin
-  struct._11 := a.struct._11 * b.struct._11 + a.struct._12 * b.struct._21 + a.struct._13 * b.struct._31 + a.struct._14 * b.struct._41;
-  struct._12 := a.struct._11 * b.struct._12 + a.struct._12 * b.struct._22 + a.struct._13 * b.struct._32 + a.struct._14 * b.struct._42;
-  struct._13 := a.struct._11 * b.struct._13 + a.struct._12 * b.struct._23 + a.struct._13 * b.struct._33 + a.struct._14 * b.struct._43;
-  struct._14 := a.struct._11 * b.struct._14 + a.struct._12 * b.struct._24 + a.struct._13 * b.struct._34 + a.struct._14 * b.struct._44;
+  value.struct._11 := a.struct._11 * b.struct._11 + a.struct._12 * b.struct._21 + a.struct._13 * b.struct._31 + a.struct._14 * b.struct._41;
+  value.struct._12 := a.struct._11 * b.struct._12 + a.struct._12 * b.struct._22 + a.struct._13 * b.struct._32 + a.struct._14 * b.struct._42;
+  value.struct._13 := a.struct._11 * b.struct._13 + a.struct._12 * b.struct._23 + a.struct._13 * b.struct._33 + a.struct._14 * b.struct._43;
+  value.struct._14 := a.struct._11 * b.struct._14 + a.struct._12 * b.struct._24 + a.struct._13 * b.struct._34 + a.struct._14 * b.struct._44;
 
-  struct._21 := a.struct._21 * b.struct._11 + a.struct._22 * b.struct._21 + a.struct._23 * b.struct._31 + a.struct._24 * b.struct._41;
-  struct._22 := a.struct._21 * b.struct._12 + a.struct._22 * b.struct._22 + a.struct._23 * b.struct._32 + a.struct._24 * b.struct._42;
-  struct._23 := a.struct._21 * b.struct._13 + a.struct._22 * b.struct._23 + a.struct._23 * b.struct._33 + a.struct._24 * b.struct._43;
-  struct._24 := a.struct._21 * b.struct._14 + a.struct._22 * b.struct._24 + a.struct._23 * b.struct._34 + a.struct._24 * b.struct._44;
+  value.struct._21 := a.struct._21 * b.struct._11 + a.struct._22 * b.struct._21 + a.struct._23 * b.struct._31 + a.struct._24 * b.struct._41;
+  value.struct._22 := a.struct._21 * b.struct._12 + a.struct._22 * b.struct._22 + a.struct._23 * b.struct._32 + a.struct._24 * b.struct._42;
+  value.struct._23 := a.struct._21 * b.struct._13 + a.struct._22 * b.struct._23 + a.struct._23 * b.struct._33 + a.struct._24 * b.struct._43;
+  value.struct._24 := a.struct._21 * b.struct._14 + a.struct._22 * b.struct._24 + a.struct._23 * b.struct._34 + a.struct._24 * b.struct._44;
 
-  struct._31 := a.struct._31 * b.struct._11 + a.struct._32 * b.struct._21 + a.struct._33 * b.struct._31 + a.struct._34 * b.struct._41;
-  struct._32 := a.struct._31 * b.struct._12 + a.struct._32 * b.struct._22 + a.struct._33 * b.struct._32 + a.struct._34 * b.struct._42;
-  struct._33 := a.struct._31 * b.struct._13 + a.struct._32 * b.struct._23 + a.struct._33 * b.struct._33 + a.struct._34 * b.struct._43;
-  struct._34 := a.struct._31 * b.struct._14 + a.struct._32 * b.struct._24 + a.struct._33 * b.struct._34 + a.struct._34 * b.struct._44;
+  value.struct._31 := a.struct._31 * b.struct._11 + a.struct._32 * b.struct._21 + a.struct._33 * b.struct._31 + a.struct._34 * b.struct._41;
+  value.struct._32 := a.struct._31 * b.struct._12 + a.struct._32 * b.struct._22 + a.struct._33 * b.struct._32 + a.struct._34 * b.struct._42;
+  value.struct._33 := a.struct._31 * b.struct._13 + a.struct._32 * b.struct._23 + a.struct._33 * b.struct._33 + a.struct._34 * b.struct._43;
+  value.struct._34 := a.struct._31 * b.struct._14 + a.struct._32 * b.struct._24 + a.struct._33 * b.struct._34 + a.struct._34 * b.struct._44;
 
-  struct._41 := a.struct._41 * b.struct._11 + a.struct._42 * b.struct._21 + a.struct._43 * b.struct._31 + a.struct._44 * b.struct._41;
-  struct._42 := a.struct._41 * b.struct._12 + a.struct._42 * b.struct._22 + a.struct._43 * b.struct._32 + a.struct._44 * b.struct._42;
-  struct._43 := a.struct._41 * b.struct._13 + a.struct._42 * b.struct._23 + a.struct._43 * b.struct._33 + a.struct._44 * b.struct._43;
-  struct._44 := a.struct._41 * b.struct._14 + a.struct._42 * b.struct._24 + a.struct._43 * b.struct._34 + a.struct._44 * b.struct._44;
+  value.struct._41 := a.struct._41 * b.struct._11 + a.struct._42 * b.struct._21 + a.struct._43 * b.struct._31 + a.struct._44 * b.struct._41;
+  value.struct._42 := a.struct._41 * b.struct._12 + a.struct._42 * b.struct._22 + a.struct._43 * b.struct._32 + a.struct._44 * b.struct._42;
+  value.struct._43 := a.struct._41 * b.struct._13 + a.struct._42 * b.struct._23 + a.struct._43 * b.struct._33 + a.struct._44 * b.struct._43;
+  value.struct._44 := a.struct._41 * b.struct._14 + a.struct._42 * b.struct._24 + a.struct._43 * b.struct._34 + a.struct._44 * b.struct._44;
 
 
-  m[0,0] := struct._11;
-  m[0,1] := struct._12;
-  m[0,2] := struct._13;
-  m[0,3] := struct._14;
-
-  m[1,0] := struct._21;
-  m[1,1] := struct._22;
-  m[1,2] := struct._23;
-  m[1,3] := struct._24;
-
-  m[2,0] := struct._31;
-  m[2,1] := struct._32;
-  m[2,2] := struct._33;
-  m[2,3] := struct._34;
-
-  m[3,0] := struct._41;
-  m[3,1] := struct._42;
-  m[3,2] := struct._43;
-  m[3,3] := struct._44;
-
+  Self := value;
 end;
 
 
@@ -1099,7 +1081,7 @@ function ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE;
 begin
   Result := D2D1ConvertColorSpace(sourceColorSpace,
                                   destinationColorSpace,
-                                  color);
+                                  @color);
 end;
 
 
@@ -1376,8 +1358,8 @@ begin
   if not Assigned(inputBitmap) then
     begin
       effect.SetInput(inputIndex,
-                      Nil);
-      Result := E_POINTER;
+                      Nil, TRUE);
+      Result := S_OK;
       Exit;
     end;
 
@@ -1387,9 +1369,9 @@ begin
   if SUCCEEDED(hr) then
     begin
       dpiCompensationEffect.SetInput(0,
-                                     inputBitmap);
-      inputBitmap.GetDpi(bitmapDpi.x,
-                         bitmapDpi.y);
+                                     inputBitmap, TRUE);
+      inputBitmap.GetDpi(@bitmapDpi.x,
+                         @bitmapDpi.y);
       hr := dpiCompensationEffect.SetValue(Ord(D2D1_DPICOMPENSATION_PROP_INPUT_DPI),
                                            D2D1_PROPERTY_TYPE_UNKNOWN,
                                            @bitmapDpi,

@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Interface specific HRESULT error codes for MPEG-2 tables.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -77,14 +77,10 @@ const
   // MPEG-2 base HRESULT code (must be at least 0x200)
   MPEG2_BASE = $200;
 
-  // Have to work around, because a macro can't be assigned to a const
-  // The macro MAKE_HRESULT is defined in WinError.pas
-  // HRESULT MAKE_HRESULT(sev: WORD;  fac: WORD;  code: WORD): HResult;
-  // So, what we do here is
-  // MAKE_S_ITFHRESULT( code )  MAKE_HRESULT( SEVERITY_ERROR, MPEG2_BASE, code )
-  //              SEVERITY_ERROR             MPEG2_BASE         code = 0
-  MAKE_S_ITFHRESULT = (0 shl 31) OR (MPEG2_BASE shl 16);
-  MAKE_E_ITFHRESULT = (1 shl 31) OR (MPEG2_BASE shl 16);
+  // Constant forms of MAKE_[SE]_ITF_HRESULT(MPEG2_BASE).
+  // FACILITY_ITF occupies bits 16..26; MPEG2_BASE is the low-word code.
+  MAKE_S_ITFHRESULT = (FACILITY_ITF shl 16) OR MPEG2_BASE;
+  MAKE_E_ITFHRESULT = ($80000000) OR (FACILITY_ITF shl 16) OR MPEG2_BASE;
 
 
   // MPEG-2 Success HRESULTs
@@ -140,14 +136,14 @@ function MAKE_S_ITF_HRESULT(x: Cardinal): HResult;
 begin
   Result := MAKE_HRESULT(SEVERITY_SUCCESS,
                          FACILITY_ITF,
-                         x);
+                         LongInt(x));
 end;
 
 function MAKE_E_ITF_HRESULT(x: Cardinal): HResult;
 begin
   Result := MAKE_HRESULT(SEVERITY_ERROR,
                          FACILITY_ITF,
-                         x);
+                         LongInt(x));
 end;
 
   // Implement Additional functions here.

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This file includes all the data structures defined for the IVPConfig
 // interface.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -83,24 +83,22 @@ type
   // enum to specify the criterion, which the vpmixer is supposed to use
   // in order to select the video format
   PAMVP_SELECT_FORMAT_BY = ^AMVP_SELECT_FORMAT_BY;
-  _AMVP_SELECT_FORMAT_BY = (
-    AMVP_DO_NOT_CARE          = 0,
-    AMVP_BEST_BANDWIDTH       = 1,
-    AMVP_INPUT_SAME_AS_OUTPUT = 2
-  );
+  _AMVP_SELECT_FORMAT_BY = (AMVP_DO_NOT_CARE = 0,
+                            AMVP_BEST_BANDWIDTH = 1,
+                            AMVP_INPUT_SAME_AS_OUTPUT = 2
+                           );
   {$EXTERNALSYM _AMVP_SELECT_FORMAT_BY}
   AMVP_SELECT_FORMAT_BY = _AMVP_SELECT_FORMAT_BY;
   {$EXTERNALSYM AMVP_SELECT_FORMAT_BY}
 
   // enum to specify the various mode
   PAMVP_MODE = ^AMVP_MODE;
-  _AMVP_MODE = (
-    AMVP_MODE_WEAVE             = 0,
-    AMVP_MODE_BOBINTERLEAVED    = 1,
-    AMVP_MODE_BOBNONINTERLEAVED = 2,
-    AMVP_MODE_SKIPEVEN          = 3,
-    AMVP_MODE_SKIPODD           = 4
-  );
+  _AMVP_MODE = (AMVP_MODE_WEAVE = 0,
+                AMVP_MODE_BOBINTERLEAVED = 1,
+                AMVP_MODE_BOBNONINTERLEAVED = 2,
+                AMVP_MODE_SKIPEVEN = 3,
+                AMVP_MODE_SKIPODD = 4
+               );
   {$EXTERNALSYM _AMVP_MODE}
   AMVP_MODE = _AMVP_MODE;
   {$EXTERNALSYM AMVP_MODE}

@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:   
 //  This version of XAudio2 is available only in Windows 8 or later.
 //  Use the XAudio2 headers and libraries from the DirectX SDK with
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:     
@@ -100,7 +100,7 @@
 //           
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -256,6 +256,7 @@ const
 type
   // XAPO registration properties, describes general XAPO characteristics, used with IXAPO.GetRegistrationProperties
 
+  PPXAPO_REGISTRATION_PROPERTIES = ^PXAPO_REGISTRATION_PROPERTIES;
   PXAPO_REGISTRATION_PROPERTIES = ^XAPO_REGISTRATION_PROPERTIES;
   XAPO_REGISTRATION_PROPERTIES = record
     clsid: CLSID;                                                         // COM class ID, used with CoCreate
@@ -271,6 +272,8 @@ type
   end;
   {$EXTERNALSYM XAPO_REGISTRATION_PROPERTIES}
 
+
+  PPWAVEFORMATEX = ^PWAVEFORMATEX;
 
   // LockForProcess buffer parameters:
   // Defines buffer parameters that remain constant while an XAPO is locked.
@@ -360,7 +363,7 @@ type
     // Memory allocation macro used by IXAPO methods that must allocate
     // arbitrary sized structures that are subsequently returned to the application.
     // Size, in bytes, of the memory block to be allocated.
-    function XAPOAlloc(size: DWord): Pointer;
+    function XAPOAlloc(size: SIZE_T): Pointer;
     {$EXTERNALSYM XAPOAlloc}
 
     // Procedure used to free memory allocated with the XAPOAlloc function.
@@ -392,7 +395,7 @@ type
     // RETURN VALUE:
     //  COM error code
     ////
-    function GetRegistrationProperties(out ppRegistrationProperties: XAPO_REGISTRATION_PROPERTIES): HRESULT; stdcall;
+    function GetRegistrationProperties(ppRegistrationProperties: PPXAPO_REGISTRATION_PROPERTIES): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -421,9 +424,9 @@ type
     //    XAPO_E_FORMAT_UNSUPPORTED - input/output configuration unsupported, ppSupportedInputFormat receives pointer to nearest input format supported if not NULL
     //    E_INVALIDARG              - either audio format invalid, ppSupportedInputFormat left untouched
     ////
-    function IsInputFormatSupported(pOutputFormat: WAVEFORMATEX;
-                                    pRequestedInputFormat: WAVEFORMATEX;
-                                    out ppSupportedInputFormat: WAVEFORMATEX): HRESULT; stdcall;
+    function IsInputFormatSupported(pOutputFormat: PWAVEFORMATEX;
+                                    pRequestedInputFormat: PWAVEFORMATEX;
+                                    ppSupportedInputFormat: PPWAVEFORMATEX): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -454,9 +457,9 @@ type
     //    XAPO_E_FORMAT_UNSUPPORTED - input/output configuration unsupported, ppSupportedOutputFormat receives pointer to nearest output format supported if not NULL
     //    E_INVALIDARG              - either audio format invalid, ppSupportedOutputFormat left untouched
     ////
-    function IsOutputFormatSupported(pInputFormat: WAVEFORMATEX;
-                                     pRequestedOutputFormat: WAVEFORMATEX;
-                                     out ppSupportedOutputFormat: WAVEFORMATEX): HRESULT; stdcall;
+    function IsOutputFormatSupported(pInputFormat: PWAVEFORMATEX;
+                                     pRequestedOutputFormat: PWAVEFORMATEX;
+                                     ppSupportedOutputFormat: PPWAVEFORMATEX): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -601,9 +604,9 @@ type
     //  void
     ////
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: PXAPO_PROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pOutputProcessParameters: PXAPO_PROCESS_BUFFER_PARAMETERS;
                       IsEnabled: BOOL); stdcall;
 
     ////
@@ -701,16 +704,8 @@ type
     // RETURN VALUE:
     //  void
     ////
-    procedure GetParameters(out pParameters: Pointer;
+    procedure GetParameters(pParameters: Pointer;
                             ParameterByteSize: UINT32); stdcall;
-
-
-    // Called by SetParameters() to allow for user-defined parameter validation.
-    // SetParameters validates that ParameterByteSize = m_uParameterBlockByteSize
-    // so the user may assume/assert ParameterByteSize = m_uParameterBlockByteSize.
-    // This method should not block as it is called from the realtime thread.
-    procedure OnSetParameters(pParameters: Pointer;
-                              ParameterByteSize: UINT32); stdcall;
 
   end;
   IID_IXAPOParameters = IXAPOParameters;
@@ -731,7 +726,7 @@ type
 implementation
 
 
-function XAPOAlloc(size: DWord): Pointer;
+function XAPOAlloc(size: SIZE_T): Pointer;
 begin
   Result:= CoTaskMemAlloc(size);
 end;

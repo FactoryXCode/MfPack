@@ -10,7 +10,7 @@
 // Release date: 30-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -101,22 +101,20 @@ type
   //  Events fired by the <video>/<audio>/<img> elements
   //  Extends MF_MEDIA_ENGINE_EVENT
   PMF_SHARING_ENGINE_EVENT = ^MF_SHARING_ENGINE_EVENT;
-  MF_SHARING_ENGINE_EVENT                         = (
-    MF_SHARING_ENGINE_EVENT_DISCONNECT            = 2000,
-    MF_SHARING_ENGINE_EVENT_LOCALRENDERINGSTARTED = 2001,
-    MF_SHARING_ENGINE_EVENT_LOCALRENDERINGENDED   = 2002,
-    MF_SHARING_ENGINE_EVENT_STOPPED               = 2003,
-    MF_SHARING_ENGINE_EVENT_ERROR                 = 2501
-  );
+  MF_SHARING_ENGINE_EVENT = (MF_SHARING_ENGINE_EVENT_DISCONNECT            = 2000,
+                             MF_SHARING_ENGINE_EVENT_LOCALRENDERINGSTARTED = 2001,
+                             MF_SHARING_ENGINE_EVENT_LOCALRENDERINGENDED   = 2002,
+                             MF_SHARING_ENGINE_EVENT_STOPPED               = 2003,
+                             MF_SHARING_ENGINE_EVENT_ERROR                 = 2501
+                            );
   {$EXTERNALSYM MF_SHARING_ENGINE_EVENT}
 
 
   //  Events fired by the <video>/<audio> elements
   //  Extends MF_MEDIA_ENGINE_EVENT
   PMF_MEDIA_SHARING_ENGINE_EVENT = ^MF_MEDIA_SHARING_ENGINE_EVENT;
-  MF_MEDIA_SHARING_ENGINE_EVENT              = (
-    MF_MEDIA_SHARING_ENGINE_EVENT_DISCONNECT = 2000
-  );
+  MF_MEDIA_SHARING_ENGINE_EVENT = (MF_MEDIA_SHARING_ENGINE_EVENT_DISCONNECT = 2000
+                                  );
   {$EXTERNALSYM MF_MEDIA_SHARING_ENGINE_EVENT}
 
 
@@ -225,9 +223,9 @@ const
   PLAYTO_SOURCE_NONE      = PLAYTO_SOURCE_CREATEFLAGS($0);
   {$EXTERNALSYM PLAYTO_SOURCE_NONE}
   PLAYTO_SOURCE_IMAGE     = PLAYTO_SOURCE_CREATEFLAGS($1);
-  {$EXTERNALSYM PLAYTO_SOURCE_AUDIO}
-  PLAYTO_SOURCE_AUDIO     = PLAYTO_SOURCE_CREATEFLAGS($2);
   {$EXTERNALSYM PLAYTO_SOURCE_IMAGE}
+  PLAYTO_SOURCE_AUDIO     = PLAYTO_SOURCE_CREATEFLAGS($2);
+  {$EXTERNALSYM PLAYTO_SOURCE_AUDIO}
   PLAYTO_SOURCE_VIDEO     = PLAYTO_SOURCE_CREATEFLAGS($4);
   {$EXTERNALSYM PLAYTO_SOURCE_VIDEO}
 // (WINVER >= _WIN32_WINNT_WINBLUE)
@@ -318,7 +316,7 @@ type
   IMFImageSharingEngineClassFactory = interface(IUnknown)
   ['{1FC55727-A7FB-4FC8-83AE-8AF024990AF1}']
 
-    function CreateInstanceFromUDN(const pUniqueDeviceName: BSTR;
+    function CreateInstanceFromUDN(pUniqueDeviceName: BSTR;
                                    out ppEngine: IMFImageSharingEngine): HRESULT; stdcall;
 
   end;
@@ -337,6 +335,8 @@ type
 
     function Connect(pFactory: IMFSharingEngineClassFactory): HRESULT; stdcall;
 
+    function Disconnect(): HRESULT; stdcall;
+
   end;
   IID_IPlayToControl = IPlayToControl;
   {$EXTERNALSYM IID_IPlayToControl}
@@ -350,7 +350,7 @@ type
   IPlayToControlWithCapabilities = interface(IPlayToControl)
   ['{AA9DD80F-C50A-4220-91C1-332287F82A34}']
 
-    function GetCapabilities(out pCapabilities: PPLAYTO_SOURCE_CREATEFLAGS): HRESULT; stdcall;
+    function GetCapabilities(out pCapabilities: PLAYTO_SOURCE_CREATEFLAGS): HRESULT; stdcall;
 
   end;
   IID_IPlayToControlWithCapabilities = IPlayToControlWithCapabilities;
@@ -362,12 +362,12 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPlayToSourceClassFactory);'}
   {$EXTERNALSYM IPlayToSourceClassFactory}
-  IPlayToSourceClassFactory = interface(IPlayToControl)
+  IPlayToSourceClassFactory = interface(IUnknown)
   ['{842B32A3-9B9B-4D1C-B3F3-49193248A554}']
 
-     function CreateInstance(dwFlags: DWORD;                               // see PLAYTO_SOURCE_CREATEFLAGS
-                             pControl: IPlayToControl;                     // element which controls the media
-                             out ppSource: IInspectable): HRESULT; stdcall;// implements Windows.Media.PlayTo.PlayToSource
+    function CreateInstance(dwFlags: DWORD;                               // see PLAYTO_SOURCE_CREATEFLAGS
+                            pControl: IPlayToControl;                     // element which controls the media
+                            out ppSource: IInspectable): HRESULT; stdcall;// implements Windows.Media.PlayTo.PlayToSource
 
   end;
   IID_IPlayToSourceClassFactory = IPlayToSourceClassFactory;

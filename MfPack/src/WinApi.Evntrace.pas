@@ -10,7 +10,7 @@
 // Release date: 24-11-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Public headers for event tracing control applications,
 // consumers and providers.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: LIBRARY CHANGES:
@@ -32,7 +32,7 @@
 //          See: const EvntraceLib declaration.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -250,8 +250,16 @@ const
 type
 
 {$IFNDEF _TRACEHANDLE_DEFINED}
+{$IFDEF UNICODE}
+  ETW_LPTSTR = PWideChar;
+{$ELSE}
+  ETW_LPTSTR = PAnsiChar;
+{$ENDIF}
+
   PTRACEHANDLE = ^ULONG64;
   TRACEHANDLE = ULONG64;
+  PTRACEGUID_HANDLE = ^TRACEGUID_HANDLE;
+  TRACEGUID_HANDLE = ULONG64;
   {$EXTERNALSYM TRACEHANDLE}
 {$DEFINE _TRACEHANDLE_DEFINED}
 {$ENDIF}
@@ -780,6 +788,10 @@ const
 
   // ControlTrace Codes
   // ==================
+
+  EVENT_CONTROL_CODE_DISABLE_PROVIDER = 0;
+  EVENT_CONTROL_CODE_ENABLE_PROVIDER = 1;
+  EVENT_CONTROL_CODE_CAPTURE_STATE = 2;
 
   EVENT_TRACE_CONTROL_QUERY               = 0;
   {$EXTERNALSYM EVENT_TRACE_CONTROL_QUERY}
@@ -1545,11 +1557,12 @@ type
   // Logger configuration and running statistics. This structure is used
   // by user-mode callers, such as PDH library
 
-  PEVENT_FILTER_DESCRIPTOR = ^_EVENT_FILTER_DESCRIPTOR;
-  EVENT_FILTER_DESCRIPTOR = _EVENT_FILTER_DESCRIPTOR;
+  PEVENT_FILTER_DESCRIPTOR = WinApi.Evntprov.PEVENT_FILTER_DESCRIPTOR;
+  EVENT_FILTER_DESCRIPTOR = WinApi.Evntprov.EVENT_FILTER_DESCRIPTOR;
   {$EXTERNALSYM EVENT_FILTER_DESCRIPTOR}
 
 
+  PPEVENT_TRACE_PROPERTIES = ^PEVENT_TRACE_PROPERTIES;
   PEVENT_TRACE_PROPERTIES = ^EVENT_TRACE_PROPERTIES;
   _EVENT_TRACE_PROPERTIES = record
     Wnode: WNODE_HEADER;
@@ -1585,6 +1598,23 @@ type
   {$EXTERNALSYM EVENT_TRACE_PROPERTIES}
 
 
+  TETW_TRACE_V2_CONTROL = record
+    V2Control: ULONG;
+    function GetVersionNumber: ULONG; inline;
+    procedure SetVersionNumber(Value: ULONG); inline;
+    property VersionNumber: ULONG read GetVersionNumber write SetVersionNumber;
+  end;
+
+  TETW_TRACE_V2_OPTIONS = record
+    V2Options: ULONG64;
+    function ReadBit(Index: Integer): ULONG; inline;    procedure WriteBit(Index: Integer;
+                       Value: ULONG); inline;
+    property Wow: ULONG index 0 read ReadBit write WriteBit;
+    property QpcDeltaTracking: ULONG index 1 read ReadBit write WriteBit;
+    property LargeMdlPages: ULONG index 2 read ReadBit write WriteBit;
+    property ExcludeKernelStack: ULONG index 3 read ReadBit write WriteBit;
+  end;
+
   PEVENT_TRACE_PROPERTIES_V2 = ^_EVENT_TRACE_PROPERTIES_V2;
   _EVENT_TRACE_PROPERTIES_V2 = record
     Wnode: WNODE_HEADER;                   // Always have WNODE_FLAG_VERSIONED_PROPERTIES.
@@ -1616,23 +1646,13 @@ type
     LoggerNameOffset    : ULONG;           // Offset to LoggerName
 
     // V2 data
-    DUMMYUNIONNAME2 : record
-    case Boolean of
-      True  : (VersionNumber: ULONG);     // Should be set to 2 for this version.
-      False : (V2Control: ULONG);
-    end;
+    DUMMYUNIONNAME2: TETW_TRACE_V2_CONTROL; // VersionNumber is the low eight bits.
 
     FilterDescCount : ULONG;                     // Number of filters
-    FilterDesc      : EVENT_FILTER_DESCRIPTOR;   // Only applicable for Private Loggers
+    FilterDesc      : PEVENT_FILTER_DESCRIPTOR;   // Only applicable for Private Loggers
 
-    DUMMYUNIONNAME3 : record
-    case Integer of
-      0  : (Wow: ULONG);
-      1  : (QpcDeltaTracking: ULONG);   // QPC delta tracking events are enabled.
-      2  : (V2Options: ULONG64);        // Logger was started by a WOW64 process (output only).
-      3  : (LargeMdlPages: ULONG);      // Buffers allocated via large MDL pages.
-      4  : (ExcludeKernelStack: ULONG); // Exclude kernel stack from stack walk.
-    end;
+    // Wow, QpcDeltaTracking, LargeMdlPages and ExcludeKernelStack are bits 0..3.
+    DUMMYUNIONNAME3: TETW_TRACE_V2_OPTIONS;
   end;
   {$EXTERNALSYM _EVENT_TRACE_PROPERTIES_V2}
   EVENT_TRACE_PROPERTIES_V2 = _EVENT_TRACE_PROPERTIES_V2;
@@ -1646,7 +1666,7 @@ type
 
   PTRACE_GUID_REGISTRATION = ^TRACE_GUID_REGISTRATION;
   _TRACE_GUID_REGISTRATION = record
-    Guid: TGUID;                 // Guid of data block being registered or updated.
+    Guid: PGUID;                 // Guid of data block being registered or updated.
     RegHandle: THandle;          // Guid Registration Handle is returned.
   end;
   {$EXTERNALSYM _TRACE_GUID_REGISTRATION}
@@ -1657,6 +1677,7 @@ type
   // Data consumer structures
   // ========================
 
+  PPTRACE_GUID_PROPERTIES = ^PTRACE_GUID_PROPERTIES;
   PTRACE_GUID_PROPERTIES = ^TRACE_GUID_PROPERTIES;
   _TRACE_GUID_PROPERTIES = record
     Guid: TGUID;
@@ -1813,9 +1834,11 @@ type
     ParentGuid: TGUID;          // Parent Guid;
     MofData: PVOID;             // Pointer to Variable Data
     MofLength: ULONG;           // Variable Datablock Length
+    DUMMYUNIONNAME: record
     case Boolean of
-        True  : (ClientContext: ULONG);
-        False : (BufferContext: ETW_BUFFER_CONTEXT);
+      True  : (ClientContext: ULONG);
+      False : (BufferContext: ETW_BUFFER_CONTEXT);
+    end;
   end;
   {$EXTERNALSYM _EVENT_TRACE}
   EVENT_TRACE = _EVENT_TRACE;
@@ -1828,20 +1851,20 @@ type
   PEVENT_TRACE_LOGFILEW = ^EVENT_TRACE_LOGFILEW;
   {$EXTERNALSYM PEVENT_TRACE_LOGFILEW}
 
-  PEVENT_TRACE_BUFFER_CALLBACKW = ^EVENT_TRACE_BUFFER_CALLBACKW;
   EVENT_TRACE_BUFFER_CALLBACKW = function (Logfile: PEVENT_TRACE_LOGFILEW): ULONG; stdcall;
+  PEVENT_TRACE_BUFFER_CALLBACKW = EVENT_TRACE_BUFFER_CALLBACKW;
   {$EXTERNALSYM EVENT_TRACE_BUFFER_CALLBACKW}
 
-  PEVENT_TRACE_BUFFER_CALLBACKA = ^EVENT_TRACE_BUFFER_CALLBACKA;
   EVENT_TRACE_BUFFER_CALLBACKA = function (Logfile: PEVENT_TRACE_LOGFILEA): ULONG; stdcall;
+  PEVENT_TRACE_BUFFER_CALLBACKA = EVENT_TRACE_BUFFER_CALLBACKA;
   {$EXTERNALSYM EVENT_TRACE_BUFFER_CALLBACKA}
 
-  PEVENT_CALLBACK = ^EVENT_CALLBACK;
   EVENT_CALLBACK = procedure (pEvent: PEVENT_TRACE); stdcall;
+  PEVENT_CALLBACK = EVENT_CALLBACK;
   {$EXTERNALSYM EVENT_CALLBACK}
 
-  PEVENT_RECORD_CALLBACK = ^EVENT_RECORD_CALLBACK;
   EVENT_RECORD_CALLBACK = procedure (EventRecord: PEVENT_RECORD); stdcall;
+  PEVENT_RECORD_CALLBACK = EVENT_RECORD_CALLBACK;
   {$EXTERNALSYM EVENT_RECORD_CALLBACK}
 
   PETW_BUFFER_HEADER = ^ETW_BUFFER_HEADER;
@@ -1868,10 +1891,10 @@ type
   {$EXTERNALSYM ETW_BUFFER_CALLBACK_INFORMATION}
 
 
-  PETW_BUFFER_CALLBACK = function (Buffer: ETW_BUFFER_HEADER;
-                                   BufferSize: ULONG;
-                                   ConsumerInfo: ETW_BUFFER_CALLBACK_INFORMATION;
-                                   {In_opt} CallbackContext: Pointer): Bool; stdcall;
+  PETW_BUFFER_CALLBACK = function(Buffer: PETW_BUFFER_HEADER;
+                                  BufferSize: ULONG;
+                                  ConsumerInfo: PETW_BUFFER_CALLBACK_INFORMATION;
+                                  CallbackContext: Pointer): BOOL; stdcall;
 
 
   PETW_PROCESS_TRACE_MODES = ^ETW_PROCESS_TRACE_MODES;
@@ -1895,8 +1918,8 @@ type
   end;
   {$EXTERNALSYM ETW_OPEN_TRACE_OPTIONS}
 
-  PETW_BUFFER_COMPLETION_CALLBACK = procedure(Buffer: ETW_BUFFER_HEADER;
-                                              {In_opt} CallbackContext: Pointer); stdcall;
+  PETW_BUFFER_COMPLETION_CALLBACK = procedure(Buffer: PETW_BUFFER_HEADER;
+                                              CallbackContext: Pointer); stdcall;
 
 
   // Prototype for service request callback. Data providers register with WMI
@@ -1905,9 +1928,9 @@ type
   // ========================================================================
 
    WMIDPREQUEST = function(RequestCode: WMIDPREQUESTCODE;
-                           const RequestContext: Pointer;
-                           var BufferSize: PULONG;
-                           var Buffer: Pointer): ULONG; stdcall;
+                          RequestContext: Pointer;
+                          BufferSize: PULONG;
+                          Buffer: Pointer): ULONG; stdcall;
    {$EXTERNALSYM WMIDPREQUEST}
 
   _EVENT_TRACE_LOGFILEW = record
@@ -1966,7 +1989,7 @@ type
 
     CurrentEvent: EVENT_TRACE;                      // Current Event from this stream.
     LogfileHeader: TRACE_LOGFILE_HEADER;            // logfile header structure
-    BufferCallback: PEVENT_TRACE_BUFFER_CALLBACKW;  // callback before each buffer is read
+    BufferCallback: PEVENT_TRACE_BUFFER_CALLBACKA;  // callback before each buffer is read
 
     // following variables are filled for BufferCallback.
     //
@@ -1996,7 +2019,7 @@ type
 
 
 
-{$IFDEF DEFINE_UNICODE}
+{$IFDEF UNICODE}
 
 type
 
@@ -2012,10 +2035,10 @@ type
   EVENT_TRACE_LOGFILE             = EVENT_TRACE_LOGFILEA;
   {$EXTERNALSYM EVENT_TRACE_LOGFILE}
 
-{$ENDIF DEFINE_UNICODE}
+{$ENDIF UNICODE}
 
 
-{$IFDEF DEFINE_UNICODE}
+{$IFDEF UNICODE}
 
 const
 
@@ -2037,7 +2060,7 @@ const
   EVENT_LOGGER_NAME               = EVENT_LOGGER_NAMEA;
   {$EXTERNALSYM EVENT_LOGGER_NAME}
 
-{$ENDIF DEFINE_UNICODE}
+{$ENDIF UNICODE}
 
 
   // Logger control APIs
@@ -2047,38 +2070,38 @@ const
   // Use the routine below to start an event trace session
   // =====================================================
 
-  function StartTrace(out TraceId: CONTROLTRACE_ID;
-                      InstanceName: LPTSTR;
-                      var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+  function StartTrace(TraceId: PCONTROLTRACE_ID;
+                      InstanceName: ETW_LPTSTR;
+                      Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StartTrace}
 
-  function StartTraceW(out TraceId: CONTROLTRACE_ID;
+  function StartTraceW(TraceId: PCONTROLTRACE_ID;
                        InstanceName: PWideChar;
-                       var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StartTraceW}
 
-  function StartTraceA(out TraceId: CONTROLTRACE_ID;
+  function StartTraceA(TraceId: PCONTROLTRACE_ID;
                        InstanceName: PAnsiChar;
-                       var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StartTraceA}
 
 
   // Use the routine below to stop an event trace session
   // ====================================================
 
-  function StopTrace(const TraceId: CONTROLTRACE_ID;
-                     InstanceName: LPTSTR;
-                     var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+  function StopTrace(TraceId: CONTROLTRACE_ID;
+                     InstanceName: ETW_LPTSTR;
+                     Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StopTrace}
 
-  function StopTraceW(const TraceId: CONTROLTRACE_ID;
+  function StopTraceW(TraceId: CONTROLTRACE_ID;
                       InstanceName: PWideChar;
-                      var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                      Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StopTraceW}
 
-  function StopTraceA(const TraceId: CONTROLTRACE_ID;
+  function StopTraceA(TraceId: CONTROLTRACE_ID;
                       InstanceName: PAnsiChar;
-                      var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                      Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM StopTraceA}
 
 
@@ -2086,19 +2109,19 @@ const
   // Use the routine below to query the properties of an event trace session
   // =======================================================================
 
-  function QueryTrace(const TraceId: CONTROLTRACE_ID;
-                      InstanceName: LPTSTR;
-                      var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+  function QueryTrace(TraceId: CONTROLTRACE_ID;
+                      InstanceName: ETW_LPTSTR;
+                      Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM QueryTrace}
 
-  function QueryTraceW(const TraceId: CONTROLTRACE_ID;
+  function QueryTraceW(TraceId: CONTROLTRACE_ID;
                        InstanceName: PWideChar;
-                       var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM QueryTraceW}
 
-  function QueryTraceA(const TraceId: CONTROLTRACE_ID;
+  function QueryTraceA(TraceId: CONTROLTRACE_ID;
                        InstanceName: PAnsiChar;
-                       var Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM QueryTraceA}
 
 
@@ -2106,18 +2129,18 @@ const
   // ============================================================================
 
   function UpdateTrace(TraceId: CONTROLTRACE_ID;
-                       InstanceName: LPTSTR;
-                       Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       InstanceName: ETW_LPTSTR;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM UpdateTrace}
 
   function UpdateTraceW(TraceId: CONTROLTRACE_ID;
                         InstanceName: PWideChar;
-                        Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                        Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM UpdateTraceW}
 
   function UpdateTraceA(TraceId: CONTROLTRACE_ID;
                         InstanceName: PAnsiChar;
-                        Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                        Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM UpdateTraceA}
 
 
@@ -2127,18 +2150,18 @@ const
   // =======================================================================
 
   function FlushTrace(TraceId: CONTROLTRACE_ID;
-                      InstanceName: LPTSTR;
-                      Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                      InstanceName: ETW_LPTSTR;
+                      Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM FlushTrace}
 
   function FlushTraceW(TraceId: CONTROLTRACE_ID;
                        InstanceName: PWideChar;
-                       Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM FlushTraceW}
 
   function FlushTraceA(TraceId: CONTROLTRACE_ID;
                        InstanceName: PAnsiChar;
-                       Properties: EVENT_TRACE_PROPERTIES): ULONG; stdcall;
+                       Properties: PEVENT_TRACE_PROPERTIES): ULONG; stdcall;
   {$EXTERNALSYM FlushTraceA}
 
 
@@ -2147,34 +2170,34 @@ const
   // =============================
 
   function ControlTrace(TraceId: CONTROLTRACE_ID;
-                        InstanceName: LPTSTR;
-                        var Properties: EVENT_TRACE_PROPERTIES;
+                        InstanceName: ETW_LPTSTR;
+                        Properties: PEVENT_TRACE_PROPERTIES;
                         ControlCode: ULONG): ULONG; stdcall;
   {$EXTERNALSYM ControlTrace}
 
   function ControlTraceW(TraceId: CONTROLTRACE_ID;
                          InstanceName: PWideChar;
-                         var Properties: EVENT_TRACE_PROPERTIES;
+                         Properties: PEVENT_TRACE_PROPERTIES;
                          ControlCode: ULONG): ULONG; stdcall;
   {$EXTERNALSYM ControlTraceW}
 
   function ControlTraceA(TraceId: CONTROLTRACE_ID;
                          InstanceName: PAnsiChar;
-                         var Properties: EVENT_TRACE_PROPERTIES;
+                         Properties: PEVENT_TRACE_PROPERTIES;
                          ControlCode: ULONG): ULONG; stdcall;
   {$EXTERNALSYM ControlTraceA}
 
-  function QueryAllTraces(var PropertyArray: PEVENT_TRACE_PROPERTIES;
+  function QueryAllTraces(PropertyArray: PPEVENT_TRACE_PROPERTIES;
                           PropertyArrayCount: ULONG;
                           LoggerCount: PULONG): ULONG; stdcall;
   {$EXTERNALSYM QueryAllTraces}
 
-  function QueryAllTracesW(var PropertyArray: PEVENT_TRACE_PROPERTIES;
+  function QueryAllTracesW(PropertyArray: PPEVENT_TRACE_PROPERTIES;
                            PropertyArrayCount: ULONG;
                            LoggerCount: PULONG): ULONG; stdcall;
   {$EXTERNALSYM QueryAllTracesW}
 
-  function QueryAllTracesA(var PropertyArray: PEVENT_TRACE_PROPERTIES;
+  function QueryAllTracesA(PropertyArray: PPEVENT_TRACE_PROPERTIES;
                            PropertyArrayCount: ULONG;
                            LoggerCount: PULONG): ULONG; stdcall;
   {$EXTERNALSYM QueryAllTracesA}
@@ -2193,15 +2216,15 @@ const
 
 //#if (WINVER >= _WIN32_WINNT_VISTA)
 
-  function EnableTraceEx(const ProviderId: TGUID;
-                         const SourceId: TGUID;
+  function EnableTraceEx(ProviderId: PGUID;
+                         SourceId: PGUID;
                          TraceId: CONTROLTRACE_ID;
                          IsEnabled: ULONG;
                          Level: UCHAR;
                          MatchAnyKeyword: ULONGLONG;
                          MatchAllKeyword: ULONGLONG;
                          EnableProperty: ULONG;
-                         EnableFilterDesc: EVENT_FILTER_DESCRIPTOR): ULONG; stdcall;
+                         EnableFilterDesc: PEVENT_FILTER_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EnableTraceEx}
 //#endif
 
@@ -2243,14 +2266,14 @@ type
 
 
 //#if (WINVER >= _WIN32_WINNT_WIN7)
-  function EnableTraceEx2(const TraceHandle: TRACEHANDLE;
-                          const ProviderId: TGUID;
+  function EnableTraceEx2(TraceId: CONTROLTRACE_ID;
+                          ProviderId: PGUID;
                           ControlCode: ULONG;
                           Level: UCHAR;
                           MatchAnyKeyword: ULONGLONG;
                           MatchAllKeyword: ULONGLONG;
                           Timeout: ULONG;
-                          EnableParameters: PENABLE_TRACE_PARAMETERS = Nil): ULONG; stdcall;
+                          EnableParameters: PENABLE_TRACE_PARAMETERS): ULONG; stdcall;
   {$EXTERNALSYM EnableTraceEx2}
 //#endif
 
@@ -2615,9 +2638,9 @@ type
   function EnumerateTraceGuidsEx(TraceQueryInfoClass: TRACE_QUERY_INFO_CLASS;
                                  InBuffer: Pointer;
                                  InBufferSize: ULONG;
-                                 out OutBuffer: Pointer;
+                                 OutBuffer: Pointer;
                                  OutBufferSize: ULONG;
-                                 out ReturnLength: ULONG): ULONG; stdcall;
+                                 ReturnLength: PULONG): ULONG; stdcall;
   {$EXTERNALSYM EnumerateTraceGuidsEx}
 //#endif
 
@@ -2685,9 +2708,9 @@ type
 //#if (WINVER >= _WIN32_WINNT_WIN8)
   function TraceQueryInformation(TraceId: CONTROLTRACE_ID;
                                  InformationClass: TRACE_INFO_CLASS;
-                                 out TraceInformation: Pointer;
+                                 TraceInformation: Pointer;
                                  InformationLength: ULONG;
-                                 out ReturnLength: ULONG): ULONG; stdcall;
+                                 ReturnLength: PULONG): ULONG; stdcall;
   {$EXTERNALSYM TraceQueryInformation}
 //#endif
 
@@ -2696,21 +2719,21 @@ type
   // ==================
 
   function CreateTraceInstanceId(RegHandle: THandle;
-                                 var InstInfo: EVENT_INSTANCE_INFO): ULONG; stdcall;
+                                 InstInfo: PEVENT_INSTANCE_INFO): ULONG; stdcall;
   {$EXTERNALSYM CreateTraceInstanceId}
 
 
   // Use the routine below to generate and record an event trace
   //============================================================
 
-  function TraceEvent(TraceHandle: TRACEHANDLE;
-                      EventTrace: EVENT_TRACE_HEADER): ULONG; stdcall;
+  function TraceEvent(TraceHandle: TRACELOGGER_HANDLE;
+                      EventTrace: PEVENT_TRACE_HEADER): ULONG; stdcall;
   {$EXTERNALSYM TraceEvent}
 
-  function TraceEventInstance(TraceHandle: TRACEHANDLE;
-                              EventTrace: EVENT_INSTANCE_HEADER;
-                              InstInfo: EVENT_INSTANCE_INFO;
-                              ParentInstInfo: EVENT_INSTANCE_INFO): ULONG; stdcall;
+  function TraceEventInstance(TraceHandle: TRACELOGGER_HANDLE;
+                              EventTrace: PEVENT_INSTANCE_HEADER;
+                              InstInfo: PEVENT_INSTANCE_INFO;
+                              ParentInstInfo: PEVENT_INSTANCE_INFO): ULONG; stdcall;
   {$EXTERNALSYM TraceEventInstance}
 
 
@@ -2720,50 +2743,50 @@ type
 
   function RegisterTraceGuids(RequestAddress: WMIDPREQUEST;
                               RequestContext: Pointer;
-                              ControlGuid: TGUID;
+                              ControlGuid: PGUID;
                               GuidCount: ULONG;
-                              TraceGuidReg: TRACE_GUID_REGISTRATION;
-                              MofImagePath: LPCSTR;
-                              MofResourceName: LPCSTR;
-                              out RegistrationHandle: TRACEHANDLE): ULONG; stdcall;
+                              TraceGuidReg: PTRACE_GUID_REGISTRATION;
+                              MofImagePath: ETW_LPTSTR;
+                              MofResourceName: ETW_LPTSTR;
+                              RegistrationHandle: PTRACEGUID_HANDLE): ULONG; stdcall;
   {$EXTERNALSYM RegisterTraceGuids}
 
 
   function RegisterTraceGuidsW(RequestAddress: WMIDPREQUEST;
                                RequestContext: Pointer;
-                               const ControlGuid: TGUID;
+                               ControlGuid: PGUID;
                                GuidCount: ULONG;
-                               TraceGuidReg: TRACE_GUID_REGISTRATION;
+                               TraceGuidReg: PTRACE_GUID_REGISTRATION;
                                MofImagePath: PWideChar;
                                MofResourceName: PWideChar;
-                               out RegistrationHandle: TRACEHANDLE): ULONG; stdcall;
+                               RegistrationHandle: PTRACEGUID_HANDLE): ULONG; stdcall;
   {$EXTERNALSYM RegisterTraceGuidsW}
 
 
   function RegisterTraceGuidsA(RequestAddress: WMIDPREQUEST;
                                RequestContext: Pointer;
-                               const ControlGuid: TGUID;
+                               ControlGuid: PGUID;
                                GuidCount: ULONG;
-                               TraceGuidReg: TRACE_GUID_REGISTRATION;
+                               TraceGuidReg: PTRACE_GUID_REGISTRATION;
                                MofImagePath: PAnsiChar;
                                MofResourceName: PAnsiChar;
-                               out RegistrationHandle: TRACEHANDLE): ULONG; stdcall;
+                               RegistrationHandle: PTRACEGUID_HANDLE): ULONG; stdcall;
   {$EXTERNALSYM RegisterTraceGuidsA}
 
 
 //#if (WINVER >= _WIN32_WINNT_WINXP)
-  function EnumerateTraceGuids(var GuidPropertiesArray: PTRACE_GUID_PROPERTIES;
+  function EnumerateTraceGuids(GuidPropertiesArray: PPTRACE_GUID_PROPERTIES;
                                PropertyArrayCount: ULONG;
-                               out GuidCount: ULONG): ULONG; stdcall;
+                               GuidCount: PULONG): ULONG; stdcall;
   {$EXTERNALSYM EnumerateTraceGuids}
 //#endif
 
 
 
-  function UnregisterTraceGuids(RegistrationHandle: TRACEHANDLE): ULONG; stdcall;
+  function UnregisterTraceGuids(RegistrationHandle: TRACEGUID_HANDLE): ULONG; stdcall;
   {$EXTERNALSYM UnregisterTraceGuids}
 
-  function GetTraceLoggerHandle (Buffer: Pointer): TRACEHANDLE stdcall;
+  function GetTraceLoggerHandle(Buffer: Pointer): TRACELOGGER_HANDLE; stdcall;
   {$EXTERNALSYM GetTraceLoggerHandle}
 
   function GetTraceEnableLevel(TraceHandle: TRACELOGGER_HANDLE): UCHAR; stdcall;
@@ -2778,12 +2801,12 @@ type
   // ===================================================
 
   PETW_PROCESS_HANDLE_INFO_TYPE = ^ETW_PROCESS_HANDLE_INFO_TYPE;
-  _ETW_PROCESS_HANDLE_INFO_TYPE  = (
-    EtwQueryPartitionInformation = 1,
-    EtwQueryProcessHandleInfoMax = 2,
-    EtwQueryLastDroppedTimes     = 3,
-    EtwQueryLogFileHeader        = 4
-    );
+  _ETW_PROCESS_HANDLE_INFO_TYPE = (EtwQueryPartitionInformation = 1,
+                                   EtwQueryPartitionInformationV2 = 2,
+                                   EtwQueryLastDroppedTimes = 3,
+                                   EtwQueryLogFileHeader = 4,
+                                   EtwQueryProcessHandleInfoMax = 5
+                                  );
   {$EXTERNALSYM _ETW_PROCESS_HANDLE_INFO_TYPE}
   ETW_PROCESS_HANDLE_INFO_TYPE = _ETW_PROCESS_HANDLE_INFO_TYPE;
   {$EXTERNALSYM ETW_PROCESS_HANDLE_INFO_TYPE}
@@ -2792,7 +2815,7 @@ type
   _ETW_TRACE_PARTITION_INFORMATION = record
     PartitionId: TGUID;
     ParentId: TGUID;
-    QpcOffsetFromRoot: ULONG64;
+    QpcOffsetFromRoot: LONG64;
     PartitionType: ULONG;
   end;
   {$EXTERNALSYM _ETW_TRACE_PARTITION_INFORMATION}
@@ -2811,13 +2834,13 @@ type
   {$EXTERNALSYM ETW_TRACE_PARTITION_INFORMATION_V2}
 
 
-  function QueryTraceProcessingHandle(const ProcessingHandle: TRACEHANDLE;
+  function QueryTraceProcessingHandle(ProcessingHandle: PROCESSTRACE_HANDLE;
                                       InformationClass: ETW_PROCESS_HANDLE_INFO_TYPE;
                                       InBuffer: Pointer;
                                       InBufferSize: ULONG;
-                                      out OutBuffer: Pointer;
+                                      OutBuffer: Pointer;
                                       OutBufferSize: ULONG;
-                                      var ReturnLength: ULONG): ULONG; stdcall;
+                                      ReturnLength: PULONG): ULONG; stdcall;
   {$EXTERNALSYM QueryTraceProcessingHandle}
 
 
@@ -2825,73 +2848,82 @@ type
   // ============================================
 
 
-  function OpenTraceW(var Logfile: PEVENT_TRACE_LOGFILEW): TRACEHANDLE; stdcall;
+  function OpenTrace(Logfile: PEVENT_TRACE_LOGFILE): PROCESSTRACE_HANDLE; stdcall;
+
+  function OpenTraceA(Logfile: PEVENT_TRACE_LOGFILEA): PROCESSTRACE_HANDLE; stdcall;
+
+  function OpenTraceW(Logfile: PEVENT_TRACE_LOGFILEW): PROCESSTRACE_HANDLE; stdcall;
   {$EXTERNALSYM OpenTraceW}
 
-  function ProcessTrace(HandleArray: PTRACEHANDLE;
+  function ProcessTrace(HandleArray: PPROCESSTRACE_HANDLE;
                         HandleCount: ULONG;
-                        StartTime: FILETIME;
-                        EndTime: FILETIME): ULONG; stdcall;
+                        StartTime: LPFILETIME;
+                        EndTime: LPFILETIME): ULONG; stdcall;
   {$EXTERNALSYM ProcessTrace}
 
-  function CloseTrace(_TraceHandle: TRACEHANDLE): ULONG; stdcall;
+  function CloseTrace(TraceHandle: PROCESSTRACE_HANDLE): ULONG; stdcall;
   {$EXTERNALSYM CloseTrace}
 
 
-  function OpenTraceFromBufferStream(Options: ETW_OPEN_TRACE_OPTIONS;
+  {_In_opt_}
+  function OpenTraceFromBufferStream(Options: PETW_OPEN_TRACE_OPTIONS;
                                      BufferCompletionCallback: PETW_BUFFER_COMPLETION_CALLBACK;
-                                     {_In_opt_} BufferCompletionContext: Pointer): TRACEHANDLE; stdcall;
+                                     BufferCompletionContext: Pointer): PROCESSTRACE_HANDLE; stdcall;
   {$EXTERNALSYM OpenTraceFromBufferStream}
 
+  {_Out_opt_}
   function OpenTraceFromRealTimeLogger(LoggerName: PWideChar;
-                                       Options: ETW_OPEN_TRACE_OPTIONS;
-                                       {_Out_opt_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+                                       Options: PETW_OPEN_TRACE_OPTIONS;
+                                       LogFileHeader: PTRACE_LOGFILE_HEADER): PROCESSTRACE_HANDLE; stdcall;
   {$EXTERNALSYM OpenTraceFromRealTimeLogger}
 
+  {_In_opt_}
+  {_Out_opt_}
   function OpenTraceFromRealTimeLoggerWithAllocationOptions(LoggerName: PWideChar;
-                                                            Options: ETW_OPEN_TRACE_OPTIONS;
+                                                            Options: PETW_OPEN_TRACE_OPTIONS;
                                                             AllocationSize: ULONG_PTR;
-                                                            {_In_opt_} MemoryPartitionHandle: THandle;
-                                                            {_Out_opt_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+                                                            MemoryPartitionHandle: THandle;
+                                                            LogFileHeader: PTRACE_LOGFILE_HEADER): PROCESSTRACE_HANDLE; stdcall;
   {$EXTERNALSYM OpenTraceFromRealTimeLoggerWithAllocationOptions}
 
+  {_Out_otp_}
   function OpenTraceFromFile(LogFileName: PWideChar;
-                             Options: ETW_OPEN_TRACE_OPTIONS;
-                             {_Out_otp_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+                             Options: PETW_OPEN_TRACE_OPTIONS;
+                             LogFileHeader: PTRACE_LOGFILE_HEADER): PROCESSTRACE_HANDLE; stdcall;
   {$EXTERNALSYM OpenTraceFromFile}
 
-  function ProcessTraceBufferIncrementReference(const TraceHandle: TRACELOGGER_HANDLE;
-                                                Buffer: ETW_BUFFER_HEADER): ULONG; stdcall;
+  function ProcessTraceBufferIncrementReference(TraceHandle: PROCESSTRACE_HANDLE;
+                                                Buffer: PETW_BUFFER_HEADER): ULONG; stdcall;
   {$EXTERNALSYM ProcessTraceBufferIncrementReference}
 
-  function ProcessTraceBufferDecrementReference(const Buffer: ETW_BUFFER_HEADER): ULONG; stdcall;
+  function ProcessTraceBufferDecrementReference(Buffer: PETW_BUFFER_HEADER): ULONG; stdcall;
   {$EXTERNALSYM ProcessTraceBufferDecrementReference}
 
-  function ProcessTraceAddBufferToBufferStream(const TraceHandle: TRACELOGGER_HANDLE;
-                                               Buffer: ETW_BUFFER_HEADER;
+  function ProcessTraceAddBufferToBufferStream(TraceHandle: PROCESSTRACE_HANDLE;
+                                               Buffer: PETW_BUFFER_HEADER;
                                                BufferSize: ULONG): ULONG; stdcall;
   {$EXTERNALSYM ProcessTraceAddBufferToBufferStream}
 
-  function SetTraceCallback(const pGuid: PGUID;
-                            EventCallback: EVENT_CALLBACK): ULONG; stdcall;
+  function SetTraceCallback(pGuid: PGUID;
+                            EventCallback: PEVENT_CALLBACK): ULONG; stdcall;
   {$EXTERNALSYM SetTraceCallback}
 
-  function RemoveTraceCallback(const pGuid: TGUID): ULONG; stdcall;
+  function RemoveTraceCallback(pGuid: PGUID): ULONG; stdcall;
   {$EXTERNALSYM RemoveTraceCallback}
 
 
   // The routines for tracing Messages follow
   // ========================================
 
-  function TraceMessage(LoggerHandle: TRACEHANDLE;
+  function TraceMessage(LoggerHandle: TRACELOGGER_HANDLE;
                         MessageFlags: ULONG;
-                        const MessageGuid: TGUID;
-                        MessageNumber: USHORT): ULONG; stdcall;
+                        MessageGuid: PGUID;
+                        MessageNumber: USHORT): ULONG; cdecl; varargs;
   {$EXTERNALSYM TraceMessage}
 
-  function TraceMessageVa(LoggerHandle: TRACEHANDLE;
+  function TraceMessageVa(LoggerHandle: TRACELOGGER_HANDLE;
                           MessageFlags: ULONG;
-                          const MessageGuid: TGUID;
+                          MessageGuid: PGUID;
                           MessageNumber: USHORT;
                           MessageArgList: va_list): ULONG; cdecl;
   {$EXTERNALSYM TraceMessageVa}
@@ -2910,34 +2942,83 @@ const
 
 implementation
 
+function TETW_TRACE_V2_CONTROL.GetVersionNumber: ULONG;
+begin
+  Result := V2Control and $FF;
+end;
+
+procedure TETW_TRACE_V2_CONTROL.SetVersionNumber(Value: ULONG);
+begin
+  V2Control := (V2Control and $FFFFFF00) or (Value and $FF);
+end;
+
+function TETW_TRACE_V2_OPTIONS.ReadBit(Index: Integer): ULONG;
+begin
+  Result := (V2Options shr Index) and 1;
+end;procedure TETW_TRACE_V2_OPTIONS.WriteBit(Index: Integer;
+                                         Value: ULONG);
+begin
+  V2Options := (V2Options and not (UInt64(1) shl Index)) or (UInt64(Value and 1) shl Index);
+end;
+
+
 const
 
   // Sechost.dll on Windows 8.1 and Windows Server 2012 R2;
-  EvntraceLib = 'Sechost.dll';
+  EvntraceLib = 'Advapi32.dll';
+  EvntraceBufferLib = 'Sechost.dll';
   // Advapi32.dll on Windows 8, Windows Server 2012, Windows 7,
   // Windows Server 2008 R2, Windows Server 2008, Windows Vista and Windows XP
   // EvntraceLib = 'Advapi32.dll';
 
 {$WARN SYMBOL_PLATFORM OFF}
-  function StartTrace; external EvntraceLib name 'StartTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function StartTrace; external EvntraceLib name 'StartTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function StartTrace; external EvntraceLib name 'StartTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function StartTraceW; external EvntraceLib name 'StartTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function StartTraceA; external EvntraceLib name 'StartTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function StopTrace; external EvntraceLib name 'StopTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function StopTrace; external EvntraceLib name 'StopTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function StopTrace; external EvntraceLib name 'StopTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function StopTraceW; external EvntraceLib name 'StopTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function StopTraceA; external EvntraceLib name 'StopTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function QueryTrace; external EvntraceLib name 'QueryTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function QueryTrace; external EvntraceLib name 'QueryTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function QueryTrace; external EvntraceLib name 'QueryTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function QueryTraceW; external EvntraceLib name 'QueryTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function QueryTraceA; external EvntraceLib name 'QueryTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function UpdateTrace; external EvntraceLib name 'UpdateTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function UpdateTrace; external EvntraceLib name 'UpdateTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function UpdateTrace; external EvntraceLib name 'UpdateTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function UpdateTraceW; external EvntraceLib name 'UpdateTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function UpdateTraceA; external EvntraceLib name 'UpdateTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function FlushTrace; external EvntraceLib name 'FlushTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function FlushTrace; external EvntraceLib name 'FlushTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function FlushTrace; external EvntraceLib name 'FlushTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function FlushTraceW; external EvntraceLib name 'FlushTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function FlushTraceA; external EvntraceLib name 'FlushTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function ControlTrace; external EvntraceLib name 'ControlTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function ControlTrace; external EvntraceLib name 'ControlTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function ControlTrace; external EvntraceLib name 'ControlTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function ControlTraceW; external EvntraceLib name 'ControlTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function ControlTraceA; external EvntraceLib name 'ControlTraceA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function QueryAllTraces; external EvntraceLib name 'QueryAllTraces' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function QueryAllTraces; external EvntraceLib name 'QueryAllTracesW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function QueryAllTraces; external EvntraceLib name 'QueryAllTracesA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function QueryAllTracesW; external EvntraceLib name 'QueryAllTracesW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function QueryAllTracesA; external EvntraceLib name 'QueryAllTracesA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function EnableTrace; external EvntraceLib name 'EnableTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -2952,7 +3033,11 @@ const
   function CreateTraceInstanceId; external EvntraceLib name 'CreateTraceInstanceId' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function TraceEvent; external EvntraceLib name 'TraceEvent' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function TraceEventInstance; external EvntraceLib name 'TraceEventInstance' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function RegisterTraceGuids; external EvntraceLib name 'RegisterTraceGuids' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  {$IFDEF UNICODE}
+  function RegisterTraceGuids; external EvntraceLib name 'RegisterTraceGuidsW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function RegisterTraceGuids; external EvntraceLib name 'RegisterTraceGuidsA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
   function RegisterTraceGuidsW; external EvntraceLib name 'RegisterTraceGuidsW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function RegisterTraceGuidsA; external EvntraceLib name 'RegisterTraceGuidsA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function EnumerateTraceGuids; external EvntraceLib name 'EnumerateTraceGuids' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -2960,16 +3045,22 @@ const
   function GetTraceLoggerHandle; external EvntraceLib name 'GetTraceLoggerHandle' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function GetTraceEnableLevel; external EvntraceLib name 'GetTraceEnableLevel' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function GetTraceEnableFlags; external EvntraceLib name 'GetTraceEnableFlags' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+{$IFDEF UNICODE}
+  function OpenTrace; external EvntraceLib name 'OpenTraceW' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ELSE}
+  function OpenTrace; external EvntraceLib name 'OpenTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
+{$ENDIF}
+  function OpenTraceA; external EvntraceLib name 'OpenTraceA' {$IFNDEF FPC}{$IF COMPILERVERSION > 20.0} delayed {$ENDIF}{$ENDIF};
   function OpenTraceW; external EvntraceLib name 'OpenTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function ProcessTrace; external EvntraceLib name 'ProcessTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function CloseTrace; external EvntraceLib name 'CloseTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function OpenTraceFromBufferStream; external EvntraceLib name 'OpenTraceFromBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function OpenTraceFromRealTimeLogger; external EvntraceLib name 'OpenTraceFromRealTimeLogger' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function OpenTraceFromRealTimeLoggerWithAllocationOptions; external EvntraceLib name 'OpenTraceFromRealTimeLoggerWithAllocationOptions' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function OpenTraceFromFile; external EvntraceLib name 'OpenTraceFromFile' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function ProcessTraceBufferIncrementReference; external EvntraceLib name 'ProcessTraceBufferIncrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function ProcessTraceBufferDecrementReference; external EvntraceLib name 'ProcessTraceBufferDecrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function ProcessTraceAddBufferToBufferStream; external EvntraceLib name 'ProcessTraceAddBufferToBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromBufferStream; external EvntraceBufferLib name 'OpenTraceFromBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromRealTimeLogger; external EvntraceBufferLib name 'OpenTraceFromRealTimeLogger' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromRealTimeLoggerWithAllocationOptions; external EvntraceBufferLib name 'OpenTraceFromRealTimeLoggerWithAllocationOptions' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromFile; external EvntraceBufferLib name 'OpenTraceFromFile' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceBufferIncrementReference; external EvntraceBufferLib name 'ProcessTraceBufferIncrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceBufferDecrementReference; external EvntraceBufferLib name 'ProcessTraceBufferDecrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceAddBufferToBufferStream; external EvntraceBufferLib name 'ProcessTraceAddBufferToBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function SetTraceCallback; external EvntraceLib name 'SetTraceCallback' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function RemoveTraceCallback ; external EvntraceLib name 'RemoveTraceCallback' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}

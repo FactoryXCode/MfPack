@@ -10,7 +10,7 @@
 // Release date: 15-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Commonm Include file for Multimedia API's
 //              Version 4.00
 //              For more information, see: https://docs.microsoft.com/en-us/windows/win32/api/mmsyscom/
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -158,7 +158,7 @@ const
 type
   PMMTIME = ^mmtime_tag;
   {$EXTERNALSYM PMMTIME}
-  mmtime_tag = record
+  mmtime_tag = packed record
     case wType: UINT of        { indicates the contents of the variant record }
 
      TIME_MS:      (ms: DWORD);      //* milliseconds */
@@ -418,11 +418,11 @@ type
                           uMsg: UINT;
                           dwUser: DWORD_PTR;
                           dw1: DWORD_PTR;
-                          dw2: DWORD_PTR);
+                          dw2: DWORD_PTR); stdcall;
   {$EXTERNALSYM DRVCALLBACK}
-  LPDRVCALLBACK = ^DRVCALLBACK;
+  LPDRVCALLBACK = DRVCALLBACK;
   {$EXTERNALSYM LPDRVCALLBACK}
-  PDRVCALLBACK = ^DRVCALLBACK;
+  PDRVCALLBACK = DRVCALLBACK;
   {$EXTERNALSYM PDRVCALLBACK}
 
   // Additional Prototypes for ALL Interfaces

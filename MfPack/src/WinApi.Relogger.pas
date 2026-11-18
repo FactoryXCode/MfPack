@@ -10,7 +10,7 @@
 // Release date: 24-12-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -81,7 +81,15 @@ uses
 
   {$I 'WinApiTypes.inc'}
 
+const
+
+  CLSID_CTraceRelogger: TGUID = '{7B40792D-05FF-44C4-9058-F440C71F17D4}';
+  CLSID_TraceRelogger: TGUID = '{7B40792D-05FF-44C4-9058-F440C71F17D4}';
+
 type
+
+  PRELOGSTREAM_ID = ^RELOGSTREAM_ID;
+  RELOGSTREAM_ID = ULONG64;
 
   // Forward Interface Declarations
 
@@ -184,16 +192,16 @@ type
   ITraceEvent = interface(IUnknown)
 	['{8CC97F40-9028-4FF3-9B62-7D1F79CA7BCB}']
 
-    function Clone(var NewEvent: ITraceEvent): HResult; stdcall;
+    function Clone(out NewEvent: ITraceEvent): HResult; stdcall;
 
     function GetUserContext(UserContext: PPointer): HResult; stdcall;
 
-    function GetEventRecord(var EventRecord: PEVENT_RECORD): HResult; stdcall;
+    function GetEventRecord(out EventRecord: PEVENT_RECORD): HResult; stdcall;
 
     function SetPayload(Payload: PByte;
                         PayloadSize: ULONG): HResult; stdcall;
 
-    function SetEventDescriptor(EventDescriptor: EVENT_DESCRIPTOR): HResult; stdcall;
+    function SetEventDescriptor(EventDescriptor: PCEVENT_DESCRIPTOR): HResult; stdcall;
 
     function SetProcessId(ProcessId: ULONG): HResult; stdcall;
 
@@ -204,11 +212,11 @@ type
     function SetThreadTimes(KernelTime: ULONG;
                             UserTime: ULONG): HResult; stdcall;
 
-    function SetActivityId(ActivityId: TGUID): HResult; stdcall;
+    function SetActivityId(ActivityId: PGUID): HResult; stdcall;
 
-    function SetTimeStamp(var TimeStamp: LARGE_INTEGER): HResult; stdcall;
+    function SetTimeStamp(TimeStamp: PLARGE_INTEGER): HResult; stdcall;
 
-    function SetProviderId(ProviderId: TGUID): HResult; stdcall;
+    function SetProviderId(ProviderId: PGUID): HResult; stdcall;
 
   end;
   IID_ITraceEvent = ITraceEvent;
@@ -224,13 +232,13 @@ type
   ITraceEventCallback = interface(IUnknown)
 	['{3ED25501-593F-43E9-8F38-3AB46F5A4A52}']
 
-    function OnBeginProcessTrace(var HeaderEvent: ITraceEvent;
-                                 var Relogger: ITraceRelogger): HResult; stdcall;
+    function OnBeginProcessTrace(HeaderEvent: ITraceEvent;
+                                 Relogger: ITraceRelogger): HResult; stdcall;
 
-    function OnFinalizeProcessTrace(var Relogger: ITraceRelogger): HResult; stdcall;
+    function OnFinalizeProcessTrace(Relogger: ITraceRelogger): HResult; stdcall;
 
-    function OnEvent(var Event: ITraceEvent;
-                     var Relogger: ITraceRelogger): HResult; stdcall;
+    function OnEvent(Event: ITraceEvent;
+                     Relogger: ITraceRelogger): HResult; stdcall;
 
   end;
   IID_ITraceEventCallback = ITraceEventCallback;
@@ -248,19 +256,19 @@ type
 
     function AddLogfileTraceStream(LogfileName: BSTR;
                                    UserContext: Pointer;
-                                   var TraceHandle: TRACEHANDLE): HResult; stdcall;
+                                   out TraceStreamId: RELOGSTREAM_ID): HResult; stdcall;
 
     function AddRealtimeTraceStream(LoggerName: BSTR;
                                     UserContext: Pointer;
-                                    var TraceHandle: TRACEHANDLE): HResult; stdcall;
+                                    out TraceStreamId: RELOGSTREAM_ID): HResult; stdcall;
 
-    function RegisterCallback(var Callback: ITraceEventCallback): HResult; stdcall;
+    function RegisterCallback(Callback: ITraceEventCallback): HResult; stdcall;
 
-    function Inject(var Event: ITraceEvent): HResult; stdcall;
+    function Inject(Event: ITraceEvent): HResult; stdcall;
 
-    function CreateEventInstance(TraceHandle: TRACEHANDLE;
+    function CreateEventInstance(TraceStreamId: RELOGSTREAM_ID;
                                  Flags: ULONG;
-                                 var Event: ITraceEvent): HResult; stdcall;
+                                 out Event: ITraceEvent): HResult; stdcall;
 
     function ProcessTrace(): HResult; stdcall;
 

@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Definitions for kernel mode code OPM communication.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Minimum supported OS: Windows 10, version 2004 (10.0; Build 19041)
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -124,12 +124,12 @@ type
     // A reference to an array of key IDs known to the session to the current status
     // of the associated key. Each entry MUST have a unique key ID.
     // https://www.w3.org/TR/2017/REC-encrypted-media-20170918/#dom-mediakeysession-keystatuses
-    function GetKeyStatuses(out keyStatuses: MFMediaKeyStatus;
+    function GetKeyStatuses(out keyStatuses: PMFMediaKeyStatus;
                             out numKeyStatuses: UINT): HResult; stdcall;
 
     // Loads the data stored for the specified session into this object.
     // https://www.w3.org/TR/2017/REC-encrypted-media-20170918/#dom-mediakeysession-load
-    function Load(sessionId: LPWSTR;
+    function Load(sessionId: LPCWSTR;
                   out loaded: BOOL): HResult; stdcall;
 
     // Generates a license request based on the initData. A message of type "license-request" or
@@ -138,7 +138,7 @@ type
     // Structure for init data is based on initDataType
     // https://www.w3.org/TR/2017/REC-encrypted-media-20170918/#dom-mediakeysession-generaterequest
     // https://www.w3.org/TR/eme-initdata-registry/
-    function GenerateRequest(initDataType: LPWSTR;
+    function GenerateRequest(initDataType: LPCWSTR;
                              initData: PByte;
                              initDataSize: DWORD): HResult; stdcall;
 
@@ -175,7 +175,7 @@ type
     function KeyMessage(messageType: MF_MEDIAKEYSESSION_MESSAGETYPE;
                         _message: PByte;
                         messageSize: DWORD;
-                        {in, optional} destinationURL: LPWSTR): HResult; stdcall;
+                        {in, optional} destinationURL: LPCWSTR): HResult; stdcall;
 
     // There has been a change in the keys in the session or their status.
     function KeyStatusChanged(): HResult; stdcall;
@@ -194,7 +194,7 @@ type
     // by the Content Decryption Module.
     // The IMFContentEnabler is normally obtained from IMFInputTrustAuthority::RequestAccess.
     function SetContentEnabler(contentEnabler: IMFContentEnabler;
-                               result: IMFAsyncResult): HResult; stdcall;
+                               _result: IMFAsyncResult): HResult; stdcall;
 
     // Provides an object for IMFContentDecryptionModuleSession suspend events.
     function GetSuspendNotify(out notify: IMFCdmSuspendNotify): HResult; stdcall;
@@ -229,7 +229,7 @@ type
     // https://w3c.github.io/encrypted-media/format-registry/initdata/cenc.html
     // systemIds should be allocated and freed using CoTaskMem.
     function GetProtectionSystemIds(out systemIds: PGUID;
-                                    out count: PDWORD): HResult; stdcall;
+                                    out count: DWORD): HResult; stdcall;
 
   end;
   IID_IMFContentDecryptionModule = IMFContentDecryptionModule;
@@ -313,7 +313,7 @@ type
     // https://www.w3.org/TR/2017/REC-encrypted-media-20170918/#mediakeysystemaccess-interface
     // See IMFMediaKeySystemAccess.CreateMediaKeys for configuration information.
     function CreateContentDecryptionModuleAccess(keySystem: LPCWSTR;
-                                                 configurations: IPropertyStore;
+                                                 configurations: PIPropertyStore;
                                                  numConfigurations: DWORD;
                                                  out contentDecryptionModuleAccess: IMFContentDecryptionModuleAccess): HResult; stdcall;
 
@@ -330,7 +330,7 @@ const
   // the IMediaProtectionPMPServer interface. An implementation of IMFContentDecryptionModule
   // should implement IMFGetService and support this service GUID.
   //
-  MF_CONTENTDECRYPTIONMODULE_SERVICE: TGUID = '{15320C45-FF80-484A-9DCB-0DF894E69A13}';
+  MF_CONTENTDECRYPTIONMODULE_SERVICE: TGUID = '{15320C45-FF80-484A-9DCB-0DF894E69A01}';
 
   { 10.0.28000.0  }
   MF_ENCRYPTEDMEDIAEXTENSIONS_ACTIVATE: TGUID = '{2DF7B51E-797B-4D06-BE71-D14A52CF8421}';

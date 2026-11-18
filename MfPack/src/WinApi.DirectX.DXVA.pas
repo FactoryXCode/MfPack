@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MfPack
@@ -10,7 +10,7 @@
 // Release date: 02-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: DirectX Video Acceleration (DXVA 2.0) header file.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1222,7 +1222,7 @@ type
 
     public
       property Index7Bits: Byte index $07 read ReadBytes write WriteBytes;      // 7 bits at offset 0
-      property AssociatedFlag: Byte index $71 read ReadBytes write WriteBytes;  // 1 bit at offset 7 ($7)
+      property AssociatedFlag: Byte index $0701 read ReadBytes write WriteBytes;  // 1 bit at offset 7 ($7)
   end;
   {$EXTERNALSYM _DXVA_PicEntry_H264}
   DXVA_PicEntry_H264 = _DXVA_PicEntry_H264;
@@ -2521,7 +2521,7 @@ type
       property VideoTransferMatrix: Integer index $0f03 read ReadBits write WriteBits;    // 3 bits at offset 15
       property VideoLighting: Integer index $1204 read ReadBits write WriteBits;          // 4 bits at offset 18
       property VideoPrimaries: Integer index $1605 read ReadBits write WriteBits;         // 5 bits at offset 22
-      property VideoTransferFunction: Integer index $1b01 read ReadBits write WriteBits;  // 5 bits at offset 27
+      property VideoTransferFunction: Integer index $1b05 read ReadBits write WriteBits;  // 5 bits at offset 27
   end;
   {$EXTERNALSYM _DXVA_ExtendedFormat}
   DXVA_ExtendedFormat = _DXVA_ExtendedFormat;
@@ -3580,10 +3580,10 @@ begin
   NrBits := aIndex and $FF;
   Offset := aIndex shr 8;
   Mask := ((1 shl NrBits) - 1);
-{$IF DEBUG}
-    Assert(Value <= Mask);
+{$IFDEF DEBUG}
+    Assert(aValue <= Mask);
 {$ENDIF}
-    bPicEntry := (aValue and (not (Mask shl Offset))) or (aValue shl Offset);
+    bPicEntry := (bPicEntry and (not (Mask shl Offset))) or ((aValue and Mask) shl Offset);
 end;
 
 
@@ -3612,10 +3612,10 @@ end;
     NrBits := iIndex and $FF;
     Offset := iIndex shr 8;
     Mask := ((1 shl NrBits) - 1);
-{$IF DEBUG}
-    Assert(Value <= Mask);
+{$IFDEF DEBUG}
+    Assert(iValue <= Mask);
 {$ENDIF}
-    Value := (iValue and (not (Mask shl Offset))) or (iValue shl Offset);
+    Value := (Value and (not (Mask shl Offset))) or ((iValue and Mask) shl Offset);
   end;
 // END DXVA2_ExtendedFormat ////////////////////////////////////////////////////
 
@@ -3977,10 +3977,11 @@ end;
 
 procedure TDXVA_Deblock_H264_BitFields.SetBits(const aIndex: Integer;
                                                const aValue: UINT8);
+var Mask: Byte;
 begin
-  SetByteBits(FirstByte,
-              aIndex,
-              aValue);
+  Mask := (1 shl Byte(aIndex)) - 1;
+  FirstByte := (FirstByte and not (Mask shl (aIndex shr 8))) or
+               ((aValue and Mask) shl (aIndex shr 8));
 end;
 
 

@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: ApiSet Contract for api-ms-win-mm-mci-l1-1-0.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -773,7 +773,7 @@ type
 
   PMCI_GENERIC_PARMS = ^tagMCI_GENERIC_PARMS;
   {$EXTERNALSYM PMCI_GENERIC_PARMS}
-  tagMCI_GENERIC_PARMS = record
+  tagMCI_GENERIC_PARMS = packed record
     dwCallback: DWORD_PTR;
   end;
   {$EXTERNALSYM tagMCI_GENERIC_PARMS}
@@ -787,7 +787,7 @@ type
 
   PMCI_OPEN_PARMSA = ^MCI_OPEN_PARMSA;
   {$EXTERNALSYM PMCI_OPEN_PARMSA}
-  tagMCI_OPEN_PARMSA = record
+  tagMCI_OPEN_PARMSA = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PAnsiChar;
@@ -802,7 +802,7 @@ type
 
   PMCI_OPEN_PARMSW = ^tagMCI_OPEN_PARMSW;
   {$EXTERNALSYM PMCI_OPEN_PARMSW}
-  tagMCI_OPEN_PARMSW = record
+  tagMCI_OPEN_PARMSW = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PWideChar;
@@ -828,7 +828,7 @@ type
 
   PMCI_PLAY_PARMS = ^tagMCI_PLAY_PARMS;
   {$EXTERNALSYM PMCI_PLAY_PARMS}
-  tagMCI_PLAY_PARMS = record
+  tagMCI_PLAY_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -844,7 +844,7 @@ type
 
   PMCI_SEEK_PARMS = ^tagMCI_SEEK_PARMS;
   {$EXTERNALSYM PMCI_SEEK_PARMS}
-  tagMCI_SEEK_PARMS = record
+  tagMCI_SEEK_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTo: DWORD;
   end;
@@ -859,7 +859,7 @@ type
 
   PMCI_STATUS_PARMS = ^tagMCI_STATUS_PARMS;
   {$EXTERNALSYM PMCI_STATUS_PARMS}
-  tagMCI_STATUS_PARMS = record
+  tagMCI_STATUS_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwReturn: DWORD_PTR;
     dwItem: DWORD;
@@ -875,7 +875,7 @@ type
   { parameter block for MCI_INFO command message }
 
   PMCI_INFO_PARMSA = ^tagMCI_INFO_PARMSA;
-  tagMCI_INFO_PARMSA = record
+  tagMCI_INFO_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PAnsiChar;
     dwRetSize: DWORD;
@@ -887,7 +887,7 @@ type
   {$EXTERNALSYM LPMCI_INFO_PARMSA}
 
   PMCI_INFO_PARMSW = ^tagMCI_INFO_PARMSW;
-  tagMCI_INFO_PARMSW = record
+  tagMCI_INFO_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PWideChar;
     dwRetSize: DWORD;
@@ -903,7 +903,7 @@ type
 
   PMCI_GETDEVCAPS_PARMS = ^tagMCI_GETDEVCAPS_PARMS;
   {$EXTERNALSYM PMCI_GETDEVCAPS_PARMS}
-  tagMCI_GETDEVCAPS_PARMS = record
+  tagMCI_GETDEVCAPS_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwReturn: DWORD;
     dwItem: DWORD;
@@ -919,7 +919,7 @@ type
 
   PMCI_SYSINFO_PARMSA = ^tagMCI_SYSINFO_PARMSA;
   {$EXTERNALSYM PMCI_SYSINFO_PARMSA}
-  tagMCI_SYSINFO_PARMSA = record
+  tagMCI_SYSINFO_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PAnsiChar;
     dwRetSize: DWORD;
@@ -934,7 +934,7 @@ type
 
   PMCI_SYSINFO_PARMSW = ^tagMCI_SYSINFO_PARMSW;
   {$EXTERNALSYM PMCI_SYSINFO_PARMSW}
-  tagMCI_SYSINFO_PARMSW = record
+  tagMCI_SYSINFO_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrReturn: PWideChar;
     dwRetSize: DWORD;
@@ -960,7 +960,7 @@ type
 
   PMCI_SET_PARMS = ^tagMCI_SET_PARMS;
   {$EXTERNALSYM PMCI_SET_PARMS}
-  tagMCI_SET_PARMS = record
+  tagMCI_SET_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTimeFormat: DWORD;
     dwAudio: DWORD;
@@ -976,7 +976,7 @@ type
 
   PMCI_BREAK_PARMS = ^tagMCI_BREAK_PARMS;
   {$EXTERNALSYM PMCI_BREAK_PARMS}
-  tagMCI_BREAK_PARMS = record
+  tagMCI_BREAK_PARMS = packed record
     dwCallback: DWORD_PTR;
     nVirtKey: Integer;
     hwndBreak: HWND;
@@ -992,7 +992,7 @@ type
 
   PMCI_SAVE_PARMSA = ^tagMCI_SAVE_PARMSA;
   {$EXTERNALSYM PMCI_SAVE_PARMSA}
-  tagMCI_SAVE_PARMSA = record
+  tagMCI_SAVE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PAnsiChar;
   end;
@@ -1004,7 +1004,7 @@ type
 
   PMCI_SAVE_PARMSW = ^tagMCI_SAVE_PARMSW;
   {$EXTERNALSYM PMCI_SAVE_PARMSW}
-  tagMCI_SAVE_PARMSW = record
+  tagMCI_SAVE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PWideChar;
   end;
@@ -1027,7 +1027,7 @@ type
 
   PMCI_LOAD_PARMSA = ^tagMCI_LOAD_PARMSA;
   {$EXTERNALSYM PMCI_LOAD_PARMSA}
-  tagMCI_LOAD_PARMSA = record
+  tagMCI_LOAD_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PAnsiChar;
   end;
@@ -1039,7 +1039,7 @@ type
 
   PMCI_LOAD_PARMSW = ^tagMCI_LOAD_PARMSW;
   {$EXTERNALSYM PMCI_LOAD_PARMSW}
-  tagMCI_LOAD_PARMSW = record
+  tagMCI_LOAD_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PWideChar;
   end;
@@ -1061,7 +1061,7 @@ type
   { parameter block for MCI_RECORD command message }
 
   PMCI_RECORD_PARMS = ^tagMCI_RECORD_PARMS;
-  tagMCI_RECORD_PARMS = record
+  tagMCI_RECORD_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1168,7 +1168,7 @@ type
 
   PMCI_VD_PLAY_PARMS = ^tagMCI_VD_PLAY_PARMS;
   {$EXTERNALSYM PMCI_VD_PLAY_PARMS}
-  tagMCI_VD_PLAY_PARMS = record
+  tagMCI_VD_PLAY_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1185,7 +1185,7 @@ type
 
   PMCI_VD_STEP_PARMS = ^tagMCI_VD_STEP_PARMS;
   {$EXTERNALSYM PMCI_VD_STEP_PARMS}
-  tagMCI_VD_STEP_PARMS = record
+  tagMCI_VD_STEP_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrames: DWORD;
   end;
@@ -1200,7 +1200,7 @@ type
 
   PMCI_VD_ESCAPE_PARMSA = ^tagMCI_VD_ESCAPE_PARMSA;
   {$EXTERNALSYM PMCI_VD_ESCAPE_PARMSA}
-  tagMCI_VD_ESCAPE_PARMSA = record
+  tagMCI_VD_ESCAPE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpstrCommand: PAnsiChar;
   end;
@@ -1212,7 +1212,7 @@ type
 
   PMCI_VD_ESCAPE_PARMSW = ^tagMCI_VD_ESCAPE_PARMSW;
   {$EXTERNALSYM PMCI_VD_ESCAPE_PARMSW}
-  tagMCI_VD_ESCAPE_PARMSW = record
+  tagMCI_VD_ESCAPE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpstrCommand: PWideChar;
   end;
@@ -1319,7 +1319,7 @@ type
 
   PMCI_WAVE_OPEN_PARMSA = ^tagMCI_WAVE_OPEN_PARMSA;
   {$EXTERNALSYM PMCI_WAVE_OPEN_PARMSA}
-  tagMCI_WAVE_OPEN_PARMSA = record
+  tagMCI_WAVE_OPEN_PARMSA = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PAnsiChar;
@@ -1335,7 +1335,7 @@ type
 
   PMCI_WAVE_OPEN_PARMSW = ^tagMCI_WAVE_OPEN_PARMSW;
   {$EXTERNALSYM PMCI_WAVE_OPEN_PARMSW}
-  tagMCI_WAVE_OPEN_PARMSW = record
+  tagMCI_WAVE_OPEN_PARMSW = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PWideChar;
@@ -1361,7 +1361,7 @@ type
 
   PMCI_WAVE_DELETE_PARMS = ^tagMCI_WAVE_DELETE_PARMS;
   {$EXTERNALSYM PMCI_WAVE_DELETE_PARMS}
-  tagMCI_WAVE_DELETE_PARMS = record
+  tagMCI_WAVE_DELETE_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1379,7 +1379,7 @@ type
 
   PMCI_WAVE_SET_PARMS = ^tagMCI_WAVE_SET_PARMS;
   {$EXTERNALSYM PMCI_WAVE_SET_PARMS}
-  tagMCI_WAVE_SET_PARMS = record
+  tagMCI_WAVE_SET_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTimeFormat: DWORD;
     dwAudio: DWORD;
@@ -1475,7 +1475,7 @@ type
 
   PMCI_SEQ_SET_PARMS = ^tagMCI_SEQ_SET_PARMS;
   {$EXTERNALSYM PMCI_SEQ_SET_PARMS}
-  tagMCI_SEQ_SET_PARMS = record
+  tagMCI_SEQ_SET_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwTimeFormat: DWORD;
     dwAudio: DWORD;
@@ -1613,7 +1613,7 @@ type
 
   PMCI_ANIM_OPEN_PARMSA = ^tagMCI_ANIM_OPEN_PARMSA;
   {$EXTERNALSYM PMCI_ANIM_OPEN_PARMSA}
-  tagMCI_ANIM_OPEN_PARMSA = record
+  tagMCI_ANIM_OPEN_PARMSA = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PAnsiChar;
@@ -1630,7 +1630,7 @@ type
 
   PMCI_ANIM_OPEN_PARMSW = ^tagMCI_ANIM_OPEN_PARMSW;
   {$EXTERNALSYM PMCI_ANIM_OPEN_PARMSW}
-  tagMCI_ANIM_OPEN_PARMSW = record
+  tagMCI_ANIM_OPEN_PARMSW = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PWideChar;
@@ -1658,7 +1658,7 @@ type
 
   PMCI_ANIM_PLAY_PARMS = ^tagMCI_ANIM_PLAY_PARMS;
   {$EXTERNALSYM PMCI_ANIM_PLAY_PARMS}
-  tagMCI_ANIM_PLAY_PARMS = record
+  tagMCI_ANIM_PLAY_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrom: DWORD;
     dwTo: DWORD;
@@ -1675,7 +1675,7 @@ type
 
   PMCI_ANIM_STEP_PARMS = ^tagMCI_ANIM_STEP_PARMS;
   {$EXTERNALSYM PMCI_ANIM_STEP_PARMS}
-  tagMCI_ANIM_STEP_PARMS = record
+  tagMCI_ANIM_STEP_PARMS = packed record
     dwCallback: DWORD_PTR;
     dwFrames: DWORD;
   end;
@@ -1690,7 +1690,7 @@ type
 
   PMCI_ANIM_WINDOW_PARMSA = ^tagMCI_ANIM_WINDOW_PARMSA;
   {$EXTERNALSYM PMCI_ANIM_WINDOW_PARMSA}
-  tagMCI_ANIM_WINDOW_PARMSA = record
+  tagMCI_ANIM_WINDOW_PARMSA = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1704,7 +1704,7 @@ type
 
   PMCI_ANIM_WINDOW_PARMSW = ^tagMCI_ANIM_WINDOW_PARMSW;
   {$EXTERNALSYM PMCI_ANIM_WINDOW_PARMSW}
-  tagMCI_ANIM_WINDOW_PARMSW = record
+  tagMCI_ANIM_WINDOW_PARMSW = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1729,7 +1729,7 @@ type
 
   PMCI_ANIM_RECT_PARMS = ^MCI_ANIM_RECT_PARMS;
   {$EXTERNALSYM PMCI_ANIM_RECT_PARMS}
-  tagMCI_ANIM_RECT_PARMS = record
+  tagMCI_ANIM_RECT_PARMS = packed record
     dwCallback: DWORD_PTR;
     rc: TRect;
   end;
@@ -1744,7 +1744,7 @@ type
 
   PMCI_ANIM_UPDATE_PARMS = ^tagMCI_ANIM_UPDATE_PARMS;
   {$EXTERNALSYM PMCI_ANIM_UPDATE_PARMS}
-  tagMCI_ANIM_UPDATE_PARMS = record
+  tagMCI_ANIM_UPDATE_PARMS = packed record
     dwCallback: DWORD_PTR;
     rc: TRect;
     hDC: HDC;
@@ -1834,7 +1834,7 @@ const
 
 type
 
-  tagMCI_OVLY_OPEN_PARMSA = record
+  tagMCI_OVLY_OPEN_PARMSA = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PAnsiChar;
@@ -1851,7 +1851,7 @@ type
   LPMCI_OVLY_OPEN_PARMSA = ^tagMCI_OVLY_OPEN_PARMSA;
   {$EXTERNALSYM LPMCI_OVLY_OPEN_PARMSA}
 
-  tagMCI_OVLY_OPEN_PARMSW = record
+  tagMCI_OVLY_OPEN_PARMSW = packed record
     dwCallback: DWORD_PTR;
     wDeviceID: MCIDEVICEID;
     lpstrDeviceType: PWideChar;
@@ -1879,7 +1879,7 @@ type
 
   { parameter block for MCI_WINDOW command message }
 
-  tagMCI_OVLY_WINDOW_PARMSA = record
+  tagMCI_OVLY_WINDOW_PARMSA = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1893,7 +1893,7 @@ type
   LPMCI_OVLY_WINDOW_PARMSA = ^tagMCI_OVLY_WINDOW_PARMSA;
   {$EXTERNALSYM LPMCI_OVLY_WINDOW_PARMSA}
 
-  tagMCI_OVLY_WINDOW_PARMSW = record
+  tagMCI_OVLY_WINDOW_PARMSW = packed record
     dwCallback: DWORD_PTR;
     hWnd: HWND;
     nCmdShow: UINT;
@@ -1920,7 +1920,7 @@ type
 
   PMCI_OVLY_RECT_PARMS = ^tagMCI_OVLY_RECT_PARMS;
   {$EXTERNALSYM PMCI_OVLY_RECT_PARMS}
-  tagMCI_OVLY_RECT_PARMS = record
+  tagMCI_OVLY_RECT_PARMS = packed record
     dwCallback: DWORD_PTR;
     rc: TRect;
   end;
@@ -1935,7 +1935,7 @@ type
 
   PMCI_OVLY_SAVE_PARMSA = ^tagMCI_OVLY_SAVE_PARMSA;
   {$EXTERNALSYM PMCI_OVLY_SAVE_PARMSA}
-  tagMCI_OVLY_SAVE_PARMSA = record
+  tagMCI_OVLY_SAVE_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PAnsiChar;
     rc: TRect;
@@ -1948,7 +1948,7 @@ type
 
   PMCI_OVLY_SAVE_PARMSW = ^tagMCI_OVLY_SAVE_PARMSW;
   {$EXTERNALSYM PMCI_OVLY_SAVE_PARMSW}
-  tagMCI_OVLY_SAVE_PARMSW = record
+  tagMCI_OVLY_SAVE_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PWideChar;
     rc: TRect;
@@ -1972,7 +1972,7 @@ type
 
   PMCI_OVLY_LOAD_PARMSA = ^tagMCI_OVLY_LOAD_PARMSA;
   {$EXTERNALSYM PMCI_OVLY_LOAD_PARMSA}
-  tagMCI_OVLY_LOAD_PARMSA = record
+  tagMCI_OVLY_LOAD_PARMSA = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PAnsiChar;
     rc: TRect;
@@ -1985,7 +1985,7 @@ type
 
   PMCI_OVLY_LOAD_PARMSW = ^tagMCI_OVLY_LOAD_PARMSW;
   {$EXTERNALSYM PMCI_OVLY_LOAD_PARMSW}
-  tagMCI_OVLY_LOAD_PARMSW = record
+  tagMCI_OVLY_LOAD_PARMSW = packed record
     dwCallback: DWORD_PTR;
     lpfilename: PWideChar;
     rc: TRect;
@@ -2021,7 +2021,7 @@ type
                             dwData: DWORD_PTR): BOOL; stdcall;
   {$EXTERNALSYM mciSetDriverData}
 
-  function mciDriverYield(wDeviceID: MCIDEVICEID): BOOL; stdcall;
+  function mciDriverYield(wDeviceID: MCIDEVICEID): UINT; stdcall;
   {$EXTERNALSYM mciDriverYield}
 
   function mciDriverNotify(hwndCallback: THandle;
@@ -2078,44 +2078,44 @@ function mciFreeCommandResource; external MCIApiLib name 'mciFreeCommandResource
 
 function MCI_MSF_MINUTE(msf: DWord): Byte;
 begin
-  Result := LoByte(LoWord(msf));
+  Result := Byte(msf and $FF);
 end;
 
 function MCI_MSF_SECOND(msf: DWord): Byte;
 begin
-  Result := HiByte(LoWord(msf));
+  Result := Byte((msf shr 8) and $FF);
 end;
 
 function MCI_MSF_FRAME(msf: DWord): Byte;
 begin
-  Result := LoByte(HiWord(msf));
+  Result := Byte((msf shr 16) and $FF);
 end;
 
 function MCI_MAKE_MSF(m: Byte;
                       s: Byte;
                       f: Byte): DWord;
 begin
-  Result := DWord(m or (s shl 8) or (f shl 16));
+  Result := DWORD(m) or (DWORD(s) shl 8) or (DWORD(f) shl 16);
 end;
 
 function MCI_TMSF_TRACK(tmsf: DWord): Byte;
 begin
-  Result := LoByte(LoWord(tmsf));
+  Result := Byte(tmsf and $FF);
 end;
 
 function MCI_TMSF_MINUTE(tmsf: DWord): Byte;
 begin
-  Result := HiByte(LoWord(tmsf));
+  Result := Byte((tmsf shr 8) and $FF);
 end;
 
 function MCI_TMSF_SECOND(tmsf: DWord): Byte;
 begin
-  Result := LoByte(HiWord(tmsf));
+  Result := Byte((tmsf shr 16) and $FF);
 end;
 
 function MCI_TMSF_FRAME(tmsf: DWord): Byte;
 begin
-  Result := HiByte(HiWord(tmsf));
+  Result := Byte((tmsf shr 24) and $FF);
 end;
 
 function MCI_MAKE_TMSF(t: Byte;
@@ -2123,29 +2123,29 @@ function MCI_MAKE_TMSF(t: Byte;
                        s: Byte;
                        f: Byte): DWord;
 begin
-  Result := DWord(t or (m shl 8) or (s shl 16) or (f shl 24));
+  Result := DWORD(t) or (DWORD(m) shl 8) or (DWORD(s) shl 16) or (DWORD(f) shl 24);
 end;
 
 function MCI_HMS_HOUR(hms: DWord): Byte;
 begin
-  Result := LoByte(LoWord(hms));
+  Result := Byte(hms and $FF);
 end;
 
 function MCI_HMS_MINUTE(hms: DWord): Byte;
 begin
-  Result := HiByte(LoWord(hms));
+  Result := Byte((hms shr 8) and $FF);
 end;
 
 function MCI_HMS_SECOND(hms: DWord): Byte;
 begin
-  Result := LoByte(HiWord(hms));
+  Result := Byte((hms shr 16) and $FF);
 end;
 
 function MCI_MAKE_HMS(h: Byte;
                       m: Byte;
                       s: Byte): DWord;
 begin
-  Result := DWord(h or (m shl 8) or (s shl 16));
+  Result := DWORD(h) or (DWORD(m) shl 8) or (DWORD(s) shl 16);
 end;
 
 

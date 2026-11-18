@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Requires Windows Vista or later.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -266,23 +266,23 @@ const
   {$EXTERNALSYM CATID_Printable}
   CATID_RequiresDataPathHost: TGUID = '{0DE86A50-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_RequiresDataPathHost}
-  CATID_PersistsToMoniker: TGUID = '{40FC6EDA-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToMoniker: TGUID = '{0DE86A51-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToMoniker}
-  CATID_PersistsToStorage: TGUID = '{40FC6EDB-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToStorage: TGUID = '{0DE86A52-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToStorage}
-  CATID_PersistsToStreamInit: TGUID = '{40FC6EDC-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToStreamInit: TGUID = '{0DE86A53-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToStreamInit}
-  CATID_PersistsToStream: TGUID = '{40FC6EDD-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToStream: TGUID = '{0DE86A54-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToStream}
-  CATID_PersistsToMemory: TGUID = '{40FC6EDE-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToMemory: TGUID = '{0DE86A55-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToMemory}
-  CATID_PersistsToFile: TGUID = '{40FC6EDF-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToFile: TGUID = '{0DE86A56-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToFile}
-  CATID_PersistsToPropertyBag: TGUID = '{40FC6EE0-2438-11CF-A3DB-080036F12502}';
+  CATID_PersistsToPropertyBag: TGUID = '{0DE86A57-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_PersistsToPropertyBag}
-  CATID_InternetAware: TGUID = '{0DE86A51-2BAA-11CF-A229-00AA003D7352}';
+  CATID_InternetAware: TGUID = '{0DE86A58-2BAA-11CF-A229-00AA003D7352}';
   {$EXTERNALSYM CATID_InternetAware}
-  CATID_DesignTimeUIActivatableControl: TGUID = '{0DE86A52-2BAA-11CF-A229-00AA003D7352}';
+  CATID_DesignTimeUIActivatableControl: TGUID = '{F2BB56D1-DB07-11D1-AA6B-006097DB9539}';
   {$EXTERNALSYM CATID_DesignTimeUIActivatableControl}
 
 implementation

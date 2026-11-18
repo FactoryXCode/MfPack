@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
 //              bitmaps, and text.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -68,10 +68,8 @@ unit WinApi.DirectX.D2D1EffectAuthor;
 interface
 
 uses
-  {WinApi}
-  WinApi.Windows,
-  WinApi.WinCodec, {or WinApi.DirectX.WinCodec,)
-  {WinApi.DirectX}
+  Windows,
+  WinApi.WIC.WinCodec,
   WinApi.DirectX.DCommon,
   WinApi.DirectX.D3DCommon,
   WinApi.DirectX.D2D1,
@@ -93,7 +91,7 @@ const
   // Set to alignedByteOffset within D2D1_INPUT_ELEMENT_DESC for elements that
   // immediately follow preceding elements in memory
   //
-  D2D1_APPEND_ALIGNED_ELEMENT         = -1;
+  D2D1_APPEND_ALIGNED_ELEMENT = UINT32($FFFFFFFF);
   {$EXTERNALSYM D2D1_APPEND_ALIGNED_ELEMENT}
 
 
@@ -307,12 +305,12 @@ type
   // This is used to define a resource texture when that resource texture is created.
   PD2D1_RESOURCE_TEXTURE_PROPERTIES = ^D2D1_RESOURCE_TEXTURE_PROPERTIES;
   D2D1_RESOURCE_TEXTURE_PROPERTIES = record
-    extents: UINT32;
+    extents: PUINT32;
     dimensions: UINT32;
     bufferPrecision: D2D1_BUFFER_PRECISION;
     channelDepth: D2D1_CHANNEL_DEPTH;
     filter: D2D1_FILTER;
-    extendModes: D2D1_EXTEND_MODE;
+    extendModes: PD2D1_EXTEND_MODE;
   end;
   {$EXTERNALSYM D2D1_RESOURCE_TEXTURE_PROPERTIES}
 
@@ -320,7 +318,7 @@ type
   // This defines a single element of the vertex layout.
   PD2D1_INPUT_ELEMENT_DESC = ^D2D1_INPUT_ELEMENT_DESC;
   D2D1_INPUT_ELEMENT_DESC = record
-    semanticName: LPCSTR;
+    semanticName: PAnsiChar;
     semanticIndex: UINT32;
     format: DXGI_FORMAT;
     inputSlot: UINT32;
@@ -367,7 +365,6 @@ type
   PD2D1_BLEND_DESCRIPTION = ^D2D1_BLEND_DESCRIPTION;
   D2D1_BLEND_DESCRIPTION = record
     sourceBlend: D2D1_BLEND;
-  {$EXTERNALSYM D2D1_BLEND_DESCRIPTION}
     destinationBlend: D2D1_BLEND;
     blendOperation: D2D1_BLEND_OPERATION;
     sourceBlendAlpha: D2D1_BLEND;
@@ -415,11 +412,10 @@ type
   {$EXTERNALSYM ID2D1VertexBuffer}
  ID2D1VertexBuffer = interface(IUnknown)
   ['{9b8b1336-00a5-4668-92b7-ced5d8bf9b7b}']
+    // SDK native virtual methods.
+    function Map(out data: PByte; bufferSize: UINT32): HRESULT; stdcall;
+    function Unmap(): HRESULT; stdcall;
 
-    function Map({out} data: PByte;
-                 bufferSize: UINT32): HResult; stdcall;
-
-    function Unmap(): HResult; stdcall;
 
   end;
   IID_ID2D1VertexBuffer = ID2D1VertexBuffer;
@@ -433,14 +429,9 @@ type
   {$EXTERNALSYM ID2D1ResourceTexture}
   ID2D1ResourceTexture = interface(IUnknown)
   ['{688d15c3-02b0-438d-b13a-d1b44c32c39a}']
+    // SDK native virtual methods.
+    function Update(minimumExtents: PUINT32; maximimumExtents: PUINT32; strides: PUINT32; dimensions: UINT32; data: PByte; dataCount: UINT32): HRESULT; stdcall;
 
-    // Update the vertex text.
-    function Update(minimumExtents: UINT32;
-                    maximimumExtents: UINT32;
-                    strides: UINT32;
-                    dimensions: UINT32;
-                    data: PByte;
-                    dataCount: UINT32): HResult; stdcall;
 
   end;
   IID_ID2D1ResourceTexture = ID2D1ResourceTexture;
@@ -456,22 +447,12 @@ type
   {$EXTERNALSYM ID2D1RenderInfo}
   ID2D1RenderInfo = interface(IUnknown)
   ['{519ae1bd-d19a-420d-b849-364f594776b7}']
-
-    // Sets options for sampling the specified image input
-    function SetInputDescription(inputIndex: UINT32;
-                                 inputDescription: D2D1_INPUT_DESCRIPTION): HResult; stdcall;
-
-    // Controls the output precision and channel-depth for the associated transform.
-    function SetOutputBuffer(bufferPrecision: D2D1_BUFFER_PRECISION;
-                             channelDepth: D2D1_CHANNEL_DEPTH): HResult; stdcall;
-
-    // Controls whether the output of the associated transform is cached.
+    // SDK native virtual methods.
+    function SetInputDescription(inputIndex: UINT32; inputDescription: D2D1_INPUT_DESCRIPTION): HRESULT; stdcall;
+    function SetOutputBuffer(bufferPrecision: D2D1_BUFFER_PRECISION; channelDepth: D2D1_CHANNEL_DEPTH): HRESULT; stdcall;
     procedure SetCached(isCached: BOOL); stdcall;
-
-    // Provides a hint of the approximate shader instruction count per pixel.  If
-    // provided, it may improve performance when processing large images.  Instructions
-    // should be counted multiple times if occurring within loops.
     procedure SetInstructionCountHint(instructionCount: UINT32); stdcall;
+
 
   end;
   IID_ID2D1RenderInfo = ID2D1RenderInfo;
@@ -487,33 +468,13 @@ type
   {$EXTERNALSYM ID2D1DrawInfo}
   ID2D1DrawInfo = interface(ID2D1RenderInfo)
   ['{693ce632-7f2f-45de-93fe-18d88b37aa21}']
+    // SDK native virtual methods.
+    function SetPixelShaderConstantBuffer(buffer: PByte; bufferCount: UINT32): HRESULT; stdcall;
+    function SetResourceTexture(textureIndex: UINT32; resourceTexture: ID2D1ResourceTexture): HRESULT; stdcall;
+    function SetVertexShaderConstantBuffer(buffer: PByte; bufferCount: UINT32): HRESULT; stdcall;
+    function SetPixelShader(const shaderId: TGUID; pixelOptions: D2D1_PIXEL_OPTIONS): HRESULT; stdcall;
+    function SetVertexProcessing(vertexBuffer: ID2D1VertexBuffer; vertexOptions: D2D1_VERTEX_OPTIONS; blendDescription: PD2D1_BLEND_DESCRIPTION; vertexRange: PD2D1_VERTEX_RANGE; vertexShader: PGUID): HRESULT; stdcall;
 
-    // Set the constant buffer for this transform's pixel shader.
-    function SetPixelShaderConstantBuffer(buffer: PByte;
-                                          bufferCount: UINT32): HResult; stdcall;
-
-    // Sets the resource texture corresponding to the given shader texture index.
-    function SetResourceTexture(textureIndex: UINT32;
-                                resourceTexture: ID2D1ResourceTexture): HResult; stdcall;
-
-
-    // Set the constant buffer for this transform's vertex shader.
-    function SetVertexShaderConstantBuffer(buffer: PByte;
-                                           bufferCount: UINT32): HResult; stdcall;
-
-
-    // Set the shader instructions for this transform.
-    function SetPixelShader(shaderId: TGuid;
-                            pixelOptions: D2D1_PIXEL_OPTIONS = D2D1_PIXEL_OPTIONS_NONE): HResult; stdcall;
-
-
-    // Set custom vertices for the associated transform.  A blend mode if
-    // foreground-over will be used if blendDescription is Nil.
-    function SetVertexProcessing(vertexBuffer: ID2D1VertexBuffer;
-                                 vertexOptions: D2D1_VERTEX_OPTIONS;
-                                 blendDescription: PD2D1_BLEND_DESCRIPTION = Nil;
-                                 vertexRange: PD2D1_VERTEX_RANGE = Nil;
-                                 vertexShader: PGuid = Nil): HResult; stdcall;
 
   end;
   IID_ID2D1DrawInfo = ID2D1DrawInfo;
@@ -530,17 +491,11 @@ type
   {$EXTERNALSYM ID2D1ComputeInfo}
   ID2D1ComputeInfo = interface(ID2D1RenderInfo)
   ['{5598b14b-9fd7-48b7-9bdb-8f0964eb38bc}']
+    // SDK native virtual methods.
+    function SetComputeShaderConstantBuffer(buffer: PByte; bufferCount: UINT32): HRESULT; stdcall;
+    function SetComputeShader(const shaderId: TGUID): HRESULT; stdcall;
+    function SetResourceTexture(textureIndex: UINT32; resourceTexture: ID2D1ResourceTexture): HRESULT; stdcall;
 
-    // Set the constant buffer for this transform.
-    function SetComputeShaderConstantBuffer(buffer: PByte;
-                                            bufferCount: UINT32): HResult; stdcall;
-
-    // Set the shader instructions for this transform.
-    function SetComputeShader(shaderId: TGuid): HResult; stdcall;
-
-    // Sets the resource texture corresponding to the given shader texture index.
-    function SetResourceTexture(textureIndex: UINT32;
-                                resourceTexture: ID2D1ResourceTexture): HResult; stdcall;
 
   end;
   IID_ID2D1ComputeInfo = ID2D1ComputeInfo;
@@ -555,9 +510,9 @@ type
   {$EXTERNALSYM ID2D1TransformNode}
  ID2D1TransformNode = interface(IUnknown)
   ['{b2efe1e7-729f-4102-949f-505fa21bf666}']
-
-    // Return the number of input this node has.
+    // SDK native virtual methods.
     function GetInputCount(): UINT32; stdcall;
+
 
   end;
   IID_ID2D1TransformNode = ID2D1TransformNode;
@@ -572,40 +527,17 @@ type
   {$EXTERNALSYM ID2D1TransformGraph}
   ID2D1TransformGraph = interface(IUnknown)
   ['{13d29038-c3e6-4034-9081-13b53a417992}']
-
-    // Return the number of input this graph has.
+    // SDK native virtual methods.
     function GetInputCount(): UINT32; stdcall;
-
-    // Sets the graph to contain a single transform whose inputs map 1:1 with effect
-    // inputs.
-    function SetSingleTransformNode(node: ID2D1TransformNode): HResult; stdcall;
-
-    // Adds the given transform node to the graph.
-    function AddNode(node: ID2D1TransformNode): HResult; stdcall;
-
-    // Removes the given transform node from the graph.
-    function RemoveNode(node: ID2D1TransformNode): HResult; stdcall;
-
-    // Indicates that the given transform node should be considered to be the output
-    // node of the graph.
-    function SetOutputNode(node: ID2D1TransformNode): HResult; stdcall;
-
-    // Connects one node to another node inside the graph.
-    function ConnectNode(fromNode: ID2D1TransformNode;
-                         toNode: ID2D1TransformNode;
-                         toNodeInputIndex: UINT32): HResult; stdcall;
-
-    // Connects a transform node inside the graph to the corresponding input of the
-    // encapsulating effect.
-    function ConnectToEffectInput(toEffectInputIndex: UINT32;
-                                  node: ID2D1TransformNode;
-                                  toNodeInputIndex: UINT32): HResult; stdcall;
-
-    // Clears all nodes and connections from the transform graph.
+    function SetSingleTransformNode(node: ID2D1TransformNode): HRESULT; stdcall;
+    function AddNode(node: ID2D1TransformNode): HRESULT; stdcall;
+    function RemoveNode(node: ID2D1TransformNode): HRESULT; stdcall;
+    function SetOutputNode(node: ID2D1TransformNode): HRESULT; stdcall;
+    function ConnectNode(fromNode: ID2D1TransformNode; toNode: ID2D1TransformNode; toNodeInputIndex: UINT32): HRESULT; stdcall;
+    function ConnectToEffectInput(toEffectInputIndex: UINT32; node: ID2D1TransformNode; toNodeInputIndex: UINT32): HRESULT; stdcall;
     procedure Clear(); stdcall;
+    function SetPassthroughGraph(effectInputIndex: UINT32): HRESULT; stdcall;
 
-    // Uses the specified input as the effect output.
-    function SetPassthroughGraph(effectInputIndex: UINT32): HResult; stdcall;
 
   end;
   IID_ID2D1TransformGraph = ID2D1TransformGraph;
@@ -620,20 +552,11 @@ type
   {$EXTERNALSYM ID2D1Transform}
   ID2D1Transform = interface(ID2D1TransformNode)
   ['{ef1a287d-342a-4f76-8fdb-da0d6ea9f92b}']
+    // SDK native virtual methods.
+    function MapOutputRectToInputRects(outputRect: PD2D1_RECT_L; inputRects: PD2D1_RECT_L; inputRectsCount: UINT32): HRESULT; stdcall;
+    function MapInputRectsToOutputRect(inputRects: PD2D1_RECT_L; inputOpaqueSubRects: PD2D1_RECT_L; inputRectCount: UINT32; outputRect: PD2D1_RECT_L; outputOpaqueSubRect: PD2D1_RECT_L): HRESULT; stdcall;
+    function MapInvalidRect(inputIndex: UINT32; invalidInputRect: D2D1_RECT_L; invalidOutputRect: PD2D1_RECT_L): HRESULT; stdcall;
 
-    function MapOutputRectToInputRects(outputRect: D2D1_RECT_L;
-                                       out inputRects: PD2D1_RECT_L;
-                                       inputRectsCount: UINT32): HResult; stdcall;
-
-    function MapInputRectsToOutputRect(inputRects: PD2D1_RECT_L;
-                                       inputOpaqueSubRects: PD2D1_RECT_L;
-                                       inputRectCount: UINT32;
-                                       out outputRect: D2D1_RECT_L;
-                                       out outputOpaqueSubRect: D2D1_RECT_L): HResult; stdcall;
-
-    function MapInvalidRect(inputIndex: UINT32;
-                            invalidInputRect: D2D1_RECT_L;
-                            out invalidOutputRect: D2D1_RECT_L): HResult; stdcall;
 
   end;
   IID_ID2D1Transform = ID2D1Transform;
@@ -648,8 +571,9 @@ type
   {$EXTERNALSYM ID2D1DrawTransform}
   ID2D1DrawTransform = interface(ID2D1Transform)
   ['{36bfdcb6-9739-435d-a30d-a653beff6a6f}']
+    // SDK native virtual methods.
+    function SetDrawInfo(drawInfo: ID2D1DrawInfo): HRESULT; stdcall;
 
-    function SetDrawInfo(drawInfo: ID2D1DrawInfo): HResult; stdcall;
 
   end;
   IID_ID2D1DrawTransform = ID2D1DrawTransform;
@@ -665,13 +589,10 @@ type
   {$EXTERNALSYM ID2D1ComputeTransform}
   ID2D1ComputeTransform = interface(ID2D1Transform)
   ['{0d85573c-01e3-4f7d-bfd9-0d60608bf3c3}']
+    // SDK native virtual methods.
+    function SetComputeInfo(computeInfo: ID2D1ComputeInfo): HRESULT; stdcall;
+    function CalculateThreadgroups(outputRect: PD2D1_RECT_L; dimensionX: PUINT32; dimensionY: PUINT32; dimensionZ: PUINT32): HRESULT; stdcall;
 
-    function SetComputeInfo(computeInfo: ID2D1ComputeInfo): HResult; stdcall;
-
-    function CalculateThreadgroups(outputRect: D2D1_RECT_L;
-                                   out dimensionX: UINT32;
-                                   out dimensionY: UINT32;
-                                   out dimensionZ: UINT32): HResult; stdcall;
 
   end;
   IID_ID2D1ComputeTransform = ID2D1ComputeTransform;
@@ -687,9 +608,9 @@ type
   {$EXTERNALSYM ID2D1AnalysisTransform}
   ID2D1AnalysisTransform = interface(IUnknown)
   ['{0359dc30-95e6-4568-9055-27720d130e93}']
+    // SDK native virtual methods.
+    function ProcessAnalysisResults(analysisData: PByte; analysisDataCount: UINT32): HRESULT; stdcall;
 
-    function ProcessAnalysisResults(analysisData: PByte;
-                                    analysisDataCount: UINT32): HResult; stdcall;
 
   end;
   IID_ID2D1AnalysisTransform = ID2D1AnalysisTransform;
@@ -705,12 +626,10 @@ type
   {$EXTERNALSYM ID2D1SourceTransform}
   ID2D1SourceTransform = interface(ID2D1Transform)
   ['{db1800dd-0c34-4cf9-be90-31cc0a5653e1}']
+    // SDK native virtual methods.
+    function SetRenderInfo(renderInfo: ID2D1RenderInfo): HRESULT; stdcall;
+    function Draw(target: ID2D1Bitmap1; drawRect: PD2D1_RECT_L; targetOrigin: D2D1_POINT_2U): HRESULT; stdcall;
 
-    function SetRenderInfo(renderInfo: ID2D1RenderInfo): HResult; stdcall;
-
-    function Draw(target: ID2D1Bitmap1;
-                  drawRect: D2D1_RECT_L;
-                  targetOrigin: D2D1_POINT_2U): HResult; stdcall;
 
   end;
   IID_ID2D1SourceTransform = ID2D1SourceTransform;
@@ -727,13 +646,10 @@ type
   {$EXTERNALSYM ID2D1ConcreteTransform}
   ID2D1ConcreteTransform = interface(ID2D1TransformNode)
   ['{1a799d8a-69f7-4e4c-9fed-437ccc6684cc}']
-
-    // Controls the output precision and channel-depth for this transform.
-    function SetOutputBuffer(bufferPrecision: D2D1_BUFFER_PRECISION;
-                             channelDepth: D2D1_CHANNEL_DEPTH): HResult; stdcall;
-
-    // Controls whether the output of this transform is cached.
+    // SDK native virtual methods.
+    function SetOutputBuffer(bufferPrecision: D2D1_BUFFER_PRECISION; channelDepth: D2D1_CHANNEL_DEPTH): HRESULT; stdcall;
     procedure SetCached(isCached: BOOL); stdcall;
+
 
   end;
   IID_ID2D1ConcreteTransform = ID2D1ConcreteTransform;
@@ -748,10 +664,10 @@ type
   {$EXTERNALSYM ID2D1BlendTransform}
   ID2D1BlendTransform = interface(ID2D1ConcreteTransform)
   ['{63ac0b32-ba44-450f-8806-7f4ca1ff2f1b}']
+    // SDK native virtual methods.
+    procedure SetDescription(description: PD2D1_BLEND_DESCRIPTION); stdcall;
+    procedure GetDescription(description: PD2D1_BLEND_DESCRIPTION); stdcall;
 
-    procedure SetDescription(description: D2D1_BLEND_DESCRIPTION); stdcall;
-
-    procedure GetDescription(out description: D2D1_BLEND_DESCRIPTION); stdcall;
 
   end;
   IID_ID2D1BlendTransform = ID2D1BlendTransform;
@@ -766,14 +682,12 @@ type
   {$EXTERNALSYM ID2D1BorderTransform}
   ID2D1BorderTransform = interface(ID2D1ConcreteTransform)
   ['{4998735c-3a19-473c-9781-656847e3a347}']
-
+    // SDK native virtual methods.
     procedure SetExtendModeX(extendMode: D2D1_EXTEND_MODE); stdcall;
-
     procedure SetExtendModeY(extendMode: D2D1_EXTEND_MODE); stdcall;
-
     function GetExtendModeX(): D2D1_EXTEND_MODE; stdcall;
-
     function GetExtendModeY(): D2D1_EXTEND_MODE; stdcall;
+
 
   end;
   IID_ID2D1BorderTransform = ID2D1BorderTransform;
@@ -789,10 +703,10 @@ type
   {$EXTERNALSYM ID2D1OffsetTransform}
   ID2D1OffsetTransform = interface(ID2D1TransformNode)
   ['{3fe6adea-7643-4f53-bd14-a0ce63f24042}']
-
+    // SDK native virtual methods.
     procedure SetOffset(offset: D2D1_POINT_2L); stdcall;
+    procedure GetOffset(out offset: D2D1_POINT_2L); stdcall;
 
-    function GetOffset(): D2D1_POINT_2L; stdcall;
 
   end;
   IID_ID2D1OffsetTransform = ID2D1OffsetTransform;
@@ -807,10 +721,10 @@ type
   {$EXTERNALSYM ID2D1BoundsAdjustmentTransform}
   ID2D1BoundsAdjustmentTransform = interface(ID2D1TransformNode)
   ['{90f732e2-5092-4606-a819-8651970baccd}']
+    // SDK native virtual methods.
+    procedure SetOutputBounds(outputBounds: PD2D1_RECT_L); stdcall;
+    procedure GetOutputBounds(outputBounds: PD2D1_RECT_L); stdcall;
 
-    procedure SetOutputBounds(outputBounds: D2D1_RECT_L); stdcall;
-
-    procedure GetOutputBounds(out outputBounds: D2D1_RECT_L); stdcall;
 
   end;
   IID_ID2D1BoundsAdjustmentTransform = ID2D1BoundsAdjustmentTransform;
@@ -826,19 +740,11 @@ type
   {$EXTERNALSYM ID2D1EffectImpl}
   ID2D1EffectImpl = interface(IUnknown)
   ['{a248fd3f-3e6c-4e63-9f03-7f68ecc91db9}']
+    // SDK native virtual methods.
+    function Initialize(effectContext: ID2D1EffectContext; transformGraph: ID2D1TransformGraph): HRESULT; stdcall;
+    function PrepareForRender(changeType: D2D1_CHANGE_TYPE): HRESULT; stdcall;
+    function SetGraph(transformGraph: ID2D1TransformGraph): HRESULT; stdcall;
 
-    // Initialize the effect with a context and a transform graph. The effect must
-    // populate the transform graph with a topology and can update it later.
-    function Initialize(effectContext: ID2D1EffectContext;
-                        transformGraph: ID2D1TransformGraph): HResult; stdcall;
-
-    // Initialize the effect with a context and a transform graph. The effect must
-    // populate the transform graph with a topology and can update it later.
-    function PrepareForRender(changeType: D2D1_CHANGE_TYPE): HResult; stdcall;
-
-    // Sets a new transform graph to the effect.  This happens when the number of
-    // inputs to the effect changes, if the effect support a variable number of inputs.
-    function SetGraph(transformGraph: ID2D1TransformGraph): HResult; stdcall;
 
   end;
   IID_ID2D1EffectImpl = ID2D1EffectImpl;
@@ -855,90 +761,29 @@ type
   {$EXTERNALSYM ID2D1EffectContext}
   ID2D1EffectContext = interface(IUnknown)
   ['{3d9f916b-27dc-4ad7-b4f1-64945340f563}']
-
-    procedure GetDpi(out dpiX: Single;
-                     out dpiY: Single); stdcall;
-
-    // Create a new effect, the effect must either be built in or previously registered
-    // through ID2D1Factory1.RegisterEffect.
-    function CreateEffect(const effectId: TGuid;
-                          out effect: ID2D1Effect): HResult; stdcall;
-
-    function GetMaximumSupportedFeatureLevel(featureLevels: D3D_FEATURE_LEVEL;
-                                             featureLevelsCount: UINT32;
-                                             out maximumSupportedFeatureLevel: D3D_FEATURE_LEVEL): HResult; stdcall;
-
-    // Create a transform node from the passed in effect.
-    function CreateTransformNodeFromEffect(effect: ID2D1Effect;
-                                           out transformNode: ID2D1TransformNode): HResult; stdcall;
-
-    function CreateBlendTransform(numInputs: UINT32;
-                                  blendDescription: D2D1_BLEND_DESCRIPTION;
-                                  out transform: ID2D1BlendTransform): HResult; stdcall;
-
-    function CreateBorderTransform(extendModeX: D2D1_EXTEND_MODE;
-                                   extendModeY: D2D1_EXTEND_MODE;
-                                   out transform: ID2D1BorderTransform): HResult; stdcall;
-
-    function CreateOffsetTransform(offset: D2D1_POINT_2L;
-                                   out transform: ID2D1OffsetTransform): HResult; stdcall;
-
-    function CreateBoundsAdjustmentTransform(outputRectangle: D2D1_RECT_L;
-                                             out transform: ID2D1BoundsAdjustmentTransform): HResult; stdcall;
-
-    function LoadPixelShader(const shaderId: TGuid;
-                             shaderBuffer: PByte;
-                             shaderBufferCount: UINT32): HResult; stdcall;
-
-    function LoadVertexShader(const resourceId: TGuid;
-                              shaderBuffer: PByte;
-                              shaderBufferCount: UINT32): HResult; stdcall;
-
-    function LoadComputeShader(const resourceId: TGuid;
-                               shaderBuffer: PByte;
-                               shaderBufferCount: UINT32): HResult; stdcall;
-
-    function IsShaderLoaded(const shaderId: TGuid): BOOL; stdcall;
-
-    function CreateResourceTexture(const resourceId: TGUID;
-                                   resourceTextureProperties: D2D1_RESOURCE_TEXTURE_PROPERTIES;
-                                   data: PByte;
-                                   strides: UINT32;
-                                   dataSize: UINT32;
-                                   out resourceTexture: ID2D1ResourceTexture): HResult; stdcall;
-
-    function FindResourceTexture(const resourceId: TGUID;
-                                 out resourceTexture: ID2D1ResourceTexture): HResult; stdcall;
-
-    function CreateVertexBuffer(vertexBufferProperties: D2D1_VERTEX_BUFFER_PROPERTIES;
-                                const resourceId: TGUID;
-                                customVertexBufferProperties: D2D1_CUSTOM_VERTEX_BUFFER_PROPERTIES;
-                                out buffer: ID2D1VertexBuffer): HResult; stdcall;
-
-    function FindVertexBuffer(const resourceId: TGUID;
-                              out buffer: ID2D1VertexBuffer): HResult; stdcall;
-
-    // Creates a color context from a color space.  If the space is Custom, the context
-    // is initialized from the profile/profileSize arguments.  Otherwise the context is
-    // initialized with the profile bytes associated with the space and
-    // profile/profileSize are ignored.
-    function CreateColorContext(space: D2D1_COLOR_SPACE;
-                                profile: PByte;
-                                profileSize: UINT32;
-                                out colorContext: ID2D1ColorContext): HResult; stdcall;
-
-    function CreateColorContextFromFilename(const filename: PWideChar;
-                                            out colorContext: ID2D1ColorContext): HResult; stdcall;
-
-    function CreateColorContextFromWicColorContext(wicColorContext: IWICColorContext;
-                                                   out colorContext: ID2D1ColorContext): HResult; stdcall;
-
-    function CheckFeatureSupport(feature: D2D1_FEATURE;
-                                 out featureSupportData: Pointer;
-                                 featureSupportDataSize: UINT32): HResult; stdcall;
-
-    // Indicates whether the buffer precision is supported by D2D.
+    // SDK native virtual methods.
+    procedure GetDpi(dpiX: PSingle; dpiY: PSingle); stdcall;
+    function CreateEffect(const effectId: TGUID; out effect: ID2D1Effect): HRESULT; stdcall;
+    function GetMaximumSupportedFeatureLevel(featureLevels: PD3D_FEATURE_LEVEL; featureLevelsCount: UINT32; maximumSupportedFeatureLevel: PD3D_FEATURE_LEVEL): HRESULT; stdcall;
+    function CreateTransformNodeFromEffect(effect: ID2D1Effect; out transformNode: ID2D1TransformNode): HRESULT; stdcall;
+    function CreateBlendTransform(numInputs: UINT32; blendDescription: PD2D1_BLEND_DESCRIPTION; out transform: ID2D1BlendTransform): HRESULT; stdcall;
+    function CreateBorderTransform(extendModeX: D2D1_EXTEND_MODE; extendModeY: D2D1_EXTEND_MODE; out transform: ID2D1BorderTransform): HRESULT; stdcall;
+    function CreateOffsetTransform(offset: D2D1_POINT_2L; out transform: ID2D1OffsetTransform): HRESULT; stdcall;
+    function CreateBoundsAdjustmentTransform(outputRectangle: PD2D1_RECT_L; out transform: ID2D1BoundsAdjustmentTransform): HRESULT; stdcall;
+    function LoadPixelShader(const shaderId: TGUID; shaderBuffer: PByte; shaderBufferCount: UINT32): HRESULT; stdcall;
+    function LoadVertexShader(const resourceId: TGUID; shaderBuffer: PByte; shaderBufferCount: UINT32): HRESULT; stdcall;
+    function LoadComputeShader(const resourceId: TGUID; shaderBuffer: PByte; shaderBufferCount: UINT32): HRESULT; stdcall;
+    function IsShaderLoaded(const shaderId: TGUID): BOOL; stdcall;
+    function CreateResourceTexture(resourceId: PGUID; resourceTextureProperties: PD2D1_RESOURCE_TEXTURE_PROPERTIES; data: PByte; strides: PUINT32; dataSize: UINT32; out resourceTexture: ID2D1ResourceTexture): HRESULT; stdcall;
+    function FindResourceTexture(resourceId: PGUID; out resourceTexture: ID2D1ResourceTexture): HRESULT; stdcall;
+    function CreateVertexBuffer(vertexBufferProperties: PD2D1_VERTEX_BUFFER_PROPERTIES; resourceId: PGUID; customVertexBufferProperties: PD2D1_CUSTOM_VERTEX_BUFFER_PROPERTIES; out buffer: ID2D1VertexBuffer): HRESULT; stdcall;
+    function FindVertexBuffer(resourceId: PGUID; out buffer: ID2D1VertexBuffer): HRESULT; stdcall;
+    function CreateColorContext(space: D2D1_COLOR_SPACE; profile: PByte; profileSize: UINT32; out colorContext: ID2D1ColorContext): HRESULT; stdcall;
+    function CreateColorContextFromFilename(filename: PWideChar; out colorContext: ID2D1ColorContext): HRESULT; stdcall;
+    function CreateColorContextFromWicColorContext(wicColorContext: IWICColorContext; out colorContext: ID2D1ColorContext): HRESULT; stdcall;
+    function CheckFeatureSupport(feature: D2D1_FEATURE; featureSupportData: Pointer; featureSupportDataSize: UINT32): HRESULT; stdcall;
     function IsBufferPrecisionSupported(bufferPrecision: D2D1_BUFFER_PRECISION): BOOL; stdcall;
+
 
   end;
   IID_ID2D1EffectContext = ID2D1EffectContext;

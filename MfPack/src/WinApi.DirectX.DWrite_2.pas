@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectWrite
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -82,6 +82,9 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
+
+type
+  PDWRITE_FONT_FAMILY_NAME = ^PWideChar;
 
 // Enums =======================================================================
 
@@ -188,9 +191,9 @@ type
                           baselineOriginY: Single;
                           orientationAngle: DWRITE_GLYPH_ORIENTATION_ANGLE;
                           measuringMode: DWRITE_MEASURING_MODE;
-                          glyphRun: DWRITE_GLYPH_RUN;
-                          glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
-                          clientDrawingEffect: IUnknown = IUnknown(Nil)): HResult; stdcall;
+                          glyphRun: PDWRITE_GLYPH_RUN;
+                          glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION;
+                          clientDrawingEffect: IUnknown = nil): HResult; stdcall; overload;
 
     // IDWriteTextLayout.Draw calls this function to instruct the client to draw
     // an underline.
@@ -222,8 +225,8 @@ type
                            baselineOriginX: Single;
                            baselineOriginY: Single;
                            orientationAngle: DWRITE_GLYPH_ORIENTATION_ANGLE;
-                           underline: DWRITE_UNDERLINE;
-                           clientDrawingEffect: IUnknown = IUnknown(Nil)): HResult; stdcall;
+                           underline: PDWRITE_UNDERLINE;
+                           clientDrawingEffect: IUnknown = nil): HResult; stdcall; overload;
 
     // IDWriteTextLayout.Draw calls this function to instruct the client to draw
     // a strikethrough.
@@ -250,8 +253,8 @@ type
                                baselineOriginX: Single;
                                baselineOriginY: Single;
                                orientationAngle: DWRITE_GLYPH_ORIENTATION_ANGLE;
-                               strikethrough: DWRITE_STRIKETHROUGH;
-                               clientDrawingEffect: IUnknown = IUnknown(Nil)): HResult; stdcall;
+                               strikethrough: PDWRITE_STRIKETHROUGH;
+                               clientDrawingEffect: IUnknown = nil): HResult; stdcall; overload;
 
     // IDWriteTextLayout.Draw calls this application callback when it needs to
     // draw an inline object.
@@ -284,10 +287,10 @@ type
                               originX: Single;
                               originY: Single;
                               orientationAngle: DWRITE_GLYPH_ORIENTATION_ANGLE;
-                              inlineObject: PIDWriteInlineObject;
+                              inlineObject: IDWriteInlineObject;
                               isSideways: BOOL;
                               isRightToLeft: BOOL;
-                              clientDrawingEffect: IUnknown = IUnknown(Nil)): HResult; stdcall;
+                              clientDrawingEffect: IUnknown = nil): HResult; stdcall; overload;
 
   end;
   IID_IDWriteTextRenderer1 = IDWriteTextRenderer1;
@@ -346,7 +349,7 @@ type
     function SetFontFallback(fontFallback: IDWriteFontFallback): HResult; stdcall;
 
     // Get the current font fallback object.
-    function GetFontFallback(fontFallback: IDWriteFontFallback): HResult; stdcall;
+    function GetFontFallback(out fontFallback: IDWriteFontFallback): HResult; stdcall;
 
   end;
   IID_IDWriteTextFormat1 = IDWriteTextFormat1;
@@ -373,7 +376,7 @@ type
     // line heights. Additionally, visible swashes and other graphic
     // adornments may extend outside the returned width and height.
     // </remarks>
-    function GetMetrics(out textMetrics: DWRITE_TEXT_METRICS1): HResult; stdcall;
+    function GetMetrics(out textMetrics: DWRITE_TEXT_METRICS1): HResult; stdcall; overload;
 
 
     // Set the preferred orientation of glyphs when using a vertical reading direction.
@@ -452,7 +455,7 @@ type
                                           isSideways: BOOL;
                                           originX: Single;
                                           originY: Single;
-                                          out transform: DWRITE_MATRIX): HResult; stdcall;
+                                          transform: PDWRITE_MATRIX): HResult; stdcall; overload;
 
     // Returns a list of typographic feature tags for the given script and language.
     // param name = fontFace: The font face to get features from.
@@ -471,7 +474,7 @@ type
                                     localeName: PWideChar;
                                     maxTagCount: UINT32;
                                     out actualTagCount: UINT32;
-                                    out tags: PDWRITE_FONT_FEATURE_TAG): HResult; stdcall;
+                                    tags: PDWRITE_FONT_FEATURE_TAG): HResult; stdcall;
 
     // Returns an array of which glyphs are affected by a given feature.
     // param name = fontFace: The font face to read glyph information from.
@@ -495,7 +498,7 @@ type
                                      localeName: PWideChar;
                                      featureTag: DWRITE_FONT_FEATURE_TAG;
                                      glyphCount: UINT32;
-                                     glyphIndices: UINT16;
+                                     glyphIndices: PWORD;
                                      featureApplies: PByte): HResult; stdcall;
 
   end;
@@ -543,9 +546,9 @@ type
                            baseWeight: DWRITE_FONT_WEIGHT;
                            baseStyle: DWRITE_FONT_STYLE;
                            baseStretch: DWRITE_FONT_STRETCH;
-                           mappedLength: UINT32;
+                           out mappedLength: UINT32;
                            mappedFont: PIDWriteFont;
-                           out scale: Single): HResult; stdcall;
+                           out scale: Single): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFontFallback = IDWriteFontFallback;
@@ -576,7 +579,7 @@ type
     // Standard HRESULT error code.
     function AddMapping(ranges: PDWRITE_UNICODE_RANGE;
                         rangesCount: UINT32;
-                        targetFamilyNames: PWideChar;
+                        targetFamilyNames: PDWRITE_FONT_FAMILY_NAME;
                         targetFamilyNamesCount: UINT32;
                         fontCollection: IDWriteFontCollection = Nil;
                         localeName: PWideChar = Nil;
@@ -593,7 +596,7 @@ type
     // param name = fontFallback: Created fallback list.
     // returns
     // Standard HRESULT error code.
-    function CreateFontFallback(fontFallback: IDWriteFontFallback): HResult; stdcall;
+    function CreateFontFallback(out fontFallback: IDWriteFontFallback): HResult; stdcall;
 
   end;
   IID_IDWriteFontFallbackBuilder = IDWriteFontFallbackBuilder;
@@ -727,7 +730,7 @@ type
                                          measuringMode: DWRITE_MEASURING_MODE;
                                          renderingParams: IDWriteRenderingParams;
                                          out renderingMode: DWRITE_RENDERING_MODE;
-                                         out gridFitMode: DWRITE_GRID_FIT_MODE): HResult; stdcall;
+                                         out gridFitMode: DWRITE_GRID_FIT_MODE): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFontFace2 = IDWriteFontFace2;
@@ -777,7 +780,7 @@ type
     // FALSE if the end of the sequence has been reached.
     // returns
     // Standard HRESULT error code.
-    function MoveNext(out hasRun: PBOOL): HResult; stdcall;
+    function MoveNext(out hasRun: BOOL): HResult; stdcall;
 
     // Gets the current color glyph run.
     // param name = colorGlyphRun: Receives a pointer to the color
@@ -787,7 +790,7 @@ type
     // Standard HRESULT error code. An error is returned if there is
     // no current glyph run, i.e., if MoveNext has not yet been called
     // or if the end of the sequence has been reached.
-    function GetCurrentRun(colorGlyphRun: DWRITE_COLOR_GLYPH_RUN): HResult; stdcall;
+    function GetCurrentRun(out colorGlyphRun: PDWRITE_COLOR_GLYPH_RUN): HResult; stdcall; overload;
 
   end;
   IID_IDWriteColorGlyphRunEnumerator = IDWriteColorGlyphRunEnumerator;
@@ -824,13 +827,13 @@ type
     // param name = fontFallback: The system fallback list.
     // returns
     // Standard HRESULT error code.
-    function GetSystemFontFallback(fontFallback: IDWriteFontFallback): HResult; stdcall;
+    function GetSystemFontFallback(out fontFallback: IDWriteFontFallback): HResult; stdcall;
 
     // Create a custom font fallback builder.
     // param name = fontFallbackBuilder: Empty font fallback builder.
     // returns
     // Standard HRESULT error code.
-    function CreateFontFallbackBuilder(fontFallbackBuilder: IDWriteFontFallbackBuilder): HResult; stdcall;
+    function CreateFontFallbackBuilder(out fontFallbackBuilder: IDWriteFontFallbackBuilder): HResult; stdcall;
 
     // Translates a glyph run to a sequence of color glyph runs, which can be
     // rendered to produce a color representation of the original "base" run.
@@ -859,12 +862,12 @@ type
     // run. Otherwise, returns a standard HRESULT error code.
     function TranslateColorGlyphRun(baselineOriginX: Single;
                                     baselineOriginY: Single;
-                                    glyphRun: DWRITE_GLYPH_RUN;
+                                    glyphRun: PDWRITE_GLYPH_RUN;
                                     glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION;
                                     measuringMode: DWRITE_MEASURING_MODE;
                                     worldToDeviceTransform: PDWRITE_MATRIX;
                                     colorPaletteIndex: UINT32;
-                                    out colorLayers: IDWriteColorGlyphRunEnumerator): HResult; stdcall;
+                                    out colorLayers: IDWriteColorGlyphRunEnumerator): HResult; stdcall; overload;
 
     // Creates a rendering parameters object with the specified properties.
     // param name = gamma: The gamma value used for gamma correction, which must be greater than zero and cannot exceed 256.
@@ -883,7 +886,7 @@ type
                                          pixelGeometry: DWRITE_PIXEL_GEOMETRY;
                                          renderingMode: DWRITE_RENDERING_MODE;
                                          gridFitMode: DWRITE_GRID_FIT_MODE;
-                                         out renderingParams: IDWriteRenderingParams2): HResult; stdcall;
+                                         out renderingParams: IDWriteRenderingParams2): HResult; stdcall; overload;
 
 
     // Creates a glyph run analysis object, which encapsulates information
@@ -900,7 +903,7 @@ type
     // param name = glyphRunAnalysis: Receives a pointer to the newly created object.
     // returns
     // Standard HRESULT error code.
-    function CreateGlyphRunAnalysis(glyphRun: DWRITE_GLYPH_RUN;
+    function CreateGlyphRunAnalysis(glyphRun: PDWRITE_GLYPH_RUN;
                                     transform: PDWRITE_MATRIX;
                                     renderingMode: DWRITE_RENDERING_MODE;
                                     measuringMode: DWRITE_MEASURING_MODE;
@@ -908,7 +911,7 @@ type
                                     antialiasMode: DWRITE_TEXT_ANTIALIAS_MODE;
                                     baselineOriginX: Single;
                                     baselineOriginY: Single;
-                                    out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall;
+                                    out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall; overload;
 
   end;
   IID_IDWriteFactory2 = IDWriteFactory2;

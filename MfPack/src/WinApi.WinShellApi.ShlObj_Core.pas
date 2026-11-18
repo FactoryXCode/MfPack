@@ -10,7 +10,7 @@
 // Release date: 30-04-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Shell api.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -30,7 +30,7 @@
 // - Do not use Delphi's native Winapi.ShlObj unit!
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,6 +73,7 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.WinApiTypes,
+  WinApi.WinError,
   WinApi.ComBaseApi,
   WinApi.Coml2Api,
   {ActiveX}
@@ -1082,6 +1083,7 @@ type
   {$EXTERNALSYM tagDTI_ADTIWUI}
 
   HPSXA = THANDLE;
+  PSHELLIMAGELIST = ^HIMAGELIST;
 
 // Import
 type
@@ -1823,15 +1825,18 @@ type
   {$EXTERNALSYM LPDATABLOCK_HEADER}
   LPDBLIST = ^DATABLOCK_HEADER;
   {$EXTERNALSYM LPDBLIST}
-  DATABLOCK_HEADER = record
+  {$ALIGN 1}
+  DATABLOCK_HEADER = packed record
     cbSize: DWORD;
     dwSignature: DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM DATABLOCK_HEADER}
 
   LPNT_CONSOLE_PROPS = ^NT_CONSOLE_PROPS;
   {$EXTERNALSYM LPNT_CONSOLE_PROPS}
-  NT_CONSOLE_PROPS = record
+  {$ALIGN 1}
+  NT_CONSOLE_PROPS = packed record
     dbh: DATABLOCK_HEADER;
     wFillAttribute: WORD;
     wPopupFillAttribute: WORD;
@@ -1854,50 +1859,61 @@ type
     bHistoryNoDup: BOOL;
     ColorTable: array[0..15] of COLORREF;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM NT_CONSOLE_PROPS}
 
   LPNT_FE_CONSOLE_PROPS = ^NT_FE_CONSOLE_PROPS;
   {$EXTERNALSYM LPNT_FE_CONSOLE_PROPS}
-  NT_FE_CONSOLE_PROPS = record
+  {$ALIGN 1}
+  NT_FE_CONSOLE_PROPS = packed record
     dbh: DATABLOCK_HEADER;
     uCodePage: UINT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM NT_FE_CONSOLE_PROPS}
 
   LPEXP_DARWIN_LINK = ^EXP_DARWIN_LINK;
   {$EXTERNALSYM LPEXP_DARWIN_LINK}
-  EXP_DARWIN_LINK = record
+  {$ALIGN 1}
+  EXP_DARWIN_LINK = packed record
     dbh: DATABLOCK_HEADER;
-    szDarwinID: array[0..MAX_PATH - 1] of CHAR;
+    szDarwinID: array[0..MAX_PATH - 1] of AnsiChar;
     szwDarwinID: array[0..MAX_PATH - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM EXP_DARWIN_LINK}
 
   LPEXP_SPECIAL_FOLDER = ^EXP_SPECIAL_FOLDER;
   {$EXTERNALSYM LPEXP_SPECIAL_FOLDER}
-  EXP_SPECIAL_FOLDER = record
+  {$ALIGN 1}
+  EXP_SPECIAL_FOLDER = packed record
     cbSize: DWORD;
     dwSignature: DWORD;
     idSpecialFolder: DWORD;
     cbOffset: DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM EXP_SPECIAL_FOLDER}
 
   LPEXP_SZ_LINK = ^EXP_SZ_LINK;
   {$EXTERNALSYM LPEXP_SZ_LINK}
-  EXP_SZ_LINK = record
+  {$ALIGN 1}
+  EXP_SZ_LINK = packed record
     cbSize: DWORD;
     dwSignature: DWORD;
-    szTarget: array[0..MAX_PATH - 1] of CHAR;
+    szTarget: array[0..MAX_PATH - 1] of AnsiChar;
     swzTarget: array[0..MAX_PATH - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM EXP_SZ_LINK}
 
-  EXP_PROPERTYSTORAGE = record
+  {$ALIGN 1}
+  EXP_PROPERTYSTORAGE = packed record
     cbSize: DWORD;
     dwSignature: DWORD;
     abPropertyStorage: array[0..0] of BYTE;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM EXP_PROPERTYSTORAGE}
 
   LPSHFOLDERCUSTOMSETTINGS = ^SHFOLDERCUSTOMSETTINGS;
@@ -1985,15 +2001,18 @@ type
 
   LPIDA = ^CIDA;
   {$EXTERNALSYM LPIDA}
-  CIDA = record
+  {$ALIGN 1}
+  CIDA = packed record
     cidl: UINT;
     aoffset: array[0..0] of UINT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM CIDA}
 
   LPFILEDESCRIPTORA = ^FILEDESCRIPTORA;
   {$EXTERNALSYM LPFILEDESCRIPTORA}
-  FILEDESCRIPTORA = record
+  {$ALIGN 1}
+  FILEDESCRIPTORA = packed record
     dwFlags: DWORD;
     clsid: CLSID;
     sizel: SIZEL;
@@ -2004,13 +2023,15 @@ type
     ftLastWriteTime: FILETIME;
     nFileSizeHigh: DWORD;
     nFileSizeLow: DWORD;
-    cFileName: array[0..MAX_PATH - 1] of CHAR;
+    cFileName: array[0..MAX_PATH - 1] of AnsiChar;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM FILEDESCRIPTORA}
 
   LPFILEDESCRIPTORW = ^FILEDESCRIPTORW;
   {$EXTERNALSYM LPFILEDESCRIPTORW}
-  FILEDESCRIPTORW = record
+  {$ALIGN 1}
+  FILEDESCRIPTORW = packed record
     dwFlags: DWORD;
     clsid: CLSID;
     sizel: SIZEL;
@@ -2023,6 +2044,7 @@ type
     nFileSizeLow: DWORD;
     cFileName: array[0..MAX_PATH - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM FILEDESCRIPTORW}
 
   {$IFDEF UNICODE}
@@ -2039,18 +2061,22 @@ type
 
   LPFILEGROUPDESCRIPTORA = ^FILEGROUPDESCRIPTORA;
   {$EXTERNALSYM LPFILEGROUPDESCRIPTORA}
-  FILEGROUPDESCRIPTORA = record
+  {$ALIGN 1}
+  FILEGROUPDESCRIPTORA = packed record
     cItems: UINT;
     fgd: array[0..0] of FILEDESCRIPTORA;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM FILEGROUPDESCRIPTORA}
 
   LPFILEGROUPDESCRIPTORW = ^FILEGROUPDESCRIPTORW;
   {$EXTERNALSYM LPFILEGROUPDESCRIPTORW}
-  FILEGROUPDESCRIPTORW = record
+  {$ALIGN 1}
+  FILEGROUPDESCRIPTORW = packed record
     cItems: UINT;
     fgd: array[0..0] of FILEDESCRIPTORW;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM FILEGROUPDESCRIPTORW}
 
   {$IFDEF UNICODE}
@@ -2067,35 +2093,43 @@ type
 
   LPDROPFILES = ^DROPFILES;
   {$EXTERNALSYM LPDROPFILES}
-  DROPFILES = record
+  {$ALIGN 1}
+  DROPFILES = packed record
     pFiles: DWORD;
     pt: POINT;
     fNC: BOOL;
     fWide: BOOL;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM DROPFILES}
 
-  FILE_ATTRIBUTES_ARRAY = record
+  {$ALIGN 1}
+  FILE_ATTRIBUTES_ARRAY = packed record
     cItems: UINT;
     dwSumFileAttributes: DWORD;
     dwProductFileAttributes: DWORD;
     rgdwFileAttributes: array[0..0] of DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM FILE_ATTRIBUTES_ARRAY}
 
-  DROPDESCRIPTION = record
+  {$ALIGN 1}
+  DROPDESCRIPTION = packed record
     _Type: DROPIMAGETYPE;
     szMessage: array[0..MAX_PATH - 1] of WCHAR;
     szInsert: array[0..MAX_PATH - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM DROPDESCRIPTION}
 
   PSHChangeNotifyEntry = ^_SHChangeNotifyEntry;
   {$EXTERNALSYM _SHChangeNotifyEntry}
-  _SHChangeNotifyEntry = record
+  {$ALIGN 1}
+  _SHChangeNotifyEntry = packed record
     pidl: PCIDLIST_ABSOLUTE;
     fRecursive: BOOL;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHChangeNotifyEntry}
   SHChangeNotifyEntry = _SHChangeNotifyEntry;
 
@@ -2109,42 +2143,51 @@ type
   OPENASINFO = _openasinfo;
   {$EXTERNALSYM OPENASINFO}
 
-  SHARDAPPIDINFO = record
+  {$ALIGN 1}
+  SHARDAPPIDINFO = packed record
     psi: IShellItem;
     pszAppID: PCWSTR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHARDAPPIDINFO}
   PSHARDAPPIDINFO = ^SHARDAPPIDINFO;
   {$EXTERNALSYM PSHARDAPPIDINFO}
 
-  SHARDAPPIDINFOIDLIST = record
+  {$ALIGN 1}
+  SHARDAPPIDINFOIDLIST = packed record
     pidl: PCIDLIST_ABSOLUTE;
     pszAppID: PCWSTR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHARDAPPIDINFOIDLIST}
   PSHARDAPPIDINFOIDLIST = ^SHARDAPPIDINFOIDLIST;
   {$EXTERNALSYM PSHARDAPPIDINFOIDLIST}
 
-  SHARDAPPIDINFOLINK = record
+  {$ALIGN 1}
+  SHARDAPPIDINFOLINK = packed record
     psl: IShellLink;
     pszAppID: PCWSTR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHARDAPPIDINFOLINK}
   PSHARDAPPIDINFOLINK = ^SHARDAPPIDINFOLINK;
   {$EXTERNALSYM PSHARDAPPIDINFOLINK}
 
   LPSHChangeDWORDAsIDList = ^SHChangeDWORDAsIDList;
   {$EXTERNALSYM LPSHChangeDWORDAsIDList}
+  {$ALIGN 1}
   SHChangeDWORDAsIDList = packed record
     cb: USHORT;
     dwItem1: DWORD;
     dwItem2: DWORD;
     cbZero: USHORT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHChangeDWORDAsIDList}
 
   LPSHChangeUpdateImageIDList = ^SHChangeUpdateImageIDList;
   {$EXTERNALSYM LPSHChangeUpdateImageIDList}
+  {$ALIGN 1}
   SHChangeUpdateImageIDList = packed record
     cb: USHORT;
     iIconIndex: Integer;
@@ -2154,6 +2197,7 @@ type
     szName: array[0..MAX_PATH - 1] of WCHAR;
     cbZero: USHORT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHChangeUpdateImageIDList}
 
   LPSHDESCRIPTIONID = ^SHDESCRIPTIONID;
@@ -2166,13 +2210,15 @@ type
 
   PAUTO_SCROLL_DATA = ^AUTO_SCROLL_DATA;
   {$EXTERNALSYM PAUTO_SCROLL_DATA}
-  AUTO_SCROLL_DATA = record
+  {$ALIGN 1}
+  AUTO_SCROLL_DATA = packed record
     iNextSample: Integer;
     dwLastScroll: DWORD;
     bFull: BOOL;
     pts: array[0..NUM_POINTS - 1] of POINT;
     dwTimes: array[0..NUM_POINTS - 1] of DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM AUTO_SCROLL_DATA}
 
 
@@ -2200,12 +2246,14 @@ type
 
   LPCABINETSTATE = ^CABINETSTATE;
   {$EXTERNALSYM LPCABINETSTATE}
+  {$ALIGN 1}
   CABINETSTATE = packed record
     cLength: WORD;
     nVersion: WORD;
     Bits: CABINETSTATE_BITS;
     fMenuEnumFilter: UINT;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM CABINETSTATE}
 
 
@@ -2458,6 +2506,7 @@ type
 
   LPSHELLSTATEA = ^SHELLSTATEA;
   {$EXTERNALSYM LPSHELLSTATEA}
+  {$ALIGN 1}
   SHELLSTATEA = packed record
     Bits1: SHELLSTATE_BITS1;
     dwWin95Unused: DWORD;
@@ -2468,6 +2517,7 @@ type
     uNotUsed: UINT;
     Bits2: SHELLSTATE_BITS2;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHELLSTATEA}
 
   LPSHELLSTATEW = ^SHELLSTATEW;
@@ -2517,37 +2567,44 @@ type
 
   LPSHELLFLAGSTATE = ^SHELLFLAGSTATE;
   {$EXTERNALSYM LPSHELLFLAGSTATE}
+  {$ALIGN 1}
   SHELLFLAGSTATE = packed record
     Bits: SHELLFLAGSTATE_BITS;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM SHELLFLAGSTATE}
 
   LPWALLPAPEROPT = ^WALLPAPEROPT;
   {$EXTERNALSYM LPWALLPAPEROPT}
   LPCWALLPAPEROPT = ^WALLPAPEROPT;
   {$EXTERNALSYM LPCWALLPAPEROPT}
-  WALLPAPEROPT = record
+  {$ALIGN 1}
+  WALLPAPEROPT = packed record
     dwSize: DWORD;
     dwStyle: DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM WALLPAPEROPT}
 
   LPCOMPONENTSOPT = ^COMPONENTSOPT;
   {$EXTERNALSYM LPCOMPONENTSOPT}
   LPCCOMPONENTSOPT = ^COMPONENTSOPT;
   {$EXTERNALSYM LPCCOMPONENTSOPT}
-  COMPONENTSOPT = record
+  {$ALIGN 1}
+  COMPONENTSOPT = packed record
     dwSize: DWORD;
     fEnableComponents: BOOL;
     fActiveDesktop: BOOL;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM COMPONENTSOPT}
 
   LPCOMPPOS = ^COMPPOS;
   {$EXTERNALSYM LPCOMPPOS}
   LPCCOMPPOS = ^COMPPOS;
   {$EXTERNALSYM LPCCOMPPOS}
-  COMPPOS = record
+  {$ALIGN 1}
+  COMPPOS = packed record
     dwSize: DWORD;
     iLeft: Integer;
     iTop: Integer;
@@ -2560,13 +2617,15 @@ type
     iPreferredLeftPercent: Integer;
     iPreferredTopPercent: Integer;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM COMPPOS}
 
   LPCOMPSTATEINFO = ^COMPSTATEINFO;
   {$EXTERNALSYM LPCOMPSTATEINFO}
   LPCCOMPSTATEINFO = ^COMPSTATEINFO;
   {$EXTERNALSYM LPCCOMPSTATEINFO}
-  COMPSTATEINFO = record
+  {$ALIGN 1}
+  COMPSTATEINFO = packed record
     dwSize: DWORD;
     iLeft: Integer;
     iTop: Integer;
@@ -2574,13 +2633,15 @@ type
     dwHeight: DWORD;
     dwItemState: DWORD;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM COMPSTATEINFO}
 
   LPIE4COMPONENT = ^IE4COMPONENT;
   {$EXTERNALSYM LPIE4COMPONENT}
   LPCIE4COMPONENT = ^IE4COMPONENT;
   {$EXTERNALSYM LPCIE4COMPONENT}
-  IE4COMPONENT = record
+  {$ALIGN 1}
+  IE4COMPONENT = packed record
     dwSize: DWORD;
     dwID: DWORD;
     iComponentType: Integer;
@@ -2592,13 +2653,15 @@ type
     wszSource: array[0..INTERNET_MAX_URL_LENGTH - 1] of WCHAR;
     wszSubscribedURL: array[0..INTERNET_MAX_URL_LENGTH - 1] of WCHAR;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM IE4COMPONENT}
 
   LPCOMPONENT = ^COMPONENT;
   {$EXTERNALSYM LPCOMPONENT}
   LPCCOMPONENT = ^COMPONENT;
   {$EXTERNALSYM LPCCOMPONENT}
-  COMPONENT = record
+  {$ALIGN 1}
+  COMPONENT = packed record
     dwSize: DWORD;
     dwID: DWORD;
     iComponentType: Integer;
@@ -2613,6 +2676,7 @@ type
     csiOriginal: COMPSTATEINFO;
     csiRestored: COMPSTATEINFO;
   end;
+  {$IFDEF WIN64}{$ALIGN 8}{$ELSE}{$ALIGN 1}{$ENDIF}
   {$EXTERNALSYM COMPONENT}
 
 
@@ -3435,7 +3499,7 @@ function SHChangeNotifyRegister(hwnd: HWND;
                                 fEvents: LONG;
                                 wMsg: UINT;
                                 cEntries: Integer;
-                                pshcne: SHChangeNotifyEntry): ULONG; stdcall;
+                                pshcne: PSHChangeNotifyEntry): ULONG; stdcall;
 {$EXTERNALSYM SHChangeNotifyRegister}
 
 function SHChangeNotifyDeregister(ulID: ULONG): BOOL; stdcall;
@@ -3443,7 +3507,7 @@ function SHChangeNotifyDeregister(ulID: ULONG): BOOL; stdcall;
 
 function SHChangeNotification_Lock(hChange: THANDLE;
                                    dwProcId: DWORD;
-                                   out pppidl: PIDLIST_ABSOLUTE;
+                                   out pppidl: PPIDLIST_ABSOLUTE;
                                    out plEvent: LONG): THANDLE; stdcall;
 {$EXTERNALSYM SHChangeNotification_Lock}
 
@@ -3537,11 +3601,11 @@ function DAD_SetDragImage(him: HIMAGELIST;
 {$EXTERNALSYM DAD_SetDragImage}
 
 function DAD_DragEnterEx(hwndTarget: HWND;
-                         const ptStart: POINT): BOOL; stdcall;
+                         ptStart: POINT): BOOL; stdcall;
 {$EXTERNALSYM DAD_DragEnterEx}
 
 function DAD_DragEnterEx2(hwndTarget: HWND;
-                          const ptStart: POINT;
+                          ptStart: POINT;
                           pdtObject: IDataObject): BOOL; stdcall;
 {$EXTERNALSYM DAD_DragEnterEx2}
 
@@ -3823,8 +3887,8 @@ function SHObjectProperties(hwnd: HWND;
 //                       options: UINT): DWORD; stdcall;
 //{$EXTERNALSYM SHFormatDrive}
 
-//procedure SHDestroyPropSheetExtArray(hpsxa: HPSXA); stdcall;
-//{$EXTERNALSYM SHDestroyPropSheetExtArray}
+procedure SHDestroyPropSheetExtArray(hpsxa: HPSXA); stdcall;
+{$EXTERNALSYM SHDestroyPropSheetExtArray}
 
 function SHAddFromPropSheetExtArray(hpsxa: HPSXA;
                                     lpfnAddPage: LPFNADDPROPSHEETPAGE;
@@ -3932,8 +3996,8 @@ function SHOpenWithDialog(hwndParent: HWND;
                           poainfo: POPENASINFO): HRESULT; stdcall;
 {$EXTERNALSYM SHOpenWithDialog}
 
-function Shell_GetImageLists(phiml: HIMAGELIST;
-                             phimlSmall: HIMAGELIST): BOOL; stdcall;
+function Shell_GetImageLists(phiml: PSHELLIMAGELIST;
+                             phimlSmall: PSHELLIMAGELIST): BOOL; stdcall;
 {$EXTERNALSYM Shell_GetImageLists}
 
 function Shell_GetCachedImageIndexA(pszIconPath: LPCSTR;
@@ -4571,7 +4635,6 @@ procedure SHUpdateImage;                 external Shell32Lib name 'SHUpdateImage
 procedure SHDestroyPropSheetExtArray;    external Shell32Lib name 'SHDestroyPropSheetExtArray' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHAddFromPropSheetExtArray;     external Shell32Lib name 'SHAddFromPropSheetExtArray' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHReplaceFromPropSheetExtArray; external Shell32Lib name 'SHReplaceFromPropSheetExtArray' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function OpenRegStream;                  external Shell32Lib name 'OpenRegStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHFindFiles;                    external Shell32Lib name 'SHFindFiles' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 procedure PathGetShortPath;              external Shell32Lib name 'PathGetShortPath' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function PathYetAnotherMakeUniqueName;   external Shell32Lib name 'PathYetAnotherMakeUniqueName' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -4579,13 +4642,10 @@ function Win32DeleteFile;                external Shell32Lib name 'Win32DeleteFi
 function SHRestricted;                   external Shell32Lib name 'SHRestricted' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SignalFileOpen;                 external Shell32Lib name 'SignalFileOpen' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function AssocGetDetailsOfPropKey;       external Shell32Lib name 'AssocGetDetailsOfPropKey' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHStartNetConnectionDialogA;    external Shell32Lib name 'SHStartNetConnectionDialogA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHStartNetConnectionDialogW;    external Shell32Lib name 'SHStartNetConnectionDialogW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$IFDEF UNICODE}
-function SHStartNetConnectionDialog;     external Shell32Lib name 'SHStartNetConnectionDialogW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ELSE}
-function SHStartNetConnectionDialog;     external Shell32Lib name 'SHStartNetConnectionDialogA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
 
 function SHDefExtractIconA;              external Shell32Lib name 'SHDefExtractIconA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -4620,7 +4680,6 @@ function SHShellFolderView_Message;   external Shell32Lib name 'SHShellFolderVie
 function SHCreateShellFolderView;     external Shell32Lib name 'SHCreateShellFolderView' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function CDefFolderMenu_Create2;      external Shell32Lib name 'CDefFolderMenu_Create2' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateDefaultContextMenu;  external Shell32Lib name 'SHCreateDefaultContextMenu' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHFind_InitMenuPopup;        external Shell32Lib name 'SHFind_InitMenuPopup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateShellFolderViewEx;   external Shell32Lib name 'SHCreateShellFolderViewEx' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 procedure SHGetSetSettings;          external Shell32Lib name 'SHGetSetSettings' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -4642,13 +4701,10 @@ function SHPathPrepareForWrite;      external Shell32Lib name 'SHPathPrepareForW
 function SHPropStgCreate;                external Shell32Lib name 'SHPropStgCreate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHPropStgReadMultiple;          external Shell32Lib name 'SHPropStgReadMultiple' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHPropStgWriteMultiple;         external Shell32Lib name 'SHPropStgWriteMultiple' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function SHCreateFileExtractIconA;       external Shell32Lib name 'SHCreateFileExtractIconA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function SHCreateFileExtractIconW;       external Shell32Lib name 'SHCreateFileExtractIconW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$IFDEF UNICODE}
-function SHCreateFileExtractIcon;        external Shell32Lib name 'SHCreateFileExtractIconW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ELSE}
-function SHCreateFileExtractIcon;        external Shell32Lib name 'SHCreateFileExtractIconA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
 
 function SHLimitInputEdit;                external Shell32Lib name 'SHLimitInputEdit' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -4670,7 +4726,6 @@ function ILRemoveLastID;             external Shell32Lib name 'ILRemoveLastID' {
 function ILIsEqual;                  external Shell32Lib name 'ILIsEqual' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function ILIsParent;                 external Shell32Lib name 'ILIsParent' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function ILSaveToStream;             external Shell32Lib name 'ILSaveToStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function ILLoadFromStream;           external Shell32Lib name 'ILLoadFromStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function ILLoadFromStreamEx;         external Shell32Lib name 'ILLoadFromStreamEx' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function ILCreateFromPathA;          external Shell32Lib name 'ILCreateFromPathA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function ILCreateFromPathW;          external Shell32Lib name 'ILCreateFromPathW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -4823,8 +4878,8 @@ begin
   Assert(aValue <= Mask);
 
   Offset := aIndex shr 8;
-  Bits := (Bits and (not (Mask shl Offset)))
-          or DWORD(aValue shl Offset);
+  Bits := (Bits and not (DWORD(Mask) shl Offset))
+          or ((DWORD(aValue) and DWORD(Mask)) shl Offset);
 end;
 
 
@@ -4900,6 +4955,120 @@ begin
   SetDWordBits(Flags,
                aIndex,
                aValue);
+end;
+
+
+// Preserve nil, empty strings and integer resource identifiers when adapting
+// ANSI entry points that are absent from current Windows x64 Shell32.
+function AnsiShellStringToWide(Value: LPCSTR;
+                              out Storage: UnicodeString;
+                              out Text: LPCWSTR): HRESULT;
+var
+  Count: Integer;
+begin
+  Storage := '';
+  Text := nil;
+  if NativeUInt(Value) <= $FFFF then
+  begin
+    Text := LPCWSTR(Value);
+    Exit(S_OK);
+  end;
+  Count := MultiByteToWideChar(CP_ACP,0,Value,-1,nil,0);
+  if Count = 0 then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  SetLength(Storage,Count);
+  if MultiByteToWideChar(CP_ACP,0,Value,-1,PWideChar(Storage),Count) = 0 then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  SetLength(Storage,Count - 1);
+  Text := PWideChar(Storage);
+  Result := S_OK;
+end;
+
+function SHStartNetConnectionDialogA(hwnd: HWND;
+                                     pszRemoteName: LPCSTR;
+                                     dwType: DWORD): HRESULT; stdcall;
+var
+  Storage: UnicodeString;
+  Text: LPCWSTR;
+begin
+  Result := AnsiShellStringToWide(pszRemoteName,Storage,Text);
+  if Result >= 0 then
+    Result := SHStartNetConnectionDialogW(hwnd,Text,dwType);
+end;
+
+function SHStartNetConnectionDialog(hwnd: HWND;
+                                    pszRemoteName: LPCTSTR;
+                                    dwType: DWORD): HRESULT; stdcall;
+begin
+  {$IFDEF UNICODE}
+  Result := SHStartNetConnectionDialogW(hwnd,pszRemoteName,dwType);
+  {$ELSE}
+  Result := SHStartNetConnectionDialogA(hwnd,pszRemoteName,dwType);
+  {$ENDIF}
+end;
+
+function SHCreateFileExtractIconA(pszFile: LPCSTR;
+                                  dwFileAttributes: DWORD;
+                                  const riid: IID;
+                                  out ppv): HRESULT; stdcall;
+var
+  Storage: UnicodeString;
+  Text: LPCWSTR;
+begin
+  Pointer(ppv) := nil;
+  Result := AnsiShellStringToWide(pszFile,Storage,Text);
+  if Result >= 0 then
+    Result := SHCreateFileExtractIconW(Text,dwFileAttributes,riid,ppv);
+end;
+
+function SHCreateFileExtractIcon(pszFile: LPCTSTR;
+                                 dwFileAttributes: DWORD;
+                                 const riid: IID;
+                                 out ppv): HRESULT; stdcall;
+begin
+  {$IFDEF UNICODE}
+  Result := SHCreateFileExtractIconW(pszFile,dwFileAttributes,riid,ppv);
+  {$ELSE}
+  Result := SHCreateFileExtractIconA(pszFile,dwFileAttributes,riid,ppv);
+  {$ENDIF}
+end;
+
+// The deprecated export is absent from current Windows. The SDK's validated
+// stream loader supplies the same owned PIDL result on supported targets.
+function ILLoadFromStream(pstm: IStream;
+                           var pidl: PIDLIST_RELATIVE): HRESULT; stdcall;
+begin
+  Result := ILLoadFromStreamEx(pstm,pidl);
+end;
+
+// COM interfaces returned directly by C must enter Pascal as an unmanaged
+// pointer. These adapters preserve the public managed-result API and ownership.
+function RawOpenRegStream(hkey: HKEY;
+                           pszSubkey: PCWSTR;
+                           pszValue: PCWSTR;
+                           grfMode: DWORD): Pointer; stdcall; external Shell32Lib name 'OpenRegStream';
+
+function OpenRegStream(hkey: HKEY;
+                       pszSubkey: PCWSTR;
+                       pszValue: PCWSTR;
+                       grfMode: DWORD): IStream; stdcall;
+begin
+  Result := nil;
+  Pointer(Result) := RawOpenRegStream(hkey,pszSubkey,pszValue,grfMode);
+end;
+
+function RawSHFindInitMenuPopup(hmenu: HMENU;
+                                hwndOwner: HWND;
+                                idCmdFirst: UINT;
+                                idCmdLast: UINT): Pointer; stdcall; external Shell32Lib name 'SHFind_InitMenuPopup';
+
+function SHFind_InitMenuPopup(hmenu: HMENU;
+                              hwndOwner: HWND;
+                              idCmdFirst: UINT;
+                              idCmdLast: UINT): IContextMenu; stdcall;
+begin
+  Result := nil;
+  Pointer(Result) := RawSHFindInitMenuPopup(hmenu,hwndOwner,idCmdFirst,idCmdLast);
 end;
 
 end.

@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Shell API.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -363,7 +363,7 @@ type
                                dwMask: FOLDERFLAGS;
                                dwFlags: FOLDERFLAGS;
                                fvMode: FOLDERVIEWMODE;
-                               pvid: Pointer;
+                               pvid: PGUID;
                                prcView: PRECT;
                                out phwndView: HWND): HRESULT; stdcall;
   end;
@@ -383,8 +383,8 @@ type
   ISearchBoxInfo = interface(IUnknown)
     ['{6AF6E03F-D664-4EF4-9626-F7E0ED36755E}']
 
-    function GetCondition(riid: REFIID;
-                          ppv: Pointer): HRESULT; stdcall;
+    function GetCondition(const riid: REFIID;
+                          out ppv: Pointer): HRESULT; stdcall;
 
     function GetText(out ppsz: LPWSTR): HRESULT; stdcall;
   end;
@@ -408,8 +408,9 @@ type
     function SetColor(vpcf: VPCOLORFLAGS; cr: COLORREF): HRESULT; stdcall;
     function GetColor(vpcf: VPCOLORFLAGS; out pcr: COLORREF): HRESULT; stdcall;
     function SetItemHeight(cyItemInPixels: Integer): HRESULT; stdcall;
-    function GetItemHeight(cyItemInPixels: Integer): HRESULT; stdcall;
-    function SetFont(plf: Pointer; bRedraw: BOOL): HRESULT; stdcall;
+    function GetItemHeight(out cyItemInPixels: Integer): HRESULT; stdcall;
+    function SetFont(plf: PLOGFONTW;
+                     bRedraw: BOOL): HRESULT; stdcall;
     function GetFont(out plf: LOGFONTW): HRESULT; stdcall;
     function SetTheme(pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
   end;
@@ -866,8 +867,6 @@ type
     function AddIDList(pidl: PCIDLIST_ABSOLUTE;
                        out ppidlAdded: PITEMID_CHILD): HRESULT; stdcall;
 
-    function RemoteAddIDList(pidl: PCIDLIST_ABSOLUTE;
-                             out ppidlAdded: PITEMID_CHILD): HRESULT; stdcall;
 
     function RemoveItem(psi: IShellItem): HRESULT; stdcall;
 
@@ -1230,19 +1229,19 @@ type
 
     function OnBeforeContextMenu(psi: IShellItem;
                                  const riid: REFIID;
-                                 ppv: Pointer): HRESULT; stdcall;
+                                 out ppv: Pointer): HRESULT; stdcall;
 
     // psi can only be NULL if NSTCS2_SHOWNULLSPACEMENU is set
     function OnAfterContextMenu(psi: IShellItem;
                                 pcmIn: IContextMenu;
                                 const riid: REFIID;
-                                ppv: Pointer): HRESULT; stdcall;
+                                out ppv: Pointer): HRESULT; stdcall;
 
     function OnBeforeStateImageChange(psi: IShellItem): HRESULT; stdcall;
 
     function OnGetDefaultIconIndex(psi: IShellItem;
-                                   piDefaultIcon: Integer;
-                                   piOpenIcon: Integer): HRESULT; stdcall;
+                                   out piDefaultIcon: Integer;
+                                   out piOpenIcon: Integer): HRESULT; stdcall;
   end;
   IID_INameSpaceTreeControlEvents = INameSpaceTreeControlEvents;
   {$EXTERNALSYM IID_INameSpaceTreeControlEvents}
@@ -1260,12 +1259,12 @@ type
                          psiaData: IShellItemArray;
                          fOutsideSource: BOOL;
                          grfKeyState: DWORD;
-                         pdwEffect: Pointer): HRESULT; stdcall;
+                         pdwEffect: PDWORD): HRESULT; stdcall;
 
     function OnDragOver(psiOver: IShellItem;
                         psiaData: IShellItemArray;
                         grfKeyState: DWORD;
-                        pdwEffect: Pointer): HRESULT; stdcall;
+                        pdwEffect: PDWORD): HRESULT; stdcall;
 
     function OnDragPosition(psiOver: IShellItem;
                             psiaData: IShellItemArray;
@@ -1276,7 +1275,7 @@ type
                     psiaData: IShellItemArray;
                     iPosition: Integer;
                     grfKeyState: DWORD;
-                    pdwEffect: Pointer): HRESULT; stdcall;
+                    pdwEffect: PDWORD): HRESULT; stdcall;
 
     function OnDropPosition(psiOver: IShellItem;
                             psiaData: IShellItemArray;
@@ -1314,18 +1313,34 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(INameSpaceTreeControlCustomDraw);'}
   {$EXTERNALSYM INameSpaceTreeControlCustomDraw}
+  PNSTCCUSTOMDRAW = ^NSTCCUSTOMDRAW;
+  NSTCCUSTOMDRAW = record
+    psi: Pointer; // Borrowed IShellItem*; this record does not own a reference.
+    uItemState: UINT;
+    nstcis: NSTCITEMSTATE;
+    pszText: LPCWSTR;
+    iImage: Integer;
+    himl: HIMAGELIST;
+    iLevel: Integer;
+    iIndent: Integer;
+  end;
+
   INameSpaceTreeControlCustomDraw = interface(IUnknown)
     ['{2D3BA758-33EE-42D5-BB7B-5F3431D86C78}']
-
-    // typedef struct NSTCCUSTOMDRAW
-    // TODO: IShellItem *psi
-    // TODO: UINT uItemState; // CDIS_xxx values
-    // TODO: NSTCITEMSTATE nstcis
-    // TODO: LPCWSTR pszText
-    // TODO: int iImage
-    // TODO: HIMAGELIST himl
-    // TODO: int iLevel
-    // TODO: int iIndent
+    function PrePaint(hdc: HDC;
+                      prc: PRect;
+                      plres: PLRESULT): HRESULT; stdcall;
+    function PostPaint(hdc: HDC;
+                       prc: PRect): HRESULT; stdcall;
+    function ItemPrePaint(hdc: HDC;
+                          prc: PRect;
+                          pnstccdItem: PNSTCCUSTOMDRAW;
+                          pclrText: PCOLORREF;
+                          pclrTextBk: PCOLORREF;
+                          plres: PLRESULT): HRESULT; stdcall;
+    function ItemPostPaint(hdc: HDC;
+                           prc: PRect;
+                           pnstccdItem: PNSTCCUSTOMDRAW): HRESULT; stdcall;
   end;
   IID_INameSpaceTreeControlCustomDraw = INameSpaceTreeControlCustomDraw;
   {$EXTERNALSYM IID_INameSpaceTreeControlCustomDraw}
@@ -1362,13 +1377,13 @@ type
   IBandHost = interface(IUnknown)
     ['{B9075C7C-D48E-403F-AB99-D6C77A1084AC}']
 
-    function CreateBand(rclsidBand: REFCLSID;
+    function CreateBand(const rclsidBand: REFCLSID;
                         fAvailable: BOOL;
                         fVisible: BOOL;
                         const riid: REFIID;
-                        ppv: Pointer): HRESULT; stdcall;
+                        out ppv: Pointer): HRESULT; stdcall;
 
-    function SetBandAvailability(rclsidBand: REFCLSID;
+    function SetBandAvailability(const rclsidBand: REFCLSID;
                                  fAvailable: BOOL): HRESULT; stdcall;
 
     function DestroyBand(const rclsidBand: REFCLSID): HRESULT; stdcall;

@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation, Core Audio etc.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -296,8 +296,8 @@ type
 
 
 {$IFDEF MFP_POLESTR}
- PPOLESTR = PWideString;
- POLESTR = PWideString;
+ PPOLESTR = ^POLESTR;
+ POLESTR = PWideChar;
 {$ENDIF}
 
 
@@ -1112,7 +1112,9 @@ type
 
 
 {$IFDEF MFP_HSTRING}
-  HSTRING = string;
+  // Opaque Windows Runtime string handle; release with WindowsDeleteString.
+  HSTRING = type Pointer;
+  PHSTRING = ^HSTRING;
   {$EXTERNALSYM HSTRING}
 {$ENDIF}
 
@@ -1474,9 +1476,9 @@ type
 
 
 {$IFDEF MFP_LPCRECT}
-  LPCRECT = TRect;
+  LPCRECT = PRect;
   {$EXTERNALSYM LPCRECT}
-  LPCRECTL = TRect;
+  LPCRECTL = PRect;
   {$EXTERNALSYM LPCRECTL}
 {$ENDIF}
 
@@ -2298,7 +2300,7 @@ type
   {$IFDEF WIN64}
     INT_PTR    = System.Int64;
     {$EXTERNALSYM INT_PTR}
-    UINT_PTR   = System.PUInt64;
+    UINT_PTR   = System.UInt64;
     {$EXTERNALSYM UINT_PTR}
     LONG_PTR   = System.Int64;
     {$EXTERNALSYM LONG_PTR}
@@ -2499,23 +2501,9 @@ type
   {$EXTERNALSYM DATE}
 {$ENDIF}
 
-{$IFDEF MFP_MFTIME}
-  {$IF COMPILERVERSION >= 11.0}
-    MFTIME = System.UInt64; // Time in 100 nanosecond slices
-    {$EXTERNALSYM MFTIME}
-  {$ENDIF}
-{$ELSE}
-  {$IFDEF WIN32}
-    MFTIME = System.Int64;
-    {$EXTERNALSYM MFTIME}
-  {$ENDIF}
-{$ELSE}
-  {$IFDEF WIN64}
-    MFTIME = System.UInt64;
-    {$EXTERNALSYM MFTIME}
-  {$ENDIF}
-{$ENDIF}
-
+{ Windows SDK defines MFTIME as signed LONGLONG on both architectures. }
+  MFTIME = Int64;
+  {$EXTERNALSYM MFTIME}
 
 {$IFDEF MFP_HNSTIME}
   PHnstime = ^HNSTIME;

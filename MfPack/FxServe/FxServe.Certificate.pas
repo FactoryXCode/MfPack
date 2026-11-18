@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Internal ACME certificate lifecycle manager for FxServe.
 //
 // Company: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)ws 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -29,7 +29,7 @@
 //          non-exportable machine keys and are never stored in configuration.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -3275,6 +3275,7 @@ end;
 const
   advapi32Lib = 'advapi32.dll';
   crypt32Lib = 'crypt32.dll';
+  ncryptLib = 'ncrypt.dll';
   httpapiLib = 'httpapi.dll';
   winhttpLib = 'winhttp.dll';
 
@@ -3302,7 +3303,7 @@ const
   function CertGetCertificateContextProperty; external crypt32Lib name 'CertGetCertificateContextProperty' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function CertGetNameStringW;                external crypt32Lib name 'CertGetNameStringW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function CryptAcquireCertificatePrivateKey; external crypt32Lib name 'CryptAcquireCertificatePrivateKey' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function NCryptFreeObject;                  external crypt32Lib name 'NCryptFreeObject' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function NCryptFreeObject;                  external ncryptLib name 'NCryptFreeObject' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function HttpInitialize; external httpapiLib name 'HttpInitialize' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function HttpTerminate;  external httpapiLib name 'HttpTerminate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

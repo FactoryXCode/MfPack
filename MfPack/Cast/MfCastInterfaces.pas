@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -119,6 +119,13 @@ type
     function Refresh(): HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function IsRunning(): Boolean;
+  end;
+
+  // Optional capability: poll for a specific receiver and finish as soon as
+  // its complete discovery reply arrives. Ordinary browsing remains available.
+  IMfCastTargetedDiscovery = interface
+    ['{1F64B299-7169-44E5-BF8C-A4A30A688A3D}']
+    function DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
   end;
 
   IMfCastTransport = interface

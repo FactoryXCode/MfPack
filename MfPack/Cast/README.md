@@ -1,4 +1,4 @@
-## MfPack Cast API 4.1.0
+## MfPack Cast API V2.2
   
 Version: 4.1.0 (Cast V2.2 wire protocol)
 
@@ -10,7 +10,7 @@ Version 4.1.0 adds paired Android TV standby/power control through `TMfCast`.
 - This release is updated for compiler version 17 up to 35.
 - SDK version: 10.0.28000.2705 (Win 11)
 - Requires Windows 10 or later.
-- Minimum supported MfPack version: 4.0.0
+- Minimum supported MfPack version: 4.1.0
   
 ---
   
@@ -188,6 +188,14 @@ and other receiver types require their own supported power-control mechanism.
 
 Read the full documentation in  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt.
   
+Notes:
+Pairing lookup resolves the current user's Windows LocalAppData known folder with
+package redirection disabled. A launcher-specific LOCALAPPDATA environment value
+therefore cannot hide credentials registered by another native Cast application.
+If an attempted power command is not acknowledged on its original remote session,
+the API reconnects solely to read power state. Confirmed off means success; an on
+or unknown state remains unconfirmed. The power command is never resent.
+
 Project: MfPack - Cast  
 Project location: MfPack  
   
@@ -195,7 +203,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 11/11/2026  
+Final release date: 18/11/2026  
   
-Copyright Â© FactoryX. All rights reserved.
-
+Copyright © FactoryX. All rights reserved.

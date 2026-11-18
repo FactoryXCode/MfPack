@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Media Foundation - CoreAudioApi - Windows Sonic
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: SpatialAudioClient API interface definition.
 //              of the Core Audio Interfaces
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -70,7 +70,7 @@ interface
 
 uses
   {WinApi}
-  WinApi.PropSys,
+  WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.WinMM.MMeApi,
   {ActiveX}
@@ -124,7 +124,9 @@ type
     AudioObjectType_BottomFrontRight = (1 SHL 14),
     AudioObjectType_BottomBackLeft   = (1 SHL 15),
     AudioObjectType_BottomBackRight  = (1 SHL 16),
-    AudioObjectType_BackCenter       = (1 SHL 17));
+    AudioObjectType_BackCenter       = (1 SHL 17),
+    AudioObjectType_StereoLeft       = (1 SHL 18),
+    AudioObjectType_StereoRight      = (1 SHL 19));
   {$EXTERNALSYM AudioObjectType}
 
 
@@ -145,7 +147,7 @@ type
 
   PSpatialAudioObjectRenderStreamActivationParams = ^SpatialAudioObjectRenderStreamActivationParams;
   SpatialAudioObjectRenderStreamActivationParams = record
-    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, stream activation will fail with SPTLAUDCLNT_E_NO_MORE_OBJECTS.
     MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStream
@@ -158,7 +160,7 @@ type
 
   PSpatialAudioObjectRenderStreamActivationParams2 = ^SpatialAudioObjectRenderStreamActivationParams2;
   SpatialAudioObjectRenderStreamActivationParams2 = record
-    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    ObjectFormat: PWAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
     StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
     MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, stream activation will fail with SPTLAUDCLNT_E_NO_MORE_OBJECTS.
     MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStream
@@ -182,7 +184,7 @@ type
     function GetCount(out count: UINT32): HRESULT; stdcall;
 
     function GetFormat(index: UINT32;
-                       out format: WAVEFORMATEX): HRESULT; stdcall;
+                       out format: PWAVEFORMATEX): HRESULT; stdcall;
     // This method returns format in order of importance, first format is the most favorable format
 
   end;
@@ -263,7 +265,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISpatialAudioObject);'}
   {$EXTERNALSYM ISpatialAudioObject}
-  ISpatialAudioObject = interface(IUnknown)
+  ISpatialAudioObject = interface(ISpatialAudioObjectBase)
   ['{DDE28967-521B-46E5-8F00-BD6F2BC8AB1D}']
 
 
@@ -447,20 +449,20 @@ type
     function GetSupportedAudioObjectFormatEnumerator(out enumerator: IAudioFormatEnumerator): HRESULT; stdcall;
     // List all supported object formats, the first on in the list is the most preferable format
     
-    function GetMaxFrameCount(objectFormat: WAVEFORMATEX;
+    function GetMaxFrameCount(objectFormat: PWAVEFORMATEX;
                               out frameCountPerBuffer: UINT32): HRESULT; stdcall;
     // Get max possible frame count per processing pass.
     // This value will change when the endpoint cadence gets changed
     // The value returned by this method can be used to allocate source buffer
     // Must specify same format which stream will be created
     
-    function IsAudioObjectFormatSupported(objectFormat: WAVEFORMATEX): HRESULT; stdcall;
+    function IsAudioObjectFormatSupported(objectFormat: PWAVEFORMATEX): HRESULT; stdcall;
     // Indicates whether ISpatialAudioObjectRenderStream supports a particular format
     // If format is not supported, this method returns AUDCLNT_E_UNSUPPORTED_FORMAT
     // otherwise it will return S_OK
     
     function IsSpatialAudioStreamAvailable(const streamUuid: REFIID;
-                                           auxiliaryInfo: PROPVARIANT): HRESULT; stdcall;
+                                           auxiliaryInfo: PPROPVARIANT): HRESULT; stdcall;
     // Check whether the currently active spatial rendering engine supports spatial audio
     // stream type such as ISpatialAudioObjectRenderStreamForMetadata.
     // Also check metadata format ID if supported by passing the GUID via auxiliaryInfo
@@ -474,7 +476,7 @@ type
     // If the format is not supported, the method returns SPTLAUDCLNT_E_METADATA_FORMAT_IS_NOT_SUPPORTED
     
     //
-    function ActivateSpatialAudioStream(activationParams: PROPVARIANT;  // activation parameters for the required streams for example SpatialAudioObjectRenderStreamForMetadataActivationParams
+    function ActivateSpatialAudioStream(activationParams: PPROPVARIANT;  // activation parameters for the required streams for example SpatialAudioObjectRenderStreamForMetadataActivationParams
                                         const riid: REFIID;                    // spatial audio stream interface UUID for example ISpatialAudioObjectRenderStreamForMetadata
                                         out stream: Pointer): HRESULT; stdcall;
     // Activate and initialize spatial audio stream using one of the spatial audio stream activation structures.
@@ -499,7 +501,7 @@ type
   ISpatialAudioClient2 = interface(ISpatialAudioClient)
   ['{caabe452-a66a-4bee-a93e-e320463f6a53}']
     function IsOffloadCapable(category: AUDIO_STREAM_CATEGORY;
-                             {out} isOffloadCapable: BOOL): HRESULT; stdcall;
+                             {out} out isOffloadCapable: BOOL): HRESULT; stdcall;
     // This method is called to find out if the audio rendering endpoint that the
     // ISpatialAudioClient2 was created on supports hardware offloaded audio processing.
     // The method also considers the capabilities of the AUDIO_STREAM_CATEGORY value that will
@@ -507,8 +509,8 @@ type
 
     function GetMaxFrameCountForCategory(category: AUDIO_STREAM_CATEGORY;
                                          offloadEnabled: BOOL;
-                                         objectFormat: WAVEFORMATEX;
-                                         {out} frameCountPerBuffer: UINT32): HRESULT; stdcall;
+                                         objectFormat: PWAVEFORMATEX;
+                                         {out} out frameCountPerBuffer: UINT32): HRESULT; stdcall;
     // Get max possible frame count per processing pass. This value will change if the endpoint cadence changes.
     // The value returned by this method can be used to allocate source buffer.
     // The caller must specify same AUDIO_STREAM_CATEGORY value and WAVEFORMATEX that will be used when creating the stream.

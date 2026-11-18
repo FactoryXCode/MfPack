@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Video for windows include file for WIN32.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -65,7 +65,7 @@
 //    can lead to mismatches that result in compilation or runtime errors.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -110,8 +110,6 @@ uses
   WinApi.CommDlg,
   WinApi.WinApiTypes,
   WinApi.WinError,
-  {Vcl}
-  Vcl.Dialogs,
   {WinMM}
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMeApi;
@@ -145,7 +143,7 @@ type
   //
   //****************************************************************************
 
-  function VideoForWindowsVersion(): DWord; pascal;
+  function VideoForWindowsVersion(): DWord; stdcall;
   {$EXTERNALSYM VideoForWindowsVersion}
 
   //****************************************************************************
@@ -893,10 +891,10 @@ const
   //************************************************************************
 
 
-  function ICGetDefaultQuality(hic: HIC): LRESULT;
+  function ICGetDefaultQuality(hic: HIC): DWORD;
   {$EXTERNALSYM ICGetDefaultQuality}
 
-  function ICGetDefaultKeyFrameRate(hic: HIC): LRESULT;
+  function ICGetDefaultKeyFrameRate(hic: HIC): DWORD;
   {$EXTERNALSYM ICGetDefaultKeyFrameRate}
 
   //************************************************************************
@@ -931,10 +929,11 @@ const
                       lpBits: Pointer;                         // frame data to compress
                       {_Out_opt_} lpckid: PDWORD;              // ckid for data in AVI file
                       {_Out_opt_} lpdwFlags: PDWORD;           // flags in the AVI index.
+                      lFrameNum: LONG;
                       dwFrameSize: DWORD;                      // reqested size in bytes. (if non zero)
                       dwQuality: DWORD;                        // quality within one frame
                       {_In_opt_} lpbiPrev: PBITMAPINFOHEADER;  // format of previous frame
-                      lpPrev: Pointer): DWORD; stdcall;
+                      lpPrev: Pointer): DWORD; cdecl;
 
   //
   //  ICCompressBegin()
@@ -1013,7 +1012,7 @@ const
                                                                 // biSizeImage has the chunk size
                         lpData: Pointer;                        // data
                         lpbi: PBITMAPINFOHEADER;                // DIB to decompress to
-                        {_Out_} lpBits: Pointer): DWord; stdcall;
+                        {_Out_} lpBits: Pointer): DWord; cdecl;
   {$EXTERNALSYM ICDecompress}
 
   //
@@ -1187,7 +1186,7 @@ const
                        dxSrc: Integer;
                        dySrc: Integer;
                        dwRate: DWORD;             // frames/second = (dwRate/dwScale)
-                       dwScale: DWORD): DWORD; stdcall;
+                       dwScale: DWORD): DWORD; cdecl;
 
   //
   //  ICDraw()
@@ -1200,7 +1199,7 @@ const
                   lpFormat: Pointer;                // format of frame to decompress
                   lpData: Pointer;                  // frame data to decompress
                   cbData: DWORD;                    // size of data
-                  lTime: LONG): DWord; stdcall;
+                  lTime: LONG): DWord; cdecl;
 
 
   // ICMessage is not supported on Win32, so provide a static inline function
@@ -1286,7 +1285,7 @@ const
   // ICMessage is not supported on NT
   function ICSetStatusProc(hic: HIC;
                            dwFlags: DWORD;
-                           lParam: DWORD;
+                           lParam: LPARAM;
                            fpfnStatus: FICStatusProc): LRESULT;
 {
     ICSETSTATUSPROC ic;
@@ -1344,7 +1343,7 @@ const
                            lpBits: Pointer;                  // data to compress
                            {_In_opt_} lpbiOut: PBITMAPINFO;  // compress to this (NULL ==> default)
                            lQuality: LONG;                   // quality to use
-                           {_Inout_opt_} plSize: LONG): THandle; stdcall;
+                           {_Inout_opt_} plSize: PLONG): THandle; stdcall;
   {$EXTERNALSYM ICImageCompress}
 
   function ICImageDecompress({_In_opt_} hic: HIC;  // compressor to use
@@ -1681,7 +1680,7 @@ const
 
 
   procedure StretchDIB(biDst: PBITMAPINFOHEADER;
-	                     {_Out_} lpDst: Pointer;
+                       {_Out_} lpDst: Pointer;
                        DstX: Integer;
                        DstY: Integer;
                        DstXE: Integer;
@@ -1780,9 +1779,9 @@ const
   {$EXTERNALSYM listtypeSTREAMHEADER}
   ckidSTREAMHEADER        = ord('s') or (ord('t') shl 8) or (ord('r') shl 16) or (ord('h') shl 24);
   {$EXTERNALSYM ckidSTREAMHEADER}
-  ckidSTREAMFORMAT        = ord('s') or (ord('t') shl 8) or (ord('r') shl 16) or (ord('h') shl 24);
+  ckidSTREAMFORMAT        = $66727473;
   {$EXTERNALSYM ckidSTREAMFORMAT}
-  ckidSTREAMHANDLERDATA   = ord('s') or (ord('t') shl 8) or (ord('r') shl 16) or (ord('h') shl 24);
+  ckidSTREAMHANDLERDATA   = $64727473;
   {$EXTERNALSYM ckidSTREAMHANDLERDATA}
   ckidSTREAMNAME		      = ord('s') or (ord('t') shl 8) or (ord('r') shl 16) or (ord('n') shl 24);
   {$EXTERNALSYM ckidSTREAMNAME}
@@ -1833,10 +1832,10 @@ const
 
   // Macro to get stream number out of a FOURCC ckid
 
-  function FromHex(n: Byte): Byte;
+  function FromHex(n: Byte): LONG;
   {$EXTERNALSYM FromHex}
 
-  function StreamFromFOURCC(fcc: FOURCC): Byte;
+  function StreamFromFOURCC(fcc: FOURCC): WORD;
   {$EXTERNALSYM StreamFromFOURCC}
 
   // Macro to get TWOCC chunk type out of a FOURCC ckid
@@ -1975,12 +1974,19 @@ type
 
 type
 
+  {$POINTERMATH ON}
+  PAVIPaletteEntry = ^PALETTEENTRY;
+  {$POINTERMATH OFF}
+
   PAVIPALCHANGE = ^AVIPALCHANGE;
   AVIPALCHANGE = record
     bFirstEntry: Byte;                       { first entry to change }
     bNumEntries: Byte;                       { # entries to change (0 if 256) }
     wFlags: WORD;                            { Mostly to preserve alignment... }
-    peNew: array[0..0] of PALETTEENTRY;      { New color specifications }
+  private
+    function GetPaletteEntries(): PAVIPaletteEntry; inline;
+  public
+    property peNew: PAVIPaletteEntry read GetPaletteEntries;
   end;
   {$EXTERNALSYM AVIPALCHANGE}
 
@@ -2183,7 +2189,7 @@ const
 
 type
 
-  AVISAVECALLBACK = function(arg1: Integer): BOOL; pascal;
+  AVISAVECALLBACK = function(arg1: Integer): BOOL; stdcall;
 
   //************************************************************************/
   // Declaration for the AVICOMPRESSOPTIONS structure.  Make sure it 	     */
@@ -2206,6 +2212,7 @@ type
   end;
   {$EXTERNALSYM AVICOMPRESSOPTIONS}
   LPAVICOMPRESSOPTIONS = ^AVICOMPRESSOPTIONS;
+  PPAVICOMPRESSOPTIONS = ^LPAVICOMPRESSOPTIONS;
   {$EXTERNALSYM LPAVICOMPRESSOPTIONS}
 
   //
@@ -2235,7 +2242,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAVIStream);'}
   {$EXTERNALSYM IAVIStream}
   IAVIStream = interface(IUnknown)
-  ['{00020021-0000-0000-0000-C00000000046}']
+  ['{00020021-0000-0000-C000-000000000046}']
     // *** IAVIStream methods ***
     function Create(lParam1: LPARAM;
                     lParam2: LPARAM): HResult; stdcall;
@@ -2247,27 +2254,27 @@ type
                         lFlags: LONG): LONG; stdcall;
 
     function ReadFormat(lPos: LONG;
-			                  {_Out_} lpFormat: Pointer;
+                        {_Out_} lpFormat: Pointer;
                         var lpcbFormat: LONG): HResult; stdcall;
 
     function SetFormat(lPos: LONG;
-			                 lpFormat: Pointer;
+                       lpFormat: Pointer;
                        cbFormat: LONG): HResult; stdcall;
 
     function Read(lStart: LONG;
                   lSamples: LONG;
-			            {_Out_} lpBuffer: Pointer;
+                  {_Out_} lpBuffer: Pointer;
                   cbBuffer: LONG;
-			            var plBytes: LONG;
-                  var plSamples: LONG): HResult; stdcall;
+                  plBytes: PLONG;
+                  plSamples: PLONG): HResult; stdcall;
 
     function Write(lStart: LONG;
                    lSamples: LONG;
-			             lpBuffer: Pointer;
+                   lpBuffer: Pointer;
                    cbBuffer: LONG;
-			             dwFlags: DWORD;
-			             var plSampWritten: LONG;
-			             var plBytesWritten: LONG): HResult; stdcall;
+                   dwFlags: DWORD;
+                   plSampWritten: PLONG;
+                   plBytesWritten: PLONG): HResult; stdcall;
 
     function Delete(lStart: LONG;
                     lSamples: LONG): HResult; stdcall;
@@ -2280,8 +2287,8 @@ type
                        lp: Pointer;
                        cb: LONG): HResult; stdcall;
 
-    function SetInfo(lpInfo: TAVISTREAMINFO;
-			               cbInfo: LONG): HResult; stdcall;
+    function SetInfo(lpInfo: LPAVISTREAMINFO;
+                     cbInfo: LONG): HResult; stdcall;
 
   end;
   IID_IAVIStream = IAVIStream;
@@ -2291,12 +2298,12 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAVIStreaming);'}
   {$EXTERNALSYM IAVIStreaming}
   IAVIStreaming = interface(IUnknown)
-  ['{00020022-0000-0000-0000-C00000000046}']
+  ['{00020022-0000-0000-C000-000000000046}']
     // *** IAVIStreaming methods ***
     function _Begin(lStart: LONG; 	    // start of what we expect
-						                            // to play
-		                lEnd: LONG; 		    // expected end, or -1
-		                lRate: LONG         // Should this be a float?
+                    // to play
+                    lEnd: LONG; 		    // expected end, or -1
+                    lRate: LONG         // Should this be a float?
                     ): HResult; stdcall;
 
     function _End(): HResult; stdcall;
@@ -2311,26 +2318,26 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAVIEditStream);'}
   {$EXTERNALSYM IAVIEditStream}
   IAVIEditStream = interface(IUnknown)
-  ['{00020024-0000-0000-0000-C00000000046}']
+  ['{00020024-0000-0000-C000-000000000046}']
     // *** IAVIEditStream methods ***
     function Cut(var plStart: LONG;
-			           var plLength: LONG;
-			           {_Outptr_} ppResult: PAVIStream): HResult; stdcall;
+                 var plLength: LONG;
+                 {_Outptr_} ppResult: PAVIStream): HResult; stdcall;
 
     function Copy(var plStart: LONG;
-			            var plLength: LONG;
-			            out ppResult: PAVIStream): HResult; stdcall;
+                  var plLength: LONG;
+                  out ppResult: IAVIStream): HResult; stdcall;
 
     function Paste(var plPos: LONG;
-			             var plLength: LONG;
-			             var pstream: IAVIStream;
-			             lStart: LONG;
-			             lEnd: LONG): HResult; stdcall;
+                   var plLength: LONG;
+                   pstream: IAVIStream;
+                   lStart: LONG;
+                   lEnd: LONG): HResult; stdcall;
 
     function Clone({_Outptr_} ppResult: PAVIStream): HResult; stdcall;
 
-    function SetInfo(lpInfo: TAVISTREAMINFO;
-			               cbInfo: LONG): HResult; stdcall;
+    function SetInfo(lpInfo: LPAVISTREAMINFO;
+                     cbInfo: LONG): HResult; stdcall;
 
   end;
   IID_IAVIEditStream = IAVIEditStream;
@@ -2352,17 +2359,17 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAVIFile);'}
   {$EXTERNALSYM IAVIFile}
   IAVIFile = interface(IUnknown)
-  ['{00020020-0000-0000-0000-C00000000046}']
+  ['{00020020-0000-0000-C000-000000000046}']
     // *** IAVIFile methods ***
-    function Info(pfi: TAVIFILEINFO;
+    function Info(pfi: LPAVIFILEINFO;
                   lSize: LONG): HResult; stdcall;
 
     function GetStream({_Outptr_} ppStream: PAVIStream;
-				               fccType: DWORD;
+                       fccType: DWORD;
                        lParam: LONG): HResult; stdcall;
 
     function CreateStream({_Outptr_} ppStream: PAVIStream;
-                          psi: TAVISTREAMINFO): HResult; stdcall;
+                          psi: LPAVISTREAMINFO): HResult; stdcall;
 
     function WriteData(ckid: DWORD;
                        lpData: Pointer;
@@ -2384,12 +2391,12 @@ type
   //****** GetFrame Interface *******************************************
 
 
-  PGETFRAME = ^IGetFrame;
+  PGETFRAME = Pointer; // Native decompression handle; close with AVIStreamGetFrameClose.
   {$EXTERNALSYM PGETFRAME}
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IGetFrame);'}
   {$EXTERNALSYM IGetFrame}
   IGetFrame = interface(IUnknown)
-  ['{00020023-0000-0000-0000-C00000000046}']
+  ['{00020023-0000-0000-C000-000000000046}']
     // *** IGetFrame methods ***
 
     function GetFrame(lPos: LONG): PBitmapInfoHeader; stdcall; // See: AVIStreamGetFrame method and
@@ -2404,11 +2411,11 @@ type
     function _End(): HResult; stdcall;
 
     function SetFormat(lpbi: PBITMAPINFOHEADER;
-                      {_In_opt_} lpBits: Pointer;
-                      x: Integer;
-                      y: Integer;
-                      dx: Integer;
-                      dy: Integer): HResult; stdcall;
+                       {_In_opt_} lpBits: Pointer;
+                       x: Integer;
+                       y: Integer;
+                       dx: Integer;
+                       dy: Integer): HResult; stdcall;
 
 //  STDMETHOD(DrawFrameStart) (THIS) PURE;  deprecated
 //  STDMETHOD(DrawFrame) (THIS_ _In_ LONG lPos, HDC hdc, _In_ int x, _In_ int y, _In_ int dx, _In_ int dy) PURE; deprecated
@@ -2423,10 +2430,10 @@ type
 
 const
 
-  CLSID_AVIFile: TGUID = '{00020000-0000-0000-0000-C00000000046}';
+  CLSID_AVIFile: TGUID = '{00020000-0000-0000-C000-000000000046}';
 
 {$IFNDEF UNICODE}
-  CLSID_AVISimpleUnMarshal: TGUID = '{00020009-0000-0000-0000-C00000000046}';
+  CLSID_AVISimpleUnMarshal: TGUID = '{00020009-0000-0000-C000-000000000046}';
   {$EXTERNALSYM CLSID_AVISimpleUnMarshal}
 {$ENDIF}
 
@@ -2456,20 +2463,20 @@ const
 
   function AVIFileOpenW({_Outptr_} ppfile: PAVIFILE;
                         szFile: PWideChar;
-			                  uMode: UINT;
+                        uMode: UINT;
                         {_In_opt_} lpHandler: LPCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIFileOpenW}
 
   function AVIFileOpenA({_Outptr_} ppfile: PAVIFILE;
                         szFile: PAnsiChar;
-			                  uMode: UINT;
+                        uMode: UINT;
                         {_In_opt_} lpHandler: LPCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIFileOpenA}
 
   { unicode }
   function AVIFileOpen({_Outptr_} ppfile: PAVIFILE;
                        szFile: PWideChar;
-			                 uMode: UINT;
+                       uMode: UINT;
                        {_In_opt_} lpHandler: LPCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIFileOpen}
 
@@ -2501,32 +2508,32 @@ const
 {$IFDEF UNICODE}
   function AVIFileCreateStreamW(pfile: IAVIFile;
                                 {_Outptr_} ppavi: PAVIStream;
-                                psi: _AVISTREAMINFOW): HResult; stdcall;
+                                psi: LPAVISTREAMINFOW): HResult; stdcall;
   {$EXTERNALSYM AVIFileCreateStreamW}
 {$ELSE}
   function AVIFileCreateStreamA(pfile: IAVIFile;
                                 {_Outptr_} ppavi: PAVIStream;
-                                psi: AVISTREAMINFOA): HResult; stdcall;
+                                psi: LPAVISTREAMINFOA): HResult; stdcall;
   {$EXTERNALSYM AVIFileCreateStreamA}
 {$ENDIF}
 
   { unicode }
   function AVIFileCreateStream(pfile: IAVIFile;
                                {_Outptr_} ppavi: PAVIStream;
-                               psi: TAVISTREAMINFO): HResult; stdcall;
+                               psi: LPAVISTREAMINFO): HResult; stdcall;
   {$EXTERNALSYM AVIFileCreateStream}
 
 
   function AVIFileWriteData(pfile: IAVIFile;
-					                  ckid: DWORD;
-					                  lpData: Pointer;
-					                  cbData: LONG): HResult; stdcall;
+                            ckid: DWORD;
+                            lpData: Pointer;
+                            cbData: LONG): HResult; stdcall;
   {$EXTERNALSYM AVIFileWriteData}
 
   function AVIFileReadData(pfile: IAVIFile;
-					                 ckid: DWORD;
-					                 {_Out_} lpData: Pointer;
-					                 {_Inout_} lpcbData: PLONG): HResult; stdcall;
+                           ckid: DWORD;
+                           {_Out_} lpData: Pointer;
+                           {_Inout_} lpcbData: PLONG): HResult; stdcall;
   {$EXTERNALSYM AVIFileReadData}
 
   function AVIFileEndRecord(pfile: IAVIFile): HResult; stdcall;
@@ -2542,19 +2549,19 @@ const
 
 {$IFDEF UNICODE}
   function AVIStreamInfoW(pavi: IAVIStream;
-                          {_Out_} psi: _AVISTREAMINFOW;
+                          {_Out_} out psi: _AVISTREAMINFOW;
                           lSize: LONG): HResult; stdcall;
   {$EXTERNALSYM AVIStreamInfoW}
 {$ELSE}
   function AVIStreamInfoA(pavi: IAVIStream;
-                          {_Out_} psi: _AVISTREAMINFOA;
+                          {_Out_} out psi: _AVISTREAMINFOA;
                           lSize: LONG): HResult; stdcall;
   {$EXTERNALSYM AVIStreamInfoA}
 {$ENDIF}
 
   { unicode }
   function AVIStreamInfo(pavi: IAVIStream;
-                         {_Out_} psi: TAVISTREAMINFO;
+                         {_Out_} out psi: TAVISTREAMINFO;
                          lSize: LONG): HResult; stdcall;
   {$EXTERNALSYM AVIStreamInfo}
 
@@ -2589,12 +2596,12 @@ const
   {$EXTERNALSYM AVIStreamWriteData}
 
   function AVIStreamRead(pavi: IAVIStream;
-			                   lStart: LONG;
-			                   lSamples: LONG;
-			                   {_Out_} lpBuffer: Pointer;
-			                   cbBuffer: LONG;
-			                   {_Out_opt_} plBytes: PLONG;
-			                   {_Out_opt_} plSamples: PLONG): HResult; stdcall;
+                         lStart: LONG;
+                         lSamples: LONG;
+                         {_Out_} lpBuffer: Pointer;
+                         cbBuffer: LONG;
+                         {_Out_opt_} plBytes: PLONG;
+                         {_Out_opt_} plSamples: PLONG): HResult; stdcall;
   {$EXTERNALSYM AVIStreamRead}
 
 const
@@ -2603,13 +2610,13 @@ const
   {$EXTERNALSYM AVISTREAMREAD_CONVENIENT}
 
   function AVIStreamWrite(pavi: IAVIStream;
-			                    lStart: LONG;
+                          lStart: LONG;
                           lSamples: LONG;
-			                    lpBuffer: Pointer;
+                          lpBuffer: Pointer;
                           cbBuffer: LONG;
                           dwFlags: DWORD;
-			                    var plSampWritten: LONG;
-			                    var plBytesWritten: LONG): HResult; stdcall;
+                          var plSampWritten: LONG;
+                          var plBytesWritten: LONG): HResult; stdcall;
   {$EXTERNALSYM AVIStreamWrite}
 
   // Right now, these just use AVIStreamInfo() to get information, then
@@ -2643,14 +2650,14 @@ const
   //
 
   function AVIStreamGetFrameOpen(pavi: IAVIStream;
-					                       {_In_opt_} lpbiWanted: PBITMAPINFOHEADER): PGETFRAME; stdcall;
+                                 {_In_opt_} lpbiWanted: PBITMAPINFOHEADER): PGETFRAME; stdcall;
   {$EXTERNALSYM AVIStreamGetFrameOpen}
 
-  function AVIStreamGetFrame(pg: IGetFrame;
+  function AVIStreamGetFrame(pg: PGETFRAME;
                              lPos: LONG): Pointer; stdcall;
   {$EXTERNALSYM AVIStreamGetFrame}
 
-  function AVIStreamGetFrameClose(pg: IGetFrame): HResult; stdcall;
+  function AVIStreamGetFrameClose(pg: PGETFRAME): HResult; stdcall;
   {$EXTERNALSYM AVIStreamGetFrameClose}
 
 
@@ -2664,17 +2671,17 @@ const
 {$IFDEF UNICODE}
   function AVIStreamOpenFromFileW({_Outptr_} ppavi: PAVIStream;
                                   szFile: PWideChar;
-			                            fccType: DWORD;
+                                  fccType: DWORD;
                                   lParam: LONG;
-			                            mode: UINT;
+                                  mode: UINT;
                                   {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIStreamOpenFromFileW}
 {$ELSE}
   function AVIStreamOpenFromFileA({_Outptr_} ppavi: PAVIStream;
                                   szFile: PAnsiChar;
-			                            fccType: DWORD;
+                                  fccType: DWORD;
                                   lParam: LONG;
-			                            mode: UINT;
+                                  mode: UINT;
                                   {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIStreamOpenFromFileA}
 {$ENDIF}
@@ -2682,9 +2689,9 @@ const
   { unicode }
   function AVIStreamOpenFromFile({_Outptr_} ppavi: PAVIStream;
                                  szFile: PWideChar;
-			                           fccType: DWORD;
+                                 fccType: DWORD;
                                  lParam: LONG;
-			                           mode: UINT;
+                                 mode: UINT;
                                  {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIStreamOpenFromFile}
 
@@ -2692,7 +2699,7 @@ const
   function AVIStreamCreate({_Outptr_} ppavi: PAVIStream;
                            lParam1: LONG;
                            lParam2: LONG;
-		                       {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
+                           {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIStreamCreate}
 
 
@@ -2751,7 +2758,7 @@ const
   function AVIStreamClose(pavi: IAVIStream): DWord; stdcall; // = function AVIStreamRelease
   {$EXTERNALSYM AVIStreamClose}
 
-  function AVIFileClose(pavi: IAVIStream): DWord; stdcall; // = function AVIFileRelease
+  function AVIFileClose(pavi: IAVIFile): DWord; stdcall; // = function AVIFileRelease
   {$EXTERNALSYM AVIFileClose}
 
   procedure AVIStreamInit(); stdcall;  // Call this first!
@@ -2877,9 +2884,9 @@ const
 
 
   function AVIMakeCompressedStream({_Outptr_} ppsCompressed: PAVIStream;
-		                               ppsSource: PAVISTREAM;
-		                               lpOptions: PAVICOMPRESSOPTIONS;
-		                               {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
+                                   ppsSource: IAVIStream;
+                                   lpOptions: PAVICOMPRESSOPTIONS;
+                                   {_In_opt_} pclsidHandler: PCLSID): HResult; stdcall;
   {$EXTERNALSYM AVIMakeCompressedStream}
 
 {$IFDEF UNICODE}
@@ -2888,7 +2895,7 @@ const
                      lpfnCallback: AVISAVECALLBACK;
                      nStreams: Integer;
                      ppavi: PAVIStream;
-                     plpOptions: LPAVICOMPRESSOPTIONS): HResult; stdcall;
+                     plpOptions: PPAVICOMPRESSOPTIONS): HResult; stdcall;
   {$EXTERNALSYM AVISaveVW}
 {$ELSE}
   function AVISaveVA(szFile: PAnsiChar;
@@ -2896,7 +2903,7 @@ const
                      lpfnCallback: AVISAVECALLBACK;
                      nStreams: Integer;
                      ppavi: PAVIStream;
-                     plpOptions: LPAVICOMPRESSOPTIONS): HResult; stdcall;
+                     plpOptions: PPAVICOMPRESSOPTIONS): HResult; stdcall;
   {$EXTERNALSYM AVISaveVA}
 {$ENDIF}
 
@@ -2905,20 +2912,41 @@ const
                     pclsidHandler: PCLSID;
                     lpfnCallback: AVISAVECALLBACK;
                     nStreams: Integer;
+                    pfile: IAVIStream;
+                    lpOptions: LPAVICOMPRESSOPTIONS): HResult; cdecl; varargs;
+
+  function AVISaveA(szFile: PAnsiChar;
+                    pclsidHandler: PCLSID;
+                    lpfnCallback: AVISAVECALLBACK;
+                    nStreams: Integer;
+                    pfile: IAVIStream;
+                    lpOptions: LPAVICOMPRESSOPTIONS): HResult; cdecl; varargs;
+
+  function AVISave(szFile: PWideChar;
+                   pclsidHandler: PCLSID;
+                   lpfnCallback: AVISAVECALLBACK;
+                   nStreams: Integer;
+                   pfile: IAVIStream;
+                   lpOptions: LPAVICOMPRESSOPTIONS): HResult; cdecl; varargs;
+
+  function AVISaveV(szFile: PWideChar;
+                    pclsidHandler: PCLSID;
+                    lpfnCallback: AVISAVECALLBACK;
+                    nStreams: Integer;
                     ppavi: PAVIStream;
-                    plpOptions: LPAVICOMPRESSOPTIONS): HResult; stdcall;
+                    plpOptions: PPAVICOMPRESSOPTIONS): HResult; stdcall;
   {$EXTERNALSYM AVISaveW}
 
 
   function AVISaveOptions(_hWnd: HWND;
-			                     uiFlags: UINT;
-                           nStreams: Integer;
-                           ppavi: PAVIStream;
-                           {_Inout_} plpOptions: LPAVICOMPRESSOPTIONS): INT_PTR; // Returns TRUE if the user pressed OK, FALSE for CANCEL, or an error otherwise.
+                          uiFlags: UINT;
+                          nStreams: Integer;
+                          ppavi: PAVIStream;
+                          {_Inout_} plpOptions: PPAVICOMPRESSOPTIONS): INT_PTR; stdcall; // Returns TRUE if the user pressed OK, FALSE for CANCEL, or an error otherwise.
   {$EXTERNALSYM AVISaveOptions}
 
   function AVISaveOptionsFree(nStreams: Integer;
-			                        plpOptions: LPAVICOMPRESSOPTIONS): HResult; stdcall;
+                              plpOptions: PPAVICOMPRESSOPTIONS): HResult; stdcall;
   {$EXTERNALSYM AVISaveOptionsFree}
 
   // FLAGS FOR uiFlags:
@@ -2947,8 +2975,8 @@ const
 
 
   function AVIMakeFileFromStreams({_Outptr_} ppfile: PAVIFILE;
-			                            nStreams: Integer;
-			                            papStreams: PAVIStream): HResult; stdcall;
+                                  nStreams: Integer;
+                                  papStreams: PAVIStream): HResult; stdcall;
   {$EXTERNALSYM AVIMakeFileFromStreams}
 
   function AVIMakeStreamFromClipboard(cfFormat: UINT;
@@ -2963,7 +2991,7 @@ const
   //
   //****************************************************************************
 
-  function AVIPutFileOnClipboard(pf: PAVIFile): HResult; stdcall;
+  function AVIPutFileOnClipboard(pf: IAVIFile): HResult; stdcall;
   {$EXTERNALSYM AVIPutFileOnClipboard}
 
   function AVIGetFromClipboard({_Outptr_} lppf: PAVIFile): HResult; stdcall;
@@ -2979,7 +3007,7 @@ const
   //****************************************************************************
 
   function CreateEditableStream({_Outptr_} ppsEditable: PAVIStream;
-		                            psSource: IAVIStream): HResult; stdcall;
+                                psSource: IAVIStream): HResult; stdcall;
   {$EXTERNALSYM CreateEditableStream}
 
   function EditStreamCut(pavi: IAVIStream;
@@ -2989,9 +3017,9 @@ const
   {$EXTERNALSYM EditStreamCut}
 
   function EditStreamCopy(pavi: IAVIStream;
-                         {_Inout_} plStart: PLONG;
-                         {_Inout_} plLength: PLONG;
-                         {_Outptr_} ppResult: PAVISTREAM): HResult; stdcall;
+                          {_Inout_} plStart: PLONG;
+                          {_Inout_} plLength: PLONG;
+                          {_Outptr_} ppResult: PAVISTREAM): HResult; stdcall;
   {$EXTERNALSYM EditStreamCopy}
 
   function EditStreamPaste(pavi: IAVIStream;
@@ -3043,7 +3071,7 @@ const
 
   // --------------------
 
-  function MAKE_AVIERR(error: DWord): DWord; inline;
+  function MAKE_AVIERR(error: DWord): HRESULT; inline;
   {$EXTERNALSYM MAKE_AVIERR}
 
 const
@@ -3054,43 +3082,43 @@ const
   // !!! Questions to be answered:
   // How can you get a string form of these errors?
   // Which of these errors should be replaced by errors in SCODE.H?
-  AVIERR_UNSUPPORTED                  = 101;
+  AVIERR_UNSUPPORTED                  = HRESULT($80044065);
   {$EXTERNALSYM AVIERR_UNSUPPORTED}
-  AVIERR_BADFORMAT                    = 102;
+  AVIERR_BADFORMAT                    = HRESULT($80044066);
   {$EXTERNALSYM AVIERR_BADFORMAT}
-  AVIERR_MEMORY                       = 103;
+  AVIERR_MEMORY                       = HRESULT($80044067);
   {$EXTERNALSYM AVIERR_MEMORY}
-  AVIERR_INTERNAL                     = 104;
+  AVIERR_INTERNAL                     = HRESULT($80044068);
   {$EXTERNALSYM AVIERR_INTERNAL}
-  AVIERR_BADFLAGS                     = 105;
+  AVIERR_BADFLAGS                     = HRESULT($80044069);
   {$EXTERNALSYM AVIERR_BADFLAGS}
-  AVIERR_BADPARAM                     = 106;
+  AVIERR_BADPARAM                     = HRESULT($8004406A);
   {$EXTERNALSYM AVIERR_BADPARAM}
-  AVIERR_BADSIZE                      = 107;
+  AVIERR_BADSIZE                      = HRESULT($8004406B);
   {$EXTERNALSYM AVIERR_BADSIZE}
-  AVIERR_BADHANDLE                    = 108;
+  AVIERR_BADHANDLE                    = HRESULT($8004406C);
   {$EXTERNALSYM AVIERR_BADHANDLE}
-  AVIERR_FILEREAD                     = 109;
+  AVIERR_FILEREAD                     = HRESULT($8004406D);
   {$EXTERNALSYM AVIERR_FILEREAD}
-  AVIERR_FILEWRITE                    = 110;
+  AVIERR_FILEWRITE                    = HRESULT($8004406E);
   {$EXTERNALSYM AVIERR_FILEWRITE}
-  AVIERR_FILEOPEN                     = 111;
+  AVIERR_FILEOPEN                     = HRESULT($8004406F);
   {$EXTERNALSYM AVIERR_FILEOPEN}
-  AVIERR_COMPRESSOR                   = 112;
+  AVIERR_COMPRESSOR                   = HRESULT($80044070);
   {$EXTERNALSYM AVIERR_COMPRESSOR}
-  AVIERR_NOCOMPRESSOR                 = 113;
+  AVIERR_NOCOMPRESSOR                 = HRESULT($80044071);
   {$EXTERNALSYM AVIERR_NOCOMPRESSOR}
-  AVIERR_READONLY                     = 114;
+  AVIERR_READONLY                     = HRESULT($80044072);
   {$EXTERNALSYM AVIERR_READONLY}
-  AVIERR_NODATA                       = 115;
+  AVIERR_NODATA                       = HRESULT($80044073);
   {$EXTERNALSYM AVIERR_NODATA}
-  AVIERR_BUFFERTOOSMALL               = 116;
+  AVIERR_BUFFERTOOSMALL               = HRESULT($80044074);
   {$EXTERNALSYM AVIERR_BUFFERTOOSMALL}
-  AVIERR_CANTCOMPRESS                 = 117;
+  AVIERR_CANTCOMPRESS                 = HRESULT($80044075);
   {$EXTERNALSYM AVIERR_CANTCOMPRESS}
-  AVIERR_USERABORT                    = 198;
+  AVIERR_USERABORT                    = HRESULT($800440C6);
   {$EXTERNALSYM AVIERR_USERABORT}
-  AVIERR_ERROR                        = 199;
+  AVIERR_ERROR                        = HRESULT($800440C7);
   {$EXTERNALSYM AVIERR_ERROR}
 
 
@@ -3181,7 +3209,7 @@ const
   function MCIWndSM(_hWnd: HWND;
                     Msg: UINT;
                     wParm: WPARAM;
-                    lParm: LPARAM): DWORD;
+                    lParm: LPARAM): LRESULT;
 
 const
   MCIWND_WINDOW_CLASS = 'MCIWndClass';
@@ -3191,13 +3219,13 @@ const
   function MCIWndCreateW({_In_opt_} hwndParent: HWND;
                          {_In_opt_} hInstance: HINSTANCE;
                          dwStyle: DWORD;
-                         {_In_opt_} szFile: PWideChar): HWND; stdcall;
+                         {_In_opt_} szFile: PWideChar): HWND; cdecl;
   {$EXTERNALSYM MCIWndCreateW}
 {$ELSE}
   function MCIWndCreateA({_In_opt_} hwndParent: HWND;
                          {_In_opt_} hInstance: HINST;
                          dwStyle: DWORD;
-                         {_In_opt_} szFile: PAnsiChar): HWND; stdcall;
+                         {_In_opt_} szFile: PAnsiChar): HWND; cdecl;
   {$EXTERNALSYM MCIWndCreateA}
 {$ENDIF}
 
@@ -3205,10 +3233,10 @@ const
   function MCIWndCreate({_In_opt_} hwndParent: HWND;
                         {_In_opt_} hInstance: HINSTANCE;
                         dwStyle: DWORD;
-                        {_In_opt_} szFile: PWideChar): HWND; stdcall;
+                        {_In_opt_} szFile: PWideChar): HWND; cdecl;
   {$EXTERNALSYM MCIWndCreate}
 
-  function MCIWndRegisterClass(): BOOL;
+  function MCIWndRegisterClass(): BOOL; cdecl;
   {$EXTERNALSYM MCIWndRegisterClass}
 
   // Flags for the MCIWndOpen command
@@ -3303,25 +3331,25 @@ const
   {$EXTERNALSYM MCIWndPaletteKick}
 
   function MCIWndSave(_hWnd: HWND;
-                      szFile: LPCSTR): DWORD; inline;
+                      szFile: LPCTSTR): LONG; inline;
   {$EXTERNALSYM MCIWndSave}
 
-  function MCIWndSaveDialog(_hWnd: HWND): DWORD; inline;
+  function MCIWndSaveDialog(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndSaveDialog}
 
 
   // if you dont give a device it will use the current device....
 
-  function MCIWndNew(_hWnd: HWND; lp: Pointer): DWORD; inline;
+  function MCIWndNew(_hWnd: HWND; lp: Pointer): LONG; inline;
   {$EXTERNALSYM MCIWndNew}
 
   function MCIWndRecord(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndRecord}
 
-  function MCIWndOpen(_hWnd: HWND; sz: LPCSTR; f: BOOL): LONG; inline;
+  function MCIWndOpen(_hWnd: HWND; sz: LPCTSTR; f: BOOL): LONG; inline;
   {$EXTERNALSYM MCIWndOpen}
 
-  function MCIWndOpenDialog(_hWnd: HWND): DWORD; inline;
+  function MCIWndOpenDialog(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndOpenDialog}
 
   function MCIWndClose(_hWnd: HWND): LONG; inline;
@@ -3330,7 +3358,7 @@ const
   function MCIWndPlay(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndPlay}
 
-  function MCIWndStop(_hWnd: DWORD): LONG; inline;
+  function MCIWndStop(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndStop}
 
   function MCIWndPause(_hWnd: HWND): LONG; inline;
@@ -3381,13 +3409,13 @@ const
   function MCIWndGetAlias(_hWnd: HWND): UINT; inline;
   {$EXTERNALSYM MCIWndGetAlias}
 
-  function MCIWndGetMode(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+  function MCIWndGetMode(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
   {$EXTERNALSYM MCIWndGetMode}
 
   function MCIWndGetPosition(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndGetPosition}
 
-  function MCIWndGetPositionString(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+  function MCIWndGetPositionString(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
   {$EXTERNALSYM MCIWndGetPositionString}
 
   function MCIWndGetStart(_hWnd: HWND): LONG; inline;
@@ -3423,10 +3451,10 @@ const
   function MCIWndGetSpeed(_hWnd: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndGetSpeed}
 
-  function MCIWndSetTimeFormat(_hWnd: HWND; lp: LPCSTR): LONG; inline;
+  function MCIWndSetTimeFormat(_hWnd: HWND; lp: LPCTSTR): LONG; inline;
   {$EXTERNALSYM MCIWndSetTimeFormat}
 
-  function MCIWndGetTimeFormat(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+  function MCIWndGetTimeFormat(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
   {$EXTERNALSYM MCIWndGetTimeFormat}
 
   procedure MCIWndValidateMedia(_hWnd: HWND); inline;
@@ -3462,7 +3490,7 @@ const
   function MCIWndRealize(_hWnd: HWND; fBkgnd: BOOL): LONG; inline;
   {$EXTERNALSYM MCIWndRealize}
 
-  function MCIWndSendString(_hWnd: HWND; sz: LPCSTR): LONG; inline;
+  function MCIWndSendString(_hWnd: HWND; sz: LPCTSTR): LONG; inline;
   {$EXTERNALSYM MCIWndSendString}
 
   function MCIWndReturnString(_hWnd: HWND; lp: Pointer; len: UINT): LONG; inline;
@@ -3491,10 +3519,10 @@ const
   function MCIWndChangeStyles(_hWnd: HWND; mask: UINT; value: LONG): LONG; inline;
   {$EXTERNALSYM MCIWndChangeStyles}
 
-  function MCIWndOpenInterface(_hWnd: HWND; pUnk: PUnknown): LONG;  inline;
+  function MCIWndOpenInterface(_hWnd: HWND; pUnk: IUnknown): LONG;  inline;
   {$EXTERNALSYM MCIWndOpenInterface}
 
-  function MCIWndSetOwner(_hWnd: HWND; hwndP: DWORD): LONG; inline;
+  function MCIWndSetOwner(_hWnd: HWND; hwndP: HWND): LONG; inline;
   {$EXTERNALSYM MCIWndSetOwner}
 
 
@@ -3923,7 +3951,7 @@ type
   {$EXTERNALSYM videohdr_tag}
   VIDEOHDR = videohdr_tag;
   {$EXTERNALSYM VIDEOHDR}
-  LPVIDEOHDR = videohdr_tag;
+  LPVIDEOHDR = ^videohdr_tag;
   {$EXTERNALSYM LPVIDEOHDR}
 
   // dwFlags field of VIDEOHDR
@@ -3961,7 +3989,7 @@ type
   {$EXTERNALSYM channel_caps_tag}
   CHANNEL_CAPS = channel_caps_tag;
   {$EXTERNALSYM CHANNEL_CAPS}
-  LPCHANNEL_CAPS = channel_caps_tag;
+  LPCHANNEL_CAPS = ^channel_caps_tag;
   {$EXTERNALSYM LPCHANNEL_CAPS}
 
   // dwFlags of CHANNEL_CAPS
@@ -4059,7 +4087,7 @@ const
   function AVICapSM(_hWnd: HWND;
                     m: UINT;
                     w: WPARAM;
-                    l: LPARAM): DWORD;
+                    l: LPARAM): LRESULT;
   {$EXTERNALSYM AVICapSM}
 
   // ------------------------------------------------------------------
@@ -4511,11 +4539,11 @@ type
                                       fpProc: CAPCONTROLCALLBACK): BOOL; inline;
   {$EXTERNALSYM capSetCallbackOnCapControl}
 
-  function capSetUserData(_hWnd: DWORD;
-                          lUser: HWND): BOOL; inline;
+  function capSetUserData(_hWnd: HWND;
+                          lUser: LPARAM): BOOL; inline;
   {$EXTERNALSYM capSetUserData}
 
-  function capGetUserData(_hwnd: HWND): DWORD; inline;
+  function capGetUserData(_hwnd: HWND): LRESULT; inline;
   {$EXTERNALSYM capGetUserData}
 
   function capDriverConnect(_hWnd: HWND;
@@ -4526,12 +4554,12 @@ type
   {$EXTERNALSYM capDriverDisconnect}
 
   function capDriverGetName(_hWnd: HWND;
-                            szName: LPCSTR;
+                            szName: LPTSTR;
                             wSize: DWORD): BOOL; inline;
   {$EXTERNALSYM capDriverGetName}
 
   function capDriverGetVersion(_hWnd: HWND;
-                               szVer: LPSTR;
+                               szVer: LPTSTR;
                                wSize: DWORD): BOOL; inline;
   {$EXTERNALSYM capDriverGetVersion}
 
@@ -4541,11 +4569,11 @@ type
   {$EXTERNALSYM capDriverGetCaps}
 
   function capFileSetCaptureFile(_hWnd: HWND;
-                                 szName: LPCSTR): BOOL; inline;
+                                 szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capFileSetCaptureFile}
 
   function capFileGetCaptureFile(_hWnd: HWND;
-                                 szName: LPCSTR; wSize: DWORD): BOOL; inline;
+                                 szName: LPTSTR; wSize: DWORD): BOOL; inline;
   {$EXTERNALSYM capFileGetCaptureFile}
 
   function capFileAlloc(_hWnd: HWND;
@@ -4553,7 +4581,7 @@ type
   {$EXTERNALSYM capFileAlloc}
 
   function capFileSaveAs(_hWnd: HWND;
-                         szName: LPCSTR): BOOL; inline;
+                         szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capFileSaveAs}
 
   function capFileSetInfoChunk(_hWnd: HWND;
@@ -4561,7 +4589,7 @@ type
   {$EXTERNALSYM capFileSetInfoChunk}
 
   function capFileSaveDIB(_hWnd: HWND;
-                          szName: LPCSTR): BOOL; inline;
+                          szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capFileSaveDIB}
 
   function capEditCopy(_hwnd: HWND): BOOL; inline;
@@ -4592,7 +4620,7 @@ type
   function capDlgVideoCompression(_hwnd: HWND): BOOL; inline;
   {$EXTERNALSYM capDlgVideoCompression}
 
-  function capGetVideoFormat(_hWnd: DWORD;
+  function capGetVideoFormat(_hWnd: HWND;
                              s: Pointer;
                              wSize: DWORD): DWORD; inline;
   {$EXTERNALSYM capGetVideoFormat}
@@ -4639,7 +4667,7 @@ type
   function capCaptureSequence(_hwnd: HWND): BOOL; inline;
   {$EXTERNALSYM capCaptureSequence}
 
-  function capCaptureSequenceNoFile(_hwnd: DWORD): BOOL; inline;
+  function capCaptureSequenceNoFile(_hwnd: HWND): BOOL; inline;
   {$EXTERNALSYM capCaptureSequenceNoFile}
 
   function capCaptureStop(_hwnd: HWND): BOOL; inline;
@@ -4668,20 +4696,20 @@ type
   {$EXTERNALSYM capCaptureSetSetup}
 
   function capSetMCIDeviceName(_hWnd: HWND;
-                               szName: LPCSTR): BOOL; inline;
+                               szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capSetMCIDeviceName}
 
   function capGetMCIDeviceName(_hWnd: HWND;
-                               szName: LPCSTR;
+                               szName: LPTSTR;
                                wSize: DWORD): BOOL; inline;
   {$EXTERNALSYM capGetMCIDeviceName}
 
   function capPaletteOpen(_hWnd: HWND;
-                          szName: LPCSTR): BOOL; inline;
+                          szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capPaletteOpen}
 
   function capPaletteSave(_hWnd: HWND;
-                          szName: LPCSTR): BOOL; inline;
+                          szName: LPCTSTR): BOOL; inline;
   {$EXTERNALSYM capPaletteSave}
 
   function capPalettePaste(_hWnd: HWND): BOOL; inline;
@@ -4748,10 +4776,10 @@ const
   {$EXTERNALSYM capCreateCaptureWindowW}
 
   function capGetDriverDescriptionW(wDriverIndex: UINT;
-                                   {_Out_} lpszName: PWideChar;
-                                   cbName: Integer;
-                                   {_Out_} lpszVer: PWideChar;
-                                   cbVer: Integer): BOOL; stdcall;
+                                    {_Out_} lpszName: PWideChar;
+                                    cbName: Integer;
+                                    {_Out_} lpszVer: PWideChar;
+                                    cbVer: Integer): BOOL; stdcall;
   {$EXTERNALSYM capGetDriverDescriptionW}
 {$ELSE}
   function capCreateCaptureWindowA(lpszWindowName: PAnsiChar;
@@ -4775,13 +4803,13 @@ const
 
   { unicode }
   function capCreateCaptureWindow(lpszWindowName: PWideChar;
-                                   dwStyle: DWORD;
-                                   x: Integer;
-                                   y: Integer;
-                                   nWidth: Integer;
-                                   nHeight: Integer;
-                                   {_In_opt_} hwndParent: HWND;
-                                   nID: Integer): HWND; stdcall;
+                                  dwStyle: DWORD;
+                                  x: Integer;
+                                  y: Integer;
+                                  nWidth: Integer;
+                                  nHeight: Integer;
+                                  {_In_opt_} hwndParent: HWND;
+                                  nID: Integer): HWND; stdcall;
 
   {$EXTERNALSYM capCreateCaptureWindow}
   function capGetDriverDescription(wDriverIndex: UINT;
@@ -4976,6 +5004,11 @@ const
 
 implementation
 
+function AVIPALCHANGE.GetPaletteEntries(): PAVIPaletteEntry;
+begin
+  Result := PAVIPaletteEntry(NativeUInt(@Self) + SizeOf(AVIPALCHANGE));
+end;
+
 const
   VfWLib      = 'msvfw32.dll';
   AvifilLib   = 'avifil32.dll';
@@ -5027,7 +5060,7 @@ function ICGetState(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_GETSTATE,
-                          DWORD_PTR(@pv),
+                          DWORD_PTR(pv),
                           cb);
 end;
 
@@ -5037,7 +5070,7 @@ function ICSetState(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_SETSTATE,
-                          DWORD_PTR(@pv),
+                          DWORD_PTR(pv),
                           DWORD_PTR(cb));
 end;
 
@@ -5051,20 +5084,22 @@ end;
 
 // get value macros ============================================================
 
-function ICGetDefaultQuality(hic: HIC): LRESULT;
+function ICGetDefaultQuality(hic: HIC): DWORD;
+var
+  Value: DWORD;
 begin
-  Result := ICSendMessage(hic,
-                          ICM_GETDEFAULTQUALITY,
-                          DWORD_PTR(@Result),
-                          SizeOf(Result));
+  Value := 0;
+  ICSendMessage(hic,ICM_GETDEFAULTQUALITY,DWORD_PTR(@Value),SizeOf(Value));
+  Result := Value;
 end;
 
-function ICGetDefaultKeyFrameRate(hic: HIC): LRESULT;
+function ICGetDefaultKeyFrameRate(hic: HIC): DWORD;
+var
+  Value: DWORD;
 begin
-  Result := ICSendMessage(hic,
-                          ICM_GETDEFAULTKEYFRAMERATE,
-                          DWORD_PTR(@Result),
-                          SizeOf(Result));
+  Value := 0;
+  ICSendMessage(hic,ICM_GETDEFAULTKEYFRAMERATE,DWORD_PTR(@Value),SizeOf(Value));
+  Result := Value;
 end;
 
 
@@ -5075,7 +5110,7 @@ function ICDrawWindow(hic: HIC;
 begin
   Result :=  ICSendMessage(hic,
                            ICM_DRAW_WINDOW,
-                           DWORD_PTR(@prc),
+                           DWORD_PTR(prc),
                            SizeOf(TRect));
 end;
 
@@ -5088,20 +5123,20 @@ function ICCompressBegin(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_COMPRESS_BEGIN,
-                          DWORD_PTR(@lpbiInput),
-                          DWORD_PTR(@lpbiOutput));
+                          DWORD_PTR(lpbiInput),
+                          DWORD_PTR(lpbiOutput));
 end;
 
 // Compress query macro ========================================================
 
 function ICCompressQuery(hic: HIC;
-                           lpbiInput: PBITMAPINFOHEADER;
-                           lpbiOutput: PBITMAPINFOHEADER): LRESULT;
+                         lpbiInput: PBITMAPINFOHEADER;
+                         lpbiOutput: PBITMAPINFOHEADER): LRESULT;
 begin
   Result := ICSendMessage(hic,
                           ICM_COMPRESS_QUERY,
-                          DWORD_PTR(@lpbiInput),
-                          DWORD_PTR(@lpbiOutput));
+                          DWORD_PTR(lpbiInput),
+                          DWORD_PTR(lpbiOutput));
 end;
 
 // Get formats macro ===========================================================
@@ -5112,8 +5147,8 @@ function ICCompressGetFormat(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_COMPRESS_GET_FORMAT,
-                          DWORD_PTR(@lpbiInput),
-                          DWORD_PTR(@lpbiOutput));
+                          DWORD_PTR(lpbiInput),
+                          DWORD_PTR(lpbiOutput));
 end;
 
 function ICCompressGetFormatSize(hic: HIC;
@@ -5128,13 +5163,13 @@ end;
 // compress size macro ===========================================================
 
 function ICCompressGetSize(hic: HIC;
-                             lpbiInput: PBITMAPINFOHEADER;
-                             lpbiOutput: PBITMAPINFOHEADER): DWord;
+                           lpbiInput: PBITMAPINFOHEADER;
+                           lpbiOutput: PBITMAPINFOHEADER): DWord;
 begin
   Result := DWORD(ICSendMessage(hic,
                                 ICM_COMPRESS_GET_SIZE,
-                                DWORD_PTR(@lpbiInput),
-                                DWORD_PTR(@lpbiOutput)));
+                                DWORD_PTR(lpbiInput),
+                                DWORD_PTR(lpbiOutput)));
 end;
 
 function ICCompressEnd(hic: HIC): LRESULT;
@@ -5154,8 +5189,8 @@ function ICDecompressBegin(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_DECOMPRESS_BEGIN,
-                          DWORD_PTR(@lpbiInput),
-                          DWORD_PTR(@lpbiOutput));
+                          DWORD_PTR(lpbiInput),
+                          DWORD_PTR(lpbiOutput));
 end;
 
 function ICDecompressQuery(hic: HIC;
@@ -5164,8 +5199,8 @@ function ICDecompressQuery(hic: HIC;
 begin
   Result :=  ICSendMessage(hic,
                            ICM_DECOMPRESS_QUERY,
-                           DWORD_PTR(@lpbiInput),
-                           DWORD_PTR(@lpbiOutput));
+                           DWORD_PTR(lpbiInput),
+                           DWORD_PTR(lpbiOutput));
 end;
 
 function ICDecompressGetFormat(hic: HIC;
@@ -5174,15 +5209,15 @@ function ICDecompressGetFormat(hic: HIC;
 begin
   Result := LONG(ICSendMessage(hic,
                               ICM_DECOMPRESS_GET_FORMAT,
-                              DWORD_PTR(@lpbiInput),
-                              DWORD_PTR(@lpbiOutput)));
+                              DWORD_PTR(lpbiInput),
+                              DWORD_PTR(lpbiOutput)));
 end;
 
 function ICDecompressGetFormatSize(hic: HIC;
                                    lpbi: PBITMAPINFOHEADER): LResult;
 begin
   Result := ICDecompressGetFormat(hic,
-                                  @lpbi,
+                                  lpbi,
                                   nil);
 end;
 
@@ -5195,8 +5230,8 @@ function ICDecompressGetPalette(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_DECOMPRESS_GET_PALETTE,
-                          DWORD_PTR(@lpbiInput),
-                          DWORD_PTR(@lpbiOutput));
+                          DWORD_PTR(lpbiInput),
+                          DWORD_PTR(lpbiOutput));
 end;
 
 function ICDecompressSetPalette(hic: HIC;
@@ -5204,7 +5239,7 @@ function ICDecompressSetPalette(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_DECOMPRESS_SET_PALETTE,
-                          DWORD_PTR(@lpbiPalette),
+                          DWORD_PTR(lpbiPalette),
                           0);
 end;
 
@@ -5252,6 +5287,7 @@ begin
   ic.xDst := xDst;
   ic.yDst := yDst;
   ic.dxDst := dxDst;
+  ic.dyDst := dyDst;
 
   // note that ICM swaps round the length and pointer
   // length in lparam2, pointer in lparam1
@@ -5352,13 +5388,13 @@ begin
 end;
 
 function ICDrawSuggestFormat(hic: HIC;
-                            lpbiIn: PBITMAPINFOHEADER;
-                            {_Out_} lpbiOut: PBITMAPINFOHEADER;
-                            dxSrc: Integer;
-                            dySrc: Integer;
-                            dxDst: Integer;
-                            dyDst: Integer;
-                            hicDecomp: HIC): LResult; inline;
+                             lpbiIn: PBITMAPINFOHEADER;
+                             {_Out_} lpbiOut: PBITMAPINFOHEADER;
+                             dxSrc: Integer;
+                             dySrc: Integer;
+                             dxDst: Integer;
+                             dyDst: Integer;
+                             hicDecomp: HIC): LResult; inline;
 var
   ic: ICDRAWSUGGEST;
 
@@ -5385,7 +5421,7 @@ function ICDrawQuery(hic: HIC; lpbiInput: PBITMAPINFOHEADER): LResult;
 begin
   Result := ICSendMessage(hic,
                           ICM_DRAW_QUERY,
-                          DWORD_PTR(@lpbiInput),
+                          DWORD_PTR(lpbiInput),
                           0);
 end;
 
@@ -5393,7 +5429,7 @@ function ICDrawChangePalette(hic: HIC; lpbiInput: PBITMAPINFOHEADER): LResult;
 begin
   Result := ICSendMessage(hic,
                           ICM_DRAW_CHANGEPALETTE,
-                          DWORD_PTR(@lpbiInput),
+                          DWORD_PTR(lpbiInput),
                           0);
 end;
 
@@ -5402,7 +5438,7 @@ function ICGetBuffersWanted(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_GETBUFFERSWANTED,
-                          DWORD_PTR(@lpdwBuffers),
+                          DWORD_PTR(lpdwBuffers),
                           0);
 end;
 
@@ -5453,7 +5489,7 @@ function ICDrawGetTime(hic: HIC;
 begin
   Result := ICSendMessage(hic,
                           ICM_DRAW_GETTIME,
-                          DWORD_PTR(@lplTime),
+                          DWORD_PTR(lplTime),
                           0);
 end;
 
@@ -5494,7 +5530,7 @@ end;
 
 function ICSetStatusProc(hic: HIC;
                          dwFlags: DWORD;
-                         lParam: DWORD;
+                         lParam: LPARAM;
                          fpfnStatus: FICStatusProc): LRESULT;
 var
   ic : _ICSETSTATUSPROC;
@@ -5505,7 +5541,7 @@ begin
   ic.Status := fpfnStatus;
   Result := ICSendMessage(hic,
                           ICM_SET_STATUS_PROC,
-                          DWORD(@ic),
+                          DWORD_PTR(@ic),
                           SizeOf(ic));
 end;
 
@@ -5602,7 +5638,7 @@ begin
 end;
 
 
-function FromHex(n: Byte): Byte;
+function FromHex(n: Byte): LONG;
 begin
   if n >= ord('A') then
     Result := ord(n) + 10 - ord('A')
@@ -5610,28 +5646,28 @@ begin
     Result := ord(n) - ord('0');
 end;
 
-function StreamFromFOURCC(fcc: FOURCC): Byte;
+function StreamFromFOURCC(fcc: FOURCC): WORD;
 begin
-  Result := (FromHex(Lo(LoWord(fcc))) shl 4) + FromHex(Hi(LoWord(fcc)));
+  Result := WORD((FromHex(Byte(fcc and $FF)) * 16) + FromHex(Byte((fcc shr 8) and $FF)));
 end;
 
 function TWOCCFromFOURCC(fcc: FOURCC): Word;
 begin
-  Result := HIWORD(fcc);
+  Result := WORD(fcc shr 16);
 end;
 
 function ToHex(n: Byte): Byte;
 begin
   if n > 9 then
-    Result := n - 10 + ord('A')
+    Result := Byte(n - 10 + ord('A'))
   else
-    Result := n + ord('0');
+    Result := Byte(n + ord('0'));
 end;
 
 function MAKEAVICKID(tcc: TWOCC;
                      stream: Byte): DWord;
 begin
-  Result := MakeLONG((ToHex(stream and $0F) shl 8) or ToHex((stream and $F0) shr 4), tcc);
+  Result := (DWORD(tcc) shl 16) or (DWORD(ToHex(stream and $0F)) shl 8) or DWORD(ToHex((stream and $F0) shr 4));
 end;
 
 
@@ -5878,8 +5914,8 @@ begin
                      LPARAM(@fpProc)) <> 0;
 end;
 
-function capSetUserData(_hWnd: DWORD;
-                        lUser: HWND): BOOL; inline;
+function capSetUserData(_hWnd: HWND;
+                        lUser: LPARAM): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_SET_USER_DATA,
@@ -5887,12 +5923,12 @@ begin
                      LPARAM(lUser)) <> 0;
 end;
 
-function capGetUserData(_hwnd: HWND): DWORD; inline;
+function capGetUserData(_hwnd: HWND): LRESULT; inline;
 begin
-  Result := AVICapSM(_hWnd,
+  Result := LRESULT(AVICapSM(_hWnd,
                      WM_CAP_GET_USER_DATA,
                      0,
-                     0);
+                     0));
 end;
 
 function capDriverConnect(_hWnd: HWND;
@@ -5913,7 +5949,7 @@ begin
 end;
 
 function capDriverGetName(_hWnd: HWND;
-                          szName: LPCSTR;
+                          szName: LPTSTR;
                           wSize: DWORD): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
@@ -5923,7 +5959,7 @@ begin
 end;
 
 function capDriverGetVersion(_hWnd: HWND;
-                             szVer: LPSTR;
+                             szVer: LPTSTR;
                              wSize: DWORD): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
@@ -5944,7 +5980,7 @@ end;
 
 
 function capFileSetCaptureFile(_hWnd: HWND;
-                               szName: LPCSTR): BOOL; inline;
+                               szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_FILE_SET_CAPTURE_FILE,
@@ -5953,7 +5989,7 @@ begin
 end;
 
 function capFileGetCaptureFile(_hWnd: HWND;
-                               szName: LPCSTR;
+                               szName: LPTSTR;
                                wSize: DWORD): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
@@ -5972,7 +6008,7 @@ begin
 end;
 
 function capFileSaveAs(_hWnd: HWND;
-                       szName: LPCSTR): BOOL; inline;
+                       szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_FILE_SAVEAS,
@@ -5990,7 +6026,7 @@ begin
 end;
 
 function capFileSaveDIB(_hWnd: HWND;
-                        szName: LPCSTR): BOOL; inline;
+                        szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_FILE_SAVEDIB,
@@ -6020,18 +6056,18 @@ function capGetAudioFormat(_hWnd: HWND;
                            s: LPWAVEFORMATEX;
                            wSize: DWORD): DWORD; inline;
 begin
-  Result := AVICapSM(_hWnd,
+  Result := DWORD(AVICapSM(_hWnd,
                      WM_CAP_GET_AUDIOFORMAT,
                      WPARAM(wSize),
-                     LPARAM(s));
+                     LPARAM(s)));
 end;
 
 function capGetAudioFormatSize(_hwnd: HWND): DWORD; inline;
 begin
-  Result := AVICapSM(_hWnd,
+  Result := DWORD(AVICapSM(_hWnd,
                      WM_CAP_GET_AUDIOFORMAT,
                      WPARAM(0),
-                     LPARAM(0));
+                     LPARAM(0)));
 end;
 
 function capDlgVideoFormat(_hWnd: HWND): BOOL; inline;
@@ -6066,22 +6102,22 @@ begin
                      0) <> 0;
 end;
 
-function capGetVideoFormat(_hWnd: DWORD;
+function capGetVideoFormat(_hWnd: HWND;
                            s: Pointer;
                            wSize: DWORD): DWORD; inline;
 begin
-  Result := AVICapSM(_hWnd,
+  Result := DWORD(AVICapSM(_hWnd,
                      WM_CAP_GET_VIDEOFORMAT,
                      WPARAM(wSize),
-                     LPARAM(s));
+                     LPARAM(s)));
 end;
 
 function capGetVideoFormatSize(_hwnd: HWND): DWORD; inline;
 begin
-  Result := AVICapSM(_hWnd,
+  Result := DWORD(AVICapSM(_hWnd,
                      WM_CAP_GET_VIDEOFORMAT,
                      0,
-                     0);
+                     0));
 end;
 
 function capSetVideoFormat(_hWnd: HWND;
@@ -6173,7 +6209,7 @@ begin
                      LPARAM(0)) <> 0;
 end;
 
-function capCaptureSequenceNoFile(_hwnd: DWORD): BOOL; inline;
+function capCaptureSequenceNoFile(_hwnd: HWND): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_SEQUENCE_NOFILE,
@@ -6242,7 +6278,7 @@ begin
 end;
 
 function capSetMCIDeviceName(_hWnd: HWND;
-                             szName: LPCSTR): BOOL; inline;
+                             szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_SET_MCI_DEVICE,
@@ -6251,7 +6287,7 @@ begin
 end;
 
 function capGetMCIDeviceName(_hWnd: HWND;
-                             szName: LPCSTR;
+                             szName: LPTSTR;
                              wSize: DWORD): BOOL;  inline;
 begin
   Result := AVICapSM(_hWnd,
@@ -6261,7 +6297,7 @@ begin
 end;
 
 function capPaletteOpen(_hWnd: HWND;
-                        szName: LPCSTR): BOOL; inline;
+                        szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_PAL_OPEN,
@@ -6270,7 +6306,7 @@ begin
 end;
 
 function capPaletteSave(_hWnd: HWND;
-                        szName: LPCSTR): BOOL; inline;
+                        szName: LPCTSTR): BOOL; inline;
 begin
   Result := AVICapSM(_hWnd,
                      WM_CAP_PAL_SAVE,
@@ -6310,92 +6346,92 @@ end;
 
 // MCI =========================================================================
 
-function MCIWndNew(_hWnd: HWND; lp: Pointer): DWORD; inline;
+function MCIWndNew(_hWnd: HWND; lp: Pointer): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_NEW,
                      0,
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndRecord(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_RECORD,
                      0,
-                     0);
+                     0));
 end;
 
-function MCIWndOpen(_hWnd: HWND; sz: LPCSTR; f: BOOL): LONG; inline;
+function MCIWndOpen(_hWnd: HWND; sz: LPCTSTR; f: BOOL): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_OPEN,
                      WPARAM(f),
-                     LPARAM(sz));
+                     LPARAM(sz)));
 end;
 
-function MCIWndOpenDialog(_hWnd: HWND): DWORD; inline;
+function MCIWndOpenDialog(_hWnd: HWND): LONG; inline;
 begin
   Result := MCIWndOpen(_hWnd,
-                       LPCSTR(-1),
+                       LPCTSTR(-1),
                        BOOL(0));
 end;
 
 function MCIWndClose(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_CLOSE,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndPlay(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_PLAY,
                      0,
-                     0);
+                     0));
 end;
 
-function MCIWndStop(_hWnd: DWORD): LONG; inline;
+function MCIWndStop(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_STOP,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndPause(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_PAUSE,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndResume(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_RESUME,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndSeek(_hWnd: HWND; lPos: LONG): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_SEEK,
                      0,
-                     LPARAM(lPos));
+                     LPARAM(lPos)));
 end;
 
 
 function MCIWndEject(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_EJECT,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndHome(_hWnd: HWND): LONG; inline;
@@ -6412,59 +6448,59 @@ end;
 
 function MCIWndGetSource(_hWnd: HWND; prc: PRect): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GET_SOURCE,
                      0,
-                     LPARAM(prc));
+                     LPARAM(prc)));
 end;
 
 function MCIWndPutSource(_hWnd: HWND; prc: PRect): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_PUT_SOURCE,
                      0,
-                     LPARAM(prc));
+                     LPARAM(prc)));
 end;
 
 function MCIWndGetDest(_hWnd: HWND; prc: PRect): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GET_DEST,
                      0,
-                     LPARAM(prc));
+                     LPARAM(prc)));
 end;
 
 function MCIWndPutDest(_hWnd: HWND; prc: PRect): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_PUT_DEST,
                      0,
-                     LPARAM(prc));
+                     LPARAM(prc)));
 end;
 
 function MCIWndPlayReverse(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_PLAYREVERSE,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndPlayFrom(_hWnd: HWND; lPos: LONG): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_PLAYFROM,
                      0,
-                     LPARAM(lPos));
+                     LPARAM(lPos)));
 end;
 
 function MCIWndPlayTo(_hWnd: HWND;
                       lPos: LONG): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_PLAYTO,
                      0,
-                     LPARAM(lPos));
+                     LPARAM(lPos)));
 end;
 
 function MCIWndPlayFromTo(_hWnd: HWND;
@@ -6480,74 +6516,74 @@ end;
 
 function MCIWndGetDeviceID(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETDEVICEID,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndGetAlias(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETALIAS,
                      0,
-                     0);
+                     0));
 end;
 
-function MCIWndGetMode(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+function MCIWndGetMode(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETMODE,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndGetPosition(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETPOSITION,
                      0,
-                     0);
+                     0));
 end;
 
-function MCIWndGetPositionString(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+function MCIWndGetPositionString(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETPOSITION,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndGetStart(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETSTART,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndGetLength(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETLENGTH,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndGetEnd(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETEND,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndStep(_hWnd: HWND; n: LONG): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_STEP,
                      0,
-                     LPARAM(n));
+                     LPARAM(n)));
 end;
 
 
@@ -6569,58 +6605,58 @@ end;
 
 function MCIWndGetZoom(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETZOOM,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndSetVolume(_hWnd: HWND; iVol: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SETVOLUME,
                      0,
-                     LPARAM(iVol));
+                     LPARAM(iVol)));
 end;
 
 function MCIWndGetVolume(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETVOLUME,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndSetSpeed(_hWnd: HWND; iSpeed: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SETSPEED,
                      0,
-                     LPARAM(iSpeed));
+                     LPARAM(iSpeed)));
 end;
 
 function MCIWndGetSpeed(_hWnd: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETSPEED,
                      0,
-                     0);
+                     0));
 end;
 
-function MCIWndSetTimeFormat(_hWnd: HWND; lp: LPCSTR): LONG; inline;
+function MCIWndSetTimeFormat(_hWnd: HWND; lp: LPCTSTR): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SETTIMEFORMAT,
                      0,
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
-function MCIWndGetTimeFormat(_hWnd: HWND; lp: LPCSTR; len: UINT): LONG; inline;
+function MCIWndGetTimeFormat(_hWnd: HWND; lp: LPTSTR; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETTIMEFORMAT,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 procedure MCIWndValidateMedia(_hWnd: HWND); inline;
@@ -6690,119 +6726,119 @@ end;
 
 function MCIWndGetActiveTimer(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETACTIVETIMER,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndGetInactiveTimer(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETINACTIVETIMER,
                      0,
-                     0);
+                     0));
 end;
 
 
 function MCIWndRealize(_hWnd: HWND; fBkgnd: BOOL): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_REALIZE,
                      WPARAM(fBkgnd),
-                     0);
+                     0));
 end;
 
 
-function MCIWndSendString(_hWnd: HWND; sz: LPCSTR): LONG; inline;
+function MCIWndSendString(_hWnd: HWND; sz: LPCTSTR): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SENDSTRING,
                      0,
-                     LPARAM(sz));
+                     LPARAM(sz)));
 end;
 
 function MCIWndReturnString(_hWnd: HWND; lp: Pointer; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_RETURNSTRING,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndGetError(_hWnd: HWND; lp: Pointer; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETERROR,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 //#define MCIWndActivate(_hWnd, f)     (void)MCIWndSM(_hWnd, WM_ACTIVATE, (WPARAM)(BOOL)(f), 0)
 
 function MCIWndGetPalette(_hWnd: HWND): HPALETTE; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := HPALETTE(MCIWndSM(_hWnd,
                      MCIWNDM_GETPALETTE,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndSetPalette(_hWnd: HWND; hpal: HPALETTE): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SETPALETTE,
                      WPARAM(hpal),
-                     0);
+                     0));
 end;
 
 
 function MCIWndGetFileName(_hWnd: HWND; lp: Pointer; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETFILENAME,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndGetDevice(_hWnd: HWND; lp: Pointer; len: UINT): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_GETDEVICE,
                      WPARAM(len),
-                     LPARAM(lp));
+                     LPARAM(lp)));
 end;
 
 function MCIWndGetStyles(_hWnd: HWND): UINT; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := UINT(MCIWndSM(_hWnd,
                      MCIWNDM_GETSTYLES,
                      0,
-                     0);
+                     0));
 end;
 
 function MCIWndChangeStyles(_hWnd: HWND; mask: UINT; value: LONG): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_CHANGESTYLES,
                      WPARAM(mask),
-                     LPARAM(value));
+                     LPARAM(value)));
 end;
 
-function MCIWndOpenInterface(_hWnd: HWND; pUnk: PUnknown): LONG;  inline;
+function MCIWndOpenInterface(_hWnd: HWND; pUnk: IUnknown): LONG;  inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
             MCIWNDM_OPENINTERFACE,
             0,
-            LPARAM(pUnk));
+            LPARAM(Pointer(pUnk))));
 end;
 
-function MCIWndSetOwner(_hWnd: HWND; hwndP: DWORD): LONG; inline;
+function MCIWndSetOwner(_hWnd: HWND; hwndP: HWND): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCIWNDM_SETOWNER,
                      WPARAM(hwndP),
-                     0);
+                     0));
 end;
 
 // AVICAP ======================================================================
@@ -6810,7 +6846,7 @@ end;
 function AVICapSM(_hWnd: HWND;
                   m: UINT;
                   w: WPARAM;
-                  l: LPARAM): DWORD;
+                  l: LPARAM): LRESULT;
 begin
   if IsWindow(_hWnd) then
     begin
@@ -6829,7 +6865,7 @@ end;
 function MCIWndSM(_hWnd: HWND;
                   Msg: UINT;
                   wParm: WPARAM;
-                  lParm: LPARAM): DWORD;
+                  lParm: LPARAM): LRESULT;
 begin
   Result := SendMessage(_hWnd,
                         Msg,
@@ -6896,32 +6932,31 @@ begin
 end;
 
 function MCIWndSave(_hWnd: HWND;
-                    szFile: LPCSTR): DWORD; inline;
+                    szFile: LPCTSTR): LONG; inline;
 begin
-  Result := MCIWndSM(_hWnd,
+  Result := LONG(MCIWndSM(_hWnd,
                      MCI_SAVE,
                      0,
-                     LPARAM(szFile));
+                     LPARAM(szFile)));
 end;
 
-function MCIWndSaveDialog(_hWnd: HWND): DWORD; inline;
+function MCIWndSaveDialog(_hWnd: HWND): LONG; inline;
 begin
   Result := MCIWndSave(_hWnd,
-                       LPCSTR(-1));
+                       LPCTSTR(-1));
 end;
 
 
 // AVI error ===================================================================
 
-function MAKE_AVIERR(error: DWord): DWord; inline;
+function MAKE_AVIERR(error: DWord): HRESULT; inline;
 begin
-  Result := MAKE_SCODE(SEVERITY_ERROR,
-                       FACILITY_ITF, $4000 + error);
+  Result := HRESULT(DWORD($80040000) or DWORD((UInt64(error) + $4000) and $FFFFFFFF));
 end;
 
 // Externals ===================================================================
 
-function VideoForWindowsVersion: DWord; pascal; external VfWLib;
+function VideoForWindowsVersion: DWord; stdcall; external VfWLib;
 
 //function InitVFW
 //function TermVFW
@@ -7036,7 +7071,10 @@ function AVISaveVW; external AvifilLib name 'AVISaveVW';
 {$ELSE}
 function AVISaveVA; external AvifilLib name 'AVISaveVA';
 {$ENDIF}
-function AVISaveW; external AvifilLib name 'AVISaveVW';
+function AVISaveW; external AvifilLib name 'AVISaveW';
+function AVISaveA; external AvifilLib name 'AVISaveA';
+function AVISave; external AvifilLib name 'AVISaveW';
+function AVISaveV; external AvifilLib name 'AVISaveVW';
 function AVISaveOptions; external AvifilLib name 'AVISaveOptions';
 function AVISaveOptionsFree; external AvifilLib name 'AVISaveOptionsFree';
 {$IFDEF UNICODE}

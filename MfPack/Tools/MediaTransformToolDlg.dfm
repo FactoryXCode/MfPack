@@ -67,7 +67,7 @@ object dlgMediaTransformTool: TdlgMediaTransformTool
   object cbxChoose: TComboBox
     Left = 8
     Top = 8
-    Width = 207
+    Width = 624
     Height = 22
     TabOrder = 3
     Text = 'cbxChoose'

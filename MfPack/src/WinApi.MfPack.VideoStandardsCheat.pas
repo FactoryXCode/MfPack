@@ -10,7 +10,7 @@
 // Release date: 14-11-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Video standards cheat.
 //              This class contains the latest standardised video resolutions,
 //              aspect ratios and framerates.
@@ -28,13 +28,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -541,8 +541,8 @@ begin
   aFrameRatesArray[iIndex].FrameRate := fRate;
   aFrameRatesArray[iIndex].Numerator := Numerator;
   aFrameRatesArray[iIndex].Denominator := Denominator;
-  aFrameRatesArray[iIndex].sFrameRate := Format('%n',
-                                                [fRate]);
+  aFrameRatesArray[iIndex].sFrameRate := string(Format('%n',
+                                                       [fRate]));
   aFrameRatesArray[iIndex].sHint := sHint;
 end;
 
@@ -725,50 +725,33 @@ function TVideoStandardsCheat.GetResolutionType(aWidth: UInt32;
                                                 aHeight: UInt32): string;
 var
   i: Integer;
-
 begin
-  if (Length(aResolutionArray) = 0) then
-    begin
-      Result := '';
-      Exit;
-    end;
-
+  Result := '';
+  if Length(aResolutionArray) = 0 then
+    Exit;
+  Result := string(Format('Width: %u x Height: %u', [aWidth, aHeight]));
   for i := 0 to Length(aResolutionArray) - 1 do
-    begin
-      if (aHeight = aResolutionArray[i].iHeight) then
-        begin
-          Result := aResolutionArray[i].Resolution;
-          Break;
-        end
-      else if (aWidth = aResolutionArray[i].iWidth) then
-        begin
-          Result := aResolutionArray[i].Resolution;
-          Break;
-        end
-      else if (aWidth = aResolutionArray[i].iWidth) and (aHeight = aResolutionArray[i].iHeight) then
-        begin
-          Result := aResolutionArray[i].Resolution;
-          Break;
-        end
-      else
-        Result := Format('Width: %d x Height: %d', [aWidth, aHeight]);
-    end;
+    if (aWidth = aResolutionArray[i].iWidth) and (aHeight = aResolutionArray[i].iHeight) then
+      begin
+        Result := aResolutionArray[i].Resolution;
+        Exit;
+      end;
 end;
 
 
 procedure TVideoStandardsCheat.SetResolutionByIndex(index: Integer);
 begin
-  CopyMemory(@rResolution,
-             @aResolutionArray[index],
-             SizeOf(TResolution));
+  if (index < 0) or (index >= Length(aResolutionArray)) then
+    raise ERangeError.Create('Invalid resolution index');
+  rResolution := aResolutionArray[index];
 end;
 
 
 procedure TVideoStandardsCheat.SetFrameRateByIndex(index: Integer);
 begin
-  CopyMemory(@rFrameRate,
-             @aFrameRatesArray[index],
-             SizeOf(TFrameRate));
+  if (index < 0) or (index >= Length(aFrameRatesArray)) then
+    raise ERangeError.Create('Invalid frame-rate index');
+  rFrameRate := aFrameRatesArray[index];
 end;
 
 end.

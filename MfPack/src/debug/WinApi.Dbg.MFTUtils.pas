@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This file contains a class that attempts to list the Media
 //              Foundation Transforms (MFTs) available on the system.
 //              See https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts.
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -68,9 +68,11 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Unknwn,
-  ActiveX,
+  WinApi.WinApiTypes,
+  WinApi.WinError,
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
   System.SysUtils,
-  VCl.Dialogs,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
@@ -113,6 +115,9 @@ type
   TListMFTs = class
   private
     FReadableArray: TReadableArray;
+    FLastResult: HResult;
+
+    procedure ClearResults;
 
     procedure initializeRegTypeInfo();
 
@@ -156,10 +161,13 @@ type
     procedure ListTansforms(pInput: MFT_REGISTER_TYPE_INFO;
                             pOutput: PMFT_REGISTER_TYPE_INFO);
 
+    // Success transfers two CoTaskMem strings to the caller.
     function GetMFT(pMFActivate: IMFActivate;
                     out pwcGuid: PWideChar;
                     out pwcFriendlyName: PWideChar): HResult;
 
+    property LastResult: HResult read FLastResult;
+    // Returned strings are borrowed until the next ListTansforms call or destruction.
     property FriendlyNames: TReadableArray read FReadableArray;
 
   end;
@@ -180,112 +188,135 @@ end;
 
 destructor TListMFTs.Destroy();
 begin
-
+  ClearResults;
   inherited;
 end;
 
 
-//
-// Prints out a list of all the Media Foundation Transforms that match for
-// the input media type and the optional output media type.
-// @param[in] pInput: pointer to the MFT input type to match.
-// @param[in] pOutput: Optional. Pointer to the MFT output type to match. If
-//                     nil all MFT's for the input type will be listed.
-//
-procedure TListMFTs.ListTansforms(pInput: MFT_REGISTER_TYPE_INFO;
-                                  pOutput: PMFT_REGISTER_TYPE_INFO);
+procedure TListMFTs.ClearResults;
 var
-  hr: HResult;
-  ppActivate: PIMFActivate;
-  category: TGUID;
-  mftCount: UINT32;
-  i: Integer;
-
-label
-  done;
-
+  I: Integer;
 begin
-
-  if IsEqualGuid(pInput.guidMajorType,
-                 MFMediaType_Audio) then
-    category := MFMediaType_Audio
-  else if IsEqualGuid(pInput.guidMajorType,
-                      MFMediaType_Video) then
-    category := MFMediaType_Video;
- // else if .. if you want to get more mft types.
-
-  hr := MFTEnumEx(category,
-                  MFT_ENUM_FLAG_SYNCMFT or
-                  MFT_ENUM_FLAG_ASYNCMFT or
-                  MFT_ENUM_FLAG_HARDWARE or
-                  MFT_ENUM_FLAG_SORTANDFILTER,
-                  @pInput,
-                  @pOutput,
-                  ppActivate,
-                  mftCount);
-
-  if FAILED(hr) then
+  for I := 0 to Length(FReadableArray) - 1 do
     begin
-      ShowMessage(Format('MFTEnumEx failed with error: %d.',
-                         [hr]));
-      goto done;
+      CoTaskMemFree(FReadableArray[I].pwcGuid);
+      CoTaskMemFree(FReadableArray[I].pwcFriendlyName);
     end;
-
-  {$POINTERMATH ON}
-  SetLength(FReadableArray,
-            mftCount);
-
-  for i := 0 to mftCount - 1 do
-    begin
-      GetMFT(ppActivate[i],
-             FReadableArray[i].pwcGuid,
-             FReadableArray[i].pwcFriendlyName);
-    end;
-
-done:
-
-  for i := 0 to mftCount - 1 do
-    SafeRelease(ppActivate[i]);
-
-  CoTaskMemFree(ppActivate);
-  ppActivate := nil;
+  SetLength(FReadableArray,0);
 end;
 
 
-//
-// Gets the friendly name and guid for a Media Foundation Transform.
-//
+procedure TListMFTs.ListTansforms(pInput: MFT_REGISTER_TYPE_INFO;
+                                  pOutput: PMFT_REGISTER_TYPE_INFO);
+var
+  Activate: PIMFActivateArray;
+  Categories: array[0..3] of TGUID;
+  CategoryCount: Integer;
+  Count: UINT32;
+  CategoryIndex: Integer;
+  I: Integer;
+  Index: Integer;
+begin
+  ClearResults;
+  FLastResult := E_INVALIDARG;
+  if IsEqualGUID(pInput.guidMajorType,MFMediaType_Audio) then
+    begin
+      Categories[0] := MFT_CATEGORY_AUDIO_DECODER;
+      Categories[1] := MFT_CATEGORY_AUDIO_ENCODER;
+      Categories[2] := MFT_CATEGORY_AUDIO_EFFECT;
+      CategoryCount := 3;
+    end
+  else if IsEqualGUID(pInput.guidMajorType,MFMediaType_Video) then
+    begin
+      Categories[0] := MFT_CATEGORY_VIDEO_DECODER;
+      Categories[1] := MFT_CATEGORY_VIDEO_ENCODER;
+      Categories[2] := MFT_CATEGORY_VIDEO_EFFECT;
+      Categories[3] := MFT_CATEGORY_VIDEO_PROCESSOR;
+      CategoryCount := 4;
+    end
+  else
+    Exit;
+  for CategoryIndex := 0 to CategoryCount - 1 do
+    begin
+      Activate := nil;
+      Count := 0;
+      try
+        FLastResult := MFTEnumEx(Categories[CategoryIndex],
+                                 MFT_ENUM_FLAG_SYNCMFT or
+                                 MFT_ENUM_FLAG_ASYNCMFT or
+                                 MFT_ENUM_FLAG_HARDWARE or
+                                 MFT_ENUM_FLAG_SORTANDFILTER,
+                                 @pInput,pOutput,Activate,Count);
+        if FAILED(FLastResult) then
+          begin
+            ClearResults;
+            Exit;
+          end;
+        for I := 0 to Integer(Count) - 1 do
+          begin
+            Index := Length(FReadableArray);
+            SetLength(FReadableArray,Index + 1);
+            FLastResult := GetMFT(Activate[I],FReadableArray[Index].pwcGuid,
+                                  FReadableArray[Index].pwcFriendlyName);
+            if FAILED(FLastResult) then
+              begin
+                ClearResults;
+                Exit;
+              end;
+          end;
+      finally
+        for I := 0 to Integer(Count) - 1 do
+          Activate[I] := nil;
+        CoTaskMemFree(Activate);
+      end;
+    end;
+  FLastResult := S_OK;
+end;
+
+
 function TListMFTs.GetMFT(pMFActivate: IMFActivate;
                           out pwcGuid: PWideChar;
                           out pwcFriendlyName: PWideChar): HResult;
 var
-  hr: HResult;
-  guidMFT: TGUID;
-  len: UINT;
-
+  GuidMFT: TGUID;
+  Len: UINT;
+  FallbackName: UnicodeString;
 begin
-
-  // get the CLSID GUID from the IMFAttributes of the activation object
-  hr := pMFActivate.GetGUID(MFT_TRANSFORM_CLSID_Attribute,
-                            guidMFT);
-
-  if SUCCEEDED(hr) then
-    hr := StringFromIID(guidMFT,
-                        pwcGuid);
-
-  if SUCCEEDED(hr) then
-    // get the friendly name string from the IMFAttributes of the activation object
-    hr := pMFActivate.GetAllocatedString(MFT_FRIENDLY_NAME_Attribute,
-                                         pwcFriendlyName,
-                                         len);
-
-  if SUCCEEDED(hr) then
+  pwcGuid := nil;
+  pwcFriendlyName := nil;
+  if pMFActivate = nil then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+  FillChar(GuidMFT,SizeOf(GuidMFT),0);
+  Result := pMFActivate.GetGUID(MFT_TRANSFORM_CLSID_Attribute,GuidMFT);
+  // Some activation objects do not publish a CLSID. Keep their other metadata.
+  if Result = MF_E_ATTRIBUTENOTFOUND then
+    Result := S_OK;
+  if SUCCEEDED(Result) then
+    Result := StringFromIID(GuidMFT,pwcGuid);
+  if SUCCEEDED(Result) then
+    Result := pMFActivate.GetAllocatedString(MFT_FRIENDLY_NAME_Attribute,pwcFriendlyName,Len);
+  if Result = MF_E_ATTRIBUTENOTFOUND then
+    begin
+      FallbackName := 'Unnamed transform';
+      pwcFriendlyName := CoTaskMemAlloc((Length(FallbackName) + 1) * SizeOf(WideChar));
+      if pwcFriendlyName = nil then
+        Result := E_OUTOFMEMORY
+      else
+        begin
+          Move(PWideChar(FallbackName)^,pwcFriendlyName^,(Length(FallbackName) + 1) * SizeOf(WideChar));
+          Result := S_OK;
+        end;
+    end;
+  if FAILED(Result) then
     begin
       CoTaskMemFree(pwcGuid);
       CoTaskMemFree(pwcFriendlyName);
+      pwcGuid := nil;
+      pwcFriendlyName := nil;
     end;
-
-  Result := hr;
 end;
 
 
@@ -363,19 +394,19 @@ begin
   audioDAC3.guidMajorType  := MFMediaType_Audio;
   audioDAC3.guidSubType    := MFAudioFormat_Dolby_AC3;
 
-  audioAAC.guidMajorType   := MFMediaType_Video;
+  audioAAC.guidMajorType   := MFMediaType_Audio;
   audioAAC.guidSubtype     := MFAudioFormat_AAC;
 
-  audioMPEG.guidMajorType   := MFMediaType_Video;
+  audioMPEG.guidMajorType   := MFMediaType_Audio;
   audioMPEG.guidSubtype     := MFAudioFormat_MPEG;
 
-  audioWMAL.guidMajorType   := MFMediaType_Video;
+  audioWMAL.guidMajorType   := MFMediaType_Audio;
   audioWMAL.guidSubtype     := MFAudioFormat_WMAudio_Lossless;
 
-  audioWMA8.guidMajorType   := MFMediaType_Video;
+  audioWMA8.guidMajorType   := MFMediaType_Audio;
   audioWMA8.guidSubtype     := MFAudioFormat_WMAudioV8;
 
-  audioWMA9.guidMajorType   := MFMediaType_Video;
+  audioWMA9.guidMajorType   := MFMediaType_Audio;
   audioWMA9.guidSubtype     := MFAudioFormat_WMAudioV9;
 
 end;

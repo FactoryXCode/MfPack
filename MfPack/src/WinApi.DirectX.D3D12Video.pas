@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -94,21 +94,19 @@ uses
 type
 
   PD3D12_VIDEO_FIELD_TYPE = ^D3D12_VIDEO_FIELD_TYPE;
-  D3D12_VIDEO_FIELD_TYPE = (
-    D3D12_VIDEO_FIELD_TYPE_NONE                          = 0,
-    D3D12_VIDEO_FIELD_TYPE_INTERLACED_TOP_FIELD_FIRST    = 1,
-    D3D12_VIDEO_FIELD_TYPE_INTERLACED_BOTTOM_FIELD_FIRST = 2
-  );
+  D3D12_VIDEO_FIELD_TYPE = (D3D12_VIDEO_FIELD_TYPE_NONE                          = 0,
+                            D3D12_VIDEO_FIELD_TYPE_INTERLACED_TOP_FIELD_FIRST    = 1,
+                            D3D12_VIDEO_FIELD_TYPE_INTERLACED_BOTTOM_FIELD_FIRST = 2
+                           );
   {$EXTERNALSYM D3D12_VIDEO_FIELD_TYPE}
 
   PD3D12_VIDEO_FRAME_STEREO_FORMAT = ^D3D12_VIDEO_FRAME_STEREO_FORMAT;
-  D3D12_VIDEO_FRAME_STEREO_FORMAT = (
-    D3D12_VIDEO_FRAME_STEREO_FORMAT_NONE       = 0,
-    D3D12_VIDEO_FRAME_STEREO_FORMAT_MONO       = 1,
-    D3D12_VIDEO_FRAME_STEREO_FORMAT_HORIZONTAL = 2,
-    D3D12_VIDEO_FRAME_STEREO_FORMAT_VERTICAL   = 3,
-    D3D12_VIDEO_FRAME_STEREO_FORMAT_SEPARATE   = 4
-  );
+  D3D12_VIDEO_FRAME_STEREO_FORMAT = (D3D12_VIDEO_FRAME_STEREO_FORMAT_NONE       = 0,
+                                     D3D12_VIDEO_FRAME_STEREO_FORMAT_MONO       = 1,
+                                     D3D12_VIDEO_FRAME_STEREO_FORMAT_HORIZONTAL = 2,
+                                     D3D12_VIDEO_FRAME_STEREO_FORMAT_VERTICAL   = 3,
+                                     D3D12_VIDEO_FRAME_STEREO_FORMAT_SEPARATE   = 4
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_FRAME_STEREO_FORMAT}
 
 
@@ -130,76 +128,73 @@ type
 
 
   PD3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE = ^D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE;
-  D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE = (
-    D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE_NONE        = 0,
-    D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE_FIELD_BASED = 1
-  );
+  D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE = (D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE_NONE        = 0,
+                                            D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE_FIELD_BASED = 1
+                                           );
   {$EXTERNALSYM D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE}
 
 
   PD3D12_FEATURE_VIDEO = ^D3D12_FEATURE_VIDEO;
-  D3D12_FEATURE_VIDEO = (
-    D3D12_FEATURE_VIDEO_DECODE_SUPPORT                         = 0,
-    D3D12_FEATURE_VIDEO_DECODE_PROFILES                        = 1,
-    D3D12_FEATURE_VIDEO_DECODE_FORMATS                         = 2,
-    D3D12_FEATURE_VIDEO_DECODE_CONVERSION_SUPPORT              = 3,
-    D3D12_FEATURE_VIDEO_PROCESS_SUPPORT                        = 5,
-    D3D12_FEATURE_VIDEO_PROCESS_MAX_INPUT_STREAMS              = 6,
-    D3D12_FEATURE_VIDEO_PROCESS_REFERENCE_INFO                 = 7,
-    D3D12_FEATURE_VIDEO_DECODER_HEAP_SIZE                      = 8,
-    D3D12_FEATURE_VIDEO_PROCESSOR_SIZE                         = 9,
-    D3D12_FEATURE_VIDEO_DECODE_PROFILE_COUNT                   = 10,
-    D3D12_FEATURE_VIDEO_DECODE_FORMAT_COUNT                    = 11,
-    D3D12_FEATURE_VIDEO_ARCHITECTURE                           = 17,
-    D3D12_FEATURE_VIDEO_DECODE_HISTOGRAM                       = 18,
-    D3D12_FEATURE_VIDEO_FEATURE_AREA_SUPPORT                   = 19,
-    D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR                       = 20,
-    D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR_SIZE                  = 21,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_COUNT                = 22,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMANDS                     = 23,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_PARAMETER_COUNT      = 24,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_PARAMETERS           = 25,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_SUPPORT              = 26,
-    D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_SIZE                 = 27,
-    D3D12_FEATURE_VIDEO_DECODE_PROTECTED_RESOURCES             = 28,
-    D3D12_FEATURE_VIDEO_PROCESS_PROTECTED_RESOURCES            = 29,
-    D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR_PROTECTED_RESOURCES   = 30,
-    D3D12_FEATURE_VIDEO_DECODER_HEAP_SIZE1                     = 31,
-    D3D12_FEATURE_VIDEO_PROCESSOR_SIZE1                        = 32,
-    D3D12_FEATURE_VIDEO_ENCODER_CODEC                          = 33,
-    D3D12_FEATURE_VIDEO_ENCODER_PROFILE_LEVEL                  = 34,
-    D3D12_FEATURE_VIDEO_ENCODER_OUTPUT_RESOLUTION_RATIOS_COUNT = 35,
-    D3D12_FEATURE_VIDEO_ENCODER_OUTPUT_RESOLUTION              = 36,
-    D3D12_FEATURE_VIDEO_ENCODER_INPUT_FORMAT                   = 37,
-    D3D12_FEATURE_VIDEO_ENCODER_RATE_CONTROL_MODE              = 38,
-    D3D12_FEATURE_VIDEO_ENCODER_INTRA_REFRESH_MODE             = 39,
-    D3D12_FEATURE_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE    = 40,
-    D3D12_FEATURE_VIDEO_ENCODER_HEAP_SIZE                      = 41,
-    D3D12_FEATURE_VIDEO_ENCODER_CODEC_CONFIGURATION_SUPPORT    = 42,
-    D3D12_FEATURE_VIDEO_ENCODER_SUPPORT                        = 43,
-    D3D12_FEATURE_VIDEO_ENCODER_CODEC_PICTURE_CONTROL_SUPPORT  = 44,
-    D3D12_FEATURE_VIDEO_ENCODER_RESOURCE_REQUIREMENTS          = 45,
-    // Update May 2024
-    D3D12_FEATURE_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_CONFIG  = 46,
-    D3D12_FEATURE_VIDEO_ENCODER_SUPPORT1                        = 47,
-    // ==
-    { 10.0.28000.0 }
-    D3D12_FEATURE_VIDEO_ENCODER_RESOURCE_REQUIREMENTS1          = 48,
-    D3D12_FEATURE_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT      = 49,
-    D3D12_FEATURE_VIDEO_ENCODER_QPMAP_INPUT                     = 50,
-    D3D12_FEATURE_VIDEO_ENCODER_DIRTY_REGIONS                   = 51,
-    D3D12_FEATURE_VIDEO_ENCODER_MOTION_SEARCH                   = 52,
-    D3D12_FEATURE_VIDEO_ENCODER_SUPPORT2                        = 55,
-    D3D12_FEATURE_VIDEO_ENCODER_HEAP_SIZE1                      = 56,
-    D3D12_FEATURE_VIDEO_ENCODER_RATE_CONTROL_FRAME_ANALYSIS     = 57
-  );
+  D3D12_FEATURE_VIDEO = (D3D12_FEATURE_VIDEO_DECODE_SUPPORT                         = 0,
+                         D3D12_FEATURE_VIDEO_DECODE_PROFILES                        = 1,
+                         D3D12_FEATURE_VIDEO_DECODE_FORMATS                         = 2,
+                         D3D12_FEATURE_VIDEO_DECODE_CONVERSION_SUPPORT              = 3,
+                         D3D12_FEATURE_VIDEO_PROCESS_SUPPORT                        = 5,
+                         D3D12_FEATURE_VIDEO_PROCESS_MAX_INPUT_STREAMS              = 6,
+                         D3D12_FEATURE_VIDEO_PROCESS_REFERENCE_INFO                 = 7,
+                         D3D12_FEATURE_VIDEO_DECODER_HEAP_SIZE                      = 8,
+                         D3D12_FEATURE_VIDEO_PROCESSOR_SIZE                         = 9,
+                         D3D12_FEATURE_VIDEO_DECODE_PROFILE_COUNT                   = 10,
+                         D3D12_FEATURE_VIDEO_DECODE_FORMAT_COUNT                    = 11,
+                         D3D12_FEATURE_VIDEO_ARCHITECTURE                           = 17,
+                         D3D12_FEATURE_VIDEO_DECODE_HISTOGRAM                       = 18,
+                         D3D12_FEATURE_VIDEO_FEATURE_AREA_SUPPORT                   = 19,
+                         D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR                       = 20,
+                         D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR_SIZE                  = 21,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_COUNT                = 22,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMANDS                     = 23,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_PARAMETER_COUNT      = 24,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_PARAMETERS           = 25,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_SUPPORT              = 26,
+                         D3D12_FEATURE_VIDEO_EXTENSION_COMMAND_SIZE                 = 27,
+                         D3D12_FEATURE_VIDEO_DECODE_PROTECTED_RESOURCES             = 28,
+                         D3D12_FEATURE_VIDEO_PROCESS_PROTECTED_RESOURCES            = 29,
+                         D3D12_FEATURE_VIDEO_MOTION_ESTIMATOR_PROTECTED_RESOURCES   = 30,
+                         D3D12_FEATURE_VIDEO_DECODER_HEAP_SIZE1                     = 31,
+                         D3D12_FEATURE_VIDEO_PROCESSOR_SIZE1                        = 32,
+                         D3D12_FEATURE_VIDEO_ENCODER_CODEC                          = 33,
+                         D3D12_FEATURE_VIDEO_ENCODER_PROFILE_LEVEL                  = 34,
+                         D3D12_FEATURE_VIDEO_ENCODER_OUTPUT_RESOLUTION_RATIOS_COUNT = 35,
+                         D3D12_FEATURE_VIDEO_ENCODER_OUTPUT_RESOLUTION              = 36,
+                         D3D12_FEATURE_VIDEO_ENCODER_INPUT_FORMAT                   = 37,
+                         D3D12_FEATURE_VIDEO_ENCODER_RATE_CONTROL_MODE              = 38,
+                         D3D12_FEATURE_VIDEO_ENCODER_INTRA_REFRESH_MODE             = 39,
+                         D3D12_FEATURE_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE    = 40,
+                         D3D12_FEATURE_VIDEO_ENCODER_HEAP_SIZE                      = 41,
+                         D3D12_FEATURE_VIDEO_ENCODER_CODEC_CONFIGURATION_SUPPORT    = 42,
+                         D3D12_FEATURE_VIDEO_ENCODER_SUPPORT                        = 43,
+                         D3D12_FEATURE_VIDEO_ENCODER_CODEC_PICTURE_CONTROL_SUPPORT  = 44,
+                         D3D12_FEATURE_VIDEO_ENCODER_RESOURCE_REQUIREMENTS          = 45,
+                         // Update May 2024
+                         D3D12_FEATURE_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_CONFIG  = 46,
+                         D3D12_FEATURE_VIDEO_ENCODER_SUPPORT1                        = 47,
+                         // ==
+                         { 10.0.28000.0 }
+                         D3D12_FEATURE_VIDEO_ENCODER_RESOURCE_REQUIREMENTS1          = 48,
+                         D3D12_FEATURE_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT      = 49,
+                         D3D12_FEATURE_VIDEO_ENCODER_QPMAP_INPUT                     = 50,
+                         D3D12_FEATURE_VIDEO_ENCODER_DIRTY_REGIONS                   = 51,
+                         D3D12_FEATURE_VIDEO_ENCODER_MOTION_SEARCH                   = 52,
+                         D3D12_FEATURE_VIDEO_ENCODER_SUPPORT2                        = 55,
+                         D3D12_FEATURE_VIDEO_ENCODER_HEAP_SIZE1                      = 56,
+                         D3D12_FEATURE_VIDEO_ENCODER_RATE_CONTROL_FRAME_ANALYSIS     = 57
+                        );
   {$EXTERNALSYM D3D12_FEATURE_VIDEO}
 
 
   PD3D12_BITSTREAM_ENCRYPTION_TYPE = ^D3D12_BITSTREAM_ENCRYPTION_TYPE;
-  D3D12_BITSTREAM_ENCRYPTION_TYPE = (
-    D3D12_BITSTREAM_ENCRYPTION_TYPE_NONE = 0
-  );
+  D3D12_BITSTREAM_ENCRYPTION_TYPE = (D3D12_BITSTREAM_ENCRYPTION_TYPE_NONE = 0
+                                    );
   {$EXTERNALSYM D3D12_BITSTREAM_ENCRYPTION_TYPE}
 
   PD3D12_VIDEO_DECODE_CONFIGURATION = ^D3D12_VIDEO_DECODE_CONFIGURATION;
@@ -244,16 +239,15 @@ type
 
 
   PD3D12_VIDEO_PROCESS_FILTER = ^D3D12_VIDEO_PROCESS_FILTER;
-  D3D12_VIDEO_PROCESS_FILTER = (
-    D3D12_VIDEO_PROCESS_FILTER_BRIGHTNESS         = 0,
-    D3D12_VIDEO_PROCESS_FILTER_CONTRAST           = 1,
-    D3D12_VIDEO_PROCESS_FILTER_HUE                = 2,
-    D3D12_VIDEO_PROCESS_FILTER_SATURATION         = 3,
-    D3D12_VIDEO_PROCESS_FILTER_NOISE_REDUCTION    = 4,
-    D3D12_VIDEO_PROCESS_FILTER_EDGE_ENHANCEMENT   = 5,
-    D3D12_VIDEO_PROCESS_FILTER_ANAMORPHIC_SCALING = 6,
-    D3D12_VIDEO_PROCESS_FILTER_STEREO_ADJUSTMENT  = 7
-  );
+  D3D12_VIDEO_PROCESS_FILTER = (D3D12_VIDEO_PROCESS_FILTER_BRIGHTNESS         = 0,
+                                D3D12_VIDEO_PROCESS_FILTER_CONTRAST           = 1,
+                                D3D12_VIDEO_PROCESS_FILTER_HUE                = 2,
+                                D3D12_VIDEO_PROCESS_FILTER_SATURATION         = 3,
+                                D3D12_VIDEO_PROCESS_FILTER_NOISE_REDUCTION    = 4,
+                                D3D12_VIDEO_PROCESS_FILTER_EDGE_ENHANCEMENT   = 5,
+                                D3D12_VIDEO_PROCESS_FILTER_ANAMORPHIC_SCALING = 6,
+                                D3D12_VIDEO_PROCESS_FILTER_STEREO_ADJUSTMENT  = 7
+                               );
   {$EXTERNALSYM D3D12_VIDEO_PROCESS_FILTER}
 
 
@@ -340,12 +334,11 @@ type
 
 
   PD3D12_VIDEO_PROCESS_ALPHA_FILL_MODE = ^D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE;
-  D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE = (
-    D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_OPAQUE        = 0,
-    D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_BACKGROUND    = 1,
-    D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_DESTINATION   = 2,
-    D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_SOURCE_STREAM = 3
-  );
+  D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE = (D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_OPAQUE        = 0,
+                                         D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_BACKGROUND    = 1,
+                                         D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_DESTINATION   = 2,
+                                         D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE_SOURCE_STREAM = 3
+                                        );
   {$EXTERNALSYM D3D12_VIDEO_PROCESS_ALPHA_FILL_MODE}
 
 
@@ -373,16 +366,7 @@ type
   ID3D12VideoDecoderHeap = interface(ID3D12Pageable)
     ['{0946B7C9-EBF6-4047-BB73-8683E27DBB1F}']
 
-  {$IFDEF WIN32}
-
-    function GetDesc(): D3D12_VIDEO_DECODER_HEAP_DESC; stdcall;
-
-  {$ELSE}  // WIN64
-
-    function GetDesc(RetVal: PD3D12_VIDEO_DECODER_HEAP_DESC): PD3D12_VIDEO_DECODER_HEAP_DESC; stdcall;
-
-  {$ENDIF}
-
+    procedure GetDesc(out RetVal: D3D12_VIDEO_DECODER_HEAP_DESC); stdcall;
   end;
   IID_ID3D12VideoDecoderHeap = ID3D12VideoDecoderHeap;
   {$EXTERNALSYM IID_ID3D12VideoDecoderHeap}
@@ -401,21 +385,19 @@ type
                                  FeatureSupportDataSize: UINT): HRESULT; stdcall;
 
     function CreateVideoDecoder(pDesc: PD3D12_VIDEO_DECODER_DESC;
-                                const riid: REFIID;  // Expected: IID_ID3D12VideoDecoder,
-                                {out} ppVideoDecoder: PPointer): HRESULT; stdcall;
+                                const riid: TGUID;
+                                ppVideoDecoder: PPointer): HRESULT; stdcall;
 
-    function CreateVideoDecoderHeap(pVideoDecoderHeapDesc: D3D12_VIDEO_DECODER_HEAP_DESC;
-                                    const riid: REFIID;  // Expected: IID_ID3D12VideoDecoderHeap,
-                                    {out} ppVideoDecoderHeap: PPointer): HRESULT; stdcall;
+    function CreateVideoDecoderHeap(pVideoDecoderHeapDesc: PD3D12_VIDEO_DECODER_HEAP_DESC;
+                                    const riid: TGUID;
+                                    ppVideoDecoderHeap: PPointer): HRESULT; stdcall;
 
     function CreateVideoProcessor(NodeMask: UINT;
                                   pOutputStreamDesc: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC;
                                   NumInputStreamDescs: UINT;
                                   pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
-                                  const riid: REFIID;  // Expected: IID_ID3D12VideoProcessor,
-                                  {out} ppVideoProcessor: PPointer): HRESULT; stdcall;
-
-
+                                  const riid: TGUID;
+                                  ppVideoProcessor: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDevice = ID3D12VideoDevice;
   {$EXTERNALSYM IID_ID3D12VideoDevice}
@@ -429,16 +411,7 @@ type
   ID3D12VideoDecoder = interface(ID3D12Pageable)
     ['{C59B6BDC-7720-4074-A136-17A156037470}']
 
-  {$IFDEF WIN32}
-
-    function GetDesc(): D3D12_VIDEO_DECODER_DESC; stdcall;
-
-  {$ELSE} // WIN64
-
-    function GetDesc(RetVal: PD3D12_VIDEO_DECODER_DESC): D3D12_VIDEO_DECODER_DESC; stdcall;
-
-  {$ENDIF}
-
+    procedure GetDesc(out RetVal: D3D12_VIDEO_DECODER_DESC); stdcall;
   end;
   IID_ID3D12VideoDecoder = ID3D12VideoDecoder;
   {$EXTERNALSYM IID_ID3D12VideoDecoder}
@@ -446,12 +419,11 @@ type
 
 
   PD3D12_VIDEO_DECODE_TIER = ^D3D12_VIDEO_DECODE_TIER;
-  D3D12_VIDEO_DECODE_TIER = (
-    D3D12_VIDEO_DECODE_TIER_NOT_SUPPORTED = 0,
-    D3D12_VIDEO_DECODE_TIER_1             = 1,
-    D3D12_VIDEO_DECODE_TIER_2             = 2,
-    D3D12_VIDEO_DECODE_TIER_3             = 3
-  );
+  D3D12_VIDEO_DECODE_TIER = (D3D12_VIDEO_DECODE_TIER_NOT_SUPPORTED = 0,
+                             D3D12_VIDEO_DECODE_TIER_1             = 1,
+                             D3D12_VIDEO_DECODE_TIER_2             = 2,
+                             D3D12_VIDEO_DECODE_TIER_3             = 3
+                            );
   {$EXTERNALSYM D3D12_VIDEO_DECODE_TIER}
 
 
@@ -485,26 +457,24 @@ const
 type
 
   PD3D12_VIDEO_DECODE_STATUS = ^D3D12_VIDEO_DECODE_STATUS;
-  D3D12_VIDEO_DECODE_STATUS = (
-    D3D12_VIDEO_DECODE_STATUS_OK                    = 0,
-    D3D12_VIDEO_DECODE_STATUS_CONTINUE              = 1,
-    D3D12_VIDEO_DECODE_STATUS_CONTINUE_SKIP_DISPLAY = 2,
-    D3D12_VIDEO_DECODE_STATUS_RESTART               = 3,
-    D3D12_VIDEO_DECODE_STATUS_RATE_EXCEEDED         = 4
-  );
+  D3D12_VIDEO_DECODE_STATUS = (D3D12_VIDEO_DECODE_STATUS_OK                    = 0,
+                               D3D12_VIDEO_DECODE_STATUS_CONTINUE              = 1,
+                               D3D12_VIDEO_DECODE_STATUS_CONTINUE_SKIP_DISPLAY = 2,
+                               D3D12_VIDEO_DECODE_STATUS_RESTART               = 3,
+                               D3D12_VIDEO_DECODE_STATUS_RATE_EXCEEDED         = 4
+                              );
   {$EXTERNALSYM D3D12_VIDEO_DECODE_STATUS}
 
 
   PD3D12_VIDEO_DECODE_ARGUMENT_TYPE = ^D3D12_VIDEO_DECODE_ARGUMENT_TYPE;
-  D3D12_VIDEO_DECODE_ARGUMENT_TYPE = (
-    D3D12_VIDEO_DECODE_ARGUMENT_TYPE_PICTURE_PARAMETERS          = 0,
-    D3D12_VIDEO_DECODE_ARGUMENT_TYPE_INVERSE_QUANTIZATION_MATRIX = 1,
-    D3D12_VIDEO_DECODE_ARGUMENT_TYPE_SLICE_CONTROL               = 2,
-    // Update May 2024
-    D3D12_VIDEO_DECODE_ARGUMENT_TYPE_HUFFMAN_TABLE               = 3
-    // D3D12_VIDEO_DECODE_ARGUMENT_TYPE_MAX_VALID                   = 3
-    // ==
-  );
+  D3D12_VIDEO_DECODE_ARGUMENT_TYPE = (D3D12_VIDEO_DECODE_ARGUMENT_TYPE_PICTURE_PARAMETERS          = 0,
+                                      D3D12_VIDEO_DECODE_ARGUMENT_TYPE_INVERSE_QUANTIZATION_MATRIX = 1,
+                                      D3D12_VIDEO_DECODE_ARGUMENT_TYPE_SLICE_CONTROL               = 2,
+                                      // Update May 2024
+                                      D3D12_VIDEO_DECODE_ARGUMENT_TYPE_HUFFMAN_TABLE               = 3
+                                      // D3D12_VIDEO_DECODE_ARGUMENT_TYPE_MAX_VALID                   = 3
+                                      // ==
+                                     );
   {$EXTERNALSYM D3D12_VIDEO_DECODE_ARGUMENT_TYPE}
 
 
@@ -569,17 +539,14 @@ type
 
 
   PD3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT = ^D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT;
-  D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT = (
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_Y = 0,
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_U = 1,
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_V = 2,
-
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_R = 0,
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_G = 1,
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_B = 2,
-
-    D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_A = 3
-  );
+  D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT = (D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_Y = 0,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_U = 1,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_V = 2,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_R = 0,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_G = 1,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_B = 2,
+                                            D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT_A = 3
+                                           );
   {$EXTERNALSYM D3D12_VIDEO_DECODE_HISTOGRAM_COMPONENT}
 
 
@@ -756,14 +723,14 @@ type
     FrameArguments: array[0..D3D12_VIDEO_DECODE_MAX_ARGUMENTS - 1] of D3D12_VIDEO_DECODE_FRAME_ARGUMENT;
     ReferenceFrames: D3D12_VIDEO_DECODE_REFERENCE_FRAMES;
     CompressedBitstream: D3D12_VIDEO_DECODE_COMPRESSED_BITSTREAM;
-    pHeap: PID3D12VideoDecoderHeap;
+    pHeap: Pointer; // Borrowed ID3D12VideoDecoderHeap reference; keep the owner alive.
   end;
   {$EXTERNALSYM D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS}
 
 
   PD3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS = ^D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS;
   D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS = record
-    pOutputTexture2D: PID3D12Resource;
+    pOutputTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     OutputSubresource: UINT;
     ConversionArguments: D3D12_VIDEO_DECODE_CONVERSION_ARGUMENTS;
   end;
@@ -788,18 +755,9 @@ type
 
     // Update May 2024
 
-  {$IFDEF WIN32}
-
-    function GetOutputStreamDesc(): D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC; stdcall;
-
-  {$ELSE} // WIN64
-
-    function GetOutputStreamDesc(RetVal: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC): D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC; stdcall;
-
-  {$ENDIF}
+    procedure GetOutputStreamDesc(out RetVal: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC); stdcall;
 
     // ==
-
   end;
   IID_ID3D12VideoProcessor = ID3D12VideoProcessor;
   {$EXTERNALSYM IID_ID3D12VideoProcessor}
@@ -858,16 +816,15 @@ const
 type
 
   PD3D12_VIDEO_PROCESS_ORIENTATION = ^D3D12_VIDEO_PROCESS_ORIENTATION;
-  D3D12_VIDEO_PROCESS_ORIENTATION = (
-    D3D12_VIDEO_PROCESS_ORIENTATION_DEFAULT                       = 0,
-    D3D12_VIDEO_PROCESS_ORIENTATION_FLIP_HORIZONTAL               = 1,
-    D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_90                  = 2,
-    D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_90_FLIP_HORIZONTAL  = 3,
-    D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_180                 = 4,
-    D3D12_VIDEO_PROCESS_ORIENTATION_FLIP_VERTICAL                 = 5,
-    D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_270                 = 6,
-    D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_270_FLIP_HORIZONTAL = 7
-  );
+  D3D12_VIDEO_PROCESS_ORIENTATION = (D3D12_VIDEO_PROCESS_ORIENTATION_DEFAULT                       = 0,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_FLIP_HORIZONTAL               = 1,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_90                  = 2,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_90_FLIP_HORIZONTAL  = 3,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_180                 = 4,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_FLIP_VERTICAL                 = 5,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_270                 = 6,
+                                     D3D12_VIDEO_PROCESS_ORIENTATION_CLOCKWISE_270_FLIP_HORIZONTAL = 7
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_PROCESS_ORIENTATION}
 
 
@@ -1032,9 +989,9 @@ type
     procedure ClearState(); stdcall;
 
     procedure ResourceBarrier(NumBarriers: UINT;
-                              const pBarriers: PD3D12_RESOURCE_BARRIER); stdcall;
+                              pBarriers: PD3D12_RESOURCE_BARRIER); stdcall;
 
-    procedure DiscardResource(pResource: PID3D12Resource;
+    procedure DiscardResource(pResource: ID3D12Resource;
                               pRegion: PD3D12_DISCARD_REGION); stdcall;
 
     procedure BeginQuery(pQueryHeap: ID3D12QueryHeap;
@@ -1052,28 +1009,25 @@ type
                                pDestinationBuffer: ID3D12Resource;
                                AlignedDestinationBufferOffset: UINT64); stdcall;
 
-    procedure SetPredication(pBuffer: PID3D12Resource;
+    procedure SetPredication(pBuffer: ID3D12Resource;
                              AlignedBufferOffset: UINT64;
                              Operation: D3D12_PREDICATION_OP); stdcall;
 
     procedure SetMarker(Metadata: UINT;
-                       const pData: Pointer;
-                       Size: UINT); stdcall;
+                        pData: Pointer;
+                        Size: UINT); stdcall;
 
     procedure BeginEvent(Metadata: UINT;
-                         const pData: Pointer;
+                         pData: Pointer;
                          Size: UINT); stdcall;
 
     procedure EndEvent(); stdcall;
 
     procedure DecodeFrame(pDecoder: ID3D12VideoDecoder;
-                          pOutputArguments: D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS;
-                          pInputArguments: D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS);
-
-    procedure WriteBufferImmediate(Count: UINT;
+                          pOutputArguments: PD3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS;
+                          pInputArguments: PD3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS); stdcall;procedure WriteBufferImmediate(Count: UINT;
                                    pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
-                                   pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE);
-
+                                   pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
   end;
   IID_ID3D12VideoDecodeCommandList = ID3D12VideoDecodeCommandList;
   {$EXTERNALSYM IID_ID3D12VideoDecodeCommandList}
@@ -1129,14 +1083,13 @@ type
     procedure EndEvent(); stdcall;
 
     procedure ProcessFrames(pVideoProcessor: ID3D12VideoProcessor;
-                            pOutputArguments: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
+                            pOutputArguments: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
                             NumInputStreams: UINT;
-                            pInputArguments: D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS); stdcall;
+                            pInputArguments: PD3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS); stdcall;
 
     procedure WriteBufferImmediate(Count: UINT;
                                    pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
                                    pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
-
   end;
   IID_ID3D12VideoProcessCommandList = ID3D12VideoProcessCommandList;
   {$EXTERNALSYM IID_ID3D12VideoProcessCommandList}
@@ -1145,7 +1098,7 @@ type
   PD3D12_VIDEO_DECODE_OUTPUT_HISTOGRAM = ^D3D12_VIDEO_DECODE_OUTPUT_HISTOGRAM;
   D3D12_VIDEO_DECODE_OUTPUT_HISTOGRAM = record
     Offset: UINT64;
-    pBuffer: PID3D12Resource;
+    pBuffer: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
   end;
   {$EXTERNALSYM D3D12_VIDEO_DECODE_OUTPUT_HISTOGRAM}
 
@@ -1153,7 +1106,7 @@ type
   PD3D12_VIDEO_DECODE_CONVERSION_ARGUMENTS1 = ^D3D12_VIDEO_DECODE_CONVERSION_ARGUMENTS1;
   D3D12_VIDEO_DECODE_CONVERSION_ARGUMENTS1 = record
     Enable: BOOL;
-    pReferenceTexture2D: PID3D12Resource;
+    pReferenceTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     ReferenceSubresource: UINT;
     OutputColorSpace: DXGI_COLOR_SPACE_TYPE;
     DecodeColorSpace: DXGI_COLOR_SPACE_TYPE;
@@ -1165,7 +1118,7 @@ type
 
   PD3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1 = ^D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1;
   D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1 = record
-    pOutputTexture2D: PID3D12Resource;
+    pOutputTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     OutputSubresource: UINT;
     ConversionArguments: D3D12_VIDEO_DECODE_CONVERSION_ARGUMENTS1;
     Histograms: array[0..D3D12_VIDEO_DECODE_MAX_HISTOGRAM_COMPONENTS - 1] of D3D12_VIDEO_DECODE_OUTPUT_HISTOGRAM;
@@ -1183,9 +1136,8 @@ type
     ['{D52F011B-B56E-453C-A05A-A7F311C8F472}']
 
     procedure DecodeFrame1(pDecoder: ID3D12VideoDecoder;
-                           pOutputArguments: D3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1;
-                           pInputArguments: D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS); stdcall;
-
+                           pOutputArguments: PD3D12_VIDEO_DECODE_OUTPUT_STREAM_ARGUMENTS1;
+                           pInputArguments: PD3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS); stdcall;
   end;
   IID_ID3D12VideoDecodeCommandList1 = ID3D12VideoDecodeCommandList1;
   {$EXTERNALSYM IID_ID3D12VideoDecodeCommandList1}
@@ -1213,20 +1165,18 @@ type
     ['{542C5C4D-7596-434F-8C93-4EFA6766F267}']
 
     procedure ProcessFrames1(pVideoProcessor: ID3D12VideoProcessor;
-                             pOutputArguments: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
+                             pOutputArguments: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
                              NumInputStreams: UINT;
                              pInputArguments: PD3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1); stdcall;
-
   end;
   IID_ID3D12VideoProcessCommandList1 = ID3D12VideoProcessCommandList1;
   {$EXTERNALSYM IID_ID3D12VideoProcessCommandList1}
 
 
   PD3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE = ^D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE;
-  D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE = (
-    D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE_8X8   = 0,
-    D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE_16X16 = 1
-  );
+  D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE = (D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE_8X8   = 0,
+                                                    D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE_16X16 = 1
+                                                   );
   {$EXTERNALSYM D3D12_VIDEO_MOTION_ESTIMATOR_SEARCH_BLOCK_SIZE}
 
 
@@ -1245,9 +1195,8 @@ const
 type
 
   PD3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION = ^D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION;
-  D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION = (
-    D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION_QUARTER_PEL = 0
-  );
+  D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION = (D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION_QUARTER_PEL = 0
+                                                  );
   {$EXTERNALSYM D3D12_VIDEO_MOTION_ESTIMATOR_VECTOR_PRECISION}
 
 
@@ -1325,21 +1274,12 @@ type
 
     // Update May 2024
 
-  {$IFDEF WIN32}
-
-    function GetDesc(): D3D12_VIDEO_MOTION_ESTIMATOR_DESC; stdcall;
-
-  {$ELSE}
-
-     function GetDesc(RetVal: PD3D12_VIDEO_MOTION_ESTIMATOR_DESC): D3D12_VIDEO_MOTION_ESTIMATOR_DESC; stdcall;
-
-  {$ENDIF}
+    procedure GetDesc(out RetVal: D3D12_VIDEO_MOTION_ESTIMATOR_DESC); stdcall;
 
     // ==
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoMotionEstimator = ID3D12VideoMotionEstimator;
   {$EXTERNALSYM IID_ID3D12VideoMotionEstimator}
@@ -1367,22 +1307,12 @@ type
 
     // Update May 2024
 
-  {$IFDEF WIN32}
-
-    function GetDesc(): D3D12_VIDEO_MOTION_ESTIMATOR_DESC; stdcall;
-
-  {$ELSE}
-
-     function GetDesc(RetVal: PD3D12_VIDEO_MOTION_ESTIMATOR_DESC): D3D12_VIDEO_MOTION_ESTIMATOR_DESC; stdcall;
-
-  {$ENDIF}
+    procedure GetDesc(out RetVal: D3D12_VIDEO_MOTION_VECTOR_HEAP_DESC); stdcall;
 
     // ==
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoMotionVectorHeap = ID3D12VideoMotionVectorHeap;
   {$EXTERNALSYM IID_ID3D12VideoMotionVectorHeap}
@@ -1396,16 +1326,15 @@ type
   ID3D12VideoDevice1 = interface(ID3D12VideoDevice)
     ['{981611AD-A144-4C83-9890-F30E26D658AB}']
 
-    function CreateVideoMotionEstimator(pDesc: D3D12_VIDEO_MOTION_ESTIMATOR_DESC;
+    function CreateVideoMotionEstimator(pDesc: PD3D12_VIDEO_MOTION_ESTIMATOR_DESC;
                                         pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                        const riid: REFIID;  // Expected: IID_ID3D12VideoMotionEstimator,
-                                        out ppVideoMotionEstimator): HRESULT; stdcall;
+                                        const riid: TGUID;
+                                        ppVideoMotionEstimator: PPointer): HRESULT; stdcall;
 
-    function CreateVideoMotionVectorHeap(pDesc: D3D12_VIDEO_MOTION_VECTOR_HEAP_DESC;
-                                         pProtectedResourceSession: ID3D12ProtectedResourceSession {can be nil};
-                                         const riid: REFIID;  // Expected: IID_ID3D12VideoMotionVectorHeap,
-                                         out ppVideoMotionVectorHeap): HRESULT; stdcall;
-
+    function CreateVideoMotionVectorHeap(pDesc: PD3D12_VIDEO_MOTION_VECTOR_HEAP_DESC;
+                                         pProtectedResourceSession: ID3D12ProtectedResourceSession;
+                                         const riid: TGUID;
+                                         ppVideoMotionVectorHeap: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDevice1 = ID3D12VideoDevice1;
   {$EXTERNALSYM IID_ID3D12VideoDevice1}
@@ -1431,9 +1360,9 @@ type
 
   PD3D12_VIDEO_MOTION_ESTIMATOR_INPUT = ^D3D12_VIDEO_MOTION_ESTIMATOR_INPUT;
   D3D12_VIDEO_MOTION_ESTIMATOR_INPUT = record
-    pInputTexture2D: PID3D12Resource;
+    pInputTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     InputSubresourceIndex: UINT;
-    pReferenceTexture2D: PID3D12Resource;
+    pReferenceTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     ReferenceSubresourceIndex: UINT;
     pHintMotionVectorHeap: ID3D12VideoMotionVectorHeap;
   end;
@@ -1442,7 +1371,7 @@ type
 
   PD3D12_RESOLVE_VIDEO_MOTION_VECTOR_HEAP_OUTPUT = ^D3D12_RESOLVE_VIDEO_MOTION_VECTOR_HEAP_OUTPUT;
   D3D12_RESOLVE_VIDEO_MOTION_VECTOR_HEAP_OUTPUT = record
-    pMotionVectorTexture2D: PID3D12Resource;
+    pMotionVectorTexture2D: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     MotionVectorCoordinate: D3D12_RESOURCE_COORDINATE;
   end;
   {$EXTERNALSYM D3D12_RESOLVE_VIDEO_MOTION_VECTOR_HEAP_OUTPUT}
@@ -1462,7 +1391,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncodeCommandList);'}
   {$EXTERNALSYM ID3D12VideoEncodeCommandList}
-  ID3D12VideoEncodeCommandList = Interface(ID3D12CommandList)
+  ID3D12VideoEncodeCommandList = interface(ID3D12CommandList)
     ['{8455293A-0CBD-4831-9B39-FBDBAB724723}']
 
     function Close(): HRESULT; stdcall;
@@ -1518,7 +1447,6 @@ type
                                    pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
 
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
-
   end;
   IID_ID3D12VideoEncodeCommandList = ID3D12VideoEncodeCommandList;
   {$EXTERNALSYM IID_ID3D12VideoEncodeCommandList}
@@ -1590,32 +1518,30 @@ type
 
 
   PD3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE = ^D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE;
-  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE = (
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CREATION              = 0,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_INITIALIZATION        = 1,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_EXECUTION             = 2,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CAPS_INPUT            = 3,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CAPS_OUTPUT           = 4,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_DEVICE_EXECUTE_INPUT  = 5,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_DEVICE_EXECUTE_OUTPUT = 6
-  );
+  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE = (D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CREATION              = 0,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_INITIALIZATION        = 1,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_EXECUTION             = 2,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CAPS_INPUT            = 3,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_CAPS_OUTPUT           = 4,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_DEVICE_EXECUTE_INPUT  = 5,
+                                                   D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE_DEVICE_EXECUTE_OUTPUT = 6
+                                                  );
   {$EXTERNALSYM D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_STAGE}
 
 
   PD3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE = ^D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE;
-  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE = (
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT8    = 0,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT16   = 1,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT32   = 2,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT64   = 3,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT8    = 4,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT16   = 5,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT32   = 6,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT64   = 7,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_FLOAT    = 8,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_DOUBLE   = 9,
-    D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_RESOURCE = 10
-  );
+  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE = (D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT8    = 0,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT16   = 1,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT32   = 2,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_UINT64   = 3,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT8    = 4,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT16   = 5,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT32   = 6,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_SINT64   = 7,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_FLOAT    = 8,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_DOUBLE   = 9,
+                                                  D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE_RESOURCE = 10
+                                                 );
   {$EXTERNALSYM D3D12_VIDEO_EXTENSION_COMMAND_PARAMETER_TYPE}
 
 
@@ -1726,12 +1652,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDecoder1);'}
   {$EXTERNALSYM ID3D12VideoDecoder1}
-  ID3D12VideoDecoder1 = Interface(ID3D12VideoDecoder)
+  ID3D12VideoDecoder1 = interface(ID3D12VideoDecoder)
     ['{79A2E5FB-CCD2-469A-9FDE-195D10951F7E}']
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDecoder1 = ID3D12VideoDecoder1;
   {$EXTERNALSYM IID_ID3D12VideoDecoder1}
@@ -1742,12 +1667,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDecoderHeap1);'}
   {$EXTERNALSYM ID3D12VideoDecoderHeap1}
-  ID3D12VideoDecoderHeap1 = Interface(ID3D12VideoDecoderHeap)
+  ID3D12VideoDecoderHeap1 = interface(ID3D12VideoDecoderHeap)
     ['{DA1D98C5-539F-41B2-BF6B-1198A03B6D26}']
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDecoderHeap1 = ID3D12VideoDecoderHeap1;
   {$EXTERNALSYM IID_ID3D12VideoDecoderHeap1}
@@ -1758,12 +1682,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoProcessor1);'}
   {$EXTERNALSYM ID3D12VideoProcessor1}
-  ID3D12VideoProcessor1 = Interface(ID3D12VideoProcessor)
+  ID3D12VideoProcessor1 = interface(ID3D12VideoProcessor)
     ['{F3CFE615-553F-425C-86D8-EE8C1B1FB01C}']
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoProcessor1 = ID3D12VideoProcessor1;
   {$EXTERNALSYM IID_ID3D12VideoProcessor1}
@@ -1774,26 +1697,17 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoExtensionCommand);'}
   {$EXTERNALSYM ID3D12VideoExtensionCommand}
-  ID3D12VideoExtensionCommand = Interface(ID3D12Pageable)
+  ID3D12VideoExtensionCommand = interface(ID3D12Pageable)
     ['{554E41E8-AE8E-4A8C-B7D2-5B4F274A30E4}']
 
     // Update May 2024
 
-  {$IFDEF WIN32}
-
-     function GetDesc(): D3D12_VIDEO_EXTENSION_COMMAND_DESC; stdcall;
-
-  {$ELSE}
-
-     function GetDesc(RetVal: PD3D12_VIDEO_EXTENSION_COMMAND_DESC): D3D12_VIDEO_EXTENSION_COMMAND_DESC; stdcall;
-
-  {$ENDIF}
+    procedure GetDesc(out RetVal: D3D12_VIDEO_EXTENSION_COMMAND_DESC); stdcall;
 
     // ==
 
-    function GetProtectedResourceSession(const riid: REFIID;  // Expected: ID3D12ProtectedResourceSession
-                                         out ppProtectedSession): HRESULT; stdcall;
-
+    function GetProtectedResourceSession(const riid: TGUID;
+                                         ppProtectedSession: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoExtensionCommand = ID3D12VideoExtensionCommand;
   {$EXTERNALSYM IID_ID3D12VideoExtensionCommand}
@@ -1804,40 +1718,39 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDevice2);'}
   {$EXTERNALSYM ID3D12VideoDevice2}
-  ID3D12VideoDevice2 = Interface(ID3D12VideoDevice1)
+  ID3D12VideoDevice2 = interface(ID3D12VideoDevice1)
     ['{F019AC49-F838-4A95-9B17-579437C8F513}']
 
-    function CreateVideoDecoder1(pDesc: D3D12_VIDEO_DECODER_DESC;
+    function CreateVideoDecoder1(pDesc: PD3D12_VIDEO_DECODER_DESC;
                                  pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                 const riid: REFIID; // Expected: IID_ID3D12VideoDecoder1,
-                                 out ppVideoDecoder): HRESULT; stdcall;
+                                 const riid: TGUID;
+                                 ppVideoDecoder: PPointer): HRESULT; stdcall;
 
-    function CreateVideoDecoderHeap1(pVideoDecoderHeapDesc: D3D12_VIDEO_DECODER_HEAP_DESC;
+    function CreateVideoDecoderHeap1(pVideoDecoderHeapDesc: PD3D12_VIDEO_DECODER_HEAP_DESC;
                                      pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                     const riid: REFIID; // Expected: IID_ID3D12VideoDecoderHeap1,
-                                     out ppVideoDecoderHeap): HRESULT; stdcall;
+                                     const riid: TGUID;
+                                     ppVideoDecoderHeap: PPointer): HRESULT; stdcall;
 
     function CreateVideoProcessor1(NodeMask: UINT;
-                                   pOutputStreamDesc: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC;
+                                   pOutputStreamDesc: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC;
                                    NumInputStreamDescs: UINT;
                                    pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
                                    pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                   const riid: REFIID; // Expected: IID_ID3D12VideoProcessor1,
-                                   out ppVideoProcessor): HRESULT; stdcall;
+                                   const riid: TGUID;
+                                   ppVideoProcessor: PPointer): HRESULT; stdcall;
 
-    function CreateVideoExtensionCommand(pDesc: D3D12_VIDEO_EXTENSION_COMMAND_DESC;
+    function CreateVideoExtensionCommand(pDesc: PD3D12_VIDEO_EXTENSION_COMMAND_DESC;
                                          pCreationParameters: Pointer;
                                          CreationParametersDataSizeInBytes: SIZE_T;
                                          pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                         const riid: REFIID; // Expected: IID_ID3D12VideoExtensionCommand,
-                                         out ppVideoExtensionCommand): HRESULT; stdcall;
+                                         const riid: TGUID;
+                                         ppVideoExtensionCommand: PPointer): HRESULT; stdcall;
 
     function ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
                                      pExecutionParameters: Pointer;
                                      ExecutionParametersSizeInBytes: SIZE_T;
                                      pOutputData: Pointer;
                                      OutputDataSizeInBytes: SIZE_T): HRESULT; stdcall;
-
   end;
   IID_ID3D12VideoDevice2 = ID3D12VideoDevice2;
   {$EXTERNALSYM IID_ID3D12VideoDevice2}
@@ -1848,8 +1761,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDecodeCommandList2);'}
   {$EXTERNALSYM ID3D12VideoDecodeCommandList2}
-  ID3D12VideoDecodeCommandList2 = Interface(ID3D12VideoDecodeCommandList1)
-    ['{6e120880-c114-4153-8036-d247051e1729}']
+  ID3D12VideoDecodeCommandList2 = interface(ID3D12VideoDecodeCommandList1)
+    ['{6E120880-C114-4153-8036-D247051E1729}']
 
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
 
@@ -1860,7 +1773,6 @@ type
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
                                       pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
-
   end;
   IID_ID3D12VideoDecodeCommandList2 = ID3D12VideoDecodeCommandList2;
   {$EXTERNALSYM IID_ID3D12VideoDecodeCommandList2}
@@ -1871,12 +1783,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDecodeCommandList3);'}
   {$EXTERNALSYM ID3D12VideoDecodeCommandList3}
-  ID3D12VideoDecodeCommandList3 = Interface(ID3D12VideoDecodeCommandList2)
-    ['{2aee8c37-9562-42da-8abf-61efeb2e4513}']
+  ID3D12VideoDecodeCommandList3 = interface(ID3D12VideoDecodeCommandList2)
+    ['{2AEE8C37-9562-42DA-8ABF-61EFEB2E4513}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
                       pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
-
   end;
   IID_ID3D12VideoDecodeCommandList3 = ID3D12VideoDecodeCommandList3;
   {$EXTERNALSYM IID_ID3D12VideoDecodeCommandList3}
@@ -1887,8 +1798,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoProcessCommandList2);'}
   {$EXTERNALSYM ID3D12VideoProcessCommandList2}
-  ID3D12VideoProcessCommandList2 = Interface(ID3D12VideoProcessCommandList1)
-    ['{db525ae4-6ad6-473c-baa7-59b2e37082e4}']
+  ID3D12VideoProcessCommandList2 = interface(ID3D12VideoProcessCommandList1)
+    ['{DB525AE4-6AD6-473C-BAA7-59B2E37082E4}']
 
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
 
@@ -1899,7 +1810,6 @@ type
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
                                       pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
-
   end;
   IID_ID3D12VideoProcessCommandList2 = ID3D12VideoProcessCommandList2;
   {$EXTERNALSYM IID_ID3D12VideoProcessCommandList2}
@@ -1910,12 +1820,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoProcessCommandList3);'}
   {$EXTERNALSYM ID3D12VideoProcessCommandList3}
-  ID3D12VideoProcessCommandList3 = Interface(ID3D12VideoProcessCommandList2)
-    ['{1a0a4ca4-9f08-40ce-9558-b411fd2666ff}']
+  ID3D12VideoProcessCommandList3 = interface(ID3D12VideoProcessCommandList2)
+    ['{1A0A4CA4-9F08-40CE-9558-B411FD2666FF}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
                       pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
-
   end;
   IID_ID3D12VideoProcessCommandList3 = ID3D12VideoProcessCommandList3;
   {$EXTERNALSYM IID_ID3D12VideoProcessCommandList3}
@@ -1926,8 +1835,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncodeCommandList1);'}
   {$EXTERNALSYM ID3D12VideoEncodeCommandList1}
-  ID3D12VideoEncodeCommandList1 = Interface(ID3D12VideoEncodeCommandList)
-    ['{94971eca-2bdb-4769-88cf-3675ea757ebc}']
+  ID3D12VideoEncodeCommandList1 = interface(ID3D12VideoEncodeCommandList)
+    ['{94971ECA-2BDB-4769-88CF-3675EA757EBC}']
 
     procedure InitializeExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
                                          pInitializationParameters: Pointer;
@@ -1936,7 +1845,6 @@ type
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
                                       pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
-
   end;
   IID_ID3D12VideoEncodeCommandList1 = ID3D12VideoEncodeCommandList1;
   {$EXTERNALSYM IID_ID3D12VideoEncodeCommandList1}
@@ -2026,54 +1934,52 @@ const
   D3D12_VIDEO_DECODE_PROFILE_JPEG_VLD_422             : TGUID = '{f04df417-eee2-4067-a778-f35c15ab9721}';
   {$EXTERNALSYM D3D12_VIDEO_DECODE_PROFILE_JPEG_VLD_422}
   D3D12_VIDEO_DECODE_PROFILE_JPEG_VLD_44              : TGUID = '{4cd00e17-89ba-48ef-b9f9-edcb82713f65}';
+  D3D12_VIDEO_DECODE_PROFILE_JPEG_VLD_444             : TGUID = '{4cd00e17-89ba-48ef-b9f9-edcb82713f65}';
   {$EXTERNALSYM D3D12_VIDEO_DECODE_PROFILE_JPEG_VLD_44}
 
 
 type
   PD3D12_VIDEO_ENCODER_AV1_PROFILE = ^D3D12_VIDEO_ENCODER_AV1_PROFILE;
-  D3D12_VIDEO_ENCODER_AV1_PROFILE                = (
-    D3D12_VIDEO_ENCODER_AV1_PROFILE_MAIN         = 0,
-    D3D12_VIDEO_ENCODER_AV1_PROFILE_HIGH         = 1,
-    D3D12_VIDEO_ENCODER_AV1_PROFILE_PROFESSIONAL = 2
-  );
+  D3D12_VIDEO_ENCODER_AV1_PROFILE = (D3D12_VIDEO_ENCODER_AV1_PROFILE_MAIN         = 0,
+                                     D3D12_VIDEO_ENCODER_AV1_PROFILE_HIGH         = 1,
+                                     D3D12_VIDEO_ENCODER_AV1_PROFILE_PROFESSIONAL = 2
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_PROFILE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_LEVELS = ^D3D12_VIDEO_ENCODER_AV1_LEVELS;
-  D3D12_VIDEO_ENCODER_AV1_LEVELS       = (
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_0 = 0,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_1 = 1,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_2 = 2,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_3 = 3,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_0 = 4,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_1 = 5,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_2 = 6,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_3 = 7,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_0 = 8,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_1 = 9,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_2 = 10,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_3 = 11,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_0 = 12,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_1 = 13,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_2 = 14,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_3 = 15,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_0 = 16,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_1 = 17,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_2 = 18,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_3 = 19,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_0 = 20,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_1 = 21,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_2 = 22,
-    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_3 = 23
-  );
+  D3D12_VIDEO_ENCODER_AV1_LEVELS = (D3D12_VIDEO_ENCODER_AV1_LEVELS_2_0 = 0,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_1 = 1,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_2 = 2,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_2_3 = 3,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_0 = 4,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_1 = 5,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_2 = 6,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_3_3 = 7,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_0 = 8,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_1 = 9,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_2 = 10,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_4_3 = 11,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_0 = 12,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_1 = 13,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_2 = 14,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_5_3 = 15,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_0 = 16,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_1 = 17,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_2 = 18,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_6_3 = 19,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_0 = 20,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_1 = 21,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_2 = 22,
+                                    D3D12_VIDEO_ENCODER_AV1_LEVELS_7_3 = 23
+                                   );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_LEVELS}
 
 
   PD3D12_VIDEO_ENCODER_AV1_TIER = ^D3D12_VIDEO_ENCODER_AV1_TIER;
-  D3D12_VIDEO_ENCODER_AV1_TIER        = (
-    D3D12_VIDEO_ENCODER_AV1_TIER_MAIN = 0,
-    D3D12_VIDEO_ENCODER_AV1_TIER_HIGH = 1
-  );
+  D3D12_VIDEO_ENCODER_AV1_TIER = (D3D12_VIDEO_ENCODER_AV1_TIER_MAIN = 0,
+                                  D3D12_VIDEO_ENCODER_AV1_TIER_HIGH = 1
+                                 );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_TIER}
 
 
@@ -2086,196 +1992,181 @@ type
 
 
   PD3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS                                 = (
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_NONE                           = 0,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_128x128_SUPERBLOCK             = $1,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FILTER_INTRA                   = $2,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTRA_EDGE_FILTER              = $4,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTERINTRA_COMPOUND            = $8,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_MASKED_COMPOUND                = $10,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_WARPED_MOTION                  = $20,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_DUAL_FILTER                    = $40,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_JNT_COMP                       = $80,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FORCED_INTEGER_MOTION_VECTORS  = $100,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_SUPER_RESOLUTION               = $200,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_LOOP_RESTORATION_FILTER        = $400,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_PALETTE_ENCODING               = $800,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_CDEF_FILTERING                 = $1000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTRA_BLOCK_COPY               = $2000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FRAME_REFERENCE_MOTION_VECTORS = $4000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_ORDER_HINT_TOOLS               = $8000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_AUTO_SEGMENTATION              = $10000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_CUSTOM_SEGMENTATION            = $20000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_LOOP_FILTER_DELTAS             = $40000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_QUANTIZATION_DELTAS            = $80000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_QUANTIZATION_MATRIX            = $100000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_REDUCED_TX_SET                 = $200000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_MOTION_MODE_SWITCHABLE         = $400000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_ALLOW_HIGH_PRECISION_MV        = $800000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_SKIP_MODE_PRESENT              = $1000000,
-    D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_DELTA_LF_PARAMS                = $2000000
-  );
+  D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS = (D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_NONE                           = 0,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_128x128_SUPERBLOCK             = $1,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FILTER_INTRA                   = $2,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTRA_EDGE_FILTER              = $4,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTERINTRA_COMPOUND            = $8,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_MASKED_COMPOUND                = $10,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_WARPED_MOTION                  = $20,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_DUAL_FILTER                    = $40,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_JNT_COMP                       = $80,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FORCED_INTEGER_MOTION_VECTORS  = $100,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_SUPER_RESOLUTION               = $200,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_LOOP_RESTORATION_FILTER        = $400,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_PALETTE_ENCODING               = $800,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_CDEF_FILTERING                 = $1000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_INTRA_BLOCK_COPY               = $2000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_FRAME_REFERENCE_MOTION_VECTORS = $4000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_ORDER_HINT_TOOLS               = $8000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_AUTO_SEGMENTATION              = $10000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_CUSTOM_SEGMENTATION            = $20000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_LOOP_FILTER_DELTAS             = $40000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_QUANTIZATION_DELTAS            = $80000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_QUANTIZATION_MATRIX            = $100000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_REDUCED_TX_SET                 = $200000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_MOTION_MODE_SWITCHABLE         = $400000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_ALLOW_HIGH_PRECISION_MV        = $800000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_SKIP_MODE_PRESENT              = $1000000,
+                                           D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAG_DELTA_LF_PARAMS                = $2000000
+                                          );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_FEATURE_FLAGS);
 
 
   PD3D12_VIDEO_ENCODER_AV1_TX_MODE = ^D3D12_VIDEO_ENCODER_AV1_TX_MODE;
-  D3D12_VIDEO_ENCODER_AV1_TX_MODE           = (
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_ONLY4x4 = 0,
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_LARGEST = 1,
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_SELECT  = 2
-  );
+  D3D12_VIDEO_ENCODER_AV1_TX_MODE = (D3D12_VIDEO_ENCODER_AV1_TX_MODE_ONLY4x4 = 0,
+                                     D3D12_VIDEO_ENCODER_AV1_TX_MODE_LARGEST = 1,
+                                     D3D12_VIDEO_ENCODER_AV1_TX_MODE_SELECT  = 2
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_TX_MODE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS          = (
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_NONE    = 0,
-
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_ONLY4x4 = 1, // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_ONLY4x4),
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_LARGEST = 2, // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_LARGEST),
-    D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_SELECT  = 4 // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_SELECT)
-  );
+  D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS = (D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_NONE    = 0,
+                                           D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_ONLY4x4 = 1, // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_ONLY4x4),
+                                           D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_LARGEST = 2, // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_LARGEST),
+                                           D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAG_SELECT  = 4 // (1 shl D3D12_VIDEO_ENCODER_AV1_TX_MODE_SELECT)
+                                          );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_TX_MODE_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS = ^D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS;
-  D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS                   = (
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP        = 0,
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SMOOTH = 1,
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SHARP  = 2,
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_BILINEAR        = 3,
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_SWITCHABLE      = 4
-  );
+  D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS = (D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP        = 0,
+                                                   D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SMOOTH = 1,
+                                                   D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SHARP  = 2,
+                                                   D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_BILINEAR        = 3,
+                                                   D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_SWITCHABLE      = 4
+                                                  );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS}
 
 
   PD3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS                  = (
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_NONE            = 0,
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP        = 1,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP),
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP_SMOOTH = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SMOOTH),
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP_SHARP  = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SHARP),
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_BILINEAR        = 8,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_BILINEAR),
-    D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_SWITCHABLE      = 16  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_SWITCHABLE)
-  );
+  D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS = (D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_NONE            = 0,
+                                                         D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP        = 1,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP),
+                                                         D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP_SMOOTH = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SMOOTH),
+                                                         D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_EIGHTTAP_SHARP  = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_EIGHTTAP_SHARP),
+                                                         D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_BILINEAR        = 8,  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_BILINEAR),
+                                                         D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAG_SWITCHABLE      = 16  // (1  shl D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_SWITCHABLE)
+                                                        );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_INTERPOLATION_FILTERS_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE = ^D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE;
-  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE         = (
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_4x4   = 0,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_8x8   = 1,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_16x16 = 2,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_32x32 = 3,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_64x64 = 4
-  );
+  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE = (D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_4x4   = 0,
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_8x8   = 1,
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_16x16 = 2,
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_32x32 = 3,
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE_64x64 = 4
+                                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_BLOCK_SIZE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE = ^D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE;
-  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE                 = (
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_DISABLED      = 0,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_Q         = 1,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_V    = 2,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_H    = 3,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_U      = 4,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_V      = 5,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_REF_FRAME = 6,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_SKIP      = 7,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_GLOBALMV  = 8
-  );
+  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE = (D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_DISABLED      = 0,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_Q         = 1,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_V    = 2,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_H    = 3,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_U      = 4,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_V      = 5,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_REF_FRAME = 6,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_SKIP      = 7,
+                                               D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_GLOBALMV  = 8
+                                              );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS               = (
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_NONE         = 0,
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_DISABLED     = 1,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_DISABLED ),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_Q        = 2,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_Q),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_Y_V   = 4,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_V),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_Y_H   = 8,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_H),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_U     = 16,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_U),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_V     = 32,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_V),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_REF_FRAME    = 64,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_REF_FRAME),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_SKIP     = 128,  // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_SKIP),
-    D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_GLOBALMV = 256   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_GLOBALMV)
-  );
+  D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS = (D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_NONE         = 0,
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_DISABLED     = 1,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_DISABLED ),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_Q        = 2,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_Q),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_Y_V   = 4,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_V),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_Y_H   = 8,    // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_Y_H),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_U     = 16,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_U),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_LF_V     = 32,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_LF_V),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_REF_FRAME    = 64,   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_REF_FRAME),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_SKIP     = 128,  // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_SKIP),
+                                                     D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAG_ALT_GLOBALMV = 256   // (1  shl D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_ALT_GLOBALMV)
+                                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MODE_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE = ^D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE;
-  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE              = (
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_DISABLED   = 0,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_SWITCHABLE = 1,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_WIENER     = 2,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_SGRPROJ    = 3
-  );
+  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE = (D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_DISABLED   = 0,
+                                              D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_SWITCHABLE = 1,
+                                              D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_WIENER     = 2,
+                                              D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE_SGRPROJ    = 3
+                                             );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_RESTORATION_TYPE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE = ^D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE;
-  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE            = (
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_DISABLED = 0,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_32x32    = 1,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_64x64    = 2,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_128x128  = 3,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_256x256  = 4
-  );
+  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE = (D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_DISABLED = 0,
+                                                  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_32x32    = 1,
+                                                  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_64x64    = 2,
+                                                  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_128x128  = 3,
+                                                  D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE_256x256  = 4
+                                                 );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_RESTORATION_TILESIZE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS                = (
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_NOT_SUPPORTED = 0,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_32x32         = $1,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_64x64         = $2,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_128x128       = $4,
-    D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_256x256       = $8
-  );
+  D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS = (D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_NOT_SUPPORTED = 0,
+                                                       D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_32x32         = $1,
+                                                       D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_64x64         = $2,
+                                                       D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_128x128       = $4,
+                                                       D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAG_256x256       = $8
+                                                      );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_RESTORATION_SUPPORT_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION = ^D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION;
-  D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION               = (
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_IDENTITY    = 0,
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_TRANSLATION = 1,
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_ROTZOOM     = 2,
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_AFFINE      = 3
-  );
+  D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION = (D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_IDENTITY    = 0,
+                                                                    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_TRANSLATION = 1,
+                                                                    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_ROTZOOM     = 2,
+                                                                    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_AFFINE      = 3
+                                                                   );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION}
 
 
   PD3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS              = (
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_NONE        = 0,
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_IDENTITY    = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_IDENTITY),
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_TRANSLATION = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_TRANSLATION),
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_ROTZOOM     = 8,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_ROTZOOM),
-    D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_AFFINE      = 16  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_AFFINE)
-  );
+  D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS = (D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_NONE        = 0,
+                                                                          D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_IDENTITY    = 1,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_IDENTITY),
+                                                                          D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_TRANSLATION = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_TRANSLATION),
+                                                                          D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_ROTZOOM     = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_ROTZOOM),
+                                                                          D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAG_AFFINE      = 8  // (1  shl D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_AFFINE)
+                                                                         );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_REFERENCE_WARPED_MOTION_TRANSFORMATION_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS                           = (
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_NONE                     = 0,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_QUANTIZATION             = $1,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_QUANTIZATION_DELTA       = $2,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_LOOP_FILTER              = $4,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_LOOP_FILTER_DELTA        = $8,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_CDEF_DATA                = $10,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_CONTEXT_UPDATE_TILE_ID   = $20,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_COMPOUND_PREDICTION_MODE = $40,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_PRIMARY_REF_FRAME        = $80,
-    D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_REFERENCE_INDICES        = $100
-  );
+  D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS = (D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_NONE                     = 0,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_QUANTIZATION             = $1,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_QUANTIZATION_DELTA       = $2,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_LOOP_FILTER              = $4,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_LOOP_FILTER_DELTA        = $8,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_CDEF_DATA                = $10,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_CONTEXT_UPDATE_TILE_ID   = $20,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_COMPOUND_PREDICTION_MODE = $40,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_PRIMARY_REF_FRAME        = $80,
+                                                      D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAG_REFERENCE_INDICES        = $100
+                                                     );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_POST_ENCODE_VALUES_FLAGS);
@@ -2298,32 +2189,29 @@ type
 
 
   PD3D12_VIDEO_ENCODER_AV1_FRAME_TYPE = ^D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE;
-  D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE                    = (
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_KEY_FRAME        = 0,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTER_FRAME      = 1,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTRA_ONLY_FRAME = 2,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_SWITCH_FRAME     = 3
-  );
+  D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE = (D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_KEY_FRAME        = 0,
+                                        D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTER_FRAME      = 1,
+                                        D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTRA_ONLY_FRAME = 2,
+                                        D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_SWITCH_FRAME     = 3
+                                       );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE}
 
 
   PD3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS                   = (
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_NONE             = 0,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_KEY_FRAME        = 1,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_KEY_FRAME),
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_INTER_FRAME      = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTER_FRAME),
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_INTRA_ONLY_FRAME = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTRA_ONLY_FRAME),
-    D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_SWITCH_FRAME     = 8   // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_SWITCH_FRAME)
-  );
+  D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS = (D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_NONE             = 0,
+                                              D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_KEY_FRAME        = 1,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_KEY_FRAME),
+                                              D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_INTER_FRAME      = 2,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTER_FRAME),
+                                              D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_INTRA_ONLY_FRAME = 4,  // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_INTRA_ONLY_FRAME),
+                                              D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAG_SWITCH_FRAME     = 8   // (1  shl D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_SWITCH_FRAME)
+                                             );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_FRAME_TYPE_FLAGS);
 
   PD3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE = ^D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE;
-  D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE                      = (
-    D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE_SINGLE_REFERENCE   = 0,
-    D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE_COMPOUND_REFERENCE = 1
-  );
+  D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE = (D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE_SINGLE_REFERENCE   = 0,
+                                                  D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE_COMPOUND_REFERENCE = 1
+                                                 );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_COMP_PREDICTION_TYPE}
 
 
@@ -2376,24 +2264,23 @@ type
 
 
   PD3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS                                   = (
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_NONE                             = 0,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_ERROR_RESILIENT_MODE      = $1,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_DISABLE_CDF_UPDATE               = $2,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_PALETTE_ENCODING          = $4,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_SKIP_MODE                 = $8,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_FRAME_REFERENCE_MOTION_VECTORS   = $10,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_FORCE_INTEGER_MOTION_VECTORS     = $20,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ALLOW_INTRA_BLOCK_COPY           = $40,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_USE_SUPER_RESOLUTION             = $80,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_DISABLE_FRAME_END_UPDATE_CDF     = $100,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_FRAME_SEGMENTATION_AUTO   = $200,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_FRAME_SEGMENTATION_CUSTOM = $400,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_WARPED_MOTION             = $800,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_REDUCED_TX_SET                   = $1000,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_MOTION_MODE_SWITCHABLE           = $2000,
-    D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ALLOW_HIGH_PRECISION_MV          = $4000
-  );
+  D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS = (D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_NONE                             = 0,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_ERROR_RESILIENT_MODE      = $1,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_DISABLE_CDF_UPDATE               = $2,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_PALETTE_ENCODING          = $4,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_SKIP_MODE                 = $8,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_FRAME_REFERENCE_MOTION_VECTORS   = $10,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_FORCE_INTEGER_MOTION_VECTORS     = $20,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ALLOW_INTRA_BLOCK_COPY           = $40,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_USE_SUPER_RESOLUTION             = $80,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_DISABLE_FRAME_END_UPDATE_CDF     = $100,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_FRAME_SEGMENTATION_AUTO   = $200,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_FRAME_SEGMENTATION_CUSTOM = $400,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ENABLE_WARPED_MOTION             = $800,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_REDUCED_TX_SET                   = $1000,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_MOTION_MODE_SWITCHABLE           = $2000,
+                                                   D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAG_ALLOW_HIGH_PRECISION_MV          = $4000
+                                                  );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_PICTURE_CONTROL_FLAGS);
@@ -2517,7 +2404,7 @@ type
     QuantizationDelta: D3D12_VIDEO_ENCODER_CODEC_AV1_QUANTIZATION_DELTA_CONFIG;
     CDEF: D3D12_VIDEO_ENCODER_AV1_CDEF_CONFIG;
     QPMapValuesCount: UINT;
-    pRateControlQPMap: INT16;
+    pRateControlQPMap: PSmallInt;
     CustomSegmentation: D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_CONFIG;
     CustomSegmentsMap: D3D12_VIDEO_ENCODER_AV1_SEGMENTATION_MAP;
   end;
@@ -2554,13 +2441,12 @@ type
 type
 
   PD3D12_VIDEO_ENCODER_RATE_CONTROL_MODE = ^D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE;
-  D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE = (
-    D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_ABSOLUTE_QP_MAP = 0,
-    D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_CQP             = 1,
-    D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_CBR             = 2,
-    D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_VBR             = 3,
-    D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_QVBR            = 4
-  );
+  D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE = (D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_ABSOLUTE_QP_MAP = 0,
+                                           D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_CQP             = 1,
+                                           D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_CBR             = 2,
+                                           D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_VBR             = 3,
+                                           D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE_QVBR            = 4
+                                          );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_RATE_CONTROL_MODE}
 
 
@@ -2747,11 +2633,10 @@ type
   //
 
   PD3D12_VIDEO_ENCODER_CODEC = ^D3D12_VIDEO_ENCODER_CODEC;
-  D3D12_VIDEO_ENCODER_CODEC = (
-    D3D12_VIDEO_ENCODER_CODEC_H264 = 0,
-    D3D12_VIDEO_ENCODER_CODEC_HEVC = 1,
-    D3D12_VIDEO_ENCODER_CODEC_AV1	 = 2 // Update May 2024
-  );
+  D3D12_VIDEO_ENCODER_CODEC = (D3D12_VIDEO_ENCODER_CODEC_H264 = 0,
+                               D3D12_VIDEO_ENCODER_CODEC_HEVC = 1,
+                               D3D12_VIDEO_ENCODER_CODEC_AV1	 = 2 // Update May 2024
+                              );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_CODEC}
 
 
@@ -2765,27 +2650,25 @@ type
 
 
   PD3D12_VIDEO_ENCODER_PROFILE_H264 = ^D3D12_VIDEO_ENCODER_PROFILE_H264;
-  D3D12_VIDEO_ENCODER_PROFILE_H264 = (
-    D3D12_VIDEO_ENCODER_PROFILE_H264_MAIN    = 0,
-    D3D12_VIDEO_ENCODER_PROFILE_H264_HIGH    = 1,
-    D3D12_VIDEO_ENCODER_PROFILE_H264_HIGH_10 = 2
-  );
+  D3D12_VIDEO_ENCODER_PROFILE_H264 = (D3D12_VIDEO_ENCODER_PROFILE_H264_MAIN    = 0,
+                                      D3D12_VIDEO_ENCODER_PROFILE_H264_HIGH    = 1,
+                                      D3D12_VIDEO_ENCODER_PROFILE_H264_HIGH_10 = 2
+                                     );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_PROFILE_H264}
 
 
   PD3D12_VIDEO_ENCODER_PROFILE_HEVC = ^D3D12_VIDEO_ENCODER_PROFILE_HEVC;
-  D3D12_VIDEO_ENCODER_PROFILE_HEVC = (
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN   = 0,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10 = 1,
-    { 10.0.28000.0  }
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12 = 2,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10_422 = 3,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12_422 = 4,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN_444 = 5,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10_444 = 6,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12_444 = 7,
-    D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN16_444 = 8
-  );
+  D3D12_VIDEO_ENCODER_PROFILE_HEVC = (D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN   = 0,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10 = 1,
+                                      { 10.0.28000.0  }
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12 = 2,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10_422 = 3,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12_422 = 4,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN_444 = 5,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN10_444 = 6,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN12_444 = 7,
+                                      D3D12_VIDEO_ENCODER_PROFILE_HEVC_MAIN16_444 = 8
+                                     );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_PROFILE_HEVC}
 
 
@@ -2802,54 +2685,51 @@ type
 
 
   PD3D12_VIDEO_ENCODER_LEVELS_H264 = ^D3D12_VIDEO_ENCODER_LEVELS_H264;
-  D3D12_VIDEO_ENCODER_LEVELS_H264 = (
-    D3D12_VIDEO_ENCODER_LEVELS_H264_1  = 0,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_1b = 1,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_11 = 2,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_12 = 3,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_13 = 4,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_2  = 5,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_21 = 6,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_22 = 7,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_3  = 8,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_31 = 9,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_32 = 10,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_4  = 11,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_41 = 12,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_42 = 13,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_5  = 14,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_51 = 15,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_52 = 16,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_6  = 17,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_61 = 18,
-    D3D12_VIDEO_ENCODER_LEVELS_H264_62 = 19
-  );
+  D3D12_VIDEO_ENCODER_LEVELS_H264 = (D3D12_VIDEO_ENCODER_LEVELS_H264_1  = 0,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_1b = 1,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_11 = 2,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_12 = 3,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_13 = 4,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_2  = 5,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_21 = 6,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_22 = 7,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_3  = 8,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_31 = 9,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_32 = 10,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_4  = 11,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_41 = 12,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_42 = 13,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_5  = 14,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_51 = 15,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_52 = 16,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_6  = 17,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_61 = 18,
+                                     D3D12_VIDEO_ENCODER_LEVELS_H264_62 = 19
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_LEVELS_H264}
 
   PD3D12_VIDEO_ENCODER_TIER_HEVC = ^D3D12_VIDEO_ENCODER_TIER_HEVC;
-  D3D12_VIDEO_ENCODER_TIER_HEVC = (
-    D3D12_VIDEO_ENCODER_TIER_HEVC_MAIN = 0,
-    D3D12_VIDEO_ENCODER_TIER_HEVC_HIGH = 1
-  );
+  D3D12_VIDEO_ENCODER_TIER_HEVC = (D3D12_VIDEO_ENCODER_TIER_HEVC_MAIN = 0,
+                                   D3D12_VIDEO_ENCODER_TIER_HEVC_HIGH = 1
+                                  );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_TIER_HEVC}
 
 
   PD3D12_VIDEO_ENCODER_LEVELS_HEVC = ^D3D12_VIDEO_ENCODER_LEVELS_HEVC;
-  D3D12_VIDEO_ENCODER_LEVELS_HEVC = (
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_1  = 0,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_2  = 1,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_21 = 2,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_3  = 3,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_31 = 4,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_4  = 5,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_41 = 6,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_5  = 7,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_51 = 8,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_52 = 9,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_6  = 10,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_61 = 11,
-    D3D12_VIDEO_ENCODER_LEVELS_HEVC_62 = 12
-  );
+  D3D12_VIDEO_ENCODER_LEVELS_HEVC = (D3D12_VIDEO_ENCODER_LEVELS_HEVC_1  = 0,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_2  = 1,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_21 = 2,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_3  = 3,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_31 = 4,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_4  = 5,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_41 = 6,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_5  = 7,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_51 = 8,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_52 = 9,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_6  = 10,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_61 = 11,
+                                     D3D12_VIDEO_ENCODER_LEVELS_HEVC_62 = 12
+                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_LEVELS_HEVC}
 
 
@@ -2945,10 +2825,9 @@ type
 
 
   PD3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE = ^D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE;
-  D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE = (
-    D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE_NONE      = 0,
-    D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE_ROW_BASED = 1
-  );
+  D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE = (D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE_NONE      = 0,
+                                            D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE_ROW_BASED = 1
+                                           );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INTRA_REFRESH_MODE}
 
 
@@ -2965,19 +2844,18 @@ type
 
 
   PD3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE = ^D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE;
-  D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE = (
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_FULL_FRAME                                = 0,
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_BYTES_PER_SUBREGION                       = 1,
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_SQUARE_UNITS_PER_SUBREGION_ROW_UNALIGNED  = 2,
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_PARTITIONING_ROWS_PER_SUBREGION   = 3,
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_PARTITIONING_SUBREGIONS_PER_FRAME = 4,
-    // Update May 2024
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_GRID_PARTITION	                  = 5,
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_CONFIGURABLE_GRID_PARTITION               = 6,
-    { 10.0.28000.0  }
-    D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_AUTO                                      = 7
-    // ==
-  );
+  D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE = (D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_FULL_FRAME                                = 0,
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_BYTES_PER_SUBREGION                       = 1,
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_SQUARE_UNITS_PER_SUBREGION_ROW_UNALIGNED  = 2,
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_PARTITIONING_ROWS_PER_SUBREGION   = 3,
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_PARTITIONING_SUBREGIONS_PER_FRAME = 4,
+                                                     // Update May 2024
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_UNIFORM_GRID_PARTITION	                  = 5,
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_CONFIGURABLE_GRID_PARTITION               = 6,
+                                                     { 10.0.28000.0  }
+                                                     D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE_AUTO                                      = 7
+                                                     // ==
+                                                    );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_FRAME_SUBREGION_LAYOUT_MODE}
 
 
@@ -2995,17 +2873,16 @@ type
   // Update May 2024
 
   PD3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS = ^D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS;
-  D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS                      = (
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_NONE                = 0,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_NOT_SPECIFIED       = $1,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_CODEC_CONSTRAINT    = $2,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_HARDWARE_CONSTRAINT = $4,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_ROWS_COUNT          = $8,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_COLS_COUNT          = $10,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_WIDTH               = $20,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_AREA                = $40,
-    D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_TOTAL_TILES         = $80
-  );
+  D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS = (D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_NONE                = 0,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_NOT_SPECIFIED       = $1,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_CODEC_CONSTRAINT    = $2,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_HARDWARE_CONSTRAINT = $4,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_ROWS_COUNT          = $8,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_COLS_COUNT          = $10,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_WIDTH               = $20,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_AREA                = $40,
+                                                                            D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAG_TOTAL_TILES         = $80
+                                                                           );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS}
 
   // DEFINE_ENUM_FLAG_OPERATORS(D3D12_VIDEO_ENCODER_AV1_FRAME_SUBREGION_LAYOUT_CONFIG_VALIDATION_FLAGS);
@@ -3131,15 +3008,14 @@ const
 type
 
   PD3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES = ^D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES;
-  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES = (
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_0_ALL_LUMA_CHROMA_SLICE_BLOCK_EDGES_ALWAYS_FILTERED            = 0,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_1_DISABLE_ALL_SLICE_BLOCK_EDGES                                = 1,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_2_DISABLE_SLICE_BOUNDARIES_BLOCKS                              = 2,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_3_USE_TWO_STAGE_DEBLOCKING                                     = 3,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_4_DISABLE_CHROMA_BLOCK_EDGES                                   = 4,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_5_DISABLE_CHROMA_BLOCK_EDGES_AND_LUMA_BOUNDARIES               = 5,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_6_DISABLE_CHROMA_BLOCK_EDGES_AND_USE_LUMA_TWO_STAGE_DEBLOCKING = 6
-  );
+  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES = (D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_0_ALL_LUMA_CHROMA_SLICE_BLOCK_EDGES_ALWAYS_FILTERED            = 0,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_1_DISABLE_ALL_SLICE_BLOCK_EDGES                                = 1,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_2_DISABLE_SLICE_BOUNDARIES_BLOCKS                              = 2,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_3_USE_TWO_STAGE_DEBLOCKING                                     = 3,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_4_DISABLE_CHROMA_BLOCK_EDGES                                   = 4,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_5_DISABLE_CHROMA_BLOCK_EDGES_AND_LUMA_BOUNDARIES               = 5,
+                                                                          D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_6_DISABLE_CHROMA_BLOCK_EDGES_AND_USE_LUMA_TWO_STAGE_DEBLOCKING = 6
+                                                                         );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES}
 
 
@@ -3230,22 +3106,20 @@ const
 type
 
   PD3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE = ^D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE;
-  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE = (
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_8x8   = 0,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_16x16 = 1,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_32x32 = 2,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_64x64 = 3
-  );
+  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE = (D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_8x8   = 0,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_16x16 = 1,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_32x32 = 2,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE_64x64 = 3
+                                                        );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_CUSIZE}
 
 
   PD3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE = ^D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE;
-  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE = (
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_4x4   = 0,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_8x8   = 1,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_16x16 = 2,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_32x32 = 3
-  );
+  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE = (D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_4x4   = 0,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_8x8   = 1,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_16x16 = 2,
+                                                         D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE_32x32 = 3
+                                                        );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_HEVC_TUSIZE}
 
 
@@ -3421,11 +3295,10 @@ const
 
 type
   PD3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES = ^D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES;
-  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES = (
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_DISABLED = 0,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_TEMPORAL = 1,
-    D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_SPATIAL  = 2
-  );
+  D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES = (D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_DISABLED = 0,
+                                                               D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_TEMPORAL = 1,
+                                                               D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES_SPATIAL  = 2
+                                                              );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_DIRECT_MODES}
 
 
@@ -3507,13 +3380,12 @@ type
 
 
   PD3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE = ^D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE;
-  D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE = (
-    D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_MAXIMUM       = 0,
-    D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_FULL_PIXEL    = 1,
-    D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_HALF_PIXEL    = 2,
-    D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_QUARTER_PIXEL = 3,
-    D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_EIGHTH_PIXEL	 = 4  // Update May 2024
-  );
+  D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE = (D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_MAXIMUM       = 0,
+                                                          D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_FULL_PIXEL    = 1,
+                                                          D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_HALF_PIXEL    = 2,
+                                                          D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_QUARTER_PIXEL = 3,
+                                                          D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE_EIGHTH_PIXEL	 = 4  // Update May 2024
+                                                         );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE}
 
 
@@ -3710,7 +3582,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncoder);'}
   {$EXTERNALSYM ID3D12VideoEncoder}
-  ID3D12VideoEncoder = Interface(ID3D12Pageable)
+  ID3D12VideoEncoder = interface(ID3D12Pageable)
     ['{2E0D212D-8DF9-44A6-A770-BB289B182737}']
 
     function GetNodeMask(): UINT; stdcall;
@@ -3719,15 +3591,13 @@ type
 
     function GetCodec(): D3D12_VIDEO_ENCODER_CODEC; stdcall;
 
-    function GetCodecProfile(var dstProfile: D3D12_VIDEO_ENCODER_PROFILE_DESC): HRESULT; stdcall;
+    function GetCodecProfile(dstProfile: D3D12_VIDEO_ENCODER_PROFILE_DESC): HRESULT; stdcall;
 
-    function GetCodecConfiguration(var dstCodecConfig: D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION):HRESULT; stdcall;
+    function GetCodecConfiguration(dstCodecConfig: D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION): HRESULT; stdcall;
 
     function GetInputFormat(): DXGI_FORMAT; stdcall;
 
     function GetMaxMotionEstimationPrecision(): D3D12_VIDEO_ENCODER_MOTION_ESTIMATION_PRECISION_MODE; stdcall;
-
-
   end;
   IID_ID3D12VideoEncoder = ID3D12VideoEncoder;
   {$EXTERNALSYM IID_ID3D12VideoEncoder}
@@ -3738,24 +3608,23 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncoderHeap);'}
   {$EXTERNALSYM ID3D12VideoEncoderHeap}
-  ID3D12VideoEncoderHeap = Interface(ID3D12Pageable)
+  ID3D12VideoEncoderHeap = interface(ID3D12Pageable)
     ['{22B35D96-876A-44C0-B25E-FB8C9C7F1C4A}']
 
-    function  GetNodeMask(): UINT; stdcall;
+    function GetNodeMask(): UINT; stdcall;
 
-    function  GetEncoderHeapFlags(): D3D12_VIDEO_ENCODER_HEAP_FLAGS; stdcall;
+    function GetEncoderHeapFlags(): D3D12_VIDEO_ENCODER_HEAP_FLAGS; stdcall;
 
-    function  GetCodec(): D3D12_VIDEO_ENCODER_CODEC; stdcall;
+    function GetCodec(): D3D12_VIDEO_ENCODER_CODEC; stdcall;
 
-    function  GetCodecProfile(var dstProfile: D3D12_VIDEO_ENCODER_PROFILE_DESC): HRESULT; stdcall;
+    function GetCodecProfile(dstProfile: D3D12_VIDEO_ENCODER_PROFILE_DESC): HRESULT; stdcall;
 
-    function  GetCodecLevel(var dstLevel: D3D12_VIDEO_ENCODER_LEVEL_SETTING): HRESULT; stdcall;
+    function GetCodecLevel(dstLevel: D3D12_VIDEO_ENCODER_LEVEL_SETTING): HRESULT; stdcall;
 
-    function  GetResolutionListCount(): UINT; stdcall;
+    function GetResolutionListCount(): UINT; stdcall;
 
-    function  GetResolutionList(const ResolutionsListCount: UINT;
-                                pResolutionList: PD3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC): HRESULT; stdcall;
-
+    function GetResolutionList(ResolutionsListCount: UINT;
+                               pResolutionList: PD3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC): HRESULT; stdcall;
   end;
   IID_ID3D12VideoEncoderHeap = ID3D12VideoEncoderHeap;
   {$EXTERNALSYM IID_ID3D12VideoEncoderHeap}
@@ -3765,7 +3634,7 @@ type
   {$EXTERNALSYM ID3D12VideoEncoderHeap1}
   ID3D12VideoEncoderHeap1 = interface(ID3D12VideoEncoderHeap)
     ['{EA8F1968-4AA0-43A4-9D30-BA86EC84D4F9}']
-    function GetPow2DownscaleFactor: UINT; stdcall;
+    function GetPow2DownscaleFactor(): UINT; stdcall;
   end;
   IID_ID3D12VideoEncoderHeap1 = ID3D12VideoEncoderHeap1;
   {$EXTERNALSYM IID_ID3D12VideoEncoderHeap1}
@@ -3777,17 +3646,16 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoDevice3);'}
   {$EXTERNALSYM ID3D12VideoDevice3}
-  ID3D12VideoDevice3 = Interface(ID3D12VideoDevice2)
+  ID3D12VideoDevice3 = interface(ID3D12VideoDevice2)
     ['{4243ADB4-3A32-4666-973C-0CCC5625DC44}']
 
-    function CreateVideoEncoder(pDesc: D3D12_VIDEO_ENCODER_DESC;
-                                const riid: REFIID;  // Expected: IID_ID3D12VideoEncoder,
-                                out ppVideoEncoder): HRESULT; stdcall;
+    function CreateVideoEncoder(pDesc: PD3D12_VIDEO_ENCODER_DESC;
+                                const riid: TGUID;
+                                ppVideoEncoder: PPointer): HRESULT; stdcall;
 
-    function CreateVideoEncoderHeap(pDesc: D3D12_VIDEO_ENCODER_HEAP_DESC;
-                                    const riid: REFIID;  // Expected: IID_ID3D12VideoEncoderHeap,
-                                    out ppVideoEncoderHeap): HRESULT; stdcall;
-
+    function CreateVideoEncoderHeap(pDesc: PD3D12_VIDEO_ENCODER_HEAP_DESC;
+                                    const riid: TGUID;
+                                    ppVideoEncoderHeap: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDevice3 = ID3D12VideoDevice3;
   {$EXTERNALSYM IID_ID3D12VideoDevice3}
@@ -3798,8 +3666,8 @@ type
   ID3D12VideoDevice4 = interface(ID3D12VideoDevice3)
     ['{E59AD09E-F1AE-42BB-8983-9F6E5586C4EB}']
     function CreateVideoEncoderHeap1(pDesc: PD3D12_VIDEO_ENCODER_HEAP_DESC1;
-                                     const riid: REFIID;
-                                     out ppVideoEncoderHeap: Pointer): HRESULT; stdcall;
+                                     const riid: TGUID;
+                                     ppVideoEncoderHeap: PPointer): HRESULT; stdcall;
   end;
   IID_ID3D12VideoDevice4 = ID3D12VideoDevice4;
   {$EXTERNALSYM IID_ID3D12VideoDevice4}
@@ -3809,12 +3677,11 @@ type
   //
 
   PD3D12_VIDEO_ENCODER_FRAME_TYPE_H264 = ^D3D12_VIDEO_ENCODER_FRAME_TYPE_H264;
-  D3D12_VIDEO_ENCODER_FRAME_TYPE_H264             = (
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_I_FRAME   = 0,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_P_FRAME   = 1,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_B_FRAME   = 2,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_IDR_FRAME = 3
-  );
+  D3D12_VIDEO_ENCODER_FRAME_TYPE_H264 = (D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_I_FRAME   = 0,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_P_FRAME   = 1,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_B_FRAME   = 2,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_H264_IDR_FRAME = 3
+                                        );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_FRAME_TYPE_H264}
 
 
@@ -3902,12 +3769,11 @@ type
 
 
   PD3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC = ^D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC;
-  D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC = (
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_I_FRAME   = 0,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_P_FRAME   = 1,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_B_FRAME   = 2,
-    D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_IDR_FRAME = 3
-  );
+  D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC = (D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_I_FRAME   = 0,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_P_FRAME   = 1,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_B_FRAME   = 2,
+                                         D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC_IDR_FRAME = 3
+                                        );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_FRAME_TYPE_HEVC}
 
 
@@ -3994,8 +3860,8 @@ type
     log2_sao_offset_scale_chroma: UCHAR;
     log2_max_transform_skip_block_size_minus2: UCHAR;
     chroma_qp_offset_list_len_minus1: UCHAR;
-    cb_qp_offset_list: array[0..5] of AnsiChar;
-    cr_qp_offset_list: array[0..5] of AnsiChar;
+    cb_qp_offset_list: array[0..5] of ShortInt;
+    cr_qp_offset_list: array[0..5] of ShortInt;
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA_HEVC1}
 
@@ -4091,7 +3957,7 @@ type
   D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS = record
     SequenceControlDesc: D3D12_VIDEO_ENCODER_SEQUENCE_CONTROL_DESC;
     PictureControlDesc: D3D12_VIDEO_ENCODER_PICTURE_CONTROL_DESC;
-    pInputFrame: PID3D12Resource;
+    pInputFrame: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     InputFrameSubresource: UINT;
     CurrentFrameBitstreamMetadataSize: UINT;
   end;
@@ -4100,7 +3966,7 @@ type
 
   PD3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM = ^D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM;
   D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM = record
-    pBuffer: PID3D12Resource;
+    pBuffer: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     FrameStartOffset: UINT64;
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM}
@@ -4108,7 +3974,7 @@ type
 
   PD3D12_VIDEO_ENCODER_RECONSTRUCTED_PICTURE = ^D3D12_VIDEO_ENCODER_RECONSTRUCTED_PICTURE;
   D3D12_VIDEO_ENCODER_RECONSTRUCTED_PICTURE = record
-    pReconstructedPicture: PID3D12Resource;
+    pReconstructedPicture: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     ReconstructedPictureSubresource: UINT;
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_RECONSTRUCTED_PICTURE}
@@ -4168,7 +4034,7 @@ type
 
   PD3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER = ^D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER;
   D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER = record
-    pBuffer: PID3D12Resource;
+    pBuffer: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     Offset: UINT64;
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER}
@@ -4249,16 +4115,14 @@ type
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_PSNR_RESOLVED_LAYOUT}
 
-  D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE = (
-    D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE_CPU_BUFFER = 0,
-    D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE_GPU_TEXTURE = 1
-  );
+  D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE = (D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE_CPU_BUFFER = 0,
+                                          D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE_GPU_TEXTURE = 1
+                                         );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INPUT_MAP_SOURCE}
 
-  D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE = (
-    D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE_DIRTY = 0,
-    D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE_SKIP = 1
-  );
+  D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE = (D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE_DIRTY = 0,
+                                                       D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE_SKIP = 1
+                                                      );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE}
 
 
@@ -4274,18 +4138,16 @@ type
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INPUT_MAP_SESSION_INFO}
 
-  D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE = (
-    D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_QUANTIZATION_MATRIX = 0,
-    D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_DIRTY_REGIONS = 1,
-    D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_MOTION_VECTORS = 2
-  );
+  D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE = (D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_QUANTIZATION_MATRIX = 0,
+                                        D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_DIRTY_REGIONS = 1,
+                                        D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE_MOTION_VECTORS = 2
+                                       );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INPUT_MAP_TYPE}
 
-  D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE = (
-    D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_FULL_SEARCH = 0,
-    D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_START_HINT = 1,
-    D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_START_HINT_LIMITED_DISTANCE = 2
-  );
+  D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE = (D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_FULL_SEARCH = 0,
+                                                  D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_START_HINT = 1,
+                                                  D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE_START_HINT_LIMITED_DISTANCE = 2
+                                                 );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_FRAME_MOTION_SEARCH_MODE}
 
   D3D12_FEATURE_DATA_VIDEO_ENCODER_QPMAP_INPUT = record
@@ -4317,11 +4179,10 @@ type
   end;
   {$EXTERNALSYM D3D12_FEATURE_DATA_VIDEO_ENCODER_DIRTY_REGIONS}
 
-  D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION = (
-    D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_FULL_PIXEL = 0,
-    D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_HALF_PIXEL = 1,
-    D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_QUARTER_PIXEL = 2
-  );
+  D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION = (D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_FULL_PIXEL = 0,
+                                                           D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_HALF_PIXEL = 1,
+                                                           D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_QUARTER_PIXEL = 2
+                                                          );
 
   D3D12_VIDEO_ENCODER_FRAME_INPUT_MOTION_UNIT_PRECISION_SUPPORT_FLAGS = UINT;
   D3D12_VIDEO_ENCODER_MOTION_SEARCH_SUPPORT_FLAGS = UINT;
@@ -4503,7 +4364,7 @@ type
 
 
   D3D12_VIDEO_ENCODER_QUANTIZATION_OPAQUE_MAP = record
-    pOpaqueQuantizationMap: PID3D12Resource;
+    pOpaqueQuantizationMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_QUANTIZATION_OPAQUE_MAP}
 
@@ -4570,8 +4431,8 @@ type
     log2_sao_offset_scale_chroma: UCHAR;
     log2_max_transform_skip_block_size_minus2: UCHAR;
     chroma_qp_offset_list_len_minus1: UCHAR;
-    cb_qp_offset_list: array[0..5] of AnsiChar;
-    cr_qp_offset_list: array[0..5] of AnsiChar;
+    cb_qp_offset_list: array[0..5] of ShortInt;
+    cr_qp_offset_list: array[0..5] of ShortInt;
     num_ref_idx_l0_active_minus1: UINT;
     num_ref_idx_l1_active_minus1: UINT;
   end;
@@ -4587,7 +4448,7 @@ type
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_PICTURE_CONTROL_CODEC_DATA1}
 
   D3D12_VIDEO_ENCODER_FRAME_ANALYSIS = record
-    pDownscaledFrame: PID3D12Resource;
+    pDownscaledFrame: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     Subresource: UINT64;
     DownscaledReferences: D3D12_VIDEO_ENCODE_REFERENCE_FRAMES;
   end;
@@ -4608,7 +4469,7 @@ type
   D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS1 = record
     SequenceControlDesc: D3D12_VIDEO_ENCODER_SEQUENCE_CONTROL_DESC;
     PictureControlDesc: D3D12_VIDEO_ENCODER_PICTURE_CONTROL_DESC1;
-    pInputFrame: PID3D12Resource;
+    pInputFrame: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     InputFrameSubresource: UINT;
     CurrentFrameBitstreamMetadataSize: UINT;
     OptionalMetadata: D3D12_VIDEO_ENCODER_OPTIONAL_METADATA_ENABLE_FLAGS;
@@ -4617,10 +4478,9 @@ type
 
   PD3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS1 = ^D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS1;
 
-  D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE = (
-    D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE_ARRAY_OF_BUFFERS = 0,
-    D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE_SINGLE_BUFFER = 1
-  );
+  D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE = (D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE_ARRAY_OF_BUFFERS = 0,
+                                                                    D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE_SINGLE_BUFFER = 1
+                                                                   );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM_BUFFER_MODE}
 
   D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM = record
@@ -4635,10 +4495,9 @@ type
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_SUBREGION_COMPRESSED_BITSTREAM}
 
-  D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE = (
-    D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE_FULL_FRAME = 0,
-    D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE_SUBREGIONS = 1
-  );
+  D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE = (D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE_FULL_FRAME = 0,
+                                                                D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE_SUBREGIONS = 1
+                                                               );
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM_NOTIFICATION_MODE}
 
   D3D12_VIDEO_ENCODER_COMPRESSED_BITSTREAM1 = record
@@ -4672,9 +4531,9 @@ type
   PD3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS1 = ^D3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS1;
   D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS1 = record
     ResolvedLayoutMetadata: D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER;
-    pOutputQPMap: PID3D12Resource;
-    pOutputSATDMap: PID3D12Resource;
-    pOutputBitAllocationMap: PID3D12Resource;
+    pOutputQPMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
+    pOutputSATDMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
+    pOutputBitAllocationMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     ResolvedFramePSNRData: D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER;
     ResolvedSubregionsPSNRData: D3D12_VIDEO_ENCODER_ENCODE_OPERATION_METADATA_BUFFER;
   end;
@@ -4683,14 +4542,14 @@ type
   PD3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS1 = ^D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS1;
 
   D3D12_VIDEO_ENCODER_INPUT_MAP_DATA_QUANTIZATION_MATRIX = record
-    pQuantizationMap: PID3D12Resource;
+    pQuantizationMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INPUT_MAP_DATA_QUANTIZATION_MATRIX}
 
   D3D12_VIDEO_ENCODER_INPUT_MAP_DATA_DIRTY_REGIONS = record
     FullFrameIdentical: BOOL;
     MapValuesType: D3D12_VIDEO_ENCODER_DIRTY_REGIONS_MAP_VALUES_MODE;
-    pDirtyRegionsMap: PID3D12Resource;
+    pDirtyRegionsMap: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
     SourceDPBFrameReference: UINT;
   end;
   {$EXTERNALSYM D3D12_VIDEO_ENCODER_INPUT_MAP_DATA_DIRTY_REGIONS}
@@ -4723,7 +4582,7 @@ type
 
   PD3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_INPUT_ARGUMENTS = ^D3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_INPUT_ARGUMENTS;
   D3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_OUTPUT_ARGUMENTS = record
-    pOpaqueLayoutBuffer: PID3D12Resource;
+    pOpaqueLayoutBuffer: Pointer; // Borrowed ID3D12Resource reference; keep the owner alive.
   end;
   PD3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_OUTPUT_ARGUMENTS = ^D3D12_VIDEO_ENCODER_RESOLVE_INPUT_PARAM_LAYOUT_OUTPUT_ARGUMENTS;
 
@@ -4778,17 +4637,16 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncodeCommandList2);'}
   {$EXTERNALSYM ID3D12VideoEncodeCommandList2}
-  ID3D12VideoEncodeCommandList2 = Interface(ID3D12VideoEncodeCommandList1)
-    ['{895491e2-e701-46a9-9a1f-8d3480ed867a}']
+  ID3D12VideoEncodeCommandList2 = interface(ID3D12VideoEncodeCommandList1)
+    ['{895491E2-E701-46A9-9A1F-8D3480ED867A}']
 
     procedure EncodeFrame(pEncoder: ID3D12VideoEncoder;
                           pHeap: ID3D12VideoEncoderHeap;
-                          pInputArguments: D3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS;
-                          pOutputArguments: D3D12_VIDEO_ENCODER_ENCODEFRAME_OUTPUT_ARGUMENTS); stdcall;
+                          pInputArguments: PD3D12_VIDEO_ENCODER_ENCODEFRAME_INPUT_ARGUMENTS;
+                          pOutputArguments: PD3D12_VIDEO_ENCODER_ENCODEFRAME_OUTPUT_ARGUMENTS); stdcall;
 
-    procedure ResolveEncoderOutputMetadata(pInputArguments: D3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS;
-                                           pOutputArguments: D3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS); stdcall;
-
+    procedure ResolveEncoderOutputMetadata(pInputArguments: PD3D12_VIDEO_ENCODER_RESOLVE_METADATA_INPUT_ARGUMENTS;
+                                           pOutputArguments: PD3D12_VIDEO_ENCODER_RESOLVE_METADATA_OUTPUT_ARGUMENTS); stdcall;
   end;
   IID_ID3D12VideoEncodeCommandList2 = ID3D12VideoEncodeCommandList2;
   {$EXTERNALSYM IID_ID3D12VideoEncodeCommandList2}
@@ -4799,12 +4657,11 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12VideoEncodeCommandList3);'}
   {$EXTERNALSYM ID3D12VideoEncodeCommandList3}
-  ID3D12VideoEncodeCommandList3 = Interface(ID3D12VideoEncodeCommandList2)
-    ['{7f027b22-1515-4e85-aa0d-026486580576}']
+  ID3D12VideoEncodeCommandList3 = interface(ID3D12VideoEncodeCommandList2)
+    ['{7F027B22-1515-4E85-AA0D-026486580576}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
                       pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
-
   end;
   IID_ID3D12VideoEncodeCommandList3 = ID3D12VideoEncodeCommandList3;
   {$EXTERNALSYM IID_ID3D12VideoEncodeCommandList3}
@@ -4830,6 +4687,10 @@ type
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
+
+const
+  D3D12_VIDEO_ENCODER_H264_DEBLOCKING_MODE_6: D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODES = D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_6_DISABLE_CHROMA_BLOCK_EDGES_AND_USE_LUMA_TWO_STAGE_DEBLOCKING;
+  D3D12_VIDEO_ENCODER_H264_DEBLOCKING_MODE_FLAG_6: D3D12_VIDEO_ENCODER_CODEC_CONFIGURATION_H264_SLICES_DEBLOCKING_MODE_FLAGS = 64;
 
 implementation
 

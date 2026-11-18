@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 23-11-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Defines property keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1626,6 +1626,21 @@ const
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
+
+// Additional key definitions from SDK 10.0.28000.0.
+const
+  DEVPKEY_Device_ContainerModelName: PROPERTYKEY = (fmtid: (D1: $7D0300E4; D2: $4FB7; D3: $493D; D4: ($8A, $95, $65, $6F, $00, $E6, $A2, $71)); pid: 2);
+  {$EXTERNALSYM DEVPKEY_Device_ContainerModelName}
+  DEVPKEY_Device_ContainerManufacturer: PROPERTYKEY = (fmtid: (D1: $7D0300E4; D2: $4FB7; D3: $493D; D4: ($8A, $95, $65, $6F, $00, $E6, $A2, $71)); pid: 3);
+  {$EXTERNALSYM DEVPKEY_Device_ContainerManufacturer}
+  DEVPKEY_Device_ContainerCategories: PROPERTYKEY = (fmtid: (D1: $7D0300E4; D2: $4FB7; D3: $493D; D4: ($8A, $95, $65, $6F, $00, $E6, $A2, $71)); pid: 4);
+  {$EXTERNALSYM DEVPKEY_Device_ContainerCategories}
+  DEVPKEY_Device_ContainerIcon: PROPERTYKEY = (fmtid: (D1: $7D0300E4; D2: $4FB7; D3: $493D; D4: ($8A, $95, $65, $6F, $00, $E6, $A2, $71)); pid: 5);
+  {$EXTERNALSYM DEVPKEY_Device_ContainerIcon}
+  DEVPKEY_Device_CompanionApps: PROPERTYKEY = (fmtid: (D1: $6A742654; D2: $D0B2; D3: $4420; D4: ($A5, $23, $E0, $68, $35, $2A, $C1, $DF)); pid: 2);
+  {$EXTERNALSYM DEVPKEY_Device_CompanionApps}
+  DEVPKEY_Device_PrimaryCompanionApp: PROPERTYKEY = (fmtid: (D1: $6A742654; D2: $D0B2; D3: $4420; D4: ($A5, $23, $E0, $68, $35, $2A, $C1, $DF)); pid: 3);
+  {$EXTERNALSYM DEVPKEY_Device_PrimaryCompanionApp}
 
 implementation
 

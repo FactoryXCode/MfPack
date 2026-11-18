@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectWrite
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -72,6 +72,7 @@ uses
   WinApi.WinApiTypes,
   {DirectX}
   WinApi.DirectX.DCommon,
+  WinApi.DirectX.D2DBaseTypes,
   WinApi.DirectX.DWrite,
   WinApi.DirectX.DWrite_1,
   WinApi.DirectX.DWrite_2;
@@ -123,6 +124,15 @@ const
   {$EXTERNALSYM DWRITE_FONT_AXIS_TAG_OPTICAL_SIZE}
   DWRITE_FONT_AXIS_TAG_ITALIC        = Ord('i') or (Ord('t') shl 8) or (Ord('a') shl 16) or (Ord('l') shl 24);
   {$EXTERNALSYM DWRITE_FONT_AXIS_TAG_ITALIC}
+
+type
+  PLOGFONTW = ^LOGFONTW;
+  PFONTSIGNATURE = ^FONTSIGNATURE;
+  PLOGFONT = ^LOGFONT;
+  PDWRITE_GLYPH_IMAGE_FORMATS = ^DWRITE_GLYPH_IMAGE_FORMATS;
+  PD2D1_POINT_2F = ^D2D1_POINT_2F;
+  PUUID = ^UUID;
+  PD2D_RECT_F = ^D2D_RECT_F;
 
 // Enums =======================================================================
 
@@ -281,7 +291,7 @@ const
 type
   // Represents a method of rendering glyphs.
   PDWRITE_RENDERING_MODE1 = ^DWRITE_RENDERING_MODE1;
-  DWRITE_RENDERING_MODE1 = DWord;
+  DWRITE_RENDERING_MODE1 = type DWord;
   {$EXTERNALSYM DWRITE_RENDERING_MODE1}
 const
   // Specifies that the rendering mode is determined automatically based on the font and size.
@@ -472,7 +482,7 @@ type
     propertyId: DWRITE_FONT_PROPERTY_ID;
 
     // Specifies the property value, such as "Segoe UI".
-    propertyValue: WideChar;
+    propertyValue: PWideChar;
 
     // Specifies the language / locale to use, such as "en-US".
     // remarks
@@ -491,8 +501,8 @@ type
   IDWriteRenderingParams3 = interface(IDWriteRenderingParams2)
   ['{B7924BAA-391B-412A-8C5C-E44CC2D867DC}']
 
-    // Gets the rendering mode.
-    function GetRenderingMode1(): DWRITE_RENDERING_MODE1; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetRenderingMode1(): DWRITE_RENDERING_MODE1; stdcall; overload;
 
   end;
 
@@ -506,123 +516,24 @@ type
   IDWriteFactory3 = interface(IDWriteFactory2)
   ['{9A1B41C3-D3BB-466A-87FC-FE67556A3B65}']
 
-    // Creates a glyph run analysis object, which encapsulates information
-    // used to render a glyph run.
-    // param name: glyphRun: Structure specifying the properties of the glyph run.
-    // param name: transform: Optional transform applied to the glyphs and their positions. This transform is applied after the
-    // scaling specified by the emSize.
-    // param name: renderingMode: Specifies the rendering mode, which must be one of the raster rendering modes (i.e., not default
-    // and not outline).
-    // param name: measuringMode: Specifies the method to measure glyphs.
-    // param name: gridFitMode: How to grid-fit glyph outlines. This must be non-default.
-    // param name: baselineOriginX: Horizontal position of the baseline origin, in DIPs.
-    // param name: baselineOriginY: Vertical position of the baseline origin, in DIPs.
-    // param name: glyphRunAnalysis: Receives a pointer to the newly created object.
-    // returns
-    // Standard HRESULT error code.
-    function CreateGlyphRunAnalysis(glyphRun: DWRITE_GLYPH_RUN;
-                                    transform: DWRITE_MATRIX;
-                                    renderingMode: DWRITE_RENDERING_MODE1;
-                                    measuringMode: DWRITE_MEASURING_MODE;
-                                    gridFitMode: DWRITE_GRID_FIT_MODE;
-                                    antialiasMode: DWRITE_TEXT_ANTIALIAS_MODE;
-                                    baselineOriginX: Single;
-                                    baselineOriginY: Single;
-                                    out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateGlyphRunAnalysis(glyphRun: PDWRITE_GLYPH_RUN; transform: PDWRITE_MATRIX; renderingMode: DWRITE_RENDERING_MODE1; measuringMode: DWRITE_MEASURING_MODE; gridFitMode: DWRITE_GRID_FIT_MODE; antialiasMode: DWRITE_TEXT_ANTIALIAS_MODE; baselineOriginX: Single; baselineOriginY: Single; out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HRESULT; stdcall; overload;
 
-    // Creates a rendering parameters object with the specified properties.
-    // param name: gamma: The gamma value used for gamma correction, which must be greater than zero and cannot exceed 256.
-    // param name: enhancedContrast: The amount of contrast enhancement, zero or greater.
-    // param name: grayscaleEnhancedContrast: The amount of contrast enhancement to use for grayscale antialiasing, zero or greater.
-    // param name: clearTypeLevel: The degree of ClearType level, from 0.0f (no ClearType) to 1.0f (full ClearType).
-    // param name: pixelGeometry: The geometry of a device pixel.
-    // param name: renderingMode: Method of rendering glyphs. In most cases, this should be DWRITE_RENDERING_MODE_DEFAULT to automatically use an appropriate mode.
-    // param name: gridFitMode: How to grid fit glyph outlines. In most cases, this should be DWRITE_GRID_FIT_DEFAULT to automatically choose an appropriate mode.
-    // param name: renderingParams: Receives a pointer to the newly created rendering parameters object, or NULL in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateCustomRenderingParams(gamma: Single;
-                                         enhancedContrast: Single;
-                                         grayscaleEnhancedContrast: Single;
-                                         clearTypeLevel: Single;
-                                         pixelGeometry: DWRITE_PIXEL_GEOMETRY;
-                                         renderingMode: DWRITE_RENDERING_MODE1;
-                                         gridFitMode: DWRITE_GRID_FIT_MODE;
-                                         out renderingParams: IDWriteRenderingParams3): HResult; stdcall;
+    function CreateCustomRenderingParams(gamma: Single; enhancedContrast: Single; grayscaleEnhancedContrast: Single; clearTypeLevel: Single; pixelGeometry: DWRITE_PIXEL_GEOMETRY; renderingMode: DWRITE_RENDERING_MODE1; gridFitMode: DWRITE_GRID_FIT_MODE; out renderingParams: IDWriteRenderingParams3): HRESULT; stdcall; overload;
 
-    // Creates a reference to a font given a full path.
-    // param name: filePath: Absolute file path. Subsequent operations on the constructed object may fail
-    //     if the user provided filePath doesn't correspond to a valid file on the disk.
-    // param name: lastWriteTime: Last modified time of the input file path. If the parameter is omitted,
-    //     the function will access the font file to obtain its last write time, so the clients are encouraged to specify this value
-    //     to avoid extra disk access. Subsequent operations on the constructed object may fail
-    //     if the user provided lastWriteTime doesn't match the file on the disk.
-    // param name: faceIndex: The zero based index of a font face in cases when the font files contain a collection of font faces.
-    //     If the font files contain a single face, this value should be zero.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontFaceReference(filePath: PWideChar;
-                                     lastWriteTime: FILETIME;
-                                     faceIndex: UINT32;
-                                     fontSimulations: DWRITE_FONT_SIMULATIONS;
-                                     out fontFaceReference: IDWriteFontFaceReference): HResult; overload; stdcall;
+    function CreateFontFaceReference(fontFile: IDWriteFontFile; faceIndex: UINT32; fontSimulations: DWRITE_FONT_SIMULATIONS; out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Creates a reference to a font given a file.
-    // param name: fontFile: User provided font file representing the font face.
-    // param name: faceIndex: The zero based index of a font face in cases when the font files contain a collection of font faces.
-    //     If the font files contain a single face, this value should be zero.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontFaceReference(fontFile: IDWriteFontFile;
-                                     faceIndex: UINT32;
-                                     fontSimulations: DWRITE_FONT_SIMULATIONS;
-                                     out fontFaceReference: IDWriteFontFaceReference): HResult; overload; stdcall;
+    function CreateFontFaceReference(filePath: PWideChar; lastWriteTime: PFILETIME; faceIndex: UINT32; fontSimulations: DWRITE_FONT_SIMULATIONS; out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Retrieves the list of system fonts.
-    // param name: fontSet: Receives a pointer to the font set object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontSet(out fontSet: IDWriteFontSet): HResult; stdcall;
+    function GetSystemFontSet(out fontSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
-    // Creates an empty font set builder to add font face references
-    // and create a custom font set.
-    // param name: fontSetBuilder: Receives a pointer to the newly created font set builder object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder): HResult; stdcall;
+    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder): HRESULT; stdcall; overload;
 
-    // Create a weight-stretch-style based collection of families (DWRITE_FONT_FAMILY_MODEL_WEIGHT_STRETCH_STYLE)
-    // from a set of fonts.
-    // param name: fontSet: A set of fonts to use to build the collection.
-    // param name: fontCollection: Receives a pointer to the newly created font collection object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontCollectionFromFontSet(fontSet: IDWriteFontSet;
-                                             out fontCollection: IDWriteFontCollection1): HResult; stdcall;
+    function CreateFontCollectionFromFontSet(fontSet: IDWriteFontSet; out fontCollection: IDWriteFontCollection1): HRESULT; stdcall; overload;
 
-    // Retrieves a weight-stretch-style based collection of font families.
-    // param name: includeDownloadableFonts: Include downloadable fonts or only locally installed ones.
-    // param name: fontCollection: Receives a pointer to the newly created font collection object, or nullptr in
-    //     case of failure.
-    // param name: checkForUpdates: If this parameter is nonzero, the function performs an immediate check for changes
-    //     to the set of system fonts. If this parameter is FALSE, the function will still detect changes if the font
-    //     cache service is running, but there may be some latency. For example, an application might specify TRUE if
-    //     it has itself just installed a font and wants to be sure the font collection contains that font.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontCollection(includeDownloadableFonts: BOOL;
-                                     out fontCollection: IDWriteFontCollection1;
-                                     checkForUpdates: BOOL = FALSE): HResult; stdcall;
+    function GetSystemFontCollection(includeDownloadableFonts: BOOL; out fontCollection: IDWriteFontCollection1; checkForUpdates: BOOL): HRESULT; stdcall; overload;
 
-    // Gets the font download queue associated with this factory object.
-    // param name: IDWriteFontDownloadQueue: Receives a pointer to the font download queue interface.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontDownloadQueue(out fontDownloadQueue: IDWriteFontDownloadQueue): HResult; stdcall;
+    function GetFontDownloadQueue(out fontDownloadQueue: IDWriteFontDownloadQueue): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory3 = IDWriteFactory3;
@@ -640,133 +551,26 @@ type
   IDWriteFontSet = interface(IUnknown)
   ['{53585141-D9F8-4095-8321-D73CF6BD116B}']
 
-    // Get the number of total fonts in the set.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontCount(): UINT32; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontCount(): UINT32; stdcall; overload;
 
-    // Get a reference to the font at this index, which may be local or remote.
-    // param name: listIndex: Zero-based index of the font.
-    // param name: fontFaceReference: Receives a pointer the font face reference object, or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(listIndex: UINT32;
-                                  out fontFaceReference: IDWriteFontFaceReference): HResult; stdcall;
+    function GetFontFaceReference(listIndex: UINT32; out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Gets the index of the matching font face reference in the font set, with the same file, face index, and simulations.
-    // param name: fontFaceReference: Font face reference object that specifies the physical font.
-    // param name: listIndex: Receives the zero-based index of the matching font if the font was found, or UINT_MAX otherwise.
-    // param name: exists: Receives TRUE if the font exists or FALSE otherwise.
-    // returns
-    // Standard HRESULT error code.
-    function FindFontFaceReference(fontFaceReference: IDWriteFontFaceReference;
-                                   out listIndex: UINT32;
-                                   out exists: BOOL): HResult; stdcall;
+    function FindFontFaceReference(fontFaceReference: IDWriteFontFaceReference; listIndex: PUINT32; exists: PBOOL): HRESULT; stdcall; overload;
 
-    // Gets the index of the matching font face reference in the font set, with the same file, face index, and simulations.
-    // param name: fontFaceReference: Font face object that specifies the physical font.
-    // param name: listIndex: Receives the zero-based index of the matching font if the font was found, or UINT_MAX otherwise.
-    // param name: exists: Receives TRUE if the font exists or FALSE otherwise.
-    // returns
-    // Standard HRESULT error code.
-    function FindFontFace(fontFace: IDWriteFontFace;
-                          out listIndex: UINT32;
-                          out exists: BOOL): HResult; stdcall;
+    function FindFontFace(fontFace: IDWriteFontFace; listIndex: PUINT32; exists: PBOOL): HRESULT; stdcall; overload;
 
-    // Returns the property values of a specific font item index.
-    // param name: listIndex: Zero-based index of the font.
-    // param name: propertyID: Font property of interest.
-    // param name: exists: Receives the value TRUE if the font contains the specified property identifier or FALSE if not.
-    // param name: strings: Receives a pointer to the newly created localized strings object, or nullptr on failure or non-existent property.
-    // returns
-    // Standard HRESULT error code.
-    function GetPropertyValues(listIndex: UINT32;
-                               propertyId: DWRITE_FONT_PROPERTY_ID;
-                               out exists: BOOL;
-                               values: IDWriteLocalizedStrings): HResult; overload; stdcall;
+    function GetPropertyValues(propertyID: DWRITE_FONT_PROPERTY_ID; out values: IDWriteStringList): HRESULT; stdcall; overload;
 
-    // Returns all unique property values in the set, which can be used
-    // for purposes such as displaying a family list or tag cloud. Values are
-    // returned in priority order according to the language list, such that if
-    // a font contains more than one localized name, the preferred one will be
-    // returned.
-    // param name: propertyID: Font property of interest.
-    // param name: preferredLocaleNames: List of semicolon delimited language names in preferred
-    //     order. When a particular string like font family has more than one localized name,
-    //     the first match is returned.
-    // param name: stringsList: Receives a pointer to the newly created strings list.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // For example, suppose the font set includes the Meiryo family, which has both Japanese and English family names.
-    // The returned list of distinct family names would include either the Japanese name (if "ja-jp" was specified as
-    // a preferred locale) or the English name (in all other cases).
-    // </remarks>
-    function GetPropertyValues(propertyID: DWRITE_FONT_PROPERTY_ID;
-                               preferredLocaleNames: PWideChar;
-                               out values: IDWriteStringList): HResult; overload; stdcall;
+    function GetPropertyValues(propertyID: DWRITE_FONT_PROPERTY_ID; preferredLocaleNames: PWideChar; out values: IDWriteStringList): HRESULT; stdcall; overload;
 
-    // Returns all unique property values in the set, which can be used
-    // for purposes such as displaying a family list or tag cloud. All values
-    // are returned regardless of language, including all localized names.
-    // param name: propertyID: Font property of interest.
-    // param name: stringsList: Receives a pointer to the newly created strings list.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // For example, suppose the font set includes the Meiryo family, which has both Japanese and English family names.
-    // The returned list of distinct family names would include both the Japanese and English names.
-    // </remarks>
-    function GetPropertyValues(propertyID: DWRITE_FONT_PROPERTY_ID;
-                               out values: IDWriteStringList): HResult; overload; stdcall;
+    function GetPropertyValues(listIndex: UINT32; propertyId: DWRITE_FONT_PROPERTY_ID; exists: PBOOL; out values: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // Returns how many times a given property value occurs in the set.
-    // param name: property: Font property of interest.
-    // param name: propertyOccurrenceCount: How many times that property occurs.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // For example, the family name "Segoe UI" may return a count of 12,
-    // whereas Harrington only has 1.
-    // </remarks>
-    function GetPropertyOccurrenceCount(_property: DWRITE_FONT_PROPERTY;
-                                        out propertyOccurrenceCount: UINT32): HResult; stdcall;
+    function GetPropertyOccurrenceCount(_property: PDWRITE_FONT_PROPERTY; propertyOccurrenceCount: PUINT32): HRESULT; stdcall; overload;
 
-    // Returns a subset of fonts filtered by the given properties.
-    // param name: properties: List of properties to filter using.
-    // param name: propertyCount: How many properties to filter.
-    // param name: filteredSet: Subset of fonts that match the properties,
-    //     or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // If no fonts matched the filter, the subset will be empty (GetFontCount
-    // returns 0), but the function does not return an error. The subset will
-    // always be equal to or less than the original set.
-    // </remarks>
-    function GetMatchingFonts(properties: DWRITE_FONT_PROPERTY;
-                              propertyCount: UINT32;
-                              out filteredSet: IDWriteFontSet): HResult; overload; stdcall;
+    function GetMatchingFonts(familyName: PWideChar; fontWeight: DWRITE_FONT_WEIGHT; fontStretch: DWRITE_FONT_STRETCH; fontStyle: DWRITE_FONT_STYLE; out filteredSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
-    // Returns a list of fonts within the given WWS family prioritized by
-    // WWS distance.
-    // param name: familyName: Neutral or localized family name of font.
-    // param name: fontWeight: Weight of font.
-    // param name: fontStretch: Stretch of font.
-    // param name: fontStyle: Slope of font.
-    // param name: filteredSet: Subset of fonts that match the properties,
-    //     or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // The returned list can include simulated bold and oblique variants,
-    // which would be useful for font fallback selection.
-    // </remarks>
-    function GetMatchingFonts(familyName: PWideChar;
-                              fontWeight: DWRITE_FONT_WEIGHT;
-                              fontStretch: DWRITE_FONT_STRETCH;
-                              fontStyle: DWRITE_FONT_STYLE;
-                              out filteredSet: IDWriteFontSet): HResult; overload; stdcall;
+    function GetMatchingFonts(properties: PDWRITE_FONT_PROPERTY; propertyCount: UINT32; out filteredSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSet = IDWriteFontSet;
@@ -782,51 +586,14 @@ type
   IDWriteFontSetBuilder = interface(IUnknown)
   ['{2F642AFE-9C68-4F40-B8BE-457401AFCB3D}']
 
-    // Adds a reference to a font to the set being built. The necessary
-    // metadata will automatically be extracted from the font upon calling
-    // CreateFontSet.
-    // param name: fontFaceReference: Font face reference object to add to the set.
-    // returns
-    // Standard HRESULT error code.
-    function AddFontFaceReference(fontFaceReference: IDWriteFontFaceReference): HResult; overload; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function AddFontFaceReference(fontFaceReference: IDWriteFontFaceReference; properties: PDWRITE_FONT_PROPERTY; propertyCount: UINT32): HRESULT; stdcall; overload;
 
-    // Adds a reference to a font to the set being built. The caller
-    // supplies enough information to search on, avoiding the need to open
-    // the potentially non-local font. Any properties not supplied by the
-    // caller will be missing, and those properties will not be available as
-    // filters in GetMatchingFonts. GetPropertyValues for missing properties
-    // will return an empty string list. The properties passed should generally
-    // be consistent with the actual font contents, but they need not be. You
-    // could, for example, alias a font using a different name or unique
-    // identifier, or you could set custom tags not present in the actual
-    // font.
-    // param name: fontFaceReference: Reference to the font.
-    // param name: properties: List of properties to associate with the reference.
-    // param name: propertyCount: How many properties are defined.
-    // returns
-    // Standard HRESULT error code.
-    function AddFontFaceReference(fontFaceReference: IDWriteFontFaceReference;
-                                  properties: DWRITE_FONT_PROPERTY;
-                                  propertyCount: UINT32): HResult; overload; stdcall;
+    function AddFontFaceReference(fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Appends an existing font set to the one being built, allowing
-    // one to aggregate two sets or to essentially extend an existing one.
-    // param name: fontSet: Font set to append font face references from.
-    // returns
-    // Standard HRESULT error code.
-    function AddFontSet(fontSet: IDWriteFontSet): HResult; stdcall;
+    function AddFontSet(fontSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
-    // Creates a font set from all the font face references added so
-    // far via AddFontFaceReference.
-    // param name: fontSet: Receives a pointer to the newly created font set object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // Creating a font set takes less time if the references were added
-    // with metadata rather than needing to extract the metadata from the
-    // font file.
-    // </remarks>
-    function CreateFontSet(out fontSet: IDWriteFontSet): HResult; stdcall;
+    function CreateFontSet(out fontSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSetBuilder = IDWriteFontSetBuilder;
@@ -841,19 +608,10 @@ type
   IDWriteFontCollection1 = interface(IDWriteFontCollection)
   ['{53585141-D9F8-4095-8321-D73CF6BD116C}']
 
-    // Get the underlying font set used by this collection.
-    // param name: fontSet: Contains font set used by the collection.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSet(out fontSet: IDWriteFontSet): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontSet(out fontSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
-    // Creates a font family object given a zero-based font family index.
-    // param name: index: Zero-based index of the font family.
-    // param name: fontFamily: Receives a pointer the newly created font family object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFamily(index: UINT32;
-                           out fontFamily: IDWriteFontFamily1): HResult; stdcall;
+    function GetFontFamily(index: UINT32; out fontFamily: IDWriteFontFamily1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontCollection1 = IDWriteFontCollection1;
@@ -870,35 +628,12 @@ type
   IDWriteFontFamily1 = interface(IDWriteFontFamily)
   ['{DA20D8EF-812A-4C43-9802-62EC4ABD7ADF}']
 
-    // Gets the current locality of a font given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // <remarks>
-    // The locality enumeration. For fully local files, the result will always
-    // be DWRITE_LOCALITY_LOCAL. For downloadable files, the result depends on how
-    // much of the file has been downloaded, and GetFont() fails if the locality
-    // is REMOTE and potentially fails if PARTIAL. The application can explicitly
-    // ask for the font to be enqueued for download via EnqueueFontDownloadRequest
-    // followed by BeginDownload().
-    // remarks:
-    // returns
-    // The locality enumeration.
-    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall; overload;
 
-    // Gets a font given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // param name: font: Receives a pointer to the newly created font object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFont(listIndex: UINT32;
-                     out font: IDWriteFont3): HResult; stdcall;
+    function GetFont(listIndex: UINT32; out font: IDWriteFont3): HRESULT; stdcall; overload;
 
-    // Gets a font face reference given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(listIndex: UINT32;
-                                  out fontFaceReference: IDWriteFontFaceReference): HResult; stdcall;
+    function GetFontFaceReference(listIndex: UINT32; out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFamily1 = IDWriteFontFamily1;
@@ -914,35 +649,12 @@ type
   IDWriteFontList1 = interface(IDWriteFontList)
   ['{DA20D8EF-812A-4C43-9802-62EC4ABD7ADE}']
 
-    // Gets the current locality of a font given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // <remarks>
-    // The locality enumeration. For fully local files, the result will always
-    // be DWRITE_LOCALITY_LOCAL. For downloadable files, the result depends on how
-    // much of the file has been downloaded, and GetFont() fails if the locality
-    // is REMOTE and potentially fails if PARTIAL. The application can explicitly
-    // ask for the font to be enqueued for download via EnqueueFontDownloadRequest
-    // followed by BeginDownload().
-    // </remarks>
-    // returns
-    // The locality enumeration.
-    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall; overload;
 
-    // Gets a font given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // param name: font: Receives a pointer to the newly created font object.
-    // returns
-    // Standard HRESULT error code. The function returns DWRITE_E_REMOTEFONT if it could not construct a remote font.
-    function GetFont(listIndex: UINT32;
-                     out font: IDWriteFont3): HResult; stdcall;
+    function GetFont(listIndex: UINT32; out font: IDWriteFont3): HRESULT; stdcall; overload;
 
-    // Gets a font face reference given its zero-based index.
-    // param name: listIndex: Zero-based index of the font in the font list.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(listIndex: UINT32;
-                                  out fontFaceReference: IDWriteFontFaceReference): HResult; stdcall;
+    function GetFontFaceReference(listIndex: UINT32; out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontList1 = IDWriteFontList1;
@@ -961,108 +673,34 @@ type
    IDWriteFontFaceReference = interface(IUnknown)
    ['{5E7FA7CA-DDE3-424C-89F0-9FCD6FED58CD}']
 
-    // Creates a font face from the reference for use with layout,
-    // shaping, or rendering.
-    // param name: fontFace: Newly created font face object, or nullptr in the case of failure.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // This function can fail with DWRITE_E_REMOTEFONT if the font is not local.
-    // </remarks>
-    function CreateFontFace(out fontFace: IDWriteFontFace3): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontFace(out fontFace: IDWriteFontFace3): HRESULT; stdcall; overload;
 
-    // Creates a font face with alternate font simulations, for example, to
-    // explicitly simulate a bold font face out of a regular variant.
-    // param name: fontFaceSimulationFlags: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontFace: Newly created font face object, or nullptr in the case of failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    // This function can fail with DWRITE_E_REMOTEFONT if the font is not local.
-    function CreateFontFaceWithSimulations(fontFaceSimulationFlags: DWRITE_FONT_SIMULATIONS;
-                                           out fontFace: IDWriteFontFace3): HResult; stdcall;
+    function CreateFontFaceWithSimulations(fontFaceSimulationFlags: DWRITE_FONT_SIMULATIONS; out fontFace: IDWriteFontFace3): HRESULT; stdcall; overload;
 
-    // Compares two instances of a font face references for equality.
-    function Equals(fontFaceReference: IDWriteFontFaceReference): BOOL; stdcall;
+    function Equals(fontFaceReference: IDWriteFontFaceReference): BOOL; stdcall; overload;
 
-    // Obtains the zero-based index of the font face in its font file. If the font files contain a single face,
-    // the return value is zero.
-    function GetFontFaceIndex(): UINT32; stdcall;
+    function GetFontFaceIndex(): UINT32; stdcall; overload;
 
-    // Obtains the algorithmic style simulation flags of a font face.
-    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall;
+    function GetSimulations(): DWRITE_FONT_SIMULATIONS; stdcall; overload;
 
-    // Obtains the font file representing a font face.
-    function GetFontFile(out fontFile: IDWriteFontFile): HResult; stdcall;
+    function GetFontFile(out fontFile: IDWriteFontFile): HRESULT; stdcall; overload;
 
-    // Get the local size of the font face in bytes.
-    // <remarks>
-    // The value returned by GetLocalFileSize will always be less than or
-    // equal to the value returned by GetFullSize. If the locality is remote,
-    // the GetLocalFileSize value is zero. If the locality is local, this
-    // value will equal the value returned by GetFileSize. If the locality is
-    // partial, this value will equal the size of the portions of the font
-    // data that have been downloaded, which will be greater than zero and
-    // less than or equal to the GetFileSize value.
-    // </remarks>
-    function GetLocalFileSize(): UINT64; stdcall;
+    function GetLocalFileSize(): UINT64; stdcall; overload;
 
-    // Get the total size of the font face in bytes.
-    // <remarks>
-    // If the locality is remote, this value is unknown and will be zero.
-    // If the locality is partial or local, the value is the full size of
-    // the font face.
-    // </remarks>
-    function GetFileSize(): UINT64; stdcall;
+    function GetFileSize(): UINT64; stdcall; overload;
 
-    // Get the last modified date.
-    // <remarks>
-    // The time may be zero if the font file loader does not expose file time.
-    // </remarks>
-    function GetFileTime(out lastWriteTime: FILETIME): HResult; stdcall;
+    function GetFileTime(lastWriteTime: PFILETIME): HRESULT; stdcall; overload;
 
-    // Get the locality of this font face reference. You can always successfully
-    // create a font face from a fully local font. Attempting to create a font
-    // face on a remote or partially local font may fail with DWRITE_E_REMOTEFONT.
-    // This function may change between calls depending on background downloads
-    // and whether cached data expires.
-    function GetLocality(): DWRITE_LOCALITY; stdcall;
+    function GetLocality(): DWRITE_LOCALITY; stdcall; overload;
 
-    // Adds a request to the font download queue (IDWriteFontDownloadQueue).
-    // returns
-    // Standard HRESULT error code.
-    function EnqueueFontDownloadRequest(): HResult; stdcall;
+    function EnqueueFontDownloadRequest(): HRESULT; stdcall; overload;
 
-    // Adds a request to the font download queue (IDWriteFontDownloadQueue).
-    // param name: characters: Array of characters to download.
-    // param name: characterCount: The number of elements in the character array.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    //   Downloading a character involves downloading every glyph it depends on
-    //   directly or indirectly, via font tables (cmap, GSUB, COLR, glyf).
-    function EnqueueCharacterDownloadRequest(characters: WideChar;
-                                             characterCount: UINT32): HResult; stdcall;
+    function EnqueueCharacterDownloadRequest(characters: PWideChar; characterCount: UINT32): HRESULT; stdcall; overload;
 
-    // Adds a request to the font download queue (IDWriteFontDownloadQueue).
-    // param name: glyphIndices: Array of glyph indices to download.
-    // param name: glyphCount: The number of elements in the glyph index array.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // Downloading a glyph involves downloading any other glyphs it depends on
-    // from the font tables (GSUB, COLR, glyf).
-    // </remarks>
-    function EnqueueGlyphDownloadRequest(glyphIndices: UINT16;
-                                         glyphCount: UINT32): HResult; stdcall;
+    function EnqueueGlyphDownloadRequest(glyphIndices: PWORD; glyphCount: UINT32): HRESULT; stdcall; overload;
 
-    // Adds a request to the font download queue (IDWriteFontDownloadQueue).
-    // param name: fileOffset: Offset of the fragment from the beginning of the font file.
-    // param name: fragmentSize: Size of the fragment in bytes.
-    // returns
-    // Standard HRESULT error code.
-    function EnqueueFileFragmentDownloadRequest(fileOffset: UINT64;
-                                                fragmentSize: UINT64): HResult; stdcall;
+    function EnqueueFileFragmentDownloadRequest(fileOffset: UINT64; fragmentSize: UINT64): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFaceReference = IDWriteFontFaceReference;
@@ -1078,36 +716,16 @@ type
   IDWriteFont3 = interface(IDWriteFont2)
   ['{29748ED6-8C9C-4A6A-BE0B-D912E8538944}']
 
-    // Creates a font face object for the font.
-    // param name: fontFace: Receives a pointer to the newly created font face object.
-    // returns
-    // Standard HRESULT error code. The function returns DWRITE_E_REMOTEFONT if it could not construct a remote font.
-    function CreateFontFace(out fontFace: IDWriteFontFace3): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontFace(out fontFace: IDWriteFontFace3): HRESULT; stdcall; overload;
 
-    // Compares two instances of a font references for equality.
-    function Equals(font: IDWriteFont): BOOL; stdcall;
+    function Equals(font: IDWriteFont): BOOL; stdcall; overload;
 
-    // Return a font face reference identifying this font.
-    // param name: fontFaceReference: A uniquely identifying reference to a font face.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(out fontFaceReference: IDWriteFontFaceReference): HResult; stdcall;
+    function GetFontFaceReference(out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Determines whether the font supports the specified character.
-    // param name: unicodeValue: Unicode (UCS-4) character value.
-    // returns
-    // Returns TRUE if the font has the specified character, FALSE if not.
-    function HasCharacter(unicodeValue: UINT32): BOOL; stdcall;
+    function HasCharacter(unicodeValue: UINT32): BOOL; stdcall; overload;
 
-    // Gets the current locality of the font.
-    // <remarks>
-    // The locality enumeration. For fully local files, the result will always
-    // be DWRITE_LOCALITY_LOCAL. A downloadable file may be any of the states,
-    // and this function may change between calls.
-    // </remarks>
-    // returns
-    // The locality enumeration.
-    function GetLocality(): DWRITE_LOCALITY; stdcall;
+    function GetLocality(): DWRITE_LOCALITY; stdcall; overload;
 
   end;
   IID_IDWriteFont3 = IDWriteFont3;
@@ -1125,134 +743,34 @@ type
   IDWriteFontFace3 = interface(IDWriteFontFace2)
   ['{D37D7598-09BE-4222-A236-2081341CC1F2}']
 
-    // Return a font face reference identifying this font.
-    // param name: fontFaceReference: A uniquely identifying reference to a font face.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(out fontFaceReference: IDWriteFontFaceReference): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontFaceReference(out fontFaceReference: IDWriteFontFaceReference): HRESULT; stdcall; overload;
 
-    // Gets the PANOSE values from the font, used for font selection and
-    // matching.
-    // param name: panose: PANOSE structure to fill in.
-    // <remarks>
-    // The function does not simulate these, such as substituting a weight or
-    // proportion inferred on other values. If the font does not specify them,
-    // they are all set to 'any' (0).
-    // </remarks>
-    procedure GetPanose(out panose: DWRITE_PANOSE); stdcall;
+    procedure GetPanose(panose: PDWRITE_PANOSE); stdcall; overload;
 
-    // Gets the weight of the specified font.
-    function GetWeight(): DWRITE_FONT_WEIGHT; stdcall;
+    function GetWeight(): DWRITE_FONT_WEIGHT; stdcall; overload;
 
-    // Gets the stretch (aka. width) of the specified font.
-    function GetStretch(): DWRITE_FONT_STRETCH; stdcall;
+    function GetStretch(): DWRITE_FONT_STRETCH; stdcall; overload;
 
-    // Gets the style (aka. slope) of the specified font.
-    function GetStyle(): DWRITE_FONT_STYLE; stdcall;
+    function GetStyle(): DWRITE_FONT_STYLE; stdcall; overload;
 
-    // Creates an localized strings object that contains the weight-stretch-style family names for the font family, indexed by locale name.
-    // param name: names: Receives a pointer to the newly created localized strings object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFamilyNames(out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetFamilyNames(out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // Gets a localized strings collection containing the weight-stretch-style face names for the font (e.g., Regular or Bold), indexed by locale name.
-    // param name: names: Receives a pointer to the newly created localized strings object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFaceNames(out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetFaceNames(out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // Gets a localized strings collection containing the specified informational strings, indexed by locale name.
-    // param name: informationalStringID: Identifies the string to get.
-    // param name: informationalStrings: Receives a pointer to the newly created localized strings object.
-    // param name: exists: Receives the value TRUE if the font contains the specified string ID or FALSE if not.
-    // returns
-    // Standard HRESULT error code. If the font does not contain the specified string, the return value is S_OK but
-    // informationalStrings receives a NULL pointer and exists receives the value FALSE.
-    function GetInformationalStrings(informationalStringID: DWRITE_INFORMATIONAL_STRING_ID;
-                                     informationalStrings: IDWriteLocalizedStrings;
-                                     out exists: BOOL): HResult; stdcall;
+    function GetInformationalStrings(informationalStringID: DWRITE_INFORMATIONAL_STRING_ID; out informationalStrings: IDWriteLocalizedStrings; exists: PBOOL): HRESULT; stdcall; overload;
 
-    // Determines whether the font supports the specified character.
-    // param name: unicodeValue: Unicode (UCS-4) character value.
-    // returns
-    // Returns TRUE if the font has the specified character, FALSE if not.
-    function HasCharacter(unicodeValue: UINT32): BOOL; stdcall;
+    function HasCharacter(unicodeValue: UINT32): BOOL; stdcall; overload;
 
-    // Determines the recommended text rendering and grid-fit mode to be used based on the
-    // font, size, world transform, and measuring mode.
-    // param name: fontEmSize: Logical font size in DIPs.
-    // param name: dpiX: Number of pixels per logical inch in the horizontal direction.
-    // param name: dpiY: Number of pixels per logical inch in the vertical direction.
-    // param name: transform: Specifies the world transform.
-    // param name: outlineThreshold: Specifies the quality of the graphics system's outline rendering,
-    // affects the size threshold above which outline rendering is used.
-    // param name: measuringMode: Specifies the method used to measure during text layout. For proper
-    // glyph spacing, the function returns a rendering mode that is compatible with the specified
-    // measuring mode.
-    // param name: renderingParams: Rendering parameters object. This parameter is necessary in case the rendering parameters
-    // object overrides the rendering mode.
-    // param name: renderingMode: Receives the recommended rendering mode.
-    // param name: gridFitMode: Receives the recommended grid-fit mode.
-    // <remarks>
-    // This method should be used to determine the actual rendering mode in cases where the rendering
-    // mode of the rendering params object is DWRITE_RENDERING_MODE_DEFAULT, and the actual grid-fit
-    // mode when the rendering params object is DWRITE_GRID_FIT_MODE_DEFAULT.
-    // </remarks>
-    // returns
-    // Standard HRESULT error code.
-    function GetRecommendedRenderingMode(fontEmSize: Single;
-                                         dpiX: Single;
-                                         dpiY: Single;
-                                         transform: DWRITE_MATRIX;
-                                         isSideways: BOOL;
-                                         outlineThreshold: DWRITE_OUTLINE_THRESHOLD;
-                                         measuringMode: DWRITE_MEASURING_MODE;
-                                         renderingParams: IDWriteRenderingParams;
-                                         out renderingMode: DWRITE_RENDERING_MODE1;
-                                         out gridFitMode: DWRITE_GRID_FIT_MODE): HResult; stdcall;
+    function GetRecommendedRenderingMode(fontEmSize: Single; dpiX: Single; dpiY: Single; transform: PDWRITE_MATRIX; isSideways: BOOL; outlineThreshold: DWRITE_OUTLINE_THRESHOLD; measuringMode: DWRITE_MEASURING_MODE; renderingParams: IDWriteRenderingParams; renderingMode: PDWRITE_RENDERING_MODE1; gridFitMode: PDWRITE_GRID_FIT_MODE): HRESULT; stdcall; overload;
 
+    function IsCharacterLocal(unicodeValue: UINT32): BOOL; stdcall; overload;
 
-    // Determines whether the character is locally downloaded from the font.
-    // param name: unicodeValue: Unicode (UCS-4) character value.
-    // returns
-    // Returns TRUE if the font has the specified character locally available,
-    // FALSE if not or if the font does not support that character.
-    function IsCharacterLocal(unicodeValue: UINT32): BOOL; stdcall;
+    function IsGlyphLocal(glyphId: UINT16): BOOL; stdcall; overload;
 
-    // Determines whether the glyph is locally downloaded from the font.
-    // param name: glyphId: Glyph identifier.
-    // returns
-    // Returns TRUE if the font has the specified glyph locally available.
-    function IsGlyphLocal(glyphId: UINT16): BOOL; stdcall;
+    function AreCharactersLocal(characters: PWideChar; characterCount: UINT32; enqueueIfNotLocal: BOOL; isLocal: PBOOL): HRESULT; stdcall; overload;
 
-    // Determines whether the specified characters are local.
-    // param name: characters: Array of characters.
-    // param name: characterCount: The number of elements in the character array.
-    // param name: enqueueIfNotLocal: Specifies whether to enqueue a download request
-    // if any of the specified characters are not local.
-    // param name: isLocal: Receives TRUE if all of the specified characters are local,
-    // FALSE if any of the specified characters are remote.
-    // returns
-    // Standard HRESULT error code.
-    function AreCharactersLocal(characters: WideChar;
-                                characterCount: UINT32;
-                                enqueueIfNotLocal: BOOL;
-                                out isLocal: BOOL): HResult; stdcall;
-
-    // Determines whether the specified glyphs are local.
-    // param name: glyphIndices: Array of glyph indices.
-    // param name: glyphCount: The number of elements in the glyph index array.
-    // param name: enqueueIfNotLocal: Specifies whether to enqueue a download request
-    // if any of the specified glyphs are not local.
-    // param name: isLocal: Receives TRUE if all of the specified glyphs are local,
-    // FALSE if any of the specified glyphs are remote.
-    // returns
-    // Standard HRESULT error code.
-    function AreGlyphsLocal(glyphIndices: UINT16;
-                            glyphCount: UINT32;
-                            enqueueIfNotLocal: BOOL;
-                            out isLocal: BOOL): HResult; stdcall;
+    function AreGlyphsLocal(glyphIndices: PWORD; glyphCount: UINT32; enqueueIfNotLocal: BOOL; isLocal: PBOOL): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFace3 = IDWriteFontFace3;
@@ -1274,46 +792,16 @@ type
   IDWriteStringList = interface(IUnknown)
   ['{CFEE3140-1157-47CA-8B85-31BFCF3F2D0E}']
 
-    // Gets the number of strings.
-    function GetCount(): UINT32; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetCount(): UINT32; stdcall; overload;
 
-    // Gets the length in characters (not including the null terminator) of the locale name with the specified index.
-    // param name: listIndex: Zero-based index of the locale name.
-    // param name: length: Receives the length in characters, not including the null terminator.
-    // returns
-    // Standard HRESULT error code.
-    function GetLocaleNameLength(listIndex: UINT32;
-                                 out length: UINT32): HResult; stdcall;
+    function GetLocaleNameLength(listIndex: UINT32; length: PUINT32): HRESULT; stdcall; overload;
 
-    // Copies the locale name with the specified index to the specified array.
-    // param name: listIndex: Zero-based index of the locale name.
-    // param name: localeName: Character array that receives the locale name.
-    // param name: size: Size of the array in characters. The size must include space for the terminating
-    // null character.
-    // returns
-    // Standard HRESULT error code.
-    function GetLocaleName(listIndex: UINT32;
-                           localeName: PWideChar;
-                           size: UINT32): HResult; stdcall;
+    function GetLocaleName(listIndex: UINT32; localeName: PWideChar; size: UINT32): HRESULT; stdcall; overload;
 
-    // Gets the length in characters (not including the null terminator) of the string with the specified index.
-    // param name: listIndex: Zero-based index of the string.
-    // param name: length: Receives the length in characters, not including the null terminator.
-    // returns
-    // Standard HRESULT error code.
-    function GetStringLength(listIndex: UINT32;
-                             out length: UINT32): HResult; stdcall;
+    function GetStringLength(listIndex: UINT32; length: PUINT32): HRESULT; stdcall; overload;
 
-    // Copies the string with the specified index to the specified array.
-    // param name: listIndex: Zero-based index of the string.
-    // param name: stringBuffer: Character array that receives the string.
-    // param name: size: Size of the array in characters. The size must include space for the terminating
-    //     null character.
-    // returns
-    // Standard HRESULT error code.
-    function GetString(listIndex: UINT32;
-                       stringBuffer: PWideChar;
-                       stringBufferSize: UINT32): HResult; stdcall;
+    function GetString(listIndex: UINT32; stringBuffer: PWideChar; stringBufferSize: UINT32): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteStringList = IDWriteStringList;
@@ -1332,17 +820,9 @@ type
   IDWriteFontDownloadListener = interface(IUnknown)
   ['{B06FE5B9-43EC-4393-881B-DBE4DC72FDA7}']
 
-    // The DownloadCompleted method is called back on an arbitrary thread when a
-    // download operation ends.
-    // param name: downloadQueue: Pointer to the download queue interface on which
-    // the BeginDownload method was called.
-    // param name: context: Optional context object that was passed to BeginDownload.
-    // AddRef is called on the context object by BeginDownload and Release is called
-    // after the DownloadCompleted method returns.
-    // param name: downloadResult: Result of the download operation.
-    procedure DownloadCompleted(downloadQueue: IDWriteFontDownloadQueue;
-                                context: IUnknown;
-                                downloadResult: HResult); stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    procedure DownloadCompleted(downloadQueue: IDWriteFontDownloadQueue; context: IUnknown; downloadResult: HRESULT); stdcall; overload;
+
   end;
   IID_IDWriteFontDownloadListener = IDWriteFontDownloadListener;
   {$EXTERNALSYM IID_IDWriteFontDownloadListener}
@@ -1360,70 +840,18 @@ type
   IDWriteFontDownloadQueue = interface(IUnknown)
   ['{B71E6052-5AEA-4FA3-832E-F60D431F7E91}']
 
-    // Registers a client-defined listener object that receives download notifications.
-    // All registered listener's DownloadCompleted will be called after BeginDownload
-    // completes.
-    // param name: listener: Listener object to add.
-    // param name: token: Receives a token value, which the caller must subsequently
-    // pass to RemoveListener.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // An IDWriteFontDownloadListener can also be passed to BeginDownload via the
-    // context parameter, rather than globally registered to the queue.
-    // </remarks>
-    function AddListener(listener: IDWriteFontDownloadListener;
-                         out token: UINT32): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function AddListener(listener: IDWriteFontDownloadListener; token: PUINT32): HRESULT; stdcall; overload;
 
-    // Unregisters a notification handler that was previously registered using
-    // AddListener.
-    // param name: token: Token value previously returned by AddListener.
-    // returns
-    // Returns S_OK if successful or E_INVALIDARG if the specified token does not
-    // correspond to a registered listener.
-    function RemoveListener(token: UINT32): HResult; stdcall;
+    function RemoveListener(token: UINT32): HRESULT; stdcall; overload;
 
-    // Determines whether the download queue is empty. Note that the queue does not
-    // include requests that are already being downloaded. In other words, BeginDownload
-    // clears the queue.
-    // returns
-    // TRUE if the queue is empty, FALSE if there are requests pending for BeginDownload.
-    function IsEmpty(): BOOL; stdcall;
+    function IsEmpty(): BOOL; stdcall; overload;
 
-    // Begins an asynchronous download operation. The download operation executes
-    // in the background until it completes or is cancelled by a CancelDownload call.
-    // param name: context: Optional context object that is passed back to the
-    // download notification handler's DownloadCompleted method. If the context object
-    // implements IDWriteFontDownloadListener, its DownloadCompleted will be called
-    // when done.
-    // returns
-    // Returns S_OK if a download was successfully begun, S_FALSE if the queue was
-    // empty, or a standard HRESULT error code.
-    // <remarks>
-    // BeginDownload removes all download requests from the queue, transferring them
-    // to a background download operation. If any previous downloads are still ongoing
-    // when BeginDownload is called again, the new download does not complete until
-    // the previous downloads have finished. If the queue is empty and no active
-    // downloads are pending, the DownloadCompleted callback is called immediately with
-    // DWRITE_DOWNLOAD_RESULT_NONE.
-    // </remarks>
-    function BeginDownload(context: IUnknown = IUnknown(Nil)): HResult; stdcall;
+    function BeginDownload(context: IUnknown): HRESULT; stdcall; overload;
 
-    // Removes all download requests from the queue and cancels any active download
-    // operations. This calls DownloadCompleted with DWRITE_E_DOWNLOADCANCELLED.
-    // Applications should call this when shutting down if they started any
-    // downloads that have not finished yet with a call to DownloadCompleted.
-    // returns
-    // Standard HRESULT error code.
-    function CancelDownload(): HResult; stdcall;
+    function CancelDownload(): HRESULT; stdcall; overload;
 
-    // Get the current generation number of the download queue, which is incremented
-    // every time after a download completes, whether failed or successful. This cookie
-    // comparison value may be used to compared against cached data to know when it is
-    // stale.
-    // returns
-    // The number of download queue generations.
-    function GetGenerationCount(): UINT64; stdcall;
+    function GetGenerationCount(): UINT64; stdcall; overload;
 
   end;
   IID_IDWriteFontDownloadQueue = IDWriteFontDownloadQueue;
@@ -1439,48 +867,14 @@ type
   IDWriteGdiInterop1 = interface(IDWriteGdiInterop)
   ['{4556BE70-3ABD-4F70-90BE-421780A6F515}']
 
-    // Creates a font object that matches the properties specified by the LOGFONT structure.
-    // param name: logFont: Structure containing a GDI-compatible font description.
-    // param name: fontCollection: The font collection to search. If NULL, the local system font collection is used.
-    // param name: font: Receives a newly created font object if successful, or NULL in case of error.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // The only fields that matter include: lfFaceName, lfCharSet, lfWeight, lfItalic.
-    // Font size and rendering mode are a rendering time property, not a font property,
-    // and text decorations like underline are drawn separately from the text. If no
-    // font matches the given weight, slope, and character set, the best match within
-    // the given GDI family name will be returned. DWRITE_E_NOFONT is returned if there
-    // is no matching font name using either the GDI family name (e.g. Arial) or the
-    // full font name (e.g. Arial Bold Italic).
-    // </remarks>
-    function CreateFontFromLOGFONT(_logFont: LOGFONT;
-                                   fontCollection: IDWriteFontCollection;
-                                   out font: IDWriteFont): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontFromLOGFONT(logFont: PLOGFONTW; fontCollection: IDWriteFontCollection; out font: IDWriteFont): HRESULT; stdcall; overload;
 
-    // Reads the font signature from the given font.
-    // param name: font: Font to read font signature from.
-    // param name: fontSignature: Font signature from the OS/2 table, ulUnicodeRange and ulCodePageRange.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSignature(font: IDWriteFont;
-                              out _fontSignature: FONTSIGNATURE): HResult; overload; stdcall;
+    function GetFontSignature(fontFace: IDWriteFontFace; fontSignature: PFONTSIGNATURE): HRESULT; stdcall; overload;
 
-    // Reads the font signature from the given font.
-    // param name: font: Font to read font signature from.
-    // param name: fontSignature: Font signature from the OS/2 table, ulUnicodeRange and ulCodePageRange.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSignature(fontFace: IDWriteFontFace;
-                              out fontSignature: FONTSIGNATURE): HResult; overload; stdcall;
+    function GetFontSignature(font: IDWriteFont; fontSignature: PFONTSIGNATURE): HRESULT; stdcall; overload;
 
-    // Get a list of matching fonts based on the LOGFONT values. Only fonts
-    // of that family name will be returned.
-    // returns
-    // Standard HRESULT error code.
-    function GetMatchingFontsByLOGFONT(_logFont: LOGFONT;
-                                       fontSet: IDWriteFontSet;
-                                       out filteredSet: IDWriteFontSet): HResult; stdcall;
+    function GetMatchingFontsByLOGFONT(logFont: PLOGFONT; fontSet: IDWriteFontSet; out filteredSet: IDWriteFontSet): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteGdiInterop1 = IDWriteGdiInterop1;
@@ -1548,17 +942,10 @@ type
   IDWriteTextFormat2 = interface(IDWriteTextFormat1)
   ['{F67E0EDD-9E3D-4ECC-8C32-4183253DFE70}']
 
-    // Set line spacing.
-    // param name: lineSpacing: How to manage space between lines.
-    // returns
-    // Standard HRESULT error code.
-    function SetLineSpacing(lineSpacingOptions: DWRITE_LINE_SPACING): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function SetLineSpacing(lineSpacingOptions: PDWRITE_LINE_SPACING): HRESULT; stdcall; overload;
 
-    // Get line spacing.
-    // param name: lineSpacing: How to manage space between lines.
-    // returns
-    // Standard HRESULT error code.
-    function GetLineSpacing(out lineSpacingOptions: DWRITE_LINE_SPACING): HResult; stdcall;
+    function GetLineSpacing(lineSpacingOptions: PDWRITE_LINE_SPACING): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteTextFormat2 = IDWriteTextFormat2;
@@ -1573,42 +960,14 @@ type
   IDWriteTextLayout3 = interface(IDWriteTextLayout2)
   ['{07DDCD52-020E-4DE8-AC33-6C953D83F92D}']
 
-    // Invalidates the layout, forcing layout to remeasure before calling the
-    // metrics or drawing functions. This is useful if the locality of a font
-    // changes, and layout should be redrawn, or if the size of a client
-    // implemented IDWriteInlineObject changes.
-    // returns
-    // Standard HRESULT error code.
-    function InvalidateLayout(): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function InvalidateLayout(): HRESULT; stdcall; overload;
 
-    // Set line spacing.
-    // param name: lineSpacing: How to manage space between lines.
-    // returns
-    // Standard HRESULT error code.
-    function SetLineSpacing(lineSpacingOptions: DWRITE_LINE_SPACING): HResult; stdcall;
+    function SetLineSpacing(lineSpacingOptions: PDWRITE_LINE_SPACING): HRESULT; stdcall; overload;
 
-    // Get line spacing.
-    // param name: lineSpacing: How to manage space between lines.
-    // returns
-    // Standard HRESULT error code.
-    function GetLineSpacing(out lineSpacingOptions: DWRITE_LINE_SPACING): HResult; stdcall;
+    function GetLineSpacing(lineSpacingOptions: PDWRITE_LINE_SPACING): HRESULT; stdcall; overload;
 
-    // GetLineMetrics returns properties of each line.
-    // param name: lineMetrics: The array to fill with line information.
-    // param name: maxLineCount: The maximum size of the lineMetrics array.
-    // param name: actualLineCount: The actual size of the lineMetrics
-    // array that is needed.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // If maxLineCount is not large enough E_NOT_SUFFICIENT_BUFFER,
-    // which is equivalent to HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
-    // is returned and *actualLineCount is set to the number of lines
-    // needed.
-    // </remarks>
-    function GetLineMetrics(out lineMetrics: PDWRITE_LINE_METRICS1;
-                            maxLineCount: UINT32;
-                            out actualLineCount: UINT32): HResult; stdcall;
+    function GetLineMetrics(lineMetrics: PDWRITE_LINE_METRICS1; maxLineCount: UINT32; actualLineCount: PUINT32): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteTextLayout3 = IDWriteTextLayout3;
@@ -1625,6 +984,7 @@ type
   // method returns an ordered collection of color glyph runs of varying types
   // depending on what the font supports.
   // For runs without any specific color, such as PNG data, the runColor field will be zero.
+  PDWRITE_COLOR_GLYPH_RUN1 = ^DWRITE_COLOR_GLYPH_RUN1;
   DWRITE_COLOR_GLYPH_RUN1 = record
     DWriteColorGlyphRun: DWRITE_COLOR_GLYPH_RUN;
     // Type of glyph image format for this color run. Exactly one type will be set since
@@ -1683,15 +1043,8 @@ type
   IDWriteColorGlyphRunEnumerator1 = interface(IDWriteColorGlyphRunEnumerator)
   ['{7C5F86DA-C7A1-4F05-B8E1-55A179FE5A35}']
 
-    // Gets the current color glyph run.
-    // param name: colorGlyphRun: Receives a pointer to the color
-    // glyph run. The pointer remains valid until the next call to
-    // MoveNext or until the interface is released.
-    // returns
-    // Standard HRESULT error code. An error is returned if there is
-    // no current glyph run, i.e., if MoveNext has not yet been called
-    // or if the end of the sequence has been reached.
-    function GetCurrentRun(colorGlyphRun: DWRITE_COLOR_GLYPH_RUN1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetCurrentRun(out colorGlyphRun: PDWRITE_COLOR_GLYPH_RUN1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteColorGlyphRunEnumerator1 = IDWriteColorGlyphRunEnumerator1;
@@ -1709,48 +1062,14 @@ type
   IDWriteFontFace4 = interface(IDWriteFontFace3)
   ['{27F2A904-4EB8-441D-9678-0563F53E3E2F}']
 
-    // Gets all the glyph image formats supported by the entire font (SVG, PNG, JPEG, ...).
-    function GetGlyphImageFormats(): DWRITE_GLYPH_IMAGE_FORMATS; overload; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetGlyphImageFormats(glyphId: UINT16; pixelsPerEmFirst: UINT32; pixelsPerEmLast: UINT32; glyphImageFormats: PDWRITE_GLYPH_IMAGE_FORMATS): HRESULT; stdcall; overload;
 
-    // Gets the available image formats of a specific glyph and ppem. Glyphs often have at least TrueType
-    // or CFF outlines, but they may also have SVG outlines, or they may have only bitmaps
-    // with no TrueType/CFF outlines. Some image formats, notably the PNG/JPEG ones, are size
-    // specific and will return no match when there isn't an entry in that size range.
-    // <remarks>
-    // Glyph ids beyond the glyph count return DWRITE_GLYPH_IMAGE_FORMATS_NONE.
-    // </remarks>
-    function GetGlyphImageFormats(glyphId: UINT16;
-                                  pixelsPerEmFirst: UINT32;
-                                  pixelsPerEmLast: UINT32;
-                                  out glyphImageFormats: DWRITE_GLYPH_IMAGE_FORMATS): HResult; overload; stdcall;
+    function GetGlyphImageFormats(): DWRITE_GLYPH_IMAGE_FORMATS; stdcall; overload;
 
-    // Gets a pointer to the glyph data based on the desired image format.
-    // <remarks>
-    // The glyphDataContext must be released via ReleaseGlyphImageData when done if the data is not empty,
-    // similar to IDWriteFontFileStream.ReadFileFragment and IDWriteFontFileStream.ReleaseFileFragment.
-    // The data pointer is valid so long as the IDWriteFontFace exists and ReleaseGlyphImageData has not
-    // been called.
-    // </remarks>
-    // <remarks>
-    // The DWRITE_GLYPH_IMAGE_DATA.uniqueDataId is valuable for caching purposes so that if the same
-    // resource is returned more than once, an existing resource can be quickly retrieved rather than
-    // needing to reparse or decompress the data.
-    // </remarks>
-    // <remarks>
-    // The function only returns SVG or raster data - requesting TrueType/CFF/COLR data returns
-    // DWRITE_E_INVALIDARG. Those must be drawn via DrawGlyphRun or queried using GetGlyphOutline instead.
-    // Exactly one format may be requested or else the function returns DWRITE_E_INVALIDARG.
-    // If the glyph does not have that format, the call is not an error, but the function returns empty data.
-    // </remarks>
-    function GetGlyphImageData(glyphId: UINT16;
-                               pixelsPerEm: UINT32;
-                               glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS;
-                               out glyphData: DWRITE_GLYPH_IMAGE_DATA;
-                               glyphDataContext: Pointer): HResult; stdcall;
+    function GetGlyphImageData(glyphId: UINT16; pixelsPerEm: UINT32; glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS; glyphData: PDWRITE_GLYPH_IMAGE_DATA; out glyphDataContext: Pointer): HRESULT; stdcall; overload;
 
-    // Releases the table data obtained earlier from ReadGlyphData.
-    // param name: glyphDataContext: Opaque context from ReadGlyphData.
-    procedure ReleaseGlyphImageData(glyphDataContext: Pointer); stdcall;
+    procedure ReleaseGlyphImageData(glyphDataContext: Pointer); stdcall; overload;
 
   end;
   IID_IDWriteFontFace4 = IDWriteFontFace4;
@@ -1765,63 +1084,12 @@ type
   IDWriteFactory4 = interface(IDWriteFactory3)
   ['{4B0B5BD3-0797-4549-8AC5-FE915CC53856}']
 
-    // Translates a glyph run to a sequence of color glyph runs, which can be
-    // rendered to produce a color representation of the original "base" run.
-    // param name: baselineOriginX: Horizontal and vertical origin of the base glyph run in
-    // pre-transform coordinates.
-    // param name: glyphRun: Pointer to the original "base" glyph run.
-    // param name: glyphRunDescription: Optional glyph run description.
-    // param name: DesiredglyphImageFormats: Which data formats TranslateColorGlyphRun
-    // should split the runs into.
-    // param name: measuringMode: Measuring mode, needed to compute the origins
-    // of each glyph.
-    // param name: worldToDeviceTransform: Matrix converting from the client's
-    // coordinate space to device coordinates (pixels), i.e., the world transform
-    // multiplied by any DPI scaling.
-    // param name: colorPaletteIndex: Zero-based index of the color palette to use.
-    // Valid indices are less than the number of palettes in the font, as returned
-    // by IDWriteFontFace2.GetColorPaletteCount.
-    // param name: colorLayers: If the function succeeds, receives a pointer
-    // to an enumerator object that can be used to obtain the color glyph runs.
-    // If the base run has no color glyphs, then the output pointer is NULL
-    // and the method returns DWRITE_E_NOCOLOR.
-    // returns
-    // Returns DWRITE_E_NOCOLOR if the font has no color information, the glyph run
-    // does not contain any color glyphs, or the specified color palette index
-    // is out of range. In this case, the client should render the original glyph
-    // run. Otherwise, returns a standard HRESULT error code.
-    // <remarks>
-    // The old IDWriteFactory2.TranslateColorGlyphRun is equivalent to passing
-    // DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE|CFF|COLR.
-    // </remarks>
-    function TranslateColorGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                                    glyphRun: DWRITE_GLYPH_RUN;
-                                    glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
-                                    desiredGlyphImageFormats: DWRITE_GLYPH_IMAGE_FORMATS;
-                                    measuringMode: DWRITE_MEASURING_MODE;
-                                    worldAndDpiTransform: DWRITE_MATRIX;
-                                    colorPaletteIndex: UINT32;
-                                    out colorLayers: IDWriteColorGlyphRunEnumerator1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function TranslateColorGlyphRun(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION; desiredGlyphImageFormats: DWRITE_GLYPH_IMAGE_FORMATS; measuringMode: DWRITE_MEASURING_MODE; worldAndDpiTransform: PDWRITE_MATRIX; colorPaletteIndex: UINT32; out colorLayers: IDWriteColorGlyphRunEnumerator1): HRESULT; stdcall; overload;
 
-    // Converts glyph run placements to glyph origins.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // The transform and DPI have no affect on the origin scaling.
-    // They are solely used to compute glyph advances when not supplied
-    // and align glyphs in pixel aligned measuring modes.
-    // </remarks>
-    function ComputeGlyphOrigins(glyphRun: DWRITE_GLYPH_RUN;
-                                 measuringMode: DWRITE_MEASURING_MODE;
-                                 baselineOrigin: D2D1_POINT_2F;
-                                 worldAndDpiTransform: DWRITE_MATRIX;
-                                 out glyphOrigins: D2D1_POINT_2F): HResult; overload; stdcall;
+    function ComputeGlyphOrigins(glyphRun: PDWRITE_GLYPH_RUN; baselineOrigin: D2D1_POINT_2F; glyphOrigins: PD2D1_POINT_2F): HRESULT; stdcall; overload;
 
-    // Converts glyph run placements to glyph origins. This overload is for natural metrics, which
-    // includes SVG, TrueType natural modes, and bitmap placement.
-    function ComputeGlyphOrigins(glyphRun: DWRITE_GLYPH_RUN;
-                                 baselineOrigin: D2D1_POINT_2F;
-                                 out glyphOrigins: D2D1_POINT_2F): HResult; overload; stdcall;
+    function ComputeGlyphOrigins(glyphRun: PDWRITE_GLYPH_RUN; measuringMode: DWRITE_MEASURING_MODE; baselineOrigin: D2D1_POINT_2F; worldAndDpiTransform: PDWRITE_MATRIX; glyphOrigins: PD2D1_POINT_2F): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory4 = IDWriteFactory4;
@@ -1843,12 +1111,8 @@ type
   IDWriteFontSetBuilder1 = interface(IDWriteFontSetBuilder)
   ['{3FF7715F-3CDC-4DC6-9B72-EC5621DCCAFD}']
 
-    // Adds references to all the fonts in the specified font file. The method
-    // parses the font file to determine the fonts and their properties.
-    // param name: fontFile: Font file reference object to add to the set.
-    // returns
-    // Standard HRESULT error code.
-    function AddFontFile(fontFile: IDWriteFontFile): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function AddFontFile(fontFile: IDWriteFontFile): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSetBuilder1 = IDWriteFontSetBuilder1;
@@ -1866,14 +1130,10 @@ type
   IDWriteAsyncResult = interface(IUnknown)
   ['{CE25F8FD-863B-4D13-9651-C1F88DC73FE2}']
 
-    // The GetWaitHandleMethod method returns a handle that can be used to wait
-    // for the asynchronous operation to complete. The handle remains valid
-    // until the interface is released.
-    function GetWaitHandle(): THandle; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetWaitHandle(): THandle; stdcall; overload;
 
-    // The GetResult method returns the result of the asynchronous operation.
-    // The return value is E_PENDING if the operation has not yet completed.
-    function GetResult(): HResult; stdcall;
+    function GetResult(): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteAsyncResult = IDWriteAsyncResult;
@@ -1909,51 +1169,14 @@ type
   IDWriteRemoteFontFileStream = interface(IDWriteFontFileStream)
   ['{4DB3757A-2C72-4ED9-B2B6-1ABABE1AFF9C}']
 
-    // GetLocalFileSize returns the number of bytes of the font file that are
-    // currently local, which should always be less than or equal to the full
-    // file size returned by GetFileSize. If the locality is remote, the return
-    // value is zero. If the file is fully local, the return value must be the
-    // same as GetFileSize.
-    // param name: localFileSize: Receives the local size of the file.
-    // returns
-    // Standard HRESULT error code.
-    function GetLocalFileSize(out localFileSize: UINT64): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetLocalFileSize(localFileSize: PUINT64): HRESULT; stdcall; overload;
 
-    // GetFileFragmentLocality returns information about the locality of a byte range (i.e.,
-    // font fragment) within the font file stream.
-    // param name: fileOffset: Offset of the fragment from the beginning of the font file.
-    // param name: fragmentSize: Size of the fragment in bytes.
-    // param name: isLocal: Receives TRUE if the first byte of the fragment is local, FALSE if not.
-    // param name: partialSize: Receives the number of contiguous bytes from the start of the
-    // fragment that have the same locality as the first byte.
-    // returns
-    // Standard HRESULT error code.
-    function GetFileFragmentLocality(fileOffset: UINT64;
-                                     fragmentSize: UINT64;
-                                     out isLocal: BOOL;
-                                     out partialSize: UINT64): HResult; stdcall;
+    function GetFileFragmentLocality(fileOffset: UINT64; fragmentSize: UINT64; isLocal: PBOOL; partialSize: PUINT64): HRESULT; stdcall; overload;
 
-    // Gets the current locality of the file.
-    // returns
-    // Returns the locality enumeration (i.e., remote, partial, or local).
-    function GetLocality(): DWRITE_LOCALITY; stdcall;
+    function GetLocality(): DWRITE_LOCALITY; stdcall; overload;
 
-    // BeginDownload begins downloading all or part of the font file.
-    // param name: fileFragments: Array of structures, each specifying a byte
-    // range to download.
-    // param name: fragmentCount: Number of elements in the fileFragments array.
-    // This can be zero to just download file information, such as the size.
-    // param name: asyncResult: Receives an object that can be used to wait for
-    // the asynchronous download to complete and to get the download result upon
-    // completion. The result may be NULL if the download completes synchronously.
-    // For example, this can happen if method determines that the requested data
-    // is already local.
-    // returns
-    // Standard HRESULT error code.
-    function BeginDownload(downloadOperationID: TGuid;
-                           fileFragments: DWRITE_FILE_FRAGMENT;
-                           fragmentCount: UINT32;
-                           asyncResult: IDWriteAsyncResult): HResult; stdcall;
+    function BeginDownload(downloadOperationID: PUUID; fileFragments: PDWRITE_FILE_FRAGMENT; fragmentCount: UINT32; out asyncResult: IDWriteAsyncResult): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteRemoteFontFileStream = IDWriteRemoteFontFileStream;
@@ -1976,48 +1199,12 @@ type
   IDWriteRemoteFontFileLoader = interface(IDWriteFontFileLoader)
   ['{68648C83-6EDE-46C0-AB46-20083A887FDE}']
 
-    // Creates a remote font file stream object that encapsulates an open file resource
-    // and can be used to download remote file data.
-    // param name: fontFileReferenceKey: Font file reference key that uniquely identifies the font file resource
-    // within the scope of the font loader being used.
-    // param name: fontFileReferenceKeySize: Size of font file reference key in bytes.
-    // param name: fontFileStream: Pointer to the newly created font file stream.
-    // returns
-    // Standard HRESULT error code.
-    // <remarks>
-    // Unlike CreateStreamFromKey, this method can be used to create a stream for a remote file. If the file is
-    // remote, the returned stream's BeginDownload method can be used to download all or part of the font file.
-    // However, the stream cannot be used to get the file size or access font data unless the file is at least
-    // partially local.
-    // </remarks>
-    function CreateRemoteStreamFromKey(fontFileReferenceKey: Pointer;
-                                       fontFileReferenceKeySize: UINT32;
-                                       out fontFileStream: IDWriteRemoteFontFileStream): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateRemoteStreamFromKey(fontFileReferenceKey: Pointer; fontFileReferenceKeySize: UINT32; out fontFileStream: IDWriteRemoteFontFileStream): HRESULT; stdcall; overload;
 
-    // Gets the locality of the file resource identified by the unique key.
-    // param name: fontFileReferenceKey: Font file reference key that uniquely identifies the font file resource
-    // within the scope of the font loader being used.
-    // param name: fontFileReferenceKeySize: Size of font file reference key in bytes.
-    // param name: locality: Locality of the file.
-    // returns
-    // Standard HRESULT error code.
-    function GetLocalityFromKey(fontFileReferenceKey: Pointer;
-                                fontFileReferenceKeySize: UINT32;
-                                out locality: DWRITE_LOCALITY): HResult; stdcall;
+    function GetLocalityFromKey(fontFileReferenceKey: Pointer; fontFileReferenceKeySize: UINT32; locality: PDWRITE_LOCALITY): HRESULT; stdcall; overload;
 
-    // Creates a font file reference from a URL if the loader supports this capability.
-    // param name: factory: Factory used to create the font file reference.
-    // param name: baseUrl: Optional base URL. The base URL is used to resolve the fontFileUrl
-    // if it is relative. For example, the baseUrl might be the URL of the referring document
-    // that contained the fontFileUrl.
-    // param name: fontFileUrl: URL of the font resource.
-    // param name: fontFile: Receives a pointer to the newly created font file reference.
-    // returns
-    // Standard HRESULT error code, or E_NOTIMPL if the loader does not implement this method.
-    function CreateFontFileReferenceFromUrl(factory: IDWriteFactory;
-                                            baseUrl: WideChar;
-                                            fontFileUrl: WideChar;
-                                            out fontFile: IDWriteFontFile): HResult; stdcall;
+    function CreateFontFileReferenceFromUrl(factory: IDWriteFactory; baseUrl: PWideChar; fontFileUrl: PWideChar; out fontFile: IDWriteFontFile): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteRemoteFontFileLoader = IDWriteRemoteFontFileLoader;
@@ -2039,32 +1226,10 @@ type
   IDWriteInMemoryFontFileLoader = interface(IDWriteFontFileLoader)
   ['{DC102F47-A12D-4B1C-822D-9E117E33043F}']
 
-    // The CreateInMemoryFontFileReference method creates a font file reference
-    // (IDWriteFontFile object) from an array of bytes. The font file reference
-    // is bound to the IDWriteInMemoryFontFileLoader instance with which it was
-    // created and remains valid for as long as that loader is registered with
-    // the factory.
-    // param name: factory: Factory object used to create the font file reference.
-    // param name: fontData: Pointer to a memory block containing the font data.
-    // param name: fontDataSize: Size of the font data.
-    // param name: ownerObject: Optional object that owns the memory specified by
-    // the fontData parameter. If this parameter is not NULL, the method stores a
-    // pointer to the font data and adds a reference to the owner object. The
-    // fontData pointer must remain valid until the owner object is released. If
-    // this parameter is NULL, the method makes a copy of the font data.
-    // param name: fontFile: Receives a pointer to the newly-created font file
-    // reference.
-    // returns
-    // Standard HRESULT error code.
-    function CreateInMemoryFontFileReference(factory: IDWriteFactory;
-                                             fontData: Pointer;
-                                             fontDataSize: UINT32;
-                                             ownerObject: IUnknown;
-                                             out fontFile: IDWriteFontFile): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateInMemoryFontFileReference(factory: IDWriteFactory; fontData: Pointer; fontDataSize: UINT32; ownerObject: IUnknown; out fontFile: IDWriteFontFile): HRESULT; stdcall; overload;
 
-    // The GetFileCount method returns the number of font file references that
-    // have been created using this loader instance.
-    function GetFileCount(): UINT32; stdcall;
+    function GetFileCount(): UINT32; stdcall; overload;
 
   end;
   IID_IDWriteInMemoryFontFileLoader = IDWriteInMemoryFontFileLoader;
@@ -2080,58 +1245,16 @@ type
   IDWriteFactory5 = interface(IDWriteFactory4)
   ['{958DB99A-BE2A-4F09-AF7D-65189803D1D3}']
 
-    // Creates an empty font set builder to add font face references
-    // and create a custom font set.
-    // param name: fontSetBuilder: Receives a pointer to the newly created font set builder object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder1): HRESULT; stdcall; overload;
 
-    // The CreateInMemoryFontFileLoader method creates a loader object that can
-    // be used to create font file references to in-memory fonts. The caller is
-    // responsible for registering and unregistering the loader.
-    // param name: newLoader: Receives a pointer to the newly-created loader object.
-    // returns
-    // Standard HRESULT error code.
-    function CreateInMemoryFontFileLoader(out newLoader: IDWriteInMemoryFontFileLoader): HResult; stdcall;
+    function CreateInMemoryFontFileLoader(out newLoader: IDWriteInMemoryFontFileLoader): HRESULT; stdcall; overload;
 
-    // The CreateHttpFontFileLoader function creates a remote font file loader
-    // that can create font file references from HTTP or HTTPS URLs. The caller
-    // is responsible for registering and unregistering the loader.
-    // param name: referrerUrl: Optional referrer URL for HTTP requests.
-    // param name: extraHeaders: Optional additional header fields to include
-    // in HTTP requests. Each header field consists of a name followed by a colon
-    // (":") and the field value, as specified by RFC 2616. Multiple header fields
-    // may be separated by newlines.
-    // param name: newLoader: Receives a pointer to the newly-created loader object.
-    // returns
-    // Standard HRESULT error code.
-    function CreateHttpFontFileLoader(referrerUrl: WideChar;
-                                      extraHeaders: WideChar;
-                                      out newLoader: IDWriteRemoteFontFileLoader): HResult; stdcall;
+    function CreateHttpFontFileLoader(referrerUrl: PWideChar; extraHeaders: PWideChar; out newLoader: IDWriteRemoteFontFileLoader): HRESULT; stdcall; overload;
 
-    // The AnalyzeContainerType method analyzes the specified file data to determine
-    // whether it is a known font container format (e.g., WOFF or WOFF2).
-    // returns
-    // Returns the container type if recognized. DWRITE_CONTAINER_TYPE_UNKOWNN is
-    // returned for all other files, including uncompressed font files.
-    function AnalyzeContainerType(fileData: Pointer;
-                                  fileDataSize: UINT32): DWRITE_CONTAINER_TYPE; stdcall;
+    function AnalyzeContainerType(fileData: Pointer; fileDataSize: UINT32): DWRITE_CONTAINER_TYPE; stdcall; overload;
 
-    // The UnpackFontFile method unpacks font data from a container file (WOFF or
-    // WOFF2) and returns the unpacked font data in the form of a font file stream.
-    // param name: containerType: Container type returned by AnalyzeContainerType.
-    // param name: fileData: Pointer to the compressed data.
-    // param name: fileDataSize: Size of the compressed data, in bytes.
-    // param name: unpackedFontStream: Receives a pointer to a newly created font
-    // file stream containing the uncompressed data.
-    // returns
-    // Standard HRESULT error code. The return value is E_INVALIDARG if the container
-    // type is DWRITE_CONTAINER_TYPE_UNKNOWN.
-    function UnpackFontFile(containerType: DWRITE_CONTAINER_TYPE;
-                            fileData: Pointer;
-                            fileDataSize: UINT32;
-                            out unpackedFontStream: IDWriteFontFileStream): HResult; stdcall;
+    function UnpackFontFile(containerType: DWRITE_CONTAINER_TYPE; fileData: Pointer; fileDataSize: UINT32; out unpackedFontStream: IDWriteFontFileStream): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory5 = IDWriteFactory5;
@@ -2206,88 +1329,20 @@ type
   IDWriteFactory6 = interface(IDWriteFactory5)
   ['{F3744D80-21F7-42EB-B35D-995BC72FC223}']
 
-    // Creates a reference to a specific font instance within a file.
-    // param name: fontFile: User provided font file representing the font face.
-    // param name: faceIndex: The zero based index of a font face in cases when the font files contain a collection of font faces.
-    // If the font files contain a single face, this value should be zero.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontFaceReference(fontFile: IDWriteFontFile;
-                                     faceIndex: UINT32;
-                                     fontSimulations: DWRITE_FONT_SIMULATIONS;
-                                     fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                                     fontAxisValueCount: UINT32;
-                                     out fontFaceReference: IDWriteFontFaceReference1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontFaceReference(fontFile: IDWriteFontFile; faceIndex: UINT32; fontSimulations: DWRITE_FONT_SIMULATIONS; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out fontFaceReference: IDWriteFontFaceReference1): HRESULT; stdcall; overload;
 
-    // Creates a font resource given a font file and face index.
-    // param name: fontFile: User provided font file representing the font face.
-    // param name: faceIndex: The zero based index of a font face in cases when the font files contain a collection of font faces.
-    // If the font files contain a single face, this value should be zero.
-    // param name: fontResource: Receives a pointer to the newly created font resource object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontResource(fontFile: IDWriteFontFile;
-                                faceIndex: UINT32;
-                                out fontResource: IDWriteFontResource): HResult; stdcall;
+    function CreateFontResource(fontFile: IDWriteFontFile; faceIndex: UINT32; out fontResource: IDWriteFontResource): HRESULT; stdcall; overload;
 
-    // Retrieves the set of system fonts.
-    // param name: includeDownloadableFonts: Include downloadable fonts or only locally installed ones.
-    // param name: fontSet: Receives a pointer to the font set object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontSet(includeDownloadableFonts: BOOL;
-                              out fontSet: IDWriteFontSet1): HResult; stdcall;
+    function GetSystemFontSet(includeDownloadableFonts: BOOL; out fontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Retrieves a collection of fonts grouped into families.
-    // param name: includeDownloadableFonts: Include downloadable fonts or only locally installed ones.
-    // param name: fontFamilyModel: How to group families in the collection.
-    // param name: fontCollection: Receives a pointer to the font collection object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontCollection(includeDownloadableFonts: BOOL;
-                                     fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
-                                     out fontCollection: IDWriteFontCollection2): HResult; stdcall;
+    function GetSystemFontCollection(includeDownloadableFonts: BOOL; fontFamilyModel: DWRITE_FONT_FAMILY_MODEL; out fontCollection: IDWriteFontCollection2): HRESULT; stdcall; overload;
 
-    // Create a collection of fonts grouped into families from a font set.
-    // param name: fontSet: A set of fonts to use to build the collection.
-    // param name: fontFamilyModel: How to group families in the collection.
-    // param name: fontCollection: Receives a pointer to the newly created font collection object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontCollectionFromFontSet(fontSet: IDWriteFontSet;
-                                             fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
-                                             out fontCollection: IDWriteFontCollection2): HResult; stdcall;
+    function CreateFontCollectionFromFontSet(fontSet: IDWriteFontSet; fontFamilyModel: DWRITE_FONT_FAMILY_MODEL; out fontCollection: IDWriteFontCollection2): HRESULT; stdcall; overload;
 
-    // Creates an empty font set builder to add font instances and create a custom font set.
-    // param name: fontSetBuilder: Receives a pointer to the newly created font set builder object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder2): HResult; stdcall;
+    function CreateFontSetBuilder(out fontSetBuilder: IDWriteFontSetBuilder2): HRESULT; stdcall; overload;
 
-    // Create a text format object used for text layout.
-    // param name: fontFamilyName: Name of the font family from the collection.
-    // param name: fontCollection: Font collection, with nullptr indicating the system font collection.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: fontSize: Logical size of the font in DIP units.
-    // param name: localeName: Locale name (e.g. "ja-JP", "en-US", "ar-EG").
-    // param name: textFormat: Receives a pointer to the newly created text format object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    // If fontCollection is nullptr, the system font collection is used, grouped by typographic family name
-    // (DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC) without downloadable fonts.
-    function CreateTextFormat(fontFamilyName: WideChar;
-                              fontCollection: IDWriteFontCollection;
-                              fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                              fontAxisValueCount: UINT32;
-                              fontSize: Single;
-                              localeName: WideChar;
-                              out textFormat: IDWriteTextFormat3): HResult; stdcall;
+    function CreateTextFormat(fontFamilyName: PWideChar; fontCollection: IDWriteFontCollection; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; fontSize: Single; localeName: PWideChar; out textFormat: IDWriteTextFormat3): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory6 = IDWriteFactory6;
@@ -2302,33 +1357,16 @@ type
   IDWriteFontFace5 = interface(IDWriteFontFace4)
   ['{98EFF3A5-B667-479A-B145-E2FA5B9FDC29}']
 
-    // Get the number of axes defined by the font. This includes both static and variable axes.
-    function GetFontAxisValueCount(): UINT32; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontAxisValueCount(): UINT32; stdcall; overload;
 
-    // Get the list of axis values used by the font.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Maximum number of font axis values to write.
-    // returns
-    // Standard HRESULT error code, or E_INVALIDARG if fontAxisValueCount doesn't match GetFontAxisValueCount.
-    // remarks
-    // The values are returned in the canonical order defined by the font, clamped to the actual range supported,
-    // not specifically the same axis value array passed to CreateFontFace.
-    function GetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32): HResult; stdcall;
+    function GetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32): HRESULT; stdcall; overload;
 
-    // Whether this font's resource supports any variable axes. When True, at least one DWRITE_FONT_AXIS_RANGE
-    // in the font resource has a non-empty range (maximum > minimum).
-    function HasVariations(): BOOL; stdcall;
+    function HasVariations(): BOOL; stdcall; overload;
 
-    // Get the underlying font resource for this font face. A caller can use that to query information on the resource
-    // or recreate a new font face instance with different axis values.
-    // param name: fontResource: Newly created font resource object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontResource(out fontResource: IDWriteFontResource): HResult; stdcall;
+    function GetFontResource(out fontResource: IDWriteFontResource): HRESULT; stdcall; overload;
 
-    // Compares two instances of a font face for equality.
-    function Equals(fontFace: IDWriteFontFace): BOOL; stdcall;
+    function Equals(fontFace: IDWriteFontFace): BOOL; stdcall; overload;
 
   end;
   IID_IDWriteFontFace5 = IDWriteFontFace5;
@@ -2344,117 +1382,30 @@ type
   IDWriteFontResource = interface(IUnknown)
   ['{1F803A76-6871-48E8-987F-B975551C50F2}']
 
-    // Get the font file of the resource.
-    // param name: fontFile: Receives a pointer to the font file.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFile(out fontFile: IDWriteFontFile): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontFile(out fontFile: IDWriteFontFile): HRESULT; stdcall; overload;
 
-    // Obtains the zero-based index of the font face in its font file. If the font files contain a single face,
-    // the return value is zero.
-    function GetFontFaceIndex(): UINT32; stdcall;
+    function GetFontFaceIndex(): UINT32; stdcall; overload;
 
-    // Get the number of axes supported by the font resource. This includes both static and variable axes.
-    function GetFontAxisCount(): UINT32; stdcall;
+    function GetFontAxisCount(): UINT32; stdcall; overload;
 
-    // Get the default values for all axes supported by the font resource.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Maximum number of font axis values to write.
-    // remarks
-    //   Different font resources may have different defaults.
-    //   For OpenType 1.8 fonts, these values come from the STAT and fvar tables.
-    //   For older fonts without a STAT table, weight-width-slant-italic are read from the OS/2 table.
-    // returns
-    // Standard HRESULT error code, or E_INVALIDARG if fontAxisValueCount doesn't match GetFontAxisCount.
-    function GetDefaultFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                                      fontAxisValueCount: UINT32): HResult; stdcall;
+    function GetDefaultFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32): HRESULT; stdcall; overload;
 
-    // Get ranges of each axis.
-    // param name: fontAxisRanges:
-    // param name: fontAxisRangeCount: Total number of axis ranges
-    // returns
-    // Standard HRESULT error code, or E_INVALIDARG if fontAxisRangeCount doesn't match GetFontAxisCount.
-    // remarks
-    // Non-varying axes will have empty ranges (minimum==maximum).
-    function GetFontAxisRanges(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE;
-                               fontAxisRangeCount: UINT32): HResult; stdcall;
+    function GetFontAxisRanges(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; fontAxisRangeCount: UINT32): HRESULT; stdcall; overload;
 
-    // Gets attributes about the given axis, such as whether the font author recommends to hide the axis
-    // in user interfaces.
-    // param name: axisIndex: Font axis, from 0 to GetFontAxisValueCount - 1.
-    // param name: axisAttributes: Receives the attributes for the given axis.
-    // returns
-    // Attributes for a font axis, or NONE if axisIndex is beyond the font count.
-    function GetFontAxisAttributes(axisIndex: UINT32): DWRITE_FONT_AXIS_ATTRIBUTES; stdcall;
+    function GetFontAxisAttributes(axisIndex: UINT32): DWRITE_FONT_AXIS_ATTRIBUTES; stdcall; overload;
 
-    // Gets the localized names of a font axis.
-    // param name: axisIndex: Font axis, from 0 to GetFontAxisCount - 1.
-    // param name: names: Receives a pointer to the newly created localized strings object.
-    // remarks
-    //   The font author may not have supplied names for some font axes. The localized strings
-    //   will be empty in that case.
-    // returns
-    // Standard HRESULT error code.
-    function GetAxisNames(axisIndex: UINT32;
-                          out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetAxisNames(axisIndex: UINT32; out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // Get the number of named values for a specific axis.
-    // param name: axisIndex: Font axis, from 0 to GetFontAxisCount - 1.
-    // returns
-    // Number of named values.
-    function GetAxisValueNameCount(axisIndex: UINT32): UINT32; stdcall;
+    function GetAxisValueNameCount(axisIndex: UINT32): UINT32; stdcall; overload;
 
-    // Gets the localized names of specific values for a font axis.
-    // param name: axisIndex: Font axis, from 0 to GetFontAxisCount - 1.
-    // param name: axisValueIndex: Value index, from 0 to GetAxisValueNameCount - 1.
-    // param name: fontAxisRange: Range of the named value.
-    // param name: names: Receives a pointer to the newly created localized strings object.
-    // remarks
-    //   The font author may not have supplied names for some font axis values. The localized strings
-    //   will be empty in that case. The range may be a single point, where minimum == maximum.
-    //   All ranges are in ascending order by axisValueIndex.
-    // returns
-    // Standard HRESULT error code.
-    function GetAxisValueNames(axisIndex: UINT32;
-                               axisValueIndex: UINT32;
-                               out fontAxisRange: PDWRITE_FONT_AXIS_RANGE;
-                               out names: IDWriteLocalizedStrings): HResult; stdcall;
+    function GetAxisValueNames(axisIndex: UINT32; axisValueIndex: UINT32; fontAxisRange: PDWRITE_FONT_AXIS_RANGE; out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // Whether this font's resource supports any variable axes. When True, at least one DWRITE_FONT_AXIS_RANGE
-    // in the font resource has a non-empty range (maximum > minimum).
-    function HasVariations(): BOOL; stdcall;
+    function HasVariations(): BOOL; stdcall; overload;
 
-    // Creates a font face instance with specific axis values.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: fontFace: Receives a pointer to the newly created font face object, or nullptr on failure.
-    // remarks
-    //   The passed input axis values are permitted to be a subset or superset of all the ones actually supported by
-    //   the font. Any unspecified axes use their default values, values beyond the ranges are clamped, and any
-    //   non-varying axes have no effect.
-    // returns
-    // Standard HRESULT error code, or DWRITE_E_REMOTEFONT if the face is not local.
-    function CreateFontFace(fontSimulations: DWRITE_FONT_SIMULATIONS;
-                            fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                            fontAxisValueCount: UINT32;
-                            out fontFace: IDWriteFontFace5): HResult; stdcall;
+    function CreateFontFace(fontSimulations: DWRITE_FONT_SIMULATIONS; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out fontFace: IDWriteFontFace5): HRESULT; stdcall; overload;
 
-    // Creates a font face reference with specific axis values.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: fontFaceReference: Receives a pointer to the newly created font face reference object, or nullptr on failure.
-    // remarks
-    //   The passed input axis values are permitted to be a subset or superset of all the ones actually supported by
-    //   the font. Any unspecified axes use their default values, values beyond the ranges are clamped, and any
-    //   non-varying axes have no effect.
-    // returns
-    // Standard HRESULT error code.
-    function CreateFontFaceReference(fontSimulations: DWRITE_FONT_SIMULATIONS;
-                                     fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                                     fontAxisValueCount: UINT32;
-                                     out fontFaceReference: IDWriteFontFaceReference1): HResult; stdcall;
+    function CreateFontFaceReference(fontSimulations: DWRITE_FONT_SIMULATIONS; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out fontFaceReference: IDWriteFontFaceReference1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontResource = IDWriteFontResource;
@@ -2469,24 +1420,12 @@ type
   IDWriteFontFaceReference1 = interface(IDWriteFontFaceReference)
   ['{C081FE77-2FD1-41AC-A5A3-34983C4BA61A}']
 
-    // Creates a font face from the reference for use with layout, shaping, or rendering.
-    // param name: fontFace: Newly created font face object, or nullptr in the case of failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    // This function can fail with DWRITE_E_REMOTEFONT if the font is not local.
-    function CreateFontFace(out fontFace: IDWriteFontFace5): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function CreateFontFace(out fontFace: IDWriteFontFace5): HRESULT; stdcall; overload;
 
-    // Get the number of axes specified by the reference.
-    function GetFontAxisValueCount(): UINT32; stdcall;
+    function GetFontAxisValueCount(): UINT32; stdcall; overload;
 
-    // Get the list of font axis values specified by the reference.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // returns
-    // Standard HRESULT error code, or E_INVALIDARG if fontAxisValueCount doesn't match GetFontAxisValueCount.
-    function GetFontAxisValues(out fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32): HResult; stdcall;
+    function GetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFaceReference1 = IDWriteFontFaceReference1;
@@ -2501,38 +1440,10 @@ type
   IDWriteFontSetBuilder2 = interface(IDWriteFontSetBuilder1)
   ['{EE5BA612-B131-463C-8F4F-3189B9401E45}']
 
-    // Adds a font to the set being built, with the caller supplying enough information to search on
-    // and determine axis ranges, avoiding the need to open the potentially non-local font.
-    // param name: fontFile: Font file reference object to add to the set.
-    // param name: faceIndex: The zero based index of a font face in a collection.
-    // param name: fontSimulations: Font face simulation flags for algorithmic emboldening and italicization.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: fontAxisRanges: List of axis ranges.
-    // param name: fontAxisRangeCount: Number of axis ranges.
-    // param name: properties: List of properties to associate with the reference.
-    // param name: propertyCount: How many properties are defined.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    // The font properties should include at least a family (typographic or weight/style/stretch).
-    // Otherwise the font would be accessible in the IDWriteFontSet only by index, not name.
-    function AddFont(fontFile: IDWriteFontFile;
-                     fontFaceIndex: UINT32;
-                     fontSimulations: DWRITE_FONT_SIMULATIONS;
-                     fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                     fontAxisValueCount: UINT32;
-                     fontAxisRanges: PDWRITE_FONT_AXIS_RANGE;
-                     fontAxisRangeCount: UINT32;
-                     properties: PDWRITE_FONT_PROPERTY;
-                     propertyCount: UINT32): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function AddFont(fontFile: IDWriteFontFile; fontFaceIndex: UINT32; fontSimulations: DWRITE_FONT_SIMULATIONS; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; fontAxisRangeCount: UINT32; properties: PDWRITE_FONT_PROPERTY; propertyCount: UINT32): HRESULT; stdcall; overload;
 
-    // Adds references to all the fonts in the specified font file. The method
-    // parses the font file to determine the fonts and their properties.
-    // param name: filePath: Absolute file path to add to the font set.
-    // returns
-    // Standard HRESULT error code.
-    function AddFontFile(filePath: WideChar): HResult; stdcall;
+    function AddFontFile(filePath: PWideChar): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSetBuilder2 = IDWriteFontSetBuilder2;
@@ -2547,160 +1458,32 @@ type
   IDWriteFontSet1 = interface(IDWriteFontSet)
   ['{7E9FDA85-6C92-4053-BC47-7AE3530DB4D3}']
 
-    // Generates a matching font set based on the requested inputs, ordered so that nearer matches are earlier.
-    // param name: property: Font property of interest, such as typographic family or weight/stretch/style family.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: matchingSet: Prioritized list of fonts that match the properties, or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    // This can yield distinct items that were not in the original font set, including items with simulation flags
-    // (if they would be a closer match to the request) and instances that were not named by the font author.
-    // Items from the same font resources are collapsed into one, the closest possible match.
-    function GetMatchingFonts(fontProperty: PDWRITE_FONT_PROPERTY;
-                              fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                              fontAxisValueCount: UINT32;
-                              out matchingFonts: IDWriteFontSet1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetMatchingFonts(fontProperty: PDWRITE_FONT_PROPERTY; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out matchingFonts: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Returns a font set that contains only the first occurrence of each font resource in the given set.
-    // param name: fontSet: New font set consisting of single default instances from font resources.
-    // returns
-    // Standard HRESULT error code.
-    function GetFirstFontResources(out filteredFontSet: IDWriteFontSet1): HResult; stdcall;
+    function GetFirstFontResources(out filteredFontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Returns a subset of fonts filtered by the given properties.
-    // param name: properties: List of properties to filter using.
-    // param name: propertyCount: How many properties to filter.
-    // param name: selectAnyProperty: Select any property rather rather than the intersection of them all.
-    // param name: filteredSet: Subset of fonts that match the properties, or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    //   If no fonts matched the filter, the returned subset will be empty (GetFontCount returns 0).
-    //   The subset will always be equal to or less than the original set.
-    function GetFilteredFonts(properties: PDWRITE_FONT_PROPERTY;
-                              propertyCount: UINT32;
-                              selectAnyProperty: BOOL;
-                              out filteredFontSet: IDWriteFontSet1): HResult; overload; stdcall;
+    function GetFilteredFonts(indices: PUINT32; indexCount: UINT32; out filteredFontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Returns a subset of fonts filtered by the given ranges, endpoint-inclusive.
-    // param name: fontAxisRanges: List of axis ranges.
-    // param name: fontAxisRangeCount: Number of axis ranges.
-    // param name: selectAnyRange: Select any range rather rather than the intersection of them all.
-    // param name: filteredSet: Subset of fonts that fall within the ranges, or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    //   If no fonts matched the filter, the subset will be empty (GetFontCount returns 0), but the function does not
-    //   return an error. The subset will always be equal to or less than the original set.
-    function GetFilteredFonts(fontAxisRanges: DWRITE_FONT_AXIS_RANGE;
-                              fontAxisRangeCount: UINT32;
-                              selectAnyRange: BOOL;
-                              out filteredFontSet: IDWriteFontSet1): HResult; overload; stdcall;
+    function GetFilteredFonts(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; fontAxisRangeCount: UINT32; selectAnyRange: BOOL; out filteredFontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Returns a subset of fonts filtered by the given indices.
-    // param name: indices: Array of indices, each index from [0..GetFontCount() - 1].
-    // param name: indexCount: Number of indices.
-    // param name: filteredSet: Subset of fonts that come from the given indices, or nullptr on failure.
-    // returns
-    // Standard HRESULT error code.
-    // remarks
-    //   The indices can come in any order, meaning this function can produce a new set with items removed, duplicated,
-    //   or reordered from the original. If zero indices were passed, an empty font set is returned.
-    function GetFilteredFonts(indices: UINT32;
-                              indexCount: UINT32;
-                              out filteredFontSet: IDWriteFontSet1): HResult; overload; stdcall;
+    function GetFilteredFonts(properties: PDWRITE_FONT_PROPERTY; propertyCount: UINT32; selectAnyProperty: BOOL; out filteredFontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
-    // Get all the item indices filtered by the given properties.
-    // param name: properties: List of properties to filter using.
-    // param name: propertyCount: How many properties to filter.
-    // param name: selectAnyProperty: Select any property rather rather than the intersection of them all.
-    // param name: indices: Ascending array of indices [0..GetFontCount() - 1].
-    // param name: indexCount: Number of indices.
-    // param name: actualIndexCount: Actual number of indices written or needed [0..GetFontCount()-1].
-    // returns
-    // E_NOT_SUFFICIENT_BUFFER if the buffer is too small, with actualIndexCount set to the needed size.
-    // The actualIndexCount will always be <= IDwriteFontSet.GetFontCount.
-    function GetFilteredFontIndices(properties: DWRITE_FONT_PROPERTY;
-                                    propertyCount: UINT32;
-                                    selectAnyProperty: BOOL;
-                                    out indices: UINT32;
-                                    maxIndexCount: UINT32;
-                                    out actualIndexCount: UINT32): HResult; overload; stdcall;
+    function GetFilteredFontIndices(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; fontAxisRangeCount: UINT32; selectAnyRange: BOOL; indices: PUINT32; maxIndexCount: UINT32; actualIndexCount: PUINT32): HRESULT; stdcall; overload;
 
-    // Get all the item indices filtered by the given ranges.
-    // param name: fontAxisRanges: List of axis ranges.
-    // param name: fontAxisRangeCount: Number of axis ranges.
-    // param name: selectAnyRange: Select any property rather rather than the intersection of them all.
-    // param name: indices: Ascending array of indices [0..GetFontCount() - 1].
-    // param name: indexCount: Number of indices.
-    // param name: actualIndexCount: Actual number of indices written or needed [0..GetFontCount()-1].
-    // returns
-    // E_NOT_SUFFICIENT_BUFFER if the buffer is too small, with actualIndexCount set to the needed size.
-    function GetFilteredFontIndices(fontAxisRanges: DWRITE_FONT_AXIS_RANGE;
-                                    fontAxisRangeCount: UINT32;
-                                    selectAnyRange: BOOL;
-                                    out indices: UINT32;
-                                    maxIndexCount: UINT32;
-                                    out actualIndexCount: UINT32): HResult; overload; stdcall;
+    function GetFilteredFontIndices(properties: PDWRITE_FONT_PROPERTY; propertyCount: UINT32; selectAnyProperty: BOOL; indices: PUINT32; maxIndexCount: UINT32; actualIndexCount: PUINT32): HRESULT; stdcall; overload;
 
-    // Gets all axis ranges in the font set, the union of all contained items.
-    // param name: fontAxisRanges: List of axis ranges.
-    // param name: fontAxisRangeCount: Number of axis ranges.
-    // param name: actualFontAxisRangeCount: Actual number of axis ranges written or needed.
-    // returns
-    // E_NOT_SUFFICIENT_BUFFER if the buffer is too small, with actualFontAxisRangeCount set to the needed size.
-    function GetFontAxisRanges(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE;
-                               maxFontAxisRangeCount: UINT32;
-                               out actualFontAxisRangeCount: UINT32): HResult; overload; stdcall;
+    function GetFontAxisRanges(listIndex: UINT32; fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; maxFontAxisRangeCount: UINT32; actualFontAxisRangeCount: PUINT32): HRESULT; stdcall; overload;
 
-    // Get the axis ranges of a single item.
-    // param name: listIndex: Zero-based index of the font in the set.
-    // param name: fontAxisRanges: List of axis ranges.
-    // param name: fontAxisRangeCount: Number of axis ranges.
-    // param name: actualFontAxisRangeCount: Actual number of axis ranges written or needed.
-    // returns
-    // E_NOT_SUFFICIENT_BUFFER if the buffer is too small, with actualFontAxisRangeCount set to the needed size.
-    function GetFontAxisRanges(listIndex: UINT32;
-                               out fontAxisRanges: PDWRITE_FONT_AXIS_RANGE;
-                               maxFontAxisRangeCount: UINT32;
-                               out actualFontAxisRangeCount: PUINT32): HResult; overload; stdcall;
+    function GetFontAxisRanges(fontAxisRanges: PDWRITE_FONT_AXIS_RANGE; maxFontAxisRangeCount: UINT32; actualFontAxisRangeCount: PUINT32): HRESULT; stdcall; overload;
 
-    // Get the font face reference of a single item.
-    // param name: listIndex: Zero-based index of the font item in the set.
-    // param name: fontFaceReference: Receives a pointer to the font face reference.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFaceReference(listIndex: UINT32;
-                                  out fontFaceReference: IDWriteFontFaceReference1): HResult; stdcall;
+    function GetFontFaceReference(listIndex: UINT32; out fontFaceReference: IDWriteFontFaceReference1): HRESULT; stdcall; overload;
 
-    // Create the font resource of a single item.
-    // param name: listIndex: Zero-based index of the font item in the set.
-    // param name: fontResource: Receives a pointer to the font resource.
-    // returns
-    // Standard HRESULT error code, or DWRITE_E_REMOTEFONT if the file is not local.
-    function CreateFontResource(listIndex: UINT32;
-                                out fontResource: IDWriteFontResource): HResult; stdcall;
+    function CreateFontResource(listIndex: UINT32; out fontResource: IDWriteFontResource): HRESULT; stdcall; overload;
 
-    // Create a font face for a single item (rather than going through the font face reference).
-    // param name: listIndex: Zero-based index of the font item in the set.
-    // param name: fontFile: Receives a pointer to the font face.
-    // returns
-    // Standard HRESULT error code, or DWRITE_E_REMOTEFONT if the file is not local.
-    function CreateFontFace(listIndex: UINT32;
-                            out fontFace: IDWriteFontFace5): HResult; stdcall;
+    function CreateFontFace(listIndex: UINT32; out fontFace: IDWriteFontFace5): HRESULT; stdcall; overload;
 
-    // Return the locality of a single item.
-    // param name: listIndex: Zero-based index of the font item in the set.
-    // <remarks>
-    // The locality enumeration. For fully local files, the result will always
-    // be DWRITE_LOCALITY_LOCAL. For downloadable files, the result depends on how
-    // much of the file has been downloaded.
-    // </remarks>
-    // returns
-    // The locality enumeration.
-    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall;
+    function GetFontLocality(listIndex: UINT32): DWRITE_LOCALITY; stdcall; overload;
 
   end;
   IID_IDWriteFontSet1 = IDWriteFontSet1;
@@ -2715,11 +1498,8 @@ type
   IDWriteFontList2 = interface(IDWriteFontList1)
   ['{C0763A34-77AF-445A-B735-08C37B0A5BF5}']
 
-    // Get the underlying font set used by this list.
-    // param name: fontSet: Contains font set used by the list.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSet(out fontSet: IDWriteFontSet1): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontSet(out fontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontList2 = IDWriteFontList2;
@@ -2734,21 +1514,10 @@ type
   IDWriteFontFamily2 = interface(IDWriteFontFamily1)
   ['{3ED49E77-A398-4261-B9CF-C126C2131EF3}']
 
-    // Gets a list of fonts in the font family ranked in order of how well they match the specified axis values.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: matchingFonts: Receives a pointer to the newly created font list object.
-    // returns
-    // Standard HRESULT error code.
-    function GetMatchingFonts(fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                              fontAxisValueCount: UINT32;
-                              out matchingFonts: IDWriteFontList2): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetMatchingFonts(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out matchingFonts: IDWriteFontList2): HRESULT; stdcall; overload;
 
-    // Get the underlying font set used by this family.
-    // param name: fontSet: Contains font set used by the family.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSet(out fontSet: IDWriteFontSet1): HResult; stdcall;
+    function GetFontSet(out fontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFamily2 = IDWriteFontFamily2;
@@ -2763,40 +1532,14 @@ type
   IDWriteFontCollection2 = interface(IDWriteFontCollection1)
   ['{514039C6-4617-4064-BF8B-92EA83E506E0}']
 
-    // Creates a font family object given a zero-based font family index.
-    // param name: index: Zero-based index of the font family.
-    // param name: fontFamily: Receives a pointer the newly created font family object.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontFamily(index: UINT32;
-                           out fontFamily: IDWriteFontFamily2): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontFamily(index: UINT32; out fontFamily: IDWriteFontFamily2): HRESULT; stdcall; overload;
 
-    // Gets a list of fonts in the specified font family ranked in order of how well they match the specified axis values.
-    // param name: familyName: Name of the font family. The name is not case-sensitive but must otherwise exactly match a family name in the collection.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: matchingFonts: Receives a pointer to the newly created font list object.
-    // <remarks>
-    // If no fonts matched, the list will be empty (GetFontCount returns 0),
-    // but the function does not return an error.
-    // </remarks>
-    // returns
-    // Standard HRESULT error code.
-    function GetMatchingFonts(familyName: WideChar;
-                              fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                              fontAxisValueCount: UINT32;
-                              out fontList: IDWriteFontList2): HResult; stdcall;
+    function GetMatchingFonts(familyName: PWideChar; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; out fontList: IDWriteFontList2): HRESULT; stdcall; overload;
 
-    // Get the font family model used by the font collection to group families.
-    // returns
-    // Family model enumeration.
-    function GetFontFamilyModel(): DWRITE_FONT_FAMILY_MODEL; stdcall;
+    function GetFontFamilyModel(): DWRITE_FONT_FAMILY_MODEL; stdcall; overload;
 
-    // Get the underlying font set used by this collection.
-    // param name: fontSet: Contains font set used by the collection.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSet(out fontSet: IDWriteFontSet1): HResult; stdcall;
+    function GetFontSet(out fontSet: IDWriteFontSet1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontCollection2 = IDWriteFontCollection2;
@@ -2811,38 +1554,16 @@ type
   IDWriteTextLayout4 = interface(IDWriteTextLayout3)
   ['{05A9BF42-223F-4441-B5FB-8263685F55E9}']
 
-    // Set values for font axes over a range of text.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // returns
-    // Standard HRESULT error code.
-    function SetFontAxisValues(fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32;
-                               textRange: DWRITE_TEXT_RANGE): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function SetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; textRange: DWRITE_TEXT_RANGE): HRESULT; stdcall; overload;
 
-    // Get the number of axes set on the text position.
-    function GetFontAxisValueCount(currentPosition: UINT32): UINT32; stdcall;
+    function GetFontAxisValueCount(currentPosition: UINT32): UINT32; stdcall; overload;
 
-    // Get the list of font axis values on the text position.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Maximum number of font axis values to write.
-    // returns
-    // Standard HRESULT error code, or E_INVALIDARG if fontAxisValueCount doesn't match GetFontAxisValueCount.
-    function GetFontAxisValues(currentPosition: UINT32;
-                               out fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32;
-                               textRange: PDWRITE_TEXT_RANGE = Nil): HResult; stdcall;
+    function GetFontAxisValues(currentPosition: UINT32; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; textRange: PDWRITE_TEXT_RANGE): HRESULT; stdcall; overload;
 
-    // Get the automatic axis options.
-    // returns
-    // Automatic axis options.
-    function GetAutomaticFontAxes(): DWRITE_AUTOMATIC_FONT_AXES; stdcall;
+    function GetAutomaticFontAxes(): DWRITE_AUTOMATIC_FONT_AXES; stdcall; overload;
 
-    // Sets the automatic font axis options.
-    // param name: automaticFontAxes: Automatic font axis options.
-    // returns
-    // Standard HRESULT error code.
-    function SetAutomaticFontAxes(automaticFontAxes: DWRITE_AUTOMATIC_FONT_AXES): HResult; stdcall;
+    function SetAutomaticFontAxes(automaticFontAxes: DWRITE_AUTOMATIC_FONT_AXES): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteTextLayout4 = IDWriteTextLayout4;
@@ -2857,35 +1578,16 @@ type
   IDWriteTextFormat3 = interface(IDWriteTextFormat2)
   ['{6D3B5641-E550-430D-A85B-B7BF48A93427}']
 
-    // Set values for font axes of the format.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // returns
-    // Standard HRESULT error code.
-    function SetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function SetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32): HRESULT; stdcall; overload;
 
-    // Get the number of axes set on the format.
-    function GetFontAxisValueCount(): UINT32; stdcall;
+    function GetFontAxisValueCount(): UINT32; stdcall; overload;
 
-    // Get the list of font axis values on the format.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Maximum number of font axis values to write.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE;
-                               fontAxisValueCount: UINT32): HResult; stdcall;
+    function GetFontAxisValues(fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32): HRESULT; stdcall; overload;
 
-    // Get the automatic axis options.
-    // returns
-    // Automatic axis options.
-    function GetAutomaticFontAxes(): DWRITE_AUTOMATIC_FONT_AXES; stdcall;
+    function GetAutomaticFontAxes(): DWRITE_AUTOMATIC_FONT_AXES; stdcall; overload;
 
-    // Sets the automatic font axis options.
-    // param name: automaticFontAxes: Automatic font axis options.
-    // returns
-    // Standard HRESULT error code.
-    function SetAutomaticFontAxes(automaticFontAxes: DWRITE_AUTOMATIC_FONT_AXES): HResult; stdcall;
+    function SetAutomaticFontAxes(automaticFontAxes: DWRITE_AUTOMATIC_FONT_AXES): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteTextFormat3 = IDWriteTextFormat3;
@@ -2900,33 +1602,8 @@ type
   IDWriteFontFallback1 = interface(IDWriteFontFallback)
   ['{2397599D-DD0D-4681-BD6A-F4F31EAADE77}']
 
-    // Determines an appropriate font to use to render the range of text.
-    // param name: source: The text source implementation holds the text and locale.
-    // param name: textLength: Length of the text to analyze.
-    // param name: baseFontCollection: Default font collection to use.
-    // param name: baseFamilyName: Family name of the base font. If you pass nullptr, no matching will be done against
-    // the base family.
-    // param name: fontAxisValues: List of font axis values.
-    // param name: fontAxisValueCount: Number of font axis values.
-    // param name: mappedLength: Length of text mapped to the mapped font. This will always be less or equal to the
-    // input text length and greater than zero (if the text length is non-zero) so that the caller advances at
-    // least one character each call.
-    // param name: mappedFontFace: The font face that should be used to render the first mappedLength characters of the text.
-    // If it returns null, then no known font can render the text, and mappedLength is the number of unsupported
-    // characters to skip.
-    // param name: scale: Scale factor to multiply the em size of the returned font by.
-    // returns
-    // Standard HRESULT error code.
-    function MapCharacters(analysisSource: IDWriteTextAnalysisSource;
-                           textPosition: UINT32;
-                           textLength: UINT32;
-                           baseFontCollection: PIDWriteFontCollection;
-                           baseFamilyName: PWideChar;
-                           fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                           fontAxisValueCount: UINT32;
-                           mappedLength: UINT32;
-                           out scale: Single;
-                           out mappedFontFace: IDWriteFontFace5): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function MapCharacters(analysisSource: IDWriteTextAnalysisSource; textPosition: UINT32; textLength: UINT32; baseFontCollection: IDWriteFontCollection; baseFamilyName: PWideChar; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; mappedLength: PUINT32; scale: PSingle; out mappedFontFace: IDWriteFontFace5): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFallback1 = IDWriteFontFallback1;
@@ -2945,17 +1622,8 @@ type
   IDWriteFontSet2 = interface(IDWriteFontSet1)
   ['{DC7EAD19-E54C-43AF-B2DA-4E2B79BA3F7F}']
 
-    // Gets the expiration event for the font set, if any. The expiration event is set on a system font set object if
-    // it is out of date due to fonts being installed, uninstalled, or updated. The client should handle the event by
-    // getting a new system font set.
-    // returns
-    // Returns an event handle if called on the system font set, or nullptr if called on a custom font set.
-    // <remarks>
-    // The client must not call CloseHandle on the returned event handle. The handle is owned by the font set
-    // object, and remains valid as long as the client holds a reference to the font set. The client can wait
-    // on the returned event or use RegisterWaitForSingleObject to request a callback when the event is set.
-    // </remarks>
-    function GetExpirationEvent(): THandle; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetExpirationEvent(): THandle; stdcall; overload;
 
   end;
   IID_IDWriteFontSet2 = IDWriteFontSet2;
@@ -2970,18 +1638,8 @@ type
   IDWriteFontCollection3 = interface(IDWriteFontCollection2)
   ['{A4D055A6-F9E3-4E25-93B7-9E309F3AF8E9}']
 
-    // Gets the expiration event for the font collection, if any. The expiration event is set on a system font
-    // collection object if it is out of date due to fonts being installed, uninstalled, or updated. The client
-    // should handle the event by getting a new system font collection.
-    // returns
-    // Returns an event handle if called on the system font collection, or nullptr if called on a custom font
-    // collection.
-    // <remarks>
-    // The client must not call CloseHandle on the returned event handle. The handle is owned by the font collection
-    // object, and remains valid as long as the client holds a reference to the font collection. The client can wait
-    // on the returned event or use RegisterWaitForSingleObject to request a callback when the event is set.
-    // </remarks>
-    function GetExpirationEvent(): THandle; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetExpirationEvent(): THandle; stdcall; overload;
 
   end;
   IID_IDWriteFontCollection3 = IDWriteFontCollection3;
@@ -2996,23 +1654,10 @@ type
   IDWriteFactory7 = interface(IDWriteFactory6)
   ['{35D0E0B3-9076-4D2E-A016-A91B568A06B4}']
 
-    // Retrieves the set of system fonts.
-    // param name: includeDownloadableFonts: Include downloadable fonts or only locally installed ones.
-    // param name: fontSet: Receives a pointer to the font set object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontSet(includeDownloadableFonts: BOOL;
-                              out fontSet: IDWriteFontSet2): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetSystemFontSet(includeDownloadableFonts: BOOL; out fontSet: IDWriteFontSet2): HRESULT; stdcall; overload;
 
-    // Retrieves a collection of fonts grouped into families.
-    // param name: includeDownloadableFonts: Include downloadable fonts or only locally installed ones.
-    // param name: fontFamilyModel: How to group families in the collection.
-    // param name: fontCollection: Receives a pointer to the font collection object, or nullptr in case of failure.
-    // returns
-    // Standard HRESULT error code.
-    function GetSystemFontCollection(includeDownloadableFonts: BOOL;
-                                     fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
-                                     out fontCollection: IDWriteFontCollection3): HResult; stdcall;
+    function GetSystemFontCollection(includeDownloadableFonts: BOOL; fontFamilyModel: DWRITE_FONT_FAMILY_MODEL; out fontCollection: IDWriteFontCollection3): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory7 = IDWriteFactory7;
@@ -3030,24 +1675,12 @@ type
   IDWriteFontSet3 = interface(IDWriteFontSet2)
   ['{7C073EF2-A7F4-4045-8C32-8AB8AE640F90}']
 
-    // Gets the font source type of the specified font.
-    // param name: listIndex: Zero-based index of the font.
-    function GetFontSourceType(fontIndex: UINT32): DWRITE_FONT_SOURCE_TYPE; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFontSourceType(fontIndex: UINT32): DWRITE_FONT_SOURCE_TYPE; stdcall; overload;
 
-    // Gets the length of the font source name for the specified font.
-    // param name: listIndex: Zero-based index of the font.
-    function GetFontSourceNameLength(listIndex: UINT32): UINT32; stdcall;
+    function GetFontSourceNameLength(listIndex: UINT32): UINT32; stdcall; overload;
 
-    // Copies the font source name for the specified font to an output array.
-    // param name: listIndex: Zero-based index of the font.
-    // param name: stringBuffer: Character array that receives the string.
-    // param name: stringBufferSize: Size of the array in characters. The size must include space for the terminating
-    // null character.
-    // returns
-    // Standard HRESULT error code.
-    function GetFontSourceName(listIndex: UINT32;
-                               out stringBuffer: PWideChar;
-                               stringBufferSize: UINT32): HResult; stdcall;
+    function GetFontSourceName(listIndex: UINT32; stringBuffer: PWideChar; stringBufferSize: UINT32): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSet3 = IDWriteFontSet3;
@@ -3074,31 +1707,11 @@ type
   IDWriteFontFace6 = interface(IDWriteFontFace5)
   ['{C4B1FE1B-6E84-47D5-B54C-A597981B06AD}']
 
-    function GetFamilyNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
-                            out names: IDWriteLocalizedStrings): HResult; stdcall;
-    /// <summary>
-    /// Creates a localized strings object that contains the family names for the font, indexed by locale name.
-    /// </summary>
-    /// <param name="fontFamilyModel">Specifies how fonts are grouped into families, which affects the family name property.</param>
-    /// <param name="names">Receives a pointer to an object to contains the font family names, indexed by locale.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetFamilyNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL; out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    // using IDWriteFontFace3::GetFamilyNames;
+    function GetFaceNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL; out names: IDWriteLocalizedStrings): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Creates a localized strings object that contains the face names for the font, indexed by locale name.
-    /// </summary>
-    /// <param name="fontFamilyModel">Specifies how fonts are grouped into families, which affects the face name property.</param>
-    /// <param name="names">Receives a pointer to an object to contains the font face names, indexed by locale.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    function GetFaceNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
-                          out names: PIDWriteLocalizedStrings): HResult; stdcall;
-
-    // using IDWriteFontFace3::GetFaceNames;
   end;
   IID_IDWriteFontFace6 = IDWriteFontFace6;
   {$EXTERNALSYM IID_IDWriteFontFace6}
@@ -3117,59 +1730,10 @@ type
   IDWriteFontSet4 = interface(IDWriteFontSet3)
   ['{EEC175FC-BEA9-4C86-8B53-CCBDD7DF0C82}']
 
-    /// <summary>
-    // Computes derived font axis values from the specified font weight, stretch, style, and size.
-    // </summary>
-    // <param name="inputAxisValues">Pointer to an optional array of input axis values. Axes present
-    // in this array are excluded from the output. This is so explicit axis values take precedence over
-    // derived axis values.</param>
-    // <param name="inputAxisCount">Size of the array of input axis values.</param>
-    // <param name="fontWeight">Font weight, used to compute "wght" axis value.</param>
-    // <param name="fontStretch">Font stretch, used to compute "wdth" axis value.</param>
-    // <param name="fontStyle">Font style, used to compute "slnt" and "ital" axis values.</param>
-    // <param name="fontSize">Font size in DIPs, used to compute "opsz" axis value. If this parameter is zero,
-    // no "opsz" axis value is added to the output array.</param>
-    // <param name="outputAxisValues">Pointer to an output array to which derived axis values are written.
-    // The size of this array must be at least DWRITE_STANDARD_FONT_AXIS_COUNT (5). The return value is
-    // the actual number of axis values written to this array.</param>
-    // <returns>Returns the actual number of derived axis values written to the output array.</returns>
-    // <remarks>The caller should concatenate the output axis values to the input axis values (if any),
-    // and pass the combined axis values to the GetMatchingFonts method. This does not result in duplicates
-    // because the output does not include any axes present in the inputAxisValues array.
-    // </remarks>
-    function ConvertWeightStretchStyleToFontAxisValues(inputAxisValues: DWRITE_FONT_AXIS_VALUE;
-                                                       inputAxisCount: UINT32;
-                                                       fontWeight: DWRITE_FONT_WEIGHT;
-                                                       fontStretch: DWRITE_FONT_STRETCH;
-                                                       fontStyle: DWRITE_FONT_STYLE;
-                                                       fontSize: Single;
-                                                       out outputAxisValues: PDWRITE_FONT_AXIS_VALUE): UINT32; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function ConvertWeightStretchStyleToFontAxisValues(inputAxisValues: PDWRITE_FONT_AXIS_VALUE; inputAxisCount: UINT32; fontWeight: DWRITE_FONT_WEIGHT; fontStretch: DWRITE_FONT_STRETCH; fontStyle: DWRITE_FONT_STYLE; fontSize: Single; outputAxisValues: PDWRITE_FONT_AXIS_VALUE): UINT32; stdcall; overload;
 
-    // <summary>
-    // Generates a matching font set based on the requested inputs, ordered so that nearer matches are earlier.
-    // </summary>
-    // <param name="familyName">Font family name. This can be a typographic family name, weight/stretch/style
-    // family name, GDI (RBIZ) family name, or full name.</param>
-    // <param name="fontAxisValues">Array of font axis values.</param>
-    // <param name="fontAxisValueCount">Number of font axis values.</param>
-    // <param name="allowedSimulations">Specifies which simulations (i.e., algorithmic emboldening and/or slant)
-    // may be applied to matching fonts to better match the specified axis values. No simulations are applied if
-    // this parameter is DWRITE_FONT_SIMULATIONS_NONE (0).</param>
-    // <param name="matchingFonts">Receives a pointer to a newly-created font set, which contains a prioritized
-    // list of fonts that match the specified inputs.</param>
-    // <returns>
-    // Standard HRESULT error code.
-    // </returns>
-    // <remarks>
-    // This can yield distinct items that were not in the original font set, including items with simulation flags
-    // (if they would be a closer match to the request) and instances that were not named by the font author.
-    // Items from the same font resources are collapsed into one, the closest possible match.
-    // </remarks>
-   function GetMatchingFonts(familyName: WideChar;
-                             fontAxisValues: DWRITE_FONT_AXIS_VALUE;
-                             fontAxisValueCount: UINT32;
-                             allowedSimulations: DWRITE_FONT_SIMULATIONS;
-                             out matchingFonts: IDWriteFontSet4): HResult; stdcall;
+    function GetMatchingFonts(familyName: PWideChar; fontAxisValues: PDWRITE_FONT_AXIS_VALUE; fontAxisValueCount: UINT32; allowedSimulations: DWRITE_FONT_SIMULATIONS; out matchingFonts: IDWriteFontSet4): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontSet4 = IDWriteFontSet4;
@@ -3203,7 +1767,7 @@ type
     width: UINT32;
     height: UINT32;
 
-    function pixels(): UINT32;
+    pixels: PUINT32;
    end;
   {$EXTERNALSYM DWRITE_BITMAP_DATA_BGRA32}
 
@@ -3219,12 +1783,8 @@ type
   IDWriteBitmapRenderTarget2 = interface(IDWriteBitmapRenderTarget1)
   ['{C553A742-FC01-44DA-A66E-B8B9ED6C3995}']
 
-    /// <summary>
-    /// Gets the demensions and a pointer to the system memory bitmap encapsulated by this
-    /// bitmap render target object. The pointer is owned by the render target object, and
-    /// remains valid as long as the object exists.
-    /// </summary>
-    function GetBitmapData(out bitmapData: DWRITE_BITMAP_DATA_BGRA32): HResult; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetBitmapData(bitmapData: PDWRITE_BITMAP_DATA_BGRA32): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteBitmapRenderTarget2 = IDWriteBitmapRenderTarget2;
@@ -3700,6 +2260,7 @@ type
   /// when passing DWRITE_PAINT_ELEMENT objects between components that may have been compiled
   /// against different versions of this header file.
   /// </remarks>
+  PDWRITE_PAINT_ELEMENT = ^DWRITE_PAINT_ELEMENT;
   DWRITE_PAINT_ELEMENT = record
     /// <summary>
     /// Specifies the paint type, and thus which member of the union is valid.
@@ -3713,8 +2274,10 @@ type
   end;
 
 
+  PD2D1_GRADIENT_STOP = ^D2D1_GRADIENT_STOP;
   D2D1_GRADIENT_STOP = record
-    // Stub
+    position: Single;
+    color: D2D_COLOR_F;
   end;
 
   /// <summary>
@@ -3726,155 +2289,24 @@ type
   IDWritePaintReader = interface(IUnknown)
   ['{8128E912-3B97-42A5-AB6C-24AAD3A86E54}']
 
-    /// <summary>
-    /// Sets the current glyph and positions the reader on the root paint element of the
-    /// selected glyph's visual tree.
-    /// </summary>
-    /// <param name="glyphIndex">Glyph index to get the color glyph representation for.</param>
-    /// <param name="paintElement">Receives information about the root paint element of the
-    /// glyph's visual tree.</param>
-    /// <param name="structSize">Size of the DWRITE_PAINT_ELEMENT structure, in bytes.</param>
-    /// <param name="clipBox">Receives a precomputed glyph box (in ems) for the specified glyph,
-    /// if one is specified by the font. Otherwise, the glyph box is set to an empty rectangle
-    /// (all zeros). If a non-empty clip box is specified, the client must clip the color
-    /// glyph's representation to the specified box.</param>
-    /// <param name="glyphAttributes">Receives optional paint attributes for the glyph.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    /// <remarks>
-    /// If the specified glyph index is not a color glyph, the method succeeds, but the paintType
-    /// member of the DWRITE_PAINT_ELEMENT structure is set to DWRITE_PAINT_TYPE_NONE. In this
-    /// case, the application should draw the input glyph as a non-color glyph.
-    /// </remarks>
-    function SetCurrentGlyph(glyphIndex: UINT32;
-                             out paintElement: DWRITE_PAINT_ELEMENT;
-                             structSize: UINT32;
-                             out clipBox: D2D_RECT_F;
-                             {_Out_opt_} out glyphAttributes: DWRITE_PAINT_ATTRIBUTES): HResult; stdcall; overload;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function SetCurrentGlyph(glyphIndex: UINT32; paintElement: PDWRITE_PAINT_ELEMENT; structSize: UINT32; clipBox: PD2D_RECT_F; glyphAttributes: PDWRITE_PAINT_ATTRIBUTES): HRESULT; stdcall; overload;
 
+    function SetTextColor(textColor: PDWRITE_COLOR_F): HRESULT; stdcall; overload;
 
-    // Inline overload of SetCurrentGlyph, in which structSize is implied.
-    // SEE: "Additional Prototypes for ALL interfaces"
-    function SetCurrentGlyph(glyphIndex: UINT32;
-                             out paintElement: DWRITE_PAINT_ELEMENT;
-                             out clipBox: D2D_RECT_F;
-                             {_Out_opt_} out glyphAttributes: DWRITE_PAINT_ATTRIBUTES): HResult stdcall; overload;
+    function SetColorPaletteIndex(colorPaletteIndex: UINT32): HRESULT; stdcall; overload;
 
-    {  // Implementation part.
-        return SetCurrentGlyph(
-            glyphIndex,
-            paintElement,
-            sizeof(DWRITE_PAINT_ELEMENT),
-            clipBox,
-            glyphAttributes
-            );
-    }
+    function SetCustomColorPalette(paletteEntries: PDWRITE_COLOR_F; paletteEntryCount: UINT32): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Sets the client-defined text color. The default value is transparent black. Changing the text color
-    /// can affect the appearance of a glyph if its definition uses the current text color. If this is the
-    /// case, the SetCurrentGlyph method returns the DWRITE_PAINT_ATTRIBUTES_USES_TEXT_COLOR flag via the
-    /// glyphAttributes output parameter.
-    /// </summary>
-    /// <param name="textColor">Specifies the text color.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    function SetTextColor(textColor: DWRITE_COLOR_F): HResult stdcall;
+    function MoveToFirstChild(paintElement: PDWRITE_PAINT_ELEMENT; structSize: UINT32): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Sets the current color palette index. The default value is zero. Changing the palette index can affect
-    /// the appearance of a glyph if its definition references colors in the color palette. If this is the case,
-    /// the SetCurrentGlyph method returns the DWRITE_PAINT_ATTRIBUTES_USES_PALETTE flag via the glyphAttributes
-    /// output parameter.
-    /// </summary>
-    /// <param name="textColor">Specifies the color palette index.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    function SetColorPaletteIndex(colorPaletteIndex: UINT32): HResult stdcall;
+    function MoveToNextSibling(paintElement: PDWRITE_PAINT_ELEMENT; structSize: UINT32): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Sets a custom color palette with client-defined palette entries instead of using a font-defined color
-    /// palette. Changing the color palette can affect the appearance of a glyph if its definition references
-    /// colors in the color palette. If this is the case, the SetCurrentGlyph method returns the
-    /// DWRITE_PAINT_ATTRIBUTES_USES_PALETTE flag via the glyphAttributes output parameter.
-    /// </summary>
-    /// <param name="paletteEntries">Array of palette entries for the client-defined color palette.</param>
-    /// <param name="paletteEntryCount">Size of the paletteEntries array. This must equal the font's palette
-    /// entry count as returned by IDWriteFontFace2::GetPaletteEntryCount.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    function SetCustomColorPalette(paletteEntries: PDWRITE_COLOR_F;
-                                   paletteEntryCount: UINT32): HResult stdcall;
+    function MoveToParent(): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Sets the current position in the visual tree to the first child of the current paint element, and returns
-    /// the newly-selected element's properties via the paintElement output parameter.
-    /// </summary>
-    /// <param name="paintElement">Receives the properties of the newly-selected element.</param>
-    /// <param name="structSize">Size of the DWRITE_PAINT_ELEMENT structure, in bytes.</param>
-    /// <returns>
-    /// Standard HRESULT error code. The return value is E_INVALIDARG if the current paint element doesn't have
-    /// any children.
-    /// </returns>
-    /// <remarks>
-    /// Whether a paint element has children (and how many) can be determined a priori from its paint type and
-    /// properties. For more information, see DWRITE_PAINT_ELEMENT.
-    /// </remarks>
-    function MoveToFirstChild(out paintElement: DWRITE_PAINT_ELEMENT;
-                              out structSize: UINT32): HResult stdcall;
+    function GetGradientStops(firstGradientStopIndex: UINT32; gradientStopCount: UINT32; gradientStops: PD2D1_GRADIENT_STOP): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Sets the current position in the visual tree to the next sibling of the current paint element, and returns
-    /// the newly-selected element's properties via the paintElement output parameter.
-    /// </summary>
-    /// <param name="paintElement">Receives the properties of the newly-selected element.</param>
-    /// <param name="structSize">Size of the DWRITE_PAINT_ELEMENT structure, in bytes.</param>
-    /// <returns>
-    /// Standard HRESULT error code. The return value is E_INVALIDARG if the current paint element doesn't have
-    /// a next sibling.
-    /// </returns>
-    /// <remarks>
-    /// Whether a paint element has children (and how many) can be determined a priori from its paint type and
-    /// properties. For more information, see DWRITE_PAINT_ELEMENT.
-    /// </remarks>
-    function MoveToNextSibling(paintElement: DWRITE_PAINT_ELEMENT;
-                               structSize: UINT32): HResult stdcall;
-
-    /// <summary>
-    /// Sets the current position in the visual tree to the parent of the current paint element.
-    /// </summary>
-    /// <returns>
-    /// Standard HRESULT error code. The return value is E_INVALIDARG if the current paint element is the root
-    /// element of the visual tree.
-    /// </returns>
-    function MoveToParent(): HResult stdcall;
-
-    /// <summary>
-    /// Returns gradient stops of the current paint element.
-    /// </summary>
-    /// <param name="firstGradientStopIndex">Index of the first gradient stop to get.</param>
-    /// <param name="gradientStopCount">Number of gradient stops to get.</param>
-    /// <param name="gradientStops">Receives the gradient stops.</param>
-    /// <returns>Standard HRESULT error code.</returns>
-    /// <remarks>Gradient stops are guaranteed to be in ascending order by position.</remarks>
-    function GetGradientStops(firstGradientStopIndex: UINT32;
-                              gradientStopCount: UINT32;
-                              out gradientStops: D2D1_GRADIENT_STOP): HResult stdcall;
-
-    /// <summary>
-    /// Returns color information about each gradient stop, such as palette indices.
-    /// </summary>
-    /// <param name="firstGradientStopIndex">Index of the first gradient stop to get.</param>
-    /// <param name="gradientStopCount">Number of gradient stops to get.</param>
-    /// <param name="gradientStopColors">Receives the gradient stop colors.</param>
-    /// <returns>Standard HRESULT error code.</returns>
-    function GetGradientStopColors(firstGradientStopIndex: UINT32;
-                                   gradientStopCount: UINT32;
-                                   out gradientStopColors: DWRITE_PAINT_COLOR): HResult stdcall;
+    function GetGradientStopColors(firstGradientStopIndex: UINT32; gradientStopCount: UINT32; gradientStopColors: PDWRITE_PAINT_COLOR): HRESULT; stdcall; overload;
 
   end;
   IID_IDWritePaintReader = IDWritePaintReader;
@@ -3886,29 +2318,10 @@ type
   IDWriteFontFace7 = interface(IDWriteFontFace6)
   ['{3945B85B-BC95-40F7-B72C-8B73BFC7E13B}']
 
-    /// <summary>
-    /// Returns the maximum paint feature level supported for the specified glyph image format.
-    /// Possible values are specified by the DWRITE_PAINT_FEATURE_LEVEL enumeration,
-    /// but additional feature levels may be added over time.
-    /// </summary>
-    /// <param name="glyphImageFormat">Glyph image format to get the paint feature level for.
-    /// The return value is zero if the image format is not supported by the IDWritePaintReader API,
-    /// or if the font doesn't contain image data in that format.</param>
-    function GetPaintFeatureLevel(glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS): DWRITE_PAINT_FEATURE_LEVEL; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetPaintFeatureLevel(glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS): DWRITE_PAINT_FEATURE_LEVEL; stdcall; overload;
 
-    /// <summary>
-    /// Creates a paint reader object, which can be used to retrieve vector  graphic information
-    /// for color glyphs in the font.
-    /// </summary>
-    /// <param name="glyphImageFormat">Specifies the type of glyph data the reader will obtain. The only
-    /// glyph image format currently supported by this method is DWRITE_GLYPH_IMAGE_FORMATS_COLR_PAINT_TREE.</param>
-    /// <param name="paintFeatureLevel">Specifies the maximum paint feature level supported by the client.
-    /// This affects the types of paint elements that may be returned by the paint reader.</param>
-    /// <param name="paintReader">Receives a pointer to the newly-created object.</param>
-    /// <returns>Standard HRESULT error code.</returns>
-    function CreatePaintReader(glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS;
-                               paintFeatureLevel: DWRITE_PAINT_FEATURE_LEVEL;
-                               out paintReader: IDWritePaintReader): HResult stdcall;
+    function CreatePaintReader(glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS; paintFeatureLevel: DWRITE_PAINT_FEATURE_LEVEL; out paintReader: IDWritePaintReader): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFontFace7 = IDWriteFontFace7;
@@ -3919,50 +2332,9 @@ type
   {$EXTERNALSYM IDWriteFactory8}
   IDWriteFactory8 = interface(IDWriteFactory7)
   ['{EE0A7FB5-DEF4-4C23-A454-C9C7DC878398}']
-    /// <summary>
-    /// Translates a glyph run to a sequence of color glyph runs, which can be
-    /// rendered to produce a color representation of the original "base" run.
-    /// </summary>
-    /// <param name="baselineOriginX">Horizontal and vertical origin of the base glyph run in
-    /// pre-transform coordinates.</param>
-    /// <param name="glyphRun">Pointer to the original "base" glyph run.</param>
-    /// <param name="glyphRunDescription">Optional glyph run description.</param>
-    /// <param name="desiredGlyphImageFormats">Which data formats TranslateColorGlyphRun
-    /// should split the runs into.</param>
-    /// <param name="paintFeatureLevel">Paint feature level supported by the caller. Used
-    /// when desiredGlyphImageFormats includes DWRITE_GLYPH_IMAGE_FORMATS_COLR_PAINT_TREE. See
-    /// DWRITE_PAINT_FEATURE_LEVEL for more information.</param>
-    /// <param name="measuringMode">Measuring mode, needed to compute the origins
-    /// of each glyph.</param>
-    /// <param name="worldToDeviceTransform">Matrix converting from the client's
-    /// coordinate space to device coordinates (pixels), i.e., the world transform
-    /// multiplied by any DPI scaling.</param>
-    /// <param name="colorPaletteIndex">Zero-based index of the color palette to use.
-    /// Valid indices are less than the number of palettes in the font, as returned
-    /// by IDWriteFontFace2::GetColorPaletteCount.</param>
-    /// <param name="colorEnumerator">If the function succeeds, receives a pointer
-    /// to an enumerator object that can be used to obtain the color glyph runs.
-    /// If the base run has no color glyphs, then the output pointer is NULL
-    /// and the method returns DWRITE_E_NOCOLOR.</param>
-    /// <returns>
-    /// Returns DWRITE_E_NOCOLOR if the font has no color information, the glyph run
-    /// does not contain any color glyphs, or the specified color palette index
-    /// is out of range. In this case, the client should render the original glyph
-    /// run. Otherwise, returns a standard HRESULT error code.
-    /// </returns>
-    /// <remarks>
-    /// The old IDWriteFactory2::TranslateColorGlyphRun is equivalent to passing
-    /// DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE|CFF|COLR.
-    /// </remarks>
-    function TranslateColorGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                                    glyphRun: DWRITE_GLYPH_RUN;
-                                    glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION;
-                                    desiredGlyphImageFormats: DWRITE_GLYPH_IMAGE_FORMATS;
-                                    paintFeatureLevel: DWRITE_PAINT_FEATURE_LEVEL;
-                                    measuringMode: DWRITE_MEASURING_MODE;
-                                    worldAndDpiTransform: PDWRITE_MATRIX;
-                                    colorPaletteIndex: UINT32;
-                                    out colorEnumerator: IDWriteColorGlyphRunEnumerator1): HResult; stdcall;
+
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function TranslateColorGlyphRun(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION; desiredGlyphImageFormats: DWRITE_GLYPH_IMAGE_FORMATS; paintFeatureLevel: DWRITE_PAINT_FEATURE_LEVEL; measuringMode: DWRITE_MEASURING_MODE; worldAndDpiTransform: PDWRITE_MATRIX; colorPaletteIndex: UINT32; out colorEnumerator: IDWriteColorGlyphRunEnumerator1): HRESULT; stdcall; overload;
 
   end;
   IID_IDWriteFactory8 = IDWriteFactory8;
@@ -3974,64 +2346,13 @@ type
   IDWriteBitmapRenderTarget3 = interface(IDWriteBitmapRenderTarget2)
   ['{AEEC37DB-C337-40F1-8E2A-9A41B167B238}']
 
-    /// <summary>
-    /// Encapsulates a bitmap which can be used for rendering glyphs.
-    /// </summary>
-    function GetPaintFeatureLevel(): DWRITE_PAINT_FEATURE_LEVEL; stdcall;
+    // Native slot order verified against Microsoft Windows projection; inline C++ helpers are not slots.
+    function GetPaintFeatureLevel(): DWRITE_PAINT_FEATURE_LEVEL; stdcall; overload;
 
-    /// <summary>
-    /// Draws a glyph run in a "paint" image format returned by IDWriteColorGlyphRunEnumerator1.
-    /// </summary>
-    /// <param name="baselineOriginX">X-coordinate of the baseline.</param>
-    /// <param name="baselineOriginY">Y-coordinate of the baseline.</param>
-    /// <param name="measuringMode">Specifies measuring mode for positioning glyphs in the run.</param>
-    /// <param name="glyphRun">The glyph run to draw.</param>
-    /// <param name="glyphImageFormat">The image format of the color glyph run, as returned by
-    /// IDWriteColorGlyphRunEnumerator1. This must be one of the "paint" image formats.</param>
-    /// <param name="textColor">Foreground color of the text, used in cases where a color glyph
-    /// uses the text color.</param>
-    /// <param name="colorPaletteIndex">Zero-based index of the font-defined color palette to use.</param>
-    /// <param name="blackBoxRect">Optional rectangle that receives the bounding box (in pixels not DIPs) of all the pixels affected by
-    /// drawing the glyph run. The black box rectangle may extend beyond the dimensions of the bitmap.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    function DrawPaintGlyphRun(baselineOriginX: FLOAT;
-                               baselineOriginY: FLOAT;
-                               measuringMode: DWRITE_MEASURING_MODE;
-                               glyphRun: DWRITE_GLYPH_RUN;
-                               glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS;
-                               textColor: COLORREF;
-                               colorPaletteIndex: UINT32;
-                               {_Out_opt_} blackBoxRect: PRECT): HResult; stdcall;
+    function DrawPaintGlyphRun(baselineOriginX: Single; baselineOriginY: Single; measuringMode: DWRITE_MEASURING_MODE; glyphRun: PDWRITE_GLYPH_RUN; glyphImageFormat: DWRITE_GLYPH_IMAGE_FORMATS; textColor: COLORREF; colorPaletteIndex: UINT32; blackBoxRect: PRECT): HRESULT; stdcall; overload;
 
-    /// <summary>
-    /// Draws a glyph run, using color representations of glyphs if available in the font.
-    /// </summary>
-    /// <param name="baselineOriginX">X-coordinate of the baseline.</param>
-    /// <param name="baselineOriginY">Y-coordinate of the baseline.</param>
-    /// <param name="measuringMode">Specifies measuring mode for positioning glyphs in the run.</param>
-    /// <param name="glyphRun">The glyph run to draw.</param>
-    /// <param name="renderingParams">Object that controls rendering behavior.</param>
-    /// <param name="textColor">Foreground color of the text.</param>
-    /// <param name="colorPaletteIndex">Zero-based index of the font-defined color palette to use.</param>
-    /// <param name="blackBoxRect">Optional rectangle that receives the bounding box (in pixels not DIPs) of all the pixels affected by
-    /// drawing the glyph run. The black box rectangle may extend beyond the dimensions of the bitmap.</param>
-    /// <returns>
-    /// Standard HRESULT error code.
-    /// </returns>
-    /// <remarks>
-    /// This method internally calls TranslateColorGlyphRun and then automatically calls the appropriate
-    /// lower-level methods to render monochrome or color glyph runs.
-    /// </remarks>
-    function DrawGlyphRunWithColorSupport(baselineOriginX: FLOAT;
-                                          baselineOriginY: FLOAT;
-                                          measuringMode: DWRITE_MEASURING_MODE;
-                                          glyphRun: DWRITE_GLYPH_RUN;
-                                          renderingParams: IDWriteRenderingParams;
-                                          textColor: COLORREF;
-                                          colorPaletteIndex: UINT32;
-                                          {_Out_opt_} blackBoxRect: PRECT): HResult; stdcall;
+    function DrawGlyphRunWithColorSupport(baselineOriginX: Single; baselineOriginY: Single; measuringMode: DWRITE_MEASURING_MODE; glyphRun: PDWRITE_GLYPH_RUN; renderingParams: IDWriteRenderingParams; textColor: COLORREF; colorPaletteIndex: UINT32; blackBoxRect: PRECT): HRESULT; stdcall; overload;
+
   end;
   IID_IDWriteBitmapRenderTarget3 = IDWriteBitmapRenderTarget3;
   {$EXTERNALSYM IID_IDWriteBitmapRenderTarget3}
@@ -4101,12 +2422,7 @@ begin
 end;
 
 
-function DWRITE_BITMAP_DATA_BGRA32.pixels(): UINT32;
-begin
 
-  // _Field_size_(width * height) UINT32* pixels;
-  Result := width * height;
-end;
 
 
   // Implement Additional Prototypes here.
@@ -4115,32 +2431,7 @@ end;
 ///
 /// Example of how to use interface IDWritePaintReader implementation in Delphi.
 ///
-{
-function TWritePaintReader.SetCurrentGlyph(glyphIndex: UINT32;
-                                           out paintElement: DWRITE_PAINT_ELEMENT;
-                                           structSize: UINT32;
-                                           out clipBox: D2D_RECT_F;
-                                           out glyphAttributes: DWRITE_PAINT_ATTRIBUTES): HRESULT;
-begin
-  // Implementation for the method with structSize parameter
-  // Your logic here
 
-  Result := S_OK; // Return appropriate HRESULT
-end;
-
-function TWritePaintReader.SetCurrentGlyph(glyphIndex: UINT32;
-                                           out paintElement: DWRITE_PAINT_ELEMENT;
-                                           out clipBox: D2D_RECT_F;
-                                           out glyphAttributes: DWRITE_PAINT_ATTRIBUTES): HRESULT;
-begin
-  // Call the other overload with the implied structSize
-  Result := SetCurrentGlyph(glyphIndex,
-                            paintElement,
-                            SizeOf(DWRITE_PAINT_ELEMENT),
-                            clipBox,
-                            glyphAttributes);
-end;
-}
 
 end.
 

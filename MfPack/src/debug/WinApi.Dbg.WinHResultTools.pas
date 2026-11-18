@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: The main unit to explore the Windows HResult codes.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please read the readme.md about how to use this tool.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -82,7 +82,7 @@ uses
 
 const
   CRLF = #13 + #10;  // DOS carriage return.
-  SDK_API_VERSION = '10.0.22621.0';  // Latest Win 11 API version.
+  SDK_API_VERSION = '10.0.28000.2705';  // Latest Win 11 API version.
   // When needed, copy newer versions to ..\MfPack\Tools\MicrosoftErrorLookupTool folder and
   // Adjust the file title here.
   WIN_ERROR_LOOKUP_TOOL = 'Err_6.4.5.exe';
@@ -162,12 +162,8 @@ var
 implementation
 
 uses
-  {WinApi}
-  WinApi.ShellAPI,
-  {Vcl}
-  Vcl.Forms,
-  Vcl.Clipbrd,
-  {Application}
+  {WinApi}  {Vcl}
+  Vcl.Forms,  {Application}
   HrDlg,
   WinApi.Dbg.WinHResult,
   WinApi.Dbg.WinError32,
@@ -184,290 +180,172 @@ begin
   rHrContent.Clear;
 end;
 
-// Please read the REadme.md about how to use this function.
+// Please read the Readme.md about how to use this function.
 function TWinHResultCracker.GetHResultDetails(aHResult: HResult): HResult;
-  // Helper
-  procedure PrintDbgMsg(msg: string);
-  begin
-    OutputDebugString(StrToPWideChar(msg));
-  end;
-
 var
-  hr: Integer;
-  i: Integer;
-
-label
-  done_HLD;
-
+  Hr: LongInt;
+  I: Integer;
 begin
-  hr := S_OK;
-
-  if (InformationStyle = isCode) then
+  rHrContent.Clear;
+  Hr := LongInt($80070490);
+  if Hr <> S_OK then
     begin
-      // Clear the record
-      rHrContent.Clear();
-
-      // Walk through the tables...
-      //
-      // Start with HResult codes first
-      hr := GetHResultDescription(aHResult,
-                                  rHrContent.hrStr,
-                                  rHrContent.hrDescr,
-                                  rHrContent.hrRegionDescr,
-                                  rHrContent.HeaderFile,
-                                  rHrContent.Reference);
-      if (hr = S_OK) then
-        begin
-          hr := GetHrRegion(aHResult,
-                            rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown Win HResult Region.';
-          goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
-      // WIN32ERR API Errors.
-      // If it's not a positive response code, check if its a win32 error code.
-      hr := GetErr32Description(aHResult,
-                                rHrContent.hrStr,
-                                rHrContent.hrDescr,
-                                rHrContent.hrRegionDescr,
-                                rHrContent.HeaderFile,
-                                rHrContent.Reference);
-      if SUCCEEDED(hr) then
-        begin
-          hr := GetErr32Region(aHResult,
-                               rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown Win32 error region.';
-              goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
-      // Media Foundation API errors.
-      // If it's not a win32 error, check if it is a Media Foundation error code.
-      // Note that the facility code is "Media Server".
-      hr := GetMFHResultDescription(aHResult,
-                                    rHrContent.hrStr,
-                                    rHrContent.hrDescr,
-                                    rHrContent.hrRegionDescr,
-                                    rHrContent.HeaderFile,
-                                    rHrContent.Reference);
-      if SUCCEEDED(hr) then
-        begin
-          hr := GetMFRegion(aHResult,
-                            rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown Media Foundation error region.';
-          goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
-      // D3D API Errors
-      hr := GetD3DErrorDescription(aHResult,
-                                   rHrContent.hrStr,
-                                   rHrContent.hrDescr,
-                                   rHrContent.hrRegionDescr,
-                                   rHrContent.HeaderFile,
-                                   rHrContent.Reference);
-      if SUCCEEDED(hr) then
-        begin
-          hr := GetD3DRegion(aHResult,
-                             rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown D3D error region.';
-            goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
-      // Still Image APIs errors
-      hr := GetStiErrorDescription(aHResult,
-                                   rHrContent.hrStr,
-                                   rHrContent.hrDescr,
-                                   rHrContent.hrRegionDescr,
-                                   rHrContent.HeaderFile,
-                                   rHrContent.Reference);
-      if SUCCEEDED(hr) then
-        begin
-          hr := GetStiErrorRegion(aHResult,
-                                  rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown Still Image API error region.';
-            goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
-      // XAudio2 API Errors.
-      hr := GetXAudio2ErrorDescription(aHResult,
-                                       rHrContent.hrStr,
-                                       rHrContent.hrDescr,
-                                       rHrContent.hrRegionDescr,
-                                       rHrContent.HeaderFile,
-                                       rHrContent.Reference);
-      if SUCCEEDED(hr) then
-        begin
-          hr := GetXAudio2ErrorRegion(aHResult,
-                                      rHrContent.hrRegionDescr);
-          if (hr <> S_OK) then
-            rHrContent.hrRegionDescr := 'Unknown XAudio2 API error region.';
-            goto done_HLD;
-        end
-      else
-        rHrContent.Clear();
-
+      rHrContent.Clear;
+      Hr := GetHResultDescription(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetHrRegion(aHResult,rHrContent.hrRegionDescr);
     end;
-
-
-done_HLD:
-
-  if SUCCEEDED(hr) then
-    // Get Facility
-    GetFacilityDescription(aHResult,
-                           rHrContent.FacilityVal,
-                           rHrContent.FacilityTag,
-                           rHrContent.FacilityDescr);
-
-  // Get the severity code.
+  if Hr <> S_OK then
+    begin
+      rHrContent.Clear;
+      Hr := GetErr32Description(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetErr32Region(aHResult,rHrContent.hrRegionDescr);
+    end;
+  if Hr <> S_OK then
+    begin
+      rHrContent.Clear;
+      Hr := GetMFHResultDescription(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetMFRegion(aHResult,rHrContent.hrRegionDescr);
+    end;
+  if Hr <> S_OK then
+    begin
+      rHrContent.Clear;
+      Hr := GetD3DErrorDescription(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetD3DRegion(aHResult,rHrContent.hrRegionDescr);
+    end;
+  if Hr <> S_OK then
+    begin
+      rHrContent.Clear;
+      Hr := GetStiErrorDescription(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetStiErrorRegion(aHResult,rHrContent.hrRegionDescr);
+    end;
+  if Hr <> S_OK then
+    begin
+      rHrContent.Clear;
+      Hr := GetXAudio2ErrorDescription(aHResult,rHrContent.hrStr,rHrContent.hrDescr,
+                       rHrContent.hrRegionDescr,rHrContent.HeaderFile,rHrContent.Reference);
+      if Hr = S_OK then
+        GetXAudio2ErrorRegion(aHResult,rHrContent.hrRegionDescr);
+    end;
+  if Hr <> S_OK then rHrContent.Clear;
+  rHrContent.lHResult := aHResult;
+  GetFacilityDescription(aHResult,rHrContent.FacilityVal,rHrContent.FacilityTag,rHrContent.FacilityDescr);
   GetSeverityTag(aHResult);
-
-  if (InformationStyle = isCode) then
+  if InformationStyle = isIDEDebugWindow then
     begin
-      Result := S_OK;
-      Exit;
-    end
-
-  // Choosen style is print results in the IDE
-  else if (InformationStyle = isIDEDebugWindow) then
-    begin
-      PrintDbgMsg(Format('Error Look Up Results of $s', [FWinHResultCracker.HResultAsString]));
-      PrintDbgMsg('=============================================================');
-      PrintDbgMsg(Format('Description:          %s', [FWinHResultCracker.HResultDescription]));
-      PrintDbgMsg(Format('Region:               %s', [FWinHResultCracker.HResultRegion]));
-      PrintDbgMsg('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
-      PrintDbgMsg(Format('Facility Tag:         %s', [FWinHResultCracker.FacilityTagAsString]));
-      PrintDbgMsg(Format('Facility Description: %s', [FWinHResultCracker.FacilityDescription]));
-      PrintDbgMsg('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
-      PrintDbgMsg(Format('Severety Tag:         %s', [FWinHResultCracker.SeveretyValue]));
-      PrintDbgMsg(Format('Severety Description: %s', [FWinHResultCracker.SeveretyDescription]));
-      PrintDbgMsg('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
-      PrintDbgMsg(Format('Header file:          %s', [FWinHResultCracker.HeaderFile]));
-      PrintDbgMsg('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -');
-      PrintDbgMsg('Reference: ');
-      for i := 0 to Length(rHrContent.Reference) -1 do
-        begin
-          if (Length(FWinHResultCracker.ReferenceUrls[i]) > 0) then
-            if (FWinHResultCracker.ReferenceUrls[i] <> '') then
-              PrintDbgMsg(Format('[%d] %s', [i + 1, FWinHResultCracker.ReferenceUrls[i]]));
-        end;
-      PrintDbgMsg('=============================================================');
+      OutputDebugStringW(PWideChar('HRESULT: ' + HResultAsString));
+      OutputDebugStringW(PWideChar(HResultDescription));
+      OutputDebugStringW(PWideChar(HResultRegion));
+      OutputDebugStringW(PWideChar(FacilityTagAsString + ': ' + FacilityDescription));
+      OutputDebugStringW(PWideChar(SeveretyValue + ': ' + SeveretyDescription));
+      OutputDebugStringW(PWideChar(HeaderFile));
+      for I := 0 to Length(rHrContent.Reference) - 1 do
+        if rHrContent.Reference[I] <> '' then OutputDebugStringW(PWideChar(rHrContent.Reference[I]));
     end;
-  Result := hr;
+  Result := Hr;
 end;
 
 
 function TWinHResultCracker.GetSysErrorMessage(aHResult: HResult;
                                                UseGetLastError: Boolean = False): string;
+var
+  Code: DWORD;
+  Buffer: PWideChar;
+  Count: DWORD;
 begin
-  if UseGetLastError then
-    begin
-      Result := SysErrorMessage(GetLastError);
-    end
-  else
-    begin
-      Result := SysErrorMessage(aHResult);
-    end;
+  if UseGetLastError then Code := GetLastError else Code := DWORD(aHResult);
+  if (Code and $FFFF0000) = $80070000 then Code := Code and $FFFF;
+  Buffer := nil;
+  Count := FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER or FORMAT_MESSAGE_FROM_SYSTEM or
+                           FORMAT_MESSAGE_IGNORE_INSERTS,nil,Code,0,PWideChar(@Buffer),0,nil);
+  try
+    if Count > 0 then
+      begin
+        SetString(Result,Buffer,Count);
+        Result := Trim(Result);
+      end
+    else
+      Result := 'Unknown system error 0x' + UnicodeString(IntToHex(Code,8));
+  finally
+    if Buffer <> nil then LocalFree(HLOCAL(Buffer));
+  end;
 end;
 
 
-// TEST
 function TWinHResultCracker.RunWinErrorTool(const CmdLine: string;
                                             WorkingDir: string = 'C:\'): string;
 var
   SecurityAttributes: TSecurityAttributes;
-  StartupInfo: TStartupInfo;
+  StartupInfo: TStartupInfoW;
   ProcessInformation: TProcessInformation;
   StdOutPipeRead: THandle;
   StdOutPipeWrite: THandle;
-  Buffer: array[0..1024] of AnsiChar;
-  dwBytesRead: DWord;
-  bReadSuccess: BOOL;
-  bHasHandle: Boolean;
-
+  Buffer: array[0..1023] of AnsiChar;
+  BytesRead: DWORD;
+  Command: UnicodeString;
+  OutputBytes: AnsiString;
+  Chunk: AnsiString;
+  Count: Integer;
 begin
   Result := '';
-
-  // Set the security attributes.
+  StdOutPipeRead := 0;
+  StdOutPipeWrite := 0;
+  FillChar(ProcessInformation,SizeOf(ProcessInformation),0);
+  FillChar(SecurityAttributes,SizeOf(SecurityAttributes),0);
   SecurityAttributes.nLength := SizeOf(SecurityAttributes);
   SecurityAttributes.bInheritHandle := True;
-  SecurityAttributes.lpSecurityDescriptor := nil;
-
   try
-
-    if not CreatePipe(StdOutPipeRead,
-                      StdOutPipeWrite,
-                      @SecurityAttributes,
-                      0) then
+    if not CreatePipe(StdOutPipeRead,StdOutPipeWrite,@SecurityAttributes,0) then
       RaiseLastOSError;
-
-    FillChar(StartupInfo,
-             SizeOf(StartupInfo),
-             0);
-
+    if not SetHandleInformation(StdOutPipeRead,HANDLE_FLAG_INHERIT,0) then
+      RaiseLastOSError;
+    FillChar(StartupInfo,SizeOf(StartupInfo),0);
     StartupInfo.cb := SizeOf(StartupInfo);
     StartupInfo.dwFlags := STARTF_USESHOWWINDOW or STARTF_USESTDHANDLES;
     StartupInfo.wShowWindow := SW_HIDE;
     StartupInfo.hStdInput := GetStdHandle(STD_INPUT_HANDLE);
     StartupInfo.hStdOutput := StdOutPipeWrite;
     StartupInfo.hStdError := StdOutPipeWrite;
-
-    //WorkDir := WorkingDir;
-    bHasHandle := CreateProcess(nil,
-                                PChar('cmd.exe /C ' + cmdLine),
-                                nil,
-                                nil,
-                                True,
-                                0,
-                                nil,
-                                PChar(WorkingDir),
-                                StartupInfo,
-                                ProcessInformation);
-
+    Command := CmdLine;
+    UniqueString(Command);
+    if not CreateProcessW(nil,PWideChar(Command),nil,nil,True,0,nil,
+                          PWideChar(UnicodeString(WorkingDir)),StartupInfo,ProcessInformation) then
+      RaiseLastOSError;
     CloseHandle(StdOutPipeWrite);
-
-    if not bHasHandle then
-      RaiseLastOSError
-    else
-      begin
-        try
-          repeat
-            bReadSuccess := ReadFile(StdOutPipeRead,
-                                     Buffer,
-                                     SizeOf(Buffer),
-                                     dwBytesRead,
-                                     nil);
-
-            if (dwBytesRead > 0) then
-              begin
-                Buffer[dwBytesRead] := #0;
-                Result := Result + string(Buffer);
-              end;
-          until (not bReadSuccess) or (dwBytesRead = 0);
-
-          WaitForSingleObject(ProcessInformation.hProcess,
-                              INFINITE);
-
-        finally
-          CloseHandle(ProcessInformation.hThread);
-          CloseHandle(ProcessInformation.hProcess);
+    StdOutPipeWrite := 0;
+    OutputBytes := '';
+    repeat
+      BytesRead := 0;
+      if not ReadFile(StdOutPipeRead,Buffer,SizeOf(Buffer),BytesRead,nil) then
+        begin
+          if GetLastError <> ERROR_BROKEN_PIPE then
+            RaiseLastOSError;
+          Break;
         end;
-     end;
+      if BytesRead = 0 then
+        Break;
+      SetString(Chunk,PAnsiChar(@Buffer[0]),BytesRead);
+      OutputBytes := OutputBytes + Chunk;
+    until False;
+    WaitForSingleObject(ProcessInformation.hProcess,INFINITE);
+    Count := MultiByteToWideChar(CP_OEMCP,0,PAnsiChar(OutputBytes),Length(OutputBytes),nil,0);
+    SetLength(Result,Count);
+    if Count > 0 then
+      MultiByteToWideChar(CP_OEMCP,0,PAnsiChar(OutputBytes),Length(OutputBytes),PWideChar(Result),Count);
   finally
-    CloseHandle(StdOutPipeRead);
+    if ProcessInformation.hThread <> 0 then CloseHandle(ProcessInformation.hThread);
+    if ProcessInformation.hProcess <> 0 then CloseHandle(ProcessInformation.hProcess);
+    if StdOutPipeWrite <> 0 then CloseHandle(StdOutPipeWrite);
+    if StdOutPipeRead <> 0 then CloseHandle(StdOutPipeRead);
   end;
 end;
 
@@ -478,7 +356,7 @@ var
 
 begin
   iSevTag := HRESULT_SEVERITY(AHresult);
-  rHrContent.SeveretyVal := '$' + IntToHex(iSevTag, 1);
+  rHrContent.SeveretyVal := '$' + UnicodeString(IntToHex(iSevTag,1));
 
   if (iSevTag = $0) then
     rHrContent.SeveretyDescr := 'SUCCESS'
@@ -511,16 +389,12 @@ end;
 
 procedure RunFxErrLookUpTool(const aHResult: HResult);
 begin
-  if not Assigned(dlgHrTools) then
-    Application.CreateForm(TdlgHrTools,
-                           dlgHrTools);
-    // Clear the clipboard first.
-    Clipboard.Clear();
-    // Copy the Hresult value to the clipboard.
-    ClipBoard.AsText := IntToStr(aHResult);
-    // When the dialog is being created, the value from the clipboard will be automaticly processed.
-    // Now we just have to use the Onclick procedure of the Searchbutton..
-    dlgHrTools.butSearch.OnClick(nil);
+  if not Assigned(dlgHrTools) then Application.CreateForm(TdlgHrTools,dlgHrTools);
+  dlgHrTools.Show;
+  dlgHrTools.edHrHex.Text := '';
+  dlgHrTools.edHrDec.Text := IntToStr(aHResult);
+  dlgHrTools.rbHLD.Checked := True;
+  dlgHrTools.butSearchClick(nil);
 end;
 
 end.

@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -30,7 +30,7 @@
 //                   IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -355,10 +355,10 @@ type
   ['{70ae66f2-c809-4e4f-8915-bdcb406b7993}']
 
     function GetStreamSelection(const dwStreamIndex: DWORD;
-                                out pfSelected: Boolean): HResult; stdcall;
+                                out pfSelected: BOOL): HResult; stdcall;
 
     function SetStreamSelection(const dwStreamIndex: DWORD;
-                                const fSelected: Boolean): HResult; stdcall;
+                                const fSelected: BOOL): HResult; stdcall;
 
     // Gets a format that is supported natively by the media source.
     // Note: To check if a format is supported by Media Foundation see:
@@ -371,7 +371,7 @@ type
                                  {out} ppMediaType: PIMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
-                      {Reserved} pdwReserved: DWORD;
+                      {Reserved} pdwReserved: PDWORD;
                                  pMediaType: IMFMediaType): HResult; stdcall;
 
     function SetCurrentPosition(const guidTimeFormat: TGUID;

@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -6065,7 +6065,8 @@ type
   function MFCreateTrackedSample(out ppMFSample: IMFTrackedSample): HResult; stdcall;
   {$EXTERNALSYM MFCreateTrackedSample}
 
-  function MFCreateMFByteStreamOnStream(pStream: IStream): HResult; stdcall;
+  function MFCreateMFByteStreamOnStream(pStream: IStream;
+                                        out ppByteStream: IMFByteStream): HResult; stdcall;
   {$EXTERNALSYM MFCreateMFByteStreamOnStream}
 
   function MFCreateStreamOnMFByteStream(var pByteStream: IMFByteStream;
@@ -6783,14 +6784,14 @@ const
   function MFCreateSequencerSource;        external MfIdlLib1 name 'MFCreateSequencerSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateSequencerSegmentOffset; external MfIdlLib1 name 'MFCreateSequencerSegmentOffset' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreatePresentationDescriptor;      external MfIdlLib1 name 'MFCreatePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreatePresentationDescriptor;      external MfIdlLib2 name 'MFCreatePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFRequireProtectedEnvironment;       external MfIdlLib1 name 'MFRequireProtectedEnvironment' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFSerializePresentationDescriptor;   external MfIdlLib1 name 'MFSerializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFDeserializePresentationDescriptor; external MfIdlLib1 name 'MFDeserializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateStreamDescriptor;            external MfIdlLib1 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateStreamDescriptor2;           external MfIdlLib1 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateStreamDescriptor;            external MfIdlLib2 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateStreamDescriptor2;           external MfIdlLib2 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFCreateSimpleTypeHandler;           external MfIdlLib1 name 'MFCreateSimpleTypeHandler' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 

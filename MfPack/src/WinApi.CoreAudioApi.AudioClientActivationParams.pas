@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudioApi
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 20-08-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This header is used by Core Audio APIs.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 build 20348 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -69,11 +69,7 @@ uses
 
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
+  {$ALIGN 4} // SDK activation records contain only 32-bit fields.
 
 
   {NTDDI_VERSION >= NTDDI_WIN10_FE}
@@ -117,7 +113,7 @@ type
 
   // Activation parameter structure that can be used with ActivateAudioInterfaceAsync
   // to create an IAudioClient.
-  PAUDIOCLIENT_ACTIVATION_PARAMS = AUDIOCLIENT_ACTIVATION_TYPE;
+  PAUDIOCLIENT_ACTIVATION_PARAMS = ^AUDIOCLIENT_ACTIVATION_PARAMS;
   AUDIOCLIENT_ACTIVATION_PARAMS = record
     ActivationType: AUDIOCLIENT_ACTIVATION_TYPE;
     case Integer of   // Used when ActivationType is AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK.

@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 24-09-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: IAudioMediaType definition.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,7 +33,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -140,7 +140,7 @@ type
     function IsEqual(pIAudioType: IAudioMediaType;
                      out pdwFlags: DWORD): HResult; stdcall;
 
-    function GetAudioFormat(): WAVEFORMATEX; stdcall;
+    function GetAudioFormat(): PWAVEFORMATEX; stdcall;
 
     function GetUncompressedAudioFormat(out pUncompressedAudioFormat: UNCOMPRESSEDAUDIOFORMAT): HResult; stdcall;
 
@@ -150,9 +150,11 @@ type
 
 
 
-  function CreateAudioMediaType(pAudioFormat: WAVEFORMATEX;
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
+  function CreateAudioMediaType(pAudioFormat: PWAVEFORMATEX;
                                 cbAudioFormatSize: UINT32;
                                 var ppIAudioMediaType: IAudioMediaType): HResult; stdcall;
+  {$ENDIF}
   // The CreateAudioMediaType function uses the format specified by the caller to create
   // a media type object that describes the audio format.
   // Parameters:
@@ -167,13 +169,19 @@ type
   // When you implement custom audio system effects, the CreateAudioMediaType function works with
   // IAudioSystemEffectsCustomFormats.GetFormat to represent a custom audio data format and to
   // provide information about the custom format.
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
   {$EXTERNALSYM CreateAudioMediaType}
+  {$ENDIF}
 
 
 
-  function CreateAudioMediaTypeFromUncompressedAudioFormat(pUncompressedAudioFormat: UNCOMPRESSEDAUDIOFORMAT;
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
+  function CreateAudioMediaTypeFromUncompressedAudioFormat(pUncompressedAudioFormat: PUNCOMPRESSEDAUDIOFORMAT;
                                                            var ppIAudioMediaType: IAudioMediaType): HResult; stdcall;
+  {$ENDIF}
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
   {$EXTERNALSYM CreateAudioMediaTypeFromUncompressedAudioFormat}
+  {$ENDIF}
 
 
 
@@ -187,12 +195,9 @@ implementation
 
   // Implement Additional functions here.
 
-const
-  AudioMediaTypelib = 'mf.dll';
-
-{$WARN SYMBOL_PLATFORM OFF}
-  function CreateAudioMediaType; external AudioMediaTypelib name 'CreateAudioMediaType' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function CreateAudioMediaTypeFromUncompressedAudioFormat; external AudioMediaTypelib name 'CreateAudioMediaTypeFromUncompressedAudioFormat' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-{$WARN SYMBOL_PLATFORM ON}
-
+// SDK static AudioBaseProcessingObject helpers; not mf.dll exports.
+  {$IFDEF MFPACK_LINK_SDK_APO_HELPERS}
+  function CreateAudioMediaType; external;
+  function CreateAudioMediaTypeFromUncompressedAudioFormat; external;
+  {$ENDIF}
 end.

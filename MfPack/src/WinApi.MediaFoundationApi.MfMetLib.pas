@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: MfPack Methods Library.
 //              This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
@@ -31,7 +31,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 07/11/2025 Tony                Added function SetSafeStream
 // 28/07/2026 Carmen              Added function GetStreamCodecDescription.
 // -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -802,7 +802,7 @@ type
   // This function returns an pointer array of IMFMediaType.
   // To get the current capture device's IMFMediaSource object, call IMFCaptureSource.GetCaptureDeviceSource.
   function EnumerateCaptureFormats(pSource: IMFMediaSource;
-                                   out ppMediaType: PIMFMediaType): HResult;
+                                   out ppMediaType: TArray<IMFMediaType>): HResult;
 
   // Enumerates the media types for every stream from a device or mediafile.
   // The function examines the mediatype format of the data internally for validation.
@@ -930,8 +930,9 @@ type
   function CreateAudioCaptureDevice(const pszEndPointID: LPCWSTR;
                                     out pSource: IMFMediaSource): HResult;
   // Lists the devicenames from an IMFActivate array.
-  procedure ListDeviceNames(ppDevices: PIMFActivate; // Pointer to array of IMFActivate
-                            out pList: TStringList); // output
+  procedure ListDeviceNames(ppDevices: PIMFActivate;
+                          DeviceCount: UINT32;
+                          out pList: TStringList);
 
   // Sets the maximum frame rate on the media source.
   function SetMaxFrameRate(pSource: IMFMediaSource;
@@ -1205,11 +1206,7 @@ type
   function GetFileDuration(pSource: IMFSourceReader;
                            out phnsDuration: LONGLONG): HResult; overload;
 
-  // Same as above, but returns MFTIME.
-  function GetFileDuration(pSourceReader: IMFSourceReader;
-                           out mftDuration: MFTIME): HResult; overload;
-
-  // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
+// Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
   // request the MF_PD_DURATION attribute.
   function GetFileDuration(pSource: IMFMediaSource;
                            out pDuration: LONGLONG): HResult; overload;
@@ -1218,12 +1215,7 @@ type
   function GetFileDuration(const sURL: PCWSTR;
                            out pDuration: LONGLONG): HResult; overload;
 
-  // Get fileduration in MFTIME units from an URL.
-  function GetFileDuration(const sURL: PCWSTR;
-                           out pDuration: MFTIME): HResult; overload;
-
-
-  // Gets the file size.
+// Gets the file size.
   function GetFileSize(pReader: IMFSourceReader;
                        out phnsFileSize: ULONGLONG): HResult; overload;
 
@@ -1299,6 +1291,13 @@ uses
 
 const
   User32Lib = 'User32.dll';
+
+function MfRegisterDeviceNotification(hRecipient: THandle;
+                                      pFilter: Pointer;
+                                      dwFlags: DWORD): HDEVNOTIFY; stdcall;
+  external 'User32.dll' name 'RegisterDeviceNotificationW';
+function MfUnregisterDeviceNotification(hNotify: HDEVNOTIFY): BOOL; stdcall;
+  external 'User32.dll' name 'UnregisterDeviceNotification';
 
 
 
@@ -2036,7 +2035,7 @@ label
 
 begin
   // Use assertions only for debugging purposes
-  {$IF DEBUG}
+  {$IFDEF DEBUG}
   assert(pTopology <> nil);
   {$ENDIF}
 
@@ -2256,7 +2255,7 @@ begin
     goto done;
 
   // Create an IMFActivate object for the renderer, based on the media type.
-  if MFMediaType_Audio = guidMajorType then
+  if IsEqualGUID(MFMediaType_Audio,guidMajorType) then
     begin
       // Create the audio renderer.
       hr := MFCreateAudioRendererActivate(pRendererActivate);
@@ -2859,89 +2858,48 @@ end;
 function GetMftEnumInfo(const MftClsid: CLSID;
                         out mftEnum: TMftEnumInfo): HResult;
 var
-  hr: HResult;
+  Inputs,Outputs,Current: PMFT_REGISTER_TYPE_INFO;
+  InputCount,OutputCount: UINT32;
   i: Integer;
-  ppInputTypes: PMFT_REGISTER_TYPE_INFO;
-  pcInputTypes: UINT32;
-  pInputTypes: MFT_REGISTER_TYPE_INFO;
-  ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
-  pOutputTypes: MFT_REGISTER_TYPE_INFO;
-  pcOutputTypes: UINT32;
-
-
 begin
-  // check for valid enum ID
-
-  hr := MFTGetInfo(MftClsid,
-                   mftEnum.pwcStr,
-                   ppInputTypes,
-                   pcInputTypes,
-                   ppOutputTypes,
-                   pcOutputTypes,
-                   mftEnum.pAttributes);
-
-  if FAILED(hr) then
-    begin
-      Result := hr;
-      Exit;
-    end;
-
-  SetLength(mftEnum.aInputTypes,
-            pcInputTypes);
-
-  SetLength(mftEnum.aOutputTypes,
-            pcOutputTypes);
-
-  // Get the supported input types.
-  for i := 0 to pcInputTypes -1 do
-    begin
-
-      pInputTypes := ppInputTypes^; // Dereference the current pointer to get the element
-      mftEnum.aInputTypes[i].RegisterTypeInfo := pInputTypes;
-
-
-      // Get the descriptions of the input formats.
-      // Get majortype info
-      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
-                       mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
-                       mftEnum.aInputTypes[i].GuidName,
-                       mftEnum.aInputTypes[i].FormatTag,
-                       mftEnum.aInputTypes[i].FOURCC,
-                       mftEnum.aInputTypes[i].majorTypeDescr);
-
-      // Get subtype info
-      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
-                       mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
-                       mftEnum.aInputTypes[i].GuidName,
-                       mftEnum.aInputTypes[i].FormatTag,
-                       mftEnum.aInputTypes[i].FOURCC,
-                       mftEnum.aInputTypes[i].subTypeDescr);
-
-      Inc(ppInputTypes);  // Move the pointer to the next element
-    end;
-
-  // Get the supported output types.
-  for i := 0 to pcOutputTypes -1 do
-    begin
-
-      pOutputTypes := ppOutputTypes^; // Dereference the current pointer to get the element.
-
-      mftEnum.aOutputTypes[i].RegisterTypeInfo := pOutputTypes;
-      // Get the descriptions of the output formats.
-      GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
-                       mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
-                       mftEnum.aOutputTypes[i].GuidName,
-                       mftEnum.aOutputTypes[i].FormatTag,
-                       mftEnum.aOutputTypes[i].FOURCC,
-                       mftEnum.aOutputTypes[i].subTypeDescr);
-
-      Inc(ppOutputTypes);  // Move the pointer to the next element.
-    end;
-
-  CoTaskMemFree(ppInputTypes);
-  CoTaskMemFree(ppOutputTypes);
-
-  Result := hr;
+  mftEnum := Default(TMftEnumInfo);
+  Inputs := nil;
+  Outputs := nil;
+  InputCount := 0;
+  OutputCount := 0;
+  Result := MFTGetInfo(MftClsid,mftEnum.pwcStr,Inputs,InputCount,Outputs,OutputCount,mftEnum.pAttributes);
+  try
+    if FAILED(Result) then
+      begin
+        mftEnum.Reset;
+        Exit;
+      end;
+    SetLength(mftEnum.aInputTypes,InputCount);
+    SetLength(mftEnum.aOutputTypes,OutputCount);
+    Current := Inputs;
+    for i := 0 to Integer(InputCount) - 1 do
+      begin
+        mftEnum.aInputTypes[i].RegisterTypeInfo := Current^;
+        GetGUIDNameConst(Current^.guidMajorType,Current^.guidSubtype,
+                         mftEnum.aInputTypes[i].GuidName,mftEnum.aInputTypes[i].FormatTag,
+                         mftEnum.aInputTypes[i].FOURCC,mftEnum.aInputTypes[i].subTypeDescr);
+        mftEnum.aInputTypes[i].majorTypeDescr := GetMajorTypeDescr(Current^.guidMajorType);
+        Inc(Current);
+      end;
+    Current := Outputs;
+    for i := 0 to Integer(OutputCount) - 1 do
+      begin
+        mftEnum.aOutputTypes[i].RegisterTypeInfo := Current^;
+        GetGUIDNameConst(Current^.guidMajorType,Current^.guidSubtype,
+                         mftEnum.aOutputTypes[i].GuidName,mftEnum.aOutputTypes[i].FormatTag,
+                         mftEnum.aOutputTypes[i].FOURCC,mftEnum.aOutputTypes[i].subTypeDescr);
+        mftEnum.aOutputTypes[i].majorTypeDescr := GetMajorTypeDescr(Current^.guidMajorType);
+        Inc(Current);
+      end;
+  finally
+    CoTaskMemFree(Inputs);
+    CoTaskMemFree(Outputs);
+  end;
 end;
 
 
@@ -2953,75 +2911,36 @@ function GetCodec(mftRegisterTypeInput: PMFT_REGISTER_TYPE_INFO;
                   selIndex: Integer = 0): HResult;
 
 var
-  hr: HResult;
-  count: UINT32;
-  ppActivate: PIMFActivateArray;
-  pOriginalActivate: PIMFActivateArray;  // Save the original pointer for cleanup.
-  attr: IMFAttributes;
+  Count: UINT32;
+  Activations: PIMFActivateArray;
   i: Integer;
-
 begin
-
-  ppActivate := nil;
-
-  // Enumerate MFTs.
-  hr := MFTEnumEx(mftCategory,
-                  flags,                   // default = MFT_ENUM_FLAG_ALL
-                  mftRegisterTypeInput,     // Input type
-                  mftRegisterTypeOutput,    // Output type
-                  ppActivate,               // Array of IMFActivate pointers
-                  count);                   // Number of pointers returned
-
-  if (SUCCEEDED(hr) and (count = 0)) then
-    Exit(MF_E_TOPO_CODEC_NOT_FOUND);
-
-  // Save the original pointer for later cleanup.
-  pOriginalActivate := ppActivate;
-
-  if SUCCEEDED(hr) then
+  mftCodec := nil;
+  if selIndex < 0 then
     begin
-      // Move to the desired decoder based on selIndex.
-      for i := 0 to count - 1 do
-        begin
-            if (i = selIndex) then
-              begin
-
-                hr := ppActivate[i].ActivateObject(IID_IMFTransform,
-                                                   Pointer(mftCodec));
-
-                if SUCCEEDED(hr) then
-                  begin
-
-                    hr := mftCodec.GetAttributes(attr);
-                    if SUCCEEDED(hr) then
-                      begin
-
-                        // Process the attributes as needed, e.g., attr.GetString()...
-
-                      end;
-                  end;
-                Break;
-              end;
-
-            // Move the pointer to the next IMFActivate object.
-            Inc(ppActivate);
-        end;
+      Result := E_INVALIDARG;
+      Exit;
     end;
-
-  // Release and free memory for IMFActivate objects.
-  if Assigned(pOriginalActivate) then
-    begin
-      for i := 0 to count - 1 do
-        begin
-          SafeRelease(pOriginalActivate^);
-          Inc(pOriginalActivate);
-        end;
-
-      // Free the original memory for the array
-      CoTaskMemFree(pOriginalActivate);  // Use the original pointer without modification.
-    end;
-
-  Result := hr;
+  Count := 0;
+  Activations := nil;
+  Result := MFTEnumEx(mftCategory,flags,mftRegisterTypeInput,mftRegisterTypeOutput,Activations,Count);
+  try
+    if FAILED(Result) then
+      Exit;
+    if (UINT32(selIndex) >= Count) or (Activations = nil) then
+      begin
+        Result := MF_E_TOPO_CODEC_NOT_FOUND;
+        Exit;
+      end;
+    Result := Activations^[selIndex].ActivateObject(IID_IMFTransform,Pointer(mftCodec));
+  finally
+    if Activations <> nil then
+      begin
+        for i := 0 to Integer(Count) - 1 do
+          Activations^[i] := nil;
+        CoTaskMemFree(Activations);
+      end;
+  end;
 end;
 
 
@@ -3099,6 +3018,8 @@ end;
 
 function GetMftCategories(): TArray<TMftCategory>;
 begin
+  Result := nil;
+  Result := nil;
   SetLength(Result, 12);
 
   // video
@@ -3543,6 +3464,7 @@ label
 
 begin
 
+  pMediaType := nil;
   dwIndex := 0;
   dwNativeCount := 0;
   dwSupportedCount := 0;
@@ -3566,12 +3488,9 @@ begin
       if Assigned(pMediaType) then
         SafeRelease(pMediaType);
 
-      // Always create IMFMediaType first!
-      hr := MFCreateMediaType(pMediaType);
-      if FAILED(hr) then
-        Break;
+      pMediaType := nil;
 
-      hr := pSourcereader.GetNativeMediaType(pStreamIndex,
+hr := pSourcereader.GetNativeMediaType(pStreamIndex,
                                              dwIndex,
                                              @pMediaType);
       if FAILED(hr) then
@@ -3711,22 +3630,24 @@ end;
 
 function GetSupportedVideoFormats(CurrentArray: TDevicePropertiesArray): TDevicePropertiesArray;
 var
-  i,
-  j: Integer;
-
+  i,j,k: Integer;
 begin
-
-
-  for i := 0 to Length(CurrentArray) -1 do
+  Result := nil;
+  SetLength(Result,Length(CurrentArray));
+  for i := 0 to High(CurrentArray) do
     begin
-      for j := 0 to Length(CurrentArray[i].aVideoFormats) -1 do
+      Result[i] := CurrentArray[i];
+      Result[i].aVideoFormats := nil;
+      k := 0;
+      for j := 0 to High(CurrentArray[i].aVideoFormats) do
         if CurrentArray[i].aVideoFormats[j].bMFSupported then
           begin
-            SetLength(Result[i].aVideoFormats, 1);
-            Result[i].aVideoFormats[j] := CurrentArray[i].aVideoFormats[j]
+            SetLength(Result[i].aVideoFormats,k + 1);
+            Result[i].aVideoFormats[k] := CurrentArray[i].aVideoFormats[j];
+            Inc(k);
           end;
+      Result[i].dwSupportedFormats := k;
     end;
-
 end;
 
 // CreateCaptureDeviceInstance
@@ -3734,120 +3655,94 @@ function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
                                      out ppActivate: IMFActivate): HResult;
 var
-  count: UINT32;
+  Count: UINT32;
   pConfig: IMFAttributes;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate.
-  hr: HResult;
-
-label
-  done;
-
+  Devices,Current: PIMFActivate;
+  i: UINT32;
 begin
-
-  count := 0;
-  ppDevices := nil;  // Initialize pointer.
-
-  // Create an attribute store to hold the search criteria.
-  hr := MFCreateAttributes(pConfig,
-                           1);
-  if FAILED(hr) then
-    goto done;
-
-  // Request video capture devices.
-  hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                        pDeviceProperties.riid);
-  if FAILED(hr) then
-    goto done;
-
-  // Enumerate the devices again.
-  hr := MFEnumDeviceSources(pConfig,
-                            ppDevices,
-                            count);
-  if FAILED(hr) then
-    goto done;
-
-  // Create a media source from the selected device.
-  if (count > 0) and (pDeviceProperties.iDeviceIndex < Integer(count)) then
+  ppSource := nil;
+  ppActivate := nil;
+  if pDeviceProperties.iDeviceIndex < 0 then
     begin
-      // Dereference the selected device.
-      hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
-                                      Pointer(ppSource));
-      if FAILED(hr) then
-        goto done;
-
-      ppActivate := ppDevices^;  // Store the IMFActivate.
-    end
-  else
-    hr := MF_E_NOT_FOUND;
-
-done:
-
-  Result := hr;
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+  Count := 0;
+  Devices := nil;
+  Result := MFCreateAttributes(pConfig,1);
+  if FAILED(Result) then
+    Exit;
+  Result := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,pDeviceProperties.riid);
+  if FAILED(Result) then
+    Exit;
+  Result := MFEnumDeviceSources(pConfig,Devices,Count);
+  try
+    if FAILED(Result) then
+      Exit;
+    if UINT32(pDeviceProperties.iDeviceIndex) >= Count then
+      begin
+        Result := MF_E_NOT_FOUND;
+        Exit;
+      end;
+    Current := Devices;
+    Inc(Current,pDeviceProperties.iDeviceIndex);
+    Result := Current^.ActivateObject(IID_IMFMediaSource,Pointer(ppSource));
+    if SUCCEEDED(Result) then
+      ppActivate := Current^;
+  finally
+    if Devices <> nil then
+      begin
+        Current := Devices;
+        i := 0;
+        while i < Count do
+          begin
+            Current^ := nil;
+            Inc(Current);
+            Inc(i);
+          end;
+        CoTaskMemFree(Devices);
+      end;
+  end;
 end;
 
 
 
 //
 function EnumerateCaptureFormats(pSource: IMFMediaSource;
-                                 out ppMediaType: PIMFMediaType): HResult;
+                                 out ppMediaType: TArray<IMFMediaType>): HResult;
 var
   pPD: IMFPresentationDescriptor;
   pSD: IMFStreamDescriptor;
   pHandler: IMFMediaTypeHandler;
-  pType: IMFMediaType;
-  hr: HResult;
   fSelected: BOOL;
   cTypes: DWORD;
   i: Integer;
-  pOriginalMediaType: PIMFMediaType;
-
-label
-  done;
-
 begin
-
-  cTypes := 0;
-  pOriginalMediaType := ppMediaType; // Save the original pointer for now.
-
-  hr := pSource.CreatePresentationDescriptor(pPD);
-  if FAILED(hr) then
-    goto done;
-
-  hr := pPD.GetStreamDescriptorByIndex(0,
-                                       fSelected,
-                                       pSD);
-  if FAILED(hr) then
-    goto done;
-
-  hr := pSD.GetMediaTypeHandler(pHandler);
-  if FAILED(hr) then
-    goto done;
-
-  hr := pHandler.GetMediaTypeCount(cTypes);
-  if FAILED(hr) then
-    goto done;
-
-  for i := 0 to cTypes - 1 do
+  ppMediaType := nil;
+  if pSource = nil then
     begin
-      hr := pHandler.GetMediaTypeByIndex(i,
-                                         pType);
-      if FAILED(hr) then
-        goto done;
-
-      // Assign the media type to the current position in the array.
-      ppMediaType^ := pType;
-
-      // Move the ppMediaType pointer to the next element.
-      Inc(ppMediaType);
-
-      SafeRelease(pType);
+      Result := E_POINTER;
+      Exit;
     end;
-
-done:
-  // Restore the original pointer.
-  ppMediaType := pOriginalMediaType;
-
-  Result := hr;
+  Result := pSource.CreatePresentationDescriptor(pPD);
+  if SUCCEEDED(Result) then
+    Result := pPD.GetStreamDescriptorByIndex(0,fSelected,pSD);
+  if SUCCEEDED(Result) then
+    Result := pSD.GetMediaTypeHandler(pHandler);
+  if SUCCEEDED(Result) then
+    Result := pHandler.GetMediaTypeCount(cTypes);
+  if FAILED(Result) then
+    Exit;
+  SetLength(ppMediaType,cTypes);
+  for i := 0 to Integer(cTypes) - 1 do
+    begin
+      Result := pHandler.GetMediaTypeByIndex(i,ppMediaType[i]);
+      if FAILED(Result) then
+        begin
+          ppMediaType := nil;
+          Exit;
+        end;
+    end;
 end;
 
 
@@ -3857,56 +3752,40 @@ function EnumerateTypesForStream(pReader: IMFSourceReader;
                                  var ppMediaTypes: TArray<IMFMediaType>;
                                  out pCount: DWord): HResult;
 var
-  hr: HResult;
-  dwMediaTypeIndex: DWORD;
+  Index: DWORD;
   pMediaType: IMFMediaType;
-  gSubFormat: TGUID;
-
+  SubType: TGUID;
 begin
-  dwMediaTypeIndex := 0;
-
-  hr := MFCreateMediaType(pMediaType);
-
-  if FAILED(hr) then
+  ppMediaTypes := nil;
+  pCount := 0;
+  if pReader = nil then
     begin
-      Result := hr;
+      Result := E_POINTER;
       Exit;
     end;
-
-  while SUCCEEDED(hr) do
+  Index := 0;
+  while True do
     begin
-      hr := pReader.GetNativeMediaType(pStreamIndex,
-                                       dwMediaTypeIndex,
-                                       @pMediaType);
-      if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
+      pMediaType := nil;
+      Result := pReader.GetNativeMediaType(pStreamIndex,Index,@pMediaType);
+      if Result = MF_E_NO_MORE_TYPES then
         begin
-            hr := S_OK;
-            break;
-        end
-      else if SUCCEEDED(hr) then
-        begin
-          // Examine the media type.
-          // Get the subtype.
-          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                                   gSubFormat);
-            if SUCCEEDED(hr) then
-              begin
-                // Check if format is supported.
-                if IsMftSupportedInputFormat(gSubFormat) then
-                  begin
-
-                    ppMediaTypes[dwMediaTypeIndex] := pMediaType;
-
-                    Inc(pCount);
-                    Break;
-                  end;
-              end;
-          SafeRelease(pMediaType);
+          Result := S_OK;
+          Exit;
         end;
-      Inc(dwMediaTypeIndex);
+      if FAILED(Result) then
+        Exit;
+      Result := pMediaType.GetGUID(MF_MT_SUBTYPE,SubType);
+      if FAILED(Result) then
+        Exit;
+      if IsMftSupportedInputFormat(SubType) then
+        begin
+          SetLength(ppMediaTypes,pCount + 1);
+          ppMediaTypes[pCount] := pMediaType;
+          Inc(pCount);
+        end;
+      Inc(Index);
     end;
-
-  Result := hr;
 end;
 
 
@@ -3914,62 +3793,8 @@ function EnumerateMediaTypes(pReader: IMFSourceReader;
                              pStreamIndex: DWord;
                              var ppMediaTypes: TArray<IMFMediaType>;
                              out pCount: DWord): HResult;
-var
-  hr: HResult;
-  pMediaType: IMFMediaType;
-  gSubFormat: TGUID;
-  dwStreamCount: DWORD;
-  dwMediaTypeIndex: DWORD;
-  i: Integer;
-
 begin
-  dwMediaTypeIndex := 0;
-  dwStreamCount := CountSourceReaderStreams(pReader);
-  SetLength(ppMediaTypes,
-            dwStreamCount);
-
-  hr := MFCreateMediaType(pMediaType);
-
-  for i := 0 to dwStreamCount - 1 do
-    begin
-      //hr := EnumerateTypesForStream(pReader,
-      //                              i,
-      //                              ppMediaTypes,
-      //                              pCount);
-      //Inc(pStreamIndex);
-
-      while SUCCEEDED(hr) do
-        begin
-          hr := pReader.GetNativeMediaType(pStreamIndex,
-                                           dwMediaTypeIndex,
-                                           @pMediaType);
-          if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
-            begin
-               hr := S_OK;
-               Break;
-           end
-      else if SUCCEEDED(hr) then
-        begin
-          // Examine the media type.
-          // Get the subtype.
-          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                                   gSubFormat);
-            if SUCCEEDED(hr) then
-              begin
-                // Check if format is supported.
-                if IsMftSupportedInputFormat(gSubFormat) then
-                  begin
-                    ppMediaTypes[dwMediaTypeIndex] := pMediaType;
-                    Inc(pCount);
-                    Break;
-                  end;
-              end;
-          SafeRelease(pMediaType);
-        end;
-      Inc(dwMediaTypeIndex);
-    end;
-    end;
-  Result := hr;
+  Result := EnumerateTypesForStream(pReader,pStreamIndex,ppMediaTypes,pCount);
 end;
 
 
@@ -3977,7 +3802,7 @@ function CountSourceReaderStreams(pReader: IMFSourceReader): DWord;
 var
   hr: HResult;
   dwStreamCount: DWORD;
-  bSelected: Boolean;
+  bSelected: BOOL;
 
 begin
   hr := S_OK;
@@ -4001,67 +3826,40 @@ function CountTypesFromDevice(pReader: IMFSourceReader;
                               out pCount: DWord;
                               const pMfSupportedOnly: Boolean = True): HResult;
 var
-  hr: HResult;
-  dwIndex: DWORD;
-  dwNativeCount: DWord;
-  dwMfSupportedCount: DWord;
-  mfType: IMFMediaType;
-  fSubType: TGuid;
-
+  Index: DWORD;
+  MediaType: IMFMediaType;
+  SubType: TGUID;
 begin
-  dwMfSupportedCount := 0;
-  dwNativeCount := 0;
-  dwIndex := 0;
-
-  repeat
+  pCount := 0;
+  if pReader = nil then
     begin
-
-      SafeRelease(mfType);
-
-      hr := MFCreateMediaType(mfType);
-      if FAILED(hr) then
-        Break;
-
-      hr := pReader.GetNativeMediaType(pStreamIndex,
-                                       dwIndex,
-                                       @mfType);
-
-      if (hr = MF_E_NO_MORE_TYPES) then
+      Result := E_POINTER;
+      Exit;
+    end;
+  Index := 0;
+  while True do
+    begin
+      MediaType := nil;
+      Result := pReader.GetNativeMediaType(pStreamIndex,Index,@MediaType);
+      if Result = MF_E_NO_MORE_TYPES then
         begin
-          hr := S_OK;
-          Break;
+          Result := S_OK;
+          Exit;
         end;
-
-      hr := mfType.GetGUID(MF_MT_SUBTYPE,
-                           fSubType);
-      if FAILED(hr) then
-        Break;
-
-      // Examine the mediatype here.
-
+      if FAILED(Result) then
+        Exit;
       if pMfSupportedOnly then
         begin
-          if IsMftSupportedInputFormat(fSubType) then
-            begin
-              Inc(dwMfSupportedCount);
-              Inc(dwNativeCount);
-            end
-          else
-            Inc(dwNativeCount);
+          Result := MediaType.GetGUID(MF_MT_SUBTYPE,SubType);
+          if FAILED(Result) then
+            Exit;
+          if IsMftSupportedInputFormat(SubType) then
+            Inc(pCount);
         end
-      else  // Get all native types from the capturedevice.
-        Inc(dwNativeCount);
-
-      Inc(dwIndex);
+      else
+        Inc(pCount);
+      Inc(Index);
     end;
-  until (hr = MF_E_NO_MORE_TYPES);
-
-  if pMfSupportedOnly then
-    pCount := dwMfSupportedCount
-  else
-    pCount := dwNativeCount;
-
-  Result := hr;
 end;
 
 
@@ -5446,6 +5244,7 @@ end;
 /// <seealso href="https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats">[Video Processor MFT]</seealso>
 function GetSupportedMftOutputFormats(): TArray<TGuid>;
 begin
+  Result := nil;
 
   SetLength(Result,
             13);
@@ -5512,6 +5311,7 @@ var
   iSize: Integer;
 
 begin
+  g_hdevnotify := HDEVNOTIFY(0);
   if (hw > 0) then
     begin
       iSize := SizeOf(DEV_BROADCAST_DEVICEINTERFACE);
@@ -5522,13 +5322,13 @@ begin
       devbroadcastdevice.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
       devbroadcastdevice.dbcc_reserved := 0;
       devbroadcastdevice.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; // KSCATEGORY_CAPTURE : Since windows 10 you should not use this guid to register for device loss! Otherwise it will return a wrong symoliclink when detecting a device lost.
-      devbroadcastdevice.dbcc_name := #0;
+      devbroadcastdevice.dbcc_name[0] := #0;
 
-      g_hdevnotify := RegisterDeviceNotification(hw,
+      g_hdevnotify := MfRegisterDeviceNotification(hw,
                                                  @devbroadcastdevice,
-                                                 DEVICE_NOTIFY_WINDOW_HANDLE);
+                                                 0);
     end;
-  Result := Assigned(g_hdevnotify);
+  Result := (g_hdevnotify <> HDEVNOTIFY(0));
 end;
 
 
@@ -5536,8 +5336,8 @@ end;
 function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): Bool;
 begin
   Result := True;
-  if Assigned(g_hdevnotify) then
-    Result := UnregisterDeviceNotification(g_hdevnotify);
+  if g_hdevnotify <> HDEVNOTIFY(0) then
+    Result := MfUnregisterDeviceNotification(g_hdevnotify);
 end;
 
 
@@ -5673,7 +5473,7 @@ end;
 //
 function GetDeviceName(pActivate: IMFActivate;
                        out g_pwszDeviceName: PWideChar;
-                       out g_cchDeviceName: UINT32): HResult; overload;
+                       out g_cchDeviceName: UINT32): HResult;
 begin
   Result := (pActivate as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
                                                                 g_pwszDeviceName,
@@ -5685,61 +5485,31 @@ function GetDeviceNameFromCollection(DeviceCollection: IMMDeviceCollection;
                                      DeviceIndex: UINT): LPWSTR;
 var
   device: IMMDevice;
-  deviceId: PWideChar;
-  hr: HResult;
   propertyStore: IPropertyStore;
   friendlyName: PROPVARIANT;
-  deviceName: PWideChar;
-  returnValue: PWideChar;
-
-label
-  done;
-
+  deviceName: UnicodeString;
 begin
-
-  returnValue := nil;
-
-  hr := DeviceCollection.Item(DeviceIndex,
-                                device);
-  if FAILED(hr) then
-    goto done;
-
-  hr := device.GetId(deviceId);
-  if FAILED(hr) then
-    goto done;
-
-  hr := device.OpenPropertyStore($00000000, // STGM_READ
-                                 propertyStore);
-  SafeRelease(device);
-
-  if FAILED(hr) then
-    goto done;
-
+  Result := nil;
+  if DeviceCollection = nil then
+    Exit;
+  if FAILED(DeviceCollection.Item(DeviceIndex,device)) then
+    Exit;
+  if FAILED(device.OpenPropertyStore($00000000,propertyStore)) then
+    Exit;
   PropVariantInit(friendlyName);
-
-  hr := propertyStore.GetValue(DEVPKEY_Device_FriendlyName,
-                               friendlyName);
-
-  SafeRelease(propertyStore);
-
-  if FAILED(hr) then
-    goto done;
-
-  if (friendlyName.vt <> VT_LPWSTR) then
-    deviceName := 'Unknown'
-  else
-    deviceName := friendlyName.pwszVal;
-
-  returnValue := StrNew(deviceName);
-
-  PropVariantClear(friendlyName);
-  CoTaskMemFree(deviceId);
-
-done:
-  Result := returnValue;
-
-  if Assigned(returnValue) then
-    StrDispose(returnValue);
+  try
+    if FAILED(propertyStore.GetValue(DEVPKEY_Device_FriendlyName,friendlyName)) then
+      Exit;
+    if (friendlyName.vt = VT_LPWSTR) and (friendlyName.pwszVal <> nil) then
+      deviceName := friendlyName.pwszVal
+    else
+      deviceName := 'Unknown';
+    Result := CoTaskMemAlloc((Length(deviceName) + 1) * SizeOf(WideChar));
+    if Result <> nil then
+      Move(PWideChar(deviceName)^,Result^,(Length(deviceName) + 1) * SizeOf(WideChar));
+  finally
+    PropVariantClear(friendlyName);
+  end;
 end;
 
 
@@ -5995,44 +5765,43 @@ end;
 // the name of each device to the stringlist:
 //
 procedure ListDeviceNames(ppDevices: PIMFActivate;
+                          DeviceCount: UINT32;
                           out pList: TStringList);
 var
-  i: Integer;
+  i: UINT32;
   hr: HResult;
   szFriendlyName: LPWSTR;
   cchName: UINT32;
-  iCount: UINT32;
-  pCurrentDevice: PIMFActivate;  // Pointer for device iteration
-
+  pCurrentDevice: PIMFActivate;
 begin
-  cchName := 0;
-  pList.Clear;
-
-  // Get the count of devices.
-  hr := ppDevices.GetCount(iCount);
-
-  if SUCCEEDED(hr) then
-    begin
-      pCurrentDevice := ppDevices;  // Start with the first device
-
-      for i := 0 to iCount - 1 do
-        begin
-          szFriendlyName := '';
-
-          // Try to get the display name.
-          hr := (pCurrentDevice^ as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                                                      szFriendlyName,
-                                                                      cchName);
-          // Add the friendly name to the string list.
-          if SUCCEEDED(hr) then
-            pList.Append(szFriendlyName);
-
-          szFriendlyName := nil;
-
-          // Move to the next device in the array
-          Inc(pCurrentDevice);
+  pList := TStringList.Create;
+  try
+    if (ppDevices = nil) and (DeviceCount <> 0) then
+      raise EArgumentException.Create('Device array is nil');
+    pCurrentDevice := ppDevices;
+    i := 0;
+    while i < DeviceCount do
+      begin
+        szFriendlyName := nil;
+        try
+          if pCurrentDevice^ <> nil then
+            begin
+              hr := pCurrentDevice^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                                       szFriendlyName,
+                                                       cchName);
+              if SUCCEEDED(hr) then
+                pList.Append({$IFDEF FPC}UTF8Encode(UnicodeString(szFriendlyName)){$ELSE}string(szFriendlyName){$ENDIF});
+            end;
+        finally
+          CoTaskMemFree(szFriendlyName);
         end;
-    end;
+        Inc(pCurrentDevice);
+        Inc(i);
+      end;
+  except
+    FreeAndNil(pList);
+    raise;
+  end;
 end;
 
 
@@ -7229,66 +6998,44 @@ function FindMatchingVideoType(pMediaTypeHandler: IMFMediaTypeHandler;
                                pFps: UINT32;
                                out pOutMediaType: IMFMediaType): HResult;
 var
-  hr: HResult;
   i: Integer;
-  pMediaType: IMFMediaType;
-  mediaTypeCount: DWORD;
-  subType: TGUID;
-  uWidth: UINT32;
-  uHeigth: UINT32;
-  uFpsNumerator: UINT32;
-  uFpsDenominator: UINT32;
-
-label
-  done;
-
+  MediaType: IMFMediaType;
+  Count,Width,Height,Num,Den: UINT32;
+  SubType: TGUID;
 begin
-  hr := pMediaTypeHandler.GetMediaTypeCount(mediaTypeCount);
-
-  if SUCCEEDED(hr) then
-    for i := 0 to mediaTypeCount -1 do
-      begin
-        hr := pMediaTypeHandler.GetMediaTypeByIndex(i,
-                                                    pMediaType);
-
-        if SUCCEEDED(hr) then
-          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                                   subType);
-
-        if SUCCEEDED(hr) then
-          hr := MFGetAttributeSize(pMediaType,
-                                   MF_MT_FRAME_SIZE,
-                                   uWidth,
-                                   uHeigth);
-
-        if SUCCEEDED(hr) then
-          hr := MFGetAttributeRatio(pMediaType,
-                                    MF_MT_FRAME_RATE,
-                                    uFpsNumerator,
-                                    uFpsDenominator);
-
-        if SUCCEEDED(hr) then
-          if (IsEqualGUID(gPixelFormat,
-                          subType)) and
-             (uWidth = pWidth) and
-             (uHeigth = pHeight) and
-             (pFps = uFpsNumerator) and
-             (uFpsDenominator = 1) then
-            begin
-              hr := pMediaType.CopyAllItems(pOutMediaType);
-
-              if SUCCEEDED(hr) then
-                begin
-                  Safe_Release(pMediaType);
-                  hr := S_OK;
-                  Break;
-                end;
-            end
-          else
-            Safe_Release(pMediaType);
-      end;
-done:
-  Result := hr;
+  pOutMediaType := nil;
+  if pMediaTypeHandler = nil then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+  Result := pMediaTypeHandler.GetMediaTypeCount(Count);
+  if FAILED(Result) then
+    Exit;
+  for i := 0 to Integer(Count) - 1 do
+    begin
+      Result := pMediaTypeHandler.GetMediaTypeByIndex(i,MediaType);
+      if FAILED(Result) then
+        Exit;
+      Result := MediaType.GetGUID(MF_MT_SUBTYPE,SubType);
+      if FAILED(Result) then
+        Exit;
+      Result := MFGetAttributeSize(MediaType,MF_MT_FRAME_SIZE,Width,Height);
+      if FAILED(Result) then
+        Exit;
+      Result := MFGetAttributeRatio(MediaType,MF_MT_FRAME_RATE,Num,Den);
+      if FAILED(Result) then
+        Exit;
+      if IsEqualGUID(gPixelFormat,SubType) and (Width = pWidth) and (Height = pHeight) and
+         (Den <> 0) and (UInt64(Num) = UInt64(pFps) * Den) then
+        begin
+          Result := MFCreateMediaType(pOutMediaType);
+          if SUCCEEDED(Result) then
+            Result := MediaType.CopyAllItems(pOutMediaType);
+          Exit;
+        end;
+    end;
+  Result := MF_E_NOT_FOUND;
 end;
 
 
@@ -7420,7 +7167,8 @@ var
   pHandler: IMFMediaTypeHandler;
   pType: IMFMediaType;
   dwTypes: DWORD;
-  i, j: DWORD;
+  i,StreamCount: DWORD;
+  j: Integer;
   bSelected: LongBool;
 
 
@@ -7443,6 +7191,15 @@ begin
   hr := pMfAudioFormat.mfSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
     goto done;
+
+  hr := pPD.GetStreamDescriptorCount(StreamCount);
+  if FAILED(hr) then
+    goto done;
+  if i >= StreamCount then
+    begin
+      hr := MF_E_NOT_FOUND;
+      goto done;
+    end;
 
   hr := pPD.GetStreamDescriptorByIndex(i,
                                        bSelected,
@@ -7597,6 +7354,8 @@ begin
               goto done;
             end;
 
+          hr := S_OK;
+          goto done;
         end; //if mediatype = audio
      end; //end if
 
@@ -7606,7 +7365,8 @@ begin
       pType := nil;
       inc(i);
 
-  until (i >= dwTypes);  // end repeat
+  until (i >= StreamCount);
+  hr := MF_E_NOT_FOUND;
 
 
 done:
@@ -7636,7 +7396,8 @@ var
   pHandler: IMFMediaTypeHandler;
   mfType: IMFMediaType;
   cTypes: DWORD;
-  i, j: DWORD;
+  i,StreamCount: DWORD;
+  j: Integer;
   bSelected: BOOL;
   sGuid: string;
   sDescr: Widestring;
@@ -7652,6 +7413,16 @@ begin
   pSamplesPerSec := 0;
   pBitsPerSample := 0;
   pBlockAlignment := 0;
+  pAverageSampleRate := 0;
+  pBitRate := 0.0;
+  pSampleRate := 0.0;
+  pFormatTag := 0;
+  pDescr := '';
+  if mSource = nil then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
   cTypes := 0;
   i := 0;
 
@@ -7664,6 +7435,15 @@ begin
   hr := mSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
     goto done;
+
+  hr := pPD.GetStreamDescriptorCount(StreamCount);
+  if FAILED(hr) then
+    goto done;
+  if i >= StreamCount then
+    begin
+      hr := MF_E_NOT_FOUND;
+      goto done;
+    end;
 
   hr := pPD.GetStreamDescriptorByIndex(i,
                                        bSelected,
@@ -7680,7 +7460,7 @@ begin
     goto done;
 
   // find the proper subtype
-  for j := 0 to cTypes-1 do
+  for j := 0 to Integer(cTypes) - 1 do
     begin
 
       hr := pHandler.GetMediaTypeByIndex(j,
@@ -7709,6 +7489,7 @@ begin
 
 
           pSubType := subtype;
+          pFormatTag := subtype.D1;
 
           sGuid := ' ( GUID: ' + sGuid + ' )';
           pDescr := sDescr + sGuid;
@@ -7730,15 +7511,15 @@ begin
                                                  MF_MT_AUDIO_BITS_PER_SAMPLE,
                                                  16);
 
-          // Bitrate (kbps)
-          pBitRate := (pAverageSampleRate * 8) / 1000;
+          pBlockAlignment := MFGetAttributeUINT32(mfType,MF_MT_AUDIO_BLOCK_ALIGNMENT,pChannels * ((pBitsPerSample + 7) div 8));
 
-
-          uAverageSampleRate := Round((pChannels * pBitRate) / 8);
+          // Default PCM bytes per second, used only when the attribute is absent.
+          uAverageSampleRate := pChannels * pSamplesPerSec * ((pBitsPerSample + 7) div 8);
 
           pAverageSampleRate := MFGetAttributeUINT32(mfType,
                                                      MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                                      uAverageSampleRate);
+          pBitRate := (pAverageSampleRate * 8.0) / 1000;
 
           // Samplerate (khz)
           pSampleRate := pSamplesPerSec / 1000;
@@ -7749,6 +7530,8 @@ begin
               goto done;
             end;
 
+          hr := S_OK;
+          goto done;
         end; //if mediatype = audio
      end; //end if
 
@@ -7758,7 +7541,8 @@ begin
       mfType := nil;
       inc(i);
 
-   until (i > cTypes);  // end repeat
+   until (i >= StreamCount);
+  hr := MF_E_NOT_FOUND;
 
 done:
   Result := hr;
@@ -8262,31 +8046,6 @@ begin
 end;
 
 
-function GetFileDuration(pSourceReader: IMFSourceReader;
-                         out mftDuration: MFTIME): HResult; overload;
-var
-  hr: HResult;
-  pvVar: PROPVARIANT;
-
-begin
-  PropVariantInit(pvVar);
-
-  // Get file duration
-  // Gets the duration in 100-nanosecond units.
-  // Divide by 10,000,000 to get the duration in seconds.
-  hr := pSourceReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
-                                               MF_PD_DURATION,
-                                               pvVar);
-  if SUCCEEDED(hr) then
-    hr := PropVariantToUInt64(pvVar,
-                              mftDuration);
-
-  PropVariantClear(pvVar);
-  Result := hr;
-end;
-
-
-
 // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
 function GetFileDuration(pSource: IMFMediaSource;
@@ -8331,33 +8090,6 @@ begin
 
   Result := hr;
 end;
-
-
-// Get fileduration in MFTIME units from an URL.
-function GetFileDuration(const sURL: PCWSTR;
-                         out pDuration: MFTIME): HResult; overload;
-var
-  hr: HResult;
-  pSource: IMFMediaSource;
-  pPD: IMFPresentationDescriptor;
-
-begin
-  pDuration := 0;
-  // Create a mediasource by given URL.
-  hr := CreateObjectFromUrl(sURL,
-                            pSource);
-
-  // Get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method
-  if SUCCEEDED(hr) then
-    hr := pSource.CreatePresentationDescriptor(pPD);
-
-  if SUCCEEDED(hr) then
-    hr := pPD.GetUINT64(MF_PD_DURATION,
-                        pDuration);
-
-  Result := hr;
-end;
-
 
 
 // Gets de file size
@@ -9189,8 +8921,8 @@ begin
   // Clean up
   CoTaskMemFree(pwcStr);
   pwcStr := nil;
-  CoTaskMemFree(@aInputTypes);
-  CoTaskMemFree(@aInputTypes);
+  SetLength(aInputTypes,0);
+  SetLength(aOutputTypes,0);
   SafeRelease(pAttributes);
 end;
 

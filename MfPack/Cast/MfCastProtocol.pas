@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 10/08/2026 Carmen              Initial protocol separation.
 //------------------------------------------------------------------------------
 //
@@ -126,7 +126,7 @@ begin
   repeat
     if (AValue >= $80) then
       AppendByte(AData,
-                 Byte(AValue or $80))
+                 Byte((AValue and $7F) or $80))
     else
       AppendByte(AData,
                  Byte(AValue));
@@ -187,6 +187,8 @@ begin
       ValueByte := AData[AIndex];
       Inc(AIndex);
 
+      if (Shift = 28) and ((ValueByte and $F0) <> 0) then
+        Exit;
       AValue := AValue or (Cardinal(ValueByte and $7F) shl Shift);
 
       if ((ValueByte and $80) = 0) then
@@ -220,6 +222,11 @@ begin
     Exit;
 
   if (ValueLength > Cardinal(Length(AData) - AIndex)) then
+    Exit;
+
+  if (ValueLength > 0) and
+     (MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,PAnsiChar(@AData[AIndex]),
+                           Integer(ValueLength),nil,0) = 0) then
     Exit;
 
   AValue := TEncoding.UTF8.GetString(AData,
@@ -265,7 +272,7 @@ begin
 
   SetLength(Result,
             Length(MessageData) + 4);
-  NetworkLength := htonl(Cardinal(Length(MessageData)));
+  NetworkLength := Cardinal(htonl(Cardinal(Length(MessageData))));
 
   Move(NetworkLength,
        Result[0],
@@ -307,6 +314,8 @@ begin
         end;
 
       FieldNumber := FieldKey shr 3;
+      if FieldNumber = 0 then
+        Exit(E_FAIL);
       WireType := FieldKey and $07;
 
       case WireType of
@@ -317,7 +326,10 @@ begin
                Result := E_FAIL;
                Exit;
              end;
-        1: Inc(Index, 8);
+        1: begin
+             if Length(AData) - Index < 8 then Exit(E_FAIL);
+             Inc(Index,8);
+           end;
         2: if FieldNumber in [2, 3, 4, 6] then
              begin
                if not ReadProtoString(AData,
@@ -342,11 +354,15 @@ begin
                    Exit;
                  end;
 
+               if ValueLength > Cardinal(Length(AData) - Index) then
+                 Exit(E_FAIL);
                Inc(Index,
                    Integer(ValueLength));
              end;
-        5: Inc(Index,
-               4);
+        5: begin
+             if Length(AData) - Index < 4 then Exit(E_FAIL);
+             Inc(Index,4);
+           end;
       else
         Result := E_FAIL;
         Exit;

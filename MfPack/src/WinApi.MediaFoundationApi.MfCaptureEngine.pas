@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -95,10 +95,9 @@ uses
   // Defines a capture device type
 type
   PMfCaptureEngineDeviceType = ^MF_CAPTURE_ENGINE_DEVICE_TYPE;
-  MF_CAPTURE_ENGINE_DEVICE_TYPE         = (
-    MF_CAPTURE_ENGINE_DEVICE_TYPE_AUDIO = $00000000,  // Audio device which is a microphone
-    MF_CAPTURE_ENGINE_DEVICE_TYPE_VIDEO = $00000001   // Video device which is a webcam
-  );
+  MF_CAPTURE_ENGINE_DEVICE_TYPE         = (MF_CAPTURE_ENGINE_DEVICE_TYPE_AUDIO = $00000000,  // Audio device which is a microphone
+                                           MF_CAPTURE_ENGINE_DEVICE_TYPE_VIDEO = $00000001   // Video device which is a webcam
+                                          );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_DEVICE_TYPE}
 
 
@@ -110,11 +109,10 @@ type
 
   // Defines the capture sink type
   PMfCaptureEngineSinkType = ^MF_CAPTURE_ENGINE_SINK_TYPE;
-  MF_CAPTURE_ENGINE_SINK_TYPE           = (
-    MF_CAPTURE_ENGINE_SINK_TYPE_RECORD  = 0,  // A recording sink, for capturing audio and video to a file.
-    MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW = $1, // A preview sink, for previewing live audio or video.
-    MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO   = $2  // A photo sink, for capturing still images.
-  );
+  MF_CAPTURE_ENGINE_SINK_TYPE           = (MF_CAPTURE_ENGINE_SINK_TYPE_RECORD  = 0,  // A recording sink, for capturing audio and video to a file.
+                                           MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW = $1, // A preview sink, for previewing live audio or video.
+                                           MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO   = $2  // A photo sink, for capturing still images.
+                                          );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_SINK_TYPE}
 
 
@@ -171,17 +169,16 @@ type
 
   // Defines the media capture categories.
   PMF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE = ^MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE;
-  MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE = (
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_OTHER          = 0,  // Default capture category
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_COMMUNICATIONS = 1,  // Communications capture category
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_MEDIA          = 2,  // General media capture category
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_GAMECHAT       = 3,  // Game Chat capture category
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_SPEECH         = 4,  // Speech capture category
-    {NTDDI_VERSION > NTDDI_WIN10_FE}
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_FARFIELDSPEECH = 5,  // Capture Audio located in the 'far field' for the purpose of speech recognition
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_UNIFORMSPEECH  = 6,  // Consistent speech processing for the captured Audio. Used for Machine Learning
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_VOICETYPING    = 7   // Capture Audio with the intent of enabling dictation or typing by voice
-  );
+  MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE = (MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_OTHER          = 0,  // Default capture category
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_COMMUNICATIONS = 1,  // Communications capture category
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_MEDIA          = 2,  // General media capture category
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_GAMECHAT       = 3,  // Game Chat capture category
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_SPEECH         = 4,  // Speech capture category
+                                           {NTDDI_VERSION > NTDDI_WIN10_FE}
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_FARFIELDSPEECH = 5,  // Capture Audio located in the 'far field' for the purpose of speech recognition
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_UNIFORMSPEECH  = 6,  // Consistent speech processing for the captured Audio. Used for Machine Learning
+                                           MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_VOICETYPING    = 7   // Capture Audio with the intent of enabling dictation or typing by voice
+                                          );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE}
 
 
@@ -193,10 +190,9 @@ type
 
   // Defines the capture audio processing mode.
   PMF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE = ^MF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE;
-  MF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE = (
-    MF_CAPTURE_ENGINE_AUDIO_PROCESSING_DEFAULT = 0, // Normal audio signal processing.
-    MF_CAPTURE_ENGINE_AUDIO_PROCESSING_RAW = 1  // Minimal audio signal processing.
-  );
+  MF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE = (MF_CAPTURE_ENGINE_AUDIO_PROCESSING_DEFAULT = 0, // Normal audio signal processing.
+                                             MF_CAPTURE_ENGINE_AUDIO_PROCESSING_RAW = 1  // Minimal audio signal processing.
+                                            );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE}
 
 
@@ -315,7 +311,7 @@ const
   // Data type: UINT32
   // This attribute dictates the maximum number of unprocessed samples that can be buffered for processing in the record sink video path.
   // Once the record has buffered MF_CAPTURE_ENGINE_RECORD_SINK_VIDEO_MAX_UNPROCESSED_SAMPLES number of unprocessed samples, it drops the frame rate by dropping samples
-  MF_CAPTURE_ENGINE_RECORD_SINK_VIDEO_MAX_UNPROCESSED_SAMPLES : TGUID = '{76e25e7b-d595-4283-962c-c594afd78ddf}';
+  MF_CAPTURE_ENGINE_RECORD_SINK_VIDEO_MAX_UNPROCESSED_SAMPLES : TGUID = '{B467F705-7913-4894-9D42-A215FEA23DA9}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_RECORD_SINK_VIDEO_MAX_UNPROCESSED_SAMPLES}
 
   // MF_CAPTURE_ENGINE_RECORD_SINK_AUDIO_MAX_UNPROCESSED_SAMPLES
@@ -954,14 +950,14 @@ type
     // App should listen for MF_CAPTURE_ENGINE_PHOTO_TAKEN via IMFCaptureEngineOnEventCallback.
 
     function GetSink(mfCaptureEngineSinkType: MF_CAPTURE_ENGINE_SINK_TYPE;
-                     {out} ppSink: PIMFCaptureSink): HResult; stdcall;
+                     out ppSink: IMFCaptureSink): HResult; stdcall;
     // Method to obtain access to an IMFCaptureSink.
     // <param name = "mfCaptureEngineSinkType">
     // Specifies the capture sink type from the MF_CAPTURE_ENGINE_SINK_TYPE enumeration.
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource({out} ppSource: PIMFCaptureSource): HResult; stdcall;
+    function GetSource(out ppSource: IMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.
@@ -1017,7 +1013,7 @@ type
   IMFCaptureEngineOnSampleCallback2 = interface(IMFCaptureEngineOnSampleCallback)
   ['{e37ceed7-340f-4514-9f4d-9c2ae026100b}']
 
-    function OnSynchronizedEvent(var pEvent: IMFMediaEvent): HResult; stdcall;
+    function OnSynchronizedEvent(pEvent: IMFMediaEvent): HResult; stdcall;
 
   end; // IMFCaptureEngineOnSampleCallback2Interface
   IID_IMFCaptureEngineOnSampleCallback2 = IMFCaptureEngineOnSampleCallback2;
@@ -1036,8 +1032,8 @@ type
   ['{f9e4219e-6197-4b5e-b888-bee310ab2c59}']
 
     function SetOutputMediaType(dwStreamIndex: DWORD;
-                                const pMediaType: PIMFMediaType;
-                                const pEncodingAttributes: PIMFAttributes): HResult; stdcall;
+                                pMediaType: IMFMediaType;
+                                pEncodingAttributes: IMFAttributes): HResult; stdcall;
 
   end;
   // IMFCaptureSink2

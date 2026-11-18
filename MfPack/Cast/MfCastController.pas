@@ -22,15 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release SDK 10.0.28000.2705 (Windows 11)
-// 13/09/2026 All                 Protect generated-stream seek replacement
-//                                from terminal events for the old stream.
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -73,6 +71,7 @@ uses
   WinApi.WinError,
   WinApi.WinSock,
   {System}
+  WinApi.MediaFoundationApi.MfUtils,
   System.SysUtils,
   System.Classes,
   {MediaFoundationApi}
@@ -106,7 +105,8 @@ type
     procedure Reset();
   end;
 
-  TMfCastController = class(TInterfacedObject, IMfCastController)
+  TMfCastController = class(TInterfacedObject, IMfCastController,
+                            IMfCastTargetedDiscovery)
   private
     FSettings: TMfCastSettings;
     FComponents: TMfCastComponents;
@@ -221,6 +221,7 @@ type
     procedure SetLogger(const ALogger: IMfCastLogger);
 
     function StartDiscovery(): HRESULT;
+    function DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
     function StopDiscovery(): HRESULT;
     function RefreshDiscovery: HRESULT;
 
@@ -970,6 +971,17 @@ begin
 end;
 
 
+function TMfCastController.DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
+var
+  Targeted: IMfCastTargetedDiscovery;
+begin
+  if Supports(FComponents.Discovery, IMfCastTargetedDiscovery, Targeted) then
+    Result := Targeted.DiscoverDevice(ADevice)
+  else
+    Result := RefreshDiscovery();
+end;
+
+
 function TMfCastController.StopDiscovery(): HRESULT;
 begin
 
@@ -1184,6 +1196,7 @@ var
   WakeTarget: TMfCastWakeTarget;
   HaveWakeTarget: Boolean;
   WakeResult: HRESULT;
+  StageTick: UInt64;
 
 begin
 
@@ -1204,6 +1217,7 @@ begin
                                         WakeTarget);
   RetryIndex := 0;
   RetryCount := MFCAST_CONNECT_RETRY_COUNT;
+  StageTick := GetTickCount64();
   Result := FComponents.Channel.Connect(ADevice);
 
   if MfCastIsConnectRetryable(Result) then
@@ -1252,6 +1266,8 @@ begin
         Format('Chromecast control channel became available after connection retry %d.',
                [RetryIndex]));
 
+  Log(cllDebug, Format('Startup timing: Cast connection and wake recovery took %d ms (HRESULT $%.8x).',
+                       [Int64(GetTickCount64() - StageTick), DWORD(Result)]));
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
@@ -1266,6 +1282,7 @@ begin
   Log(cllInfo,
       'Launching the Default Media Receiver.');
 
+  StageTick := GetTickCount64();
   Result := FComponents.Channel.LaunchReceiver();
   if MfCastIsLaunchRetryable(Result) then
     begin
@@ -1300,6 +1317,8 @@ begin
         end;
     end;
 
+  Log(cllDebug, Format('Startup timing: receiver launch took %d ms (HRESULT $%.8x).',
+                       [Int64(GetTickCount64() - StageTick), DWORD(Result)]));
   if (Result <> S_OK) then
     begin
       Result := FailCastAttempt(Result,
@@ -1638,6 +1657,7 @@ var
   AdvertisedAddress: string;
   EntryPath: string;
   Url: string;
+  StartupTick, StageTick: UInt64;
 
 begin
   
@@ -1650,6 +1670,8 @@ begin
      (not Assigned(FComponents.CapturePipeline)) then
     Exit(E_POINTER);
 
+  StartupTick := GetTickCount64();
+  Log(cllDebug, 'Startup timing: desktop cast preparation started.');
   if FState in [csError, csStopped] then
     CleanupCastAttempt();
     
@@ -1667,6 +1689,7 @@ begin
   FMediaPlaybackStarted := False;
   SetState(csPreparingMedia);
 
+  StageTick := GetTickCount64();
   if FComponents.DesktopHttpServer.IsRunning() then
     FComponents.DesktopHttpServer.Stop();
     
@@ -1720,6 +1743,8 @@ begin
     Exit(FailCastAttempt(Result,
                          'Build capture URL', 'The desktop capture URL could not be created.'));
 
+  Log(cllDebug, Format('Startup timing: desktop HTTP preparation took %d ms.',
+                       [Int64(GetTickCount64() - StageTick)]));
   FPendingLoadRequest.ContentId := Url;
   
   if ASettings.AudioOnly then
@@ -1752,10 +1777,13 @@ begin
   // selected receiver has accepted its control connection. Besides avoiding
   // needless capture work, this keeps receiver failures separate from local
   // DXGI/WASAPI failures in the diagnostic log.
+  StageTick := GetTickCount64();
   Result := FComponents.CapturePipeline.Start(ASettings,
                                               AVideoSubtype,
                                               FComponents.DesktopPublisher,
                                               FComponents.PreviewSink);
+  Log(cllDebug, Format('Startup timing: capture/encoder startup took %d ms (HRESULT $%.8x).',
+                       [Int64(GetTickCount64() - StageTick), DWORD(Result)]));
   if FAILED(Result) then
     begin
       if ASettings.AudioOnly then
@@ -1776,7 +1804,10 @@ begin
       Exit;
     end;
 
+  StageTick := GetTickCount64();
   Result := StartPendingMedia();
+  Log(cllDebug, Format('Startup timing: media LOAD acknowledgement took %d ms (HRESULT $%.8x).',
+                       [Int64(GetTickCount64() - StageTick), DWORD(Result)]));
   if FAILED(Result) then
     begin
       CleanupCastAttempt();
@@ -1785,6 +1816,7 @@ begin
     
   // LOAD has acknowledged the paused media session. SetVolume can now target
   // either receiver volume or a fixed-volume receiver's media-stream volume.
+  StageTick := GetTickCount64();
   Result := SetVolume(0.0);
   if SUCCEEDED(Result) then
     Result := FComponents.Channel.Play();
@@ -1797,6 +1829,9 @@ begin
       Exit;
     end;
 
+  Log(cllDebug, Format('Startup timing: zero-volume/PLAY submission took %d ms; desktop startup commands accepted after %d ms total.',
+                       [Int64(GetTickCount64() - StageTick),
+                        Int64(GetTickCount64() - StartupTick)]));
   if ASettings.AudioOnly then
     Log(cllInfo,
         Format('System-audio capture LOAD accepted: url="%s".',
@@ -3030,12 +3065,32 @@ var
   Detail: string;
   IsOn: Boolean;
   StandbyResult: HRESULT;
+  VolumeResult: HRESULT;
 begin
 
   // Retain the actual connected receiver, including after Stop clears media
   // state. Never use a potentially different selection in the sender's UI.
   Device := FStandbyDevice;
   FStandbyDevice.Reset;
+  FPreviewVolume := 0.0;
+
+  // Reset the actual receiver before STOP/CLOSE and standby. SetVolume on the
+  // controller can target decoded PCM during transcoding, leaving TV volume
+  // unchanged, so this command must go directly to the connected channel.
+  if (Device.Address <> '') and Assigned(FComponents.Channel) then
+    try
+      VolumeResult := FComponents.Channel.SetVolume(0.0);
+      if Succeeded(VolumeResult) then
+        Log(cllInfo, 'Receiver volume 0% requested before disconnect.')
+      else
+        Log(cllWarning, Format('Receiver volume reset failed (HRESULT $%.8x); continuing disconnect.',
+                               [DWORD(VolumeResult)]));
+    except
+      on E: Exception do
+        Log(cllWarning, 'Receiver volume reset failed: ' + E.Message +
+                         '; continuing disconnect.');
+    end;
+
   CleanupCastAttempt();
   SetState(csIdle);
   StandbyResult := MfCastAndroidTvPower(Device, True, IsOn, Detail);

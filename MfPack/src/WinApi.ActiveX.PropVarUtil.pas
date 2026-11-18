@@ -10,7 +10,7 @@
 // Release date: 13-02-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Variant and PropVariant helpers.
 //
 // Organisation: FactoryX
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -1119,7 +1119,7 @@ procedure IUnknown_Set({_Inout_} var ppunk: Pointer {IUnknown};
 
 // Makes a copy of a string in newly allocated memory.
 function SHStrDupW(const psz: LPCWSTR;
-                   ppwsz: LPCWSTR): HRESULT; stdcall;
+                   out ppwsz: LPWSTR): HRESULT; stdcall;
 {$EXTERNALSYM SHStrDupW}
 
 // Additional helpers from OleAut32
@@ -1598,6 +1598,7 @@ end;
 function InitPropVariantFromString(psz: LPCWSTR;
                                    out ppropvar: PROPVARIANT): HResult; inline;
 begin
+  PropVariantInit(ppropvar);
   ppropvar.vt:= VT_LPWSTR;
   Result:= SHStrDupW(psz, ppropvar.pwszVal);
   if FAILED(Result) then

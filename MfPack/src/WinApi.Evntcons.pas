@@ -10,7 +10,7 @@
 // Release date: 18-12-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This unit defines the event consumer API.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -131,9 +131,9 @@ type
  PEVENT_HEADER_EXTENDED_DATA_ITEM = ^EVENT_HEADER_EXTENDED_DATA_ITEM;
  _EVENT_HEADER_EXTENDED_DATA_ITEM = record
   public
-    Value: UINT;                             // Same as 'flags' used to acces all bitvalues
     Reserved1: USHORT;                       // Reserved for internal use
     ExtType: USHORT;                         // Extended info type
+    Value: USHORT;                             // Same as 'flags' used to acces all bitvalues
     DataSize: USHORT;                        // Size of extended info data
     DataPtr: ULONGLONG;                      // Pointer to extended info data
   private
@@ -141,7 +141,7 @@ type
     procedure WriteBits(const aIndex: Integer; const aValue: Integer);
   public
     property Linkage: Integer index $0001 read ReadBits write WriteBits;      // 1 bit at offset 0
-    property Reserved2: Integer index $0215 read ReadBits write WriteBits;    // 15 bits at offset 2
+    property Reserved2: Integer index $010F read ReadBits write WriteBits;    // 15 bits at offset 2
   end;
   EVENT_HEADER_EXTENDED_DATA_ITEM = _EVENT_HEADER_EXTENDED_DATA_ITEM;
 
@@ -402,7 +402,7 @@ const
   {$EXTERNALSYM PROCESS_TRACE_MODE_EVENT_RECORD}
 
 
-  function GetEventProcessorIndex(EventRecord: EVENT_RECORD): ULONG;
+  function GetEventProcessorIndex(EventRecord: PEVENT_RECORD): ULONG;
 
 
   // Provider Trait APIs
@@ -438,19 +438,19 @@ type
 
 //#if (WINVER >= _WIN32_WINNT_LONGHORN)
 
-  function EventAccessControl(const Guid: TGUID;
+  function EventAccessControl(Guid: PGUID;
                               Operation: ULONG;
                               Sid: PSID;
                               Rights: ULONG;
                               AllowOrDeny: BOOLEAN): ULONG; stdcall;
   {$EXTERNALSYM EventAccessControl}
 
-  function EventAccessQuery(const Guid: PGUID;
-                            out Buffer: PSECURITY_DESCRIPTOR;
-                            var BufferSize: PULONG): ULONG; stdcall;
+  function EventAccessQuery(Guid: PGUID;
+                            Buffer: PSECURITY_DESCRIPTOR;
+                            BufferSize: PULONG): ULONG; stdcall;
   {$EXTERNALSYM EventAccessQuery}
 
-  function EventAccessRemove(const Guid: PGUID): ULONG; stdcall;
+  function EventAccessRemove(Guid: PGUID): ULONG; stdcall;
   {$EXTERNALSYM EventAccessRemove}
 //#endif
 
@@ -511,12 +511,12 @@ const
   end;
 
 
-  function GetEventProcessorIndex(EventRecord: EVENT_RECORD): ULONG;
+  function GetEventProcessorIndex(EventRecord: PEVENT_RECORD): ULONG;
   begin
-    if (EventRecord.EventHeader.Flags AND EVENT_HEADER_FLAG_PROCESSOR_INDEX) <> 0 then
-      Result:= EventRecord.BufferContext.DUMMYSTRUCTNAME.ProcessorNumber
+    if (EventRecord^.EventHeader.Flags AND EVENT_HEADER_FLAG_PROCESSOR_INDEX) <> 0 then
+      Result:= EventRecord^.BufferContext.DUMMYSTRUCTNAME.ProcessorIndex
     else
-      Result:= EventRecord.BufferContext.DUMMYSTRUCTNAME.ProcessorIndex;
+      Result:= EventRecord^.BufferContext.DUMMYSTRUCTNAME.ProcessorNumber;
   end;
 
   // Implement Additional Prototypes here.

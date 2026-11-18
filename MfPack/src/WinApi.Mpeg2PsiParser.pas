@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Interface definitions for the MPEG-2 PSI parsing functionality.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -93,9 +93,9 @@ type
     function Initialize(pbDesc: PByte;
                         bCount: INT): HRESULT; stdcall;
 
-    function GetTag(out pbVal: PByte): HRESULT; stdcall;
+    function GetTag(out pbVal: Byte): HRESULT; stdcall;
 
-    function GetLength(out pbVal: PByte): HRESULT; stdcall;
+    function GetLength(out pbVal: Byte): HRESULT; stdcall;
 
     function GetBody(out ppbVal: PByte): HRESULT; stdcall;
 
@@ -146,7 +146,7 @@ type
 
     function GetTransportStreamId(out pwVal: WORD): HRESULT; stdcall;
 
-    function GetVersionNumber(out pbVal: PByte): HRESULT; stdcall;
+    function GetVersionNumber(out pbVal: Byte): HRESULT; stdcall;
 
     function GetCountOfRecords(out pdwVal: DWORD): HRESULT; stdcall;
 
@@ -161,7 +161,7 @@ type
 
     function RegisterForNextTable(hNextTableAvailable: THandle): HRESULT; stdcall;
 
-    function GetNextTable(out ppPAT: PIPAT): HRESULT; stdcall;
+    function GetNextTable(out ppPAT: IPAT): HRESULT; stdcall;
 
     function RegisterForWhenCurrent(hNextTableIsCurrent: THandle): HRESULT; stdcall;
 
@@ -185,21 +185,22 @@ type
     function Initialize(pSectionList: ISectionList;
                         pMPEGData: IMpeg2Data): HRESULT; stdcall;
 
-    function GetVersionNumber(out pbVal: PByte): HRESULT; stdcall;
+    function GetVersionNumber(out pbVal: Byte): HRESULT; stdcall;
 
     function GetCountOfTableDescriptors(out pdwVal: DWORD): HRESULT; stdcall;
 
     function GetTableDescriptorByIndex(dwIndex: DWORD;
-                                       out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                       out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
+    // pdwCookie is optional and may be nil.
     function GetTableDescriptorByTag(bTag: Byte;
-                                     {in, out} pdwCookie: PDWORD;  // OPTIONAL
-                                     out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                     pdwCookie: PDWORD;
+                                     out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
     function RegisterForNextTable(hNextTableAvailable: THandle): HRESULT; stdcall;
 
     function GetNextTable(dwTimeout: DWORD;
-                          out ppCAT: PICAT): HRESULT; stdcall;
+                          out ppCAT: ICAT): HRESULT; stdcall;
 
     function RegisterForWhenCurrent(hNextTableIsCurrent: THandle): HRESULT; stdcall;
 
@@ -223,9 +224,9 @@ type
     function Initialize(pSectionList: ISectionList;
                         pMPEGData: IMpeg2Data): HRESULT; stdcall;
 
-    function GetProgramNumber(out pwVal: PWORD): HRESULT; stdcall;
+    function GetProgramNumber(out pwVal: WORD): HRESULT; stdcall;
 
-    function GetVersionNumber(out pbVal: PByte): HRESULT; stdcall;
+    function GetVersionNumber(out pbVal: Byte): HRESULT; stdcall;
 
     function GetPcrPid(out pPidVal: PID): HRESULT; stdcall;
 
@@ -234,29 +235,31 @@ type
     function GetTableDescriptorByIndex(dwIndex: DWORD;
                                        out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
+    // pdwCookie is optional and may be nil.
     function GetTableDescriptorByTag(bTag: Byte;
-                                    {in, out} pdwCookie: PDWORD;  // OPTIONAL
-                                    out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                     pdwCookie: PDWORD;
+                                     out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
     function GetCountOfRecords(out pwVal: WORD): HRESULT; stdcall;
 
     function GetRecordStreamType(dwRecordIndex: DWORD;
-                                out pbVal: PByte): HRESULT; stdcall;
+                                 out pbVal: Byte): HRESULT; stdcall;
 
     function GetRecordElementaryPid(dwRecordIndex: DWORD;
-                                   out pPidVal: PID): HRESULT; stdcall;
+                                    out pPidVal: PID): HRESULT; stdcall;
 
     function GetRecordCountOfDescriptors(dwRecordIndex: DWORD;
-                                        out pdwVal: PDWORD): HRESULT; stdcall;
+                                         out pdwVal: DWORD): HRESULT; stdcall;
 
     function GetRecordDescriptorByIndex(dwRecordIndex: DWORD;
                                         dwDescIndex: DWORD;
-                                        out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                        out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
+    // pdwCookie is optional and may be nil.
     function GetRecordDescriptorByTag(dwRecordIndex: DWORD;
                                       bTag: Byte;
-                                      {in, out} pdwCookie: PDWORD;  // OPTIONAL
-                                      out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                      pdwCookie: PDWORD;
+                                      out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
     function QueryServiceGatewayInfo(out ppDSMCCList: PDSMCC_ELEMENT;
                                      out puiCount: UINT): HRESULT; stdcall;
@@ -266,7 +269,7 @@ type
 
     function RegisterForNextTable(hNextTableAvailable: THandle): HRESULT; stdcall;
 
-    function GetNextTable(out ppPMT: PIPMT): HRESULT; stdcall;
+    function GetNextTable(out ppPMT: IPMT): HRESULT; stdcall;
 
     function RegisterForWhenCurrent(hNextTableIsCurrent: THandle): HRESULT; stdcall;
 
@@ -290,20 +293,21 @@ type
     function Initialize(pSectionList: ISectionList;
                         pMPEGData: IMpeg2Data): HRESULT; stdcall;
 
-    function GetVersionNumber(out pbVal: PByte): HRESULT; stdcall;
+    function GetVersionNumber(out pbVal: Byte): HRESULT; stdcall;
 
     function GetCountOfTableDescriptors(out pdwVal: DWORD): HRESULT; stdcall;
 
     function GetTableDescriptorByIndex(dwIndex: DWORD;
-                                       out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                       out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
+    // pdwCookie is optional and may be nil.
     function GetTableDescriptorByTag(bTag: Byte;
-                                     {in, out} pdwCookie: PDWORD;  // OPTIONAL
-                                     out ppDescriptor: PIGenericDescriptor): HRESULT; stdcall;
+                                     pdwCookie: PDWORD;
+                                     out ppDescriptor: IGenericDescriptor): HRESULT; stdcall;
 
     function RegisterForNextTable(hNextTableAvailable: THandle): HRESULT; stdcall;
 
-    function GetNextTable(out ppTSDT: PITSDT): HRESULT; stdcall;
+    function GetNextTable(out ppTSDT: ITSDT): HRESULT; stdcall;
 
     function RegisterForWhenCurrent(hNextTableIsCurrent: THandle): HRESULT; stdcall;
 
@@ -332,7 +336,7 @@ type
                       dwTID_PID: DWORD;
                       dwHashedVer: DWORD;
                       dwPara4: DWORD;
-                      out ppIUnknown: PIUnknown): HRESULT; stdcall;
+                      out ppIUnknown: IUnknown): HRESULT; stdcall;
 
   end;
 

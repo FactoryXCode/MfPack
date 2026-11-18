@@ -238,7 +238,6 @@ The units are organized like this:
         MfCastRemux.pas
         MfCastTranscode.pas
         MfCastWindowsSupport.pas
-       MfCastAndroidTvRemote.pas
         Media\
             LangTags.pas
             MfEmbeddedSubtitleReader.pas
@@ -1339,6 +1338,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 23/09/2026
+Final release date: 15/11/2026
   
 Copyright © FactoryX. All rights reserved.

@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -101,14 +101,14 @@ const
   //
   // The supplied buffer was too small to accommodate the data.
   //
-  D2DERR_INSUFFICIENT_BUFFER          = HRESULT(ERROR_INSUFFICIENT_BUFFER);
+  D2DERR_INSUFFICIENT_BUFFER          = HRESULT($8007007A);
   {$EXTERNALSYM D2DERR_INSUFFICIENT_BUFFER}
 
 
   //
   // The file specified was not found.
   //
-  D2DERR_FILE_NOT_FOUND               = HRESULT(ERROR_FILE_NOT_FOUND);
+  D2DERR_FILE_NOT_FOUND               = HRESULT($80070002);
   {$EXTERNALSYM D2DERR_FILE_NOT_FOUND}
 
   //

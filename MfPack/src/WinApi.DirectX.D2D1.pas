@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
@@ -27,13 +27,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -95,6 +95,10 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
+
+type
+  PUINT32 = ^UINT32;
+  PHDC = ^HDC;
 
 var
   TD2D1_RECT_F: D2D1_RECT_F;
@@ -915,10 +919,8 @@ type
   {$EXTERNALSYM ID2D1Resource}
   ID2D1Resource = interface(IUnknown)
   ['{2cd90691-12e2-11dc-9fed-001143a055f9}']
-
-    // Retrieve the factory associated with this resource.
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure GetFactory(out factory: ID2D1Factory); stdcall;
-
   end;
   IID_ID2D1Resource = ID2D1Resource;
   {$EXTERNALSYM IID_ID2D1Resource}
@@ -932,6 +934,7 @@ type
   {$EXTERNALSYM ID2D1Image}
   ID2D1Image = interface(ID2D1Resource)
   ['{65019f75-8da2-497c-b32c-dfa34e48ede6}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
 
   end;
   IID_ID2D1Image = ID2D1Image;
@@ -946,31 +949,20 @@ type
   {$EXTERNALSYM ID2D1Bitmap}
   ID2D1Bitmap = interface(ID2D1Image)
   ['{a2296057-ea42-4099-983b-539fb6505426}']
-    // Returns the size of the bitmap in resolution independent units.
-    procedure GetSize(out size: D2D1_SIZE_F); stdcall;
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetSize(out value: D2D1_SIZE_F); stdcall;
 
-    // Returns the size of the bitmap in resolution dependent units, (pixels).
-    procedure GetPixelSize(out pixelSize: D2D1_SIZE_U); stdcall;
+    procedure GetPixelSize(out value: D2D1_SIZE_U); stdcall;
 
-    // Retrieve the format of the bitmap.
-    procedure GetPixelFormat(out pixelFormat: D2D1_PIXEL_FORMAT); stdcall;
+    procedure GetPixelFormat(out value: D2D1_PIXEL_FORMAT); stdcall;
 
-    // Return the DPI of the bitmap.
-    procedure GetDpi(out dpiX: Single;
-                     out dpiY: Single); stdcall;
+    procedure GetDpi(dpiX: PSingle; dpiY: PSingle); stdcall;
 
-    function CopyFromBitmap(var destPoint: D2D1_POINT_2U;
-                            bitmap: ID2D1Bitmap;
-                            var srcRect: D2D1_RECT_U): HResult; stdcall;
+    function CopyFromBitmap(destPoint: PD2D1_POINT_2U; bitmap: ID2D1Bitmap; srcRect: PD2D1_RECT_U): HRESULT; stdcall;
 
-    function CopyFromRenderTarget(var destPoint: D2D1_POINT_2U;
-                                  renderTarget: ID2D1RenderTarget;
-                                  var srcRect: D2D1_RECT_U): HResult; stdcall;
+    function CopyFromRenderTarget(destPoint: PD2D1_POINT_2U; renderTarget: ID2D1RenderTarget; srcRect: PD2D1_RECT_U): HRESULT; stdcall;
 
-    function CopyFromMemory(var dstRect: D2D1_RECT_U;
-                            srcData: Pointer;
-                            pitch: Cardinal): HResult; stdcall;
-
+    function CopyFromMemory(dstRect: PD2D1_RECT_U; srcData: Pointer; pitch: UINT32): HRESULT; stdcall;
   end;
   IID_ID2D1Bitmap = ID2D1Bitmap;
   {$EXTERNALSYM IID_ID2D1Bitmap}
@@ -985,15 +977,11 @@ type
   {$EXTERNALSYM ID2D1GradientStopCollection}
   ID2D1GradientStopCollection = interface(ID2D1Resource)
   ['{2cd906a7-12e2-11dc-9fed-001143a055f9}']
-    // Returns the number of stops in the gradient.
+    // Native virtual slots; structure-return methods use explicit result buffers.
     function GetGradientStopCount(): UINT32; stdcall;
 
-    // Copies the gradient stops from the collection into the caller's interface.
-    // The returned colors have straight alpha.
-    procedure GetGradientStops(out gradientStops: D2D1_GRADIENT_STOP;
-                               gradientStopsCount: UINT32); stdcall;
+    procedure GetGradientStops(gradientStops: PD2D1_GRADIENT_STOP; gradientStopsCount: UINT32); stdcall;
 
-    // Returns whether the interpolation occurs with 1.0 or 2.2 gamma.
     function GetColorInterpolationGamma(): D2D1_GAMMA; stdcall;
 
     function GetExtendMode(): D2D1_EXTEND_MODE; stdcall;
@@ -1010,17 +998,14 @@ type
   {$EXTERNALSYM ID2D1Brush}
   ID2D1Brush = interface(ID2D1Resource)
   ['{2cd906a8-12e2-11dc-9fed-001143a055f9}']
-
-    // Sets the opacity for when the brush is drawn over the entire fill of the brush.
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure SetOpacity(opacity: Single); stdcall;
 
-    // Sets the transform that applies to everything drawn by the brush.
-    procedure SetTransform(const transform: D2D1_MATRIX_3X2_F); stdcall;
+    procedure SetTransform(transform: PD2D1_MATRIX_3X2_F); stdcall;
 
     function GetOpacity(): Single; stdcall;
 
-    procedure GetTransform(out transform: D2D1_MATRIX_3X2_F); stdcall;
-
+    procedure GetTransform(transform: PD2D1_MATRIX_3X2_F); stdcall;
   end;
   IID_ID2D1Brush = ID2D1Brush;
   {$EXTERNALSYM IID_ID2D1Brush}
@@ -1034,19 +1019,13 @@ type
   {$EXTERNALSYM ID2D1BitmapBrush}
   ID2D1BitmapBrush = interface(ID2D1Brush)
   ['{2cd906aa-12e2-11dc-9fed-001143a055f9}']
-
-    // Sets how the bitmap is to be treated outside of its natural extent on the X
-    // axis.
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure SetExtendModeX(extendModeX: D2D1_EXTEND_MODE); stdcall;
 
-    // Sets how the bitmap is to be treated outside of its natural extent on the X
-    // axis.
     procedure SetExtendModeY(extendModeY: D2D1_EXTEND_MODE); stdcall;
 
-    // Sets the interpolation mode used when this brush is used.
     procedure SetInterpolationMode(interpolationMode: D2D1_BITMAP_INTERPOLATION_MODE); stdcall;
 
-    // Sets the bitmap associated as the source of this brush.
     procedure SetBitmap(bitmap: ID2D1Bitmap); stdcall;
 
     function GetExtendModeX(): D2D1_EXTEND_MODE; stdcall;
@@ -1056,7 +1035,6 @@ type
     function GetInterpolationMode(): D2D1_BITMAP_INTERPOLATION_MODE; stdcall;
 
     procedure GetBitmap(out bitmap: ID2D1Bitmap); stdcall;
-
   end;
   IID_ID2D1BitmapBrush = ID2D1BitmapBrush;
   {$EXTERNALSYM IID_ID2D1BitmapBrush}
@@ -1070,11 +1048,10 @@ type
   {$EXTERNALSYM ID2D1SolidColorBrush}
   ID2D1SolidColorBrush = interface(ID2D1Brush)
   ['{2cd906a9-12e2-11dc-9fed-001143a055f9}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure SetColor(color: PD2D1_COLOR_F); stdcall;
 
-    procedure SetColor(const color: D2D1_COLOR_F); stdcall;
-
-    function  GetColor(): D2D1_COLOR_F; stdcall;
-
+    procedure GetColor(out value: D2D1_COLOR_F); stdcall;
   end;
   IID_ID2D1SolidColorBrush = ID2D1SolidColorBrush;
   {$EXTERNALSYM IID_ID2D1SolidColorBrush}
@@ -1088,19 +1065,16 @@ type
   {$EXTERNALSYM ID2D1LinearGradientBrush}
   ID2D1LinearGradientBrush = interface(ID2D1Brush)
   ['{2cd906ab-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure SetStartPoint(startPoint: D2D1_POINT_2F); stdcall;
 
-    // Sets the end point of the gradient in local coordinate space. This is not
-    // influenced by the geometry being filled.
     procedure SetEndPoint(endPoint: D2D1_POINT_2F); stdcall;
 
-    function GetStartPoint(): D2D1_POINT_2F; stdcall;
+    procedure GetStartPoint(out value: D2D1_POINT_2F); stdcall;
 
-    function GetEndPoint(): D2D1_POINT_2F; stdcall;
+    procedure GetEndPoint(out value: D2D1_POINT_2F); stdcall;
 
     procedure GetGradientStopCollection(out gradientStopCollection: ID2D1GradientStopCollection); stdcall;
-
   end;
   IID_ID2D1LinearGradientBrush = ID2D1LinearGradientBrush;
   {$EXTERNALSYM IID_ID2D1LinearGradientBrush}
@@ -1114,28 +1088,24 @@ type
   {$EXTERNALSYM ID2D1RadialGradientBrush}
   ID2D1RadialGradientBrush = interface(ID2D1Brush)
   ['{2cd906ac-12e2-11dc-9fed-001143a055f9}']
-
-    // Sets the center of the radial gradient. This will be in local coordinates and
-    // will not depend on the geometry being filled.
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure SetCenter(center: D2D1_POINT_2F); stdcall;
 
-    // Sets offset of the origin relative to the radial gradient center.
     procedure SetGradientOriginOffset(gradientOriginOffset: D2D1_POINT_2F); stdcall;
 
     procedure SetRadiusX(radiusX: Single); stdcall;
 
     procedure SetRadiusY(radiusY: Single); stdcall;
 
-    function GetCenter(): D2D1_POINT_2F; stdcall;
+    procedure GetCenter(out value: D2D1_POINT_2F); stdcall;
 
-    function GetGradientOriginOffset(): D2D1_POINT_2F; stdcall;
+    procedure GetGradientOriginOffset(out value: D2D1_POINT_2F); stdcall;
 
     function GetRadiusX(): Single; stdcall;
 
     function GetRadiusY(): Single; stdcall;
 
     procedure GetGradientStopCollection(out gradientStopCollection: ID2D1GradientStopCollection); stdcall;
-
   end;
   IID_ID2D1RadialGradientBrush = ID2D1RadialGradientBrush;
   {$EXTERNALSYM IID_ID2D1RadialGradientBrush}
@@ -1149,7 +1119,7 @@ type
   {$EXTERNALSYM ID2D1StrokeStyle}
   ID2D1StrokeStyle = interface(ID2D1Resource)
   ['{2cd9069d-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     function GetStartCap(): D2D1_CAP_STYLE; stdcall;
 
     function GetEndCap(): D2D1_CAP_STYLE; stdcall;
@@ -1166,11 +1136,7 @@ type
 
     function GetDashesCount(): UINT32; stdcall;
 
-    // Returns the dashes from the object into a user allocated array. The user must
-    // call GetDashesCount to retrieve the required size.
-    procedure GetDashes(out dashes: Single;
-                        dashesCount: UINT32); stdcall;
-
+    procedure GetDashes(dashes: PSingle; dashesCount: UINT32); stdcall;
   end;
   IID_ID2D1StrokeStyle = ID2D1StrokeStyle;
   {$EXTERNALSYM IID_ID2D1StrokeStyle}
@@ -1186,91 +1152,32 @@ type
   {$EXTERNALSYM ID2D1Geometry}
   ID2D1Geometry = interface(ID2D1Resource)
   ['{2cd906a1-12e2-11dc-9fed-001143a055f9}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function GetBounds(worldTransform: PD2D1_MATRIX_3X2_F; bounds: PD2D1_RECT_F): HRESULT; stdcall;
 
-    // Retrieve the bounds of the geometry, with an optional applied transform.
-    function GetBounds(const worldTransform: PD2D1_MATRIX_3X2_F;
-                       out bounds: D2D1_RECT_F): HResult; stdcall;
+    function GetWidenedBounds(strokeWidth: Single; strokeStyle: ID2D1StrokeStyle; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; bounds: PD2D1_RECT_F): HRESULT; stdcall;
 
-    // Get the bounds of the corresponding geometry after it has been widened or have
-    // an optional pen style applied.
-    function GetWidenedBounds(strokeWidth: Single;
-                              strokeStyle: ID2D1StrokeStyle;
-                              const worldTransform: PD2D1_MATRIX_3X2_F;
-                              flatteningTolerance: Single;
-                              out bounds: D2D1_RECT_F): HResult; stdcall;
+    function StrokeContainsPoint(point: D2D1_POINT_2F; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; contains: PBOOL): HRESULT; stdcall;
 
-    // Checks to see whether the corresponding penned and widened geometry contains the
-    // given point.
-    function StrokeContainsPoint(point: D2D1_POINT_2F;
-                                 strokeWidth: Single;
-                                 strokeStyle: ID2D1StrokeStyle;
-                                 const worldTransform: PD2D1_MATRIX_3X2_F;
-                                 flatteningTolerance: Single;
-                                 out contains: BOOL): HResult; stdcall;
+    function FillContainsPoint(point: D2D1_POINT_2F; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; contains: PBOOL): HRESULT; stdcall;
 
-    // Test whether the given fill of this geometry would contain this point.
-    function FillContainsPoint(point: D2D1_POINT_2F;
-                               const worldTransform: PD2D1_MATRIX_3X2_F;
-                               flatteningTolerance: Single;
-                               out contains: BOOL): HResult; stdcall;
+    function CompareWithGeometry(inputGeometry: ID2D1Geometry; inputGeometryTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; relation: PD2D1_GEOMETRY_RELATION): HRESULT; stdcall;
 
-    // Compare how one geometry intersects or contains another geometry.
-    function CompareWithGeometry(inputGeometry: ID2D1Geometry;
-                                 const inputGeometryTransform: PD2D1_MATRIX_3X2_F;
-                                 flatteningTolerance: Single;
-                                 out relation: D2D1_GEOMETRY_RELATION): HResult; stdcall;
+    function Simplify(simplificationOption: D2D1_GEOMETRY_SIMPLIFICATION_OPTION; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; geometrySink: ID2D1SimplifiedGeometrySink): HRESULT; stdcall;
 
-    // Converts a geometry to a simplified geometry that has arcs and quadratic beziers
-    // removed.
-    function Simplify(simplificationOption: D2D1_GEOMETRY_SIMPLIFICATION_OPTION;
-                      const worldTransform: PD2D1_MATRIX_3X2_F;
-                      flatteningTolerance: Single;
-                      geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
+    function Tessellate(worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; tessellationSink: ID2D1TessellationSink): HRESULT; stdcall;
 
-    // Tessellates a geometry into triangles.
-    function Tessellate(const worldTransform: PD2D1_MATRIX_3X2_F;
-                        flatteningTolerance: Single;
-                        tessellationSink: ID2D1TessellationSink): HResult; stdcall;
+    function CombineWithGeometry(inputGeometry: ID2D1Geometry; combineMode: D2D1_COMBINE_MODE; inputGeometryTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; geometrySink: ID2D1SimplifiedGeometrySink): HRESULT; stdcall;
 
-    // Performs a combine operation between the two geometries to produce a resulting
-    // geometry.
-    function CombineWithGeometry(inputGeometry: ID2D1Geometry;
-                                 combineMode: D2D1_COMBINE_MODE;
-                                 const inputGeometryTransform: PD2D1_MATRIX_3X2_F;
-                                 flatteningTolerance: Single;
-                                 geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
+    function Outline(worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; geometrySink: ID2D1SimplifiedGeometrySink): HRESULT; stdcall;
 
-    // Computes the outline of the geometry. The result is written back into a
-    // simplified geometry sink.
-    function Outline(const worldTransform: PD2D1_MATRIX_3X2_F;
-                     flatteningTolerance: Single;
-                     geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
+    function ComputeArea(worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; area: PSingle): HRESULT; stdcall;
 
-    // Computes the area of the geometry.
-    function ComputeArea(const worldTransform: PD2D1_MATRIX_3X2_F;
-                         flatteningTolerance: Single;
-                         out area: Single): HResult; stdcall;
+    function ComputeLength(worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; length: PSingle): HRESULT; stdcall;
 
-    // Computes the length of the geometry.
-    function ComputeLength(const worldTransform: PD2D1_MATRIX_3X2_F;
-                           flatteningTolerance: Single;
-                           out length: Single): HResult; stdcall;
+    function ComputePointAtLength(length: Single; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; point: PD2D1_POINT_2F; unitTangentVector: PD2D1_POINT_2F): HRESULT; stdcall;
 
-    // Computes the point and tangent a given distance along the path.
-    function ComputePointAtLength(length: Single;
-                                  const worldTransform: PD2D1_MATRIX_3X2_F;
-                                  flatteningTolerance: Single;
-                                  out point: D2D1_POINT_2F;
-                                  out unitTangentVector: D2D1_POINT_2F): HResult; stdcall;
-
-    // Get the geometry and widen it as well as apply an optional pen style.
-    function Widen(strokeWidth: Single;
-                   strokeStyle: ID2D1StrokeStyle;
-                   const worldTransform: PD2D1_MATRIX_3X2_F;
-                   flatteningTolerance: Single;
-                   geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
-
-
+    function Widen(strokeWidth: Single; strokeStyle: ID2D1StrokeStyle; worldTransform: PD2D1_MATRIX_3X2_F; flatteningTolerance: Single; geometrySink: ID2D1SimplifiedGeometrySink): HRESULT; stdcall;
   end;
   IID_ID2D1Geometry = ID2D1Geometry;
   {$EXTERNALSYM IID_ID2D1Geometry}
@@ -1284,9 +1191,8 @@ type
   {$EXTERNALSYM ID2D1RectangleGeometry}
   ID2D1RectangleGeometry = interface(ID2D1Geometry)
   ['{2cd906a2-12e2-11dc-9fed-001143a055f9}']
-
-    procedure GetRect(out rect: D2D1_RECT_F); stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetRect(rect: PD2D1_RECT_F); stdcall;
   end;
   IID_ID2D1RectangleGeometry = ID2D1RectangleGeometry;
   {$EXTERNALSYM IID_ID2D1RectangleGeometry}
@@ -1300,9 +1206,8 @@ type
   {$EXTERNALSYM ID2D1RoundedRectangleGeometry}
   ID2D1RoundedRectangleGeometry = interface(ID2D1Geometry)
   ['{2cd906a3-12e2-11dc-9fed-001143a055f9}']
-
-    procedure GetRoundedRect(out roundedRect: D2D1_ROUNDED_RECT); stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetRoundedRect(roundedRect: PD2D1_ROUNDED_RECT); stdcall;
   end;
   IID_ID2D1RoundedRectangleGeometry = ID2D1RoundedRectangleGeometry;
   {$EXTERNALSYM IID_ID2D1RoundedRectangleGeometry}
@@ -1316,9 +1221,8 @@ type
   {$EXTERNALSYM ID2D1EllipseGeometry}
   ID2D1EllipseGeometry = interface(ID2D1Geometry)
   ['{2cd906a4-12e2-11dc-9fed-001143a055f9}']
-
-    procedure GetEllipse(out ellipse: D2D1_ELLIPSE); stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetEllipse(ellipse: PD2D1_ELLIPSE); stdcall;
   end;
   IID_ID2D1EllipseGeometry = ID2D1EllipseGeometry;
   {$EXTERNALSYM IID_ID2D1EllipseGeometry}
@@ -1332,14 +1236,12 @@ type
   {$EXTERNALSYM ID2D1GeometryGroup}
   ID2D1GeometryGroup = interface(ID2D1Geometry)
   ['{2cd906a6-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     function GetFillMode(): D2D1_FILL_MODE; stdcall;
 
     function GetSourceGeometryCount(): UINT32; stdcall;
 
-    procedure GetSourceGeometries(out geometries: ID2D1Geometry;
-                                  geometriesCount: UINT32); stdcall;
-
+    procedure GetSourceGeometries(geometries: PID2D1Geometry; geometriesCount: UINT32); stdcall;
   end;
   IID_ID2D1GeometryGroup = ID2D1GeometryGroup;
   {$EXTERNALSYM IID_ID2D1GeometryGroup}
@@ -1353,11 +1255,10 @@ type
   {$EXTERNALSYM ID2D1TransformedGeometry}
   ID2D1TransformedGeometry = interface(ID2D1Geometry)
   ['{2cd906bb-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure GetSourceGeometry(out sourceGeometry: ID2D1Geometry); stdcall;
 
-    procedure GetTransform(out transform: D2D1_MATRIX_3X2_F); stdcall;
-
+    procedure GetTransform(transform: PD2D1_MATRIX_3X2_F); stdcall;
   end;
   IID_ID2D1TransformedGeometry = ID2D1TransformedGeometry;
   {$EXTERNALSYM IID_ID2D1TransformedGeometry}
@@ -1373,24 +1274,20 @@ type
   {$EXTERNALSYM ID2D1SimplifiedGeometrySink}
   ID2D1SimplifiedGeometrySink = interface(IUnknown)
   ['{2cd9069e-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure SetFillMode(fillMode: D2D1_FILL_MODE); stdcall;
 
     procedure SetSegmentFlags(vertexFlags: D2D1_PATH_SEGMENT); stdcall;
 
-    procedure BeginFigure(startPoint: D2D1_POINT_2F;
-                          figureBegin: D2D1_FIGURE_BEGIN); stdcall;
+    procedure BeginFigure(startPoint: D2D1_POINT_2F; figureBegin: D2D1_FIGURE_BEGIN); stdcall;
 
-    procedure AddLines(points: PD2D1_POINT_2F; // pointer to array of points
-                       pointsCount: UINT32); stdcall;
+    procedure AddLines(points: PD2D1_POINT_2F; pointsCount: UINT32); stdcall;
 
-    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; // pointer to array of beziers
-                         beziersCount: UINT32); stdcall;
+    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; beziersCount: UINT32); stdcall;
 
     procedure EndFigure(figureEnd: D2D1_FIGURE_END); stdcall;
 
-    function Close(): HResult; stdcall;
-
+    function Close(): HRESULT; stdcall;
   end;
   IID_ID2D1SimplifiedGeometrySink = ID2D1SimplifiedGeometrySink;
   {$EXTERNALSYM IID_ID2D1SimplifiedGeometrySink}
@@ -1406,18 +1303,16 @@ type
   {$EXTERNALSYM ID2D1GeometrySink}
   ID2D1GeometrySink = interface(ID2D1SimplifiedGeometrySink)
   ['{2cd9069f-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     procedure AddLine(point: D2D1_POINT_2F); stdcall;
 
-    procedure AddBezier(const bezier: D2D1_BEZIER_SEGMENT); stdcall;
+    procedure AddBezier(bezier: PD2D1_BEZIER_SEGMENT); stdcall;
 
-    procedure AddQuadraticBezier(const bezier: D2D1_QUADRATIC_BEZIER_SEGMENT); stdcall;
+    procedure AddQuadraticBezier(bezier: PD2D1_QUADRATIC_BEZIER_SEGMENT); stdcall;
 
-    procedure AddQuadraticBeziers(beziers: PD2D1_QUADRATIC_BEZIER_SEGMENT; // pointer to array of beziers
-                                  beziersCount: UINT32); stdcall;
+    procedure AddQuadraticBeziers(beziers: PD2D1_QUADRATIC_BEZIER_SEGMENT; beziersCount: UINT32); stdcall;
 
-    procedure AddArc(const arc: D2D1_ARC_SEGMENT); stdcall;
-
+    procedure AddArc(arc: PD2D1_ARC_SEGMENT); stdcall;
   end;
   IID_ID2D1GeometrySink = ID2D1GeometrySink;
   {$EXTERNALSYM IID_ID2D1GeometrySink}
@@ -1431,12 +1326,10 @@ type
   {$EXTERNALSYM ID2D1TessellationSink}
   ID2D1TessellationSink = interface(IUnknown)
   ['{2cd906c1-12e2-11dc-9fed-001143a055f9}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure AddTriangles(triangles: PD2D1_TRIANGLE; trianglesCount: UINT32); stdcall;
 
-    procedure AddTriangles(triangles: PD2D1_TRIANGLE;    // pointer to array of triangles
-                           trianglesCount: UINT32); stdcall;
-
-    function Close(): HResult; stdcall;
-
+    function Close(): HRESULT; stdcall;
   end;
   IID_ID2D1TessellationSink = ID2D1TessellationSink;
   {$EXTERNALSYM IID_ID2D1TessellationSink}
@@ -1450,18 +1343,14 @@ type
   {$EXTERNALSYM ID2D1PathGeometry}
   ID2D1PathGeometry = interface(ID2D1Geometry)
   ['{2cd906a5-12e2-11dc-9fed-001143a055f9}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function Open(out geometrySink: ID2D1GeometrySink): HRESULT; stdcall;
 
-    // Opens a geometry sink that will be used to create this path geometry.
-    function Open(out geometrySink: ID2D1GeometrySink): HResult; stdcall;
+    function Stream(geometrySink: ID2D1GeometrySink): HRESULT; stdcall;
 
-    // Retrieve the contents of this geometry. The caller passes an implementation of a
-    // ID2D1GeometrySink interface to receive the data.
-    function Stream(geometrySink: ID2D1GeometrySink): HResult; stdcall;
+    function GetSegmentCount(count: PUINT32): HRESULT; stdcall;
 
-    function GetSegmentCount(out count: UINT32): HResult; stdcall;
-
-    function GetFigureCount(out count: UINT32): HResult; stdcall;
-
+    function GetFigureCount(count: PUINT32): HRESULT; stdcall;
   end;
   IID_ID2D1PathGeometry = ID2D1PathGeometry;
   {$EXTERNALSYM IID_ID2D1PathGeometry}
@@ -1475,10 +1364,8 @@ type
   {$EXTERNALSYM ID2D1Mesh}
   ID2D1Mesh = interface(ID2D1Resource)
   ['{2cd906c2-12e2-11dc-9fed-001143a055f9}']
-
-    // Opens the mesh for population.
-    function Open(out tessellationSink: ID2D1TessellationSink): HResult; stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function Open(out tessellationSink: ID2D1TessellationSink): HRESULT; stdcall;
   end;
   IID_ID2D1Mesh = ID2D1Mesh;
   {$EXTERNALSYM IID_ID2D1Mesh}
@@ -1492,9 +1379,8 @@ type
   {$EXTERNALSYM ID2D1Layer}
   ID2D1Layer = interface(ID2D1Resource)
   ['{2cd9069b-12e2-11dc-9fed-001143a055f9}']
-
-    function GetSize(): D2D1_SIZE_F; stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetSize(out value: D2D1_SIZE_F); stdcall;
   end;
   IID_ID2D1Layer = ID2D1Layer;
   {$EXTERNALSYM IID_ID2D1Layer}
@@ -1509,21 +1395,14 @@ type
   {$EXTERNALSYM ID2D1DrawingStateBlock}
   ID2D1DrawingStateBlock = interface(ID2D1Resource)
   ['{28506e39-ebf6-46a1-bb47-fd85565ab957}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    procedure GetDescription(stateDescription: PD2D1_DRAWING_STATE_DESCRIPTION); stdcall; overload;
 
-    // Retrieves the state currently contained within this state block resource.
-    procedure GetDescription(out stateDescription: D2D1_DRAWING_STATE_DESCRIPTION); stdcall;
+    procedure SetDescription(stateDescription: PD2D1_DRAWING_STATE_DESCRIPTION); stdcall; overload;
 
-    // Sets the state description of this state block resource.
-    procedure SetDescription(stateDescription: D2D1_DRAWING_STATE_DESCRIPTION); stdcall;
-
-    // Sets the text rendering parameters of this state block resource.
     procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams); stdcall;
 
-    // Retrieves the text rendering parameters contained within this state block
-    // resource. If a nil text rendering parameter was specified, nil will be
-    // returned.
     procedure GetTextRenderingParams(out textRenderingParams: IDWriteRenderingParams); stdcall;
-
   end;
   IID_ID2D1DrawingStateBlock = ID2D1DrawingStateBlock;
   {$EXTERNALSYM IID_ID2D1DrawingStateBlock}
@@ -1540,193 +1419,62 @@ type
   {$EXTERNALSYM ID2D1RenderTarget}
   ID2D1RenderTarget = interface(ID2D1Resource)
   ['{2cd90694-12e2-11dc-9fed-001143a055f9}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function CreateBitmap(size: D2D1_SIZE_U; srcData: Pointer; pitch: UINT32; bitmapProperties: PD2D1_BITMAP_PROPERTIES; out bitmap: ID2D1Bitmap): HRESULT; stdcall; overload;
 
-    // Create a D2D bitmap by copying from memory, or create uninitialized.
-    function CreateBitmap(size: D2D1_SIZE_U;
-                          srcData: Pointer;
-                          pitch: UINT32;
-                          const bitmapProperties: D2D1_BITMAP_PROPERTIES;
-                          out bitmap: ID2D1Bitmap): HResult; stdcall;
+    function CreateBitmapFromWicBitmap(wicBitmapSource: IWICBitmapSource; bitmapProperties: PD2D1_BITMAP_PROPERTIES; out bitmap: ID2D1Bitmap): HRESULT; stdcall; overload;
 
-    // Create a D2D bitmap by copying a WIC bitmap.
-    function CreateBitmapFromWicBitmap(wicBitmapSource: IWICBitmapSource;
-                                       bitmapProperties: PD2D1_BITMAP_PROPERTIES;
-                                       out bitmap: ID2D1Bitmap): HResult; stdcall;
+    function CreateSharedBitmap(const riid: TGUID; data: Pointer; bitmapProperties: PD2D1_BITMAP_PROPERTIES; out bitmap: ID2D1Bitmap): HRESULT; stdcall;
 
-    // Create a D2D bitmap by sharing bits from another resource. The bitmap must be
-    // compatible with the render target for the call to succeed. For example, an
-    // IWICBitmap can be shared with a software target, or a DXGI surface can be shared
-    // with a DXGI render target.
-    function CreateSharedBitmap(const riid: REFIID;
-                                var data: Pointer;
-                                bitmapProperties: PD2D1_BITMAP_PROPERTIES;
-                                out bitmap: ID2D1Bitmap): HResult; stdcall;
+    function CreateBitmapBrush(bitmap: ID2D1Bitmap; bitmapBrushProperties: PD2D1_BITMAP_BRUSH_PROPERTIES; brushProperties: PD2D1_BRUSH_PROPERTIES; out bitmapBrush: ID2D1BitmapBrush): HRESULT; stdcall; overload;
 
-    // Creates a bitmap brush. The bitmap is scaled, rotated, skewed or tiled to fill
-    // or pen a geometry.
-    function CreateBitmapBrush(bitmap: ID2D1Bitmap;
-                               bitmapBrushProperties: PD2D1_BITMAP_BRUSH_PROPERTIES;
-                               brushProperties: PD2D1_BRUSH_PROPERTIES;
-                               out bitmapBrush: ID2D1BitmapBrush): HResult; stdcall;
+    function CreateSolidColorBrush(color: PD2D1_COLOR_F; brushProperties: PD2D1_BRUSH_PROPERTIES; out solidColorBrush: ID2D1SolidColorBrush): HRESULT; stdcall;
 
-    function CreateSolidColorBrush(const color: D2D1_COLOR_F;
-                                   brushProperties: PD2D1_BRUSH_PROPERTIES;
-                                   out solidColorBrush: ID2D1SolidColorBrush): HResult; stdcall;
+    function CreateGradientStopCollection(gradientStops: PD2D1_GRADIENT_STOP; gradientStopsCount: UINT32; colorInterpolationGamma: D2D1_GAMMA; extendMode: D2D1_EXTEND_MODE; out gradientStopCollection: ID2D1GradientStopCollection): HRESULT; stdcall; overload;
 
-    // A gradient stop collection represents a set of stops in an ideal unit length.
-    // This is the source resource for a linear gradient and radial gradient brush.
+    function CreateLinearGradientBrush(linearGradientBrushProperties: PD2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES; brushProperties: PD2D1_BRUSH_PROPERTIES; gradientStopCollection: ID2D1GradientStopCollection; out linearGradientBrush: ID2D1LinearGradientBrush): HRESULT; stdcall;
 
-    // <param name="colorInterpolationGamma">Specifies which space the color
-    // interpolation occurs in.</param>
-    // <param name="extendMode">Specifies how the gradient will be extended outside of
-    // the unit length.</param>
-    function CreateGradientStopCollection(const gradientStops: PD2D1_GRADIENT_STOP;
-                                          gradientStopsCount: UINT32;
-                                          colorInterpolationGamma: D2D1_GAMMA;
-                                          extendMode: D2D1_EXTEND_MODE;
-                                          out gradientStopCollection: ID2D1GradientStopCollection): HResult; stdcall;
+    function CreateRadialGradientBrush(radialGradientBrushProperties: PD2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES; brushProperties: PD2D1_BRUSH_PROPERTIES; gradientStopCollection: ID2D1GradientStopCollection; out radialGradientBrush: ID2D1RadialGradientBrush): HRESULT; stdcall;
 
-    function CreateLinearGradientBrush(const linearGradientBrushProperties: D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES;
-                                       brushProperties: PD2D1_BRUSH_PROPERTIES;
-                                       gradientStopCollection: ID2D1GradientStopCollection;
-                                       out linearGradientBrush: ID2D1LinearGradientBrush): HResult; stdcall;
+    function CreateCompatibleRenderTarget(desiredSize: PD2D1_SIZE_F; desiredPixelSize: PD2D1_SIZE_U; desiredFormat: PD2D1_PIXEL_FORMAT; options: D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS; out bitmapRenderTarget: ID2D1BitmapRenderTarget): HRESULT; stdcall;
 
-    function CreateRadialGradientBrush(const radialGradientBrushProperties: D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES;
-                                       brushProperties: PD2D1_BRUSH_PROPERTIES;
-                                       gradientStopCollection: ID2D1GradientStopCollection;
-                                       out radialGradientBrush: ID2D1RadialGradientBrush): HResult; stdcall;
+    function CreateLayer(size: PD2D1_SIZE_F; out layer: ID2D1Layer): HRESULT; stdcall;
 
-    // Creates a bitmap render target whose bitmap can be used as a source for
-    // rendering in the API.
+    function CreateMesh(out mesh: ID2D1Mesh): HRESULT; stdcall;
 
-    // <param name="desiredSize">The requested size of the target in DIPs. If the pixel
-    // size is not specified, the DPI is inherited from the parent target. However, the
-    // render target will never contain a fractional number of pixels.</param>
-    // <param name="desiredPixelSize">The requested size of the render target in
-    // pixels. If the DIP size is also specified, the DPI is calculated from these two
-    // values. If the desired size is not specified, the DPI is inherited from the
-    // parent render target. If neither value is specified, the compatible render
-    // target will be the same size and have the same DPI as the parent target.</param>
-    // <param name="desiredFormat">The desired pixel format. The format must be
-    // compatible with the parent render target type. If the format is not specified,
-    // it will be inherited from the parent render target.</param>
-    // <param name="options">Allows the caller to retrieve a GDI compatible render
-    // target.</param>
-    // <param name="bitmapRenderTarget">The returned bitmap render target.</param>
-    function CreateCompatibleRenderTarget(desiredSize: PD2D1_SIZE_F;
-                                          desiredPixelSize: PD2D1_SIZE_U;
-                                          desiredFormat: PD2D1_PIXEL_FORMAT;
-                                          options: D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS;
-                                          out bitmapRenderTarget: ID2D1BitmapRenderTarget): HResult; stdcall;
+    procedure DrawLine(point0: D2D1_POINT_2F; point1: D2D1_POINT_2F; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle); stdcall;
 
-    // Creates a layer resource that can be used on any target and which will resize
-    // under the covers if necessary.
+    procedure DrawRectangle(rect: PD2D1_RECT_F; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle); stdcall;
 
-    // <param name="size">The resolution independent minimum size hint for the layer
-    // resource. Specify this to prevent unwanted reallocation of the layer backing
-    // store. The size is in DIPs, but, it is unaffected by the current world
-    // transform. If the size is unspecified, the returned resource is a placeholder
-    // and the backing store will be allocated to be the minimum size that can hold the
-    // content when the layer is pushed.</param>
-    function CreateLayer(size: PD2D1_SIZE_F;
-                         out layer: ID2D1Layer): HResult; stdcall;
+    procedure FillRectangle(rect: PD2D1_RECT_F; brush: ID2D1Brush); stdcall;
 
-    // Create a D2D mesh.
-    function CreateMesh(out mesh: ID2D1Mesh): HResult; stdcall;
+    procedure DrawRoundedRectangle(roundedRect: PD2D1_ROUNDED_RECT; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle); stdcall;
 
-    procedure DrawLine(point0: D2D1_POINT_2F;
-                       point1: D2D1_POINT_2F;
-                       brush: ID2D1Brush;
-                       strokeWidth: Single = 1.0;
-                       strokeStyle: ID2D1StrokeStyle = nil); stdcall;
+    procedure FillRoundedRectangle(roundedRect: PD2D1_ROUNDED_RECT; brush: ID2D1Brush); stdcall;
 
-    procedure DrawRectangle(const rect: D2D1_RECT_F;
-                            brush: ID2D1Brush;
-                            strokeWidth: Single = 1.0;
-                            strokeStyle: ID2D1StrokeStyle = nil); stdcall;
+    procedure DrawEllipse(ellipse: PD2D1_ELLIPSE; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle); stdcall;
 
-    procedure FillRectangle(const rect: D2D1_RECT_F;
-                            brush: ID2D1Brush); stdcall;
+    procedure FillEllipse(ellipse: PD2D1_ELLIPSE; brush: ID2D1Brush); stdcall;
 
-    procedure DrawRoundedRectangle(const roundedRect: D2D1_ROUNDED_RECT;
-                                   brush: ID2D1Brush;
-                                   const strokeWidth: Single = 1.0;
-                                   const strokeStyle: ID2D1StrokeStyle = nil); stdcall;
+    procedure DrawGeometry(geometry: ID2D1Geometry; brush: ID2D1Brush; strokeWidth: Single; strokeStyle: ID2D1StrokeStyle); stdcall;
 
-    procedure FillRoundedRectangle(const roundedRect: D2D1_ROUNDED_RECT;
-                                   const brush: ID2D1Brush); stdcall;
+    procedure FillGeometry(geometry: ID2D1Geometry; brush: ID2D1Brush; opacityBrush: ID2D1Brush); stdcall;
 
-    procedure DrawEllipse(const ellipse: D2D1_ELLIPSE;
-                          brush: ID2D1Brush;
-                          const strokeWidth: Single = 1.0;
-                          const strokeStyle: ID2D1StrokeStyle = nil); stdcall;
+    procedure FillMesh(mesh: ID2D1Mesh; brush: ID2D1Brush); stdcall;
 
-    procedure FillEllipse(const ellipse: D2D1_ELLIPSE;
-                          brush: ID2D1Brush); stdcall;
+    procedure FillOpacityMask(opacityMask: ID2D1Bitmap; brush: ID2D1Brush; content: D2D1_OPACITY_MASK_CONTENT; destinationRectangle: PD2D1_RECT_F; sourceRectangle: PD2D1_RECT_F); stdcall; overload;
 
-    procedure DrawGeometry(const geometry: ID2D1Geometry;
-                           brush: ID2D1Brush;
-                           const strokeWidth: Single = 1.0;
-                           strokeStyle: ID2D1StrokeStyle = nil); stdcall;
+    procedure DrawBitmap(bitmap: ID2D1Bitmap; destinationRectangle: PD2D1_RECT_F; opacity: Single; interpolationMode: D2D1_BITMAP_INTERPOLATION_MODE; sourceRectangle: PD2D1_RECT_F); stdcall; overload;
 
-    // <param name="opacityBrush">An optionally specified opacity brush. Only the alpha
-    // channel of the corresponding brush will be sampled and will be applied to the
-    // entire fill of the geometry. If this brush is specified, the fill brush must be
-    // a bitmap brush with an extend mode of D2D1_EXTEND_MODE_CLAMP.</param>
-    procedure FillGeometry(geometry: ID2D1Geometry;
-                           brush: ID2D1Brush;
-                           const opacityBrush: ID2D1Brush = nil); stdcall;
+    procedure DrawText(_string: PWideChar; stringLength: UINT32; textFormat: IDWriteTextFormat; layoutRect: PD2D1_RECT_F; defaultFillBrush: ID2D1Brush; options: D2D1_DRAW_TEXT_OPTIONS; measuringMode: DWRITE_MEASURING_MODE); stdcall; overload;
 
-    // Fill a mesh. Since meshes can only render aliased content, the render target
-    // antialiasing mode must be set to aliased.
-    procedure FillMesh(mesh: ID2D1Mesh;
-                       brush: ID2D1Brush); stdcall;
+    procedure DrawTextLayout(origin: D2D1_POINT_2F; textLayout: IDWriteTextLayout; defaultFillBrush: ID2D1Brush; options: D2D1_DRAW_TEXT_OPTIONS); stdcall; overload;
 
-    // Fill using the alpha channel of the supplied opacity mask bitmap. The brush
-    // opacity will be modulated by the mask. The render target antialiasing mode must
-    // be set to aliased.
-    procedure FillOpacityMask(opacityMask: ID2D1Bitmap;
-                              brush: ID2D1Brush;
-                              content: D2D1_OPACITY_MASK_CONTENT;
-                              destinationRectangle: PD2D1_RECT_F = nil;
-                              sourceRectangle: PD2D1_RECT_F = nil); stdcall;
+    procedure DrawGlyphRun(baselineOrigin: D2D1_POINT_2F; glyphRun: PDWRITE_GLYPH_RUN; foregroundBrush: ID2D1Brush; measuringMode: DWRITE_MEASURING_MODE); stdcall; overload;
 
-    procedure DrawBitmap(bitmap: ID2D1Bitmap;
-                         destinationRectangle: PD2D1_RECT_F = nil;
-                         opacity: Single = 1.0;
-                         interpolationMode: D2D1_BITMAP_INTERPOLATION_MODE = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
-                         sourceRectangle: PD2D1_RECT_F = nil); stdcall;
+    procedure SetTransform(transform: PD2D1_MATRIX_3X2_F); stdcall;
 
-    // Draws the text within the given layout rectangle and by default also performs
-    // baseline snapping.
-    procedure DrawText(_string: PWideChar;
-                       const stringLength: UINT32;
-                       textFormat: IDWriteTextFormat;
-                       const layoutRect: D2D1_RECT_F;
-                       defaultFillBrush: ID2D1Brush;
-                       options: D2D1_DRAW_TEXT_OPTIONS = D2D1_DRAW_TEXT_OPTIONS_NONE;
-                       measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL); stdcall;
-
-    // Draw a text layout object. If the layout is not subsequently changed, this can
-    // be more efficient than DrawText when drawing the same layout repeatedly.
-
-    // <param name="options">The specified text options. If D2D1_DRAW_TEXT_OPTIONS_CLIP
-    // is used, the text is clipped to the layout bounds. These bounds are derived from
-    // the origin and the layout bounds of the corresponding IDWriteTextLayout object.
-    // </param>
-    procedure DrawTextLayout(origin: D2D1_POINT_2F;
-                             textLayout: IDWriteTextLayout;
-                             defaultFillBrush: ID2D1Brush;
-                             options: D2D1_DRAW_TEXT_OPTIONS = D2D1_DRAW_TEXT_OPTIONS_NONE); stdcall;
-
-    procedure DrawGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                           glyphRun: DWRITE_GLYPH_RUN;
-                           foregroundBrush: ID2D1Brush;
-                           measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL); stdcall;
-
-    procedure SetTransform(const transform: D2D1_MATRIX_3X2_F); stdcall;
-
-    procedure GetTransform(var transform: D2D1_MATRIX_3X2_F); stdcall;
+    procedure GetTransform(transform: PD2D1_MATRIX_3X2_F); stdcall;
 
     procedure SetAntialiasMode(antialiasMode: D2D1_ANTIALIAS_MODE); stdcall;
 
@@ -1736,92 +1484,47 @@ type
 
     function GetTextAntialiasMode(): D2D1_TEXT_ANTIALIAS_MODE; stdcall;
 
-    procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams = nil); stdcall;
+    procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams); stdcall;
 
-    // Retrieve the text render parameters. NOTE: If nil is specified to
-    // SetTextRenderingParameters, nil will be returned.
     procedure GetTextRenderingParams(out textRenderingParams: IDWriteRenderingParams); stdcall;
 
-    // Set a tag to correspond to the succeeding primitives. If an error occurs
-    // rendering a primitive, the tags can be returned from the Flush or EndDraw call.
-    procedure SetTags(tag1: D2D1_TAG;
-                      tag2: D2D1_TAG); stdcall;
+    procedure SetTags(tag1: D2D1_TAG; tag2: D2D1_TAG); stdcall;
 
-    // Retrieves the currently set tags. This does not retrieve the tags corresponding
-    // to any primitive that is in error.
-    procedure GetTags(tag1: PD2D1_TAG = nil;
-                      tag2: PD2D1_TAG = nil); stdcall;
+    procedure GetTags(tag1: PD2D1_TAG; tag2: PD2D1_TAG); stdcall;
 
-    // Start a layer of drawing calls. The way in which the layer must be resolved is
-    // specified first as well as the logical resource that stores the layer
-    // parameters. The supplied layer resource might grow if the specified content
-    // cannot fit inside it. The layer will grow monotonically on each axis.  If a NULL
-    // ID2D1Layer is provided, then a layer resource will be allocated automatically.
-    procedure PushLayer(layerParameters: D2D1_LAYER_PARAMETERS;
-                        layer: ID2D1Layer); stdcall;
+    procedure PushLayer(layerParameters: PD2D1_LAYER_PARAMETERS; layer: ID2D1Layer); stdcall; overload;
 
-    // Ends a layer that was defined with particular layer resources.
     procedure PopLayer(); stdcall;
 
-    function Flush(tag1: PD2D1_TAG = nil;
-                   tag2: PD2D1_TAG = nil): HResult; stdcall;
+    function Flush(tag1: PD2D1_TAG; tag2: PD2D1_TAG): HRESULT; stdcall;
 
-    // Gets the current drawing state and saves it into the supplied
-    // IDrawingStatckBlock.
-    procedure SaveDrawingState(var drawingStateBlock: ID2D1DrawingStateBlock); stdcall;
+    procedure SaveDrawingState(drawingStateBlock: ID2D1DrawingStateBlock); stdcall;
 
-    // Copies the state stored in the block interface.
     procedure RestoreDrawingState(drawingStateBlock: ID2D1DrawingStateBlock); stdcall;
 
-    // Pushes a clip. The clip can be antialiased. The clip must be axis aligned. If
-    // the current world transform is not axis preserving, then the bounding box of the
-    // transformed clip rect will be used. The clip will remain in effect until a
-    // PopAxisAligned clip call is made.
-    procedure PushAxisAlignedClip(const clipRect: D2D1_RECT_F;
-                                  antialiasMode: D2D1_ANTIALIAS_MODE); stdcall;
+    procedure PushAxisAlignedClip(clipRect: PD2D1_RECT_F; antialiasMode: D2D1_ANTIALIAS_MODE); stdcall;
 
     procedure PopAxisAlignedClip(); stdcall;
 
-    procedure Clear(const clearColor: D2D1_COLOR_F); stdcall;
+    procedure Clear(clearColor: PD2D1_COLOR_F); stdcall;
 
-    // Start drawing on this render target. Draw calls can only be issued between a
-    // BeginDraw and EndDraw call.
     procedure BeginDraw(); stdcall;
 
-    // Ends drawing on the render target, error results can be retrieved at this time,
-    // or when calling flush.
-    function EndDraw(tag1: PD2D1_TAG = nil;
-                     tag2: PD2D1_TAG = nil): HResult; stdcall;
+    function EndDraw(tag1: PD2D1_TAG; tag2: PD2D1_TAG): HRESULT; stdcall;
 
-    procedure GetPixelFormat(out pixelFormat: D2D1_PIXEL_FORMAT); stdcall;
+    procedure GetPixelFormat(out value: D2D1_PIXEL_FORMAT); stdcall;
 
-    // Sets the DPI on the render target. This results in the render target being
-    // interpreted to a different scale. Neither DPI can be negative. If zero is
-    // specified for both, the system DPI is chosen. If one is zero and the other
-    // unspecified, the DPI is not changed.
-    procedure SetDpi(dpiX: Single;
-                     dpiY: Single); stdcall;
+    procedure SetDpi(dpiX: Single; dpiY: Single); stdcall;
 
-    // Return the current DPI from the target.
-    procedure GetDpi(out dpiX: Single;
-                     out dpiY: Single); stdcall;
+    procedure GetDpi(dpiX: PSingle; dpiY: PSingle); stdcall;
 
-    // Returns the size of the render target in DIPs.
-    procedure GetSize(out size: D2D1_SIZE_F); stdcall;
+    procedure GetSize(out value: D2D1_SIZE_F); stdcall;
 
-    // Returns the size of the render target in pixels.
-    procedure GetPixelSize(out pixelSize: D2D1_SIZE_U); stdcall;
+    procedure GetPixelSize(out value: D2D1_SIZE_U); stdcall;
 
-    // Returns the maximum bitmap and render target size that is guaranteed to be
-    // supported by the render target.
     function GetMaximumBitmapSize(): UINT32; stdcall;
 
-    // Returns True if the given properties are supported by this render target.
-    // The DPI is ignored. NOTE: If the render target type is software, then neither
-    // D2D1_FEATURE_LEVEL_9 nor D2D1_FEATURE_LEVEL_10 will be considered to be
-    // supported.
-    function IsSupported(const renderTargetProperties: D2D1_RENDER_TARGET_PROPERTIES): BOOL; stdcall;
-
+    function IsSupported(renderTargetProperties: PD2D1_RENDER_TARGET_PROPERTIES): BOOL; stdcall;
   end;
   IID_ID2D1RenderTarget = ID2D1RenderTarget;
   {$EXTERNALSYM IID_ID2D1RenderTarget}
@@ -1837,9 +1540,8 @@ type
   {$EXTERNALSYM ID2D1BitmapRenderTarget}
   ID2D1BitmapRenderTarget = interface(ID2D1RenderTarget)
   ['{2cd90695-12e2-11dc-9fed-001143a055f9}']
-
-    function GetBitmap(out bitmap: ID2D1Bitmap): HResult; stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function GetBitmap(out bitmap: ID2D1Bitmap): HRESULT; stdcall;
   end;
   IID_ID2D1BitmapRenderTarget = ID2D1BitmapRenderTarget;
   {$EXTERNALSYM IID_ID2D1BitmapRenderTarget}
@@ -1853,19 +1555,12 @@ type
   {$EXTERNALSYM ID2D1HwndRenderTarget}
   ID2D1HwndRenderTarget = interface(ID2D1RenderTarget)
   ['{2cd90698-12e2-11dc-9fed-001143a055f9}']
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
     function CheckWindowState(): D2D1_WINDOW_STATE; stdcall;
 
-    // Resize the buffer underlying the render target. This operation might fail if
-    // there is insufficient video memory or system memory, or if the render target is
-    // resized beyond the maximum bitmap size. If the method fails, the render target
-    // will be placed in a zombie state and D2DERR_RECREATE_TARGET will be returned
-    // from it when EndDraw is called. In addition an appropriate failure result will
-    // be returned from Resize.
-    function Resize(var pixelSize: D2D1_SIZE_U): HResult; stdcall;
+    function Resize(pixelSize: PD2D1_SIZE_U): HRESULT; stdcall;
 
     function GetHwnd(): HWND; stdcall;
-
   end;
   IID_ID2D1HwndRenderTarget = ID2D1HwndRenderTarget;
   {$EXTERNALSYM IID_ID2D1HwndRenderTarget}
@@ -1879,12 +1574,10 @@ type
   {$EXTERNALSYM ID2D1GdiInteropRenderTarget}
   ID2D1GdiInteropRenderTarget = interface(IUnknown)
   ['{e0db51c3-6f77-4bae-b3d5-e47509b35838}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function GetDC(mode: D2D1_DC_INITIALIZE_MODE; hdc: PHDC): HRESULT; stdcall;
 
-    function GetDC(mode: D2D1_DC_INITIALIZE_MODE;
-                   out hdc: HDC): HResult; stdcall;
-
-    function ReleaseDC(update: PRECT): HResult; stdcall;
-
+    function ReleaseDC(update: PRect): HRESULT; stdcall;
   end;
   IID_ID2D1GdiInteropRenderTarget = ID2D1GdiInteropRenderTarget;
   {$EXTERNALSYM IID_ID2D1GdiInteropRenderTarget}
@@ -1898,10 +1591,8 @@ type
   {$EXTERNALSYM ID2D1DCRenderTarget}
   ID2D1DCRenderTarget = interface(ID2D1RenderTarget)
   ['{1c51bc64-de61-46fd-9899-63a5d8f03950}']
-
-    function BindDC(hDC: HDC;
-                    pSubRect: PRECT): HResult; stdcall;
-
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function BindDC(hDC: HDC; pSubRect: PRect): HRESULT; stdcall;
   end;
   IID_ID2D1DCRenderTarget = ID2D1DCRenderTarget;
   {$EXTERNALSYM IID_ID2D1DCRenderTarget}
@@ -1915,71 +1606,34 @@ type
   {$EXTERNALSYM ID2D1Factory}
   ID2D1Factory = interface(IUnknown)
   ['{06152247-6f50-465a-9245-118bfd3b6007}']
+    // Native virtual slots; structure-return methods use explicit result buffers.
+    function ReloadSystemMetrics(): HRESULT; stdcall;
 
-    // Cause the factory to refresh any system metrics that it might have been snapped
-    // on factory creation.
-    function ReloadSystemMetrics(): HResult; stdcall;
+    procedure GetDesktopDpi(dpiX: PSingle; dpiY: PSingle); stdcall;
 
-    // Retrieves the current desktop DPI. To refresh this, call ReloadSystemMetrics.
-    procedure GetDesktopDpi(out dpiX: Single;
-                            out dpiY: Single); stdcall;
+    function CreateRectangleGeometry(rectangle: PD2D1_RECT_F; out rectangleGeometry: ID2D1RectangleGeometry): HRESULT; stdcall;
 
-    function CreateRectangleGeometry(const rectangle: D2D1_RECT_F;
-                                     out rectangleGeometry: ID2D1RectangleGeometry): HResult; stdcall;
+    function CreateRoundedRectangleGeometry(roundedRectangle: PD2D1_ROUNDED_RECT; out roundedRectangleGeometry: ID2D1RoundedRectangleGeometry): HRESULT; stdcall;
 
-    function CreateRoundedRectangleGeometry(const roundedRectangle: D2D1_ROUNDED_RECT;
-                                            out roundedRectangleGeometry: ID2D1RoundedRectangleGeometry): HResult; stdcall;
+    function CreateEllipseGeometry(ellipse: PD2D1_ELLIPSE; out ellipseGeometry: ID2D1EllipseGeometry): HRESULT; stdcall;
 
-    function CreateEllipseGeometry(const ellipse: D2D1_ELLIPSE;
-                                   out ellipseGeometry: ID2D1EllipseGeometry): HResult; stdcall;
+    function CreateGeometryGroup(fillMode: D2D1_FILL_MODE; geometries: PID2D1Geometry; geometriesCount: UINT32; out geometryGroup: ID2D1GeometryGroup): HRESULT; stdcall;
 
-    // Create a geometry which holds other geometries.
-    function CreateGeometryGroup(fillMode: D2D1_FILL_MODE;
-                                 geometries: ID2D1Geometry; // pointer to array of geometries
-                                 geometriesCount: UINT32;
-                                 out geometryGroup: ID2D1GeometryGroup): HResult; stdcall;
+    function CreateTransformedGeometry(sourceGeometry: ID2D1Geometry; transform: PD2D1_MATRIX_3X2_F; out transformedGeometry: ID2D1TransformedGeometry): HRESULT; stdcall;
 
-    function CreateTransformedGeometry(const sourceGeometry: ID2D1Geometry;
-                                       const transform: D2D1_MATRIX_3X2_F;
-                                       out transformedGeometry: ID2D1TransformedGeometry): HResult; stdcall;
+    function CreatePathGeometry(out pathGeometry: ID2D1PathGeometry): HRESULT; stdcall; overload;
 
-    // Returns an initially empty path geometry interface. A geometry sink is created
-    // off the interface to populate it.
-    function CreatePathGeometry(out pathGeometry: ID2D1PathGeometry): HResult; stdcall;
+    function CreateStrokeStyle(strokeStyleProperties: PD2D1_STROKE_STYLE_PROPERTIES; dashes: PSingle; dashesCount: UINT32; out strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall; overload;
 
-    // Allows a non-default stroke style to be specified for a given geometry at draw
-    // time.
-    function CreateStrokeStyle(const strokeStyleProperties: D2D1_STROKE_STYLE_PROPERTIES;
-                               dashes: PSingle;
-                               dashesCount: UINT32;
-                               out strokeStyle: ID2D1StrokeStyle): HResult; stdcall;
+    function CreateDrawingStateBlock(drawingStateDescription: PD2D1_DRAWING_STATE_DESCRIPTION; textRenderingParams: IDWriteRenderingParams; out drawingStateBlock: ID2D1DrawingStateBlock): HRESULT; stdcall; overload;
 
-    // Creates a new drawing state block, this can be used in subsequent
-    // SaveDrawingState and RestoreDrawingState operations on the render target.
-    function CreateDrawingStateBlock(drawingStateDescription: PD2D1_DRAWING_STATE_DESCRIPTION;
-                                     textRenderingParams: IDWriteRenderingParams;
-                                     out drawingStateBlock: ID2D1DrawingStateBlock): HResult; stdcall;
+    function CreateWicBitmapRenderTarget(target: IWICBitmap; renderTargetProperties: PD2D1_RENDER_TARGET_PROPERTIES; out renderTarget: ID2D1RenderTarget): HRESULT; stdcall;
 
-    // Creates a render target which is a source of bitmaps.
-    function CreateWicBitmapRenderTarget(target: IWICBitmap;
-                                         renderTargetProperties: D2D1_RENDER_TARGET_PROPERTIES;
-                                         out renderTarget: ID2D1RenderTarget): HResult; stdcall;
+    function CreateHwndRenderTarget(renderTargetProperties: PD2D1_RENDER_TARGET_PROPERTIES; hwndRenderTargetProperties: PD2D1_HWND_RENDER_TARGET_PROPERTIES; out hwndRenderTarget: ID2D1HwndRenderTarget): HRESULT; stdcall;
 
-    // Creates a render target that appears on the display.
-    function CreateHwndRenderTarget(const renderTargetProperties: D2D1_RENDER_TARGET_PROPERTIES;
-                                    const hwndRenderTargetProperties: D2D1_HWND_RENDER_TARGET_PROPERTIES;
-                                    out hwndRenderTarget: ID2D1HwndRenderTarget): HResult; stdcall;
+    function CreateDxgiSurfaceRenderTarget(dxgiSurface: IDXGISurface; renderTargetProperties: PD2D1_RENDER_TARGET_PROPERTIES; out renderTarget: ID2D1RenderTarget): HRESULT; stdcall;
 
-    // Creates a render target that draws to a DXGI Surface. The device that owns the
-    // surface is used for rendering.
-    function CreateDxgiSurfaceRenderTarget(dxgiSurface: IDXGISurface;
-                                           var renderTargetProperties: D2D1_RENDER_TARGET_PROPERTIES;
-                                           out renderTarget: ID2D1RenderTarget): HResult; stdcall;
-
-    // Creates a render target that draws to a GDI device context.
-    function CreateDCRenderTarget(const renderTargetProperties: D2D1_RENDER_TARGET_PROPERTIES;
-                                  out dcRenderTarget: ID2D1DCRenderTarget): HResult; stdcall;
-
+    function CreateDCRenderTarget(renderTargetProperties: PD2D1_RENDER_TARGET_PROPERTIES; out dcRenderTarget: ID2D1DCRenderTarget): HRESULT; stdcall;
   end;
   IID_ID2D1Factory = ID2D1Factory;
   {$EXTERNALSYM IID_ID2D1Factory}
@@ -1994,7 +1648,7 @@ type
     //
 
     function D2D1CreateFactory(factoryType: D2D1_FACTORY_TYPE;
-                               const riid: REFIID;
+                               const riid: TGUID;
                                pFactoryOptions: PD2D1_FACTORY_OPTIONS;
                                out ppIFactory): HResult; stdcall;
     {$EXTERNALSYM D2D1CreateFactory}
@@ -2010,7 +1664,7 @@ type
                                  out matrix: D2D1_MATRIX_3X2_F); stdcall;
     {$EXTERNALSYM D2D1MakeSkewMatrix}
 
-    function D2D1IsMatrixInvertible(matrix: D2D1_MATRIX_3X2_F): BOOL; stdcall;
+    function D2D1IsMatrixInvertible(const matrix: D2D1_MATRIX_3X2_F): BOOL; stdcall;
     {$EXTERNALSYM D2D1IsMatrixInvertible}
 
     function D2D1InvertMatrix(var matrix: D2D1_MATRIX_3X2_F): BOOL; stdcall;
@@ -2031,8 +1685,8 @@ const
 
 {$WARN SYMBOL_PLATFORM OFF}
     function D2D1CreateFactory;      external D2D1Lib name 'D2D1CreateFactory' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-    procedure D2D1MakeRotateMatrix;  external D2D1Lib name 'D2D1MakeRotateMatrix' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-    procedure D2D1MakeSkewMatrix;    external D2D1Lib name 'D2D1MakeSkewMatrix' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+    procedure D2D1MakeRotateMatrix;  external D2D1Lib name 'D2D1MakeRotateMatrix';
+    procedure D2D1MakeSkewMatrix;    external D2D1Lib name 'D2D1MakeSkewMatrix';
     function D2D1IsMatrixInvertible; external D2D1Lib name 'D2D1IsMatrixInvertible' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
     function D2D1InvertMatrix;       external D2D1Lib name 'D2D1InvertMatrix' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}

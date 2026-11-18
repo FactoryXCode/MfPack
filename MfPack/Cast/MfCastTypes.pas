@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -500,6 +500,8 @@ type
 
   function MfCastStateToString(const AState: TMfCastState): string;
   function MfCastLogLevelToString(const ALevel: TMfCastLogLevel): string;
+  function MfCastFormatLogLine(const AText: string;
+                               const ATimestamp: TDateTime): string;
   function MfCastMediaModeToString(const AMode: TMfCastMediaMode): string;
   function MfCastSubtitleModeToString(const AMode: TMfCastSubtitleMode): string;
   function MfCastStreamTypeToString(const AStreamType: TMfCastStreamType): string;
@@ -1012,6 +1014,13 @@ begin
   else
     Result := 'Unknown';
   end;
+end;
+
+
+function MfCastFormatLogLine(const AText: string;
+                             const ATimestamp: TDateTime): string;
+begin
+  Result := '[' + FormatDateTime('hh:nn:ss.zzz', ATimestamp) + '] ' + AText;
 end;
 
 

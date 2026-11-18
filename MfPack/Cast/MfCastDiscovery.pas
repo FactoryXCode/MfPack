@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)ws 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705  (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -78,13 +78,15 @@ type
 
   TMfCastIPv4AddressArray = array of u_long;
 
-  TMfCastMdnsDiscovery = class(TInterfacedObject, IMfCastDiscovery)
+  TMfCastMdnsDiscovery = class(TInterfacedObject, IMfCastDiscovery,
+                              IMfCastTargetedDiscovery)
   private
     FProtocol: TMfCastProtocolSettings;
     FSettings: TMfCastDiscoverySettings;
     FCallbacks: TMfCastDiscoveryCallbacks;
     FLogger: IMfCastLogger;
     FDevices: TMfCastDeviceArray;
+    FTargetDevice: TMfCastDevice;
     FLock: TCriticalSection;
     FRunning: Boolean;
     FSocket: TSocket;
@@ -96,6 +98,7 @@ type
     function EnsureSocket(): HRESULT;
     procedure CloseSocket();
     function SendQuery(): HRESULT;
+    function DiscardQueuedResponses(): HRESULT;
     function ReceiveResponses(): HRESULT;
     function ParseResponse(const AData: TBytes;
                            out ADevice: TMfCastDevice): HRESULT;
@@ -115,6 +118,7 @@ type
     function Start(): HRESULT;
     function Stop(): HRESULT;
     function Refresh(): HRESULT;
+    function DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function IsRunning(): Boolean;
   end;
@@ -187,7 +191,7 @@ procedure MfCastAppendDnsName(var AData: TBytes;
 var
   LabelStart: Integer;
   DotPos: Integer;
-  LabelText: AnsiString;
+  LabelText: UTF8String;
   Remaining: string;
   I: Integer;
 
@@ -202,12 +206,12 @@ begin
                     Remaining);
       if (DotPos = 0) then
         begin
-          LabelText := AnsiString(Remaining);
+          LabelText := UTF8String(Remaining);
           Remaining := '';
         end
       else
         begin
-          LabelText := AnsiString(Copy(Remaining,
+          LabelText := UTF8String(Copy(Remaining,
                                        1,
                                        DotPos - 1));
           Delete(Remaining,
@@ -295,7 +299,7 @@ function MfCastReadDnsName(const AData: TBytes;
 var
   Position: Integer;
   LabelLength: Integer;
-  LabelText: AnsiString;
+  LabelText: UTF8String;
   I: Integer;
   PointerOffset: Integer;
   Jumped: Boolean;
@@ -464,6 +468,7 @@ begin
   FSocket := INVALID_SOCKET;
   FWSAStarted := False;
   FCallbacks.Reset;
+  FTargetDevice.Reset;
   SetLength(FDevices, 0);
 end;
 
@@ -647,6 +652,17 @@ begin
 
   RemoveExpiredDevices();
 
+  // Ordinary browsing must process replies received between search windows.
+  // Only a targeted freshness check should discard packets queued before its
+  // new query; those packets must not trigger early target completion.
+  if (FTargetDevice.Id <> '') or (FTargetDevice.ServiceInstance <> '') or
+     (FTargetDevice.HostName <> '') or (FTargetDevice.Address <> '') then
+    begin
+      Result := DiscardQueuedResponses();
+      if FAILED(Result) then
+        Exit;
+    end;
+
   Result := SendQuery();
   if FAILED(Result) then
     Exit;
@@ -654,6 +670,20 @@ begin
   Result := ReceiveResponses();
   if SUCCEEDED(Result) then
     RemoveExpiredDevices();
+end;
+
+
+function TMfCastMdnsDiscovery.DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
+begin
+  FTargetDevice := ADevice;
+  try
+    if FRunning then
+      Result := Refresh()
+    else
+      Result := Start();
+  finally
+    FTargetDevice.Reset;
+  end;
 end;
 
 
@@ -943,6 +973,40 @@ begin
 end;
 
 
+function TMfCastMdnsDiscovery.DiscardQueuedResponses(): HRESULT;
+var
+  Buffer: array[0..8191] of Byte;
+  Count, ErrorCode: Integer;
+  StartTick: DWORD;
+begin
+  Result := EnsureSocket();
+  if FAILED(Result) then
+    Exit;
+  StartTick := GetTickCount();
+  // This socket may have accumulated replies between searches. They must not
+  // complete a new targeted search before its query has even been answered.
+  repeat
+    Count := recv(FSocket, Buffer, SizeOf(Buffer), 0);
+    if Count = SOCKET_ERROR then
+    begin
+      ErrorCode := WSAGetLastError();
+      if ErrorCode = WSAEWOULDBLOCK then
+        Exit(S_OK);
+      // An oversized discarded datagram has already been consumed.
+      if ErrorCode <> WSAEMSGSIZE then
+        Exit(HRESULT($80070000 or DWORD(ErrorCode)));
+    end;
+  until (not FRunning) or ((GetTickCount() - StartTick) >= 100);
+  if FRunning then
+  begin
+    // Keep a saturated socket from making this pre-query drain unbounded.
+    CloseSocket();
+    Exit(EnsureSocket());
+  end;
+  Result := S_OK;
+end;
+
+
 function TMfCastMdnsDiscovery.ReceiveResponses(): HRESULT;
 var
   Buffer: array[0..8191] of Byte;
@@ -959,6 +1023,7 @@ var
   NextQueryMs: Cardinal;
   PacketCount: Cardinal;
   AcceptedCount: Cardinal;
+  TargetFound: Boolean;
 
 begin
 
@@ -983,6 +1048,7 @@ begin
   NextQueryMs := 500;
   PacketCount := 0;
   AcceptedCount := 0;
+  TargetFound := False;
 
   repeat
 
@@ -993,13 +1059,13 @@ begin
         if FAILED(Result) then
           Exit;
 
-        // Query immediately above, once after 500 ms, then once more at
-        // 1500 ms. The late retry covers slow Android TV responders without
-        // flooding the multicast network throughout the response window.
+        // Keep the early retries at 500/1500 ms, then poll every two seconds
+        // throughout the configured window. Slow standby receivers may not
+        // answer until more than six seconds after the initial query.
         if (NextQueryMs < 1500) then
           NextQueryMs := 1500
         else
-          NextQueryMs := WindowMs;
+          NextQueryMs := ElapsedMs + 2000;
       end;
 
     FromLen := SizeOf(FromAddr);
@@ -1050,6 +1116,15 @@ begin
                         BytesRead]));
             MfCastRememberWakeTarget(Device);
             UpsertDevice(Device);
+            // A fast reply from another receiver must not end a TV search.
+            // Only a complete endpoint matching the requested identity can.
+            TargetFound := (Device.Address <> '') and (Device.Port <> 0) and
+              (MfCastSameDevice(FTargetDevice, Device) or
+               ((FTargetDevice.Id = '') and
+                (FTargetDevice.ServiceInstance = '') and
+                (FTargetDevice.HostName = '') and
+                (FTargetDevice.Address <> '') and
+                SameText(FTargetDevice.Address, Device.Address)));
           end
         else
           if (ParseResult = S_FALSE) then
@@ -1073,11 +1148,16 @@ begin
                         DWORD(ParseResult)]));
 
       end;
-  until ((GetTickCount() - StartTick) >= WindowMs);
+  until TargetFound or (not FRunning) or
+        ((GetTickCount() - StartTick) >= WindowMs);
+
+  if TargetFound then
+    Log(cllDebug, Format('Requested receiver "%s" answered after %d ms; finishing discovery early.',
+                         [Device.FriendlyName, GetTickCount() - StartTick]));
 
   Log(cllDebug,
       Format('mDNS response window finished after %d ms: packets=%d accepted=%d.',
-             [WindowMs,
+             [GetTickCount() - StartTick,
               PacketCount,
               AcceptedCount]));
   Result := S_OK;
@@ -1104,7 +1184,7 @@ var
   DataOffset: Integer;
   ServiceInstance: string;
   HostName: string;
-  TxtText: AnsiString;
+  TxtText: UTF8String;
   TxtName: string;
   TxtValue: string;
   TxtLength: Integer;

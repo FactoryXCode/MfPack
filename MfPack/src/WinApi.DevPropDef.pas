@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Defines property types and keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -193,15 +193,15 @@ const
 type
 
   PDevpropBoolean = ^DEVPROP_BOOLEAN;
-  PDEVPROP_BOOLEAN = ^ByteBool;
-  DEVPROP_BOOLEAN = ByteBool;
+  PDEVPROP_BOOLEAN = ^DEVPROP_BOOLEAN;
+  DEVPROP_BOOLEAN = ShortInt;
   {$EXTERNALSYM DEVPROP_BOOLEAN}
 
 const
 
-  DEVPROP_TRUE                        = -1;
+  DEVPROP_TRUE = DEVPROP_BOOLEAN(-1);
   {$EXTERNALSYM DEVPROP_TRUE}
-  DEVPROP_FALSE                       = 0;
+  DEVPROP_FALSE = DEVPROP_BOOLEAN(0);
   {$EXTERNALSYM DEVPROP_FALSE}
 
 

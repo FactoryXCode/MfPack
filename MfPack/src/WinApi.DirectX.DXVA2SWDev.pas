@@ -10,7 +10,7 @@
 // Release date: 02-10-2015
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: DirectX Video Acceleration 2 header file for software video
 //              processing devices.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -72,7 +72,7 @@ uses
   {DirectX}
   WinApi.DirectX.DXVA9Typ,
   WinApi.DirectX.DXVA2Api,
-  WinApi.DirectX.D3D9;
+  WinApi.DirectX.D3D9Types;
 
   {$MINENUMSIZE 4}
 
@@ -160,55 +160,56 @@ type
 
 // #if defined(_D3D9_H_) || defined(_d3d9P_H_)
 
-  PDXVA2SW_GETVIDEOPROCESSORRENDERTARGETCOUNT = function(pVideoDesc: DXVA2_VideoDesc;
-                                                         var pCount: UINT): HResult; stdcall;
+  PDXVA2SW_GETVIDEOPROCESSORRENDERTARGETCOUNT = function(pVideoDesc: PDXVA2VideoDesc;
+                                                         pCount: PUINT): HRESULT; stdcall;
 
-  PDXVA2SW_GETVIDEOPROCESSORRENDERTARGETS = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETVIDEOPROCESSORRENDERTARGETS = function(pVideoDesc: PDXVA2VideoDesc;
                                                      Count: UINT;
-                                                     var pFormats: PD3DFORMAT): HResult; stdcall;
+                                                     pFormats: PD3DFORMAT): HRESULT; stdcall;
 
-  PDXVA2SW_GETVIDEOPROCESSORCAPS = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETVIDEOPROCESSORCAPS = function(pVideoDesc: PDXVA2VideoDesc;
                                             RenderTargetFormat: D3DFORMAT;
-                                            var pCaps: DXVA2_VideoProcessorCaps): HResult; stdcall;
+                                            pCaps: PDXVA2_VideoProcessorCaps): HRESULT; stdcall;
 
-  PDXVA2SW_GETVIDEOPROCESSORSUBSTREAMFORMATCOUNT = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETVIDEOPROCESSORSUBSTREAMFORMATCOUNT = function(pVideoDesc: PDXVA2VideoDesc;
                                                             RenderTargetFormat: D3DFORMAT;
-                                                            var pCount: UINT): HResult; stdcall;
+                                                            pCount: PUINT): HRESULT; stdcall;
 
-  PDXVA2SW_GETVIDEOPROCESSORSUBSTREAMFORMATS = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETVIDEOPROCESSORSUBSTREAMFORMATS = function(pVideoDesc: PDXVA2VideoDesc;
                                                         RenderTargetFormat: D3DFORMAT;
                                                         Count: UINT;
-                                                        var pFormats: PD3DFORMAT): HResult; stdcall;
+                                                        pFormats: PD3DFORMAT): HRESULT; stdcall;
 
-  PDXVA2SW_GETPROCAMPRANGE = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETPROCAMPRANGE = function(pVideoDesc: PDXVA2VideoDesc;
                                       RenderTargetFormat: D3DFORMAT;
                                       ProcAmpCap: UINT;
-                                      var pRange: DXVA2_ValueRange): HResult; stdcall;
+                                      pRange: PDXVA2_ValueRange): HRESULT; stdcall;
 
-  PDXVA2SW_GETFILTERPROPERTYRANGE = function(pVideoDesc: DXVA2_VideoDesc;
+  PDXVA2SW_GETFILTERPROPERTYRANGE = function(pVideoDesc: PDXVA2VideoDesc;
                                              RenderTargetFormat: D3DFORMAT;
                                              FilterSetting: UINT;
-                                             var pRange: DXVA2_ValueRange): HResult; stdcall;
+                                             pRange: PDXVA2_ValueRange): HRESULT; stdcall;
 
-  PDXVA2SW_CREATEVIDEOPROCESSDEVICE = function(pD3DD9: IDirect3DDevice9;
-                                               pVideoDesc: DXVA2_VideoDesc;
+  // COM inputs are borrowed raw references; callbacks do not AddRef/Release.
+  PDXVA2SW_CREATEVIDEOPROCESSDEVICE = function(pD3DD9: Pointer;
+                                               pVideoDesc: PDXVA2VideoDesc;
                                                RenderTargetFormat: D3DFORMAT;
                                                MaxSubStreams: UINT;
-                                               var phDevice: THandle): HResult; stdcall;
+                                               phDevice: PHANDLE): HRESULT; stdcall;
 
-  PDXVA2SW_DESTROYVIDEOPROCESSDEVICE = function(hDevice: THandle): HResult; stdcall;
+  PDXVA2SW_DESTROYVIDEOPROCESSDEVICE = function(hDevice: THandle): HRESULT; stdcall;
 
 
-  PDXVA2SW_VIDEOPROCESSBEGINFRAME = function(hDevice: THANDLE): HResult; stdcall;
+  PDXVA2SW_VIDEOPROCESSBEGINFRAME = function(hDevice: THandle): HRESULT; stdcall;
 
-  PDXVA2SW_VIDEOPROCESSENDFRAME = function(hDevice: THANDLE;
-                                           var pHandleComplete: THandle): HResult; stdcall;
+  PDXVA2SW_VIDEOPROCESSENDFRAME = function(hDevice: THandle;
+                                           pHandleComplete: PHANDLE): HRESULT; stdcall;
 
   PDXVA2SW_VIDEOPROCESSSETRENDERTARGET = function(hDevice: THandle;
-                                                  pRenderTarget: IDirect3DSurface9): HResult; stdcall;
+                                                  pRenderTarget: Pointer): HRESULT; stdcall;
 
   PDXVA2SW_VIDEOPROCESSBLT = function(hDevice: THandle;
-                                      pBlt: DXVA2_VIDEOPROCESSBLT): HResult; stdcall;
+                                      pBlt: PDXVA2_VIDEOPROCESSBLT): HRESULT; stdcall;
 
 
   PDXVA2SW_CALLBACKS = ^DXVA2SW_CALLBACKS;

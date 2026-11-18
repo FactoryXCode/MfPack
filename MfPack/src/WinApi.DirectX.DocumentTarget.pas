@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Defines for document package target interfaces.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -74,6 +74,7 @@ uses
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.ActiveX;
   {$ELSE}
+  WinApi.ActiveX.OaIdl,
   WinApi.ActiveX.ObjIdlbase;
   {$ENDIF}
 
@@ -101,18 +102,12 @@ type
   {$EXTERNALSYM IPrintDocumentPackageTarget}
   IPrintDocumentPackageTarget = interface(IUnknown)
   ['{1b8efec4-3019-4c27-964e-367202156906}']
+    // SDK native virtual methods.
+    function GetPackageTargetTypes(out targetCount: UINT32; out targetTypes: PGUID): HRESULT; stdcall;
 
-    // This method is called for enumerating supported target types.
-    // The first GUID is preferred type by target.
-    function GetPackageTargetTypes(out targetCount: UINT32;
-                                   out targetTypes: PGUID): HResult; stdcall;
+    function GetPackageTarget(const guidTargetType: TGUID; const riid: TGUID; out ppvTarget: Pointer): HRESULT; stdcall;
 
-    // This method is called for createing a target instance.")]
-    function GetPackageTarget({in} const guidTargetType: TGUID;
-                              {in} const riid: TGUID;
-                              out ppvTarget: Pointer): HResult; stdcall;
-
-    function Cancel(): HResult; stdcall;
+    function Cancel(): HRESULT; stdcall;
   end;
   IID_IPrintDocumentPackageTarget = IPrintDocumentPackageTarget;
   {$EXTERNALSYM IID_IPrintDocumentPackageTarget}
@@ -148,11 +143,8 @@ type
   {$EXTERNALSYM IPrintDocumentPackageStatusEvent}
   IPrintDocumentPackageStatusEvent = interface(IDispatch)
   ['{ed90c8ad-5c34-4d05-a1ec-0e8a9b3ad7af}']
-
-    // This method is called for updating package status when the progressive
-    // print job event signals or job completes.
-    function PackageStatusUpdated({in} packageStatus: PrintDocumentPackageStatus): HResult; stdcall;
-
+    // SDK native virtual methods.
+    function PackageStatusUpdated(packageStatus: PPrintDocumentPackageStatus): HRESULT; stdcall;
   end;
   IID_IPrintDocumentPackageStatusEvent = IPrintDocumentPackageStatusEvent;
   {$EXTERNALSYM IID_IPrintDocumentPackageStatusEvent}
@@ -167,15 +159,8 @@ type
   {$EXTERNALSYM IPrintDocumentPackageTargetFactory}
   IPrintDocumentPackageTargetFactory = interface(IUnknown)
   ['{d2959bf7-b31b-4a3d-9600-712eb1335ba4}']
-
-    // This method is the entry point for creating IPrintDocumentPackageTarget.
-    function CreateDocumentPackageTargetForPrintJob({in} printerName: PWideChar;
-                                                    {in} jobName: PWideChar;
-                                                    // application must set seek pointer to original before specifying the job output stream.
-                                                    {in} jobOutputStream: IStream;
-                                                    {in} jobPrintTicketStream: IStream;
-                                                    out docPackageTarget: IPrintDocumentPackageTarget): HResult; stdcall;
-
+    // SDK native virtual methods.
+    function CreateDocumentPackageTargetForPrintJob(printerName: PWideChar; jobName: PWideChar; jobOutputStream: IStream; jobPrintTicketStream: IStream; out docPackageTarget: IPrintDocumentPackageTarget): HRESULT; stdcall;
   end;
   IID_IPrintDocumentPackageTargetFactory = IPrintDocumentPackageTargetFactory;
   {$EXTERNALSYM IID_IPrintDocumentPackageTargetFactory}
@@ -190,14 +175,10 @@ type
   {$EXTERNALSYM IPrintDocumentPackageTarget2}
   IPrintDocumentPackageTarget2 = interface(IUnknown)
   ['{c560298a-535c-48f9-866a-632540660cb4}']
+    // SDK native virtual methods.
+    function GetIsTargetIppPrinter(out isIppPrinter: BOOL): HRESULT; stdcall;
 
-    // This method returns True if the printer is an IppPrinter.
-    function GetIsTargetIppPrinter(out isIppPrinter: BOOL): HResult; stdcall;
-
-    // This method returns IppPrinterDevice for the target printer.
-    function GetTargetIppPrintDevice(const riid: REFIID;
-                                     out ppvTarget: Pointer): HResult; stdcall;
-
+    function GetTargetIppPrintDevice(const riid: TGUID; out ppvTarget: Pointer): HRESULT; stdcall;
   end;
   IID_IPrintDocumentPackageTarget2 = IPrintDocumentPackageTarget2;
   {$EXTERNALSYM IID_IPrintDocumentPackageTarget2}
@@ -206,6 +187,7 @@ type
 
 
 const
+  CLSID_PrintDocumentPackageTarget: TGUID = '{4842669E-9947-46EA-8BA2-D8CCE432C2CA}';
 
   ID_DOCUMENTPACKAGETARGET_MSXPS   : TGUID = '{9cae40a8-ded1-41c9-a9fd-d735ef33aeda}';
   {$EXTERNALSYM ID_DOCUMENTPACKAGETARGET_MSXPS}
@@ -228,6 +210,9 @@ const
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
+
+const
+  CLSID_PrintDocumentPackageTargetFactory: TGUID = '{348EF17D-6C81-4982-92B4-EE188A43867A}';
 
 implementation
 

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Interface definitions for WDM-CSA proxy filters.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -182,31 +182,30 @@ const
 
 type
 
+  PIMediaSample = ^IMediaSample;
+
   PKSALLOCATORMODE = ^KSALLOCATORMODE;
-  KSALLOCATORMODE = (
-    KsAllocatorMode_User,
-    KsAllocatorMode_Kernel
-  );
+  KSALLOCATORMODE = (KsAllocatorMode_User,
+                     KsAllocatorMode_Kernel
+                    );
   {$EXTERNALSYM KSALLOCATORMODE}
 
 
   PFRAMING_PROP = ^FRAMING_PROP;
-  FRAMING_PROP = (
-    FramingProp_Uninitialized,
-    FramingProp_None,
-    FramingProp_Old,
-    FramingProp_Ex
-  );
+  FRAMING_PROP = (FramingProp_Uninitialized,
+                  FramingProp_None,
+                  FramingProp_Old,
+                  FramingProp_Ex
+                 );
   {$EXTERNALSYM FRAMING_PROP}
 
 
   PFRAMING_CACHE_OPS = ^FRAMING_CACHE_OPS;
-  FRAMING_CACHE_OPS = (
-    Framing_Cache_Update,     // request to bypass cache when read/write
-    Framing_Cache_ReadLast,
-    Framing_Cache_ReadOrig,
-    Framing_Cache_Write
-  );
+  FRAMING_CACHE_OPS = (Framing_Cache_Update,     // request to bypass cache when read/write
+                       Framing_Cache_ReadLast,
+                       Framing_Cache_ReadOrig,
+                       Framing_Cache_Write
+                      );
   {$EXTERNALSYM FRAMING_CACHE_OPS}
 
   POPTIMAL_WEIGHT_TOTALS = ^OPTIMAL_WEIGHT_TOTALS;
@@ -279,13 +278,12 @@ type
 
 
   PPIPE_STATE = ^PIPE_STATE;
-  PIPE_STATE = (
-    PipeState_DontCare,
-    PipeState_RangeNotFixed,
-    PipeState_RangeFixed,
-    PipeState_CompressionUnknown,
-    PipeState_Finalized
-  );
+  PIPE_STATE = (PipeState_DontCare,
+                PipeState_RangeNotFixed,
+                PipeState_RangeFixed,
+                PipeState_CompressionUnknown,
+                PipeState_Finalized
+               );
   {$EXTERNALSYM PIPE_STATE}
 
   //
@@ -301,25 +299,23 @@ type
 
 
   PPIPE_ALLOCATOR_PLACE = ^PIPE_ALLOCATOR_PLACE;
-  PIPE_ALLOCATOR_PLACE = (
-    Pipe_Allocator_None,
-    Pipe_Allocator_FirstPin,
-    Pipe_Allocator_LastPin,
-    Pipe_Allocator_MiddlePin
-  );
+  PIPE_ALLOCATOR_PLACE = (Pipe_Allocator_None,
+                          Pipe_Allocator_FirstPin,
+                          Pipe_Allocator_LastPin,
+                          Pipe_Allocator_MiddlePin
+                         );
   {$EXTERNALSYM PIPE_ALLOCATOR_PLACE}
 
 
   PKS_LogicalMemoryType = ^KS_LogicalMemoryType;
-  KS_LogicalMemoryType = (
-    KS_MemoryTypeDontCare,
-    KS_MemoryTypeKernelPaged,
-    KS_MemoryTypeKernelNonPaged,
-    KS_MemoryTypeDeviceHostMapped,
-    KS_MemoryTypeDeviceSpecific,
-    KS_MemoryTypeUser,
-    KS_MemoryTypeAnyHost
-  );
+  KS_LogicalMemoryType = (KS_MemoryTypeDontCare,
+                          KS_MemoryTypeKernelPaged,
+                          KS_MemoryTypeKernelNonPaged,
+                          KS_MemoryTypeDeviceHostMapped,
+                          KS_MemoryTypeDeviceSpecific,
+                          KS_MemoryTypeUser,
+                          KS_MemoryTypeAnyHost
+                         );
   {$EXTERNALSYM KS_LogicalMemoryType}
 
   PPIPE_TERMINATION = ^PIPE_TERMINATION;
@@ -356,9 +352,9 @@ type
     AllocatorPlace    : PIPE_ALLOCATOR_PLACE;
     Dimensions        : PIPE_DIMENSIONS;
     PhysicalRange     : KS_FRAMING_RANGE;   // on allocator pin
-    PrevSegment       : IKsAllocatorEx;     // doubly-linked list of KS allocators
+    PrevSegment       : Pointer;     // doubly-linked list of KS allocators
     CountNextSegments : ULONG;              // possible multiple dependent pipes
-    NextSegments      : IKsAllocatorEx;
+    NextSegments      : PPointer;
     InsideFactors     : ULONG;              // existing factors (different from "don't care")
     NumberPins        : ULONG;
   end;
@@ -376,26 +372,25 @@ type
   {$EXTERNALSYM IKsClockPropertySet}
   IKsClockPropertySet = interface(IUnknown)
   ['{5C5CBD84-E755-11D0-AC18-00A0C9223196}']
+    function KsGetTime(out Time: LONGLONG): HRESULT; stdcall;
 
-    procedure KsGetTime(out Time: LONGLONG); stdcall;
+    function KsSetTime(Time: LONGLONG): HRESULT; stdcall;
 
-    procedure KsSetTime(Time: LONGLONG); stdcall;
+    function KsGetPhysicalTime(out Time: LONGLONG): HRESULT; stdcall;
 
-    procedure KsGetPhysicalTime(out Time: LONGLONG); stdcall;
+    function KsSetPhysicalTime(Time: LONGLONG): HRESULT; stdcall;
 
-    procedure KsSetPhysicalTime(Time: LONGLONG); stdcall;
+    function KsGetCorrelatedTime(out CorrelatedTime: KSCORRELATED_TIME): HRESULT; stdcall;
 
-    procedure KsGetCorrelatedTime(out CorrelatedTime: KSCORRELATED_TIME); stdcall;
+    function KsSetCorrelatedTime(CorrelatedTime: PKSCORRELATED_TIME): HRESULT; stdcall;
 
-    procedure KsSetCorrelatedTime(CorrelatedTime: KSCORRELATED_TIME); stdcall;
+    function KsGetCorrelatedPhysicalTime(out CorrelatedTime: KSCORRELATED_TIME): HRESULT; stdcall;
 
-    procedure KsGetCorrelatedPhysicalTime(out CorrelatedTime: KSCORRELATED_TIME); stdcall;
+    function KsSetCorrelatedPhysicalTime(CorrelatedTime: PKSCORRELATED_TIME): HRESULT; stdcall;
 
-    procedure KsSetCorrelatedPhysicalTime(CorrelatedTime: KSCORRELATED_TIME); stdcall;
+    function KsGetResolution(out Resolution: KSRESOLUTION): HRESULT; stdcall;
 
-    procedure KsGetResolution(out Resolution: KSRESOLUTION); stdcall;
-
-    procedure KsGetState(out State: KSSTATE); stdcall;
+    function KsGetState(out State: KSSTATE): HRESULT; stdcall;
   end;
   IID_IKsClockPropertySet = IKsClockPropertySet;
   {$EXTERNALSYM IID_IKsClockPropertySet}
@@ -407,13 +402,12 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsAllocator);'}
   {$EXTERNALSYM IKsAllocator}
   IKsAllocator = interface(IUnknown)
-  ['{8da64899-c0d9-11d0-8413-0000f822fe8a}']
+  ['{8DA64899-C0D9-11D0-8413-0000F822FE8A}']
+    function KsGetAllocatorHandle: THandle; stdcall;
 
-    function  KsGetAllocatorHandle: THandle; stdcall;
+    function KsGetAllocatorMode: KSALLOCATORMODE; stdcall;
 
-    function  KsGetAllocatorMode: KSALLOCATORMODE; stdcall;
-
-    procedure KsGetAllocatorStatus(AllocatorStatus: PKSSTREAMALLOCATOR_STATUS); stdcall;
+    function KsGetAllocatorStatus(AllocatorStatus: PKSSTREAMALLOCATOR_STATUS): HRESULT; stdcall;
 
     procedure KsSetAllocatorMode(Mode: KSALLOCATORMODE); stdcall;
   end;
@@ -427,25 +421,23 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsAllocatorEx);'}
   {$EXTERNALSYM IKsAllocatorEx}
   IKsAllocatorEx = interface(IKsAllocator)
-  ['{091bb63a-603f-11d1-b067-00a0c9062802}']
+  ['{091BB63A-603F-11D1-B067-00A0C9062802}']
+    function KsGetProperties: PALLOCATOR_PROPERTIES_EX; stdcall;
 
-    function  KsGetProperties: PALLOCATOR_PROPERTIES_EX; stdcall;
-
-    procedure KsSetProperties(PROPERTIES: PALLOCATOR_PROPERTIES_EX); stdcall;
+    procedure KsSetProperties(Properties: PALLOCATOR_PROPERTIES_EX); stdcall;
 
     procedure KsSetAllocatorHandle(AllocatorHandle: THandle); stdcall;
 
-    function  KsCreateAllocatorAndGetHandle(KsPin: IKsPin): THandle; stdcall;
+    function KsCreateAllocatorAndGetHandle(KsPin: IKsPin): THandle; stdcall;
   end;
   IID_IKsAllocatorEx = IKsAllocatorEx;
   {$EXTERNALSYM IID_IKsAllocatorEx}
 
 
   PKSPEEKOPERATION = ^KSPEEKOPERATION;
-  KSPEEKOPERATION = (
-    KsPeekOperation_PeekOnly,
-    KsPeekOperation_AddRef
-  );
+  KSPEEKOPERATION = (KsPeekOperation_PeekOnly,
+                     KsPeekOperation_AddRef
+                    );
   {$EXTERNALSYM KSPEEKOPERATION}
 
   PKSSTREAM_SEGMENT = ^KSSTREAM_SEGMENT;
@@ -457,38 +449,37 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsPin);'}
   {$EXTERNALSYM IKsPin}
   IKsPin = interface(IUnknown)
-  ['{b61178d1-a2d9-11cf-9e53-00aa00a216a1}']
+  ['{B61178D1-A2D9-11CF-9E53-00AA00A216A1}']
+    function KsQueryMediums(out MediumList: PKSMULTIPLE_ITEM): HRESULT; stdcall;
 
-    function KsQueryMediums(out MediumList: PKSMULTIPLE_ITEM): HResult; stdcall;
+    function KsQueryInterfaces(out InterfaceList: PKSMULTIPLE_ITEM): HRESULT; stdcall;
 
-    function KsQueryInterfaces(InterfaceList: PKSMULTIPLE_ITEM): HResult; stdcall;
-
-    function KsCreateSinkPinHandle(_Interface: KSPIN_INTERFACE;
-                                   Medium: KSPIN_MEDIUM): HResult; stdcall;
+    function KsCreateSinkPinHandle(var _Interface: KSPIN_INTERFACE;
+                                   var Medium: KSPIN_MEDIUM): HRESULT; stdcall;
 
     function KsGetCurrentCommunication(Communication: PKSPIN_COMMUNICATION;
                                        _Interface: PKSPIN_INTERFACE;
-                                       Medium: PKSPIN_MEDIUM): HResult; stdcall;
+                                       Medium: PKSPIN_MEDIUM): HRESULT; stdcall;
 
-    function KsPropagateAcquire: HResult; stdcall;
+    function KsPropagateAcquire: HRESULT; stdcall;
 
     function KsDeliver(Sample: IMediaSample;
-                       Flags: ULONG): HResult; stdcall;
+                       Flags: ULONG): HRESULT; stdcall;
 
-    function KsMediaSamplesCompleted(StreamSegment: PKSSTREAM_SEGMENT): HResult; stdcall;
+    function KsMediaSamplesCompleted(StreamSegment: PKSSTREAM_SEGMENT): HRESULT; stdcall;
 
-    function KsPeekAllocator(Operation: KSPEEKOPERATION): IMemAllocator; stdcall;
+    function KsPeekAllocator(Operation: KSPEEKOPERATION): Pointer; stdcall;
 
-    function KsReceiveAllocator(MemAllocator: IMemAllocator): HResult; stdcall;
+    function KsReceiveAllocator(MemAllocator: IMemAllocator): HRESULT; stdcall;
 
-    function KsRenegotiateAllocator: HResult; stdcall;
+    function KsRenegotiateAllocator: HRESULT; stdcall;
 
-    function KsIncrementPendingIoCount: Long; stdcall;
+    function KsIncrementPendingIoCount: LONG; stdcall;
 
-    function KsDecrementPendingIoCount: Long; stdcall;
+    function KsDecrementPendingIoCount: LONG; stdcall;
 
     function KsQualityNotify(Proportion: ULONG;
-                             TimeDelta: ReferenceTime): HResult; stdcall;
+                             TimeDelta: REFERENCE_TIME): HRESULT; stdcall;
   end;
   IID_IKsPin = IKsPin;
   {$EXTERNALSYM IID_IKsPin}
@@ -500,10 +491,9 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsPinEx);'}
   {$EXTERNALSYM IKsPinEx}
   IKsPinEx = interface(IKsPin)
-  ['{7bb38260-d19c-11d2-b38a-00a0c95ec22e}']
-
+  ['{7BB38260-D19C-11D2-B38A-00A0C95EC22E}']
     procedure KsNotifyError(Sample: IMediaSample;
-                            hr: HResult);
+                            hr: HRESULT); stdcall;
   end;
   IID_IKsPinEx = IKsPinEx;
   {$EXTERNALSYM IID_IKsPinEx}
@@ -515,33 +505,32 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsPinPipe);'}
   {$EXTERNALSYM IKsPinPipe}
   IKsPinPipe = interface(IUnknown)
-  ['{e539cd90-a8b4-11d1-8189-00a0c9062802}']
-
-    procedure KsGetPinFramingCache(FramingEx: PKSALLOCATOR_FRAMING_EX;
+  ['{E539CD90-A8B4-11D1-8189-00A0C9062802}']
+    function KsGetPinFramingCache(out FramingEx: PKSALLOCATOR_FRAMING_EX;
                                   FramingProp: PFRAMING_PROP;
-                                  Option: FRAMING_CACHE_OPS); stdcall;
+                                  Option: FRAMING_CACHE_OPS): HRESULT; stdcall;
 
-    procedure KsSetPinFramingCache(FramingEx: PKSALLOCATOR_FRAMING_EX;
-                                   FramingProp: PFRAMING_PROP;
-                                   Option: FRAMING_CACHE_OPS); stdcall;
+    function KsSetPinFramingCache(FramingEx: PKSALLOCATOR_FRAMING_EX;
+                                  FramingProp: PFRAMING_PROP;
+                                  Option: FRAMING_CACHE_OPS): HRESULT; stdcall;
 
-    function KsGetConnectedPin(): IPin; stdcall;
+    function KsGetConnectedPin: Pointer; stdcall;
 
-    function KsGetPipe(Operation: KSPEEKOPERATION): IKsAllocatorEx; stdcall;
+    function KsGetPipe(Operation: KSPEEKOPERATION): Pointer; stdcall;
 
-    procedure KsSetPipe(KsAllocator: IKsAllocatorEx); stdcall;
+    function KsSetPipe(KsAllocator: IKsAllocatorEx): HRESULT; stdcall;
 
     function KsGetPipeAllocatorFlag: ULONG; stdcall;
 
-    procedure KsSetPipeAllocatorFlag(Flag: ULONG); stdcall;
+    function KsSetPipeAllocatorFlag(Flag: ULONG): HRESULT; stdcall;
 
-    function KsGetPinBusCache(): TGUID; stdcall;
+    {$IFDEF WIN64}
+    function KsGetPinBusCache(out Bus: TGUID): PGUID; stdcall;
+    {$ELSE}
+    function KsGetPinBusCache: TGUID; stdcall;
+    {$ENDIF}
 
-    procedure KsSetPinBusCache(const Bus: TGUID); stdcall;
-
-    //
-    // very useful methods for tracing.
-    //
+    function KsSetPinBusCache(Bus: TGUID): HRESULT; stdcall;
 
     function KsGetPinName: PWCHAR; stdcall;
 
@@ -558,18 +547,16 @@ type
   {$EXTERNALSYM IKsPinFactory}
   IKsPinFactory = interface(IUnknown)
   ['{CD5EBE6B-8B6E-11D1-8AE0-00A0C9223196}']
-
-    procedure KsPinFactory(out PinFactory: ULONG); stdcall;
+    function KsPinFactory(out PinFactory: ULONG): HRESULT; stdcall;
   end;
   IID_IKsPinFactory = IKsPinFactory;
   {$EXTERNALSYM IID_IKsPinFactory}
 
 
   PKSIOOPERATION = ^KSIOOPERATION;
-  KSIOOPERATION = (
-    KsIoOperation_Write,
-    KsIoOperation_Read
-  );
+  KSIOOPERATION = (KsIoOperation_Write,
+                   KsIoOperation_Read
+                  );
   {$EXTERNALSYM KSIOOPERATION}
 
 
@@ -579,22 +566,21 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsDataTypeHandler);'}
   {$EXTERNALSYM IKsDataTypeHandler}
   IKsDataTypeHandler = interface(IUnknown)
-  ['{5ffbaa02-49a3-11d0-9f36-00aa00a216a1}']
+  ['{5FFBAA02-49A3-11D0-9F36-00AA00A216A1}']
+    function KsCompleteIoOperation(Sample: IMediaSample;
+                                   StreamHeader: Pointer;
+                                   IoOperation: KSIOOPERATION;
+                                   Cancelled: BOOL): HRESULT; stdcall;
 
-    procedure KsCompleteIoOperation(var Sample: IMediaSample;
-                                    var StreamHeader: Pointer;
-                                    IoOperation: KSIOOPERATION;
-                                    Cancelled: BOOL); stdcall;
+    function KsIsMediaTypeInRanges(DataRanges: Pointer): HRESULT; stdcall;
 
-    procedure KsIsMediaTypeInRanges(DataRanges: Pointer); stdcall;
+    function KsPrepareIoOperation(Sample: IMediaSample;
+                                  StreamHeader: Pointer;
+                                  IoOperation: KSIOOPERATION): HRESULT; stdcall;
 
-    procedure KsPrepareIoOperation(var Sample: IMediaSample;
-                                   var StreamHeader: Pointer;
-                                   IoOperation: KSIOOPERATION); stdcall;
+    function KsQueryExtendedSize(out ExtendedSize: ULONG): HRESULT; stdcall;
 
-    procedure KsQueryExtendedSize(out ExtendedSize: ULONG); stdcall;
-
-    procedure KsSetMediaType(const _AmMediaType: AM_MEDIA_TYPE); stdcall;
+    function KsSetMediaType(const _AmMediaType: AM_MEDIA_TYPE): HRESULT; stdcall;
   end;
   IID_IKsDataTypeHandler = IKsDataTypeHandler;
   {$EXTERNALSYM IID_IKsDataTypeHandler}
@@ -607,10 +593,9 @@ type
   {$EXTERNALSYM IKsDataTypeCompletion}
   IKsDataTypeCompletion = interface(IUnknown)
   ['{827D1A0E-0F73-11D2-B27A-00A0C9223196}']
-
-    procedure KsCompleteMediaType(FilterHandle: THandle;
-                                  PinFactoryId: ULONG;
-                                  var _AmMediaType: AM_MEDIA_TYPE); stdcall;
+    function KsCompleteMediaType(FilterHandle: THandle;
+                                 PinFactoryId: ULONG;
+                                 var _AmMediaType: AM_MEDIA_TYPE): HRESULT; stdcall;
   end;
   IID_IKsDataTypeCompletion = IKsDataTypeCompletion;
   {$EXTERNALSYM IID_IKsDataTypeCompletion}
@@ -618,8 +603,8 @@ type
 
   // PKSSTREAM_SEGMENT = ^_KSSTREAM_SEGMENT;  see^
   _KSSTREAM_SEGMENT = record
-    KsInterfaceHandler: IKsInterfaceHandler;
-    KsDataTypeHandler: IKsDataTypeHandler;
+    KsInterfaceHandler: Pointer;
+    KsDataTypeHandler: Pointer;
     IoOperation: KSIOOPERATION;
     CompletionEvent: THandle;
   end;
@@ -633,17 +618,16 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsInterfaceHandler);'}
   {$EXTERNALSYM IKsInterfaceHandler}
   IKsInterfaceHandler = interface(IUnknown)
-  ['{D3ABC7E0-9A61-11d0-A40D-00A0C9223196}']
+  ['{D3ABC7E0-9A61-11D0-A40D-00A0C9223196}']
+    function KsSetPin(KsPin: IKsPin): HRESULT; stdcall;
 
-    procedure KsSetPin(KsPin: IKsPin); stdcall;
+    function KsProcessMediaSamples(KsDataTypeHandler: IKsDataTypeHandler;
+                                   SampleList: PIMediaSample;
+                                   var SampleCount: LONG;
+                                   IoOperation: KSIOOPERATION;
+                                   out StreamSegment: PKSSTREAM_SEGMENT): HRESULT; stdcall;
 
-    procedure KsProcessMediaSamples(KsDataTypeHandler: IKsDataTypeHandler;
-                                    SampleList: IMediaSample;
-                                    var SampleCount: LONG;
-                                    IoOperation: KSIOOPERATION;
-                                    out StreamSegment: KSSTREAM_SEGMENT); stdcall;
-
-    procedure KsCompleteIo(var StreamSegment: KSSTREAM_SEGMENT); stdcall;
+    function KsCompleteIo(StreamSegment: PKSSTREAM_SEGMENT): HRESULT; stdcall;
   end;
   IID_IKsInterfaceHandler = IKsInterfaceHandler;
   {$EXTERNALSYM IID_IKsInterfaceHandler}
@@ -663,8 +647,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsObject);'}
   {$EXTERNALSYM IKsObject}
   IKsObject = interface(IUnknown)
-  ['{423c13a2-2070-11d0-9ef7-00aa00a216a1}']
-
+  ['{423C13A2-2070-11D0-9EF7-00AA00A216A1}']
     function KsGetObjectHandle: THandle; stdcall;
   end;
   IID_IKsObject = IKsObject;
@@ -676,9 +659,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsQualityForwarder);'}
   {$EXTERNALSYM IKsQualityForwarder}
-  IKsQualityForwarder = interface(IUnknown)
-  ['{97ebaacb-95bd-11d0-a3ea-00a0c9223196}']
-
+  IKsQualityForwarder = interface(IKsObject)
+  ['{97EBAACB-95BD-11D0-A3EA-00A0C9223196}']
     procedure KsFlushClient(Pin: IKsPin); stdcall;
   end;
   IID_IKsQualityForwarder = IKsQualityForwarder;
@@ -691,11 +673,10 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsNotifyEvent);'}
   {$EXTERNALSYM IKsNotifyEvent}
   IKsNotifyEvent = interface(IUnknown)
-  ['{412bd695-f84b-46c1-ac73-54196dbc8fa7}']
-
-    procedure KsNotifyEvent(Event: ULONG;
-                            lParam1: ULONG_PTR;
-                            lParam2: ULONG_PTR); stdcall;
+  ['{412BD695-F84B-46C1-AC73-54196DBC8FA7}']
+    function KsNotifyEvent(Event: ULONG;
+                           lParam1: ULONG_PTR;
+                           lParam2: ULONG_PTR): HRESULT; stdcall;
   end;
   IID_IKsNotifyEvent = IKsNotifyEvent;
   {$EXTERNALSYM IID_IKsNotifyEvent}
@@ -707,8 +688,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsPropertySet);'}
   {$EXTERNALSYM IKsPropertySet}
   IKsPropertySet = interface(IUnknown)
-  ['{31EFAC30-515C-11d0-A9AA-00aa0061be93}']
-
+  ['{31EFAC30-515C-11D0-A9AA-00AA0061BE93}']
     function _Set(const PropSet: TGUID;
                   Id: ULONG;
                   InstanceData: Pointer;
@@ -720,13 +700,13 @@ type
                  Id: ULONG;
                  InstanceData: Pointer;
                  InstanceLength: ULONG;
-                 out PropertyData: Pointer;
+                 PropertyData: Pointer;
                  DataLength: ULONG;
-                 out BytesReturned: PULONG): HRESULT; stdcall;
+                 out BytesReturned: ULONG): HRESULT; stdcall;
 
     function QuerySupported(const PropSet: TGUID;
                             Id: ULONG;
-                            out TypeSupport: PULONG): HRESULT; stdcall;
+                            out TypeSupport: ULONG): HRESULT; stdcall;
   end;
   IID_IKsPropertySet = IKsPropertySet;
   {$EXTERNALSYM IID_IKsPropertySet}
@@ -739,24 +719,23 @@ type
   {$EXTERNALSYM IKsControl}
   IKsControl = interface(IUnknown)
   ['{28F54685-06FD-11D2-B27A-00A0C9223196}']
-
     function KsProperty(_Property: PKSPROPERTY;
                         PropertyLength: ULONG;
-                        var PropertyData: Pointer;
+                        PropertyData: Pointer;
                         DataLength: ULONG;
-                        var {OPTIONAL} BytesReturned: PULONG): HRESULT; stdcall;
+                        out BytesReturned: ULONG): HRESULT; stdcall;
 
     function KsMethod(Method: PKSMETHOD;
                       MethodLength: ULONG;
-                      var MethodData: Pointer;
+                      MethodData: Pointer;
                       DataLength: ULONG;
-                      var {OPTIONAL} BytesReturned: PULONG): HRESULT; stdcall;
+                      out BytesReturned: ULONG): HRESULT; stdcall;
 
     function KsEvent(Event: PKSEVENT;
                      EventLength: ULONG;
-                     var EventData: Pointer;
+                     EventData: Pointer;
                      DataLength: ULONG;
-                     var {OPTIONAL} BytesReturned: PULONG): HRESULT; stdcall;
+                     out BytesReturned: ULONG): HRESULT; stdcall;
   end;
   IID_IKsControl = IKsControl;
   {$EXTERNALSYM IID_IKsControl}
@@ -769,10 +748,9 @@ type
   {$EXTERNALSYM IKsAggregateControl}
   IKsAggregateControl = interface(IUnknown)
   ['{7F40EAC0-3947-11D2-874E-00A0C9223196}']
+    function KsAddAggregate(const AggregateClass: TGUID): HRESULT; stdcall;
 
-    procedure KsAddAggregate(const AggregateClass: TGUID); stdcall;
-
-    procedure KsRemoveAggregate(const AggregateClass: TGUID); stdcall;
+    function KsRemoveAggregate(const AggregateClass: TGUID): HRESULT; stdcall;
   end;
   IID_IKsAggregateControl = IKsAggregateControl;
   {$EXTERNALSYM IID_IKsAggregateControl}
@@ -785,13 +763,12 @@ type
   {$EXTERNALSYM IKsTopology}
   IKsTopology = interface(IUnknown)
   ['{28F54683-06FD-11D2-B27A-00A0C9223196}']
-
-    procedure CreateNodeInstance(NodeId: ULONG;
-                                 Flags: ULONG;
-                                  DesiredAccess: ACCESS_MASK;
-                                 {OPTIONAL}UnkOuter: IUnknown;
-                                 const InterfaceId: TGUID;
-                                 out _Interface); stdcall;
+    function CreateNodeInstance(NodeId: ULONG;
+                                Flags: ULONG;
+                                DesiredAccess: ACCESS_MASK;
+                                UnkOuter: IUnknown;
+                                const InterfaceId: TGUID;
+                                out _Interface: Pointer): HRESULT; stdcall;
   end;
   IID_IKsTopology = IKsTopology;
   {$EXTERNALSYM IID_IKsTopology}
@@ -801,18 +778,18 @@ type
                                        {In OPTIONAL} Attributes: PKSMULTIPLE_ITEM): HResult; stdcall;
   {$EXTERNALSYM KsResolveRequiredAttributes}
 
-  function KsOpenDefaultDevice(Category: TGUID;
+  function KsOpenDefaultDevice(const Category: TGUID;
                                Access: ACCESS_MASK;
-                               out DeviceHandle: PHANDLE): HResult; stdcall;
+                               out DeviceHandle: THandle): HResult; stdcall;
   {$EXTERNALSYM KsOpenDefaultDevice}
 
   function KsSynchronousDeviceControl(Handle: THandle;
                                       IoControl: ULONG;
                                       InBuffer: Pointer; {In OPTIONAL}
                                       InLength: ULONG;
-                                      out OutBuffer: Pointer; {Out OPTIONAL}
+                                      OutBuffer: Pointer; {Out OPTIONAL}
                                       OutLength: ULONG;
-                                      var BytesReturned: PULONG {Inout OPTIONAL}): HResult; stdcall;
+                                      BytesReturned: PULONG {Inout OPTIONAL}): HResult; stdcall;
   {$EXTERNALSYM KsSynchronousDeviceControl}
 
   function KsGetMultiplePinFactoryItems(FilterHandle: THandle;
@@ -837,10 +814,17 @@ type
 
   // end of Additional Prototypes
 
+  // Typed access to the native GUID result and a private aligned GUID value copy.
+  function KsGetPinBusCache(const Pipe: IKsPinPipe;
+                           out Bus: TGUID): HRESULT;
+
+  function KsSetPinBusCache(const Pipe: IKsPinPipe;
+                           const Bus: TGUID): HRESULT;
+
 implementation
 
 const
-  KsProxyLib = 'ksproxy.dll';
+  KsProxyLib = 'ksproxy.ax';
 
 {$WARN SYMBOL_PLATFORM OFF}
 function KsResolveRequiredAttributes ; external KsProxyLib name 'KsResolveRequiredAttributes' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -852,5 +836,51 @@ function KsGetMediaType              ; external KsProxyLib name 'KsGetMediaType'
 {$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional Prototypes here.
+
+
+type
+  TKsPipeVTable = array[0..13] of Pointer;
+  PKsPipeVTable = ^TKsPipeVTable;
+  TKsSetBusEntry = function(Self: Pointer;Bus: PGUID): HRESULT; stdcall;
+
+function KsGetPinBusCache(const Pipe: IKsPinPipe;
+                         out Bus: TGUID): HRESULT;
+begin
+  FillChar(Bus,SizeOf(Bus),0);
+  if Pipe = nil then
+    Exit(E_POINTER);
+  {$IFDEF WIN64}
+  Pipe.KsGetPinBusCache(Bus);
+  {$ELSE}
+  Bus := Pipe.KsGetPinBusCache;
+  {$ENDIF}
+  Result := S_OK;
+end;
+
+function KsSetPinBusCache(const Pipe: IKsPinPipe;
+                         const Bus: TGUID): HRESULT;
+{$IFDEF WIN64}
+var
+  Storage: array[0..31] of Byte;
+  PrivateBus: PGUID;
+  Entry: TKsSetBusEntry;
+begin
+  if Pipe = nil then
+    Exit(E_POINTER);
+  PrivateBus := PGUID((NativeUInt(@Storage[0])+15) and not NativeUInt(15));
+  PrivateBus^ := Bus;
+  Entry := TKsSetBusEntry(PKsPipeVTable(PPointer(Pointer(Pipe))^)^[11]);
+  Result := Entry(Pointer(Pipe),PrivateBus);
+end;
+{$ELSE}
+var
+  PrivateBus: TGUID;
+begin
+  if Pipe = nil then
+    Exit(E_POINTER);
+  PrivateBus := Bus;
+  Result := Pipe.KsSetPinBusCache(PrivateBus);
+end;
+{$ENDIF}
 
 end.
