@@ -13,5 +13,3 @@ There are 4 samples in 4 project degrees.
   *MFT processing, Source Reader/Sink Writer transcoding, IMFByteStream,*
   *mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together*
   *inside a Delphi application, without using 3th party components.*
-  
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
