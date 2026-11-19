@@ -118,7 +118,7 @@ are not claimed as supported by this snapshot.
 * Delphi XE7 or later, including Delphi 12.  
 * MfPack 4.1.0.  
 * Windows SDK: `10.0.28000.2705`.  
-* Chromecast, Chromecast-enabled television, Google/Android TV device or Cromecast supported speakers.  
+* Chromecast, Chromecast-enabled television, Google/Android TV device or Chromecast supported speakers.  
 * The PC and Cast receiver must be reachable on the same local network.  
 * Windows Firewall must permit the temporary local HTTP listener.  
   
