@@ -179,7 +179,7 @@ to the volume control in the volume mixer.
 This sample implements a simple "Chat" that demonstrates the Windows audio  
 ducking feature. In capture mode, audio from the default communications  
 capture endpoint is routed to the default playback endpoint.  
-Select Capture in the application to hear the routed input.  
+Select 'Use default input device' in the application to hear the routed input.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
   
@@ -518,7 +518,7 @@ This is not a sample for absolute beginners. Please read the documents included 
   
 ** Player Sample 5**
   
-This is a non-visual components application sample using .  
+This is a non-visual components application sample.  
 The sample shows you how to build a real-time audio playback engine for  
 Windows using Delphi style components.  
   
@@ -576,9 +576,9 @@ All WASAPI and MFT sample code comes together in this sample.
  You have to know the principles of WASAPI, MFT's (see MFT samples) and audio manipulation.  
  Before compiling this sample make sure, you have all needed components compiled and installed (see instructions).
  
- This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ)
+ This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ)
   
-![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJ_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJ_Interface_s.png)
   
   
 **RDJ Pro Mixer sample**  
@@ -609,9 +609,9 @@ MfPack Cast V2 protocols.
 You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2, FxServe and audio manipulation.  
 Before compiling this sample make sure, you have all needed components compiled and installed (see instructions). 
 
-This sample has been moved to the [RDJ Pro repository](https://github.com/FactoryXCode/FactoryX-RDJ/tree/main/RDJ/RDJ%20Pro)  
+This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ)  
 
-![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RDJ/Pic/RDJPro_Interface_s.png)
+![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJPro_Interface_s.png)
   
 ---
 **MfMftExplorer sample**
