@@ -1,6 +1,6 @@
 # LoopbackCapture Sample 1
   
-Version: 4.0.0  
+Version: 4.1.0  
   
 Description:  
   
@@ -18,14 +18,14 @@ This is caused by the fact Windows 11 has an internal process to "smooth" audio 
 * This release is updated for compiler version 17 up to 34.
 * SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 10 version 22H2 or later.
-* Minimum supported MfPack version: 3.1.4
+* Minimum supported MfPack version: 4.1.0
   
 Project: Media Foundation - MFPack - Samples  
 Project location: https://github.com/FactoryXCode/MfPack  
 https://sourceforge.net/projects/MFPack  
   
 First release date: 12-03-2023  
-Final release date: 05/05/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.
 

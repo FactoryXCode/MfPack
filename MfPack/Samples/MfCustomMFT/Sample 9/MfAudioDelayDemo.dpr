@@ -375,7 +375,7 @@ begin
                     MFSTARTUP_FULL));
     try
       Run();
-      Sleep(5000); // Wait before closing when running from the IDE.
+      if ParamStr(1) <> '--smoke' then Sleep(5000); // Wait before closing when running from the IDE.
     finally
       MFShutdown();
     end;

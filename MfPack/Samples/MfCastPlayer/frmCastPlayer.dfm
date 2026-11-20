@@ -64,7 +64,6 @@ object CastPlayerForm: TCastPlayerForm
     Height = 285
     Align = alTop
     TabOrder = 2
-    ExplicitTop = 2
     object Bevel2: TBevel
       Left = 4
       Top = 17

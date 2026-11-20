@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WAS Loopback Capture Engine using TThread to render data.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -64,8 +64,8 @@ unit LoopbackCapture;
 interface
 
 uses
-
-  {WinApi}
+  System.Classes,
+{WinApi}
   WinApi.Windows,
   WinApi.WinError,
   WinApi.WinApiTypes,
@@ -73,7 +73,6 @@ uses
   WinApi.Messages,
   {System}
   System.SysUtils,
-  System.Classes,
   System.SyncObjs,
   {activeX}
   WinApi.ActiveX.PropIdl,
@@ -130,6 +129,10 @@ type
     pvRenderThread: TRenderThread;
 
   private
+    FNotifyWindow: HWND;
+    FClosing: Boolean;
+    procedure NotifyWindowProc(var Msg: TMessage);
+  private
 
     pvRenderThreadClosedEvent: THandle;
     pvShutdownEvent: THandle;
@@ -150,7 +153,7 @@ type
     pvMixFormat: WAVEFORMATEXTENSIBLE;
 
 
-    pvFrameSize: NativeUint;
+    pvFrameSize: SIZE_T;
     pvBufferSize: UINT32;
 
     pvFileName: TFileName;
@@ -203,18 +206,18 @@ type
 
 {$Region 'Implementation of IAudioSessionEvents'}
     function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
-                                  const EventContext: TGUID): HResult; stdcall;
+                                  EventContext: PGUID): HResult; stdcall;
     function OnIconPathChanged(NewIconPath: LPCWSTR;
-                               const EventContext: TGUID): HResult; stdcall;
+                               EventContext: PGUID): HResult; stdcall;
     function OnSimpleVolumeChanged(NewSimpleVolume: Single;
                                    NewMute: BOOL;
-                                   const EventContext: TGUID): HResult; stdcall;
+                                   EventContext: PGUID): HResult; stdcall;
     function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelVolumeArray: PSINGLE;
                                     ChangedChannel: UINT;
-                                    const EventContext: TGUID): HResult; stdcall;
+                                    EventContext: PGUID): HResult; stdcall;
     function OnGroupingParamChanged(const NewGroupingParam: TGUID;
-                                    const EventContext: TGUID): HResult; stdcall;
+                                    EventContext: PGUID): HResult; stdcall;
     function OnStateChanged(NewState: AudioSessionState): HResult; stdcall;
     function OnSessionDisconnected(DisconnectReason: AudioSessionDisconnectReason): HResult; stdcall;
 {$EndRegion}
@@ -305,6 +308,24 @@ uses
   System.Services.Avrt;
 
 
+procedure TWASCapture.NotifyWindowProc(var Msg: TMessage);
+begin
+  if Msg.Msg = WM_APP + $4D0 then
+    begin
+      if not FClosing and Assigned(pvOnCapturingStart) then
+        pvOnCapturingStart(Self);
+      Msg.Result := 0;
+    end
+  else if Msg.Msg = WM_APP + $4D1 then
+    begin
+      if not FClosing and Assigned(pvOnCapturingStopped) then
+        pvOnCapturingStopped(Self);
+      Msg.Result := 0;
+    end
+  else
+    Msg.Result := DefWindowProc(FNotifyWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+
 constructor TRenderThread.Create(AEngine: TWASCapture);
 begin
   inherited Create(True);
@@ -314,14 +335,26 @@ end;
 
 
 procedure TRenderThread.Execute;
+var
+  ComResult: HRESULT;
+  SavedMask: TFPUExceptionMask;
 begin
-
-  // The function where we render the audio data and
-  // (de)activate the MMCSS feature.
-  // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-  // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
-  FSuccess := FEngine.CaptureThreadFunc;
-  Synchronize(SetEvent);
+  ComResult := CoInitializeEx(nil,COINIT_MULTITHREADED);
+  FSuccess := ComResult;
+  if SUCCEEDED(ComResult) then
+    begin
+      SavedMask := GetExceptionMask();
+      SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,exUnderflow,exPrecision]);
+      try
+        FSuccess := FEngine.CaptureThreadFunc();
+      finally
+        ClearExceptions(False);
+        SetExceptionMask(SavedMask);
+        CoUninitialize();
+      end;
+    end;
+  
+  TThread.Queue(Self,SetEvent);
 end;
 
 
@@ -358,17 +391,18 @@ end;
 
 procedure TWASCapture.TerminateRenderThread();
 begin
-
+  if pvShutdownEvent <> 0 then WinApi.Windows.SetEvent(pvShutdownEvent);
   if Assigned(pvRenderThread) then
     begin
-      pvRenderThread.SetFreeOnTerminate(True);
-      pvRenderThread.Terminate;
-      // Give thread time to terminate itself.
-      Sleep(200);
-      pvRenderThread := nil;
-      // Signal the thread is closed.
-      if (pvRenderThreadClosedEvent <> 0) then
-        SetEvent(pvRenderThreadClosedEvent);
+      pvRenderThread.Terminate();
+      pvRenderThread.WaitFor();
+      TThread.RemoveQueuedEvents(pvRenderThread);
+      FreeAndNil(pvRenderThread);
+    end;
+  if pvRenderThreadClosedEvent <> 0 then
+    begin
+      CloseHandle(pvRenderThreadClosedEvent);
+      pvRenderThreadClosedEvent := 0;
     end;
 end;
 
@@ -385,7 +419,8 @@ var
 
 begin
 
-  inherited Create;
+  inherited Create();
+  FNotifyWindow := AllocateHWnd(NotifyWindowProc);
 
   if (pEndpoint <> nil) then
     pvEndpoint := pEndpoint
@@ -421,16 +456,17 @@ begin
   pvBufferSize := 0;
   pvCaptureBuffer := nil;
   pvCaptureBufferSize := 0;
-  pvEnableStreamSwitch := False;
 
 end;
 
 
 destructor TWASCapture.Destroy();
 begin
+  FClosing := True;
 
   Shutdown();
-  inherited Destroy;
+  if FNotifyWindow <> 0 then DeallocateHWnd(FNotifyWindow);
+  inherited Destroy();
 end;
 
 
@@ -958,7 +994,7 @@ end;
 /// IAudioSessionEvents methods ////////////////////////////////////////////////
 
 function TWASCapture.OnDisplayNameChanged(NewDisplayName: LPCWSTR;
-                                          const EventContext: TGUID): HResult;
+                                          EventContext: PGUID): HResult;
 begin
 
   Result := S_OK;
@@ -966,7 +1002,7 @@ end;
 
 
 function TWASCapture.OnIconPathChanged(NewIconPath: LPCWSTR;
-                                       const EventContext: TGUID): HResult;
+                                       EventContext: PGUID): HResult;
 begin
 
   Result := S_OK;
@@ -975,7 +1011,7 @@ end;
 
 function TWASCapture.OnSimpleVolumeChanged(NewSimpleVolume: Single;
                                                    NewMute: BOOL;
-                                                   const EventContext: TGUID): HResult;
+                                                   EventContext: PGUID): HResult;
 begin
 
   Result := S_OK;
@@ -985,7 +1021,7 @@ end;
 function TWASCapture.OnChannelVolumeChanged(ChannelCount: UINT;
                                                     NewChannelVolumeArray: PSINGLE;
                                                     ChangedChannel: UINT;
-                                                    const EventContext: TGUID): HResult;
+                                                    EventContext: PGUID): HResult;
 begin
 
   Result := S_OK;
@@ -993,7 +1029,7 @@ end;
 
 
 function TWASCapture.OnGroupingParamChanged(const NewGroupingParam: TGUID;
-                                            const EventContext: TGUID): HResult;
+                                            EventContext: PGUID): HResult;
 begin
 
   Result := S_OK;
@@ -1179,6 +1215,7 @@ end;
 //
 procedure TWASCapture.Shutdown();
 begin
+  Stop();
   if (pvRenderThreadClosedEvent <> 0) then
     begin
 
@@ -1226,49 +1263,22 @@ end;
 //
 function TWASCapture.Start(const pFileName: TFileName): Boolean;
 var
-  hr: HResult;
-
+  hr: HRESULT;
 begin
-
+  Result := False;
+  if (pFileName = '') or not Assigned(pvAudioClient) then Exit;
+  TerminateRenderThread();
+  if pvShutdownEvent <> 0 then ResetEvent(pvShutdownEvent);
   pvFileName := pFileName;
-
-  // Now the stream will be rendered in another thread.
-  // So, we need to create another thread to keep control.
-  //
-  // Note that, when this audiostream is over,
-  // the end of buffer will be signaled first, before signal endofstream.
-  if Assigned(pvRenderThread) then
-    begin
-
-      TerminateRenderThread();
-
-      if (pvRenderThreadClosedEvent <> 0) then
-        begin
-
-          WaitForSingleObject(pvRenderThreadClosedEvent,
-                              INFINITE);
-
-          CloseHandle(pvRenderThreadClosedEvent);
-          pvRenderThreadClosedEvent := 0;
-        end;
-    end
-  else
-    begin
-      // Start the rendering loop in the separate thread.
-      CreateRenderThread();
-    end;
-
-  // We're ready to go, start capturing!
+  pvBytesCaptured := 0;
+  CreateRenderThread();
   hr := pvAudioClient.Start();
   if FAILED(hr) then
     begin
-
-      InfoMsg(optIDE, Format('Unable to start capture client: %d.',[GetLastError()]), hr);
-      Exit(False);
+      TerminateRenderThread();
+      Exit;
     end;
-
-  // Notify the mainform to start it's timer.
-  pvOnCapturingStart(Self);
+  if Assigned(pvOnCapturingStart) then if not FClosing then PostMessage(FNotifyWindow,WM_APP + $4D0 + 0,0,0);
   Result := True;
 end;
 
@@ -1313,7 +1323,7 @@ begin
     begin
 
       // Signal the mainform capturing has been stopped.
-      pvOnCapturingStopped(Self);
+      if not FClosing then PostMessage(FNotifyWindow,WM_APP + $4D0 + 1,0,0);
       Sleep(1); // Sleep to prevent a mainform timer would stop before the notify event has been processed.
       pvDeviceState := Stopped;
     end;

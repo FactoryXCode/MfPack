@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -25,13 +25,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -215,8 +215,7 @@ var
   vHdc: HDC;
 
 begin
-  vHdc := 0;
-  BeginPaint(Self.Handle,
+  vHdc := BeginPaint(Self.Handle,
              ps);
 
   try
@@ -254,7 +253,8 @@ end;
 
 procedure TFrm_SimpleCapture.HandleRotationChanged(Sender: TObject);
 begin
-  MfDeviceCapture.Rotation := StrToInt(cboRotation.Text);
+  if Assigned(MfDeviceCapture) then
+    MfDeviceCapture.Rotation := StrToInt(cboRotation.Text);
 end;
 
 // Message listener

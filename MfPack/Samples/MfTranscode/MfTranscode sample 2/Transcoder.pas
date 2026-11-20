@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -375,6 +375,9 @@ begin
       goto done;
     end;
 
+  if (arIndex < 0) or (arIndex >= Length(pCont)) then
+    Exit(MF_E_INVALIDMEDIATYPE);
+
   // Create attribute store.
   hr := MFCreateAttributes(pVideoAttrs,
                            5);
@@ -394,8 +397,10 @@ begin
   //                            pCont[arIndex].video_FrameRateDenominator);
 
   if SUCCEEDED(hr) then
-    hr := pVideoAttrs.SetDouble(MF_MT_AVG_BITRATE,
-                                FVideoStandardsCheat.SelectedFrameRate.FrameRate);
+    hr := MFSetAttributeRatio(pVideoAttrs,
+                              MF_MT_FRAME_RATE,
+                              FVideoStandardsCheat.SelectedFrameRate.Numerator,
+                              FVideoStandardsCheat.SelectedFrameRate.Denominator);
 
   // Set the frame size.
   // Note that if the custom resolution is larger than the source,
@@ -422,11 +427,11 @@ begin
                               pCont[arIndex].video_PixelAspectRatioNumerator,
                               pCont[arIndex].video_PixelAspectRatioDenominator);
 
-  // Aversge Bitrate = FrameRateNumerator.
+  // Use a video bit rate independent of the frame-rate numerator.
 
   if SUCCEEDED(hr) then
     hr := pVideoAttrs.SetUINT32(MF_MT_AVG_BITRATE,
-                                pCont[arIndex].video_FrameRateNumerator);
+                                2500000);
 
 
 done:
@@ -547,6 +552,7 @@ var
   pEvent: IMFMediaEvent;
   meType: MediaEventType;  // Event type
   startUpdateProcessing: Boolean;
+  ClockPosition: Int64;
 
 begin
 
@@ -568,7 +574,8 @@ begin
           // For this you need to implement a message handler in the unit or form where this is going to be processed.
           if (m_pClock <> nil) then
             begin
-              {void} m_pClock.GetTime(m_Position);
+              if SUCCEEDED(m_pClock.GetTime(ClockPosition)) and (ClockPosition >= 0) then
+                m_Position := UInt64(ClockPosition);
               SendMessage(rcHandle,
                           WM_PROGRESSNOTIFY,
                           WParam(1),
@@ -775,7 +782,7 @@ function TTranscoder.GetMediaFromContArray(const mitype: TMediaTypes): Integer;
 var
   I: Integer;
 begin
-  Result := 0;
+  Result := -1;
   if Assigned(pCont) then
     if Length(pCont) > 0 then
       for I := 0 to Length(pCont)-1 do

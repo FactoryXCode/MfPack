@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -131,22 +131,22 @@ type
 
    // IAudioSessionEvents implementation
     function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
-                                  const EventContext: TGUID): HResult; stdcall;
+                                  EventContext: PGUID): HResult; stdcall;
 
     function OnIconPathChanged(NewIconPath: LPCWSTR;
-                               const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                               EventContext: PGUID): HResult; stdcall; { return S_OK; }
 
     function OnSimpleVolumeChanged(NewVolume: FLOAT;
                                    NewMute: BOOL;
-                                   const EvntContext: TGUID): HResult; stdcall;
+                                   EvntContext: PGUID): HResult; stdcall;
 
     function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelArray: PFloat;
                                     ChangedChannel: UINT;
-                                    const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                    EventContext: PGUID): HResult; stdcall; { return S_OK; }
 
     function OnGroupingParamChanged(const NewGroupingParam: TGUID;
-                                    const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                    EventContext: PGUID): HResult; stdcall; { return S_OK; }
 
     function OnStateChanged(NewState: AudioSessionState): HResult; stdcall; { return S_OK; }
 
@@ -255,7 +255,7 @@ begin
                          Pointer(_GraphBuilder));
   if Succeeded(hr) then
     begin
-      hr := _GraphBuilder.QueryInterface(IID_IMediaEvent,
+      hr := _GraphBuilder.QueryInterface(IID_IMediaEventEx,
                                          _MediaEvent);
       if Succeeded(hr) then
         hr := _MediaEvent.SetNotifyWindow(_AppWindow,
@@ -551,7 +551,7 @@ var
   evCode: LongInt;
 
   param1,
-  param2: {WinApi.Windows.}LONG_PTR;
+  param2: NativeInt;
 
   timeBegin,
   timeStop: REFERENCE_TIME;
@@ -875,7 +875,7 @@ end;
 
 // IAudioSessionEvents implementations
 function TCMediaPlayer.OnDisplayNameChanged(NewDisplayName: LPCWSTR;
-                                            const EventContext: TGUID): HResult;
+                                            EventContext: PGUID): HResult;
 begin
   // to prevent "Return value might be undefined" compilerwarning
   Result := S_OK;
@@ -883,7 +883,7 @@ end;
 
 
 function TCMediaPlayer.OnIconPathChanged(NewIconPath: LPCWSTR;
-                                         const EventContext: TGUID): HResult;
+                                         EventContext: PGUID): HResult;
 begin
   // to prevent "Return value might be undefined" compilerwarning
   Result := S_OK;
@@ -898,9 +898,9 @@ end;
 //
 function TCMediaPlayer.OnSimpleVolumeChanged(NewVolume: FLOAT;
                                              NewMute: BOOL;
-                                             const EvntContext: TGUID): HResult;
+                                             EvntContext: PGUID): HResult;
 begin
-  if IsEqualGuid(EvntContext, _MediaPlayerEventContext) then
+  if ((EvntContext = nil) or not IsEqualGuid(EvntContext^, _MediaPlayerEventContext)) then
     PostMessage(_AppWindow,
                 WM_APP_SESSION_VOLUME_CHANGED,
                 WParam(NewMute),
@@ -913,7 +913,7 @@ end;
 function TCMediaPlayer.OnChannelVolumeChanged(ChannelCount: UINT;
                                               NewChannelArray: PFloat;
                                               ChangedChannel: UINT;
-                                              const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                              EventContext: PGUID): HResult; stdcall; { return S_OK; }
 begin
   // to prevent "Return value might be undefined" compilerwarning
   Result := S_OK;
@@ -921,7 +921,7 @@ end;
 
 
 function TCMediaPlayer.OnGroupingParamChanged(const NewGroupingParam: TGUID;
-                                              const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                              EventContext: PGUID): HResult; stdcall; { return S_OK; }
 begin
   // to prevent "Return value might be undefined" compilerwarning
   Result := S_OK;

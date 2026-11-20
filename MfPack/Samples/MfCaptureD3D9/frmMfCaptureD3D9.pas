@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Preview window.
 //
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -131,11 +131,13 @@ type
     procedure OnSize(var message: TWMSize); message WM_SIZE;
     procedure OnWindowVisible(var message: TMessage); message WM_WINDOWVISIBLE;
 
+    procedure OnCaptureTime(var Msg: TMessage); message WM_APP + 3;
     procedure OnPreviewError(var Msg: TMessage); message WM_APP_PREVIEW_ERROR;
     procedure WMEraseBkGnd(var Msg: TMessage); message WM_ERASEBKGND;
     procedure OnQueryEndSession(var Msg: TMessage); message WM_QUERYENDSESSION;
 
   public
+    destructor Destroy; override;
     { Public declarations }
 
     function ShutDown(): Boolean;
@@ -150,6 +152,14 @@ var
 implementation
 
 {$R *.dfm}
+destructor TfrmMain.Destroy;
+begin
+ CleanUp;
+ inherited;
+end;
+procedure TfrmMain.OnCaptureTime(var Msg: TMessage);
+begin Caption:='Capturing: '+IntToStr(Msg.WParam)+' ms';end;
+
 
 
 procedure TfrmMain.OnPreviewError(var Msg: TMessage);
@@ -215,7 +225,10 @@ begin
   if Assigned(dlgSelectDevice) then
     dlgSelectDevice.Close();
 
-  UnRegisterForDeviceNotification(g_hdevnotify);
+  if NativeUInt(g_hdevnotify) <> 0 then begin
+    UnRegisterForDeviceNotification(g_hdevnotify);
+    FillChar(g_hdevnotify,SizeOf(g_hdevnotify),0);
+  end;
 
 end;
 

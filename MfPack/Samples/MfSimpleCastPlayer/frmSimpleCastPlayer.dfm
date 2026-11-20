@@ -64,7 +64,6 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
     Height = 271
     Align = alTop
     TabOrder = 2
-    ExplicitTop = 2
     object Bevel4: TBevel
       Left = 1
       Top = 233
@@ -156,7 +155,7 @@ object SimpleCastPlayerForm: TSimpleCastPlayerForm
       OnClick = SubtitleSelectionChanged
     end
     object btnDiscover: TButton
-      Left = 157
+      Left = 159
       Top = 17
       Width = 60
       Height = 25

@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: CastPlayer GUI.
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -828,7 +828,7 @@ begin
       FWorker.WaitFor();
       FreeAndNil(FWorker);
     end;
-  Hr := HRESULT(message.WParam);
+  Hr := HRESULT(DWORD(message.WParam));
   LogResult('Cast media', Hr);
   if SUCCEEDED(Hr) then
     begin
@@ -867,10 +867,10 @@ begin
 
   if Boolean(message.LParam) then
     LogResult('Subtitle switch',
-              HRESULT(message.WParam))
+              HRESULT(DWORD(message.WParam)))
   else
     LogResult('Disable subtitles',
-              HRESULT(message.WParam));
+              HRESULT(DWORD(message.WParam)));
   UpdateControls();
 end;
 

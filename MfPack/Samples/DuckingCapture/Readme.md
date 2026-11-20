@@ -1,6 +1,6 @@
 # DuckingCapture Sample
   
-Version: 4.0.0  
+Version: 4.1.0  
   
 Description:  
   ========================================================================  
@@ -13,7 +13,7 @@ capture endpoint is routed to the default playback endpoint.
 Select Capture in the application to hear the routed input.  
 Use headphones while testing to avoid microphone feedback.  
   
-Note that this sample requires Windows 7 or later.  
+Note that this sample requires Windows 10 or later.  
   
 NOTES:  
  - There are 2 versions of the sample. One that uses the function callback and   
@@ -24,8 +24,8 @@ NOTES:
    endpoint when necessary.
  - This release is updated for compiler version 17 up to 35.
  - SDK version 10.0.28000.2705 (Win 11)
- - Requires Windows 7 or later.
- - Minimum supported MfPack version: 3.1.2
+ - Requires Windows 10 or later.
+ - Minimum supported MfPack version: 4.1.0
   
 Project: Media Foundation - MFPack - Samples  
   
@@ -34,6 +34,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 05-07-2020  
-Final release date: 24/08/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit uses the D2D1 API to perform the translation from sample to bitmap.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFFrameCapture
+// Related projects: MfPackX410/Samples/MFFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -103,144 +103,49 @@ type
   end;
 
 implementation
-
-uses
-  {System}
-  System.SysUtils;
-
-
+uses System.SysUtils;
 constructor TSampleConverter.Create;
-begin
-  inherited;
-  FDPI := DevicePixelPerInch;
-  CreateRenderTarget;
-  CreateDirect2DBitmapProperties;
-end;
-
-
+begin inherited;end;
 destructor TSampleConverter.Destroy;
-begin
-  inherited;
-  FRenderTarget.Flush();
-  SafeRelease(FRenderTarget);
-end;
-
-
-function TSampleConverter.CreateRenderTarget: Boolean;
-var
-  pFactory: ID2D1Factory;
-  oProperties: D2D1_RENDER_TARGET_PROPERTIES;
-
-begin
-  Result := SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-                                        IID_ID2D1Factory,
-                                        Nil,
-                                        pFactory));
-  if Result then
-    begin
-      oProperties._type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-      oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
-      oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      oProperties.dpiX := 0;
-      oProperties.dpiY := 0;
-
-      oProperties.usage := D2D1_RENDER_TARGET_USAGE_NONE;
-      oProperties.minLevel := D2D1_FEATURE_LEVEL_DEFAULT;
-      Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties,
-                                                        FRenderTarget));
-    end;
-end;
-
-
+begin inherited;end;
 procedure TSampleConverter.CreateDirect2DBitmapProperties;
-var
-  oPixelFormat: D2D1_PIXEL_FORMAT;
-
-begin
-  oPixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
-  oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-  F2DBitmapProperties._PixelFormat := oPixelFormat;
-  F2DBitmapProperties.dpiX := FDPI;
-  F2DBitmapProperties.dpiY := FDPI;
-end;
-
-
+begin end;
+function TSampleConverter.CreateRenderTarget: Boolean;
+begin Result:=False;end;
 function TSampleConverter.BitmapFromSample(const ASample: IMFSample;
-                                           const AVideoInfo: TVideoFormatInfo;
-                                           var AError: string;
-                                           var AImage: TBitmap): Boolean;
-var
-  pBuffer: IMFMediaBuffer;
-  pBitmapData: PByte;
-  cbBitmapData: DWord;
-  o2DBitmap: ID2D1Bitmap;
-  oSize: D2D1_SIZE_U;
-  iPitch: Integer;
-  iActualBMPDataSize: Integer;
-  iExpectedBMPDataSize: Integer;
-  pClipRect: PRect;
-
+ const AVideoInfo: TVideoFormatInfo; var AError: string; var AImage: TBitmap): Boolean;
+var Buffer: IMFMediaBuffer; Data: PByte; Count: DWORD;
+    RowBytes, Pitch, Y, Offset: Integer; Required: UInt64;
+    Header: TBitmapFileHeader; Info: TBitmapInfoHeader; Stream: TMemoryStream;
 begin
-  AError := '';
-
-  // Converts a sample with multiple buffers into a sample with a single buffer.
-  Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(@pBuffer));
-
+ Result:=False; AError:='Invalid RGB32 sample';
+ if (ASample=nil) or (AImage=nil) or (AVideoInfo.iVideoWidth<=0) or
+    (AVideoInfo.iVideoHeight<=0) or (AVideoInfo.iVideoWidth>MaxInt div 4) then Exit;
+ RowBytes:=AVideoInfo.iVideoWidth*4; Pitch:=AVideoInfo.iStride;
+ if Pitch=0 then Pitch:=RowBytes;
+ if (Pitch=Low(Integer)) or (Abs(Pitch)<RowBytes) then Exit;
+ Required:=UInt64(Abs(Pitch))*UInt64(AVideoInfo.iVideoHeight-1)+UInt64(RowBytes);
+ if (Required>MaxInt) or
+    (UInt64(RowBytes)*UInt64(AVideoInfo.iVideoHeight)>High(DWORD)-54) then Exit;
+ if FAILED(ASample.ConvertToContiguousBuffer(@Buffer)) then Exit;
+ if FAILED(Buffer.Lock(Data,nil,@Count)) then Exit;
+ try
+  if (Data=nil) or (Required>Count) then Exit;
+  Stream:=TMemoryStream.Create;
   try
-
-  if Result then
-    begin
-      Result := SUCCEEDED(pBuffer.Lock(pBitmapData,
-                                       Nil,
-                                       @cbBitmapData));
-      try
-        iPitch := 4 * AVideoInfo.iVideoWidth;
-        // For full frame capture, use the buffer dimensions for the data size check
-        iExpectedBMPDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
-        iActualBMPDataSize := Integer(cbBitmapData);
-        if iActualBMPDataSize <> iExpectedBMPDataSize then
-          AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
-                           [iActualBMPDataSize, iExpectedBMPDataSize]);
-        if Result then
-          begin
-            // Bind the render target to the bitmap
-            // Note: When going in to async mode, and going to into this function, frendertarget is lost, so we need to reinitialize a new rendertarget.
-            CopyTRectToPRect(AImage.Canvas.ClipRect,
-                             pClipRect);
-            Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle,
-                                                     pClipRect));
-            if Result then
-              begin
-                // Create the 2D bitmap interface
-                oSize.Width := AVideoInfo.iVideoWidth;
-                oSize.Height := AVideoInfo.iVideoHeight;
-                Result := SUCCEEDED(FRenderTarget.CreateBitmap(oSize,
-                                                               pBitmapData,
-                                                               iPitch,
-                                                               F2DBitmapProperties,
-                                                               o2DBitmap));
-              end;
-
-            // Draw the 2D bitmap to the render target
-            if Result then
-              begin
-                FRenderTarget.BeginDraw;
-                FRenderTarget.DrawBitmap(o2DBitmap);
-                FRenderTarget.EndDraw();
-              end;
-          end;
-
-      finally
-        pBuffer.Unlock;
-        SafeRelease(pBuffer);
-      end;
-    end;
-
-  finally
-    pBitmapData := Nil;
-    pClipRect := Nil;
-  end;
-
+   FillChar(Header,SizeOf(Header),0); FillChar(Info,SizeOf(Info),0);
+   Header.bfType:=$4D42; Header.bfOffBits:=SizeOf(Header)+SizeOf(Info);
+   Info.biSize:=SizeOf(Info); Info.biWidth:=AVideoInfo.iVideoWidth;
+   Info.biHeight:=-AVideoInfo.iVideoHeight; Info.biPlanes:=1; Info.biBitCount:=32;
+   Info.biSizeImage:=RowBytes*AVideoInfo.iVideoHeight;
+   Header.bfSize:=Header.bfOffBits+Info.biSizeImage;
+   Stream.WriteBuffer(Header,SizeOf(Header)); Stream.WriteBuffer(Info,SizeOf(Info));
+   for Y:=0 to AVideoInfo.iVideoHeight-1 do begin
+    if Pitch<0 then Offset:=(AVideoInfo.iVideoHeight-1-Y)*(-Pitch) else Offset:=Y*Pitch;
+    Stream.WriteBuffer(PByte(NativeUInt(Data)+NativeUInt(Offset))^,RowBytes);
+   end;
+   Stream.Position:=0; AImage.LoadFromStream(Stream); AError:=''; Result:=True;
+  finally Stream.Free;end;
+ finally Buffer.Unlock;end;
 end;
-
 end.

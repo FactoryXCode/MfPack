@@ -10,7 +10,7 @@
 // Release date: 02-04-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Process Info Dialog lists a snapshot of running processes so
 //              a user can pick a process.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -174,7 +174,7 @@ begin
   hHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,
                                       0);
 
-  if (hHandle <> 0) then
+  if (hHandle <> INVALID_HANDLE_VALUE) then
     begin
 
       // Set the record to default values.
@@ -207,7 +207,7 @@ begin
                                      lppe.th32ParentProcessID) then
                 begin
                   inc(i);
-                  sgProcesses.RowCount := i;
+                  sgProcesses.RowCount := i + 1;
                   PopulateCells(i,
                                 lppe.szExeFile,
                                 lppe.th32ProcessID,

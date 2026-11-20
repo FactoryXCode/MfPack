@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -401,14 +401,13 @@ begin
   mat := mat * D2D_MATRIX_3X2_F.Translation((m_nrcBound.left * sizeRT.width),
                                             (m_nrcBound.top * sizeRT.height));
 
-  pRT.SetTransform(mat);
+  pRT.SetTransform(@mat);
 
   // Store the matrix
   m_mat := mat;
 
   //
-  pRT.DrawBitmap(m_pBitmap,
-                 @m_fill);
+  pRT.DrawBitmap(m_pBitmap,@m_fill,1,D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,nil);
 
 end;
 

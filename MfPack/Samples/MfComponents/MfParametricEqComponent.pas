@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Compressor + limiter MFT with GR meters.
 //              Includes smoothed true-peak limiter using Catmull-Rom oversampling (2×/4×/8×),
 //              ceiling default -1.0 dBTP, and attack/release smoothing to avoid pumping.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfParametricEqMFT
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -123,7 +123,7 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); //override;
+    constructor Create(AOwner: TComponent); override;
     procedure AfterConstruction(); override;
     destructor Destroy(); override;
 

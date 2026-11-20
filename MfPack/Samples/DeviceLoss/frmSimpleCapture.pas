@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -24,13 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -145,6 +145,8 @@ type
     procedure WMDeviceLoss(var aMessage: TMessage); message WM_DEVICELOST;
 
   public
+    destructor Destroy; override;
+  public
     { Public declarations }
 
     bDeviceLost: Boolean;
@@ -163,6 +165,9 @@ implementation
 //-------------------------------------------------------------------
 // CleanUp: Frees resources before the application exits
 //-------------------------------------------------------------------
+destructor TFrm_SimpleCapture.Destroy;
+begin QuitSession;inherited;end;
+
 procedure TFrm_SimpleCapture.QuitSession();
 begin
   if Assigned(MfDeviceCapture) then
@@ -191,6 +196,9 @@ begin
 
            // Set the device
           hr := MfDeviceCapture.SetDevice(dpa[iSelectedDevice]);
+          if SUCCEEDED(hr) then begin
+            FreeAndNil(FDeviceLoss);FDeviceLoss:=TDeviceLoss.Create(Handle,iSelectedDevice,dmo_Message);
+          end;
           if FAILED(hr) then
             begin
               GetLastError();
@@ -257,7 +265,7 @@ begin
       MfDeviceCapture := Nil;
       // We want the video to be played on the VideoPanel, so, we use that handle.
       TMfCaptureEngine.CreateInstance(pnlVideo.Handle,       // The clipping window / control
-                                      Frm_SimpleCapture.Handle,
+                                      Handle,
                                       MfDeviceCapture);  // Must be main form or parent window !!!
       // If you want to switch to a different clipping surface while the session is active:
       // MfDeviceCapture.SetVideoSurface := myFormOrControl.Handle;

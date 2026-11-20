@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Loopback capturer.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -100,6 +100,8 @@ type
 
     FThread: TThread;
     FStopEvent: TEvent;
+    FReadyEvent: TEvent;
+    FLastError: string;
 
     FDevice: IMMDevice;
     FAudioClient: IAudioClient;
@@ -122,6 +124,7 @@ type
     procedure Start();
     procedure Stop();
 
+    property LastError: string read FLastError;
     property AudioDeviceId: string read FAudioDeviceId write FAudioDeviceId;
     property OnData: TWasapiDataEvent read FOnData write FOnData;
   end;
@@ -143,6 +146,7 @@ begin
                               True,
                               False,
                               '');
+  FReadyEvent := TEvent.Create(nil,True,False,'');
   FEventHandle := 0;
   FWaveFormat := nil;
 end;
@@ -154,6 +158,7 @@ begin
   Stop;
   FreeClient;
   FreeAndNil(FStopEvent);
+  FreeAndNil(FReadyEvent);
 
   inherited;
 end;
@@ -233,9 +238,7 @@ begin
   if Assigned(FAudioClient) then
     begin
 
-      hr := FAudioClient.Stop();
-      if FAILED(hr) then
-        ShowMessage('Error: FAudioClient.Stop');
+      FAudioClient.Stop();
     end;
 
   FCaptureClient := nil;
@@ -262,13 +265,22 @@ begin
     Exit;
 
   FStopEvent.ResetEvent();
+  FReadyEvent.ResetEvent();
+  FLastError := '';
 
-  FThread := TThread.CreateAnonymousThread(procedure
-                                             begin
-                                               CaptureThreadProc;
-                                             end);
+  FThread := TGpuCaptureWorker.Create(CaptureThreadProc);
   FThread.FreeOnTerminate := False;
   FThread.Start;
+  if FReadyEvent.WaitFor(5000) <> wrSignaled then
+    begin
+      Stop();
+      raise Exception.Create('WASAPI startup timed out');
+    end;
+  if FLastError <> '' then
+    begin
+      Stop();
+      raise Exception.Create(FLastError);
+    end;
 end;
 
 
@@ -297,14 +309,14 @@ var
 
 begin
 
-  CoInitializeEx(nil,
-                 COINIT_MULTITHREADED);
   try
 
+    try
     InitClient();
 
     hr := FAudioClient.Start();
     CheckHR(hr, 'IAudioClient.Start');
+    FReadyEvent.SetEvent();
 
     while (FStopEvent.WaitFor(0) = wrTimeout) do
       begin
@@ -377,10 +389,14 @@ begin
       // Do nothing.
     end;
 
-    FreeClient();
+    except
+      on E: Exception do FLastError := E.ClassName + ': ' + E.Message;
+    end;
   finally
+    FreeClient();
+    FReadyEvent.SetEvent();
 
-    CoUninitialize();
+
   end;
 end;
 

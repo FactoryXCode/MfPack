@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: 3-band EQ (Low / Mid / High) MFT.
 //
 // Company: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -33,7 +33,7 @@
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 //
 // Related objects: MfAudioEffectMFTBase
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -151,6 +151,13 @@ type
     FSampleRate: Integer;
     FChannels: Integer;
 
+    // Owned by the processing thread; targets arrive through pending settings.
+    FCurrentLowDb: Double;
+    FCurrentMidDb: Double;
+    FCurrentHighDb: Double;
+    FRampSamplesLeft: Integer;
+    FRampUpdateFrames: Integer;
+
     // Smoothed gains (linear) - currently unity, kept for future crossfade.
     // We keep them for future use.
     // These gain members may be reused later for:
@@ -181,6 +188,8 @@ type
 
     procedure ApplyPendingSettings();
     procedure EnsureChannelState();
+    procedure StepGainRamp();
+    procedure SnapGainRamp();
 
     procedure CalcLowShelf(const FreqHz,
                            GainDb, Q: Double;
@@ -219,6 +228,10 @@ type
     procedure SetSettings(const S: TMfLowMidHighEqSettings); stdcall;
     function GetSettings(out S: TMfLowMidHighEqSettings): HRESULT; stdcall;
     procedure ResetState; stdcall;
+    procedure GetBiquadCoeffs(out Low,
+                                 Mid,
+                                 High: TBiquadCoeffs;
+                                 out SampleRate: Double);
   end;
 
 
@@ -328,34 +341,157 @@ begin
 end;
 
 
-procedure TMfLowMidHighEqMFT.ApplyPendingSettings;
+procedure TMfLowMidHighEqMFT.GetBiquadCoeffs(out Low,
+                                              Mid,
+                                              High: TBiquadCoeffs;
+                                              out SampleRate: Double);
 var
-  dirty: LongInt;
+  Settings: TMfLowMidHighEqSettings;
+  B: TBiquad;
+  Rate: Integer;
+
+  procedure CopyCoeffs(out Coeffs: TBiquadCoeffs);
+  begin
+
+    Coeffs.b0 := B.b0;
+    Coeffs.b1 := B.b1;
+    Coeffs.b2 := B.b2;
+    Coeffs.a1 := B.a1;
+    Coeffs.a2 := B.a2;
+  end;
 
 begin
 
-  dirty := InterlockedCompareExchange(FPendingDirty,
-                                      0,
-                                      0);
-  if (dirty = 0) then
-    Exit;
-
-  // Reset dirty first to avoid churn.
-  InterlockedExchange(FPendingDirty,
-                      0);
-
+  // Read the latest requested tuning without changing processing filter state.
   FCS.Enter();
-
   try
-
-    FSettings := FPendingSettings;
+    Settings := FPendingSettings;
+    Rate := FSampleRate;
   finally
-
     FCS.Leave();
   end;
 
-  // Recalc coeffs at block boundary.
-  EnsureChannelState;
+  if Rate <= 0 then
+    Rate := 48000;
+  SampleRate := Rate;
+
+  FillChar(Low, SizeOf(Low), 0);
+  Low.b0 := 1.0;
+  Mid := Low;
+  High := Low;
+  if not Settings.Enabled then
+    Exit;
+
+  CalcLowShelf(ClampHz(Settings.LowFreqHz, Rate),
+                EnsureRange(Settings.LowGainDb, -24.0, 24.0),
+                EnsureRange(Settings.LowQ, 0.1, 4.0),
+                Rate,
+                B);
+  CopyCoeffs(Low);
+
+  if Settings.MidMode = emmNotch then
+    CalcNotch(ClampHz(Settings.MidFreqHz, Rate),
+               EnsureRange(Settings.MidQ, 0.1, 12.0),
+               Rate,
+               B)
+  else
+    CalcPeaking(ClampHz(Settings.MidFreqHz, Rate),
+                 EnsureRange(Settings.MidGainDb, -24.0, 24.0),
+                 EnsureRange(Settings.MidQ, 0.1, 12.0),
+                 Rate,
+                 B);
+  CopyCoeffs(Mid);
+
+  CalcHighShelf(ClampHz(Settings.HighFreqHz, Rate),
+                 EnsureRange(Settings.HighGainDb, -24.0, 24.0),
+                 EnsureRange(Settings.HighQ, 0.1, 4.0),
+                 Rate,
+                 B);
+  CopyCoeffs(High);
+end;
+
+
+procedure TMfLowMidHighEqMFT.ApplyPendingSettings;
+var
+  Settings: TMfLowMidHighEqSettings;
+  GainsChanged: Boolean;
+
+begin
+
+  if InterlockedExchange(FPendingDirty, 0) = 0 then
+    Exit;
+
+  FCS.Enter();
+  try
+    Settings := FPendingSettings;
+  finally
+    FCS.Leave();
+  end;
+
+  Settings.LowGainDb := EnsureRange(Settings.LowGainDb, -24.0, 24.0);
+  Settings.MidGainDb := EnsureRange(Settings.MidGainDb, -24.0, 24.0);
+  Settings.HighGainDb := EnsureRange(Settings.HighGainDb, -24.0, 24.0);
+  Settings.RampMs := EnsureRange(Settings.RampMs, 0, 5000);
+
+  GainsChanged := (Settings.LowGainDb <> FSettings.LowGainDb) or
+                  (Settings.MidGainDb <> FSettings.MidGainDb) or
+                  (Settings.HighGainDb <> FSettings.HighGainDb) or
+                  (Settings.RampMs <> FSettings.RampMs);
+  FCS.Enter();
+  try
+    FSettings := Settings;
+  finally
+    FCS.Leave();
+  end;
+
+  if FSettings.RampMs = 0 then
+    SnapGainRamp()
+  else if GainsChanged then
+    begin
+      // Retarget from the current gains without resetting the filter histories.
+      FRampSamplesLeft := Max(1, Round(FSettings.RampMs * FSampleRate / 1000.0));
+      FRampUpdateFrames := 0;
+    end;
+
+  EnsureChannelState();
+end;
+
+
+procedure TMfLowMidHighEqMFT.SnapGainRamp();
+begin
+
+  FCurrentLowDb := FSettings.LowGainDb;
+  FCurrentMidDb := FSettings.MidGainDb;
+  FCurrentHighDb := FSettings.HighGainDb;
+  FRampSamplesLeft := 0;
+  FRampUpdateFrames := 0;
+end;
+
+
+procedure TMfLowMidHighEqMFT.StepGainRamp();
+begin
+
+  if FRampSamplesLeft <= 0 then
+    Exit;
+
+  FCurrentLowDb := FCurrentLowDb +
+                  (FSettings.LowGainDb - FCurrentLowDb) / FRampSamplesLeft;
+  FCurrentMidDb := FCurrentMidDb +
+                  (FSettings.MidGainDb - FCurrentMidDb) / FRampSamplesLeft;
+  FCurrentHighDb := FCurrentHighDb +
+                   (FSettings.HighGainDb - FCurrentHighDb) / FRampSamplesLeft;
+  Dec(FRampSamplesLeft);
+  Inc(FRampUpdateFrames);
+
+  if FRampSamplesLeft = 0 then
+    SnapGainRamp();
+
+  // Limit filter redesign work; the cadence is independent of packet sizes.
+  if (FRampUpdateFrames >= 32) or (FRampSamplesLeft = 0) then
+    begin
+      EnsureChannelState();
+      FRampUpdateFrames := 0;
+    end;
 end;
 
 
@@ -456,15 +592,15 @@ begin
                     0.1,
                     4.0);
 
-  lg := EnsureRange(FSettings.LowGainDb,
+  lg := EnsureRange(FCurrentLowDb,
                    -24.0,
                    24.0);
 
-  mg := EnsureRange(FSettings.MidGainDb,
+  mg := EnsureRange(FCurrentMidDb,
                     -24.0,
                     24.0);
 
-  hg := EnsureRange(FSettings.HighGainDb,
+  hg := EnsureRange(FCurrentHighDb,
                     -24.0,
                     24.0);
 
@@ -718,6 +854,7 @@ var
   x,
   y: Double;
   en: Integer;
+  FormatChanged: Boolean;
   pS: PSingle;
 
   // Helper
@@ -740,18 +877,18 @@ begin
      (SampleRate <= 0) then
     Exit;
 
-  // Ensure our cached SR/Ch are consistent.
-  if (SampleRate <> FSampleRate) or
-     (Channels <> FChannels) then
-    begin
+  FormatChanged := (SampleRate <> FSampleRate) or (Channels <> FChannels);
+  FSampleRate := SampleRate;
+  FChannels := Channels;
+  ApplyPendingSettings();
 
-      FSampleRate := SampleRate;
-      FChannels := Channels;
-      EnsureChannelState;
+  if FormatChanged then
+    begin
+      // Opening/reopening a stream starts at its configured tuning.
+      SnapGainRamp();
+      EnsureChannelState();
       ResetState();
     end;
-
-  ApplyPendingSettings();
 
   en := NormalizeBOOL(FSettings.Enabled);
   if (en = 0) then
@@ -761,6 +898,7 @@ begin
 
   for i := 0 to Frames - 1 do
     begin
+      StepGainRamp();
 
       for ch := 0 to Channels - 1 do
         begin

@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -33,7 +33,7 @@
 //          feature in Windows 7 and higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -116,7 +116,7 @@ type
     tmrProgress: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure butOKClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormDestroy(Sender: TObject);
     procedure cbCheckPauseOnDuckClick(Sender: TObject);
     procedure cbOptOutOnDuckingClick(Sender: TObject);
     procedure butBrowseClick(Sender: TObject);
@@ -283,12 +283,12 @@ begin
 end;
 
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  CanClose := False;
+
   g_MediaPlayer.Shutdown();
   FreeAndNil(g_MediaPlayer);
-  CanClose := True;
+
 end;
 
 

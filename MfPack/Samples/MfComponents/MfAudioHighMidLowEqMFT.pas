@@ -24,7 +24,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: 3-band EQ (Low / Mid / High) MFT.
 //
@@ -36,7 +36,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 10 (2H20) or later.
@@ -48,7 +48,7 @@
 //
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -77,7 +77,7 @@
 // their product.
 //
 //==============================================================================
-unit MfLomMidHighEqMFT;
+unit MfAudioHighMidLowEqMFT;
 
 interface
 
@@ -91,8 +91,8 @@ uses
   System.Math,
   System.SyncObjs,  
   {Application}
-  MfAudioEffectMFTBase, // MfPack base: implements IMFTransform boilerplate
-  MfMFTypes;            // MfPack common MF types (if available)
+  MfAudioEffectMFTBase,
+  PcmLib;
 
 type
   
@@ -170,7 +170,6 @@ type
       FHigh: array of TBiquad;
 
     procedure ApplyPendingSettings;
-    procedure ResetStateInternal;
 
     procedure EnsureChannelState;
 
@@ -186,13 +185,13 @@ type
 
   protected
     // TMfAudioEffectMFTBase hook: called when the rack configures float32
-    function OnSetInputTypeFloat32(const SampleRate, Channels: Integer): HRESULT; override;
+    function OnSetInputTypeFloat32(const SampleRate, Channels: Integer): HRESULT;
 
     // Processing
     procedure ProcessAudioFloat32(pData: PSingle; Frames, Channels, SampleRate: Integer); override;
 
   public
-    constructor Create; override;
+    constructor Create; reintroduce;
     destructor Destroy; override;
 
     procedure SetSettings(const S: TMfHighMidLowEqSettings); stdcall;
@@ -624,7 +623,7 @@ begin
   begin
     for ch := 0 to Channels - 1 do
     begin
-      x := pData[idx];
+      x := PtrSingleOffset(pData,idx)^;
 
       // 3-band cascade
       y := ProcBiquad(FLow[ch], x);
@@ -640,7 +639,7 @@ begin
       else if y < -1.0 then
         y := -1.0;
 
-      pData[idx] := Single(y);
+      PtrSingleOffset(pData,idx)^ := y;
       Inc(idx);
     end;
   end;

@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Wav and Flac writer.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -116,6 +116,7 @@ type
     // MF/FLAC
     FFlacWriter: IMFSinkWriter;
     FFlacAudioStreamIndex: DWORD;
+    FMFStarted: Boolean;
     FFlacReady: Boolean;
     FAudioRt100ns: Int64;
     FTempPcm16: TBytes;
@@ -218,41 +219,8 @@ end;
 
 
 procedure TLoopbackAudioOnlyRecorder.ApplyDeviceIdToCapture();
-var
-  Ctx: TRttiContext;
-  T: TRttiType;
-  P: TRttiProperty;
-  Names: array[0..3] of string;
-  i: Integer;
-
 begin
-
-  if (FCaptureDeviceId = '') or
-     (FCapture = nil) then
-  Exit;
-
-  Names[0] := 'AudioDeviceID';
-  Names[1] := 'AudioDeviceId';
-  Names[2] := 'DeviceId';
-  Names[3] := 'DeviceID';
-
-  Ctx := TRttiContext.Create;
-  T := Ctx.GetType(FCapture.ClassType);
-
-  for i := Low(Names) to High(Names) do
-    begin
-
-      P := T.GetProperty(Names[i]);
-      if (P <> nil) and
-        P.IsWritable and
-        (P.PropertyType.TypeKind = tkUString) then
-        begin
-
-          P.SetValue(FCapture,
-                     FCaptureDeviceId);
-          Exit;
-        end;
-    end;
+  if FCapture <> nil then FCapture.AudioDeviceId := FCaptureDeviceId;
 end;
 
 
@@ -363,11 +331,18 @@ begin
         FFlacReady := False;
       end;
 
+    if FMFStarted then
+      begin
+        MFShutdown();
+        FMFStarted := False;
+      end;
     SetLength(FTempPcm16, 0);
   finally
 
     FCrit.Leave;
   end;
+  if (FCapture <> nil) and (FCapture.LastError <> '') then
+    raise Exception.Create(FCapture.LastError);
 end;
 
 
@@ -712,9 +687,12 @@ begin
      (Wf.nSamplesPerSec = 0) then
     Exit;
 
-  hr := MFStartup(MF_VERSION,
-                  MFSTARTUP_FULL);
-  CheckHR(hr, 'MFStartup');
+  if not FMFStarted then
+    begin
+      hr := MFStartup(MF_VERSION,MFSTARTUP_FULL);
+      CheckHR(hr,'MFStartup');
+      FMFStarted := True;
+    end;
 
   hr := MFCreateSinkWriterFromURL(PWideChar(WideString(FFileName)),
                                   nil,

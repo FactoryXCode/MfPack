@@ -1,13 +1,12 @@
 ## MfCastPlayer
   
-Version: 4.0.0  
+Version: 4.1.0  
   
 NOTES:  
 This release is updated for compiler version 17 up to 35.  
 SDK version: 10.0.28000.2705 (Win 11)  
 Requires Windows 10 or later.  
-Minimum supported MfPack version: 4.0.0  
-MfCast V2
+Minimum supported MfPack version: 3.2.0  
   
   
 This Delphi XE7 and higher compatible VCL sample demonstrates the public `TMfCast` main interface.  
@@ -91,12 +90,37 @@ retaining discovery, direct playback, and media-track inspection.
 The sender is a native implementation of the Google Cast protocol. Google does  
 not provide an official Delphi/Windows Cast Sender SDK.  
   
+  
+### Automatic receiver wake-up
+  
+All applications using the shared TMfCast controller try the normal Cast
+connection first. After a retryable connection failure, a known receiver MAC
+address enables native Wake-on-LAN recovery, followed by bounded Cast connection
+retries. Receivers that connect immediately, including always-available speakers,
+use the normal path without sending wake packets.
+  
+The MAC address is learned from the Windows IPv4 neighbor table during discovery
+and after a successful connection. Discover or connect once while the receiver is
+awake. The per-receiver cache is shared by these applications for the current
+Windows user at `%LOCALAPPDATA%\MfPack\Cast\WakeTargets.ini`. It is keyed by the
+Cast device identity, not just an IP address. The current local interface and
+subnet broadcast address are selected again for each attempt. A missing or
+unusable MAC skips wake-up and retains ordinary retries.
+  
+Wake-on-LAN uses three bursts of standard 102-byte magic packets over UDP port 9,
+addressed to the receiver's MAC via subnet broadcast and unicast. The receiver
+must support network wake-up. HDMI-CEC can also turn connected equipment on.
+This is native Delphi/Windows code; Python and remote-control pairing are not
+required. Logs distinguish wake packets sent, wake-up skipped, and connection
+retry results. File, URL, desktop, and RDJ live-stream casting share this behavior.
+  
+  
 Project: Media Foundation - MFPack - Samples  
 Project location:  
 https://github.com/FactoryXCode/MfPack  
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 22/08/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

@@ -2,7 +2,7 @@
 
 &#x20;
 
-Version 4.0.0
+Version 4.1.0
 
 &#x20;
 
@@ -804,9 +804,11 @@ SourceForge: [https://sourceforge.net/projects/MFPack](https://sourceforge.net/p
 
 &#x20;
 
-First release date: 27/08/2026
+First release date: 27/08/2026  
+Final release date: 18/11/2026 
 
 &#x20;
+
 Copyright © FactoryX. All rights reserved.
 
 &#x20;

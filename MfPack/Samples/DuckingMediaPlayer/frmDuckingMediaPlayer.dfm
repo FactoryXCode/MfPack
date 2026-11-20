@@ -12,7 +12,7 @@ object Form1: TForm1
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OnCloseQuery = FormCloseQuery
+  OnDestroy = FormDestroy
   OnCreate = FormCreate
   TextHeight = 13
   object Label1: TLabel

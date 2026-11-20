@@ -10,7 +10,7 @@
 // Release date: 01-02-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Manages video capture.
 //              This sample demonstrates how to capture video from camera to a file.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -137,7 +137,7 @@ type
             State_SessionEnded
            );
 
-  TMfCaptureEngine = class(TInterfacedObject, IMFSourceReaderCallback)
+  TMfCaptureEngine = class(TInterfacedPersistent, IMFSourceReaderCallback)
 
   protected
 
@@ -145,6 +145,9 @@ type
     m_critsec: TCriticalSection;
     m_hwndEvent: HWND;         // Application window to receive events.
     m_pReader: IMFSourceReader;
+    FFlushEvent: THandle;
+    FSource: IMFMediaSource;
+    FActivation: IMFActivate;
     m_pWriter: IMFSinkWriter;
     m_pVideoDisplay: IMFVideoDisplayControl;    // Video control.
     m_bFirstSample: Boolean;
@@ -221,7 +224,7 @@ end;
 destructor TDeviceList.Destroy();
 begin
   Clear();
-  SafeRelease(m_ppDevices);
+
   inherited Destroy();
 end;
 
@@ -352,6 +355,8 @@ begin
   m_llBaseTime := 0;
   SetSubTypes();
   m_critsec := TCriticalSection.Create();
+  FFlushEvent := CreateEvent(nil,True,False,nil);
+  if FFlushEvent=0 then RaiseLastOSError;
 end;
 
 
@@ -360,15 +365,10 @@ end;
 //-------------------------------------------------------------------
 destructor TMfCaptureEngine.Destroy();
 begin
-  if Assigned(m_pReader) then
-    SafeRelease(m_pReader);
-
-  if Assigned(m_pWriter) then
-    SafeRelease(m_pWriter);
-
-  FreeAndnil(m_critsec);
-
-  inherited Destroy();
+ EndCaptureSession;
+ if FFlushEvent<>0 then CloseHandle(FFlushEvent);
+ FreeAndNil(m_critsec);
+ inherited;
 end;
 
 
@@ -540,6 +540,7 @@ end;
 
 function TMfCaptureEngine.OnFlush(dwStreamIndex: DWORD): HResult; stdcall;
 begin
+  SetEvent(FFlushEvent);
   Result := S_OK;
 end;
 
@@ -567,6 +568,8 @@ var
 
 begin
 
+  if (pActivate=nil) or (pwszFileName=nil) then Exit(E_INVALIDARG);
+  EndCaptureSession;
   m_critsec.Enter;
 
   // Create the media source for the device.
@@ -586,7 +589,11 @@ begin
                                        chLength);
 
   if SUCCEEDED(hr) then
-    hr := OpenMediaSource(pSource);
+    begin
+      FSource:=pSource;
+      FActivation:=pActivate;
+      hr := OpenMediaSource(pSource);
+    end;
 
   // Create the sink writer
   if SUCCEEDED(hr) then
@@ -632,27 +639,29 @@ end;
 // To start another capture session, call SetCaptureFile.
 //-------------------------------------------------------------------
 function TMfCaptureEngine.EndCaptureSession(): HResult;
-var
-  hr: HResult;
-
+var Reader: IMFSourceReader; Writer: IMFSinkWriter; Source: IMFMediaSource;
 begin
-
-  hr := S_OK;
-
-  if Assigned(m_pWriter) then
-    hr := m_pWriter.Finalize();
-
-  SafeRelease(m_pWriter);
-  SafeRelease(m_pReader);
-
-  CoTaskMemFree(m_DeviceFriendlyName);
-  m_DeviceFriendlyName := nil;
-  CoTaskMemFree(m_DeviceSymbolicLink);
-  m_DeviceSymbolicLink := nil;
-
-  State := State_NotReady;
-
-  Result := hr;
+ Result:=S_OK;
+ if m_critsec=nil then Exit;
+ m_critsec.Enter;
+ try
+  State:=State_NotReady;
+  Reader:=m_pReader; m_pReader:=nil;
+  Writer:=m_pWriter; m_pWriter:=nil;
+  Source:=FSource; FSource:=nil;
+ finally m_critsec.Leave;end;
+ if Reader<>nil then begin
+  ResetEvent(FFlushEvent);
+  if SUCCEEDED(Reader.Flush(MF_SOURCE_READER_ALL_STREAMS)) then WaitForSingleObject(FFlushEvent,5000);
+ end;
+ if Source<>nil then Source.Shutdown;
+ if FActivation<>nil then FActivation.ShutdownObject;
+ FActivation:=nil;
+ Reader:=nil;
+ if Writer<>nil then Result:=Writer.Finalize;
+ Writer:=nil;
+ CoTaskMemFree(m_DeviceFriendlyName);m_DeviceFriendlyName:=nil;
+ CoTaskMemFree(m_DeviceSymbolicLink);m_DeviceSymbolicLink:=nil;
 end;
 
 
@@ -663,7 +672,7 @@ var
 begin
   m_critsec.Enter;
 
-  bIsCapturing := (m_pWriter <> nil);
+  bIsCapturing := (m_pWriter <> nil) and (State=State_Capturing);
 
   if bIsCapturing then
     State := State_Capturing
@@ -728,7 +737,7 @@ begin
   if FAILED(hr) then
     goto done;
 
-  for i := 0 to length(m_SubTypes) do
+  for i := 0 to High(m_SubTypes) do
     begin
       if (subtype = m_SubTypes[i]) then
         begin

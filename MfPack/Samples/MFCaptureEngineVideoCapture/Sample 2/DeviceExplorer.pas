@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit contains the DeviceExplorer class to discover video devices like webcams etc.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -298,7 +298,8 @@ label
 
 begin
 
-  if (pDeviceIndex < Length(FDeviceProperties)) then
+  if (pDeviceIndex >= 0) and (pDeviceIndex < Length(FDeviceProperties)) and
+     (pFormatsIndex >= 0) and (pFormatsIndex < Length(FDeviceProperties[pDeviceIndex].aVideoFormats)) then
     begin
 
       iSelection := pDeviceIndex;
@@ -335,7 +336,7 @@ begin
       FVideoFormatInfo := FDeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex];
     end
   else
-    hr := ERROR_INVALID_PARAMETER;
+    hr := HRESULT_FROM_WIN32(ERROR_INVALID_PARAMETER);
 
 done:
   Result := hr;
@@ -350,6 +351,8 @@ var
   hr: HResult;
 
 begin
+  pActivate := nil;
+  pCount := 0;
   hr := MFCreateAttributes(mfAttributes,
                            1);
 
@@ -365,7 +368,6 @@ begin
                               pCount);
 
   ppActivate := pActivate;
-  SafeRelease(pActivate);
   Result := hr;
 end;
 

@@ -10,7 +10,7 @@
 // Release date: 25-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Small HTTP server for MfSimpleWebCamStreamer.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -104,6 +104,7 @@ type
   private
 
     FSocket: TSocket;
+    FClientSocket: TSocket;
     FThread: TSimpleHttpServerThread;
     FPort: Word;
     FRunning: Boolean;
@@ -196,6 +197,7 @@ begin
   inherited Create();
 
   FSocket := INVALID_SOCKET;
+  FClientSocket := INVALID_SOCKET;
   FThread := nil;
   FDebugDropRequests := False;
   FPort := 0;
@@ -361,11 +363,21 @@ begin
     Thread.Terminate();
 
   CloseListenSocket();
+  FLock.Enter;
+  try
+    if FClientSocket <> INVALID_SOCKET then
+      begin
+        shutdown(FClientSocket,SD_BOTH);
+        closesocket(FClientSocket);
+        FClientSocket := INVALID_SOCKET;
+      end;
+  finally
+    FLock.Leave;
+  end;
 
   if Assigned(Thread) then
     begin
-      WaitForSingleObject(Thread.Handle,
-                          INFINITE);
+      Thread.WaitFor();
 
       FThread := nil;
       Thread.Free();
@@ -1188,13 +1200,27 @@ begin
         end;
 
       try
+        FLock.Enter;
+      try
+        FClientSocket := ClientSocket;
+      finally
+        FLock.Leave;
+      end;
+      if FRunning then
         HandleClient(ClientSocket);
 
       finally
-        shutdown(ClientSocket,
-                 SD_BOTH);
-
-        closesocket(ClientSocket);
+        FLock.Enter;
+      try
+        if FClientSocket = ClientSocket then
+          begin
+            FClientSocket := INVALID_SOCKET;
+            shutdown(ClientSocket,SD_BOTH);
+            closesocket(ClientSocket);
+          end;
+      finally
+        FLock.Leave;
+      end;
       end;
     end;
 end;

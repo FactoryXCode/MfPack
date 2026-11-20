@@ -23,13 +23,13 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/09/2026 All                 Explain unavailable DTS decoding and keep the
 //                                audio-stream choice with the user.
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -71,6 +71,7 @@ uses
   WinApi.ActiveX,
   WinApi.messages,
   {System}
+  WinApi.MediaFoundationApi.MfUtils,
   System.SysUtils,
   System.Classes,
   System.UITypes,
@@ -238,6 +239,7 @@ type
     procedure RegisterGlobalHotKeys();
     procedure UnregisterGlobalHotKeys();
 
+    procedure AddLog(const AText: string; const ATimestamp: TDateTime = 0);
     procedure LogResult(const AOperation: string;
                         const AHResult: HRESULT);
 
@@ -294,7 +296,7 @@ begin
     end;
 
   LogResult('Disconnect',
-            HRESULT(message.WParam));
+            HRESULT(DWORD(message.WParam)));
   UpdateControls();
 end;
 
@@ -389,11 +391,16 @@ var
   CodecName: string;
 
   function StartCapture(): HRESULT;
-    begin
+  var
+    CapabilityTick: UInt64;
+  begin
       PostLog('Checking capture capabilities in the worker thread...');
+      CapabilityTick := GetTickCount64();
       Result := FCast.GetCaptureCapabilities(FDevice,
                                              FSettings,
                                              Capabilities);
+    PostLog(Format('Startup timing: capture capability check took %d ms (HRESULT $%.8x).',
+                   [Int64(GetTickCount64() - CapabilityTick), DWORD(Result)]));
     if FAILED(Result) then
       begin
         PostLog('Capture capability check failed: ' + Capabilities.SelectionReason);
@@ -443,7 +450,8 @@ begin
   try
     try
       if SUCCEEDED(HrCom) then
-        Hr := StartCapture()
+        if FCast = nil then Hr := E_POINTER
+        else Hr := StartCapture()
       else
         begin
           Hr := HrCom;
@@ -466,7 +474,7 @@ begin
     // Release the UI's busy state even when preparation raises an exception.
     PostMessage(FNotifyWindow,
                 WM_MFCAST_FINISHED,
-                WPARAM(Hr),
+                WPARAM(DWORD(Hr)),
                 0);
   end;
 end;
@@ -511,7 +519,7 @@ begin
   trkSeek.Max := 7200;
   trkVolume.Max := 100;
   trkVolume.Position := 0;
-  memLog.Lines.Add('Ready. Choose a local file/URL, or cast the desktop with DXGI and WASAPI.');
+  AddLog('Ready. Choose a local file/URL, or cast the desktop with DXGI and WASAPI.');
   RegisterGlobalHotKeys();
   UpdateControls;
 end;
@@ -594,7 +602,7 @@ const
                         const ADescription: string);
   begin
     if not RegisterHotKey(Handle, AId, AModifiers, AKey) then
-      memLog.Lines.Add(Format('Global shortcut unavailable: %s (Windows error %d).',
+      AddLog(Format('Global shortcut unavailable: %s (Windows error %d).',
                               [ADescription, GetLastError()]));
   end;
 
@@ -640,7 +648,7 @@ begin
               Ord('M'),
               'Ctrl+Alt+M');
 
-  memLog.Lines.Add('Global shortcuts: Cast Ctrl+Alt+C, desktop Ctrl+Alt+D, play/pause/stop Ctrl+Alt+F5/F6/F7, volume Ctrl+Alt+Up/Down, mute Ctrl+Alt+M.');
+  AddLog('Global shortcuts: Cast Ctrl+Alt+C, desktop Ctrl+Alt+D, play/pause/stop Ctrl+Alt+F5/F6/F7, volume Ctrl+Alt+Up/Down, mute Ctrl+Alt+M.');
 end;
 
 
@@ -937,7 +945,7 @@ begin
     if (SourceName = '') or (not FileExists(SourceName)) then
       Exit;
 
-    memLog.Lines.Add(Format('[DEBUG][Subtitles] Scanning source="%s".',
+    AddLog(Format('[DEBUG][Subtitles] Scanning source="%s".',
                             [SourceName]));
 
     // Sidecars are deliberately inserted first. AddSubtitleChoice suppresses
@@ -977,7 +985,7 @@ begin
                 AddSubtitleChoice(Choice);
               end
             else
-              memLog.Lines.Add(Format('[INFO][Subtitles] Unsupported bitmap or unknown subtitle sidecar: "%s".',
+              AddLog(Format('[INFO][Subtitles] Unsupported bitmap or unknown subtitle sidecar: "%s".',
                                       [ExtractFileName(Sidecars[I].sFile)]));
 
           SetLength(Sidecars, 0);
@@ -990,7 +998,7 @@ begin
                                                              EmbeddedTracks)) then
         for I := Low(EmbeddedTracks) to High(EmbeddedTracks) do
           begin
-            memLog.Lines.Add(Format('[DEBUG][Subtitles] Candidate stream=%d language="%s" name="%s" codec="%s" supported=%s.',
+            AddLog(Format('[DEBUG][Subtitles] Candidate stream=%d language="%s" name="%s" codec="%s" supported=%s.',
                                     [EmbeddedTracks[I].StreamIndex,
                                      EmbeddedTracks[I].Language,
                                      EmbeddedTracks[I].Name,
@@ -1017,7 +1025,7 @@ begin
 
                 Choice.Language := TLanguageTags.NormalizeLanguageTag(Choice.Language);
 
-                memLog.Lines.Add(Format('[DEBUG][Subtitles] Embedded track %d: stream=%d language="%s" name="%s".',
+                AddLog(Format('[DEBUG][Subtitles] Embedded track %d: stream=%d language="%s" name="%s".',
                                         [EmbeddedTrackNumber,
                                          EmbeddedTracks[I].StreamIndex,
                                          Choice.Language,
@@ -1056,7 +1064,7 @@ begin
     cbxSubtitleLanguage.Items.EndUpdate();
   end;
 
-  memLog.Lines.Add(Format('Subtitle languages found: %d.',
+  AddLog(Format('Subtitle languages found: %d.',
                           [cbxSubtitleLanguage.Items.Count]));
   UpdateControls();
 end;
@@ -1119,7 +1127,7 @@ begin
                                AllTracks);
     if FAILED(Hr) then
       begin
-        memLog.Lines.Add(Format('Audio track scan failed: HRESULT $%.8x',
+        AddLog(Format('Audio track scan failed: HRESULT $%.8x',
                                 [DWORD(Hr)]));
         Exit;
       end;
@@ -1158,7 +1166,7 @@ begin
     SetLength(AllTracks, 0);
   end;
 
-  memLog.Lines.Add(Format('Audio tracks found: %d.',
+  AddLog(Format('Audio tracks found: %d.',
                           [cbxAudioStream.Items.Count]));
 end;
 
@@ -1260,7 +1268,7 @@ begin
                                                       Handle);
 
   FAudioTrackWorker.Start();
-  memLog.Lines.Add('Switching audio track in a worker thread...');
+  AddLog('Switching audio track in a worker thread...');
   UpdateControls();
 end;
 
@@ -1283,11 +1291,21 @@ begin
                                                   Handle);
   FSubtitleWorker.Start();
   if Subtitle.Enabled then
-    memLog.Lines.Add('Switching subtitles in a worker thread...')
+    AddLog('Switching subtitles in a worker thread...')
   else
-    memLog.Lines.Add('Disabling subtitles in a worker thread...');
+    AddLog('Disabling subtitles in a worker thread...');
 
   UpdateControls();
+end;
+
+
+procedure TCastPlayerForm.AddLog(const AText: string; const ATimestamp: TDateTime);
+var
+  Stamp: TDateTime;
+begin
+  Stamp := ATimestamp;
+  if Stamp = 0 then Stamp := Now;
+  memLog.Lines.Add(MfCastFormatLogLine(AText, Stamp));
 end;
 
 
@@ -1296,10 +1314,10 @@ procedure TCastPlayerForm.LogResult(const AOperation: string;
 begin
 
   if FAILED(AHResult) then
-    memLog.Lines.Add(Format('%s failed: HRESULT $%.8x',
+    AddLog(Format('%s failed: HRESULT $%.8x',
                             [AOperation, DWORD(AHResult)]))
   else
-    memLog.Lines.Add(AOperation + ' requested.');
+    AddLog(AOperation + ' requested.');
 end;
 
 
@@ -1501,7 +1519,7 @@ begin
   Logmessage := TMfCastUiLogMessage(message.WParam);
 
   try
-    memLog.Lines.Add(Logmessage.Text);
+    AddLog(Logmessage.Text, Logmessage.CreatedAt);
     UpdateControls();
 
   finally
@@ -1522,7 +1540,7 @@ begin
       FreeAndNil(FWorker);
     end;
 
-  Hr := HRESULT(message.WParam);
+  Hr := HRESULT(DWORD(message.WParam));
   if FAILED(Hr) then
     FActiveDesktopMode := -1;
 
@@ -1560,7 +1578,7 @@ begin
   Logmessage := TMfCastUiLogMessage(message.WParam);
 
   try
-    memLog.Lines.Add(Logmessage.Text);
+    AddLog(Logmessage.Text, Logmessage.CreatedAt);
 
   finally
     Logmessage.Free();
@@ -1579,10 +1597,10 @@ begin
 
   if Boolean(message.LParam) then
     LogResult('Subtitle switch',
-              HRESULT(message.WParam))
+              HRESULT(DWORD(message.WParam)))
   else
     LogResult('Disable subtitles',
-              HRESULT(message.WParam));
+              HRESULT(DWORD(message.WParam)));
   UpdateControls();
 end;
 
@@ -1600,9 +1618,9 @@ begin
     end;
 
   LogResult('Audio track switch',
-            HRESULT(message.WParam));
+            HRESULT(DWORD(message.WParam)));
 
-  if SUCCEEDED(HRESULT(message.WParam)) then
+  if SUCCEEDED(HRESULT(DWORD(message.WParam))) then
     for I := Low(FAudioTracks) to High(FAudioTracks) do
       FAudioTracks[I].Selected := I = cbxAudioStream.ItemIndex;
 
@@ -1770,7 +1788,7 @@ begin
                                       Subtitle,
                                       Handle);
   FWorker.Start();
-  memLog.Lines.Add('Preparing and connecting in a worker thread...');
+  AddLog('Preparing and connecting in a worker thread...');
   UpdateControls;
 end;
 
@@ -1846,12 +1864,12 @@ begin
 
   if (not Settings.CaptureSystemAudio) and MfCastDeviceIsAudioOnly(FDevices[cbxDevices.ItemIndex]) then
     begin
-      memLog.Lines.Add(
+      AddLog(
         'Video-only casting requires a video-capable receiver. Select another receiver or capture mode.');
       Exit;
     end;
 
-  memLog.Lines.Add(Format('Desktop target: name="%s", model="%s", address=%s:%d, capabilities=%d.',
+  AddLog(Format('Desktop target: name="%s", model="%s", address=%s:%d, capabilities=%d.',
                           [FDevices[cbxDevices.ItemIndex].FriendlyName,
                            FDevices[cbxDevices.ItemIndex].ModelName,
                            FDevices[cbxDevices.ItemIndex].Address,
@@ -1871,18 +1889,18 @@ begin
       if not SelectCaptureMonitor(Settings.OutputIndex,
                                   MonitorDescription) then
         begin
-          memLog.Lines.Add('Desktop casting cancelled: no screen was selected.');
+          AddLog('Desktop casting cancelled: no screen was selected.');
           Exit;
         end;
     end;
 
   if Settings.AudioOnly then
-    memLog.Lines.Add('Audio source: default Windows playback device (WASAPI loopback); DXGI is not used.')
+    AddLog('Audio source: default Windows playback device (WASAPI loopback); DXGI is not used.')
   else
     if (Settings.ArtworkSourceName <> '') then
-      memLog.Lines.Add('Artwork source: ' + Settings.ArtworkSourceName + '; system audio uses WASAPI loopback.')
+      AddLog('Artwork source: ' + Settings.ArtworkSourceName + '; system audio uses WASAPI loopback.')
     else
-      memLog.Lines.Add(Format('Desktop source: %s (DXGI output %d).',
+      AddLog(Format('Desktop source: %s (DXGI output %d).',
                               [MonitorDescription, Settings.OutputIndex]));
 
   Hr := SetDesktopCaptureExcluded((not Settings.AudioOnly) and (Settings.ArtworkSourceName = ''));
@@ -1894,7 +1912,7 @@ begin
     end;
 
   if (not Settings.AudioOnly) and (Settings.ArtworkSourceName = '') then
-    memLog.Lines.Add('Local preview enabled; player window excluded from desktop capture to prevent feedback.');
+    AddLog('Local preview enabled; player window excluded from desktop capture to prevent feedback.');
 
   // Every new desktop cast starts silent; raise the slider after connecting.
   trkVolume.Position := 0;
@@ -1908,15 +1926,15 @@ begin
   FWorker.Start();
 
   if Settings.AudioOnly then
-    memLog.Lines.Add('Starting WASAPI audio-only casting in a worker thread...')
+    AddLog('Starting WASAPI audio-only casting in a worker thread...')
   else
     if Settings.ArtworkSourceName <> '' then
-      memLog.Lines.Add('Starting system audio with artwork in a worker thread...')
+      AddLog('Starting system audio with artwork in a worker thread...')
     else
       if not Settings.CaptureSystemAudio then
-        memLog.Lines.Add('Starting DXGI video-only desktop casting in a worker thread...')
+        AddLog('Starting DXGI video-only desktop casting in a worker thread...')
       else
-        memLog.Lines.Add('Starting DXGI/WASAPI desktop casting in a worker thread...');
+        AddLog('Starting DXGI/WASAPI desktop casting in a worker thread...');
 
   UpdateControls();
 end;
@@ -1959,7 +1977,7 @@ begin
   FWorker := TMfCastDisconnectWorker.Create(FCast,
                                             Handle);
   FWorker.Start();
-  memLog.Lines.Add('Disconnecting and requesting standby for the paired TV...');
+  AddLog('Disconnecting and requesting standby for the paired TV...');
 
   UpdateControls();
 end;

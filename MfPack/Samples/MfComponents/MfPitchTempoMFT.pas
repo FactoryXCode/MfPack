@@ -24,7 +24,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Pitch + Tempo (time-stretch + pitch-shift) MFT.
 // Notes:
@@ -40,14 +40,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //          Requires MfAudioEffectMFTBase (IMFTransform helper), PcmLib (PSingleArray).
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -114,7 +114,8 @@ type
 
 const
 
-  PITCH_TEMPO_DEFAULTS: TPitchTempoSettings = (PitchSemitones: 0.0;
+  PITCH_TEMPO_DEFAULTS: TPitchTempoSettings = (Enabled: 1;
+                                               PitchSemitones: 0.0;
                                                TempoPercent: 100.0;
                                                PreserveFormants: LongBool(False);
                                                WindowSize: 1024;
@@ -795,7 +796,7 @@ begin
   for i := 0 to N - 1 do
     begin
 
-      ch^.FFTBuf[i].Re := Double(ReadInSample(i)) * FWindow[i];
+      ch^.FFTBuf[i].Re := (ReadInSample(i)) * FWindow[i];
       ch^.FFTBuf[i].Im := 0.0;
     end;
 
@@ -850,7 +851,7 @@ begin
   for i := 0 to hopS - 1 do
     begin
 
-      PushOutSample(Single(ch^.OLA[ch^.OLAPos mod Length(ch^.OLA)]));
+      PushOutSample((ch^.OLA[ch^.OLAPos mod Length(ch^.OLA)]));
       ch^.OLA[ch^.OLAPos mod Length(ch^.OLA)] := 0.0;
 
       Inc(ch^.OLAPos);
@@ -943,6 +944,7 @@ begin
   // Pitch: snap (or fast ramp)
   FCurPitchFactor := FCurPitchFactor + (pitchFactorTarget - FCurPitchFactor) * 0.45; // fast ramp
   FCurPitchFactor := pitchFactorTarget;
+  pitchFactor := FCurPitchFactor;
 
   idx := 0;
   for i := 0 to Frames - 1 do

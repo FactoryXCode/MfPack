@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -31,13 +31,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -147,6 +147,7 @@ type
   private
     { Private declarations }
 
+    FSourceName, FTargetName: UnicodeString;
     wSourceFile: PWideChar;     // The sourcefile URL
     wTargetFile: PWideChar;     // The target file URL
     MfAudioClip: TAudioClipClass;
@@ -154,6 +155,8 @@ type
     procedure Reset();
     procedure OnClipEngineMsg(var Msg: TMessage); message WM_CLIPENGINE_MSG;
 
+  public
+    destructor Destroy; override;
   public
     { Public declarations }
   end;
@@ -164,6 +167,9 @@ var
 implementation
 
 {$R *.dfm}
+
+destructor TAudioClipExFrm.Destroy;
+begin FreeAndNil(MfAudioClip);inherited;end;
 
 procedure TAudioClipExFrm.Reset();
 begin
@@ -301,7 +307,7 @@ begin
         DeleteFile(Savedialog1.FileName);
 
       lblTargetFile.Caption := Savedialog1.FileName;
-      wTargetFile := PWideChar(Savedialog1.FileName);
+      FTargetName:=Savedialog1.FileName;wTargetFile:=PWideChar(FTargetName);
       butExtract.Enabled := True;
       butCancel.Enabled := True;
       butClose.Enabled := False;
@@ -367,7 +373,7 @@ begin
     begin
       if FileExists(Opendialog1.Filename) then
         begin
-          wSourceFile := PWideChar(Opendialog1.Filename);
+          FSourceName:=Opendialog1.Filename;wSourceFile:=PWideChar(FSourceName);
           lblSourceFile.Caption := Opendialog1.Filename;
 
           // Now we have to check some properties of the source file.

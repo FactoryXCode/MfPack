@@ -15,6 +15,7 @@ object MainWindow: TMainWindow
   Menu = MainMenu
   OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
+  OnDestroy = FormDestroy
   OnCreate = FormCreate
   DesignSize = (
     1013

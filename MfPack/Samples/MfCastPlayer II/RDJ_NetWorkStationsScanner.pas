@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Network scanner for lightweight filebrowser dialog.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: LWFileBrowserExDlg.pas
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -109,6 +109,7 @@ type
   private
 
     FResultList: TStringList;
+    FPendingStation: string;
     FCheckedStations: TStringList;
     FOnStationFound: TDiscoveryEvent;
     FOnFinished: TNotifyEvent;
@@ -117,6 +118,7 @@ type
     procedure AddStationToTarget(const AStationName: string);
     procedure FindStations;
     procedure FindStationsShellNetworkFolder;
+    procedure PublishStation();
     procedure DoFinished;
 
   protected
@@ -567,13 +569,17 @@ begin
   // Publish each verified computer immediately instead of waiting for the
   // remaining shell enumeration and its potentially slow network calls.
   if Assigned(FOnStationFound) then
-    Synchronize(procedure
-                begin
-                  if not Terminated then
-                    AddStationToTarget(StationName);
-                end);
+    begin
+      FPendingStation := StationName;
+      Synchronize(PublishStation);
+    end;
 end;
 
+
+procedure TNetworkDiscoveryThread.PublishStation();
+begin
+  if not Terminated then AddStationToTarget(FPendingStation);
+end;
 
 procedure TNetworkDiscoveryThread.DoFinished();
 begin

@@ -9,7 +9,7 @@
 // Release date: 23-04-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   Dialog to choose an rendering or capture device.
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -141,7 +141,7 @@ end;
 procedure TDevicesDlg.butOkClick(Sender: TObject);
 begin
 
-  if (Length(prDevices) > 0) and (sgDevices.Row > 0) then
+  if (Length(prDevices) > 0) and (sgDevices.Row > 0) and (sgDevices.Row <= Length(prDevices)) then
     begin
       prDataFlow := prDevices[sgDevices.Row - 1].DataFlow;
       prEndPointDevice := prDevices[sgDevices.Row - 1].Device;
@@ -174,13 +174,14 @@ procedure TDevicesDlg.butRefreshClick(Sender: TObject);
   var
     i: Integer;
   begin
+  sgDevices.RowCount := Length(devices) + 1;
   i := StartAt; // Start at at row 1
   while (i <= Length(devices)) do
     begin
       // Write to new row
       DoList(devices[i -1], i);
       // Add new row
-      sgDevices.RowCount := sgDevices.RowCount + 1;
+
       Inc(i);
     end;
   end;

@@ -10,7 +10,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This player version is based on the IMFMediaEngine interface,
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -131,9 +131,10 @@ type
     { Private declarations }
     bIsFullScreen: Boolean;
 
-    procedure OnMeTimerUpdate(var Msg: TMsg); message WM_TIMERUPDATE;
+    procedure OnMeTimerUpdate(var Msg: TMessage); message WM_TIMERUPDATE;
 
   public
+    destructor Destroy; override;
     { Public declarations }
 
     procedure SetWindowStyle(bFullScreen: Boolean);
@@ -156,6 +157,13 @@ uses
   Vcl.ClipBrd;
 
 
+
+destructor TFeMediaEnginePlayer.Destroy;
+begin
+ ReleaseEngine;
+ 
+ inherited;
+end;
 
 procedure TFeMediaEnginePlayer.ResetInterface();
 begin
@@ -438,7 +446,7 @@ begin
 end;
 
 
-procedure TFeMediaEnginePlayer.OnMeTimerUpdate(var Msg: TMsg);
+procedure TFeMediaEnginePlayer.OnMeTimerUpdate(var Msg: TMessage);
 begin
   if Not Assigned(gi_MediaEngine) then
     Exit;

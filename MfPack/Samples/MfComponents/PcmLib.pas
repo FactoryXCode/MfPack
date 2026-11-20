@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: PCM converter unit.
 //
 // Notes:
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/WasApiPlayer/Example4
+// Related projects: MfPackX410/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -188,55 +188,37 @@ begin
 end;
 
 
-function GetWfxBitsAndFloat(const pwfx: PWAVEFORMATEX;
-                            out Bits: Integer;
-                            out IsFloat: Boolean): Boolean; inline;
+function GetWfxBitsAndFloat(const pwfx: PWAVEFORMATEX;out Bits: Integer;out IsFloat: Boolean): Boolean;
 var
-  pEx: PWAVEFORMATEXTENSIBLE;
-
+  Extended: PWAVEFORMATEXTENSIBLE;
 begin
-
+  Result := False;
   Bits := 0;
   IsFloat := False;
-  Result := False;
-
   if pwfx = nil then
     Exit;
-
+  Bits := pwfx^.wBitsPerSample;
   case pwfx^.wFormatTag of
+    WAVE_FORMAT_PCM:
+      Result := Bits in [16,24,32];
     WAVE_FORMAT_IEEE_FLOAT:
       begin
-        Bits := pwfx^.wBitsPerSample;
-        IsFloat := (Bits = 32);
-        Result := True;
-        Exit;
+        IsFloat := Bits = 32;
+        Result := IsFloat;
       end;
-
-    WAVE_FORMAT_PCM:
-      begin
-        Bits := pwfx^.wBitsPerSample;
-        IsFloat := False;
-        Result := True;
-        Exit;
-      end;
-
     WAVE_FORMAT_EXTENSIBLE:
       begin
-        pEx := PWAVEFORMATEXTENSIBLE(pwfx);
-        Bits := pEx^.Format.wBitsPerSample;
-
-        // SubFormat decides if this is IEEE float or integer PCM.
-        if IsEqualGUID(pEx^.SubFormat, KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) then
-          IsFloat := (Bits = 32)
-        else
-          IsFloat := False;
-
-        Result := True;
-        Exit;
+        if pwfx^.cbSize < 22 then
+          Exit;
+        Extended := PWAVEFORMATEXTENSIBLE(pwfx);
+        if IsEqualGUID(Extended^.SubFormat,KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) then
+          begin
+            IsFloat := Bits = 32;
+            Result := IsFloat;
+          end
+        else if IsEqualGUID(Extended^.SubFormat,KSDATAFORMAT_SUBTYPE_PCM) then
+          Result := Bits in [16,24,32];
       end;
-  else
-    // Unknown/unsupported format tag.
-    Result := False;
   end;
 end;
 
@@ -336,7 +318,7 @@ begin
   for i := 0 to Samples - 1 do
     begin
 
-      x := pIn^;
+      x := MfSanitizeSampleS(pIn^,1.0);
       if (x < -1.0) then
         x := -1.0
       else
@@ -376,15 +358,14 @@ begin
   for i := 0 to Samples - 1 do
     begin
 
-      x := pIn^;
+      x := MfSanitizeSampleS(pIn^,1.0);
 
-      if (x < -1.0) then
-        x := -1.0
+      if x >= 1.0 then
+        v64 := 2147483647
+      else if x <= -1.0 then
+        v64 := -2147483648
       else
-        if (x > 0.99999994) then
-          x := 0.99999994;
-
-      v64 := Round(x * 2147483648.0);
+        v64 := Round(x * 2147483648.0);
       if (v64 < Int64(-2147483648)) then
         v64 := Int64(-2147483648)
       else
@@ -417,7 +398,7 @@ begin
   for i := 0 to Samples - 1 do
     begin
 
-      x := pIn^;
+      x := MfSanitizeSampleS(pIn^,1.0);
 
       if (x < -1.0) then
         x := -1.0

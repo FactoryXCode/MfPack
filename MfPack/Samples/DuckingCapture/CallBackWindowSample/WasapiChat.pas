@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright: � FactoryX. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WasApi threaded capture class.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -106,6 +106,7 @@ type
 
     constructor Create(AppWindow: HWND); override;
     destructor Destroy(); override;
+
     function Initialize(const UseInputDevice: Boolean): Boolean; override;
     procedure Shutdown(); override;
 
@@ -118,7 +119,7 @@ type
     function HandlesMessage(_hwnd: HWND;
                             message: UINT): Boolean; override;
     function MessageHandler(_hWnd: HWND;
-                            message: TMessage): INT_PTR; override;
+                            message: WinApi.Messages.TMessage): NativeInt; override;
   end;
 
 
@@ -156,7 +157,8 @@ begin
   pCaptureClient := chat._CaptureClient;
   pAudioClient := chat._AudioClient;
 
-  SetLength(waitArray, 2);
+  SetLength(waitArray,
+            2);
   waitArray[0] := chat._ShutdownEvent;
   waitArray[1] := chat._AudioSamplesReadyEvent;
 
@@ -270,10 +272,7 @@ begin
                                     0,
                                     EVENT_MODIFY_STATE or SYNCHRONIZE);
     {$ELSE}
-    _ShutdownEvent := CreateEvent(Nil,
-                                  False,
-                                  True,
-                                  LPCWSTR('ShutdownEvent'));
+    _ShutdownEvent := CreateEvent(nil,False,False,nil);
     {$ENDIF}
 
     if _ShutdownEvent = 0 then
@@ -293,12 +292,9 @@ begin
                                              EVENT_MODIFY_STATE or SYNCHRONIZE);
 
     {$ELSE}
-    _AudioSamplesReadyEvent := CreateEvent(Nil,
-                                           False,
-                                           True,
-                                           LPCWSTR('AudioSamplesReadyEvent'));
+    _AudioSamplesReadyEvent := CreateEvent(nil,False,False,nil);
     {$ENDIF}
-    if _ShutdownEvent = 0 then
+    if _AudioSamplesReadyEvent = 0 then
       begin
         MessageBox(_AppWindow,
                    'Unable to create samples ready event.',
@@ -603,9 +599,9 @@ end;
 //  Returns "true" for the window messages we handle in our transport (only when wave in is rendered! See: WaveChat).
 //
 function CWasapiChat.MessageHandler(_hWnd: HWND;
-                                    message: TMessage): INT_PTR;
+                                    message: WinApi.Messages.TMessage): NativeInt;
 begin
-  Result := INT_PTR(False);
+  Result := NativeInt(False);
 end;
 
 

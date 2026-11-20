@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WasApiEngine component.
 //
 // Company: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //          Please, read documentation carefully!
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -196,7 +196,7 @@ type
     destructor Destroy(); override;
 
     // Commands (forwarded)
-    function OpenFile(const audiofile: TFileName;
+    function OpenFile(const audiofile: UnicodeString;
                       fileDuration100ns: LONGLONG): HRESULT;
     function Start(): HRESULT;
     function Stop(): HRESULT;
@@ -247,8 +247,8 @@ type
     procedure SetPitchAutoZeroPct(const Value: Double);
     function GetPitchRampMs: Integer;
     procedure SetPitchRampMs(const Value: Integer);
-    function GetVarispeedEnabled: LongBool;
-    procedure SetVarispeedEnabled(const Value: LongBool);
+    function GetVarispeedEnabled: Boolean;
+    procedure SetVarispeedEnabled(const Value: Boolean);
 
   published
 
@@ -298,7 +298,7 @@ type
     property PitchDetentPct: Double read GetPitchDetentPct write SetPitchDetentPct;
     property PitchAutoZeroPct: Double read GetPitchAutoZeroPct write SetPitchAutoZeroPct;
     property PitchRampMs: Integer read GetPitchRampMs write SetPitchRampMs;
-    property VarispeedEnabled: LongBool read GetVarispeedEnabled write SetVarispeedEnabled;
+    property VarispeedEnabled: Boolean read GetVarispeedEnabled write SetVarispeedEnabled;
   end;
 
 procedure Register;
@@ -809,7 +809,7 @@ end;
 
 // ---- public API forwarders ----
 
-function TMfWasApiPlayerEngine.OpenFile(const audiofile: TFileName;
+function TMfWasApiPlayerEngine.OpenFile(const audiofile: UnicodeString;
                                         fileDuration100ns: LONGLONG): HRESULT;
 begin
 
@@ -1211,7 +1211,7 @@ begin
 end;
 
 
-function TMfWasApiPlayerEngine.GetVarispeedEnabled: LongBool;
+function TMfWasApiPlayerEngine.GetVarispeedEnabled: Boolean;
 begin
 
   CheckForEngine();
@@ -1223,7 +1223,7 @@ begin
 end;
 
 
-procedure TMfWasApiPlayerEngine.SetVarispeedEnabled(const Value: LongBool);
+procedure TMfWasApiPlayerEngine.SetVarispeedEnabled(const Value: Boolean);
 begin
 
   CheckForEngine();

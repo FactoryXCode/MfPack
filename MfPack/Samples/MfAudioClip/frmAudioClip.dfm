@@ -14,6 +14,7 @@ object frmAudioClip: TfrmAudioClip
   Menu = MainMenu1
   OldCreateOrder = False
   Position = poDesktopCenter
+  OnCloseQuery = FormCloseQuery
   ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
@@ -88,7 +89,6 @@ object frmAudioClip: TfrmAudioClip
     Enabled = False
     TabOrder = 1
     OnClick = butCancelClick
-    OnEnter = butCancelClick
   end
   object butExtract: TButton
     Left = 5
@@ -128,6 +128,7 @@ object frmAudioClip: TfrmAudioClip
   end
   object SaveDialog1: TSaveDialog
     DefaultExt = '.wav'
+    Options = [ofOverwritePrompt, ofPathMustExist, ofEnableSizing]
     Title = 'Extract to'
     Left = 436
     Top = 4

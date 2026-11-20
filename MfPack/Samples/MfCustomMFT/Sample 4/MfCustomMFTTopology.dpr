@@ -37,8 +37,10 @@ begin
       Application.Initialize;
       Application.MainFormOnTaskbar := True;
       Application.CreateForm(TfrmMain, frmMain);
-      Application.Run;
+      if ParamStr(1) = '--smoke' then Application.ProcessMessages
+      else Application.Run;
     finally
+      FreeAndNil(frmMain);
       MFShutdown();
     end;
 

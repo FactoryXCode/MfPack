@@ -10,7 +10,7 @@
 // Release date: 25-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Transparent IMFByteStream wrapper for MfSimpleWebCamStreamer.
 //              It forwards all byte-stream operations to a real Media Foundation byte
 //              stream and passively observes top-level fragmented MP4 boxes.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -486,6 +486,9 @@ begin
   if ((Flags and $000004) <> 0) then
     Inc(Cursor,
         4);
+
+  if SampleCount = 0 then
+    Exit;
 
   for I := 0 to SampleCount - 1 do
     begin

@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit contains the TCameraCapture class for project CameraFrameCapture.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/CameraFrameCapture
+// Related projects: MfPackX410/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -63,7 +63,9 @@ unit CameraCapture;
 interface
 
 uses
-  {Winapi}
+  WinApi.ComBaseApi,
+WinApi.DirectX.D3D11_4,
+{Winapi}
   WinAPI.Windows,
   WinAPI.Messages,
   {System}
@@ -249,7 +251,6 @@ uses
   WinAPI.WinApiTypes,
   WinAPI.MediaFoundationApi.MfError,
   WinAPI.ActiveX.PropVarUtil,
-  Winapi.D3D10,
   {System}
   System.Math,
   System.SysUtils,
@@ -280,6 +281,8 @@ end;
 
 destructor TCameraCapture.Destroy();
 begin
+  CloseSource();
+  FVideoAmp := nil;
   FreeAndNil(FCritSec);
   FreeAndNil(FSampleConverter);
   DestroyDirectXDevice;
@@ -313,6 +316,8 @@ begin
           ltInfo);
     end;
 
+  FVideoAmp := nil;
+  SetLength(FVideoFormats,0);
   ResetVariables();
 end;
 
@@ -538,7 +543,7 @@ end;
 function TCameraCapture.SetupDirectXAccereration(oAttributes: IMFAttributes): Boolean;
 var
   oFlags: UINT;
-  pMultithread: ID3D10Multithread;
+  pMultithread: ID3D11Multithread;
   oFeatureLevels: array[0..6] of D3D_FEATURE_LEVEL;
 
 const
@@ -571,7 +576,7 @@ begin
 
   if Result then
     begin
-      Result := SUCCEEDED(FDirectXDevice.QueryInterface(IID_ID3D10Multithread,
+      Result := SUCCEEDED(FDirectXDevice.QueryInterface(IID_ID3D11Multithread,
                           pMultithread));
 
       if Result then
@@ -634,55 +639,34 @@ end;
 function TCameraCapture.ActiveDevice(const ADeviceSymbolicLink: PWideChar;
                                      out AMediaSource: IMFMediaSource): Boolean;
 var
-  oAttributes: IMFAttributes;
-  ppDevices: PIMFActivate;
-  iCount: UINT32;
-  iDeviceIndex: Integer;
-  i: Integer;
-  pcchLength: UINT32;
-  m_pwszSymbolicLink: PWideChar;
-
+  Attributes: IMFAttributes;
+  Devices: PIMFActivate;
+  Count,Length: UINT32;
+  Name: PWideChar;
+  I: Integer;
 begin
-  Result := SUCCEEDED(MFCreateAttributes(oAttributes,
-                      1));
-
-  // Ask for source type to be video capture devices
-  if Result then
-    Result := SUCCEEDED(oAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID));
-
-  if Result then
-    begin
-      try
-        // Enumerate the devices.
-        Result := SUCCEEDED(MFEnumDeviceSources(oAttributes,
-                                                ppDevices,
-                                                iCount));
-
-       iDeviceIndex := -1;
-       for i := 0 to iCount - 1 do
-         begin
-          {$POINTERMATH ON}
-          ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                          m_pwszSymbolicLink,
-                                          pcchLength);
-          {$POINTERMATH OFF}
-          // Check the symbolic link to see if this is the device we want.
-          if SameText(m_pwszSymbolicLink,
-                      ADeviceSymbolicLink) then
-           iDeviceIndex := i;
-         end;
-
-      if (iDeviceIndex > - 1) then
-      {$POINTERMATH ON}
-        // Active the device based on the index found
-        Result := SUCCEEDED(ppDevices[iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                   Pointer(AMediaSource)));
-      {$POINTERMATH OFF}
-
-    finally
-      ppDevices := nil;
-    end;
+  Result := False;AMediaSource := nil;Devices := nil;Count := 0;
+  if FAILED(MFCreateAttributes(Attributes,1)) then Exit;
+  if FAILED(Attributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID)) then Exit;
+  if FAILED(MFEnumDeviceSources(Attributes,Devices,Count)) then Exit;
+  try
+    for I := 0 to Integer(Count)-1 do
+      begin
+        Name := nil;
+        {$POINTERMATH ON}
+        if SUCCEEDED(Devices[I].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,Name,Length)) then
+          try
+            if SameText(UnicodeString(Name),UnicodeString(ADeviceSymbolicLink)) then
+              begin
+                Result := SUCCEEDED(Devices[I].ActivateObject(IID_IMFMediaSource,Pointer(AMediaSource)));
+                Exit;
+              end;
+          finally CoTaskMemFree(Name);end;
+      end;
+  finally
+    for I := 0 to Integer(Count)-1 do Devices[I] := nil;
+    {$POINTERMATH OFF}
+    CoTaskMemFree(Devices);
   end;
 end;
 

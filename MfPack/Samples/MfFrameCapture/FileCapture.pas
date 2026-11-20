@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit contains the TFileCapture class for project MFFrameCapture.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFFrameCapture
+// Related projects: MfPackX410/Samples/MFFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -199,6 +199,7 @@ end;
 destructor TFileCapture.Destroy;
 begin
   // Would FeeAndNil be an option?  Tony: I think so .. I'll try out And Yes it does.
+  CloseSource;
   FreeAndNil(FSampleConverter);
   inherited;
 end;
@@ -407,8 +408,7 @@ var
   pInputType: IMFMediaType;
 
 begin
-  Result := SUCCEEDED(FSourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                        pInputType));
+  Result := SUCCEEDED(FSourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,@pInputType));
 
   if Result and SUCCEEDED(pInputType.GetGUID(MF_MT_SUBTYPE,
                                              oSubType)) then
@@ -434,9 +434,7 @@ begin
                 end;
             end;
 
-          FVideoInfo.iStride := MFGetAttributeUINT32(pInputType,
-                                                     MF_MT_DEFAULT_STRIDE,
-                                                     1);
+          FVideoInfo.iStride := Integer(MFGetAttributeUINT32(pInputType,MF_MT_DEFAULT_STRIDE,DWORD(FVideoInfo.iVideoWidth*4)));
         end
       else
         Log('GetVideoFormat. Video is not RGB 32 format', ltError);

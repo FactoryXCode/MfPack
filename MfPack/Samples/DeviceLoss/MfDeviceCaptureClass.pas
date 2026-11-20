@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -75,7 +75,9 @@ uses
   WinApi.Ks,
   {System}
   System.Services.Dbt,
+  WinApi.ComBaseApi,
   System.SysUtils,
+  System.Math,
   System.Classes,
   System.Types,
   {ActiveX}
@@ -122,6 +124,12 @@ type
   // Applications should use the Media Session for playback.
 
   TMfCaptureEngine = class(TInterfacedPersistent, IMFAsyncCallback)
+  private
+    FOwnedSymbolicLink: UnicodeString;
+    FEventWindow: HWND;
+    FEventClosing: Boolean;
+    procedure MediaEventWindowProc(var Msg: TMessage);
+    procedure DiscardMediaEvents();
   private
     // Constructor is private. Use static CreateInstance method to instantiate.
     constructor Create(hVideo: HWND; hMainForm: HWND); overload;
@@ -292,6 +300,8 @@ begin
   assert(m_State = Closed);
 
   // Create the media session.
+  FEventClosing := False;
+  if hCloseEvent = 0 then Initialize();
   hr:= MFCreateMediaSession(Nil, m_pSession);
   if FAILED(hr) then
     goto done;
@@ -318,6 +328,8 @@ label
   Done;
 
 begin
+  FEventClosing := True;
+  if hCloseEvent <> 0 then ResetEvent(hCloseEvent);
   // The IMFMediaSession.Close method is asynchronous, but the
   // MfPlayer.CloseSession method waits on the MESessionClosed event.
   //
@@ -364,7 +376,9 @@ begin
   // Release the global interfaces
   SafeRelease(m_pSession);
   SafeRelease(m_pSource);
+  if Assigned(m_pActivate) then m_pActivate.ShutdownObject();
   SafeRelease(m_pActivate);
+  DiscardMediaEvents();
   State := Closed;
   // Unregister device notification
   if not UnRegisterForDeviceNotification(m_hdevnotify) then
@@ -398,11 +412,10 @@ begin
 
 try
 
-  if SUCCEEDED(StopRecording()) then
-    hr := CloseSession();  // Close the session
+  StopRecording();
+  hr := CloseSession();  // Close the session
 
   // Shutdown the Media Foundation platform
-  hr := MFShutdown();
 
   if (hCloseEvent <> 0) then
     begin
@@ -472,6 +485,8 @@ var
 
 begin
   inherited Create();
+  Clear();
+  FEventWindow := AllocateHWnd(MediaEventWindowProc);
 
   m_pSource:= Nil;
 
@@ -522,8 +537,10 @@ end;
 //
 procedure TMfCaptureEngine.BeforeDestruction();
 begin
+  ShutDownEngine();
+  DiscardMediaEvents();
+  if FEventWindow <> 0 then DeallocateHWnd(FEventWindow);
   Clear();
-  MFShutdown();
   inherited;
 end;
 
@@ -936,68 +953,60 @@ end;
 
 function TMfCaptureEngine.Invoke(pAsyncResult: IMFAsyncResult): HResult;
 var
-  pEvent: IMFMediaEvent;
-  hr: HRESULT;
-  meType: MediaEventType;
-
-label
-  done;
-
+  Session: IMFMediaSession;
+  Event: IMFMediaEvent;
+  EventType: MediaEventType;
 begin
-
-  if not Assigned(m_pSession) then
+  Session := m_pSession;
+  if Session = nil then Exit(MF_E_SHUTDOWN);
+  Result := Session.EndGetEvent(pAsyncResult,Event);
+  if FAILED(Result) then Exit;
+  Result := Event.GetType(EventType);
+  if FAILED(Result) then Exit;
+  if EventType = MESessionClosed then
     begin
-      Result := E_POINTER;
-      Exit;
+      SetEvent(hCloseEvent);
+      Exit(S_OK);
     end;
+  Event._AddRef();
+  if not PostMessage(FEventWindow,WM_APP + $4C1,0,LPARAM(Pointer(Event))) then
+    Event._Release();
+  Result := Session.BeginGetEvent(Self as IMFAsyncCallback,nil);
+end;
 
-  // Get the event from the event queue.
-  hr := m_pSession.EndGetEvent(pAsyncResult, pEvent);
-  if FAILED(hr) then
-    goto done;
-
-  // Get the event type.
-  hr := pEvent.GetType(meType);
-  if FAILED(hr) then
-    goto done;
-
-  if meType = MESessionClosed then
+procedure TMfCaptureEngine.MediaEventWindowProc(var Msg: TMessage);
+var
+  Event: IMFMediaEvent;
+  SavedMask: TFPUExceptionMask;
+begin
+  if Msg.Msg = WM_APP + $4C1 then
     begin
-      // If the session is closed, the application is waiting on the event
-      // handle. Also, do not request any more events from the session.
-      SetEvent(THandle(hCloseEvent));
+      Pointer(Event) := Pointer(Msg.LParam);
+      SavedMask := GetExceptionMask();
+      SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,exUnderflow,exPrecision]);
+      try
+        if not FEventClosing then
+          HandleEvent(UINT_PTR(Pointer(Event)));
+      finally
+        ClearExceptions(False);
+        SetExceptionMask(SavedMask);
+      end;
+      Msg.Result := 0;
     end
   else
+    Msg.Result := DefWindowProc(FEventWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+
+procedure TMfCaptureEngine.DiscardMediaEvents();
+var
+  Msg: TMsg;
+  Event: IMFMediaEvent;
+begin
+  while PeekMessage(Msg,FEventWindow,WM_APP + $4C1,WM_APP + $4C1,PM_REMOVE) do
     begin
-      // For all other events, ask the media session for the
-      // next event in the queue.
-      hr := m_pSession.BeginGetEvent(IMFAsyncCallback(Self), Nil);
-      if FAILED(hr) then
-        goto done;
+      Pointer(Event) := Pointer(Msg.LParam);
+      Event := nil;
     end;
-
-
-    // For most events, post the event as a private window message to the
-    // application. This lets the application process the event on its main
-    // thread.
-
-    // However, if a call to IMFMediaSession.Close is pending, it means the
-    // application is waiting on the m_hCloseEvent event handle. (Blocking
-    // call.) In that case, we simply discard the event.
-
-    // When IMFMediaSession.Close is called, MESessionClosed is NOT
-    // necessarily the next event that we will receive. We may receive any
-    // number of other events before receiving MESessionClosed.
-
-
-  if (State <> Closing) then
-    begin
-      // Send event message
-      HandleEvent(UINT_PTR(pEvent));
-    end;
-
-done:
-  Result := hr;
 end;
 
 function TMfCaptureEngine.GetParameters(out pdwFlags: DWord;
@@ -1016,103 +1025,35 @@ end;
 //
 //  pActivate: The activation object for the device source.
 //-------------------------------------------------------------------
-function TMfCaptureEngine.SetDevice(DeviceProperty: TDeviceProperties): HRESULT;
-var
-  hr: HRESULT;
-  pSource: IMFMediaSource;
-  pConfig: IMFAttributes;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
-  count: UINT32;
-
+function TMfCaptureEngine.SetDevice(DeviceProperty: TDeviceProperties): HResult;
+var Config: IMFAttributes;Devices: PIMFActivate;Count: UINT32;I: Integer;
 begin
-  hr := S_OK;
-  count := 0;
-
-  // Release the current instance of the player (if any).
-  Clear();
-  // Close session and release interfaces
-  CloseSession();
-
-  // Prepare the device
-  // ==================
-  // 1. Create a new session.
-  // 2. Create an attribute store.
-  // 3. Send a request to get video capture device.
-  // 4. Enumerate the devices again (optional)
-  // 5. Create a media source from the selected device.
-  // 6. Get the symbolic link.
-  // 7. Prepare session for recording.
-  //
-
-try
-  // Create a new session for the player.
-  hr := CreateSession();
-
-  // Create an attribute store to hold the search criteria.
-  hr := MFCreateAttributes(pConfig,
-                           1);
-
-  // Request video capture devices.
-  if SUCCEEDED(hr) then
-    begin
-      hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            DeviceProperty.riid);
-    end;
-
-  // Enumerate the devices again, because in the mean while a device could be
-  // disconnected.
-  if SUCCEEDED(hr) then
-    begin
-      hr := MFEnumDeviceSources(pConfig,
-                                ppDevices,
-                                count);
-    end;
-
-{$POINTERMATH ON}
-
-   // Create a media source from the selected device.
-  if SUCCEEDED(hr) then
-    begin
-      if (count > 0) then
-        begin
-          hr := ppDevices[DeviceProperty.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                      Pointer(pSource));
-          if SUCCEEDED(hr) then
-            begin
-              m_pActivate := ppDevices[DeviceProperty.iDeviceIndex];
-            end;
-        end
-      else
-        begin
-          hr := MF_E_NOT_FOUND;
-        end;
-    end;
-
-  // Get the symbolic link. This is needed to handle device-
-  // loss notifications. (See CheckCaptureDeviceLost.)
-  //
-  // Create a new media item for this media source, lookup by symboliclink.
-  if SUCCEEDED(hr) then
-    hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink,
-                                                pSource);
-  // Set source and symboliclink, needed for devicelost
-  if SUCCEEDED(hr) then
-    begin
-      m_pSource := pSource;
-      m_pwszSymbolicLink := DeviceProperty.lpSymbolicLink;
-      m_cchSymbolicLink := DeviceProperty.iDeviceIndex;
-    end;
-
-finally
-
-{$POINTERMATH OFF}
-
-  // Prepare the recording session
-  if SUCCEEDED(hr) then
-    PrepareSession();
-
-  Result:= hr;
-end;
+ Devices:=nil;Count:=0;
+ Result:=CloseSession;
+ if FAILED(Result) then Exit;
+ Result:=CreateSession;
+ if SUCCEEDED(Result) then Result:=MFCreateAttributes(Config,1);
+ if SUCCEEDED(Result) then Result:=Config.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,DeviceProperty.riId);
+ if SUCCEEDED(Result) then Result:=MFEnumDeviceSources(Config,Devices,Count);
+ if FAILED(Result) then Exit;
+ try
+  if (DeviceProperty.iDeviceIndex<0) or (UINT32(DeviceProperty.iDeviceIndex)>=Count) then Exit(E_INVALIDARG);
+  {$POINTERMATH ON}
+  m_pActivate:=Devices[DeviceProperty.iDeviceIndex];
+  {$POINTERMATH OFF}
+  Result:=m_pActivate.ActivateObject(IID_IMFMediaSource,Pointer(m_pSource));
+  if SUCCEEDED(Result) then begin
+   FOwnedSymbolicLink:=UnicodeString(DeviceProperty.lpSymbolicLink);
+   m_pwszSymbolicLink:=PWideChar(FOwnedSymbolicLink);
+   m_cchSymbolicLink:=Length(FOwnedSymbolicLink);
+   Result:=PrepareSession;
+  end;
+ finally
+  {$POINTERMATH ON}
+  for I:=0 to Integer(Count)-1 do Devices[I]:=nil;
+  {$POINTERMATH OFF}
+  CoTaskMemFree(Devices);
+ end;
 end;
 
 
@@ -1190,10 +1131,7 @@ try
       // Register device notification
 
       //
-      hr := GetSymbolicLink(m_pActivate,
-                            m_pwszSymbolicLink,
-                            m_cchSymbolicLink,
-                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK);
+      hr := S_OK; // SetDevice retains the selected symbolic link.
 
       // Set state to "open pending"
       State := OpenPending;
@@ -1251,7 +1189,7 @@ begin
       if (dRect = Nil) then
         begin
           WinApi.Windows.GetClientRect(m_hwndVideo, rc);
-          CopyTRectToLPRect(rc, rcpdest);
+          rcpdest := @rc;
         end
       else
         rcpDest := dRect;
@@ -1384,6 +1322,6 @@ initialization
   Initialize();
 
 finalization
- // see BeforeDestruction.
+ MFShutdown();
 
 end.

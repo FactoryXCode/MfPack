@@ -34,8 +34,10 @@ begin
       Application.Initialize;
       Application.MainFormOnTaskbar := True;
       Application.CreateForm(TfrmAudioTopology, frmAudioTopology);
-      Application.Run;
+      if ParamStr(1) = '--smoke' then Application.ProcessMessages
+      else Application.Run;
     finally
+      FreeAndNil(frmAudioTopology);
       MFShutdown;
     end;
   finally

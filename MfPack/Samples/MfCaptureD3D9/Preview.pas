@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Manages video preview.
 //
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -161,6 +161,8 @@ type
 
     m_Request: TRequest;
     FCritSec: TCriticalSection;
+    FFlushEvent: THandle;
+    FActivation: IMFActivate;
 
     // Constructor is private. Use static CreateInstance method to create.
     class function CreateInstance(hVideo: HWND;
@@ -244,6 +246,8 @@ begin
 
   // Create the callback
   FCritSec := TCriticalSection.Create();
+  FFlushEvent:=CreateEvent(nil,True,False,nil);
+  if FFlushEvent=0 then RaiseLastOSError;
 
   m_bFirstSample := FALSE;
   m_llBaseTime := 0;
@@ -275,7 +279,8 @@ begin
       FreeAndnil(m_draw);
     end;
 
-  FCritSec.Destroy;
+  if FFlushEvent<>0 then CloseHandle(FFlushEvent);
+  FCritSec.Free;
   inherited Destroy();
 end;
 //
@@ -307,31 +312,32 @@ end;
 //  Releases all resources held by this object.
 //-------------------------------------------------------------------
 function TCPreview.CloseDevice(): HResult;
+var Reader: IMFSourceReader; Source: IMFMediaSource;
 begin
-  FCritSec.Enter;
-
-  if Assigned(m_pReader) then
-    begin
-      if Assigned(m_pSource) then
-        begin
-          m_pSource.Shutdown();
-        end;
-      m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
-    end;
-
-  m_strSymbolicLink := '';
-  m_strDeviceName := '';
-  m_State := stStopped;
-  FCritSec.Leave;
-  Result := S_OK;
+ Result:=S_OK;
+ if FCritSec=nil then Exit;
+ FCritSec.Enter;
+ try
+  m_State:=stStopped;
+  Reader:=m_pReader;m_pReader:=nil;
+  Source:=m_pSource;m_pSource:=nil;
+  m_strSymbolicLink:='';m_strDeviceName:='';
+ finally FCritSec.Leave;end;
+ if Reader<>nil then begin
+  ResetEvent(FFlushEvent);
+  if SUCCEEDED(Reader.Flush(MF_SOURCE_READER_ALL_STREAMS)) then WaitForSingleObject(FFlushEvent,5000);
+ end;
+ if Source<>nil then Source.Shutdown;
+ if FActivation<>nil then FActivation.ShutdownObject;
+ FActivation:=nil;
 end;
 
 
 procedure TCPreview.NotifyError(hr: HResult);
 begin
-  SendMessage(m_hwndEvent,
+  PostMessage(m_hwndEvent,
               WM_APP_PREVIEW_ERROR,
-              WPARAM(hr),
+              WPARAM(DWORD(hr)),
               LPARAM(0));
 end;
 
@@ -430,10 +436,10 @@ begin
   hr := S_OK;
   FCritSec.Enter();
 
-  if not Assigned(g_pPreview) then
+  if m_State=stStopped then
     goto done;
 
-  if (g_pPreview.m_pReader = nil) and (pSample = nil) then
+  if (Self.m_pReader = nil) and (pSample = nil) then
     begin
       hr := E_POINTER;
       goto done;
@@ -446,14 +452,14 @@ begin
     begin
       if Assigned(pSample) then
         begin
-          if g_pPreview.m_bFirstSample then
+          if Self.m_bFirstSample then
             begin
-              g_pPreview.m_llBaseTime := llTimeStamp;
-              g_pPreview.m_bFirstSample := FALSE;
+              Self.m_llBaseTime := llTimeStamp;
+              Self.m_bFirstSample := FALSE;
             end;
 
           // rebase the time stamp
-          llTimeStamp := llTimeStamp - g_pPreview.m_llBaseTime;
+          llTimeStamp := llTimeStamp - Self.m_llBaseTime;
           hr := pSample.SetSampleTime(llTimeStamp);
 
           // Get the video frame buffer from the sample.
@@ -466,15 +472,15 @@ begin
 
           // Draw the frame and create the lockbuffer (buffer)
           if SUCCEEDED(hr) then
-            hr := g_pPreview.m_draw.DrawFrame(pBuffer);
+            hr := Self.m_draw.DrawFrame(pBuffer);
         end;
     end;
 
   // Request the next frame.
   if SUCCEEDED(hr) then
     begin
-     if Assigned(g_pPreview.m_pReader) then
-       hr := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+     if Assigned(Self.m_pReader) then
+       hr := Self.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                              0,
                                              nil,   // actual
                                              nil,   // flags
@@ -491,16 +497,15 @@ begin
   // check the StreamFlags
 
   // Show timeframes in Mainwindow caption
-  SetWindowText(g_pPreview.m_hwndEvent,
-                'Capturing: ' + HnsTimeToStr(llTimestamp, false));
+  PostMessage(m_hwndEvent,WM_APP+3,WPARAM(llTimestamp div 10000),0);
 
   // On resize, resize the picture to destination size.
   // Note: On critical events, like for example OnResize, we need to process these when a sample
   //       is ready. (Note: Remember we are dealing with asynchronous mode event handling)
-  if (g_pPreview.m_Request = ReqResize) then
+  if (Self.m_Request = ReqResize) then
     begin
-      g_pPreview.ResizeVideo();
-      g_pPreview.m_Request := ReqNone;
+      Self.ResizeVideo();
+      Self.m_Request := ReqNone;
     end;
 
 
@@ -508,22 +513,23 @@ done:
 
   if FAILED(hr) then
     begin
-      g_pPreview.NotifyError(hr);
+      Self.NotifyError(hr);
       m_State := stError;
     end
-  else
+  else if m_State<>stStopped then
     m_State := stCapturing;
 
   pBuffer := nil;
 
   FCritSec.Leave();
-  SetEvent(m_hwndEvent);
+
   Result := hr;
 end;
 
 
 function TCPreview.OnFlush(dwStreamIndex: DWord): HRESULT;
 begin
+  SetEvent(FFlushEvent);
   Result := S_OK;
 end;
 
@@ -570,6 +576,7 @@ begin
   if FAILED(hr) then
     goto done;
 
+  FActivation:=pActivate;
   // Get the symbolic link.
   hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
                                      m_pwszSymbolicLink,
@@ -585,7 +592,9 @@ begin
   if FAILED(hr) or (m_cchAllocStr = 0) then
     goto done;
 
-  m_strDeviceName := WideCharToString(m_pwszSymbolicLink);
+  m_strDeviceName := WideCharToString(m_pwszDeviceName);
+  CoTaskMemFree(m_pwszSymbolicLink);
+  CoTaskMemFree(m_pwszDeviceName);
 
 
 
@@ -638,6 +647,7 @@ begin
   if FAILED(hr) then
     goto done;
 
+  m_State:=stInitializing;
   // Ask for the first sample. From here the IMFSourceReaderCallback.OnReadSample will be activated
   hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                              0,

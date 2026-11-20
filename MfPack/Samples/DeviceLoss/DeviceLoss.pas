@@ -10,7 +10,7 @@
 // Release date: 26-02-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This sample describes how to detect device loss when using a
 //              video capture device.
 //              It contains the following steps:
@@ -37,14 +37,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -81,7 +81,10 @@ unit DeviceLoss;
 interface
 
 uses
-  {WinApi}
+  WinApi.ComBaseApi,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfObjects,
+{WinApi}
   WinApi.Windows,
   WinApi.Messages,
   WinApi.Ks,
@@ -105,6 +108,10 @@ type
 
   TDeviceLoss = class(TObject)
   private
+    procedure ClearDevices;
+  private
+    FSymbolicLink: UnicodeString;
+    FFriendlyName: UnicodeString;
     p_HWND: HWND;
     p_hdevnotify: HDEVNOTIFY;
     p_hwndSource: HWND;
@@ -139,32 +146,32 @@ var
   FDeviceLoss: TDeviceLoss;
 
 
+{$POINTERMATH ON}
 implementation
 
 uses
   System.SysUtils;
 
 
-constructor TDeviceLoss.Create(hwndAppWindow: HWND;
-                               aDeviceIndex: Integer;
-                               msgOptions: TDeviceLossMessageOptions);
+constructor TDeviceLoss.Create(hwndAppWindow: HWND;aDeviceIndex: Integer;msgOptions: TDeviceLossMessageOptions);
 begin
-  inherited Create();
-  p_HWND := AllocateHWnd(OnDeviceChange);
-  p_hwndSource := hwndAppWindow;
-  p_DeviceLossMessageOptions := msgOptions;
-  if not RegisterForDeviceNotification() then
-    Self.Free;
-  EnumDevices();
+ inherited Create;
+ p_ActiveDeviceIndex:=aDeviceIndex;p_hwndSource:=hwndAppWindow;p_DeviceLossMessageOptions:=msgOptions;
+ if (aDeviceIndex<0) or (EnumDevices<=aDeviceIndex) then raise Exception.Create('Invalid capture device index');
+ FSymbolicLink:=UnicodeString(p_dpa[aDeviceIndex].lpSymbolicLink);
+ FFriendlyName:=UnicodeString(p_dpa[aDeviceIndex].lpFriendlyName);
+ p_pwszSymbolicLink:=PWideChar(FSymbolicLink);p_pwszFriendlyName:=PWideChar(FFriendlyName);
+ p_HWND:=AllocateHWnd(OnDeviceChange);
+ if not RegisterForDeviceNotification then RaiseLastOSError;
 end;
 
 
 destructor TDeviceLoss.Destroy();
 begin
-  DeallocateHWnd(p_HWND);
-  if Assigned(p_hdevnotify) then
-    CloseDeviceNotify();
-  inherited Destroy();
+ CloseDeviceNotify;
+ if p_HWND<>0 then DeallocateHWnd(p_HWND);
+ ClearDevices;
+ inherited;
 end;
 
 
@@ -190,28 +197,47 @@ begin
                                                  @devbroadcastdevice,
                                                  DEVICE_NOTIFY_WINDOW_HANDLE);
     end;
-  Result := Assigned(p_hdevnotify);
+  Result := (NativeUInt(p_hdevnotify)<>0);
 end;
 
 
 procedure TDeviceLoss.CloseDeviceNotify();
 begin
-  if Assigned(p_hdevnotify) then
-    UnregisterDeviceNotification(p_hdevnotify);
+ if NativeUInt(p_hdevnotify)<>0 then begin
+  UnregisterDeviceNotification(p_hdevnotify);
+  FillChar(p_hdevnotify,SizeOf(p_hdevnotify),0);
+ end;
 end;
 
 
-function TDeviceLoss.EnumDevices(): Integer;
-var
-  hr: HResult;
-
+procedure TDeviceLoss.ClearDevices;
+var I: Integer;
 begin
-  hr := EnumCaptureDeviceSources(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID,
-                                 p_dpa);
-  if SUCCEEDED(hr) then
-    Result := Length(p_dpa)
-  else
-    Result := -1;
+ for I:=0 to Length(p_dpa)-1 do begin
+  CoTaskMemFree(p_dpa[I].lpFriendlyName);CoTaskMemFree(p_dpa[I].lpSymbolicLink);
+ end;
+ SetLength(p_dpa,0);
+end;
+function TDeviceLoss.EnumDevices(): Integer;
+var Attributes: IMFAttributes; Devices: PIMFActivate; Count,N: UINT32; I: Integer; HR: HResult;
+begin
+ ClearDevices;Devices:=nil;Count:=0;
+ HR:=MFCreateAttributes(Attributes,1);
+ if SUCCEEDED(HR) then HR:=Attributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+ if SUCCEEDED(HR) then HR:=MFEnumDeviceSources(Attributes,Devices,Count);
+ if FAILED(HR) then Exit(-1);
+ try
+  SetLength(p_dpa,Count);
+  for I:=0 to Integer(Count)-1 do begin
+   p_dpa[I].riId:=MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID;p_dpa[I].iDeviceIndex:=I;p_dpa[I].pActivate:=Devices[I];
+   Devices[I].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,p_dpa[I].lpFriendlyName,N);
+   Devices[I].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,p_dpa[I].lpSymbolicLink,N);
+  end;
+  Result:=Count;
+ finally
+  for I:=0 to Integer(Count)-1 do Devices[I]:=nil;
+  CoTaskMemFree(Devices);
+ end;
 end;
 
 
@@ -222,24 +248,24 @@ var
 
 begin
 
-  if not Assigned(p_hdevnotify) then
+  if not (NativeUInt(p_hdevnotify)<>0) then
     Exit;
 
   bDeviceLost := False;
 
-  if (AMessage.LParam <> 0) then
+  if (AMessage.Msg=WM_DEVICECHANGE) and (AMessage.WParam=DBT_DEVICEREMOVECOMPLETE) and (AMessage.LParam <> 0) then
     begin
       hr := CheckDeviceLost(PDEV_BROADCAST_HDR(Pointer(AMessage.LParam)),
                             bDeviceLost);
 
-      if (FAILED(hr) or bDeviceLost) then
+      if (SUCCEEDED(hr) and bDeviceLost) then
         begin
           if (p_DeviceLossMessageOptions = dmo_Message) or (p_DeviceLossMessageOptions = dmo_Both) then
             begin
               // Send a WM_DEVICELOST message to the application window
               SendMessage(p_hwndSource,
                           WM_DEVICELOST,
-                          WPARAM(Pointer(p_pwszFriendlyName)),
+                          WPARAM(p_pwszFriendlyName),
                           LPARAM(p_ActiveDeviceIndex));
             end;
 
@@ -256,63 +282,20 @@ begin
 end;
 
 
-function TDeviceLoss.CheckDeviceLost(pHdr: PDEV_BROADCAST_HDR;
-                                     out pbDeviceLost: Boolean): HResult;
-var
-  hr: HRESULT;
-  pDi: PDEV_BROADCAST_DEVICEINTERFACE;
-  pDeviceName: PWideChar;
-  pSymbolicLink: PWideChar;
-
-label
-  done;
-
+function TDeviceLoss.CheckDeviceLost(pHdr: PDEV_BROADCAST_HDR;out pbDeviceLost: Boolean): HResult;
+var Device: PDEV_BROADCAST_DEVICEINTERFACE; Name: PWideChar; Count,I: Integer;
 begin
-  hr := S_OK;
-  pbDeviceLost := False;
-
-  if (pHdr = nil) then
-    begin
-      hr := S_OK;
-      goto done;
-    end;
-
-
-  if (pHdr.dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
-    begin
-      hr := S_OK;
-      goto done;
-    end;
-
-  // Unregister existing device
-  UnregisterForDeviceNotification(p_hdevnotify);
-  p_hdevnotify := nil;
-
-  pDi := PDEV_BROADCAST_DEVICEINTERFACE(pHdr);
-  // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
-  // Dereference the struct's field dbcc_name (array [0..0] of WideChar) for a readable string.
-  pDeviceName := PChar(@pDi^.dbcc_name);
-
-  // Compare the device name with the symbolic link.
-  if Assigned(p_pwszSymbolicLink) then
-    begin
-      pSymbolicLink := p_pwszSymbolicLink;
-      // Perform a lowercase comparison of strings.
-      if (StrIComp(pSymbolicLink,
-                   pDeviceName) = 0) then
-        begin
-          pbDeviceLost := True;
-          hr := ERROR_DEVICE_REMOVED;
-        end;
-    end
-  else // Unknown device
-    begin
-      pbDeviceLost := True;
-      hr := E_POINTER;
-    end;
-
-done:
-  Result := hr;
+ Result:=S_OK;pbDeviceLost:=False;
+ if pHdr=nil then Exit;
+ if (pHdr.dbch_size<SizeOf(DEV_BROADCAST_HDR)) then Exit(E_INVALIDARG);
+ if pHdr.dbch_devicetype<>DBT_DEVTYP_DEVICEINTERFACE then Exit;
+ Device:=PDEV_BROADCAST_DEVICEINTERFACE(pHdr);
+ Count:=(Integer(pHdr.dbch_size)-(NativeUInt(@Device.dbcc_name)-NativeUInt(Device))) div SizeOf(WideChar);
+ if Count<=0 then Exit(E_INVALIDARG);
+ Name:=PWideChar(@Device.dbcc_name);I:=0;
+ while (I<Count) and (Name[I]<>#0) do Inc(I);
+ if I=Count then Exit(E_INVALIDARG);
+ pbDeviceLost:=(FSymbolicLink<>'') and SameText(FSymbolicLink,UnicodeString(Name));
 end;
 
 end.

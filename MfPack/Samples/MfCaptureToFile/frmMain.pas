@@ -10,7 +10,7 @@
 // Release date: 01-02-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Application Mainform.
 //              This sample demonstrates how to capture video from camera to a file.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -115,7 +115,7 @@ type
     procedure rbMP4Click(Sender: TObject);
     procedure rbWMVClick(Sender: TObject);
     procedure butCaptureClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
 
   private
     { Private declarations }
@@ -288,8 +288,7 @@ begin
 end;
 
 
-procedure TdlgMfCaptureToFile.FormClose(Sender: TObject;
-  var Action: TCloseAction);
+procedure TdlgMfCaptureToFile.FormDestroy(Sender: TObject);
 begin
   if Assigned(CaptureEngine) then
     begin
@@ -569,7 +568,7 @@ done:
 
 {$IF DEBUG}
   if FAILED(hr) then
-     OutputDebugString(PChar('Error starting capture. hr = ') + PChar(IntToStr(hr));
+     OutputDebugString(PChar('Error starting capture. hr = ' + IntToStr(hr)));
 {$ENDIF}
 
 end;
@@ -597,7 +596,7 @@ begin
 
 {$IF DEBUG}
   if FAILED(hr) then
-     OutputDebugString(PChar('Error stopping capture. File might be corrupt. hr = ') + PChar(IntToStr(hr));
+     OutputDebugString(PChar('Error stopping capture. File might be corrupt. hr = ' + IntToStr(hr)));
 {$ENDIF}
 
   Result := hr

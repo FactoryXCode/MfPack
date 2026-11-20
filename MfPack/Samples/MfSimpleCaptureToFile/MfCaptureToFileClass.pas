@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -148,6 +148,11 @@ type
 
   TCaptureToFile = class(TInterfacedPersistent, IMFSourceReaderCallback)
   private
+    FLock: System.SyncObjs.TCriticalSection;
+    FFlushEvent: THandle;
+    FSource: IMFMediaSource;
+    FActivation: IMFActivate;
+    FLastError: HResult;
     m_State: TState;
     m_hwndEvent: HWND;         // Application window to receive events.
 
@@ -198,6 +203,7 @@ type
     function IsCapturing(): BOOL;
 
   published
+    property LastError: HResult read FLastError;
     property State: TState read m_State write m_State;
     property DeviceName: string read m_strName;
     property DeviceSymbolicLink: string read m_strSymbolicLink;
@@ -248,33 +254,22 @@ end;
 // Constructor & destructor section ////////////////////////////////////////////
 constructor TCaptureToFile.Create(hMainForm: HWND);
 begin
-  inherited Create();
-
-  if (MfStatus = MfStarted) then
-    begin
-      m_hwndEvent := hMainForm;
-    end;
+ inherited Create;m_hwndEvent:=hMainForm;
+ FLock:=System.SyncObjs.TCriticalSection.Create;
+ FFlushEvent:=CreateEvent(nil,True,False,nil);
+ if FFlushEvent=0 then RaiseLastOSError;
 end;
 
 //
 procedure TCaptureToFile.BeforeDestruction();
-begin
-  Clear();
-
-  MfDeviceList.Free;
-  MfDeviceList := nil;
-
-  MFShutdown();
-
-  inherited;
-end;
+begin EndCaptureInternal;inherited;end;
 
 
 // Caller should call Release!!
 destructor TCaptureToFile.Destroy();
 begin
-
-  inherited Destroy();
+ if FFlushEvent<>0 then CloseHandle(FFlushEvent);
+ FLock.Free;inherited;
 end;
 
 // End Constructor & destructor section ////////////////////////////////////////
@@ -282,139 +277,30 @@ end;
 
 // Event methods ///////////////////////////////////////////////////////////////
 
-function TCaptureToFile.OnReadSample(hrStatus: HRESULT;
-                                     dwStreamIndex: DWORD;
-                                     dwStreamFlags: DWORD;
-                                     llTimestamp: LONGLONG;
-                                     pSample: IMFSample): HResult; stdcall;
-var
-  hr: HRESULT;
-
-label
-  Done;
-
+function TCaptureToFile.OnReadSample(hrStatus: HRESULT;dwStreamIndex,dwStreamFlags: DWORD;llTimestamp: LONGLONG;pSample: IMFSample): HResult;
 begin
-
-  if (State = State_NotReady) then
-    begin
-      Result := S_OK;
-      Exit;
-    end;
-
-
-  if (IsCapturing() = False) then
-    begin
-      Result := S_OK;
-      Exit;
-    end;
-
-  if FAILED(hrStatus) then
-    begin
-      hr := hrStatus;
-      goto Done;
-    end;
-
-  if Assigned(pSample) then
-    begin
-      if m_bFirstSample then
-        begin
-          m_llBaseTime := llTimeStamp;
-          m_bFirstSample := False;
-          State := State_Capturing;
-        end;
-
-      // rebase the time stamp
-      llTimeStamp := llTimeStamp - m_llBaseTime;
-
-      hr := pSample.SetSampleTime(llTimeStamp);
-
-      if (FAILED(hr)) then
-        goto Done;
-
-      hr := pSample.SetUINT32(MFSampleExtension_Discontinuity,
-                              0);
-
-      if (FAILED(hr)) then
-       goto Done;
-
-      hr := m_pWriter.WriteSample(0,
-                                  pSample);
-
-      if FAILED(hr) then
-        goto Done;
-
-      // When a sample has been written, you may get the statistics.
-
-      m_VideoStats := InitializeStatistics();
-      hr := m_pWriter.GetStatistics(0,
-                                    m_VideoStats);
-      if FAILED(hr) then
-        goto Done;
-
-      pSample := nil;  // Must do!
-    end;
-
-  // Read another sample.
-  hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                             0,
-                             nil,
-                             nil,
-                             nil,
-                             nil);
-
-  // check the StreamFlags
-    if SUCCEEDED(hr) then
-      begin
-        case dwStreamFlags of
-        DWORD(MF_SOURCE_READERF_ERROR):                    begin {An error occurred.
-                                                           If you receive this flag, do not make any further calls to IMFSourceReader methods.
-                                                           } end;
-        DWORD(MF_SOURCE_READERF_ENDOFSTREAM):              begin {The source reader reached the end of the stream.} end;
-        DWORD(MF_SOURCE_READERF_NEWSTREAM):                begin {One or more new streams were created.
-                                                           Respond to this flag by doing at least one of the following:
-                                                            - Set the output types on the new streams.
-                                                            - Update the stream selection by selecting or deselecting streams.
-                                                          } end;
-        DWORD(MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED):   begin {The native format has changed for one or more streams.
-                                                          The native format is the format delivered by the media source before any decoders are inserted.
-                                                          } end;
-        DWORD(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED):  begin {The current media has type changed for one or more streams.
-                                                           To get the current media type, call the IMFSourceReader.GetCurrentMediaType method.
-                                                           } end;
-        DWORD(MF_SOURCE_READERF_STREAMTICK):               begin {There is a gap in the stream.
-                                                           This flag corresponds to an MEStreamTick event from the media source.
-                                                           } end;
-        DWORD(MF_SOURCE_READERF_ALLEFFECTSREMOVED):        begin {All transforms inserted by the application have been removed for a particular stream.
-                                                           This could be due to a dynamic format change from a source or decoder that prevents custom transforms from
-                                                           being used because they cannot handle the new media type.
-                                                           } end;
-        else
-          begin
-            // Set text in Mainwindow caption
-            SetWindowText(m_hwndEvent,
-                          'Capturing: ' + HnsTimeToStr((llTimeStamp), True));
-          end;
-        end;
-      end;
-
-
-Done:
-
-  SafeRelease(pSample);  // Must do! Else the sample pool will be exhausted after 20 samples
-  if FAILED(hr) then
-    SetWindowText(m_hwndEvent,
-                  'Capture Failure! (' + IntToStr(hr) + ')');
-
-
-  Result := hr;
+ Result:=S_OK;FLock.Enter;
+ try
+  if (m_State<>State_Capturing) or (m_pReader=nil) or (m_pWriter=nil) then Exit;
+  Result:=hrStatus;
+  if SUCCEEDED(Result) and (pSample<>nil) then begin
+   if m_bFirstSample then begin m_llBaseTime:=llTimestamp;m_bFirstSample:=False;end;
+   Result:=pSample.SetSampleTime(llTimestamp-m_llBaseTime);
+   if SUCCEEDED(Result) then Result:=m_pWriter.WriteSample(0,pSample);
+   if SUCCEEDED(Result) then begin m_VideoStats:=InitializeStatistics;m_pWriter.GetStatistics(0,m_VideoStats);end;
+  end;
+  if SUCCEEDED(Result) and ((dwStreamFlags and MF_SOURCE_READERF_ENDOFSTREAM)=0) then
+   Result:=m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,0,nil,nil,nil,nil);
+  if FAILED(Result) then begin
+   FLastError:=Result;m_State:=State_NotReady;
+   PostMessage(m_hwndEvent,WM_APP_PREVIEW_ERROR,WPARAM(DWORD(Result)),0);
+  end;
+ finally FLock.Leave;end;
 end;
 
 
-function TCaptureToFile.OnFlush(dwStreamIndex: DWORD): HRESULT;
-begin
-  // Empty for now
-  Result := S_OK;
-end;
+function TCaptureToFile.OnFlush(dwStreamIndex: DWORD): HResult;
+begin SetEvent(FFlushEvent);Result:=S_OK;end;
 
 
 function TCaptureToFile.OnEvent(dwStreamIndex: DWORD;
@@ -466,8 +352,7 @@ begin
   hr:= ConfigureSourceReader(m_pReader);
 
   if SUCCEEDED(hr) then
-    hr:= m_pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                       pType);
+    hr:= m_pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),@pType);
 
   if SUCCEEDED(hr) then
     hr := ConfigureEncoder(param,
@@ -507,20 +392,24 @@ end;
 //
 // Stops capture.
 //------------------------------------------------------------------------------
-function TCaptureToFile.EndCaptureInternal(): HRESULT;
-var
-  hr: HRESULT;
-
+function TCaptureToFile.EndCaptureInternal(): HResult;
+var Reader: IMFSourceReader;Writer: IMFSinkWriter;Source: IMFMediaSource;Activation: IMFActivate;
 begin
-  hr := S_OK;
-
-  if Assigned(m_pWriter) then
-    hr := m_pWriter.Finalize();
-
-  SafeRelease(m_pWriter);
-  SafeRelease(m_pReader);
-
-  Result := hr;
+ Result:=S_OK;if FLock=nil then Exit;
+ FLock.Enter;
+ try
+  m_State:=State_NotReady;Reader:=m_pReader;m_pReader:=nil;
+  Writer:=m_pWriter;m_pWriter:=nil;Source:=FSource;FSource:=nil;
+  Activation:=FActivation;FActivation:=nil;
+ finally FLock.Leave;end;
+ if Reader<>nil then begin
+  ResetEvent(FFlushEvent);
+  if SUCCEEDED(Reader.Flush(MF_SOURCE_READER_ALL_STREAMS)) then WaitForSingleObject(FFlushEvent,5000);
+ end;
+ if Source<>nil then Source.Shutdown;
+ if Activation<>nil then Activation.ShutdownObject;
+ Reader:=nil;
+ if Writer<>nil then Result:=Writer.Finalize;
 end;
 
 
@@ -530,100 +419,30 @@ end;
 //
 // Start capturing.
 //------------------------------------------------------------------------------
-function TCaptureToFile.StartCapture(pActivate: IMFActivate;
-                                     const wszFileName: WideString;
-                                     param: EncodingParameters): HRESULT;
-var
-  hr: HRESULT;
-  pSource: IMFMediaSource;
-  pAttributes: IMFAttributes;
-  pcchLength: UINT32;
-  pFileName: PWideChar;
-  pDeviceName: PWideChar;
-  pSymLink: PWideChar;
-
-label
-  done;
-
+function TCaptureToFile.StartCapture(pActivate: IMFActivate;const wszFileName: WideString;param: EncodingParameters): HResult;
+var Attributes: IMFAttributes;Name,Link: PWideChar;Count: UINT32;
 begin
-
-  pFileName := StrToPWideChar(wszFileName);
-
-  // Create the media source for the device.
-  hr := pActivate.ActivateObject(IID_IMFMediaSource,
-                                 Pointer(pSource));
-  if FAILED(hr) then
-    goto done;
-
-  // Get the symbolic link. This is needed to handle device-
-  // loss notifications. (See CheckDeviceLost.)
-  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                     pSymLink,
-                                     pcchLength);
-  if FAILED(hr) then
-    goto done;
-
-  m_strSymbolicLink := WideCharToString(pSymLink);
-
-  // Get displayed device name
-  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                     pDeviceName,
-                                     pcchLength);
-  if FAILED(hr) then
-    goto done;
-
-  m_strName := WideCharToString(pDeviceName);
-
-  hr := MFCreateAttributes(pAttributes,
-                           2);
-  if FAILED(hr) then
-    goto done;
-
-  hr:= pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                              Self);
-  if FAILED(hr) then
-    goto done;
-
-  hr:= MFCreateSourceReaderFromMediaSource(pSource,
-                                           pAttributes,
-                                           m_pReader);
-  if FAILED(hr) then
-    goto done;
-
-  // Create the sink writer
-  hr := MFCreateSinkWriterFromURL(pFileName,
-                                  nil,
-                                  nil,
-                                  m_pWriter);
-  if FAILED(hr) then
-    goto done;
-
-  // Set up the encoding parameters.
-  hr := ConfigureCapture(param);
-  if FAILED(hr) then
-    goto done;
-
-
-  m_bFirstSample := True;
-  m_llBaseTime := 0;
-
-  // Request the first video frame.
-  // This function will fire the OnReadSample events.
-  hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                             0,
-                             nil,
-                             nil,
-                             nil,
-                             nil);  // No sample needed for first time.
-  if FAILED(hr) then
-    goto done;
-
-  // Begin writing (must be initialized before any atempt by the sink is made to write data to the file.)
-  State := State_Capturing;
-  hr := m_pWriter.BeginWriting();
-
-done:
-  Result := hr;
+ if (pActivate=nil) or (wszFileName='') then Exit(E_INVALIDARG);
+ EndCaptureInternal;Name:=nil;Link:=nil;FLock.Enter;
+ try
+  FLastError:=S_OK;FActivation:=pActivate;
+  Result:=pActivate.ActivateObject(IID_IMFMediaSource,Pointer(FSource));
+  if SUCCEEDED(Result) then Result:=pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,Name,Count);
+  if SUCCEEDED(Result) then Result:=pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,Link,Count);
+  if SUCCEEDED(Result) then begin m_strName:=UnicodeString(Name);m_strSymbolicLink:=UnicodeString(Link);end;
+  if SUCCEEDED(Result) then Result:=MFCreateAttributes(Attributes,1);
+  if SUCCEEDED(Result) then Result:=Attributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,Self);
+  if SUCCEEDED(Result) then Result:=MFCreateSourceReaderFromMediaSource(FSource,Attributes,m_pReader);
+  if SUCCEEDED(Result) then Result:=MFCreateSinkWriterFromURL(PWideChar(wszFileName),nil,nil,m_pWriter);
+  if SUCCEEDED(Result) then Result:=ConfigureCapture(param);
+  if SUCCEEDED(Result) then Result:=m_pWriter.BeginWriting;
+  if SUCCEEDED(Result) then begin
+   m_bFirstSample:=True;m_llBaseTime:=0;m_State:=State_Capturing;
+   Result:=m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,0,nil,nil,nil,nil);
+  end;
+  if FAILED(Result) then m_State:=State_NotReady;
+ finally CoTaskMemFree(Name);CoTaskMemFree(Link);FLock.Leave;end;
+ if FAILED(Result) then EndCaptureInternal;
 end;
 
 //------------------------------------------------------------------------------
@@ -634,24 +453,8 @@ end;
 // NOTE: This method resets the object's state to State_NotReady.
 // To start another capture session, call SetCaptureFile.
 //------------------------------------------------------------------------------
-function TCaptureToFile.EndCaptureSession(): HRESULT;
-var
-  hr: HRESULT;
-
-begin
-
-  hr := S_OK;
-  State := State_NotReady;
-  EndCaptureInternal();
-
-  if Assigned(m_pWriter) then
-    hr := m_pWriter.Finalize();
-
-  SafeRelease(m_pWriter);
-  SafeRelease(m_pReader);
-
-  Result := hr;
-end;
+function TCaptureToFile.EndCaptureSession(): HResult;
+begin Result:=EndCaptureInternal;end;
 
 
 function TCaptureToFile.IsCapturing(): BOOL;
@@ -703,11 +506,15 @@ end;
 
 
 procedure TDeviceList.Clear();
+var I: Integer;
 begin
-  // Release the pointer to array
+ if m_ppDevices<>nil then begin
+  {$POINTERMATH ON}
+  for I:=0 to Integer(m_cDevices)-1 do m_ppDevices[I]:=nil;
+  {$POINTERMATH OFF}
   CoTaskMemFree(m_ppDevices);
-  m_ppDevices := nil;
-  m_cDevices := 0;
+ end;
+ m_ppDevices:=nil;m_cDevices:=0;
 end;
 
 
@@ -796,7 +603,7 @@ begin
 
   // Convert to string strName
   if SUCCEEDED(hr) then
-    strName := WideCharToString(ppszName)
+    begin strName := WideCharToString(ppszName);CoTaskMemFree(ppszName);end
   else
     strName := 'Unknown';
 
@@ -873,7 +680,7 @@ begin
 
   hr := pReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                    0,  // Type index
-                                   pType);
+                                   @pType);
 
   if FAILED(hr) then
     goto Done;
@@ -888,7 +695,7 @@ begin
     // MFVideoFormat_RGB32, MFVideoFormat_RGB24, MFVideoFormat_IYUV);
 
 
-  for _i := 0 to SizeOf(subtypes) - 1 do
+  for _i := 0 to High(subtypes) do
     begin
       if IsEqualGuid(subtype, subtypes[_i]^) then
         begin
@@ -901,7 +708,7 @@ begin
         end;
     end;
 
-  if (bUseNativeType = True) then
+  if not bUseNativeType then
     begin
       // None of the native types worked. The camera might offer
       // output a compressed type such as MJPEG or DV.
@@ -1037,6 +844,6 @@ initialization
   MfStatus := MfStarted;
 
 finalization
-  // See BeforeDestruction.
+  MFShutdown();
 
 end.

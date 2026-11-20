@@ -1,6 +1,6 @@
 # MfCustomMFT
 
-Version: 4.0.0  
+Version: 4.1.0  
   
   
 NOTES:  
@@ -150,6 +150,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 15/09/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

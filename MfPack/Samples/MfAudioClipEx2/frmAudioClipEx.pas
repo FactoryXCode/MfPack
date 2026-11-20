@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This application demonstrates using the Media Foundation
@@ -32,7 +32,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 07/11/2025 Tony                Addded support for WMA and FLAC.
 //------------------------------------------------------------------------------
 //
@@ -126,6 +126,9 @@ type
     procedure Timer1Timer(Sender: TObject);
 
   private
+    FWorker: TThread;
+    procedure ExtractionDone(var Message: TMessage); message WM_APP + 901;
+  private
     FEngine: TAudioClipClass;
     FCancelEvent: TEvent;
     FThrottle: Integer;
@@ -145,24 +148,55 @@ var
 
 
 implementation
+uses WinApi.ComBaseApi, WinApi.ActiveX.ObjBase, System.Math;
+type
+ TClipWorker = class(TThread)
+ private
+  FEngine: TAudioClipClass;
+  FCancel: THandle;
+  FWindow: HWND;
+ protected
+  procedure Execute; override;
+ public
+  Status: HResult;
+  constructor Create(Engine: TAudioClipClass;Cancel: THandle;Window: HWND);
+ end;
+constructor TClipWorker.Create(Engine: TAudioClipClass;Cancel: THandle;Window: HWND);
+begin inherited Create(True);FEngine:=Engine;FCancel:=Cancel;FWindow:=Window;FreeOnTerminate:=False;end;
+procedure TClipWorker.Execute;
+var Mask: TFPUExceptionMask; HR: HResult;
+begin
+ Mask:=GetExceptionMask;SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,exUnderflow,exPrecision]);
+ HR:=CoInitializeEx(nil,COINIT_MULTITHREADED);Status:=HR;
+ try
+  if SUCCEEDED(HR) then begin
+   try Status:=FEngine.ExtractSoundClip(FCancel,nil);except Status:=E_UNEXPECTED;end;
+  end;
+ finally
+  if SUCCEEDED(HR) then CoUninitialize;
+  ClearExceptions(False);SetExceptionMask(Mask);
+ end;
+ PostMessage(FWindow,WM_APP+901,0,0);
+end;
+procedure TAudioClipExfrm.ExtractionDone(var Message: TMessage);
+var HR: HResult;
+begin
+ if FWorker=nil then Exit;
+ FWorker.WaitFor;HR:=TClipWorker(FWorker).Status;
+ FreeAndNil(FWorker);FreeAndNil(FEngine);
+ if SUCCEEDED(HR) then lblStatus.Caption:='Extraction complete!'
+ else lblStatus.Caption:=Format('Extraction ended (0x%x)',[HR]);
+ UpdateUIBusy(False);
+end;
 
 {$R *.dfm}
 
-uses
-  System.Threading;
 
-procedure TAudioClipExfrm.FormCloseQuery(Sender: TObject;
-  var CanClose: Boolean);
+
+procedure TAudioClipExfrm.FormCloseQuery(Sender: TObject;var CanClose: Boolean);
 begin
-  CanClose := False;
-
-  if Assigned(FEngine) then
-    FreeAndNil(FEngine);
-
-  if Assigned(FCancelEvent) then
-    FreeAndNil(FCancelEvent);
-
-  CanClose := True;
+ if Assigned(FCancelEvent) then FCancelEvent.SetEvent;
+ CanClose:=True;
 end;
 
 
@@ -179,8 +213,9 @@ end;
 
 procedure TAudioClipExfrm.FormDestroy(Sender: TObject);
 begin
-  FCancelEvent.Free;
-  FEngine := nil;
+ if Assigned(FCancelEvent) then FCancelEvent.SetEvent;
+ if FWorker<>nil then begin FWorker.WaitFor;FreeAndNil(FWorker);end;
+ FreeAndNil(FEngine);FreeAndNil(FCancelEvent);
 end;
 
 
@@ -250,59 +285,15 @@ end;
 
 
 procedure TAudioClipExfrm.butStartClick(Sender: TObject);
-var
-  hr: HResult;
-
 begin
-  if (Trim(lblSourceFile.Caption) = '') or (Trim(lblTargetFile.Caption) = '') then
-    begin
-      MessageDlg('Please select a valid source and target file.', mtWarning, [mbOK], 0);
-      Exit;
-    end;
-
-  pbProgress.Position := 0;
-  lblStatus.Caption := 'Starting extraction...';
-  UpdateUIBusy(True);
-
-  FCancelEvent.ResetEvent;
-
-  if Assigned(FEngine) then
-    FEngine := nil;
-
-  FEngine := TAudioClipClass.Create();
-
-  FEngine.SourceFile := lblSourceFile.Caption;
-  FEngine.OutputFile := lblTargetFile.Caption;
-
-  // Run in background thread to avoid blocking UI
-  TTask.Run(procedure
-            var
-              hr: HResult;
-
-            begin
-              FEngine.SamplingPriority := FThrottle;
-              hr := FEngine.ExtractSoundClip(FCancelEvent.Handle,
-                                             WorkerComplete);
-
-
-              if Failed(hr) then
-                TThread.Queue(nil,
-                              TThreadProcedure(procedure
-                                               begin
-                                                 lblStatus.Caption := Format('Failed to start extraction (0x%x)', [hr]);
-                                                 UpdateUIBusy(False);
-                                               end));
-
-    end);
-
-    // Get the size of the sourcefile.
-  hr := GetFileDuration(PCWSTR(FEngine.SourceFile),
-                        FDuration);
-  if SUCCEEDED(hr) then
-    lblTime.Caption := MSecToStr(FDuration div 10000,
-                                 False)
-  else
-    lblTime.Caption := '00:00:00';
+ if FWorker<>nil then Exit;
+ if (Trim(lblSourceFile.Caption)='') or (Trim(lblTargetFile.Caption)='') then Exit;
+ FCancelEvent.ResetEvent;FreeAndNil(FEngine);
+ FEngine:=TAudioClipClass.Create;
+ FEngine.SourceFile:=lblSourceFile.Caption;FEngine.OutputFile:=lblTargetFile.Caption;FEngine.SamplingPriority:=FThrottle;
+ pbProgress.Position:=0;lblStatus.Caption:='Extracting...';UpdateUIBusy(True);
+ FWorker:=TClipWorker.Create(FEngine,FCancelEvent.Handle,Handle);
+ FWorker.Start;
 end;
 
 
@@ -316,20 +307,9 @@ begin
 end;
 
 
-procedure TAudioClipExfrm.WorkerComplete(Sender: TObject;
-                                         Success: Boolean;
-                                         HResultCode: HResult);
+procedure TAudioClipExfrm.WorkerComplete(Sender: TObject;Success: Boolean;HResultCode: HResult);
 begin
-  TThread.Queue(nil,
-                TThreadProcedure(procedure
-                                 begin
-                                   if Success then
-                                     lblStatus.Caption := 'Extraction complete!'
-                                   else
-                                     lblStatus.Caption := Format('Extraction aborted (0x%x)', [HResultCode]);
-                                   UpdateUIBusy(False);
-                                   FreeAndNil(FEngine);
-                                 end));
+ // The owned worker posts completion only after extraction has fully returned.
 end;
 
 

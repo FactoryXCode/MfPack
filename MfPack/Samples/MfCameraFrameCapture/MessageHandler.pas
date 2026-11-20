@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit handles the messages between the mainform and sync modules.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/CameraFrameCapture
+// Related projects: MfPackX410/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -100,7 +100,7 @@ implementation
 constructor TMessageHandler.Create();
 begin
   inherited;
-  FWinHandle := INVALID_HANDLE_VALUE;
+  FWinHandle := 0;
   AllocateHandle;
 end;
 
@@ -121,8 +121,8 @@ end;
 
 procedure TMessageHandler.RemoveHandle();
 begin
-  DeallocateHWnd(FWinHandle);
-  FWinHandle := INVALID_HANDLE_VALUE;
+  if FWinHandle <> 0 then DeallocateHWnd(FWinHandle);
+  FWinHandle := 0;
 end;
 
 

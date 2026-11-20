@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: TimedText callback implementation.
 //
 // Company: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires WinApi.MediaFoundationApi.MfMetLib.pas version 2.6.4 (or higher) and MfComponents to be installed!
 //          All TimedText interfaces require Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -65,7 +65,8 @@ unit TimedTextNotifyClass;
 interface
 
 uses
-  {WinApi}
+  System.Classes,
+{WinApi}
   WinApi.Windows,
   Winapi.Messages,
   WinApi.WinApiTypes,
@@ -103,9 +104,26 @@ type
     sourceTrackId: DWORD
   end;
 
+  PTextPacket = ^TTextPacket;
+  TTextPacket = record
+    Kind: Integer;
+    CueEvent: MF_TIMED_TEXT_CUE_EVENT;
+    CurrentTime: Double;
+    Cue: IMFTimedTextCue;
+    ErrorCode: MF_TIMED_TEXT_ERROR_CODE;
+    ErrorHR: HRESULT;
+    Track: DWORD;
+  end;
   TcTimedTextNotify = class(TInterfacedObject, IMFTimedTextNotify)
   private
 
+    FDispatchWindow: HWND;
+    FClosing: Boolean;
+    FTimedText: IMFTimedText;
+    procedure DispatchMessage(var Msg: TMessage);
+    procedure DeliverCue(cueEvent: MF_TIMED_TEXT_CUE_EVENT; currentTime: Double; cue: IMFTimedTextCue);
+    procedure DeliverError(errorCode: MF_TIMED_TEXT_ERROR_CODE; extendedErrorCode: HResult; sourceTrackId: DWORD);
+  private
     gv_url: string;
     gv_label: PWideChar;
     gv_lang: PWideChar;
@@ -119,7 +137,7 @@ type
     ttnmsg_durTime: Double;    // Returned duration
     ttnmsg_endTime: Double;    // Returned end time
 
-    ttLiveText: LPWSTR;      // live text / comment that can be injected.
+    ttLiveText: string;      // live text / comment that can be injected.
 
     bTrackAdded: Boolean;
 
@@ -185,6 +203,8 @@ type
 
 
 
+    procedure Detach;
+    procedure SelectWhenReady(const TimedText: IMFTimedText);
     // Properties
     property LiveText: String read GetLiveText write SetLiveText;
     property SubTitle: String read GetSubTitle write SetSubTitle;
@@ -208,6 +228,7 @@ constructor TcTimedTextNotify.Create(const url: string;
 begin
   inherited Create();
 
+  FDispatchWindow:=AllocateHWnd(DispatchMessage);
   gv_url := url;
   gv_label := pclabel;
   gv_lang := pclang;
@@ -226,17 +247,61 @@ end;
 // DESTRUCTOR
 destructor TcTimedTextNotify.Destroy();
 begin
+  Detach;
+  if FDispatchWindow<>0 then DeallocateHWnd(FDispatchWindow);
   FreeAndNil(ttnmsg_Font);
 
   inherited Destroy();
 end;
 
 
+procedure TcTimedTextNotify.Detach;
+var Msg: TMsg;
+begin
+ FClosing:=True;gv_Handle:=0;FTimedText:=nil;
+ if FDispatchWindow<>0 then
+  while PeekMessage(Msg,FDispatchWindow,WM_APP+78,WM_APP+78,PM_REMOVE) do Dispose(PTextPacket(Msg.LParam));
+end;
+procedure TcTimedTextNotify.SelectWhenReady(const TimedText: IMFTimedText);
+begin FTimedText:=TimedText;end;
+procedure TcTimedTextNotify.DispatchMessage(var Msg: TMessage);
+var Packet: PTextPacket;
+begin
+ if Msg.Msg=WM_APP+79 then begin
+  if not FClosing and Assigned(FTimedText) then FTimedText.SelectTrack(DWORD(Msg.WParam),True);
+  Msg.Result:=0;Exit;
+ end;
+ if Msg.Msg=WM_APP+78 then begin
+  Packet:=PTextPacket(Msg.LParam);
+  try
+   if not FClosing then
+    if Packet.Kind=0 then DeliverCue(Packet.CueEvent,Packet.CurrentTime,Packet.Cue)
+    else if Packet.Kind=1 then DeliverError(Packet.ErrorCode,Packet.ErrorHR,Packet.Track)
+    else if Assigned(FTimedText) then FTimedText.SelectTrack(Packet.Track,True);
+  finally Dispose(Packet);end;
+  Msg.Result:=0;
+ end else Msg.Result:=DefWindowProc(FDispatchWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+procedure TcTimedTextNotify.Cue(cueEvent: MF_TIMED_TEXT_CUE_EVENT; currentTime: Double; cue: IMFTimedTextCue);
+var Packet: PTextPacket;
+begin
+ if FClosing then Exit;
+ New(Packet);Packet.Kind:=0;Packet.CueEvent:=cueEvent;Packet.CurrentTime:=currentTime;Packet.Cue:=cue;
+ if not PostMessage(FDispatchWindow,WM_APP+78,0,LPARAM(Packet)) then Dispose(Packet);
+end;
+procedure TcTimedTextNotify.Error(errorCode: MF_TIMED_TEXT_ERROR_CODE; extendedErrorCode: HResult; sourceTrackId: DWORD);
+var Packet: PTextPacket;
+begin
+ if FClosing then Exit;
+ New(Packet);Packet.Kind:=1;Packet.ErrorCode:=errorCode;Packet.ErrorHR:=extendedErrorCode;Packet.Track:=sourceTrackId;
+ if not PostMessage(FDispatchWindow,WM_APP+78,0,LPARAM(Packet)) then Dispose(Packet);
+end;
 // callback methods
 
 procedure TcTimedTextNotify.TrackAdded(trackId: DWORD);
 begin
-  bTrackAdded := (trackId > ttnmsg_TrackId);
+  if FClosing then Exit;
+  if not PostMessage(FDispatchWindow,WM_APP+79,trackId,0) then Exit;
 end;
 
 
@@ -255,37 +320,11 @@ end;
 
 procedure TcTimedTextNotify.TrackReadyStateChanged(trackId: DWORD);
 begin
-  // MF_TIMED_TEXT_TRACK_READY_STATE
-  case trackId of
-    // MF_TIMED_TEXT_TRACK_READY_STATE_NONE  > Loading track cues has not been started yet.
-    0: begin
-         // Not implemented
-
-       end;
-    // MF_TIMED_TEXT_TRACK_READY_STATE_LOADING  > Track cues are being loaded.
-    1: begin
-         // Not implemented
-
-       end;
-    // MF_TIMED_TEXT_TRACK_READY_STATE_LOADED  > Track cues are loaded and ready.
-    2: begin
-         // Not implemented
-
-       end;
-    // MF_TIMED_TEXT_TRACK_READY_STATE_ERROR  > Track error occurred.
-    3: begin
-         FTimedTxtError.errorCode := MF_TIMED_TEXT_ERROR_CODE_DATA_FORMAT; //Format error occured.
-         FTimedTxtError.extendedErrorCode := HRESULT($C00D3E8C);  // The Media format is recognized but is invalid.
-         FTimedTxtError.sourceTrackId := trackId;
-         FTimedTxtError.TrackReadyState := MF_TIMED_TEXT_TRACK_READY_STATE_ERROR;
-         PPTimedTxtError := @FTimedTxtError;
-         SendErrorNotification(0);
-       end;
-  end;
+ // trackId identifies the changed track; it is not a ready-state enumeration.
 end;
 
 
-procedure TcTimedTextNotify.Error(errorCode: MF_TIMED_TEXT_ERROR_CODE;
+procedure TcTimedTextNotify.DeliverError(errorCode: MF_TIMED_TEXT_ERROR_CODE;
                                   extendedErrorCode: HResult;
                                   sourceTrackId: DWORD);
 begin
@@ -297,7 +336,7 @@ begin
 end;
 
 
-procedure TcTimedTextNotify.Cue(cueEvent: MF_TIMED_TEXT_CUE_EVENT;
+procedure TcTimedTextNotify.DeliverCue(cueEvent: MF_TIMED_TEXT_CUE_EVENT;
                                 currentTime: Double;
                                 cue: IMFTimedTextCue);
 var
@@ -337,7 +376,7 @@ try
              ttnmsg_Lines := cue.GetLineCount();  // Zero based index!
 
              // If there are multiple lines, we have to itterate through them
-             for i := 0 to ttnmsg_Lines -1 do
+             for i := 0 to Integer(ttnmsg_Lines) -1 do
                begin
                  cue.GetLine(i,
                              fText);
@@ -351,9 +390,9 @@ try
               end;
 
              // Gets the number of subformats in the formatted timed-text object.
-             SubFmtCount := fText.GetSubformattingCount();
+             if Assigned(fText) then SubFmtCount := fText.GetSubformattingCount() else SubFmtCount:=0;
 
-             for i := 0 to SubFmtCount -1 do
+             for i := 0 to Integer(SubFmtCount) -1 do
                begin
                  // font style  Note; If no fontstyle can be found, result will be <> S_OK
                  hr := fText.GetSubformatting(i,
@@ -493,7 +532,7 @@ end;
 procedure TcTimedTextNotify.SetLiveText(value: string);
 begin
   if (ttLiveText <> value) then
-    ttLiveText := LPWSTR(value);
+    ttLiveText := value;
 end;
 
 function TcTimedTextNotify.GetSubTitle(): string;

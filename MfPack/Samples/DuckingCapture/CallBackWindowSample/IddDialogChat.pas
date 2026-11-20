@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
@@ -29,14 +29,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //          This sample uses the CALLBACK_WINDOW callbacktype as used in the original C++ sample.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -135,9 +135,9 @@ type
 
     // Forward declarations of functions included in this code module:
     // Note: We do the Delphi way here
-    procedure WimOpenProc(var message: TMessage); message WIM_OPEN;
-    procedure WimCloseProc(var message: TMessage); message WIM_CLOSE;
-    procedure WimDataProc(var message: TMessage); message WIM_DATA;
+    procedure WimOpenProc(var message: WinApi.Messages.TMessage); message WIM_OPEN;
+    procedure WimCloseProc(var message: WinApi.Messages.TMessage); message WIM_CLOSE;
+    procedure WimDataProc(var message: WinApi.Messages.TMessage); message WIM_DATA;
 
   public
     { Public declarations }
@@ -180,6 +180,7 @@ begin
   Result := bWin7OrLater;
 end;
 
+
 procedure TForm1.btnChatStartClick(Sender: TObject);
 begin
 
@@ -189,6 +190,7 @@ begin
   if g_CurrentChat.StartChat(chkHideFromVolumeMixer.Checked) then
     SyncUIState(ChatStatePlaying);
 end;
+
 
 procedure TForm1.btnChatStopClick(Sender: TObject);
 begin
@@ -217,6 +219,7 @@ begin
     end;
   Close; // EndDialog(hWnd, TRUE);
 end;
+
 
 procedure TForm1.cbxChatTransportChange(Sender: TObject);
 var
@@ -287,6 +290,7 @@ begin
                MB_OK);
 end;
 
+
 procedure TForm1.FormCreate(Sender: TObject);
 begin
 
@@ -333,6 +337,7 @@ begin
   SyncUIState(ChatStateNotPlaying);
 end;
 
+
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   if Assigned(g_CurrentChat) then
@@ -344,6 +349,7 @@ begin
     end;
   Close;
 end;
+
 
 //
 //  Makes all of the dialog controls consistent with the current transport and specified chat state
@@ -396,6 +402,7 @@ begin
     end;
 end;
 
+
 // NOTE: This method is also used by rbtRender (see: rbtRender.OnClick)
 procedure TForm1.rbtCaptureClick(Sender: TObject);
 var
@@ -445,17 +452,19 @@ end;
 //
 
 
-procedure TForm1.WimOpenProc(var message: TMessage);
+procedure TForm1.WimOpenProc(var message: WinApi.Messages.TMessage);
 begin
   // discard
 end;
 
-procedure TForm1.WimCloseProc(var message: TMessage);
+
+procedure TForm1.WimCloseProc(var message: WinApi.Messages.TMessage);
 begin
   // discard
 end;
 
-procedure TForm1.WimDataProc(var message: TMessage);
+
+procedure TForm1.WimDataProc(var message: WinApi.Messages.TMessage);
 begin
   DataProcHandled := False;
   //

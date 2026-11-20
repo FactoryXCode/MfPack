@@ -28,7 +28,7 @@
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -123,11 +123,6 @@ type
 
     procedure Execute; override;
   public
-
-    // External feed mode (InputSource = isExternalFeed).
-    procedure BeginExternalFormat(ASampleRate, AChannels: Integer; AIsFloat: Boolean);
-    procedure PushFloat32Interleaved(pData: PSingle; Frames: Integer);
-    procedure PushInt16Interleaved(pData: PSmallInt; Frames: Integer);
 
     constructor Create(AOwner: TMfAudioVisualizer);
   end;
@@ -376,7 +371,7 @@ begin
     begin
 
       w := 0.5 * (1.0 - Cos(2.0 * Pi * i / (N - 1)));
-      X[i] := X[i] * Single(w);
+      X[i] := X[i] * (w);
     end;
 end;
 
@@ -460,10 +455,10 @@ begin
               ur := Re[i];
               ui := Im[i];
 
-              Re[i] := Single(ur + tr);
-              Im[i] := Single(ui + ti);
-              Re[i + m2] := Single(ur - tr);
-              Im[i + m2] := Single(ui - ti);
+              Re[i] := (ur + tr);
+              Im[i] := (ui + ti);
+              Re[i + m2] := (ur - tr);
+              Im[i + m2] := (ui - ti);
 
               i := i + m;
             end;
@@ -609,8 +604,8 @@ var
                          FOwner.FAttackMs) / 1000.0));
     rr := Exp(-dt / (Max(1,
                          FOwner.FReleaseMs) / 1000.0));
-    attackA := Single(aa);
-    releaseA := Single(rr);
+    attackA := (aa);
+    releaseA := (rr);
   end;
 
   procedure PushMonoToRing(const X: TArray<Single>);
@@ -768,7 +763,7 @@ begin
       if (MixFmt.wFormatTag = WAVE_FORMAT_EXTENSIBLE) then
         begin
 
-          if (PWaveFormatExtensible(MixFmt).SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) then
+          if (IsEqualGUID(PWaveFormatExtensible(MixFmt).SubFormat,KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)) then
             isFloat := True;
         end;
 
@@ -988,9 +983,9 @@ begin
 
                 CaptureClient.ReleaseBuffer(NumFrames);
 
-                rmsL := Single(Sqrt(sumSqL / Max(1,
+                rmsL := (Sqrt(sumSqL / Max(1,
                                                  nSamp)));
-                rmsR := Single(Sqrt(sumSqR / Max(1,
+                rmsR := (Sqrt(sumSqR / Max(1,
                                                  nSamp)));
 
                 aAtk := Power(attackA,
@@ -1189,7 +1184,21 @@ begin
   Active := False;
 
   if Assigned(FTimer) then
-    begi
+    begin
+
+      FTimer.Enabled := False;
+      FTimer.OnTimer := nil;
+    end;
+
+  FreeAndNil(FBack);
+
+  if (FStopEvent <> 0) then
+    CloseHandle(FStopEvent);
+
+  inherited Destroy;
+end;
+
+
 procedure TMfAudioVisualizer.BeginExternalFormat(ASampleRate, AChannels: Integer; AIsFloat: Boolean);
 begin
   if (csDesigning in ComponentState) then
@@ -1259,8 +1268,8 @@ var
     dt := 1.0 / Max(1, FSampleRate);
     aa := Exp(-dt / (Max(1, FAttackMs) / 1000.0));
     rr := Exp(-dt / (Max(1, FReleaseMs) / 1000.0));
-    FExtAttackA := Single(aa);
-    FExtReleaseA := Single(rr);
+    FExtAttackA := (aa);
+    FExtReleaseA := (rr);
   end;
 
   function ShouldDispatch(): Boolean;
@@ -1398,8 +1407,8 @@ begin
       Inc(pData, FChannels - 2);
   end;
 
-  rmsL := Single(Sqrt(sumSqL / Max(1, Frames)));
-  rmsR := Single(Sqrt(sumSqR / Max(1, Frames)));
+  rmsL := (Sqrt(sumSqL / Max(1, Frames)));
+  rmsR := (Sqrt(sumSqR / Max(1, Frames)));
 
   if (FExtAttackA = 0) or (FExtReleaseA = 0) then
     ComputeAttackRelease();
@@ -1521,8 +1530,8 @@ var
     dt := 1.0 / Max(1, FSampleRate);
     aa := Exp(-dt / (Max(1, FAttackMs) / 1000.0));
     rr := Exp(-dt / (Max(1, FReleaseMs) / 1000.0));
-    FExtAttackA := Single(aa);
-    FExtReleaseA := Single(rr);
+    FExtAttackA := (aa);
+    FExtReleaseA := (rr);
   end;
 
   function ShouldDispatch(): Boolean;
@@ -1629,8 +1638,8 @@ begin
       Inc(pData, FChannels - 2);
   end;
 
-  rmsL := Single(Sqrt(sumSqL / Max(1, Frames)));
-  rmsR := Single(Sqrt(sumSqR / Max(1, Frames)));
+  rmsL := (Sqrt(sumSqL / Max(1, Frames)));
+  rmsR := (Sqrt(sumSqR / Max(1, Frames)));
 
   if (FExtAttackA = 0) or (FExtReleaseA = 0) then
     ComputeAttackRelease();
@@ -1648,20 +1657,6 @@ begin
 
   if ShouldDispatch() then
     PublishLevelsOnly(FSmPeakL, FSmPeakR, FSmRmsL, FSmRmsR);
-end;
-
-n
-
-      FTimer.Enabled := False;
-      FTimer.OnTimer := nil;
-    end;
-
-  FreeAndNil(FBack);
-
-  if (FStopEvent <> 0) then
-    CloseHandle(FStopEvent);
-
-  inherited Destroy;
 end;
 
 

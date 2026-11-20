@@ -1,19 +1,19 @@
 ## MfCastPlayer II (MfPack Cast API 4.1.0)
   
-Version: 4.0.1 
+Version: 4.1.0 
   
 NOTES:  
 This release is updated for compiler version 17 up to 35.  
 SDK version: 10.0.28000.2705 (Win 11)  
 Requires Windows 10 or later.  
-Minimum supported MfPack version: 4.0.0  
-Minimum supported Cast API version: 4.1.0
+Minimum supported MfPack version: 4.1.0  
+Minimum supported Cast API version: 2.2
 MfCast V2.1  
   
   
 This sample demonstrates the public `TMfCast` interface.  
 
-The main project uses Cast API 4.1.0 from `MfPack\Cast`. Its Disconnect button
+The main project uses Cast API V2.2 from `MfPack\Cast`. Its Disconnect button
 starts the API's `TMfCastDisconnectWorker`, which calls `TMfCast.Disconnect` and
 requests standby for a registered paired Android TV. Completion and diagnostics
 are posted back to the VCL window, keeping the interface responsive. The sample
@@ -154,16 +154,7 @@ retaining discovery, direct playback, and media-track inspection.
   
 The sender is a native implementation of the Google Cast protocol. Google does  
 not provide an official Delphi/Windows Cast Sender SDK.  
-  
-Project: Media Foundation - MFPack - Samples  
-Project location:  
-https://github.com/FactoryXCode/MfPack  
-https://sourceforge.net/projects/MFPack  
-  
-First release date: 02/08/2026  
-Final release date: 07/11/2026  
-  
-Copyright © FactoryX. All rights reserved.
+
 
 ### Automatic receiver wake-up
 
@@ -198,3 +189,15 @@ including shell icons, network locations, file filters, and artwork preview.
 No MPxpButton, MfTrackBar, MfLevelProgressBar, or RDJ custom-control dependency
 is required. Shared Cast API units are resolved through relative paths to
 `MfPack\Cast`, `MfPack\Cast\Media`, and `MfPack\src`.
+  
+  
+  
+Project: Media Foundation - MFPack - Samples  
+Project location:  
+https://github.com/FactoryXCode/MfPack  
+https://sourceforge.net/projects/MFPack  
+  
+First release date: 02/08/2026  
+Final release date: 18/11/2026  
+  
+Copyright © FactoryX. All rights reserved.

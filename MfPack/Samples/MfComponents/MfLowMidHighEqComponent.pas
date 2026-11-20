@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: 3-band EQ (Low / Mid / High) rack component wrapper.
 //              Provides an IMFTransform (TMfLowMidHighEqMFT) to TMfWasApiEffectsRack.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfParametricEqMFT
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -76,7 +76,8 @@ uses
   WinApi.MediaFoundationApi.MfTransform,
   {Application}
   MfWasApiFxComponentBase,
-  MfLowMidHighEqMFT;
+  MfLowMidHighEqMFT,
+  MfAudioEffectMFTBase;
 
 type
 
@@ -113,10 +114,15 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); reintroduce;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
     // Optional helper for callers (not part of TMfWasApiFxComponentBase).
     procedure ResetState();
+    procedure GetBiquadCoeffs(out Low,
+                                 Mid,
+                                 High: TBiquadCoeffs;
+                                 out SampleRate: Double);
+
 
   published
 
@@ -357,6 +363,26 @@ begin
               IMfLowMidHighEqMft,
               Eq) then
     Eq.SetSettings(FSettings);
+end;
+
+
+procedure TMfLowMidHighEqEffect.GetBiquadCoeffs(out Low,
+                                                 Mid,
+                                                 High: TBiquadCoeffs;
+                                                 out SampleRate: Double);
+begin
+
+  CheckForMft();
+  if Assigned(FMftObj) then
+    FMftObj.GetBiquadCoeffs(Low, Mid, High, SampleRate)
+  else
+    begin
+      FillChar(Low, SizeOf(Low), 0);
+      Low.b0 := 1.0;
+      Mid := Low;
+      High := Low;
+      SampleRate := 48000;
+    end;
 end;
 
 

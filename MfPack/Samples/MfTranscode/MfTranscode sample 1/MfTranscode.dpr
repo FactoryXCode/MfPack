@@ -1,7 +1,11 @@
 program MfTranscode;
 
 uses
-  {$IFDEF FASTMM}
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
+  System.Win.ComObj,
+  System.SysUtils,
+{$IFDEF FASTMM}
   FastMM4,
   madExcept,
   madLinkDisAsm,
@@ -17,9 +21,23 @@ uses
 {$R *.res}
 
 begin
-  Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.Title := 'MfTranscode version 3.0.2';
-  Application.CreateForm(TfrmTranscoder, frmTranscoder);
-  Application.Run;
+  OleCheck(CoInitializeEx(nil,
+                          COINIT_APARTMENTTHREADED));
+  try
+    Application.Initialize;
+    Application.MainFormOnTaskbar := True;
+    Application.Title := 'MfTranscode version 3.0.2';
+    Application.CreateForm(TfrmTranscoder, frmTranscoder);
+    if (ParamCount = 1) and (ParamStr(1) = '--smoke') then
+      begin
+        Application.ProcessMessages;
+        frmTranscoder.Close();
+        Application.ProcessMessages;
+        FreeAndNil(frmTranscoder);
+      end
+    else
+      Application.Run;
+  finally
+    CoUninitialize();
+  end;
 end.

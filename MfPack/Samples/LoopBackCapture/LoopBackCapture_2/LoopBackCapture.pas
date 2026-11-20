@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: The audio loopback capture engine.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 // 28/03/2026 Tony                Fixed TCallbackAsync.Invoke
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -64,7 +64,8 @@ unit LoopBackCapture;
 interface
 
 uses
-  {WinApi}
+  System.Classes,
+{WinApi}
   WinApi.Windows,
   WinApi.WinError,
   WinApi.WinApiTypes,
@@ -77,7 +78,7 @@ uses
   WinApi.WinMM.MMReg,
   {System}
   System.SysUtils,
-  System.Classes,
+  System.Math,
   System.SyncObjs,
   {activeX}
   //WinApi.ActiveX,
@@ -142,6 +143,10 @@ type
     pvRenderThread: TRenderThread;
 
   private
+    FNotifyWindow: HWND;
+    FClosing: Boolean;
+    procedure NotifyWindowProc(var Msg: TMessage);
+  private
 
     pvAudioClient: IAudioClient;
     pvAudioCaptureClient: IAudioCaptureClient;
@@ -150,10 +155,10 @@ type
     pvRenderThreadClosedEvent: THandle;
     pvShutdownEvent: THandle;
 
-    pvxStartCapture: TCallbackAsync;
-    pvxStopCapture: TCallbackAsync;
-    pvxSampleReady: TCallbackAsync;
-    pvxFinishCapture: TCallbackAsync;
+    pvxStartCapture: IMFAsyncCallback;
+    pvxStopCapture: IMFAsyncCallback;
+    pvxSampleReady: IMFAsyncCallback;
+    pvxFinishCapture: IMFAsyncCallback;
 
     FOnCapturingStart: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
@@ -169,7 +174,7 @@ type
     pvdwQueueID: DWord;
     // These two members are used to communicate between the main thread
     // and the ActivateCompleted callback.
-    pvoutputFileName: LPCWSTR;
+    pvoutputFileName: UnicodeString;
     pvactivateResult: HResult;
 
     pvDeviceState: TDeviceState;
@@ -227,7 +232,7 @@ type
 
   //   ////////////////////////////////////////////////////////////////////////
 
-  TCallbackAsync = class(TInterfacedPersistent, IMFAsyncCallback)
+  TCallbackAsync = class(TInterfacedObject, IMFAsyncCallback)
   private
     _parent: TLoopbackCapture;
     _dwQueueID: DWord;
@@ -284,6 +289,24 @@ uses
 
 
 // Thread ======================================================================
+procedure TLoopbackCapture.NotifyWindowProc(var Msg: TMessage);
+begin
+  if Msg.Msg = WM_APP + $4D0 then
+    begin
+      if not FClosing and Assigned(FOnCapturingStart) then
+        FOnCapturingStart(Self);
+      Msg.Result := 0;
+    end
+  else if Msg.Msg = WM_APP + $4D1 then
+    begin
+      if not FClosing and Assigned(FOnCapturingStopped) then
+        FOnCapturingStopped(Self);
+      Msg.Result := 0;
+    end
+  else
+    Msg.Result := DefWindowProc(FNotifyWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+
 constructor TRenderThread.Create(AEngine: TLoopbackCapture);
 begin
   inherited Create(True);
@@ -307,7 +330,7 @@ begin
   // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
   // To get the best performance, it's recommended to set "Best Performance" in Windows energy settings.
   FSuccess := FEngine.CaptureThreadFunc;
-  Synchronize(SetEvent);
+  TThread.Queue(Self,SetEvent);
 end;
 
 
@@ -346,18 +369,16 @@ end;
 
 procedure TLoopbackCapture.TerminateRenderThread();
 begin
-
+  if pvShutdownEvent <> 0 then WinApi.Windows.SetEvent(pvShutdownEvent);
   if Assigned(pvRenderThread) then
     begin
-
-      pvRenderThread.Terminate;
-      pvRenderThread.WaitFor; // Ensure capture thread finishes (and closes writer) before cleanup.
+      pvRenderThread.Terminate();
+      pvRenderThread.WaitFor();
+      TThread.RemoveQueuedEvents(pvRenderThread);
       FreeAndNil(pvRenderThread);
     end;
-
-  if (pvRenderThreadClosedEvent <> 0) then
+  if pvRenderThreadClosedEvent <> 0 then
     begin
-
       CloseHandle(pvRenderThreadClosedEvent);
       pvRenderThreadClosedEvent := 0;
     end;
@@ -367,6 +388,8 @@ end;
 
 constructor TLoopbackCapture.Create();
 begin
+  inherited Create();
+  FNotifyWindow := AllocateHWnd(NotifyWindowProc);
 
   pvactivateResult := E_UNEXPECTED;
   pvDeviceState := Uninitialized;
@@ -391,13 +414,15 @@ end;
 
 destructor TLoopbackCapture.Destroy();
 begin
+  FClosing := True;
 
   Reset();
-  FreeAndNil(pvxStartCapture);
-  FreeAndNil(pvxStopCapture);
-  FreeAndNil(pvxSampleReady);
+  pvxStartCapture := nil;
+  pvxStopCapture := nil;
+  pvxSampleReady := nil;
 
-  FreeAndNil(pvxFinishCapture);
+  pvxFinishCapture := nil;
+  if FNotifyWindow <> 0 then DeallocateHWnd(FNotifyWindow);
   inherited Destroy();
 end;
 
@@ -415,6 +440,8 @@ var
   hrActivateResult: HResult;
 
 begin
+  hr := E_UNEXPECTED;
+  try
 
   // Check for a successful activation result
   hrActivateResult := E_UNEXPECTED;
@@ -423,7 +450,7 @@ begin
                                             IUnknown(pvAudioClient));
   if FAILED(hrActivateResult) or FAILED(hr) then
     begin
-      hr := hrActivateResult;
+      if SUCCEEDED(hr) then hr := hrActivateResult;
       ErrMsg(Format('activateOperation.GetActivateResult failed. LastError = %d',[GetLastError()]), hrActivateResult);
       Exit(hr);
     end;
@@ -479,9 +506,11 @@ begin
   pvDeviceState := Initialized;
 
   // Let ActivateAudioInterface know that pvactivateResult has the result of the activation attempt.
-  gs_hActivateCompleted.SetEvent();
-
   Result := hr;
+  finally
+    pvactivateResult := hr;
+    gs_hActivateCompleted.SetEvent();
+  end;
 end;
 
 
@@ -590,12 +619,11 @@ begin
   // Writer finalization happens inside the capture thread.
   hr := S_OK;
 
-  gs_hCaptureStopped.SetEvent();
-
   pvDeviceState := Stopped;
   if Assigned(FOnCapturingStopped) then
-    FOnCapturingStopped(Self);
+    if not FClosing then PostMessage(FNotifyWindow,WM_APP + $4D0 + 1,0,0);
 
+  gs_hCaptureStopped.SetEvent();
   Result := hr;
 end;
 
@@ -645,7 +673,7 @@ begin
     end;
 
   // Set the capture event work queue to use the MMCSS queue.
-  pvxSampleReady.SetQueueID(pvdwQueueID);
+  // Sample-ready MF work items are not used by the owned capture thread.
 
   // Create the completion event as auto-reset.
   gs_hActivateCompleted := TEvent.Create(nil,
@@ -738,7 +766,7 @@ begin
 
   pvBytesWritten := 0;
   // Validate output format early (writer is created/opened in the capture thread).
-  fn := WideCharToString(pvoutputFileName);
+  fn := pvoutputFileName;
   w := CreateAudioWriterFromFileName(fn);
   if (w = nil) then
     Exit(E_FAIL);
@@ -790,7 +818,7 @@ begin
   try
 
     // Thread-local writer (v3 rule).
-    fn := WideCharToString(pvoutputFileName);
+    fn := pvoutputFileName;
     audioWriter := CreateAudioWriterFromFileName(fn);
 
     if (audioWriter = nil) then
@@ -992,7 +1020,8 @@ begin
       goto leave;
     end;
 
-  hr := EventWait(gs_hActivateCompleted);
+  hr := EventWait(gs_hActivateCompleted,10000);
+  if SUCCEEDED(hr) then hr := pvactivateResult;
     if SUCCEEDED(hr) then
       pvDeviceState := Initialized;
 
@@ -1078,7 +1107,7 @@ try
   if Assigned(gs_hCaptureStopped) then
     begin
       gs_hCaptureStopped.ResetEvent;
-      hr := EventWait(gs_hCaptureStopped);
+      hr := EventWait(gs_hCaptureStopped,10000);
       FreeAndNil(gs_hCaptureStopped);
     end;
 
@@ -1244,7 +1273,7 @@ begin
 
                      hr := _parent.OnStartCapture(pResult);
                      if SUCCEEDED(hr) and Assigned(_parent.FOnCapturingStart) then
-                       _parent.FOnCapturingStart(Self);
+                       if not _parent.FClosing then PostMessage(_parent.FNotifyWindow,WM_APP + $4D0 + 0,0,0);
                    end;
     StopCapture:   hr := _parent.OnStopCapture(pResult);
     SampleReady:   hr := _parent.OnSampleReady(pResult);

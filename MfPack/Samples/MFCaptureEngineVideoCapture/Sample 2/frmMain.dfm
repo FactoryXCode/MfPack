@@ -6,7 +6,7 @@ object MainWindow: TMainWindow
   Caption = 'Capture Engine Application Sample 2'
   ClientHeight = 1011
   ClientWidth = 1640
-  Color = clDarkslategray
+  Color = $004F4F2F
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,6 +15,7 @@ object MainWindow: TMainWindow
   Font.Style = []
   Menu = MainMenu
   OnCloseQuery = FormCloseQuery
+  OnDestroy = FormDestroy
   OnCreate = FormCreate
   PixelsPerInch = 144
   DesignSize = (

@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -257,7 +257,7 @@ begin
   if not (csDesigning in ComponentState) then
     begin
       // Set the form click-through
-      Params.ExStyle := WS_EX_LAYERED or WS_EX_TRANSPARENT;
+      Params.ExStyle := Params.ExStyle or WS_EX_LAYERED or WS_EX_TRANSPARENT;
     end;
 end;
 
@@ -265,6 +265,7 @@ end;
 // Sets the font of the window (the label Parentfont has been set to True)
 procedure TFloatingForm.SetFont(aValue: TFont);
 begin
+  if Assigned(aValue) then fLayerFont.Assign(aValue);
   Font := fLayerFont;
   lblSubTitle.Font := fLayerFont;
   Invalidate;

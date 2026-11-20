@@ -10,7 +10,7 @@
 // Release date: 24-11-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helpers unit for this project.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -68,9 +68,23 @@ uses
   WinApi.Windows,
   WinApi.ActiveX,
   System.SysUtils,
+  System.Classes,
+  System.Math,
+  WinApi.ComBaseApi,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfTransform;
+  WinApi.MediaFoundationApi.MfTransform,
+  WinApi.DirectX.D3D11;
+
+type
+  TGpuCaptureWorker = class(TThread)
+  private
+    FRun: TThreadMethod;
+  protected
+    procedure Execute(); override;
+  public
+    constructor Create(const Run: TThreadMethod);
+  end;
 
   // Utility to check HRESULT
   procedure CheckHR(hr: HRESULT;
@@ -85,7 +99,65 @@ uses
                                  Width: UInt32;
                                  Height: UInt32): Boolean;
 
+function GpuCounterTime(Counter,Frequency: Int64): Int64;
+procedure PackGpuNV12(const Source: D3D11_MAPPED_SUBRESOURCE;
+                      Width,Height: UINT;
+                      Destination: PByte);
+
 implementation
+
+function GpuCounterTime(Counter,Frequency: Int64): Int64;
+begin
+  if Frequency <= 0 then raise EArgumentException.Create('Invalid counter frequency');
+  Result := (Counter div Frequency) * 10000000 +
+            ((Counter mod Frequency) * 10000000) div Frequency;
+end;
+
+procedure PackGpuNV12(const Source: D3D11_MAPPED_SUBRESOURCE;
+                      Width,Height: UINT;
+                      Destination: PByte);
+var
+  Row: UINT;
+  Input: PByte;
+begin
+  if (Source.pData = nil) or (Destination = nil) or
+     (Width = 0) or (Height = 0) or
+     ((Width and 1) <> 0) or ((Height and 1) <> 0) or
+     (Source.RowPitch < Width) then
+    raise EArgumentException.Create('Invalid NV12 layout');
+  Input := Source.pData;
+  for Row := 0 to Height + Height div 2 - 1 do
+    begin
+      Move(Input^,Destination^,Width);
+      Inc(Input,Source.RowPitch);
+      Inc(Destination,Width);
+    end;
+end;
+
+constructor TGpuCaptureWorker.Create(const Run: TThreadMethod);
+begin
+  inherited Create(True);
+  FreeOnTerminate := False;
+  FRun := Run;
+end;
+
+procedure TGpuCaptureWorker.Execute();
+var
+  ComResult: HRESULT;
+  SavedMask: TFPUExceptionMask;
+begin
+  ComResult := CoInitializeEx(nil,COINIT_MULTITHREADED);
+  if FAILED(ComResult) then Exit;
+  SavedMask := GetExceptionMask();
+  SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,exUnderflow,exPrecision]);
+  try
+    FRun();
+  finally
+    ClearExceptions(False);
+    SetExceptionMask(SavedMask);
+    CoUninitialize();
+  end;
+end;
 
 
 // Utility to check HRESULT

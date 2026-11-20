@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright: � FactoryX. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Wave in renderer class.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -94,6 +94,7 @@ type
   public
     constructor Create(AppWindow: HWND); override;
     destructor Destroy(); override;
+
     function Initialize(const UseInputDevice: Boolean): Boolean; override;
     procedure Shutdown(); override;
 
@@ -106,7 +107,7 @@ type
     function HandlesMessage(_hwnd: HWND;
                             message: UINT): Boolean; override;
     function MessageHandler(_hWnd: HWND;
-                            message: TMessage): INT_PTR; override;
+                            message: WinApi.Messages.TMessage): NativeInt; override;
   end;
 
 
@@ -267,6 +268,7 @@ begin
   if Assigned(_waveOutput) then
     _waveOutput.Shutdown;
 end;
+
 
 destructor CWaveChat.Destroy();
 begin
@@ -513,23 +515,23 @@ end;
 //  We ignore all the wave messages except the "Data" message.
 //
 function CWaveChat.MessageHandler(_hWnd: HWND;
-                                  message: TMessage): INT_PTR;
+                                  message: WinApi.Messages.TMessage): NativeInt;
 var
   mmr: MMRESULT;
   hwaveHandle: HWAVEIN;
   waveHeader: LPWAVEHDR;
 
 begin
-  Result := INT_PTR(False);
+  Result := NativeInt(False);
 
   case message.Msg of
 
     MM_WIM_OPEN:  begin
-                    Result := INT_PTR(True);
+                    Result := NativeInt(True);
                   end;
 
     MM_WIM_CLOSE: begin
-                    Result := INT_PTR(True);
+                    Result := NativeInt(True);
                   end;
 
     MM_WIM_DATA:  begin
@@ -557,12 +559,12 @@ begin
                                      'Failed to add buffer',
                                      'Error',
                                      MB_OK);
-                        Result := INT_PTR(True);
+                        Result := NativeInt(True);
                       end;
                   end;
     else
       begin
-        Result := INT_PTR(False);
+        Result := NativeInt(False);
       end;
    end;
 end;
@@ -572,6 +574,7 @@ function CWaveChat.CanStartChat(): Boolean;
 begin
   Result := True;
 end;
+
 
 function CWaveChat.TransportType(): ChatTransportType;
 begin

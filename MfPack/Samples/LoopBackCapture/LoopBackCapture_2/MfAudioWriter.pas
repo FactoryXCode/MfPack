@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: WAV/FLAC Writer class using IMFSinkWriter.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -111,6 +111,7 @@ type
 
     FKind: TAudioOutputKind;
     FFileName: string;
+    FMFStarted: Boolean;
 
     FSinkWriter: IMFSinkWriter;
     FAudioStreamIndex: DWORD;
@@ -529,6 +530,9 @@ var
 
 begin
 
+  if FMFStarted then Exit(MF_E_INVALIDREQUEST);
+  if (Wf.nChannels = 0) or (Wf.nSamplesPerSec = 0) or
+     (Wf.nBlockAlign = 0) then Exit(E_INVALIDARG);
   if FileName = '' then
     Exit(E_INVALIDARG);
 
@@ -536,6 +540,7 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
+  FMFStarted := True;
   FFileName := FileName;
   FSinkWriter := nil;
   FAudioStreamIndex := 0;
@@ -547,6 +552,7 @@ begin
   if FAILED(hr) then
     begin
 
+      FMFStarted := False;
       EnsureMFStopped();
       Exit(hr);
     end;
@@ -557,6 +563,7 @@ begin
 
       // Clean up and balance MFStartup refcount.
       FSinkWriter := nil;
+      FMFStarted := False;
       EnsureMFStopped();
     end;
 end;
@@ -713,6 +720,7 @@ begin
   BytesWritten := 0;
 
   if FSinkWriter = nil then Exit(MF_E_NOT_INITIALIZED);
+  if NumFrames = 0 then Exit(S_OK);
 
   // Decide actual source pointer/size we feed to MF (maybe converted)
   if (FKind = aokFlac) then
@@ -829,7 +837,11 @@ begin
     FSinkWriter := nil;
   end;
 
-  EnsureMFStopped;
+  if FMFStarted then
+    begin
+      FMFStarted := False;
+      EnsureMFStopped();
+    end;
   Result := hr;
 end;
 

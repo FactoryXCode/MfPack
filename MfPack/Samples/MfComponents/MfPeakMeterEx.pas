@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35               q
@@ -87,7 +87,8 @@ uses
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.EndPointVolume,
   {Additional}
-  QueueTimer;
+  QueueTimer,
+  ThreadedQueueTimer;
 
 const
   // Timer period (in milliseconds)
@@ -408,7 +409,7 @@ begin
             fChannelCount);
 
   // Create and activate a qtimer
-  FTimer := TQTimer.Create(Self);
+  FTimer := TThreadedQTimer.Create(Self);
   FTimer.DueTime := 0;  // Immediate
   FTimer.Period := TIMER_PERIOD;
   FTimer.OnTimerEvent := TimerTimer;

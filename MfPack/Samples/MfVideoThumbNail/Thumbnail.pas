@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Videothumbnail generator.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -181,6 +181,7 @@ var
   pBitmap: ID2D1Bitmap;
   _var: PROPVARIANT;
   pitch: UINT32;
+  BitmapProps: D2D1_BITMAP_PROPERTIES;
 
   // debug
   //iSpriteIndex: Integer;
@@ -253,16 +254,15 @@ begin
           end;
 
 
-          if hr = E_POINTER then
-            goto done;
+          goto done;
         end;
 
-      if (dwFlags = DWORD(MF_SOURCE_READERF_ENDOFSTREAM)) then
+      if ((dwFlags and DWORD(MF_SOURCE_READERF_ENDOFSTREAM))<>0) then
         begin
           break;
         end;
 
-      if (dwFlags = DWORD(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED)) then
+      if ((dwFlags and DWORD(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED))<>0) then
         begin
           // Type change. Get the new format.
           hr := GetVideoFormat(m_format);
@@ -329,16 +329,14 @@ begin
       if (FAILED(hr)) then
         goto done;
 
-      {$IFDEF DEBUG}
-      assert(cbBitmapData = (pitch * m_format.imageHeightPels));  // debug!
-      {$ENDIF}
+      if (UInt64(pitch)*m_format.imageHeightPels>cbBitmapData) then begin hr:=E_INVALIDARG;goto done;end;
 
+      BitmapProps:=D2D1BitmapProperties(D2D1PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,D2D1_ALPHA_MODE_IGNORE));
       hr := pRT.CreateBitmap(D2D1SizeU(m_format.imageWidthPels,
                                        m_format.imageHeightPels),
                              pBitmapData,
                              pitch,
-                             D2D1BitmapProperties(D2D1PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, // Format = RGB32
-                                                                  D2D1_ALPHA_MODE_IGNORE)),
+                             @BitmapProps,
                              pBitmap);
 
 
@@ -655,6 +653,7 @@ var
   hPos: LONGLONG;
 
 begin
+  if (pRT=nil) or (count=0) or (count>Length(pSprites)) then Exit(E_INVALIDARG);
   bCanSeek := FALSE;
 
   hnsDuration := 0;
@@ -695,9 +694,9 @@ begin
     begin
       hPos := hnsIncrement * (i + 1);
 
-      hr := CreateBitmap(pRT,
-                         hPos,
-                         pSprites[i]);
+      if pSprites[i]=nil then Exit(E_POINTER);
+      hr := CreateBitmap(pRT,hPos,pSprites[i]);
+      if FAILED(hr) then Break;
     end;
 
   Result:= hr;
@@ -721,7 +720,8 @@ var
 
 begin
   // Start with a rectangle the same size as src, but offset to the origin (0,0).
- // rc := {0, 0, src.right - src.left, src.bottom - src.top};
+  Result:=src;rc:=src;
+  if (srcPAR.Numerator=0) or (srcPAR.Denominator=0) then Exit;
 
   if ((srcPAR.Numerator <> 1) OR (srcPAR.Denominator <> 1)) then
     begin

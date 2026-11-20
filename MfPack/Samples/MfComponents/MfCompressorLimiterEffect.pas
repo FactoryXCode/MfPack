@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //
 // Company: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -126,7 +126,8 @@ type
 
   protected
 
-    procedure EnsureMft(); override;
+    procedure EnsureMft();
+    procedure CheckForMft(); override;
     function GetMftInstance(): IMFTransform; override;
 
   public
@@ -221,6 +222,12 @@ begin
 
   if not (csDesigning in ComponentState) then
     EnsureMft();
+end;
+
+
+procedure TMfCompressorLimiterEffect.CheckForMft();
+begin
+  EnsureMft;
 end;
 
 

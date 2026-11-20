@@ -23,13 +23,13 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/09/2026 All                 Explain unavailable DTS decoding and keep the
 //                                audio-stream choice with the user.
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -93,18 +93,18 @@ type
 
 // DisplayConfig declarations for Delphi versions whose Windows units predate them.
 
-  TCaptureDisplayHeader = record
+  TCaptureDisplayHeader = packed record
     InfoType, Size: DWORD;
     AdapterId: TLuid;
     Id: DWORD;
   end;
 
-  TCaptureDisplaySourceName = record
+  TCaptureDisplaySourceName = packed record
     Header: TCaptureDisplayHeader;
     DeviceName: array[0..31] of WideChar;
   end;
 
-  TCaptureDisplayTargetName = record
+  TCaptureDisplayTargetName = packed record
     Header: TCaptureDisplayHeader;
     Flags, OutputTechnology: DWORD;
     ManufacturerId, ProductId: Word;
@@ -113,7 +113,7 @@ type
     DevicePath: array[0..127] of WideChar;
   end;
 
-  TCaptureDisplayPath = record
+  TCaptureDisplayPath = packed record
     SourceAdapterId: TLuid;
     SourceId, SourceModeIndex, SourceFlags: DWORD;
     TargetAdapterId: TLuid;
@@ -123,7 +123,7 @@ type
     TargetFlags, Flags: DWORD;
   end;
 
-  TCaptureDisplayMode = record
+  TCaptureDisplayMode = packed record
     // DISPLAYCONFIG_MODE_INFO is 64 bytes; only path identities are needed here.
     Data: array[0..63] of Byte;
   end;

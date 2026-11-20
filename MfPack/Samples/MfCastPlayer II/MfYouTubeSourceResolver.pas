@@ -10,7 +10,7 @@
 // Release date: 10-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Resolver for Youtube URL' like "https://www.youtube.com/watch?v=m9Py1mHq45M".
 //              It deliberately keeps YouTube-specific behavior out of MfCast and
 //              supports both immediate and best-quality media resolution.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -85,6 +85,7 @@ type
     FLastErrorText: string;
     FLastResolvedSourceName: string;
     FMode: TMfYouTubeResolveMode;
+    FTimeoutMs: DWORD;
 
     function ExtractVideoId(const ASourceName: string;
                             out AVideoId: string): Boolean;
@@ -120,6 +121,7 @@ type
 
     procedure Release(const AResolvedSource: TMfCastResolvedSource);
 
+    property TimeoutMs: DWORD read FTimeoutMs write FTimeoutMs;
     property Mode: TMfYouTubeResolveMode read FMode write FMode;
     property LastResolvedSourceName: string read FLastResolvedSourceName;
   end;
@@ -134,6 +136,7 @@ begin
   inherited Create();
 
   FMode := yrmFastCombinedStream;
+  FTimeoutMs := 120000;
   FLastResolvedSourceName := '';
 end;
 
@@ -150,75 +153,50 @@ end;
 function TMfYouTubeSourceResolver.ExtractVideoId(const ASourceName: string;
                                                  out AVideoId: string): Boolean;
 var
-  Source: string;
-  LowerSource: string;
-  StartIndex: Integer;
-  EndIndex: Integer;
-
+  Source,Host,Path,Query,Item: string;
+  P,I: Integer;
 begin
-
+  Result := False;
   AVideoId := '';
   Source := Trim(ASourceName);
-  LowerSource := LowerCase(Source);
-
-  StartIndex := Pos('youtu.be/',
-                    LowerSource);
-  if (StartIndex > 0) then
-    Inc(StartIndex,
-        Length('youtu.be/'))
-  else
+  P := Pos('://',Source);
+  if P > 0 then
     begin
-      StartIndex := Pos('youtube.com/watch?',
-                        LowerSource);
-      if (StartIndex > 0) then
+      if not (SameText(Copy(Source,1,P-1),'https') or
+              SameText(Copy(Source,1,P-1),'http')) then Exit;
+      Delete(Source,1,P+2);
+    end;
+  P := Pos('/',Source);
+  if P = 0 then Exit;
+  Host := LowerCase(Copy(Source,1,P-1));
+  Path := Copy(Source,P,MaxInt);
+  if Copy(Host,1,4) = 'www.' then Delete(Host,1,4);
+  if Copy(Host,1,2) = 'm.' then Delete(Host,1,2);
+  if (Host <> 'youtube.com') and (Host <> 'youtu.be') and
+     (Host <> 'youtube-nocookie.com') then Exit;
+  P := Pos('#',Path);
+  if P > 0 then SetLength(Path,P-1);
+  Query := '';
+  P := Pos('?',Path);
+  if P > 0 then begin Query := Copy(Path,P+1,MaxInt);SetLength(Path,P-1);end;
+  if Host = 'youtu.be' then AVideoId := Copy(Path,2,MaxInt)
+  else if Path = '/watch' then
+    begin
+      while Query <> '' do
         begin
-          StartIndex := Pos('v=',
-                            Copy(LowerSource,
-                                 StartIndex,
-                                 MaxInt));
-          if (StartIndex > 0) then
-            begin
-              StartIndex := Pos('youtube.com/watch?',
-                                LowerSource) + StartIndex + 1;
-            end;
-        end
-      else
-        begin
-          StartIndex := Pos('youtube.com/shorts/',
-                            LowerSource);
-          if (StartIndex > 0) then
-            Inc(StartIndex,
-                Length('youtube.com/shorts/'))
-          else
-            begin
-              StartIndex := Pos('youtube.com/embed/',
-                                LowerSource);
-              if (StartIndex > 0) then
-                Inc(StartIndex,
-                    Length('youtube.com/embed/'));
-            end;
+          P := Pos('&',Query);
+          if P = 0 then P := Length(Query)+1;
+          Item := Copy(Query,1,P-1);Delete(Query,1,P);
+          if Copy(Item,1,2) = 'v=' then begin AVideoId := Copy(Item,3,MaxInt);Break;end;
         end;
-    end;
-
-  if (StartIndex <= 0) or (StartIndex > Length(Source)) then
-    begin
-      Result := False;
-      Exit;
-    end;
-
-  EndIndex := StartIndex;
-  while (EndIndex <= Length(Source)) and
-        CharInSet(Source[EndIndex],
-                  ['A'..'Z', 'a'..'z', '0'..'9', '_', '-']) do
-    Inc(EndIndex);
-
-  AVideoId := Copy(Source,
-                   StartIndex,
-                   EndIndex - StartIndex);
-
-  Result := Length(AVideoId) = 11;
-  if not Result then
-    AVideoId := '';
+    end
+  else if Copy(Path,1,8) = '/shorts/' then AVideoId := Copy(Path,9,MaxInt)
+  else if Copy(Path,1,7) = '/embed/' then AVideoId := Copy(Path,8,MaxInt);
+  if Length(AVideoId) <> 11 then begin AVideoId := '';Exit;end;
+  for I := 1 to Length(AVideoId) do
+    if not CharInSet(AVideoId[I],['A'..'Z','a'..'z','0'..'9','_','-']) then
+      begin AVideoId := '';Exit;end;
+  Result := True;
 end;
 
 
@@ -484,10 +462,12 @@ begin
     end;
 
   try
-    if (WaitForSingleObject(ProcessInfo.hProcess,
-                           INFINITE) <> WAIT_OBJECT_0) then
+    if (WaitForSingleObject(ProcessInfo.hProcess,FTimeoutMs) <> WAIT_OBJECT_0) then
       begin
-        Result := HRESULT_FROM_WIN32(GetLastError());
+        TerminateProcess(ProcessInfo.hProcess,ERROR_TIMEOUT);
+        WaitForSingleObject(ProcessInfo.hProcess,5000);
+        FLastErrorText := 'yt-dlp did not complete before the resolver timeout.';
+        Result := HRESULT_FROM_WIN32(ERROR_TIMEOUT);
         Exit;
       end;
 
@@ -634,10 +614,12 @@ begin
     end;
 
   try
-    if WaitForSingleObject(ProcessInfo.hProcess,
-                           INFINITE) <> WAIT_OBJECT_0 then
+    if WaitForSingleObject(ProcessInfo.hProcess,FTimeoutMs) <> WAIT_OBJECT_0 then
       begin
-        Result := HRESULT_FROM_WIN32(GetLastError());
+        TerminateProcess(ProcessInfo.hProcess,ERROR_TIMEOUT);
+        WaitForSingleObject(ProcessInfo.hProcess,5000);
+        FLastErrorText := 'yt-dlp did not complete before the resolver timeout.';
+        Result := HRESULT_FROM_WIN32(ERROR_TIMEOUT);
         Exit;
       end;
 
@@ -778,6 +760,7 @@ var
   FFmpegExecutableName: string;
   TempPathBuffer: array[0..MAX_PATH - 1] of Char;
   TempDirectory: string;
+  TempName: array[0..MAX_PATH - 1] of Char;
   OutputTemplate: string;
   ResolvedFileName: string;
   ResolvedUrl: string;
@@ -819,8 +802,10 @@ begin
       Exit;
     end;
 
-  TempDirectory := IncludeTrailingPathDelimiter(TempPathBuffer) +
-                   'MfCastPlayer';
+  if GetTempFileName(TempPathBuffer,'MFC',0,TempName) = 0 then
+    begin Result := HRESULT_FROM_WIN32(GetLastError());Exit;end;
+  DeleteFile(TempName);
+  TempDirectory := TempName;
 
   if not ForceDirectories(TempDirectory) then
     begin
@@ -835,6 +820,8 @@ begin
                                ASourceName,
                                TempDirectory,
                                ResolvedUrl);
+      DeleteFile(PChar(IncludeTrailingPathDelimiter(TempDirectory)+'yt-dlp-fast-last-run.log'));
+      RemoveDir(TempDirectory);
       if FAILED(Result) then
         Exit;
 
@@ -882,6 +869,7 @@ begin
   AResolvedSource.SourceName := ResolvedFileName;
   AResolvedSource.Title := 'YouTube ' + VideoId;
   AResolvedSource.IsTemporary := True;
+  FLastResolvedSourceName := ResolvedFileName;
   Result := S_OK;
 end;
 
@@ -898,7 +886,10 @@ begin
   if AResolvedSource.IsTemporary and
      (AResolvedSource.SourceName <> '') and
      FileExists(AResolvedSource.SourceName) then
-    DeleteFile(AResolvedSource.SourceName);
+    begin
+      DeleteFile(AResolvedSource.SourceName);
+      RemoveDir(ExtractFileDir(AResolvedSource.SourceName));
+    end;
 end;
 
 end.

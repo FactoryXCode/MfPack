@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit contains helpermethods for the MFFrameCapture project.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/CameraFrameCapture
+// Related projects: MfPackX410/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -125,7 +125,7 @@ type
   end;
 
   procedure HandleThreadMessages(AThread: THandle;
-                                 AWait: Cardinal = INFINITE);
+                                 AWait: Cardinal = 0);
   function GetMemoryUsed(): string;
 
   procedure SaveImage(AInput: TBitmap;
@@ -207,36 +207,22 @@ procedure SaveImage(AInput: TBitmap;
 var
   pPng: TPngImage;
   pJpg: TJPEGImage;
-
 begin
+  if AInput = nil then raise Exception.Create('No image to save');
   case AType of
-    itBitmap :
+    itBitmap: AInput.SaveToFile(APath);
+    itPNG:
       begin
-         AInput.SaveToFile(APath);
+        pPng := TPngImage.Create();
+        try pPng.Assign(AInput);pPng.SaveToFile(APath);finally pPng.Free;end;
       end;
-    itPNG :
+    itJPG:
       begin
-         pPng := TPngImage.Create;
-         pPng.Assign(AInput);
-         AInput.SaveToFile(APath);
-
-         if Assigned(pPng) then
-           pPng.Free;
-      end;
-    itJPG :
-      begin
-        pJpg := TJPEGImage.Create;
-        // Adjust performance, compression etc.
-        pJpg.Performance := jpBestQuality;
-        pJpg.ProgressiveEncoding := True;
-        pJpg.ProgressiveDisplay := True;
-        //pJpg.CompressionQuality := 30;
-        pJpg.Compress;
-        pJpg.Assign(AInput);
-        pjpg.SaveToFile(APath);
-
-        if Assigned(pJpg) then
-          pJpg.Free();
+        pJpg := TJPEGImage.Create();
+        try
+          pJpg.ProgressiveEncoding := True;
+          pJpg.Assign(AInput);pJpg.Compress();pJpg.SaveToFile(APath);
+        finally pJpg.Free;end;
       end;
   end;
 end;
@@ -265,7 +251,7 @@ begin
 end;
 
 procedure HandleThreadMessages(AThread: THandle;
-                               AWait: Cardinal = INFINITE);
+                               AWait: Cardinal = 0);
 var
   oMsg: TMsg;
 

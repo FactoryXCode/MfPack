@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Renders GPU output to a preview object (TPanel in this case)
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -236,16 +236,31 @@ procedure TPreviewRenderer.RenderFrame(const SrcTex: ID3D11Texture2D);
 var
   ctx: ID3D11DeviceContext;
   backBuf: ID3D11Texture2D;
+  sourceDesc: D3D11_TEXTURE2D_DESC;
   hr: HResult;
 
 begin
 
   if (FDevice = nil) or
      (FContext = nil) or
-     (FSwapChain = nil) then
+     (FSwapChain = nil) or
+     (SrcTex = nil) then
     Exit;
 
   FDevice.GetImmediateContext(ctx);
+
+  SrcTex.GetDesc(sourceDesc);
+  if (sourceDesc.Width <> FWidth) or (sourceDesc.Height <> FHeight) then
+    begin
+      ctx.OMSetRenderTargets(0,nil,nil);
+      FRenderTargetView := nil;
+      CheckHR(FSwapChain.ResizeBuffers(0,sourceDesc.Width,sourceDesc.Height,
+                                       DXGI_FORMAT_UNKNOWN,0),
+              'Preview: ResizeBuffers');
+      FWidth := sourceDesc.Width;
+      FHeight := sourceDesc.Height;
+      CreateRenderTarget();
+    end;
 
   // Copy source BGRA into swapchain backbuffer
   hr := FSwapChain.GetBuffer(0,

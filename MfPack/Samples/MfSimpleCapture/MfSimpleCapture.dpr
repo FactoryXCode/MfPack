@@ -1,7 +1,11 @@
 program MfSimpleCapture;
 
 uses
-  {$IFDEF FASTMM}
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
+  System.Win.ComObj,
+  System.SysUtils,
+{$IFDEF FASTMM}
   FastMM4,
   {$ENDIF }
 
@@ -13,16 +17,28 @@ uses
 {$R *.res}
 
 begin
-
-  // Check for memoryleaks (debug mode (F9) only!)
-{$IFNDEF madExcept}
+  {$IFNDEF madExcept}
   {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
   {$WARN SYMBOL_PLATFORM ON}
-{$ENDIF}
-  Application.Initialize;
-  Application.MainFormOnTaskbar:= True;
-  Application.CreateForm(TFrm_SimpleCapture, Frm_SimpleCapture);
-  Application.CreateForm(TdlgChooseDevice, dlgChooseDevice);
-  Application.Run;
+  {$ENDIF}
+  OleCheck(CoInitializeEx(nil,
+                          COINIT_APARTMENTTHREADED));
+  try
+    Application.Initialize;
+    Application.MainFormOnTaskbar:= True;
+    Application.CreateForm(TFrm_SimpleCapture, Frm_SimpleCapture);
+    Application.CreateForm(TdlgChooseDevice, dlgChooseDevice);
+    if (ParamCount = 1) and (ParamStr(1) = '--smoke') then
+      begin
+        Application.ProcessMessages;
+        Frm_SimpleCapture.Close();
+        Application.ProcessMessages;
+        FreeAndNil(Frm_SimpleCapture);
+      end
+    else
+      Application.Run;
+  finally
+    CoUninitialize();
+  end;
 end.

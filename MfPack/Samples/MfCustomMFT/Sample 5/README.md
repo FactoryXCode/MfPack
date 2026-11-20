@@ -1,6 +1,6 @@
 # Sample 5 - Registered grayscale MFT
 
-Version: 4.0.0  
+Version: 4.1.0  
   
   
 NOTES:  
@@ -8,7 +8,7 @@ NOTES:
 * This release is updated for compiler version 17 up to 35.
 * SDK version: 10.0.28000.2705 (Win 11)
 * Requires Windows 10 or later.
-* Minimum supported MfPack version: 4.0.0
+* Minimum supported MfPack version: 4.1.0
 
 This sample packages the RGB32 grayscale transform as a Win32 in-process COM
 server and registers it as a synchronous Media Foundation video effect.
@@ -94,6 +94,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 02/08/2026  
-Final release date: 15/09/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

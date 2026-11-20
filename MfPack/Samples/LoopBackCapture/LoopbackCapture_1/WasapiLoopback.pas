@@ -10,7 +10,7 @@
 // Release date: 12-03-2023
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit contains the WASAPI loopback class.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -63,15 +63,16 @@ unit WasapiLoopback;
 interface
 
 uses
-  {WinApi}
+  System.Classes,
+{WinApi}
   WinApi.Windows,
   WinApi.ComBaseApi,
   WinApi.WinApiTypes,
   WinApi.Messages,
   WinApi.WinError,
   {System}
-  System.Classes,
   System.SysUtils,
+  System.Math,
   System.SyncObjs,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
@@ -102,6 +103,10 @@ type
     hmFile: HMMIO;
     pvRenderThread: TRenderThread;
 
+  private
+    FNotifyWindow: HWND;
+    FClosing: Boolean;
+    procedure NotifyWindowProc(var Msg: TMessage);
   private
 
     pvAudioClient: IAudioClient;
@@ -206,6 +211,24 @@ implementation
 
 
 // Thread ======================================================================
+procedure TAudioSink.NotifyWindowProc(var Msg: TMessage);
+begin
+  if Msg.Msg = WM_APP + $4D0 then
+    begin
+      if not FClosing and Assigned(FOnCapturingStart) then
+        FOnCapturingStart(Self);
+      Msg.Result := 0;
+    end
+  else if Msg.Msg = WM_APP + $4D1 then
+    begin
+      if not FClosing and Assigned(FOnCapturingStopped) then
+        FOnCapturingStopped(Self);
+      Msg.Result := 0;
+    end
+  else
+    Msg.Result := DefWindowProc(FNotifyWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+
 constructor TRenderThread.Create(AEngine: TAudioSink);
 begin
   inherited Create(True);
@@ -224,13 +247,26 @@ end;
 
 
 procedure TRenderThread.Execute;
+var
+  ComResult: HRESULT;
+  SavedMask: TFPUExceptionMask;
 begin
-  // The function where we render the audio data and
-  // (de)activate the MMCSS feature.
-  // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-  // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
-  FSuccess := FEngine.RenderData();
-  Synchronize(SetEvent);
+  ComResult := CoInitializeEx(nil,COINIT_MULTITHREADED);
+  FSuccess := ComResult;
+  if SUCCEEDED(ComResult) then
+    begin
+      SavedMask := GetExceptionMask();
+      SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,exUnderflow,exPrecision]);
+      try
+        FSuccess := FEngine.RenderData();
+      finally
+        ClearExceptions(False);
+        SetExceptionMask(SavedMask);
+        CoUninitialize();
+      end;
+    end;
+  FEngine.pvErrorStatus := FSuccess;
+  TThread.Queue(Self,SetEvent);
 end;
 
 
@@ -260,30 +296,25 @@ begin
                                              0,
                                              EVENT_MODIFY_STATE or SYNCHRONIZE);
 
+  pvStopRec := False;
   pvRenderThread.Start;
 end;
 
 
 procedure TAudioSink.TerminateRenderThread();
 begin
-
+  if Assigned(pvRenderThread) then pvStopRec := True;
   if Assigned(pvRenderThread) then
     begin
-
-      pvRenderThread.Terminate;
-      pvRenderThread.WaitFor;
-
-      // Close threadhandle.
-      if (pvRenderThreadClosedEvent <> 0) then
-        begin
-
-          SetEvent(pvRenderThreadClosedEvent);
-          WaitForSingleObject(pvRenderThreadClosedEvent,
-                              INFINITE);
-          CloseHandle(pvRenderThreadClosedEvent);
-          pvRenderThreadClosedEvent := 0;
-        end;
+      pvRenderThread.Terminate();
+      pvRenderThread.WaitFor();
+      TThread.RemoveQueuedEvents(pvRenderThread);
       FreeAndNil(pvRenderThread);
+    end;
+  if pvRenderThreadClosedEvent <> 0 then
+    begin
+      CloseHandle(pvRenderThreadClosedEvent);
+      pvRenderThreadClosedEvent := 0;
     end;
 end;
 
@@ -293,6 +324,7 @@ constructor TAudioSink.Create();
 begin
 
   inherited Create();
+  FNotifyWindow := AllocateHWnd(NotifyWindowProc);
 
   pvAppIsClosing := False;
 end;
@@ -300,11 +332,15 @@ end;
 
 destructor TAudioSink.Destroy();
 begin
+  FClosing := True;
 
   pvAppIsClosing := True;
   pvStopRec := True;
   TerminateRenderThread();
+  CoTaskMemFree(pvPwfx);
+  pvPwfx := nil;
 
+  if FNotifyWindow <> 0 then DeallocateHWnd(FNotifyWindow);
   inherited Destroy();
 end;
 
@@ -314,6 +350,7 @@ function TAudioSink.CopyData(pData: PByte;
                              pwfx: PWAVEFORMATEX): HResult;
 var
   hr: HResult;
+  Silence: TBytes;
   iBytesToWrite: Integer;
   iBytesWritten: Integer;
 
@@ -335,6 +372,11 @@ begin
     end;
 
   iBytesToWrite := (NumFrames * pwfx.nBlockAlign);
+  if pData = nil then
+    begin
+      SetLength(Silence,iBytesToWrite);
+      if iBytesToWrite > 0 then pData := @Silence[0];
+    end;
   iBytesWritten := mmioWrite(hmFile,
                              PAnsiChar(pData),
                              iBytesToWrite);
@@ -589,10 +631,7 @@ try
     begin
 
       // Sleep for half the buffer duration if the size > 0.
-      if (bufferDuration > 0) then
-        Sleep((pvHnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
-      else
-        Sleep(0);
+      Sleep(Cardinal(Max(1,pvHnsActualDuration div (2 * REFTIMES_PER_MILLISEC))));
 
       hr := pvCaptureClient.GetNextPacketSize(packetLength);
       if FAILED(hr) then
@@ -616,7 +655,7 @@ try
 
           // Tell CopyData to write silence.
           // When a sound is detected, the app will act and process data.
-          if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
+          if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
             pData := nil;
 
          // Store the buffersize.
@@ -641,10 +680,7 @@ try
     end;
 
     // Wait for last data in buffer to play before stopping.
-    if (bufferDuration > 0) then
-      Sleep((pvHnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
-    else
-      Sleep(0);
+    Sleep(Cardinal(Max(1,pvHnsActualDuration div (2 * REFTIMES_PER_MILLISEC))));
 
 finally
 
@@ -652,8 +688,8 @@ finally
     begin
       hr := pvAudioClient.Stop();  // Stop recording.
         if SUCCEEDED(hr) then
-      hr := FinishWaveFile(pvCkData,
-                           pvCkRIFF);
+      hr := FinishWaveFile(pvCkRIFF,
+                           pvCkData);
       mmioClose(hmFile,
                 0);
     end
@@ -665,7 +701,7 @@ finally
     end;
 
   // Send capturing stopped.
-  FOnCapturingStopped(Self);
+  if not FClosing then PostMessage(FNotifyWindow,WM_APP + $4D0 + 1,0,0);
   pData := nil;
   Result := hr;
 end;
@@ -697,7 +733,11 @@ label
   done;
 
 begin
+  Stop();
+  if pvPwfx <> nil then CoTaskMemFree(pvPwfx);
   pvStopRec := False;
+  pvBytesWritten := 0;
+  pvBufferFrames := 0;
   pvPwfx := nil;
 
   // Create the initial audio file
@@ -794,13 +834,14 @@ begin
 
   // Calculate the actual duration of the allocated buffer.
   if (bufferFrameCount > 0) then
-    hnsActualDuration := (REFTIMES_PER_SEC *
+    hnsActualDuration := (Int64(REFTIMES_PER_SEC) *
                           bufferFrameCount div pvPwfx.nSamplesPerSec)
   else
     hnsActualDuration := 0;
 
   // Store for user information.
   pvBufferHns := hnsActualDuration;
+  pvHnsActualDuration := hnsActualDuration;
 
   // Get the stream latency (normally this should be inbetween 0 and 15 ms on Windows 11)
   hr := pvAudioClient.GetStreamLatency(pvHnsLatency);
@@ -812,7 +853,7 @@ begin
     goto done;
 
   // Signal the mainform caturing started.
-  FOnCapturingStart(Self);
+  if not FClosing then PostMessage(FNotifyWindow,WM_APP + $4D0 + 0,0,0);
 
   // Render the audiodata.
   CreatedRenderThread;

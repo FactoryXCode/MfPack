@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit shows how to get a videoframe from a camera in A-sync mode.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/CameraFrameCapture
+// Related projects: MfPackX410/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -102,6 +102,8 @@ type
     FMaxCalcStartTime: TDateTime;
     FSampleReadCount: Integer;
     FCancelBurst: Boolean;
+    FClosing: Boolean;
+    FFlushEvent: THandle;
     FBurstEnabled: Boolean;
 
     procedure HandleMessages(var AMessage: TMessage;
@@ -149,6 +151,8 @@ implementation
 constructor TCameraCaptureAsync.Create();
 begin
   inherited;
+  FFlushEvent := CreateEvent(nil,True,False,nil);
+  if FFlushEvent = 0 then RaiseLastOSError;
   FMaxCalcStartTime := 0;
   FSampleReadCount := 0;
   FMessageHandler := TMessageHandler.Create();
@@ -159,19 +163,31 @@ end;
 
 
 destructor TCameraCaptureAsync.Destroy();
+var
+  Msg: TMsg;
 begin
+  FClosing := True;
   StopBurst();
-  FMessageHandler.RemoveHandle();
-  FreeAndNil(FMessageHandler);
+  CloseSource();
+  if FMessageHandler <> nil then
+    begin
+      while PeekMessage(Msg,FMessageHandler.Handle,WM_SAMPLE_FOUND,WM_SAMPLE_FOUND,PM_REMOVE) do
+        Dispose(PSampleReply(Msg.LParam));
+      FreeAndNil(FMessageHandler);
+    end;
+  if FFlushEvent <> 0 then CloseHandle(FFlushEvent);
   inherited;
 end;
 
 
 procedure TCameraCaptureAsync.Flush;
 begin
+  if SourceReader = nil then Exit;
   inherited;
-  Log('Flushing source', ltInfo);
-  SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
+  ResetEvent(FFlushEvent);
+  if SUCCEEDED(SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS)) then
+    WaitForSingleObject(FFlushEvent,5000);
+  HandleFlushComplete();
 end;
 
 
@@ -186,14 +202,8 @@ end;
 
 function TCameraCaptureAsync.OnFlush(dwStreamIndex: DWord): HRESULT;
 begin
-  // Note: This will be called in a worker thread.
+  SetEvent(FFlushEvent);
   Result := S_OK;
-
-  PostMessage(FMessageHandler.Handle,
-              WM_FLUSH_COMPLETE,
-              0,
-              0);
-  HandleThreadMessages(GetCurrentThread());
 end;
 
 
@@ -214,9 +224,9 @@ begin
         CritSec.Lock();
 
         try
-          bEndOfStream := (dwStreamFlags = MF_SOURCE_READERF_ENDOFSTREAM);
+          bEndOfStream := ((dwStreamFlags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0);
 
-          if (dwStreamFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then
+          if ((dwStreamFlags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
             NotifyMediaFormatChanged
           else
             if not Assigned(pSample) and (FramesSkipped < MaxFramesToSkip) and not bEndOfStream then
@@ -227,8 +237,6 @@ begin
           else
             if Assigned(pSample) then
               begin
-                FCalculatingMax := SecondsBetween(Now,
-                                                  FMaxCalcStartTime) <= 10;
                 if FCalculatingMax then
                   begin
                     // Exclude the time taken to read the first sample
@@ -261,49 +269,37 @@ end;
 
 
 procedure TCameraCaptureAsync.ProcessSample(ASample: IMFSample);
+var
+  Reply: PSampleReply;
 begin
-  // Note: This will be called in a worker thread.
-  // _AddRef will be called, so the sample will not be released until the message is handled.
-  FSampleReply.oSample := ASample;
-
-  if not PostMessage(FMessageHandler.Handle,
-                     WM_SAMPLE_FOUND,
-                     0,
-                     LPARAM(@FSampleReply)) then
-    begin
-      SafeRelease(FSampleReply.oSample);
-    end;
-
-  HandleThreadMessages(GetCurrentThread());
+  if FClosing then Exit;
+  New(Reply);
+  Reply.oSample := ASample;
+  if not PostMessage(FMessageHandler.Handle,WM_SAMPLE_FOUND,0,LPARAM(Reply)) then Dispose(Reply);
 end;
 
 
 procedure TCameraCaptureAsync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);
 var
-  iDurationSec : Integer;
-  iSampleReadCount : Integer;
-
+  Started,Elapsed: DWORD;
+  Count: Integer;
 begin
   inherited;
-  FMaxCalcStartTime := Now();
-
   FSampleReadCount := 0;
-  ReadNextSample();
-
-  while FCalculatingMax do
-  begin
-    HandleThreadMessages(GetCurrentThread());
-    Sleep(1000);
-  end;
-
-  iSampleReadCount := FSampleReadCount;
-  iDurationSec := SecondsBetween(FMaxCalcStartTime,
-                                 Now);
-
+  Started := GetTickCount();
+  if not ReadNextSample() then FCalculatingMax := False;
+  while FCalculatingMax and (DWORD((UInt64(GetTickCount()) + $100000000 - Started) and $FFFFFFFF) < 10000) do
+    begin HandleThreadMessages(GetCurrentThread(),0);Sleep(10);end;
+  CritSec.Lock();
+  try FCalculatingMax := False;finally CritSec.Unlock();end;
   Flush();
-
+  Elapsed := DWORD((UInt64(GetTickCount()) + $100000000 - Started) and $FFFFFFFF);
+  Count := FSampleReadCount;
   if Assigned(OnCalculateComplete) then
-    OnCalculateComplete(Round(iSampleReadCount / iDurationSec));
+    begin
+      if (Elapsed = 0) or (Count = 0) then OnCalculateComplete(0)
+      else OnCalculateComplete(Round(Int64(Count)*1000.0/Elapsed));
+    end;
 end;
 
 
@@ -378,20 +374,14 @@ end;
 
 procedure TCameraCaptureAsync.HandleSampleFoundMessage(var AMessage: TMessage);
 var
-  oSampleReply: PSampleReply;
+  Reply: PSampleReply;
 begin
-  oSampleReply := PSampleReply(AMessage.LPARAM);
-
-  if FCancelBurst then
-  begin
-    if Assigned(oSampleReply.oSample) then
-    begin
-      oSampleReply.oSample.RemoveAllBuffers;
-      SafeRelease(oSampleReply.oSample);
-    end;
-  end
-  else
-    ReturnDataFromSample(oSampleReply.oSample)
+  Reply := PSampleReply(AMessage.LParam);
+  try
+    if not FClosing and not FCancelBurst then ReturnDataFromSample(Reply.oSample);
+  finally
+    Dispose(Reply);
+  end;
 end;
 
 
@@ -420,7 +410,7 @@ var
 
 begin
 
-  Result := Assigned(SourceReader);
+  Result := not FClosing and not AwaitingFlush and Assigned(SourceReader);
 
   if Result then
     begin

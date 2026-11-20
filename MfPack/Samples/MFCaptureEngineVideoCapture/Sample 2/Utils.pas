@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   Helpers for the MFCaptureEngineVideoCapture.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -182,9 +182,10 @@ var
 
 begin
 {$POINTERMATH ON}
-  for i := 0 to count -1 do
+  for i := 0 to Integer(Count)-1 do
     SafeRelease(ppDevices[i]);
   CoTaskMemFree(ppDevices);
+  ppDevices := nil;
 
   Count := 0;
   SelectedDevice := -1;
@@ -264,36 +265,22 @@ procedure SaveImage(const pBitmap: TMfpBitmap;
 var
   pPng: TPngImage;
   pJpg: TJPEGImage;
-
 begin
+  if pBitmap = nil then raise Exception.Create('No image to save');
   case pType of
-    itBitmap :
+    itBitmap: pBitmap.SaveToFile(pPath);
+    itPNG:
       begin
-         pBitmap.SaveToFile(pPath);
+        pPng := TPngImage.Create();
+        try pPng.Assign(pBitmap);pPng.SaveToFile(pPath);finally pPng.Free;end;
       end;
-    itPNG :
+    itJPG:
       begin
-         pPng := TPngImage.Create;
-         pPng.Assign(pBitmap);
-         pBitmap.SaveToFile(pPath);
-
-         if Assigned(pPng) then
-           pPng.Free;
-      end;
-    itJPG :
-      begin
-        pJpg := TJPEGImage.Create;
-        // Adjust performance, compression etc.
-        pJpg.Performance := jpBestQuality;
-        pJpg.ProgressiveEncoding := True;
-        pJpg.ProgressiveDisplay := True;
-        //pJpg.CompressionQuality := 30;
-        pJpg.Compress;
-        pJpg.Assign(pBitmap);
-        pjpg.SaveToFile(pPath);
-
-        if Assigned(pJpg) then
-          pJpg.Free();
+        pJpg := TJPEGImage.Create();
+        try
+          pJpg.ProgressiveEncoding := True;
+          pJpg.Assign(pBitmap);pJpg.Compress();pJpg.SaveToFile(pPath);
+        finally pJpg.Free;end;
       end;
   end;
 end;
@@ -446,6 +433,8 @@ var
   hr: HResult;
 
 begin
+  pActivate := nil;
+  pCount := 0;
   hr := MFCreateAttributes(mfAttributes,
                            1);
 
@@ -461,7 +450,6 @@ begin
                               pCount);
 
   ppActivate := pActivate;
-  SafeRelease(pActivate);
   Result := hr;
 end;
 

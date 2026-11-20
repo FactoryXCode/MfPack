@@ -12,7 +12,7 @@ object dlgMfCaptureToFile: TdlgMfCaptureToFile
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OnClose = FormClose
+  OnDestroy = FormDestroy
   OnCreate = FormCreate
   TextHeight = 13
   object Label1: TLabel

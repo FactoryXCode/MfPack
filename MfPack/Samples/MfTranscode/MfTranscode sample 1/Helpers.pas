@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Helpers for the Transcoding sample,
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -128,9 +128,9 @@ type
       video_FrameSizeWidth: UINT32;         // Output frame width
 
       // Audio
-      audio_lpStreamName: LPWSTR;           // The name of the stream (if stored in the sourcestream)
-      audio_lpLangShortName: LPWSTR;        // Short language name (like 'en' for English, 'de' for German, 'fr' for French etc. stored in the stream
-      audio_lpLangFullName: LPWSTR;         // Friendly language name (optional, caller needs to set these)
+      audio_lpStreamName: WideString;           // The name of the stream (if stored in the sourcestream)
+      audio_lpLangShortName: WideString;        // Short language name (like 'en' for English, 'de' for German, 'fr' for French etc. stored in the stream
+      audio_lpLangFullName: WideString;         // Friendly language name (optional, caller needs to set these)
       audio_wsAudioDescr: WideString;       // Audio codec description.
       audio_iAudioChannels: UINT32;         // Number of audio channels.
       audio_iSamplesPerSec: UINT32;         // Audio Samples per second.
@@ -227,7 +227,7 @@ begin
 
   // Get the IMFMediaSource from the IUnknown pointer.
   if SUCCEEDED(hr) then
-    hr := pUnkSource.QueryInterface(IID_IMFMediaSourceEx,
+    hr := pUnkSource.QueryInterface(IID_IMFMediaSource,
                                     ppMediaSource);
 
   Result := hr;
@@ -272,7 +272,7 @@ begin
   // Get the PD, which is stored as an attribute.
   hr := pNode.GetUnknown(MF_TOPONODE_PRESENTATION_DESCRIPTOR,
                          IID_IMFPresentationDescriptor,
-                         pPD);
+                         Pointer(pPD));
   if FAILED(hr) then
     goto done;
 
@@ -410,6 +410,7 @@ var
 begin
 
   pSourceSD := Nil;
+  pwszValue := nil;
   SetLength(alsCont, 0);
   sdCount := 0;
   pcchLength := 0;
@@ -487,6 +488,7 @@ try
                 end;
             end;
 
+          CoTaskMemFree(pwszValue);
           pwszValue := Nil;
           pcchLength := 0;
           // Retrieves a wide-character string associated with a key (MF_SD_STREAM_NAME)
@@ -501,6 +503,9 @@ try
               alsCont[i].audio_lpStreamName := 'Not available';
               hr := S_OK;
             end;
+
+          CoTaskMemFree(pwszValue);
+          pwszValue := nil;
 
           // Note:
           // Set your initial preffered language somewhere in the caller.
@@ -897,8 +902,9 @@ begin
   video_FrameSizeHeigth := 0;
   video_FrameSizeWidth := 0;
 
-  audio_lpLangShortName := Nil;
-  audio_lpLangFullName := Nil;
+  audio_lpStreamName := '';
+  audio_lpLangShortName := '';
+  audio_lpLangFullName := '';
   audio_wsAudioDescr := '';
   audio_iAudioChannels := 0;
   audio_iSamplesPerSec := 0;

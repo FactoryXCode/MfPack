@@ -4,6 +4,7 @@ object VolumeControl: TVolumeControl
   Caption = 'Volume Control Sample'
   ClientHeight = 260
   ClientWidth = 517
+  OnCreate = FormCreate
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,14 +17,14 @@ object VolumeControl: TVolumeControl
     Top = 40
     Width = 107
     Height = 15
-    Caption = 'SetMasterDbVolume'
+    Caption = 'Volume (dB)'
   end
   object Label2: TLabel
-    Left = -1
+    Left = 15
     Top = 88
     Width = 123
     Height = 15
-    Caption = 'SetMasterScalarVolume'
+    Caption = 'Volume (0 to 1)'
   end
   object Edit1: TEdit
     Left = 133
@@ -61,7 +62,6 @@ object VolumeControl: TVolumeControl
     Width = 253
     Height = 37
     PositionToolTip = ptLeft
-    SelStart = -6
     TabOrder = 3
     TickMarks = tmBoth
     OnChange = tbDbVolumeChange
@@ -74,7 +74,6 @@ object VolumeControl: TVolumeControl
     DoubleBuffered = True
     ParentDoubleBuffered = False
     PositionToolTip = ptLeft
-    SelEnd = 100
     TabOrder = 4
     TickMarks = tmBoth
     OnChange = tbScVolumeChange
@@ -87,14 +86,5 @@ object VolumeControl: TVolumeControl
     Caption = 'Close'
     TabOrder = 5
     OnClick = butCloseClick
-  end
-  object MfAudioEndPoint1: TMfAudioEndPoint
-    DeviceState = 'Active'
-    MasterScalarVolume = 0.683802247047424300
-    MasterDbVolume = -5.764730453491211000
-    Mute = True
-    OnNotify = MfAudioEndPoint1Notify
-    Left = 446
-    Top = 142
   end
 end

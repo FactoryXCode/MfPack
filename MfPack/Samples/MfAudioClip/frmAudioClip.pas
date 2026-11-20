@@ -10,7 +10,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -32,13 +32,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -120,11 +120,13 @@ type
     procedure Extractto1Click(Sender: TObject);
     procedure butExtractClick(Sender: TObject);
     procedure butCancelClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject;var CanClose: Boolean);
   private
-    { Private declarations }
+    FExtracting: Boolean;
+    FClosePending: Boolean;
 
-    wSourceFile: PWideChar;     // the sourcefile URL
-    wTargetFile: PWideChar;     // The target file URL
+    wSourceFile: UnicodeString;     // the sourcefile URL
+    wTargetFile: UnicodeString;     // The target file URL
 
 
   public
@@ -146,29 +148,59 @@ begin
   if TryStrToInt(Edit1.Text, iClipLen) then
     begin
 
-      butExtract.Enabled := False;
-      butCancel.Enabled := True;
-
-      if SUCCEEDED(ExtractSound(Self.Handle,
-                                wSourceFile,
-                                wTargetFile,
-                                iClipLen * 1000)) then
+      if (iClipLen <= 0) or (iClipLen > MaxInt div 1000) or
+         (wSourceFile = '') or (wTargetFile = '') then
         begin
-          if (bFlush = false) then
-            ShowMessage('Clip extracted!')
-          else
-            ShowMessage('Clip extraction aborted!');
-        end
-      else
-        ShowMessage('Clip extraction failed!');
+          ShowMessage('Choose source and target files and a positive clip length.');
+          Exit;
+        end;
+      FExtracting := True;
+      butExtract.Enabled := False;
+      Open1.Enabled := False;
+      Extractto1.Enabled := False;
+      Exit1.Enabled := False;
+      try
+        butCancel.Enabled := True;
 
-      butExtract.Enabled := True;
-      butCancel.Enabled := False;
+        if SUCCEEDED(ExtractSound(Self.Handle,
+                                  PWideChar(wSourceFile),
+                                  PWideChar(wTargetFile),
+                                  iClipLen * 1000)) then
+          begin
+            if (bFlush = false) then
+              ShowMessage('Clip extracted!')
+            else
+              ShowMessage('Clip extraction aborted!');
+          end
+        else
+          ShowMessage('Clip extraction failed!');
+
+      finally
+        FExtracting := False;
+        if FClosePending then
+          PostMessage(Handle,WM_CLOSE,0,0);
+        butExtract.Enabled := True;
+        butCancel.Enabled := False;
+        Open1.Enabled := True;
+        Extractto1.Enabled := True;
+        Exit1.Enabled := True;
+      end;
     end
   else
     begin
       ShowMessage('Invalid clip length!');
       Edit1.Text := '5';
+    end;
+end;
+
+
+procedure TfrmAudioClip.FormCloseQuery(Sender: TObject;var CanClose: Boolean);
+begin
+  CanClose := not FExtracting;
+  if FExtracting then
+    begin
+      FClosePending := True;
+      FlushSourceReader(True);
     end;
 end;
 
@@ -196,12 +228,9 @@ begin
 
   if Savedialog1.execute then
     begin
-      if FileExists(Savedialog1.FileName) then
-        DeleteFile(Savedialog1.FileName);
-
       lblTargetFile.Caption := Savedialog1.FileName;
-      wTargetFile := PWideChar(Savedialog1.FileName);
-      ButExtract.Enabled := True;
+      wTargetFile := UnicodeString(Savedialog1.FileName);
+      ButExtract.Enabled := (wSourceFile <> '') and (wTargetFile <> '');
     end;
 end;
 
@@ -215,8 +244,9 @@ begin
     begin
       if FileExists(Opendialog1.Filename) then
         begin
-          wSourceFile := PWideChar(Opendialog1.Filename);
+          wSourceFile := UnicodeString(Opendialog1.Filename);
           lblSourceFile.Caption := Opendialog1.Filename;
+          ButExtract.Enabled := (wTargetFile <> '');
         end;
     end;
 end;

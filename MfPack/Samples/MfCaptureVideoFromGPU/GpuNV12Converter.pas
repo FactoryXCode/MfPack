@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Converter for NV12 to BGRA.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -121,6 +121,7 @@ type
     FRtvUV: ID3D11RenderTargetView;
 
     // CPU staging for Y/UV
+    FSource: ID3D11Texture2D;
     FStagingY: ID3D11Texture2D;
     FStagingUV: ID3D11Texture2D;
 
@@ -235,6 +236,12 @@ begin
   if ADevice = nil then
     raise Exception.Create('GpuNV12Converter: Device is nil');
 
+  if AContext = nil then
+    raise Exception.Create('GpuNV12Converter: Context is nil');
+  if (AWidth = 0) or (AHeight = 0) or
+     ((AWidth and 1) <> 0) or ((AHeight and 1) <> 0) then
+    raise Exception.Create('GpuNV12Converter: NV12 dimensions must be positive and even');
+
   FDevice := ADevice;
   FContext := AContext;
   FWidth := AWidth;
@@ -249,6 +256,7 @@ end;
 destructor TGpuNV12Converter.Destroy;
 begin
 
+  FSource := nil;
   FStagingUV := nil;
   FStagingY := nil;
 
@@ -552,6 +560,8 @@ var
   ctx: ID3D11DeviceContext;
   srv: ID3D11ShaderResourceView;
   srvDesc: D3D11_SHADER_RESOURCE_VIEW_DESC;
+  sourceDesc: D3D11_TEXTURE2D_DESC;
+  copyDesc: D3D11_TEXTURE2D_DESC;
   stride: UINT;
   offset: UINT;
   vp: D3D11_VIEWPORT;
@@ -566,6 +576,31 @@ begin
 
   FDevice.GetImmediateContext(ctx);
 
+  SrcBGRA.GetDesc(sourceDesc);
+  if (sourceDesc.Format <> DXGI_FORMAT_B8G8R8A8_UNORM) or
+     (sourceDesc.SampleDesc.Count <> 1) then
+    raise Exception.Create('GpuNV12: expected a single-sample BGRA texture');
+  if FSource <> nil then
+    begin
+      FSource.GetDesc(copyDesc);
+      if (copyDesc.Width <> sourceDesc.Width) or
+         (copyDesc.Height <> sourceDesc.Height) then
+        FSource := nil;
+    end;
+  if FSource = nil then
+    begin
+      copyDesc := sourceDesc;
+      copyDesc.MipLevels := 1;
+      copyDesc.ArraySize := 1;
+      copyDesc.Usage := D3D11_USAGE_DEFAULT;
+      copyDesc.BindFlags := D3D11_BIND_SHADER_RESOURCE;
+      copyDesc.CPUAccessFlags := 0;
+      copyDesc.MiscFlags := 0;
+      CheckHR(FDevice.CreateTexture2D(copyDesc,nil,@FSource),
+              'GpuNV12: Create source texture');
+    end;
+  ctx.CopySubresourceRegion(FSource,0,0,0,0,SrcBGRA,0,nil);
+
   // Create SRV for source BGRA (desktop duplication is usually B8G8R8A8_UNORM)
   ZeroMemory(@srvDesc,
              SizeOf(srvDesc));
@@ -575,7 +610,7 @@ begin
   srvDesc.Texture2D.MostDetailedMip := 0;
   srvDesc.Texture2D.MipLevels := 1;
 
-  CheckHR(FDevice.CreateShaderResourceView(SrcBGRA,
+  CheckHR(FDevice.CreateShaderResourceView(FSource,
                                            @srvDesc,
                                            @srv),
           'GpuNV12: CreateShaderResourceView');
@@ -788,6 +823,9 @@ begin
   if (FDevice = nil) or
      (SrcBGRA = nil) then
     Exit;
+
+  if (DestNV12.pData = nil) or (DestNV12.RowPitch < FWidth) then
+    raise Exception.Create('GpuNV12: invalid NV12 destination');
 
   // 1) Render BGRA -> Y/UV GPU render targets
   RenderToYUV(SrcBGRA);

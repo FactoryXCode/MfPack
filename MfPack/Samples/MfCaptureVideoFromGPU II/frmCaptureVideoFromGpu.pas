@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: GUI for MfCaptureVideoFromGPU version 2
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MfCaptureVideoFromGPU II
+// Related projects: MfPackX410/Samples/MfCaptureVideoFromGPU II
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -360,6 +360,7 @@ end;
 procedure TfrmCapture.FormDestroy(Sender: TObject);
 begin
 
+  FreeAndNil(FAudioOnly);
   StopLogFile();
   DisableGlobalHotkeys();
 
@@ -421,6 +422,7 @@ begin
       Exit;
     end;
 
+  try
   CheckChecks();
 
 
@@ -556,6 +558,10 @@ begin
 
   WriteLog('--- Capture Started ---');
   WriteLog('Output file: ' + sFileName);
+  except
+    butStopClick(Self);
+    raise;
+  end;
 end;
 
 
@@ -608,11 +614,11 @@ begin
   if (butStart.Enabled = True) and (butStop.Enabled = False) then
     begin
 
-      path := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+      path := ExpandFileName(edtOutput.Text);
       // Play file with the default player.
       ShellExecute(Handle,
                    'open',
-                   StrToPWideChar(path + edtOutput.Text),
+                   PWideChar(path),
                    nil,
                    nil,
                    SW_SHOWNORMAL);
@@ -1223,6 +1229,9 @@ begin
         end;
   end;
 
+  FCaptureWidth := FCaptureWidth and not 1;
+  FCaptureHeigth := FCaptureHeigth and not 1;
+
   case cbxFrameRate.ItemIndex of
     0:  FFrameRate := 30;
 
@@ -1282,21 +1291,19 @@ begin
 
   FFpsAvg := FFpsAvg + (InstFps - FFpsAvg) * W;
 
-  TThread.Queue(nil,
-                procedure
-                  begin
-                    // Show averaged FPS to avoid jitter.
-                    lblFPS.Caption := Format('FPS: %.1f', [FFpsAvg]);
+  
+  // Show averaged FPS to avoid jitter.
+  lblFPS.Caption := Format('FPS: %.1f', [FFpsAvg]);
 
-                    // Keep the instantaneous value available as a tooltip.
-                    lblFPS.ShowHint := True;
-                    lblFPS.Hint := Format('Instant: %.1f FPS, Avg(%.0d): %.1f FPS',
-                                          [InstFps, FPS_AVG_WINDOW, FFpsAvg]);
+  // Keep the instantaneous value available as a tooltip.
+  lblFPS.ShowHint := True;
+  lblFPS.Hint := Format('Instant: %.1f FPS, Avg(%.0d): %.1f FPS',
+                        [InstFps, FPS_AVG_WINDOW, FFpsAvg]);
 
-                    if ((FrameIndex mod 30) = 0) then
-                      WriteLog(Format('Frame %d Elapsed time: %.3f ms',
-                                       [FrameIndex, Msec * 1000]));
-                  end);
+  if ((FrameIndex mod 30) = 0) then
+    WriteLog(Format('Frame %d Elapsed time: %.3f ms',
+                     [FrameIndex, Msec * 1000]));
+
 end;
 
 
@@ -1333,13 +1340,11 @@ procedure TfrmCapture.CaptureError(Sender: TObject;
                                    const Msg: string);
 begin
 
-  TThread.Queue(nil,
-                procedure
-                  begin
-                    WriteLog('ERROR: ' + Msg);
-                    lblStatus.Caption := 'Error';
-                    lblStatus.Font.Color := clRed;
-                   end);
+  
+  WriteLog('ERROR: ' + Msg);
+  lblStatus.Caption := 'Error';
+  lblStatus.Font.Color := clRed;
+
 end;
 
 

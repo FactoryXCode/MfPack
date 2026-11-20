@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -78,6 +78,7 @@ type
   private
     { Private declarations }
     FTimer: TUniThreadedTimer;
+    FStopEvent: THandle;
     isActive: Boolean;
 
   protected
@@ -133,7 +134,8 @@ constructor TTimerThread.Create(ATimer: TUniThreadedTimer);
 begin
   inherited
   Create(True);
-  FreeOnTerminate := True;
+  FreeOnTerminate := False;
+  FStopEvent := CreateEvent(nil,True,False,nil);
   isDestroying := False;
   isActive := False;
   FTimer := ATimer;
@@ -143,16 +145,22 @@ end;
 destructor TTimerThread.Destroy();
 begin
   isDestroying := True;
+  Terminate();
+  SetEvent(FStopEvent);
+  WaitFor();
+  TThread.RemoveQueuedEvents(Self);
+  CloseHandle(FStopEvent);
   inherited Destroy();
 end;
 
 
 procedure TTimerThread.DoTimer();
 begin
-  if Assigned(FTimer.OnTimerEvent) then
+  if not Terminated and Assigned(FTimer) and FTimer.Enabled and
+     Assigned(FTimer.OnTimerEvent) then
     begin
-      FTimer.OnTimerEvent(FTimer);
       isActive := True;
+      FTimer.OnTimerEvent(FTimer);
     end;
 end;
 
@@ -161,9 +169,8 @@ procedure TTimerThread.Execute();
 begin
   while (not Self.Terminated) and (FTimer.Enabled) do
     begin
-      WaitForSingleObject(Self.Handle,
-                          FTimer.Period);
-      Synchronize(DoTimer);
+      if WaitForSingleObject(FStopEvent,FTimer.Period) <> WAIT_TIMEOUT then Break;
+      TThread.Queue(Self,DoTimer);
     end;
 end;
 
@@ -180,6 +187,8 @@ end;
 
 destructor TUniThreadedTimer.Destroy();
 begin
+  bEnabled := False;
+  UpdateTimer();
 
   inherited Destroy();
 end;
@@ -189,7 +198,7 @@ procedure TUniThreadedTimer.UpdateTimer();
 begin
   if Assigned(thTimerThread) then
     begin
-      thTimerThread.Terminate;
+      thTimerThread.Free();
       thTimerThread := nil;
     end;
 
@@ -203,6 +212,7 @@ end;
 
 procedure TUniThreadedTimer.SetEnabled(Value: Boolean);
 begin
+  if bEnabled = Value then Exit;
   if Assigned(thTimerThread) then
     thTimerThread.isActive := Value;
 
@@ -213,12 +223,10 @@ end;
 
 procedure TUniThreadedTimer.SetTimerPeriod(Value: DWord);
 begin
-  if Assigned(thTimerThread) and (thTimerThread.isDestroying = False) then
-    if (Value <> dwPeriod) then
-      begin
-        dwPeriod := Value;
-        UpdateTimer();
-     end;
+  if Value = 0 then Value := 1;
+  if Value = dwPeriod then Exit;
+  dwPeriod := Value;
+  UpdateTimer();
 end;
 
 end.

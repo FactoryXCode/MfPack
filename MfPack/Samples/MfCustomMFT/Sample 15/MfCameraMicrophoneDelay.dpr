@@ -1,7 +1,8 @@
 program MfCameraMicrophoneDelay;
 
 uses
-  Vcl.Forms,
+  System.SysUtils,
+Vcl.Forms,
   WinApi.Windows,
   WinApi.ActiveX,
   WinApi.MediaFoundationApi.MfApi,
@@ -22,8 +23,10 @@ begin
       Application.Initialize();
       Application.MainFormOnTaskbar := True;
       Application.CreateForm(TfrmCapture, frmCapture);
-      Application.Run();
+      if ParamStr(1) = '--smoke' then Application.ProcessMessages
+      else Application.Run;
     finally
+      FreeAndNil(frmCapture);
       MFShutdown();
     end;
   finally

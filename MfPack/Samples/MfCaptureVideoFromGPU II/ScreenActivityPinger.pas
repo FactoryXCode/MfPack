@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This unit creates a small window that blinks at a rate of ~30 in on
 //              the screen that's being captured. This is necessary in cases where
 //              two separate video outputs (like most laptops) are being used.
@@ -26,13 +26,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -138,12 +138,10 @@ begin
         phdc := BeginPaint(aHwnd,
                            pPaintStruct);
 
-        if (pHdc = 0) then
-            begin
-              EndPaint(aHwnd,
-                       pPaintStruct);
-              raise Exception.Create('No display device context is available.');
-            end;
+        EndPaint(aHwnd,
+                 pPaintStruct);
+        Result := 0;
+        Exit;
       end;
   end;
 
@@ -212,7 +210,7 @@ end;
 
 procedure TScreenActivityPinger.CreatePingWindow;
 var
-  pWndClass: WNDCLASS;
+  pWndClass: WNDCLASSW;
   x,
   y: Integer;
 
@@ -235,7 +233,7 @@ begin
   x := FDesktopRect.Right - FHorSize - 2;
   y := FDesktopRect.Bottom - FVertSize - 2;
 
-  FPingWnd := CreateWindowEx(WS_EX_TOPMOST or WS_EX_TOOLWINDOW,
+  FPingWnd := CreateWindowExW(WS_EX_TOPMOST or WS_EX_TOOLWINDOW,
                              'ScreenActivityPingerWnd',
                              nil,
                              WS_POPUP,     // popup top-level window
@@ -316,7 +314,8 @@ end;
 procedure TScreenActivityPinger.Stop;
 begin
 
-  FTimer.Enabled := False;
+  if FTimer <> nil then
+    FTimer.Enabled := False;
 
   if (FPingWnd <> 0) then
     ShowWindow(FPingWnd,

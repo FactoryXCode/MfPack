@@ -10,7 +10,7 @@
 // Release date: 26-01-2018
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Main window
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -161,6 +161,8 @@ type
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
 
   public
+    destructor Destroy; override;
+  public
     { Public declarations }
 
   end;
@@ -177,6 +179,14 @@ implementation
 //-------------------------------------------------------------------
 // CleanUp: Frees resources before the application exits
 //-------------------------------------------------------------------
+destructor TFrm_SimpleCapture.Destroy;
+begin
+ QuitSession;
+ if NativeUInt(m_hdevnotify)<>0 then begin UnRegisterForDeviceNotification(m_hdevnotify);FillChar(m_hdevnotify,SizeOf(m_hdevnotify),0);end;
+ FreeAndNil(MfDeviceList);
+ inherited;
+end;
+
 procedure TFrm_SimpleCapture.QuitSession();
 begin
   StopCapture();
@@ -225,7 +235,7 @@ begin
   CanClose := False;
   // Before closing the app, clean up.
   QuitSession();
-  UnRegisterForDeviceNotification(m_hdevnotify);
+  if NativeUInt(m_hdevnotify)<>0 then begin UnRegisterForDeviceNotification(m_hdevnotify);FillChar(m_hdevnotify,SizeOf(m_hdevnotify),0);end;
   CanClose := True;
 end;
 
@@ -280,7 +290,7 @@ begin
       if FAILED(hr) then
         goto Done;
 
-      for iDevice := 0 to MfDeviceList.Count() - 1 do
+      for iDevice := 0 to Integer(MfDeviceList.Count()) - 1 do
         begin
           // Get the friendly name of the device.
           hr := MfDeviceList.GetDeviceName(iDevice,
@@ -372,13 +382,13 @@ begin
   // Start capturing.
 
   if SUCCEEDED(hr) then
-    MfCaptureToFileEngine.Create(Frm_SimpleCapture.Handle);
+    if MfCaptureToFileEngine=nil then MfCaptureToFileEngine:=TCaptureToFile.Create(Handle);
 
   if SUCCEEDED(hr) then
     begin
-      pszFile := StrToPWideChar(edOutputFile.Text);
+      pszFile := PWideChar(WideString(edOutputFile.Text));
       hr := MfCaptureToFileEngine.StartCapture(pActivate,
-                                               pszFile,
+                                               WideString(edOutputFile.Text),
                                                params);
     end;
 
@@ -447,7 +457,7 @@ begin
   if not Assigned(MfCaptureToFileEngine) then
     begin
       MfCaptureToFileEngine := nil;
-      MfCaptureToFileEngine := TCaptureToFile.Create(Frm_SimpleCapture.Handle);  // Must be main form or a parent window !!!
+      MfCaptureToFileEngine := TCaptureToFile.Create(Handle);  // Must be main form or a parent window !!!
       Result := S_OK;
     end;
 end;
@@ -472,6 +482,7 @@ begin
 
   if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
     begin
+      if AMessage.LParam=0 then Exit;
       // Check for added/removed devices, regardless of whether
       // the application is capturing video at this time.
       UpdateDeviceList();

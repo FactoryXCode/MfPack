@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -267,7 +267,7 @@ begin
   if FAILED(Result) then
     Exit;
 
-  if (AWidth = 0) or (AHeight = 0) then
+  if (AWidth = 0) or (AHeight = 0) or (AWidth > Cardinal(MaxInt div 4)) then
     Exit(MF_E_INVALIDMEDIATYPE);
 
   AStride := Integer(AWidth) * 4;
@@ -277,11 +277,13 @@ begin
     begin
       AStride := Integer(StrideValue);
 
+      if AStride = Low(Integer) then Exit(MF_E_INVALIDMEDIATYPE);
       if (AStride < 0) then
         AStride := -AStride;
     end;
 
-  if (AStride < Integer(AWidth) * 4) then
+  if (AStride < Integer(AWidth) * 4) or
+     (UInt64(AStride) * UInt64(AHeight) > UInt64(High(DWORD))) then
     Exit(MF_E_INVALIDMEDIATYPE);
 
   Result := S_OK;

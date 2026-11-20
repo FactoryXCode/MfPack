@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit shows how to get a videoframe from a file source in A-sync mode.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFFrameCapture
+// Related projects: MfPackX410/Samples/MFFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -104,6 +104,8 @@ type
     FPositionRequest: TPositionRequest;
     FCritSec: TMFCritSec;
     FFindingSample: Boolean;
+    FClosing: Boolean;
+    FFlushEvent: THandle;
     oSampleReply: TSampleReply;
 
     procedure HandleMessages(var AMessage: TMessage;
@@ -164,16 +166,25 @@ begin
   FMessageHandler := TMessageHandler.Create;
   FMessageHandler.OnMessage := HandleMessages;
 
+  FFlushEvent := CreateEvent(nil,True,False,nil);
+  if FFlushEvent=0 then RaiseLastOSError;
   FPositionRequest.Reset;
 end;
 
 
 destructor TFileCaptureAsync.Destroy;
+var Msg: TMsg;
 begin
-  FreeAndNil(FCritSec);
-  FMessageHandler.RemoveHandle;
+ FClosing:=True;
+ CloseSource;
+ if Assigned(FMessageHandler) then begin
+  while PeekMessage(Msg,FMessageHandler.Handle,WM_SAMPLE_FOUND,WM_SAMPLE_FOUND,PM_REMOVE) do
+   Dispose(PSampleReply(Msg.LParam));
   FreeAndNil(FMessageHandler);
-  inherited;
+ end;
+ if FFlushEvent<>0 then CloseHandle(FFlushEvent);
+ FreeAndNil(FCritSec);
+ inherited;
 end;
 
 
@@ -182,7 +193,7 @@ begin
   inherited;
   FFindingSample := False;
 
-  if SourceOpen and FPositionRequest.bPending then
+  if not FClosing and SourceOpen and FPositionRequest.bPending then
     ProcessPendingRequest;
 end;
 
@@ -228,24 +239,28 @@ end;
 // hide message H2077, this is true in sync mode, not in a-sync mode
 {$HINTS OFF}
 procedure TFileCaptureAsync.HandleSampleFoundMessage(var AMessage: TMessage);
-var
-  oSampleReply: PSampleReply;
-
+var Reply: PSampleReply;
 begin
-  oSampleReply := PSampleReply(AMessage.LPARAM);
-
-  ReturnSample(oSampleReply.oSample,
-               oSampleReply.oSampleTimeStamp);
+ Reply:=PSampleReply(AMessage.LParam);
+ try
+  if not FClosing then ReturnSample(Reply.oSample,Reply.oSampleTimeStamp);
+ finally Dispose(Reply);end;
 end;
 {$HINTS ON}
 
 
 procedure TFileCaptureAsync.Flush;
+var Msg: TMsg;
 begin
-  inherited;
-  Log('Flush - Begin',
-      ltInfo);
-  SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
+ if SourceReader=nil then Exit;
+ inherited;
+ ResetEvent(FFlushEvent);
+ if SUCCEEDED(SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS)) then
+  WaitForSingleObject(FFlushEvent,5000);
+ while PeekMessage(Msg,FMessageHandler.Handle,WM_SAMPLE_FOUND,WM_SAMPLE_FOUND,PM_REMOVE) do
+  Dispose(PSampleReply(Msg.LParam));
+ while PeekMessage(Msg,FMessageHandler.Handle,WM_MEDIA_FORMAT_CHANGED,WM_MEDIA_FORMAT_CHANGED,PM_REMOVE) do begin end;
+ HandleFlushComplete;
 end;
 
 
@@ -280,7 +295,7 @@ var
   oResult: HRESULT;
 
 begin
-  Result := Assigned(SourceReader);
+  Result := not FClosing and not AwaitingFlush and Assigned(SourceReader);
 
   if Result then
   begin
@@ -321,14 +336,7 @@ end;
 
 function TFileCaptureAsync.OnFlush(dwStreamIndex: DWord): HRESULT;
 begin
-  // Note: This will be called in a worker thread.
-  Result := S_OK;
-
-  PostMessage(FMessageHandler.Handle,
-              WM_FLUSH_COMPLETE,
-              0,
-              0);
-  HandleThreadMessages(GetCurrentThread());
+ SetEvent(FFlushEvent); Result:=S_OK;
 end;
 
 
@@ -343,25 +351,12 @@ begin
 end;
 
 
-procedure TFileCaptureAsync.ProcessSample(ASample: IMFSample;
-                                          ATimeStamp: TTimeSpan);
+procedure TFileCaptureAsync.ProcessSample(ASample: IMFSample; ATimeStamp: TTimeSpan);
+var Reply: PSampleReply;
 begin
-  // Note: This will be called in a worker thread.
-
-  // _AddRef will be called, so the sample will not be released until the message is handled.
-
-  oSampleReply.oSample := ASample;
-  oSampleReply.oSampleTimeStamp := ATimeStamp;
-
-  if not PostMessage(FMessageHandler.Handle,
-                     WM_SAMPLE_FOUND,
-                     0,
-                     LPARAM(@oSampleReply)) then
-    begin
-      SafeRelease(oSampleReply.oSample);
-    end;
-
-  HandleThreadMessages(GetCurrentThread());
+ if FClosing then Exit;
+ New(Reply); Reply.oSample:=ASample; Reply.oSampleTimeStamp:=ATimeStamp;
+ if not PostMessage(FMessageHandler.Handle,WM_SAMPLE_FOUND,0,LPARAM(Reply)) then Dispose(Reply);
 end;
 
 
@@ -386,9 +381,9 @@ try
   if SUCCEEDED(hrStatus) then
     begin
 
-      bEndOfStream := (dwStreamFlags = MF_SOURCE_READERF_ENDOFSTREAM);
+      bEndOfStream := ((dwStreamFlags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0);
 
-      if (dwStreamFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then
+      if ((dwStreamFlags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
         NotifyMediaFormatChanged
       else if Assigned(pSample) and SUCCEEDED(pSample.GetSampleTime(@dSampleTimeStamp)) then
         begin

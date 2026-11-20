@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/CameraFrameCapture
+// Related projects: MfPackX410/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -148,6 +148,7 @@ type
     btnResetBrightness: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject;var CanClose: Boolean);
     procedure btnRefreshDevicesClick(Sender: TObject);
     procedure HandleSelectedDeviceChange(Sender: TObject);
     procedure btnClearLogClick(Sender: TObject);
@@ -171,6 +172,7 @@ type
   private
     FLogLevel: TLogType;
     FUpdating : Boolean;
+    FBusyDepth: Integer;
     FDisplayingMessage : Boolean;
     FFormatSettings: TFormatSettings;
     FCapture: TCameraCaptureAsync;
@@ -292,6 +294,9 @@ begin
                                  ptrDeviceNotify);
 end;
 
+
+procedure TFrmMain.FormCloseQuery(Sender: TObject;var CanClose: Boolean);
+begin CanClose := FBusyDepth = 0;end;
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
 begin
@@ -1072,6 +1077,8 @@ end;
 procedure TFrmMain.BeginBusy();
 begin
 
+  Inc(FBusyDepth);
+  Enabled := False;
   Screen.Cursor := crHourGlass;
 end;
 
@@ -1079,6 +1086,8 @@ end;
 procedure TFrmMain.EndBusy();
 begin
 
+  if FBusyDepth > 0 then Dec(FBusyDepth);
+  Enabled := FBusyDepth = 0;
   Screen.Cursor := crDefault;
 end;
 

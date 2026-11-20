@@ -1,12 +1,12 @@
 # MfWebCamStreamer
 
-Version: 4.0.0
+Version: 4.1.0
   
 NOTES:  
 This release is updated for compiler version 17 up to 35.  
 SDK version 10.0.28000.2705 (Win 11)  
 Requires Windows 10 or later.  
-Minimum supported MfPack version: 4.0.0  
+Minimum supported MfPack version: 4.1.0  
    
 Description:  
 `MfWebCamStreamer` is an FxServe-based follow-up to `MfSimpleWebCamStreamer`.
@@ -153,9 +153,12 @@ During development the application finds the player files in the sample's
 FxServe `www\WebCam` publication folder when streaming starts.
 
 Project: Media Foundation - MFPack - Samples  
+  
 Project location: https://github.com/FactoryXCode/MfPack  
+  
 https://sourceforge.net/projects/MFPack
-First release date: 24/01/2020  
-Last updated: 18/09/2026  
+  
+First release date: 24/01/2026  
+Last updated: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

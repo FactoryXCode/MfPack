@@ -10,7 +10,7 @@
 // Release date: 25-08-2026
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: MfSimpleWebCamStreamer - simple webcam + microphone A/V sample.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -108,11 +108,15 @@ type
                                       IMFSourceReaderCallback)
   private
     FOwner: TSimpleAvCapture;
+    FOwnerLock: TCriticalSection;
     FKind: TSimpleCaptureKind;
 
   public
     constructor Create(AOwner: TSimpleAvCapture;
                        const AKind: TSimpleCaptureKind);
+
+    destructor Destroy(); override;
+    procedure DetachOwner();
 
     function OnReadSample(hrStatus: HRESULT;
                           dwStreamIndex: DWORD;
@@ -146,6 +150,8 @@ type
     FObserver: TSimpleFmp4ByteStream;
 
     FVideoCallback: IMFSourceReaderCallback;
+    FVideoCallbackObject: TSimpleSourceReaderCallback;
+    FAudioCallbackObject: TSimpleSourceReaderCallback;
     FAudioCallback: IMFSourceReaderCallback;
 
     FVideoStreamIndex: DWORD;
@@ -350,7 +356,8 @@ begin
 
   inherited Create;
 
- FOwner := AOwner;
+  FOwnerLock := TCriticalSection.Create();
+  FOwner := AOwner;
   FKind := AKind;
 end;
 
@@ -370,22 +377,41 @@ begin
 end;
 
 
+destructor TSimpleSourceReaderCallback.Destroy();
+begin
+  FOwnerLock.Free;
+  inherited Destroy;
+end;
+
+procedure TSimpleSourceReaderCallback.DetachOwner();
+begin
+  FOwnerLock.Enter;
+  try
+    FOwner := nil;
+  finally
+    FOwnerLock.Leave;
+  end;
+end;
+
 function TSimpleSourceReaderCallback.OnReadSample(hrStatus: HRESULT;
                                                   dwStreamIndex: DWORD;
                                                   dwStreamFlags: DWORD;
                                                   llTimestamp: LONGLONG;
                                                   pSample: IMFSample): HRESULT;
 begin
-
-  // Media Foundation calls this on a worker thread.
-  if Assigned(FOwner) then
-    FOwner.HandleSample(FKind,
-                        hrStatus,
-                        dwStreamFlags,
-                        llTimestamp,
-                        pSample);
-
-  Result := S_OK;
+  FOwnerLock.Enter;
+  try
+    try
+      if Assigned(FOwner) then
+        FOwner.HandleSample(FKind,hrStatus,dwStreamFlags,llTimestamp,pSample);
+      Result := S_OK;
+    except
+      Result := E_FAIL;
+      if Assigned(FOwner) then FOwner.SetError(Result);
+    end;
+  finally
+    FOwnerLock.Leave;
+  end;
 end;
 
 
@@ -405,8 +431,10 @@ begin
   FVideoStreamIndex := DWORD(-1);
   FAudioStreamIndex := DWORD(-1);
 
-  FVideoCallback := TSimpleSourceReaderCallback.Create(Self, ckVideo);
-  FAudioCallback := TSimpleSourceReaderCallback.Create(Self, ckAudio);
+  FVideoCallbackObject := TSimpleSourceReaderCallback.Create(Self,ckVideo);
+  FVideoCallback := FVideoCallbackObject;
+  FAudioCallbackObject := TSimpleSourceReaderCallback.Create(Self,ckAudio);
+  FAudioCallback := FAudioCallbackObject;
 
   FState := csStopped;
   FLastError := S_OK;
@@ -418,6 +446,10 @@ begin
 
   Stop();
 
+  if Assigned(FVideoCallbackObject) then FVideoCallbackObject.DetachOwner();
+  if Assigned(FAudioCallbackObject) then FAudioCallbackObject.DetachOwner();
+  FVideoCallbackObject := nil;
+  FAudioCallbackObject := nil;
   FVideoCallback := nil;
   FAudioCallback := nil;
 
@@ -445,6 +477,7 @@ var
 begin
 
   AReader := nil;
+  if AActivate = nil then Exit(E_INVALIDARG);
 
   Result := AActivate.ActivateObject(IID_IMFMediaSource,
                                      Pointer(Source));
@@ -897,6 +930,9 @@ var
 
 begin
 
+  if (FState <> csStopped) then
+    Exit(MF_E_INVALIDREQUEST);
+
   // Keep the IMFActivate objects for the lifetime of this capture session.
   // After Stop releases the SourceReaders, ShutdownObject() is called on
   // these activations so the next Start receives fresh media sources instead
@@ -904,8 +940,6 @@ begin
   FVideoActivate := AVideoDevice;
   FAudioActivate := AAudioDevice;
 
-  if (FState <> csStopped) then
-    Exit(MF_E_INVALIDREQUEST);
 
   FState := csStarting;
   FLastError := S_OK;

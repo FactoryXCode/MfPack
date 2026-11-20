@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: The capture engine that takes care of writing to a
 //              preview object (TPanel) and output file (MP4).
 //
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -66,8 +66,8 @@ unit CaptureStreamEngine;
 interface
 
 uses
-
-  {WinApi}
+  WinApi.Messages,
+{WinApi}
   WinApi.Windows,
   WinApi.ActiveX,
   WinApi.WinApiTypes,
@@ -108,6 +108,14 @@ uses
   Helpers;
 
 type
+  PGpuCaptureNotification = ^TGpuCaptureNotification;
+  TGpuCaptureNotification = record
+    FrameIndex: Int64;
+    Seconds: Double;
+    ErrorMessage: UnicodeString;
+    IsError: Boolean;
+  end;
+
   TCaptureProgressEvent = procedure(Sender: TObject;
                                     FrameIndex: Int64;
                                     MilliSeconds: Double) of object;
@@ -121,6 +129,16 @@ type
   end;
 
   TCaptureStreamEngine = class
+  private
+    FNotifyWindow: HWND;
+    FNotifyClosing: Boolean;
+    FMFStarted: Boolean;
+    procedure NotifyWindowProc(var Msg: TMessage);
+    procedure DiscardNotifications();
+    procedure QueueProgress(Sender: TObject;FrameIndex: Int64;Seconds: Double);
+    procedure QueueError(Sender: TObject;const Text: string);
+  private
+    procedure VideoThreadProc();
   private
 
     // D3D / DXGI
@@ -229,6 +247,19 @@ begin
                           @FDevice,
                           @rUsedFeatureLevel,  // Returns the feature level the device is using depending on your system's Direct3D runtime version.
                           @FContext);
+  if hr = DXGI_ERROR_SDK_COMPONENT_MISSING then
+    begin
+      hr := D3D11CreateDevice(nil,
+                              D3D_DRIVER_TYPE_HARDWARE,
+                              0,
+                              D3D11_CREATE_DEVICE_BGRA_SUPPORT,  // For the best performance, shut the D3D11 debugger down on your final release! Remove "or D3D11_CREATE_DEVICE_DEBUG"
+                              @FeatureLevels,
+                              Length(FeatureLevels),
+                              D3D11_SDK_VERSION,
+                              @FDevice,
+                              @rUsedFeatureLevel,  // Returns the feature level the device is using depending on your system's Direct3D runtime version.
+                              @FContext);
+    end;
   CheckHR(hr, 'D3D11CreateDevice');
 
   FPreview := TPreviewRenderer.Create(FDevice, FContext);
@@ -510,15 +541,7 @@ begin
   CheckHR(hr, 'IMFMediaBuffer.Lock');
 
   try
-    // Y plane
-    Move(mappedNV12.pData^,
-         pData^,
-         frameSizeY);
-
-    // UV plane
-    Move(PByte(NativeUInt(mappedNV12.pData) + mappedNV12.RowPitch * FHeight)^,
-         PByte(NativeUInt(pData) + frameSizeY)^,
-         frameSizeUV);
+    PackGpuNV12(mappedNV12,FWidth,FHeight,pData);
 
     hr := buffer.SetCurrentLength(frameSizeY + frameSizeUV);
     CheckHR(hr, 'IMFMediaBuffer.SetCurrentLength');
@@ -534,7 +557,7 @@ begin
 
   // timestamps
   QueryPerformanceCounter(qpcNow);
-  sampleTime := MulDiv(qpcNow - FQpcStart, 10000000, FPerfFreq);
+  sampleTime := GpuCounterTime(qpcNow - FQpcStart,FPerfFreq);
 
   hr := sample.SetSampleTime(sampleTime);
   CheckHR(hr, 'IMFSample.SetSampleTime');
@@ -574,7 +597,10 @@ begin
                                         desktopRes);
 
       if not FVideoRunning then
-        Break;
+        begin
+          if hr >= 0 then FDeskDupl.ReleaseFrame();
+          Break;
+        end;
 
       if (hr = DXGI_ERROR_WAIT_TIMEOUT) then
         Continue;
@@ -587,7 +613,7 @@ begin
             on E: Exception do
               begin
                 if Assigned(FOnError) then
-                  FOnError(Self, 'Access lost: ' + E.Message);
+                  QueueError(Self, 'Access lost: ' + E.Message);
                 Exit;
               end;
           end;
@@ -618,12 +644,12 @@ begin
         try
           FConverter.Convert(desktopTex,
                              mappedNV12);
+          SubmitVideoSampleToSinkWriter(mappedNV12);
         finally
           ctx.Unmap(FNV12StagingTexture, 0);
         end;
 
-        // push sample
-        SubmitVideoSampleToSinkWriter(mappedNV12);
+        // The mapped bytes are consumed before Unmap above.
 
         QueryPerformanceCounter(t1);
         FMilliSeconds := (t1 - t0) / FPerfFreq;
@@ -631,7 +657,7 @@ begin
         Inc(FFrameIndex);
 
         if Assigned(FOnProgress) then
-          FOnProgress(Self,
+          QueueProgress(Self,
                       FFrameIndex,
                       FMilliSeconds);
 
@@ -641,6 +667,69 @@ begin
   end;
 end;
 
+
+procedure TCaptureStreamEngine.VideoThreadProc();
+begin
+  try
+    VideoLoop();
+  except
+    on E: Exception do
+      if Assigned(FOnError) then
+        QueueError(Self,'VideoLoop error: ' + E.Message);
+  end;
+end;
+
+procedure TCaptureStreamEngine.QueueProgress(Sender: TObject;FrameIndex: Int64;Seconds: Double);
+var
+  Notice: PGpuCaptureNotification;
+begin
+  if FNotifyClosing then Exit;
+  New(Notice);
+  Notice.FrameIndex := FrameIndex;
+  Notice.Seconds := Seconds;
+  Notice.IsError := False;
+  if not PostMessage(FNotifyWindow,WM_APP + $510,0,LPARAM(Notice)) then Dispose(Notice);
+end;
+
+procedure TCaptureStreamEngine.QueueError(Sender: TObject;const Text: string);
+var
+  Notice: PGpuCaptureNotification;
+begin
+  if FNotifyClosing then Exit;
+  New(Notice);
+  Notice.ErrorMessage := Text;
+  Notice.IsError := True;
+  if not PostMessage(FNotifyWindow,WM_APP + $510,0,LPARAM(Notice)) then Dispose(Notice);
+end;
+
+procedure TCaptureStreamEngine.NotifyWindowProc(var Msg: TMessage);
+var
+  Notice: PGpuCaptureNotification;
+begin
+  if Msg.Msg = WM_APP + $510 then
+    begin
+      Notice := PGpuCaptureNotification(Msg.LParam);
+      try
+        if not FNotifyClosing then
+          if Notice.IsError then
+            begin
+              if Assigned(FOnError) then FOnError(Self,Notice.ErrorMessage);
+            end
+          else if Assigned(FOnProgress) then
+            FOnProgress(Self,Notice.FrameIndex,Notice.Seconds);
+      finally Dispose(Notice);end;
+      Msg.Result := 0;
+    end
+  else Msg.Result := DefWindowProc(FNotifyWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+
+procedure TCaptureStreamEngine.DiscardNotifications();
+var
+  Msg: TMsg;
+begin
+  while PeekMessage(Msg,FNotifyWindow,WM_APP + $510,WM_APP + $510,PM_REMOVE) do
+    Dispose(PGpuCaptureNotification(Msg.LParam));
+end;
 
 constructor TCaptureStreamEngine.Create(aHwnd: HWND;
                                         aWidth,
@@ -652,6 +741,9 @@ var
 begin
 
   inherited Create;
+  FNotifyWindow := AllocateHWnd(NotifyWindowProc);
+  if (aWidth = 0) or (aHeight = 0) or (aFrameRate = 0) then
+    raise EArgumentException.Create('Capture size and frame rate must be positive');
 
   FPreviewHandle := aHwnd;
   FWidth := aWidth;
@@ -668,6 +760,7 @@ begin
   hr := MFStartup(MF_VERSION,
                   MFSTARTUP_FULL);
   CheckHR(hr, 'MFStartup');
+  FMFStarted := True;
 
   QueryPerformanceFrequency(FPerfFreq);
   FFrameDuration100ns := 10000000 div FFrameRate;
@@ -676,6 +769,7 @@ end;
 
 destructor TCaptureStreamEngine.Destroy;
 begin
+  FNotifyClosing := True;
 
   // Ensure capture is fully stopped and thread is gone
   StopCapture();
@@ -689,8 +783,10 @@ begin
   FDXGIDevice := nil;
   FNV12StagingTexture := nil;
 
-  MFShutdown();
+  if FMFStarted then MFShutdown();
 
+  DiscardNotifications();
+  if FNotifyWindow <> 0 then DeallocateHWnd(FNotifyWindow);
   inherited;
 end;
 
@@ -701,6 +797,13 @@ begin
   if FRunning then
     Exit;
 
+  if (FWidth = 0) or (FHeight = 0) or (FFrameRate = 0) or
+     ((FWidth and 1) <> 0) or ((FHeight and 1) <> 0) then
+    raise EArgumentException.Create('NV12 dimensions must be positive and even; frame rate must be positive');
+  FFrameDuration100ns := 10000000 div FFrameRate;
+  DiscardNotifications();
+  FRunning := True;
+  try
   SetFrameWidth := FWidth;
   SetFrameHeight := FHeight;
   SetFrameRate := FFRameRate;
@@ -724,18 +827,13 @@ begin
   FVideoRunning := True;
 
   // Dedicated worker thread
-  FVideoThread := TThread.CreateAnonymousThread(procedure
-                                                begin
-                                                  try
-                                                    VideoLoop();
-                                                  except
-                                                    on E: Exception do
-                                                      if Assigned(FOnError) then
-                                                        FOnError(Self, 'VideoLoop error: ' + E.Message);
-                                                  end;
-                                                end);
+  FVideoThread := TGpuCaptureWorker.Create(VideoThreadProc);
   FVideoThread.FreeOnTerminate := False;
   FVideoThread.Start;
+  except
+    StopCapture();
+    raise;
+  end;
 end;
 
 

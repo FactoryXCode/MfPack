@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description: Pitch + Tempo (time-stretch + pitch-shift) MFT.
 // Notes: - Intended to be hosted by TMfWasApiEffectsRack (float32 processing path).
@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 10 (2H20) or later.
@@ -34,7 +34,7 @@
 //
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -120,7 +120,7 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); reintroduce;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
   published

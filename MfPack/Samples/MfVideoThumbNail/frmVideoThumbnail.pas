@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Videothumbnail Mainform
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -75,6 +75,7 @@ uses
   System.Classes,
   System.Types,
   {Vcl}
+  Vcl.ExtCtrls,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -118,6 +119,10 @@ type
   private
     { Private declarations }
     bTerminate: Boolean;
+    FInitialized: Boolean;
+    FStartedMF: Boolean;
+    FAnimationTimer: TTimer;
+    procedure AnimationTick(Sender: TObject);
 
     function InitializeApp(): Boolean;
     procedure CleanUp();
@@ -128,6 +133,7 @@ type
     procedure OnPaint(var message: TMessage); message WM_PAINT;
 
   public
+    destructor Destroy; override;
     { Public declarations }
   end;
 
@@ -175,6 +181,13 @@ implementation
 {$R *.dfm}
 
 
+destructor TForm1.Destroy;
+begin
+ FreeAndNil(FAnimationTimer);CleanUp;inherited;
+end;
+procedure TForm1.AnimationTick(Sender: TObject);
+begin if FInitialized and not bTerminate then RenderFrame(Handle);end;
+
 procedure TForm1.Exit1Click(Sender: TObject);
 begin
   Close();
@@ -217,7 +230,7 @@ procedure TForm1.FormShow(Sender: TObject);
 begin
   // We have to initialize after the form is shown.
   // Post the custom message WM_DONE_ONSHOW
-  PostMessage(Form1.Handle,
+  PostMessage(Handle,
               WM_DONE_ONSHOW,
               0,
               0);
@@ -226,19 +239,12 @@ end;
 //
 procedure TForm1.WmAfterShow(var Msg: TMessage);
 begin
-
-  // Initialize the DPI scalar.
-  InitializeDPIScale(Self.Handle);
-
-  // Initialize the thumb rects
-  InitSmallRects();
-  InitBigRect();
-
-  // Initialize
-  if InitializeApp() then
-    begin
-       MessageLoop(Self.Handle);
-    end;
+ if FInitialized then Exit;
+ InitializeDPIScale(Handle);InitSmallRects;InitBigRect;
+ if InitializeApp then begin
+  FInitialized:=True;FAnimationTimer:=TTimer.Create(Self);
+  FAnimationTimer.Interval:=16;FAnimationTimer.OnTimer:=AnimationTick;FAnimationTimer.Enabled:=True;
+ end;
 end;
 
 
@@ -257,7 +263,7 @@ begin
       d2d1su := D2D1SizeU(Form1.Width,
                           Form1.Height);
 
-      {void} g_pRT.Resize(d2d1su);
+      {void} g_pRT.Resize(@d2d1su);
 
       InvalidateRect(Form1.Handle,
                      Nil,
@@ -313,6 +319,7 @@ begin
       Abort;
     end;
     
+  FStartedMF:=True;
   // Set the background color
   BACKGROUND_COLOR := D2D1TColorF($2F4F4F);
 
@@ -348,6 +355,7 @@ var
   i: Integer;
 begin
   bTerminate := True;
+  if FAnimationTimer<>nil then FAnimationTimer.Enabled:=False;
 
   if assigned(g_ThumbnailGen) then
     begin
@@ -363,9 +371,13 @@ begin
 
   for i := 0 to MAX_SPRITES do
     begin
-      g_pSprites[i].Clear();
-      FreeAndNil(g_pSprites[i]);
+      if Assigned(g_pSprites[i]) then begin
+        g_pSprites[i].Clear();FreeAndNil(g_pSprites[i]);
+      end;
     end;
+
+  FInitialized:=False;
+  if FStartedMF then begin MFShutdown;FStartedMF:=False;end;
 
 end;
 
@@ -442,42 +454,7 @@ end;
 // Message loop for the application window.
 //-------------------------------------------------------------------
 function TForm1.MessageLoop(hw: HWND): INT;
-var
-  _msg: TMsg;
-  timerhandle: THandle;
-
-begin
-
-
-  repeat
-      if (PeekMessage(_msg,
-                      0,
-                      0,
-                      0,
-                      PM_REMOVE)) then
-        begin
-          TranslateMessage(_msg);
-          DispatchMessage(_msg);
-          Continue;
-        end;
-
-      timerhandle := g_Timer.Handle;
-      // Wait until the timer expires or any message is posted.
-      if (WAIT_OBJECT_0 = MsgWaitForMultipleObjects(1,
-                                                    timerhandle,
-                                                    FALSE,
-                                                    INFINITE,
-                                                    QS_ALLINPUT)) then
-        begin
-          RenderFrame(hw);
-        end;
-  until (_msg.Message = WM_QUIT) or (bTerminate = True);
-
-
-  DestroyWindow(hw);
-
-  Result := INT(_msg.wParam);
-end;
+begin Result:=0;end;
 
 
 
@@ -576,6 +553,8 @@ var
   rcClient: TRect;
   pFactory: ID2D1Factory;
   pRenderTarget: ID2D1HwndRenderTarget;
+  Props: D2D1_RENDER_TARGET_PROPERTIES;
+  HwndProps: D2D1_HWND_RENDER_TARGET_PROPERTIES;
 
 begin
 
@@ -598,11 +577,9 @@ begin
 
   if (SUCCEEDED(hr)) then
     begin
-      hr := pFactory.CreateHwndRenderTarget(D2D1RenderTargetProperties(),
-                                            D2D1HwndRenderTargetProperties(hw,
-                                                                           D2D1SizeU(rcClient.right,
-                                                                                     rcClient.bottom)),
-                                            pRenderTarget);
+      Props:=D2D1RenderTargetProperties();
+      HwndProps:=D2D1HwndRenderTargetProperties(hw,D2D1SizeU(rcClient.right,rcClient.bottom));
+      hr := pFactory.CreateHwndRenderTarget(@Props,@HwndProps,pRenderTarget);
 
     end;
 
@@ -620,6 +597,7 @@ end;
 //-------------------------------------------------------------------
 function RenderFrame(hw: HWND): HRESULT;
 var
+  Identity: D2D1_MATRIX_3X2_F;
   hr: HResult;
   fTime: Single;
   i: Integer;
@@ -627,6 +605,7 @@ var
 
 begin
   hr := S_OK;
+  if g_Timer=nil then Exit(S_OK);
 
   if Assigned(g_pRT) and (g_pRT.CheckWindowState() = D2D1_WINDOW_STATE_OCCLUDED) then
     begin
@@ -644,12 +623,13 @@ begin
   if (SUCCEEDED(hr)) then
     begin
 
+      Identity:=D2D1_MATRIX_3X2_F.Identity();
       fTime := Round(g_Timer.GetFrameNumber()) / 30;
       //fTime := g_Timer.GetFrameNumber() div 30;
 
       g_pRT.BeginDraw();
 
-      g_pRT.Clear(BACKGROUND_COLOR);  //D2D1ColorF(0.93, 0.94, 0.96, 1.0)
+      g_pRT.Clear(@BACKGROUND_COLOR);  //D2D1ColorF(0.93, 0.94, 0.96, 1.0)
 
       // Update and draw each sprite.
       for i := 0 to MAX_SPRITES do
@@ -663,9 +643,9 @@ begin
                 pSprite.Draw(g_pRT);
             end;
            // Reset the transform to the identiy matrix.
-           g_pRT.SetTransform(D2D1_MATRIX_3X2_F.Identity());
+           g_pRT.SetTransform(@Identity);
         end;
-      hr := g_pRT.EndDraw();
+      hr := g_pRT.EndDraw(nil,nil);
     end;
 
   Result := hr;

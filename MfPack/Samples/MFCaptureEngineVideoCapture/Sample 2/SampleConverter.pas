@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 //
 // Description:
 //   This unit returns a IMFSample to BMP and stores the bitmap in to a memory stream.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX400/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX410/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.28000.2705
@@ -63,7 +63,8 @@ unit SampleConverter;
 interface
 
 uses
-  {Winapi}
+  WinApi.WinApiTypes,
+{Winapi}
   WinApi.Windows,
   WinApi.WinError,
   WinAPI.ActiveX,
@@ -202,70 +203,81 @@ function TSampleConverter.DataFromSample(const ASample: IMFSample;
                                          const AVideoInfo: TVideoFormatInfo;
                                          out AMemoryStream: TMemoryStream): HResult;
 var
-  hr: HResult;
-  pBuffer: IMFMediaBuffer;
-  pConvertedSample: IMFSample;
-  pBitmapData: PByte;
-  cbBitmapData: DWord;
-  iActualDataSize: Integer;
-  iExpectedDataSize: Integer;
-  oFileHeader: BITMAPFILEHEADER;
-  oFileInfo: BITMAPINFOHEADER;
-
-label
-  done;
-
+  AError: string;
+  function BuildBitmap(): Boolean;
+var
+  Sample: IMFSample;
+  Buffer: IMFMediaBuffer;
+  Buffer2D: IMF2DBuffer;
+  Data,Top: PByte;
+  Length: DWORD;
+  Pitch: LONG;
+  Width,Height,Y: Integer;
+  Header: BITMAPFILEHEADER;
+  Info: BITMAPINFOHEADER;
+  Locked2D,Locked: Boolean;
+  Bits: UINT32;
 begin
-  if (AVideoInfo.fSubType <> MFVideoFormat_RGB32) then
-    begin
-      hr := ConvertSampleToRGB(ASample,
-                               pConvertedSample);
-      if SUCCEEDED(hr) then
-        begin
-          // Converts a sample with multiple buffers into a sample with a single buffer.
-          hr := pConvertedSample.ConvertToContiguousBuffer(@pBuffer);
-        end;
-    end
+  Result := False;
+  AMemoryStream := nil;
+  AError := '';
+  if ASample = nil then begin AError := 'No input sample';Exit;end;
+  Width := AVideoInfo.iVideoWidth;Height := AVideoInfo.iVideoHeight;
+  if (Width <= 0) or (Height <= 0) or (Int64(Width)*Height > (MaxInt-54) div 4) then
+    begin AError := 'Invalid video dimensions';Exit;end;
+  if IsEqualGUID(AVideoInfo.fSubType,MFVideoFormat_RGB32) then Sample := ASample
   else
-    hr := ConvertSampleToRGB(ASample,
-                             pConvertedSample);
-
-  if SUCCEEDED(hr) then
     begin
-      hr := pBuffer.Lock(pBitmapData,
-                         nil,
-                         @cbBitmapData);
-      if FAILED(hr) then
-        goto done;  // No need to unlock.
-
-
-      // For full frame capture, use the buffer dimensions for the data size check
-      iExpectedDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
-      iActualDataSize := Integer(cbBitmapData);
-
-      if (iActualDataSize = iExpectedDataSize) then
-        begin
-            AMemoryStream := TMemoryStream.Create;
-            oFileHeader := GetBMPFileHeader;
-            oFileInfo := GetBMPFileInfo(AVideoInfo);
-            AMemoryStream.Write(oFileHeader, SizeOf(oFileHeader));
-            AMemoryStream.Write(oFileInfo, SizeOf(oFileInfo));
-            AMemoryStream.Write(pBitmapData[0], iActualDataSize);
-        end
-      else
-        begin
-          hr := ERROR_INCORRECT_SIZE;
-          pBuffer.Unlock();
-          goto done;
-        end;
-      pBuffer.Unlock();
+      if FTransform = nil then begin AError := 'Converter is not initialized';Exit;end;
+      if FAILED(ConvertSampleToRGB(ASample,Sample)) then
+        begin AError := 'Video processor conversion failed';Exit;end;
     end;
-
-done:
-  SafeRelease(pBuffer);
-  if Assigned(pConvertedSample) then
-    SafeRelease(pConvertedSample);
-  Result := hr;
+  if FAILED(Sample.ConvertToContiguousBuffer(@Buffer)) then
+    begin AError := 'Cannot access frame buffer';Exit;end;
+  Locked2D := False;Locked := False;
+  try
+    if SUCCEEDED(Buffer.QueryInterface(IMF2DBuffer,Buffer2D)) then
+      Locked2D := SUCCEEDED(Buffer2D.Lock2D(Top,Pitch));
+    if not Locked2D then
+      begin
+        if FAILED(Buffer.Lock(Data,nil,@Length)) then
+          begin AError := 'Cannot lock frame buffer';Exit;end;
+        Locked := True;
+        MFGetStrideForBitmapInfoHeader(MFVideoFormat_RGB32.D1,Width,Pitch);
+        if IsEqualGUID(AVideoInfo.fSubType,MFVideoFormat_RGB32) then
+          begin
+            if (AVideoInfo.iStride <> 0) and (AVideoInfo.iStride <> 1) then Pitch := LONG(AVideoInfo.iStride);
+          end
+        else if (FOutputType <> nil) and SUCCEEDED(FOutputType.GetUINT32(MF_MT_DEFAULT_STRIDE,Bits)) then
+          Pitch := LONG(Bits);
+        if (Abs(Int64(Pitch)) < Int64(Width)*4) or
+           (Int64(Length) < Abs(Int64(Pitch))*(Height-1)+Int64(Width)*4) then
+          begin AError := 'Frame buffer is shorter than its dimensions/stride';Exit;end;
+        Top := Data;
+        if Pitch < 0 then Top := PByte(NativeInt(Data)+NativeInt(-Int64(Pitch)*(Height-1)));
+      end;
+    if Abs(Int64(Pitch)) < Int64(Width)*4 then
+      begin AError := 'Invalid frame pitch';Exit;end;
+    FillChar(Header,SizeOf(Header),0);FillChar(Info,SizeOf(Info),0);
+    Header.bfType := $4D42;Header.bfOffBits := SizeOf(Header)+SizeOf(Info);
+    Header.bfSize := Header.bfOffBits+DWORD(Width*Height*4);
+    Info.biSize := SizeOf(Info);Info.biWidth := Width;Info.biHeight := -Height;
+    Info.biPlanes := 1;Info.biBitCount := 32;Info.biCompression := BI_RGB;Info.biSizeImage := Width*Height*4;
+    AMemoryStream := TMemoryStream.Create();
+    try
+      AMemoryStream.WriteBuffer(Header,SizeOf(Header));AMemoryStream.WriteBuffer(Info,SizeOf(Info));
+      for Y := 0 to Height-1 do
+        AMemoryStream.WriteBuffer(PByte(NativeInt(Top)+NativeInt(Int64(Y)*Pitch))^,Width*4);
+      AMemoryStream.Position := 0;
+      Result := True;
+    except FreeAndNil(AMemoryStream);raise;end;
+  finally
+    if Locked2D then Buffer2D.Unlock2D();
+    if Locked then Buffer.Unlock();
+  end;
+end;
+begin
+  if BuildBitmap() then Result := S_OK else Result := E_FAIL;
 end;
 
 
@@ -312,7 +324,7 @@ begin
   Result := CreateTransform(AManager,
                             AInputType);
 
-  NotifyBeginStreaming();
+  if SUCCEEDED(Result) then NotifyBeginStreaming();
 end;
 
 

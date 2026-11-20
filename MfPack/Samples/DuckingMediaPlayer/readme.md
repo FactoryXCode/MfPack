@@ -2,7 +2,7 @@
 
 &#x20; 
 
-Version: 4.0.0
+Version: 4.1.0
 
 &#x20; 
 
@@ -19,7 +19,7 @@ NOTES:
 * This release is updated for compiler version 17 up to 35.
 * SDK version 10.0.28000.2705 (Win 11)
 * Requires Windows 7 or later.
-* Minimum supported MfPack version: 3.1.2
+* Minimum supported MfPack version: 4.1.0
 
 &#x20; 
 
@@ -32,7 +32,7 @@ https://sourceforge.net/projects/MFPack
 &#x20; 
 
 First release date: 05-07-2020  
-Final release date: 05/05/2026  
+Final release date: 18/11/2026  
 
 &#x20; 
 

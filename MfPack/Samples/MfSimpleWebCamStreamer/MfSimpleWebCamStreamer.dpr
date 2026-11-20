@@ -1,13 +1,16 @@
 ﻿program MfSimpleWebCamStreamer;
 
 uses
-
-  {WinApi}
   WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
+  System.Win.ComObj,
+  System.SysUtils,
+{WinApi}
+
   {Vcl}
   Vcl.Forms,
   {ActiveX}
-  WinApi.ActiveX.ObjBase,
+
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   {Application}
@@ -19,19 +22,28 @@ uses
 {$R *.res}
 
 begin
-
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED);
-
-  MFStartup(MF_VERSION,
-            MFSTARTUP_FULL);
+  OleCheck(CoInitializeEx(nil,
+                          COINIT_APARTMENTTHREADED));
   try
-    Application.Initialize;
-    Application.MainFormOnTaskbar := True;
-    Application.CreateForm(TfrmMain, frmMain);
-    Application.Run;
+    OleCheck(MFStartup(MF_VERSION,
+                       MFSTARTUP_FULL));
+    try
+      Application.Initialize;
+      Application.MainFormOnTaskbar := True;
+      Application.CreateForm(TfrmMain, frmMain);
+      if (ParamCount = 1) and (ParamStr(1) = '--smoke') then
+        begin
+          Application.ProcessMessages;
+          frmMain.Close();
+          Application.ProcessMessages;
+          FreeAndNil(frmMain);
+        end
+      else
+        Application.Run;
+    finally
+      MFShutdown();
+    end;
   finally
-    MFShutdown();
     CoUninitialize();
   end;
 end.

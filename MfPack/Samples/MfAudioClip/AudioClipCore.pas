@@ -9,7 +9,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -31,13 +31,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -147,566 +147,302 @@ var
 implementation
 
 
-function ExtractSound(const wHandle: HWnd;
-                      const wszSourceFile: PWideChar;     // the sourcefile URL
-                      const wszTargetFile: PWideChar;     // The target file URL
-                      msDuration: Int64): HResult;        // The duration in ms to extract.
+function SampleSetFilePointerEx(hFile: THandle;
+                                Distance: Int64;
+                                NewPosition: Pointer;
+                                Method: DWORD): BOOL; stdcall;
+  external 'kernel32.dll' name 'SetFilePointerEx';
+
+function SampleGetFullPathNameW(Name: PWideChar;
+                                Size: DWORD;
+                                Buffer: PWideChar;
+                                FilePart: Pointer): DWORD; stdcall;
+  external 'kernel32.dll' name 'GetFullPathNameW';
+
+
+function FullFileName(Name: PWideChar): UnicodeString;
 var
-  hr: HResult;
-  pReader: IMFSourceReader;
-  hFile: THandle;  // The file handle
-
+  Size: DWORD;
+  Written: DWORD;
 begin
-
-  if not FileExists(wszSourceFile) then
-    begin
-      Result := ERROR_FILE_NOT_FOUND;
-      Exit;
-    end;
-
-  if (wszTargetFile = '') or (ExtractFileExt(WideCharToString(wszTargetFile)) <> '.wav') then
-    begin
-      Result := ERROR_FILE_NOT_FOUND;
-      Exit;
-    end;
-
-  bFlush := False;
-  hFile := INVALID_HANDLE_VALUE;
-
-  // Intialize the Media Foundation platform.
-  hr := MFStartup(MF_VERSION);
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('Your computer does not support this Media Foundation API version' +
-                         IntToStr(MF_VERSION) + '.'),
-                 LPCWSTR('MFStartup Failure!'),
-                 MB_ICONSTOP);
-      Exit(hr);
-    end;
-
-  // Create the source reader to read the input file.
-  if SUCCEEDED(hr) then
-    begin
-      hr := MFCreateSourceReaderFromURL(wszSourceFile,
-                                        nil,
-                                        pReader);
-
-      if FAILED(hr) then
-        begin
-          Result := hr;
-          //  printf("Error opening input file: %S\n", wszSourceFile, hr);
-          Exit;
-        end;
-    end;
-
-  // Open the output file for writing.
-  if SUCCEEDED(hr) then
-    begin
-      hFile := CreateFile(wszTargetFile,
-                          GENERIC_WRITE,
-                          FILE_SHARE_READ,
-                          nil,
-                          CREATE_ALWAYS,
-                          0,
-                          0);
-
-      if (hFile = INVALID_HANDLE_VALUE) then
-        begin
-          Result := HRESULT_FROM_WIN32(GetLastError());
-          //  printf("Cannot create output file: %S\n", wszTargetFile, hr);
-          Exit;
-        end;
-    end;
-
-  // Write the WAVE file.
-  if SUCCEEDED(hr) then
-    hr := WriteWaveFile(pReader,
-                        hFile,
-                        msDuration);
-
-  if FAILED(hr) then
-    begin
-      //  printf("Failed, hr = 0x%X\n", hr);
-      Result := hr;
-      Exit;
-    end;
-
-  // Clean up.
-  if (hFile <> INVALID_HANDLE_VALUE) then
-    CloseHandle(hFile);
-
-  Result := hr;
+  Result := '';
+  Size := SampleGetFullPathNameW(Name,0,nil,nil);
+  if Size = 0 then
+    Exit;
+  SetLength(Result,Size);
+  Written := SampleGetFullPathNameW(Name,Size,PWideChar(Result),nil);
+  if (Written = 0) or (Written >= Size) then
+    Result := ''
+  else
+    SetLength(Result,Written);
 end;
 
 
+function ExtractSound(const wHandle: HWnd;
+                      const wszSourceFile: PWideChar;
+                      const wszTargetFile: PWideChar;
+                      msDuration: Int64): HResult;
+var
+  Reader: IMFSourceReader;
+  FileHandle: THandle;
+  SourcePath: UnicodeString;
+  TargetPath: UnicodeString;
+  Extension: UnicodeString;
+  Attributes: DWORD;
+begin
+  Result := E_INVALIDARG;
+  if (wszSourceFile = nil) or (wszTargetFile = nil) then
+    Exit;
+  if (wszSourceFile^ = #0) or (wszTargetFile^ = #0) or
+     (msDuration <= 0) or (msDuration > MaxInt) then
+    Exit;
+  SourcePath := FullFileName(wszSourceFile);
+  TargetPath := FullFileName(wszTargetFile);
+  Extension := Copy(TargetPath,Length(TargetPath) - 3,4);
+  if (SourcePath = '') or (TargetPath = '') or
+     (lstrcmpiW(PWideChar(Extension),'.wav') <> 0) or
+     (lstrcmpiW(PWideChar(SourcePath),PWideChar(TargetPath)) = 0) then
+    Exit;
+  Attributes := GetFileAttributesW(wszSourceFile);
+  if (Attributes = INVALID_FILE_ATTRIBUTES) or
+     ((Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) then
+    Exit(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+  bFlush := False;
+  Result := MFStartup(MF_VERSION,MFSTARTUP_FULL);
+  if FAILED(Result) then
+    Exit;
+  try
+    Result := MFCreateSourceReaderFromURL(wszSourceFile,nil,Reader);
+    if FAILED(Result) then
+      Exit;
+    FileHandle := CreateFileW(wszTargetFile,GENERIC_WRITE,FILE_SHARE_READ,nil,
+                              CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,0);
+    if FileHandle = INVALID_HANDLE_VALUE then
+      Exit(HRESULT_FROM_WIN32(GetLastError));
+    try
+      Result := WriteWaveFile(Reader,FileHandle,LONG(msDuration));
+    finally
+      CloseHandle(FileHandle);
+    end;
+  finally
+    Reader := nil;
+    MFShutdown;
+  end;
+end;
 
-//-------------------------------------------------------------------
-// WriteWaveFile
-//
-// Writes a WAVE file by getting audio data from the source reader.
-//
-//-------------------------------------------------------------------
-function WriteWaveFile(pReader: IMFSourceReader;    // Pointer to the source reader.
-                       const hFile: THandle;                // Handle to the output file.
+
+function WriteWaveFile(pReader: IMFSourceReader;
+                       const hFile: THandle;
                        msecAudioData: LONG): HResult;
 var
-  hr: HResult;
-  cbHeader: DWORD;
-  cbAudioData: DWORD;
-  cbMaxAudioData: DWORD;
-  pAudioType: IMFMediaType;  // Represents the PCM audio format.
-
+  AudioType: IMFMediaType;
+  HeaderSize: DWORD;
+  AudioSize: DWORD;
+  MaxSize: DWORD;
 begin
-
-  cbHeader := 0;         // Size of the WAVE file header, in bytes.
-  cbAudioData := 0;      // Total bytes of PCM audio data written to the file.
-
-  // Configure the source reader to get uncompressed PCM audio from the source file.
-  hr := ConfigureAudioStream(pReader,
-                             pAudioType);
-
-  // Write the WAVE file header.
-  if SUCCEEDED(hr) then
-    hr := WriteWaveHeader(hFile,
-                          pAudioType,
-                          cbHeader);
-
-
-  // Calculate the maximum amount of audio to decode, in bytes.
-  if SUCCEEDED(hr) then
-    begin
-      cbMaxAudioData := CalculateMaxAudioDataSize(pAudioType,
-                                                  cbHeader,
-                                                  msecAudioData);
-
-      // Decode audio data to the file.
-      hr := WriteWaveData(hFile,
-                          pReader,
-                          cbMaxAudioData,
-                          cbAudioData);
-    end;
-
-  // Fix up the RIFF headers with the correct sizes.
-  if SUCCEEDED(hr) then
-    hr := FixUpChunkSizes(hFile,
-                          cbHeader,
-                          cbAudioData);
-
-  // SafeRelease(pAudioType); releasing wil be automaticly done by compiler.
-  Result := hr;
+  if (pReader = nil) or (msecAudioData <= 0) then
+    Exit(E_INVALIDARG);
+  Result := ConfigureAudioStream(pReader,AudioType);
+  if FAILED(Result) then
+    Exit;
+  Result := WriteWaveHeader(hFile,AudioType,HeaderSize);
+  if FAILED(Result) then
+    Exit;
+  MaxSize := CalculateMaxAudioDataSize(AudioType,HeaderSize,DWORD(msecAudioData));
+  Result := WriteWaveData(hFile,pReader,MaxSize,AudioSize);
+  if SUCCEEDED(Result) then
+    Result := FixUpChunkSizes(hFile,HeaderSize,AudioSize);
 end;
 
 
-//-------------------------------------------------------------------
-// CalculateMaxAudioDataSize
-//
-// Calculates how much audio to write to the WAVE file, given the
-// audio format and the maximum duration of the WAVE file.
-// The return value is the size of the desired audio clip in bytes
-//-------------------------------------------------------------------
-function CalculateMaxAudioDataSize(pAudioType: IMFMediaType;     // The PCM audio format.
-                                   cbHeader: DWORD;              // The size of the WAVE file header.
-                                   msecAudioData: DWORD): DWord;
-var
-  cbBlockSize: UINT32;      // Audio frame size, in bytes.
-  cbBytesPerSecond: UINT32; // Bytes per second.
-  cbAudioClipSize: DWORD;
-  cbMaxSize: DWORD;
-
-begin
-
-  // Get the audio block size and number of bytes/second from the audio format.
-
-  cbBlockSize := MFGetAttributeUINT32(pAudioType,
-                                      MF_MT_AUDIO_BLOCK_ALIGNMENT,
-                                      0);
-
-  cbBytesPerSecond := MFGetAttributeUINT32(pAudioType,
-                                           MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                                           0);
-
-  // Calculate the maximum amount of audio data to write.
-  // This value equals (duration in seconds x bytes/second), but cannot
-  // exceed the maximum size of the data chunk in the WAVE file.
-
-  // Size of the desired audio clip in bytes:
-  cbAudioClipSize := DWORD(MulDiv(cbBytesPerSecond,
-                            msecAudioData,
-                            1000));
-
-  // Largest possible size of the data chunk:
-  cbMaxSize := (MAXDWORD - cbHeader);
-
-  // Maximum size altogether.
-  cbAudioClipSize := min(cbAudioClipSize,
-                         cbMaxSize);
-
-  // Round to the audio block size, so that we do not write a partial audio frame.
-  cbAudioClipSize := ((cbAudioClipSize div cbBlockSize) * cbBlockSize);
-
-  Result := cbAudioClipSize;
-end;
-
-
-//-------------------------------------------------------------------
-// ConfigureAudioStream
-//
-// Selects an audio stream from the source file, and configures the
-// stream to deliver decoded PCM audio.
-//-------------------------------------------------------------------
-function ConfigureAudioStream(pReader: IMFSourceReader;    // Pointer to the source reader.
+function ConfigureAudioStream(pReader: IMFSourceReader;
                               out ppPCMAudio: IMFMediaType): HResult;
 var
-  hr: HResult;
-  pUncompressedAudioType: IMFMediaType;
-  pPartialType: IMFMediaType;
-
+  PartialType: IMFMediaType;
 begin
-
-  // Create a partial media type that specifies uncompressed PCM audio.
-  hr := MFCreateMediaType(pPartialType);
-
-  if SUCCEEDED(hr) then
-    hr := pPartialType.SetGUID(MF_MT_MAJOR_TYPE,
-                               MFMediaType_Audio);
-
-  if SUCCEEDED(hr) then
-    hr := pPartialType.SetGUID(MF_MT_SUBTYPE,
-                               MFAudioFormat_PCM);
-
-  // Set this type on the source reader. The source reader will
-  // load the necessary decoder.
-  if SUCCEEDED(hr) then
-    hr := pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-                                      0,
-                                      pPartialType);
-
-  // Get the complete uncompressed format.
-  if SUCCEEDED(hr) then
-    hr := pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-                                      @pUncompressedAudioType);
-
-
-  // a suggestion to prevent memory leak issues from msdn
-  if SUCCEEDED(hr) then
-    hr := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_ALL_STREAMS),
-                                     False);
-
-  // Ensure the stream is selected.
-  if SUCCEEDED(hr) then
-    hr := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-                                     True);
-
-
-  // Return the PCM format to the caller.
-  if SUCCEEDED(hr) then
-    ppPCMAudio := pUncompressedAudioType;
-
-  // In C/C++ we have to release the interfaces when going out of scope.
-  // Delphi is automaticly taking care of that.
-  // SafeRelease(pUncompressedAudioType);
-  // SafeRelease(pPartialType);
-  Result := hr;
+  ppPCMAudio := nil;
+  if pReader = nil then
+    Exit(E_POINTER);
+  Result := MFCreateMediaType(PartialType);
+  if SUCCEEDED(Result) then
+    Result := PartialType.SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Audio);
+  if SUCCEEDED(Result) then
+    Result := PartialType.SetGUID(MF_MT_SUBTYPE,MFAudioFormat_PCM);
+  if SUCCEEDED(Result) then
+    Result := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_ALL_STREAMS),False);
+  if SUCCEEDED(Result) then
+    Result := pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),nil,PartialType);
+  if SUCCEEDED(Result) then
+    Result := pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),@ppPCMAudio);
+  if SUCCEEDED(Result) then
+    Result := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),True);
 end;
 
 
-//-------------------------------------------------------------------
-// WriteWaveHeader
-//
-// Write the WAVE file header.
-//
-// Note: This function writes placeholder values for the file size
-// and data size, as these values will need to be filled in later.
-//-------------------------------------------------------------------
-
-function WriteWaveHeader(const hFile: THandle;             // Output file.
-                         pMediaType: IMFMediaType;         // PCM audio format.
-                         out pcbWritten: DWORD): HResult;  // bytes written
+function CalculateMaxAudioDataSize(pAudioType: IMFMediaType;
+                                   cbHeader: DWORD;
+                                   msecAudioData: DWORD): DWORD;
 var
-  hr: HResult;
-  cbFormat: UINT32;
-  header: array [0..4] of DWORD; // Each FOURCC (DWord) has a datalength of 4 bytes
-  pWav: PWAVEFORMATEX;
-  dataHeader: array [0..1] of DWORD;
-
+  BlockSize: UINT32;
+  BytesPerSecond: UINT32;
+  Size: UInt64;
+  Limit: UInt64;
 begin
-  cbFormat := 0;
-  pcbWritten := 0;
-  pWav := Nil;
-
-  // Convert the PCM audio format into a WAVEFORMATEX structure.
-  hr := MFCreateWaveFormatExFromMFMediaType(pMediaType, // Pointer to the IMFMediaType interface of the media type.
-                                            pWav,   // Receives a pointer to the WAVEFORMATEX structure.
-                                            cbFormat, // Receives the size of the WAVEFORMATEX structure.
-                                            DWord(MFWaveFormatExConvertFlag_Normal)); // Contains a flag from the MFWaveFormatExConvertFlags enumeration.
-
-  // Wave header explained: https://docs.microsoft.com/en-us/windows/win32/medfound/tutorial--decoding-audio
-
-
-  // Define the 'RIFF' header and the start of the 'fmt ' chunk first
-  if SUCCEEDED(hr) then
-    begin
-
-      // Here the header sections are stored in a fixed array.
-      // A dynamic array could do as well, even as a record.
-      // When using the Win api WriteToFile function, keep in mind that pointer data to be written, must be de-referenced!
-
-      // RIFF header
-      header[0] := FCC('RIFF'); // 4 bytes
-      header[1] := 0;           // 4 bytes
-      header[2] := FCC('WAVE'); // 4 bytes
-      // Start of 'fmt ' chunk
-      header[3] := FCC('fmt '); // 4 bytes
-      header[4] := cbFormat;    // 4 bytes
-
-      // The WaveFormatEx structure will be placed inbetween RIFF and Data header
-
-      // data
-      dataHeader[0] := FCC('data'); // 4 bytes
-      dataHeader[1] := 0;           // 4 bytes
-
-      // Write the RIFF header
-      hr := WriteToFile(hFile,
-                        header,   // can be written directly
-                        SizeOf(header));
-
-      // Write the WAVEFORMATEX structure.
-      if SUCCEEDED(hr) then
-        hr := WriteToFile(hFile,
-                          pWav^,  // Dereference the pointer, to store the WAVEFORMATEX struct correctly
-                          cbFormat);
-
-      // Write the start of the 'data' chunk
-      if SUCCEEDED(hr) then
-        hr := WriteToFile(hFile,
-                          dataHeader, // can be written directly
-                          SizeOf(dataHeader));
-
-      if SUCCEEDED(hr) then
-        pcbWritten := SizeOf(header) + cbFormat + SizeOf(dataHeader);
-
-    end;
-
-
-  CoTaskMemFree(pWav);
-  Result := hr;
+  Result := 0;
+  if pAudioType = nil then
+    Exit;
+  BlockSize := MFGetAttributeUINT32(pAudioType,MF_MT_AUDIO_BLOCK_ALIGNMENT,0);
+  BytesPerSecond := MFGetAttributeUINT32(pAudioType,MF_MT_AUDIO_AVG_BYTES_PER_SECOND,0);
+  if (BlockSize = 0) or (BytesPerSecond = 0) then
+    Exit;
+  Size := UInt64(msecAudioData) * BytesPerSecond div 1000;
+  Limit := UInt64(MAXDWORD) - cbHeader;
+  if Size > Limit then
+    Size := Limit;
+  Result := DWORD(Size div BlockSize * BlockSize);
 end;
 
 
-//-------------------------------------------------------------------
-// WriteWaveData
-//
-// Decodes PCM audio data from the source file and writes it to
-// the WAVE file.
-//-------------------------------------------------------------------
-function WriteWaveData(const hFile: THandle;        // Output file.
-                       pReader: IMFSourceReader;    // Source reader.
-                       cbMaxAudioData: DWORD;       // Maximum amount of audio data (bytes).
+function WriteWaveHeader(const hFile: THandle;
+                         pMediaType: IMFMediaType;
+                         out pcbWritten: DWORD): HResult;
+var
+  FormatSize: UINT32;
+  Format: PWAVEFORMATEX;
+  Header: array[0..4] of DWORD;
+  DataHeader: array[0..1] of DWORD;
+begin
+  pcbWritten := 0;
+  if pMediaType = nil then
+    Exit(E_POINTER);
+  Format := nil;
+  FormatSize := 0;
+  Result := MFCreateWaveFormatExFromMFMediaType(pMediaType,Format,FormatSize,
+                                               DWORD(MFWaveFormatExConvertFlag_Normal));
+  try
+    if FAILED(Result) then
+      Exit;
+    if (Format = nil) or (FormatSize = 0) then
+      Exit(E_UNEXPECTED);
+    Header[0] := FCC('RIFF');
+    Header[1] := 0;
+    Header[2] := FCC('WAVE');
+    Header[3] := FCC('fmt ');
+    Header[4] := FormatSize;
+    DataHeader[0] := FCC('data');
+    DataHeader[1] := 0;
+    Result := WriteToFile(hFile,Header,SizeOf(Header));
+    if SUCCEEDED(Result) then
+      Result := WriteToFile(hFile,Format^,FormatSize);
+    if SUCCEEDED(Result) then
+      Result := WriteToFile(hFile,DataHeader,SizeOf(DataHeader));
+    if SUCCEEDED(Result) then
+      pcbWritten := SizeOf(Header) + FormatSize + SizeOf(DataHeader);
+  finally
+    CoTaskMemFree(Format);
+  end;
+end;
+
+
+function WriteWaveData(const hFile: THandle;
+                       pReader: IMFSourceReader;
+                       cbMaxAudioData: DWORD;
                        out pcbDataWritten: DWORD): HResult;
 var
-  hr: HResult;
-  cbAudioData: DWORD;
-  cbBuffer: DWORD;
-  pAudioData: PByte;
-  pSample: IMFSample;
-  pBuffer: IMFMediaBuffer;
-  dwFlags: DWORD;
-  ActualStreamIndex: DWORD;
-  Timestamp: LONGLONG;
-
+  Sample: IMFSample;
+  Buffer: IMFMediaBuffer;
+  AudioData: PByte;
+  BufferSize: DWORD;
+  Flags: DWORD;
+  UnlockResult: HRESULT;
 begin
-  hr := E_FAIL;
-  cbAudioData := 0;
-  cbBuffer := 0;
-  pAudioData := nil;
-  pBuffer := nil;
-
-  // Get audio samples from the source reader.
-  while (cbAudioData < cbMaxAudioData) do
+  pcbDataWritten := 0;
+  if pReader = nil then
+    Exit(E_POINTER);
+  Result := S_OK;
+  while (pcbDataWritten < cbMaxAudioData) and not bFlush do
     begin
-
-      // Read the next sample.
-      // The SourceReader is in Synchronous Mode
-      hr := pReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                               0,
-                               @ActualStreamIndex,
-                               @dwFlags,
-                               @Timestamp,
-                               @pSample);
-      if FAILED(hr) then
-        Break;
-      
-      // Check whether the data is still valid
-      if (MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED and dwFlags <> 0) then
-			  Break;
-
-      // Check for EOF
-      if (MF_SOURCE_READERF_ENDOFSTREAM and dwFlags <> 0) then
-			  Break;
-
-      // If the sample is nil, there is a gap in the data stream that can't be filled; No reason to quit though..
-      if (pSample = nil) then
-        Continue;
-
-      // Get a pointer to the audio data in the sample.
-      hr := pSample.ConvertToContiguousBuffer(@pBuffer);
-
-      if FAILED(hr) then
-        Break;
-
-      hr := pBuffer.Lock(pAudioData,
-                         nil,
-                         @cbBuffer);
-
-      if FAILED(hr) then
-        Break;
-
-      // Make sure not to exceed the specified maximum size.
-      if ((cbMaxAudioData - cbAudioData) < cbBuffer) then
-        cbBuffer := (cbMaxAudioData - cbAudioData);
-
-      // Write this data to the output file.
-      hr := WriteToFile(hFile,
-                        pAudioData^,
-                        cbBuffer);
-
-      if FAILED(hr) then
-        Break;
-
-      // Unlock the buffer.
-      hr := pBuffer.Unlock();
-      pAudioData := nil;
-
-      if FAILED(hr) then
-        Break;
-
-      // Update running total of audio data.
-      Inc(cbAudioData, cbBuffer);
-
-      // We reached the end of data required
-      if (cbAudioData >= cbMaxAudioData) then
-        Break;
-
-      // User wants to abort
-      if bFlush then
+      // Native output slots overwrite pointers; release the previous interfaces first.
+      Sample := nil;
+      Buffer := nil;
+      Flags := 0;
+      Result := pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),0,
+                                    nil,@Flags,nil,@Sample);
+      if FAILED(Result) then
+        Exit;
+      if (Flags and MF_SOURCE_READERF_ERROR) <> 0 then
+        Exit(E_FAIL);
+      if (Flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0 then
+        Exit(MF_E_INVALIDMEDIATYPE);
+      if Sample <> nil then
         begin
-          hr := pReader.Flush(DWORD(MF_SOURCE_READER_ALL_STREAMS));
-          Break;
+          Result := Sample.ConvertToContiguousBuffer(@Buffer);
+          if FAILED(Result) then
+            Exit;
+          AudioData := nil;
+          BufferSize := 0;
+          Result := Buffer.Lock(AudioData,nil,@BufferSize);
+          if FAILED(Result) then
+            Exit;
+          try
+            if BufferSize > cbMaxAudioData - pcbDataWritten then
+              BufferSize := cbMaxAudioData - pcbDataWritten;
+            if BufferSize > 0 then
+              Result := WriteToFile(hFile,AudioData^,BufferSize);
+            if SUCCEEDED(Result) then
+              Inc(pcbDataWritten,BufferSize);
+          finally
+            UnlockResult := Buffer.Unlock;
+            if SUCCEEDED(Result) then
+              Result := UnlockResult;
+          end;
+          if FAILED(Result) then
+            Exit;
         end;
+      if (Flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0 then
+        Break;
     end;
-
-  if SUCCEEDED(hr) then
-    pcbDataWritten := cbAudioData;
-
-  if (pAudioData <> Nil) then
-    pBuffer.Unlock();
-
-  // In Delphi this will be done automaticly.
-  // SafeRelease(pBuffer);
-  // SafeRelease(pSample);
-
-  Result := hr;
+  if bFlush then
+    Result := pReader.Flush(DWORD(MF_SOURCE_READER_ALL_STREAMS));
 end;
 
-//-------------------------------------------------------------------
-// FixUpChunkSizes
-//
-// Writes the file-size information into the WAVE file header.
-//
-// WAVE files use the RIFF file format. Each RIFF chunk has a data
-// size, and the RIFF header has a total file size.
-//-------------------------------------------------------------------
 
-function FixUpChunkSizes(const hFile: THandle;     // Output file.
-                         cbHeader: DWORD;          // Size of the 'fmt ' chuck.
+function FixUpChunkSizes(const hFile: THandle;
+                         cbHeader: DWORD;
                          cbAudioData: DWORD): HResult;
 var
-  hr: HResult;
-  ll: Int64;
-  cbRiffFileSize: DWORD;
-
+  Position: Int64;
+  RiffSize: DWORD;
 begin
-  hr := S_OK;
-
-  ll := (cbHeader - SizeOf(DWORD));
-
-  if (SetFilePointerEx(hFile,
-                       ll,
-                       Nil,
-                       FILE_BEGIN) = False) then
-    hr := HRESULT_FROM_WIN32(GetLastError());
-
-
-  // Write the data size.
-  if SUCCEEDED(hr) then
-    hr := WriteToFile(hFile,
-                      cbAudioData,
-                      SizeOf(cbAudioData));
-
-  if SUCCEEDED(hr) then
-    begin
-        // Write the file size.
-        ll := sizeof(FOURCC);
-
-        if (SetFilePointerEx(hFile,
-                             ll,
-                             Nil,
-                             FILE_BEGIN) = False) then
-          hr := HRESULT_FROM_WIN32(GetLastError());
-    end;
-
-  if SUCCEEDED(hr) then
-    begin
-      cbRiffFileSize := cbHeader + cbAudioData - 8;
-
-      // NOTE: The "size" field in the RIFF header does not include
-      // the first 8 bytes of the file. i.e., it is the size of the
-      // data that appears _after_ the size field.
-
-      hr := WriteToFile(hFile,
-                        cbRiffFileSize,
-                        SizeOf(cbRiffFileSize));
-    end;
-
-    Result := hr;
+  if (cbHeader < 8) or (UInt64(cbHeader) + cbAudioData > MAXDWORD) then
+    Exit(E_INVALIDARG);
+  Position := cbHeader - SizeOf(DWORD);
+  if not SampleSetFilePointerEx(hFile,Position,nil,FILE_BEGIN) then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  Result := WriteToFile(hFile,cbAudioData,SizeOf(cbAudioData));
+  if FAILED(Result) then
+    Exit;
+  Position := 4;
+  if not SampleSetFilePointerEx(hFile,Position,nil,FILE_BEGIN) then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  RiffSize := cbHeader + cbAudioData - 8;
+  Result := WriteToFile(hFile,RiffSize,SizeOf(RiffSize));
 end;
 
-
-
-//-------------------------------------------------------------------
-//
-// Writes a block of data to a file
-//
-// hFile: Handle to the file.
-// p: Pointer to the buffer to write.
-// cb: Size of the buffer, in bytes.
-//
-//-------------------------------------------------------------------
 
 function WriteToFile(const hFile: THandle;
                      const p;
                      cb: DWORD): HResult;
 var
-  hr: HResult;
-  cbWritten: DWORD;
-  bResult: BOOL;
-
+  Written: DWORD;
 begin
-  cbWritten := 0;
-  hr := S_OK;
-
-  bResult := WriteFile(hFile,
-                       p,
-                       cb,
-                       cbWritten,
-                       Nil);
-  if not bResult then
-    hr := HRESULT_FROM_WIN32(GetLastError());
-
+  Written := 0;
+  if not WriteFile(hFile,p,cb,Written,nil) then
+    Exit(HRESULT_FROM_WIN32(GetLastError));
+  if Written <> cb then
+    Exit(HRESULT_FROM_WIN32(ERROR_WRITE_FAULT));
+  Result := S_OK;
   Application.ProcessMessages;
-
-  Result := hr;
 end;
 
 
@@ -715,6 +451,4 @@ begin
   bFlush := doFlush;
 end;
 
-
 end.
-

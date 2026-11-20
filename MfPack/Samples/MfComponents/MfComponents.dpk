@@ -31,12 +31,15 @@ package MfComponents;
 requires
   rtl,
   vcl,
+{$IFDEF WIN32}
   DesignIDE,
-  MfPackX400;
+{$ENDIF}
+  MfPackX410;
 
 contains
   QueueTimer in 'QueueTimer.pas',
   ThreadedQueueTimer in 'ThreadedQueueTimer.pas',
+  MfGuiRefreshTimer in 'MfGuiRefreshTimer.pas',
   MfPeakMeterEx in 'MfPeakMeterEx.pas',
   MfPeakMeter in 'MfPeakMeter.pas',
   MfPeakMeterMmcs in 'MfPeakMeterMmcs.pas',
@@ -48,7 +51,9 @@ contains
   MfFlangerEchoMFT in 'MfFlangerEchoMFT.pas',
   MfWasApiFxIntf in 'MfWasApiFxIntf.pas',
   MfWasApiFxComponentBase in 'MfWasApiFxComponentBase.pas',
+{$IFDEF WIN32}
   MfFxEditors in 'MfFxEditors.pas',
+{$ENDIF}
   MfFlangerEchoComponent in 'MfFlangerEchoComponent.pas',
   MfParametricEqComponent in 'MfParametricEqComponent.pas',
   MfCompressorLimiterMFT in 'MfCompressorLimiterMFT.pas',
@@ -60,6 +65,8 @@ contains
   MfAudioEndPoint in 'MfAudioEndPoint.pas',
   MfWasApiPlayerEngineComponent in 'MfWasApiPlayerEngineComponent.pas',
   WASAPIEngine in 'WASAPIEngine.pas',
+  MfPitchTempoMFT in 'MfPitchTempoMFT.pas',
+  MfPitchTempoComponent in 'MfPitchTempoComponent.pas',
   MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas';
 
 end.

@@ -10,7 +10,7 @@
 // Release date: 04-07-2025
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: Sample how to use the Audio Endpoint Volume API.
 //
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -79,7 +79,6 @@ uses
 
 type
   TVolumeControl = class(TForm)
-    MfAudioEndPoint1: TMfAudioEndPoint;
     Label1: TLabel;
     Edit1: TEdit;
     Label2: TLabel;
@@ -94,10 +93,12 @@ type
     procedure CheckBox1Click(Sender: TObject);
     procedure tbDbVolumeChange(Sender: TObject);
     procedure butCloseClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
+    FRefreshing: Boolean;
+    procedure RefreshVolume;
   public
-    { Public declarations }
+    MfAudioEndPoint1: TMfAudioEndPoint;
   end;
 
 var
@@ -107,6 +108,45 @@ implementation
 
 {$R *.dfm}
 
+procedure TVolumeControl.FormCreate(Sender: TObject);
+begin
+  // Owner-managed runtime creation keeps the form usable without an IDE package.
+  MfAudioEndPoint1 := TMfAudioEndPoint.Create(Self);
+  MfAudioEndPoint1.Name := 'MfAudioEndPoint1';
+  MfAudioEndPoint1.OnNotify := MfAudioEndPoint1Notify;
+  MfAudioEndPoint1.FollowDefaultDevice := True;
+  MfAudioEndPoint1.GetDefaultDevice;
+  RefreshVolume;
+end;
+
+
+procedure TVolumeControl.RefreshVolume;
+var
+  MinDb: Single;
+  MaxDb: Single;
+  StepDb: Single;
+begin
+  FRefreshing := True;
+  try
+    tbScVolume.Min := 0;
+    tbScVolume.Max := 1000;
+    MfAudioEndPoint1.GetVolumeRange(MinDb,MaxDb,StepDb);
+    tbDbVolume.Min := Trunc(MinDb * 10);
+    tbDbVolume.Max := Round(MaxDb * 10);
+    tbScVolume.Enabled := MfAudioEndPoint1.IMMDeviceInterface <> nil;
+    tbDbVolume.Enabled := tbScVolume.Enabled and (MinDb < MaxDb);
+    CheckBox1.Enabled := tbScVolume.Enabled;
+    tbScVolume.Position := Round(MfAudioEndPoint1.MasterScalarVolume * 1000);
+    tbDbVolume.Position := Round(MfAudioEndPoint1.MasterDbVolume * 10);
+    CheckBox1.Checked := MfAudioEndPoint1.Mute;
+    Edit1.Text := FormatFloat('0.0',MfAudioEndPoint1.MasterDbVolume);
+    Edit2.Text := FormatFloat('0.000',MfAudioEndPoint1.MasterScalarVolume);
+  finally
+    FRefreshing := False;
+  end;
+end;
+
+
 procedure TVolumeControl.butCloseClick(Sender: TObject);
 begin
   Close;
@@ -115,40 +155,45 @@ end;
 
 procedure TVolumeControl.CheckBox1Click(Sender: TObject);
 begin
-  MfAudioEndPoint1.Mute := BOOL(CheckBox1.Checked);
+  if FRefreshing then
+    Exit;
+  try
+    MfAudioEndPoint1.Mute := CheckBox1.Checked;
+  finally
+    RefreshVolume;
+  end;
 end;
 
 
 procedure TVolumeControl.MfAudioEndPoint1Notify(Sender: TObject;
-  pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA);
+                                             pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA);
 begin
- // Bogus, just for checking the pointer values.
- if (pNotify = Nil) then
-   Exit;
-
+  if pNotify <> nil then
+    RefreshVolume;
 end;
 
 
 procedure TVolumeControl.tbScVolumeChange(Sender: TObject);
-var
-  sVal: Single;
-
 begin
-  sVal := tbScVolume.Position / 10;
-  MfAudioEndPoint1.MasterScalarVolume := sVal;
-  Edit2.Text := sVal.ToString();
-
+  if FRefreshing then
+    Exit;
+  try
+    MfAudioEndPoint1.MasterScalarVolume := tbScVolume.Position / 1000;
+  finally
+    RefreshVolume;
+  end;
 end;
 
 
 procedure TVolumeControl.tbDbVolumeChange(Sender: TObject);
-var
-  sVal: Single;
-
 begin
-  sVal := tbDbVolume.Position / 10;
-  MfAudioEndPoint1.MasterDBVolume := sVal;
-  Edit1.Text := sVal.ToString();
+  if FRefreshing then
+    Exit;
+  try
+    MfAudioEndPoint1.MasterDbVolume := tbDbVolume.Position / 10;
+  finally
+    RefreshVolume;
+  end;
 end;
 
 end.

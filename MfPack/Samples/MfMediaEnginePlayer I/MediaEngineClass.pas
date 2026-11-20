@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This class uses the IMFMediaEngine based on extended HTML5.
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -104,6 +104,12 @@ type
                  rMsgPlay);
 
 
+  PEngineEvent = ^TEngineEvent;
+  TEngineEvent = record
+    Event: DWORD;
+    Param1: DWORD_PTR;
+    Param2: DWORD;
+  end;
   TcMediaEngine = class(TInterfacedPersistent, IMFMediaEngineNotify)
   protected
     {protected fields}
@@ -162,6 +168,13 @@ type
     procedure OnSupportedRatesChanged(event: DWORD);
     procedure OnAudioEndPointChanged(event: DWORD);
 
+  private
+    FDispatchWindow: HWND;
+    FClosing: Boolean;
+    FStopped: Boolean;
+    FStartedMF: Boolean;
+    procedure DispatchMessage(var Msg: TMessage);
+    function DispatchEvent(Event: DWORD; Param1: DWORD_PTR; Param2: DWORD): HRESULT;
   private
     {private fields}
     pr_Volume: Double;
@@ -239,151 +252,36 @@ implementation
 
 
 // CONSTRUCTOR
-constructor TcMediaEngine.Create(hwndVideo: HWND;
-                                 hwndEvent: HWND;
-                                 hwndCaller: HWND;
-                                 out hres: HResult);
-var
-  hr: HResult;
-  li_Attributes: IMFAttributes; // Attributes store
-  li_MediaEngineClassFactory: IMFMediaEngineClassFactory;
-
+constructor TcMediaEngine.Create(hwndVideo: HWND; hwndEvent: HWND; hwndCaller: HWND; out hres: HResult);
+var Attributes: IMFAttributes; Factory: IMFMediaEngineClassFactory; Base: IMFMediaEngine;
 begin
-  inherited Create();
-
-try
-  // store the given handles from the caller.
-  pt_hwndVideo := hwndVideo;
-  pt_hwndEvent := hwndEvent;
-  pt_hwndCaller := hwndCaller;
-
-  // Initialize Media Foundation platform
-  hr := InitMF();
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying to initialize Media Foundation.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := hr;
-      Exit();
-    end;
-
-
-  // IMFMediaEngineClassFactory
-  // Creates an instance of the Media Engine.
-  // Note: Before using this interface, MFStartup should be initialized.
-  // To get a pointer to this interface, call CoCreateInstance.
-  // The class identifier is CLSID_MFMediaEngineClassFactory.
-  //
-  // hr := CoCreateInstance(CLSID_MFMediaEngineClassFactory,
-  //                        Nil,
-  //                        CLSCTX_INPROC_SERVER,
-  //                        IID_IMFMediaEngineClassFactory,
-  //                        li_MediaEngineClassFactory);
-  // Or:
-  //
-  // In Delphi you could use CreateCOMObject function to do the same.
-  // pr_MediaEngineClassFactory is a reference to the IMFMediaEngineClassFactory interface
-  li_MediaEngineClassFactory := CreateCOMObject(CLSID_MFMediaEngineClassFactory) as IMFMediaEngineClassFactory;
-
-  if Not Assigned(li_MediaEngineClassFactory) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying initialize the MediaEngineClassFactory interface.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := E_POINTER;
-      Exit();
-    end;
-
-  // Call MFCreateAttributes to create the attribute store.
-  hr := MFCreateAttributes(li_Attributes,
-                           2);
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying to get an attributes store.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := hr;
-      Exit();
-     end;
-
-  // Set the required attributes
-  // See: https://docs.microsoft.com/windows/desktop/api/mfmediaengine/nf-mfmediaengine-imfmediaengineclassfactory-createinstance for
-  // more info about this.
-
-  // Set the callback pointer on the Media Engine.
-  hr := li_Attributes.SetUnknown(MF_MEDIA_ENGINE_CALLBACK,
-                                 Self);
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying to set the callback pointer on the Media Engine.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := hr;
-      Exit();
-    end;
-
-  // Sets a handle to a video playback window for the Media Engine.
-  // This also puts the engine in rendering mode.
-  hr := li_Attributes.SetUINT64(MF_MEDIA_ENGINE_PLAYBACK_HWND,
-                                pt_hwndVideo);
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying to set handle to the video playback window.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := hr;
-      Exit();
-    end;
-
-
-  // Create the mediaEngine
-  hr := li_MediaEngineClassFactory.CreateInstance(0,
-                                                  li_Attributes,
-                                                  IUnknown(pr_MediaEngine));
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('An error occured while trying to get the MediaEngine interface.'),
-                 LPCWSTR('Fatal Error!'),
-                 MB_ICONEXCLAMATION);
-      hres := hr;
-      Exit();
-     end;
-
-  // Create CriticalSection
-  pt_CritSec := TCriticalSection.Create();
-
-  // Note: local interface declarations will be released if going out of scope.
-  //       There is no need to release them manually.
-
-except
-  // Silent Exception
-  hres := E_UNEXPECTED;
-end;
-
+ inherited Create;
+ hres:=E_FAIL;
+ pt_hwndVideo:=hwndVideo;pt_hwndEvent:=hwndEvent;pt_hwndCaller:=hwndCaller;
+ pt_RequestMsg:=rMsgNone;pu_RenderingState:=rsInitialised;
+ pt_CritSec:=TCriticalSection.Create;
+ FDispatchWindow:=AllocateHWnd(DispatchMessage);
+ hres:=MFStartup(MF_VERSION);
+ if FAILED(hres) then Exit;
+ FStartedMF:=True;
+ hres:=CoCreateInstance(CLSID_MFMediaEngineClassFactory,nil,CLSCTX_INPROC_SERVER,IMFMediaEngineClassFactory,Factory);
+ if FAILED(hres) then Exit;
+ hres:=MFCreateAttributes(Attributes,2);
+ if SUCCEEDED(hres) then hres:=Attributes.SetUnknown(MF_MEDIA_ENGINE_CALLBACK,Self);
+ if SUCCEEDED(hres) then hres:=Attributes.SetUINT64(MF_MEDIA_ENGINE_PLAYBACK_HWND,hwndVideo);
+ if SUCCEEDED(hres) then hres:=Factory.CreateInstance(0,Attributes,Base);
+ if SUCCEEDED(hres) then hres:=Base.QueryInterface(IMFMediaEngineEx,pr_MediaEngine);
 end;
 
 
 // DESTRUCTOR
 destructor TcMediaEngine.Destroy();
 begin
-  // Release the global interfaces
-  pr_MediaEngine := Nil;
-  // Release CriticalSection
-  FreeAndNil(pt_CritSec);
-  // Close the media foundation platform and end COM
-  {void} CloseMF();
-  inherited Destroy();
+ Flush;
+ if FDispatchWindow<>0 then DeallocateHWnd(FDispatchWindow);
+ FreeAndNil(pt_CritSec);
+ if FStartedMF then MFShutdown;
+ inherited;
 end;
 
 
@@ -428,10 +326,7 @@ end;
 
 
 procedure TcMediaEngine.OnEmptied(event: DWORD);
-begin
-  // Implement code here
-  pr_MediaEngine :=  Nil;
-end;
+begin pu_RenderingState:=rsStopped;end;
 
 
 procedure TcMediaEngine.OnStalled(event: DWORD);
@@ -447,9 +342,7 @@ end;
 
 
 procedure TcMediaEngine.OnPause(event: DWORD);
-begin
-  pu_RenderingState := rsPaused;
-end;
+begin if not FStopped then pu_RenderingState:=rsPaused;end;
 
 
 procedure TcMediaEngine.OnLoadedMetaData(event: DWORD);
@@ -509,76 +402,10 @@ end;
 
 {$HINTS OFF}
 procedure TcMediaEngine.OnTimeUpdate(event: DWORD);
-var
-  hr: HResult; // Debug
-
-label
- doexit;
-
 begin
-  hr := S_OK;
-
-  if Not Assigned(pr_MediaEngine) then
-    Exit;
-
-  // Request handlers
-  //if pt_RequestMsg <> rMsgNone then
-
-  case pt_RequestMsg of
-  rMsgSetPosition:       begin
-                           hr := pr_MediaEngine.SetCurrentTime(pr_Position);
-                         end;
-  rMsgSetVolume:         begin
-                           hr := pr_MediaEngine.SetVolume(pr_Volume);
-                         end;
-  rMsgSetBalance:        begin
-                           hr := pr_MediaEngine.SetBalance(pr_Balance);
-                         end;
-  rMsgUpdateVideoStream: begin
-                           hr := pr_MediaEngine.UpdateVideoStream(Nil,
-                                                                  @pt_rcpdest,
-                                                                  Nil);
-                         end;
-  rMsgFlush:             begin
-                           hr := pr_MediaEngine.Shutdown();
-                           goto doexit;
-                         end;
-  rMsgPause:             begin
-                           hr := pr_MediaEngine.Pause();
-                           goto doexit;
-                         end;
-  rMsgStop:              begin
-                           if SUCCEEDED(pr_MediaEngine.Pause()) then
-                             begin
-                               hr := pr_MediaEngine.SetCurrentTime(0.0);
-                               SetWindowText(pt_hwndEvent,
-                                             'STOPPED');
-                             end;
-                           goto doexit;
-                         end;
-  end;
-
-  // Progress Information send to caller form.
-  pu_CurrPosition := pr_MediaEngine.GetCurrentTime;
-  // Send message to the caller, for instance to update a progressbar
-  PostMessage(pt_hwndCaller,
-              WM_TIMERUPDATE,
-              0,
-              0);
-
-  SetWindowText(pt_hwndEvent,
-                'Playing file ' + ExtractFileName(pu_SourceURL) +
-                '  Duration: ' + MfSecToStr(pu_Duration - pu_CurrPosition, false) +
-                ' / ' + MfSecToStr(pu_CurrPosition, true)
-                );
-
-doexit:
-  if Failed(hr) then
-    SetWindowText(pt_hwndEvent,
-                  Format('An error (%u) occured in procedure OnTimeUpdate', [hr]));
-
-  pt_RequestMsg := rMsgNone;
-
+ if pr_MediaEngine=nil then Exit;
+ pu_CurrPosition:=pr_MediaEngine.GetCurrentTime;
+ PostMessage(pt_hwndCaller,WM_TIMERUPDATE,0,0);
 end;
 {$HINTS ON}
 
@@ -728,7 +555,26 @@ end;
 //
 // Values below 1000 correspond to events defined in HTML 5 for media elements.
 //
-function TcMediaEngine.EventNotify(event: DWORD;
+function TcMediaEngine.EventNotify(Event: DWORD; Param1: DWORD_PTR; Param2: DWORD): HRESULT;
+var Packet: PEngineEvent;
+begin
+ Result:=S_OK;
+ if Event=Ord(MF_MEDIA_ENGINE_EVENT_NOTIFYSTABLESTATE) then begin SetEvent(THandle(Param1));Exit;end;
+ if FClosing then Exit;
+ New(Packet);Packet.Event:=Event;Packet.Param1:=Param1;Packet.Param2:=Param2;
+ if not PostMessage(FDispatchWindow,WM_APP+77,0,LPARAM(Packet)) then Dispose(Packet);
+end;
+procedure TcMediaEngine.DispatchMessage(var Msg: TMessage);
+var Packet: PEngineEvent;
+begin
+ if Msg.Msg=WM_APP+77 then begin
+  Packet:=PEngineEvent(Msg.LParam);
+  try if not FClosing then DispatchEvent(Packet.Event,Packet.Param1,Packet.Param2);
+  finally Dispose(Packet);end;
+  Msg.Result:=0;
+ end else Msg.Result:=DefWindowProc(FDispatchWindow,Msg.Msg,Msg.WParam,Msg.LParam);
+end;
+function TcMediaEngine.DispatchEvent(event: DWORD;
                                    param1: DWORD_PTR;
                                    param2: DWORD): HResult;
 var
@@ -923,16 +769,7 @@ end;
 
 
 procedure TcMediaEngine.StopPlayer();
-var
-  hMsg: Cardinal;
-begin
-  // Stop the player and release all it's resources
-  // This is handled in the OnTime event
-  pt_RequestMsg := rMsgFlush;
-  hMsg := GetCurrentThread();
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(hMsg);
-end;
+begin Flush;end;
 
 
 // IMPLEMENTED METHODS /////////////////////////////////////////////////////////
@@ -962,7 +799,7 @@ begin
   if FAILED(hr) then
     goto done;
 
-  hr := pr_MediaEngine.SetSource(pwURL);
+  hr := pr_MediaEngine.SetSource(WinApi.WinApiTypes.BSTR(PWideChar(WideString(pwURL))));
   if FAILED(hr) then
     goto done;
 
@@ -986,6 +823,7 @@ label
 
 begin
 
+ FStopped:=False;
  if pu_SourceURL <> '' then
    begin
      hr := pr_MediaEngine.EnableTimeUpdateTimer(True);
@@ -1006,13 +844,7 @@ end;
 
 procedure TcMediaEngine.Pause();
 begin
-  // Send request required, as this is an async method
-  // The request will be handled during the ontime eventhandler
-  pt_RequestMsg := rMsgPause;
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(GetCurrentThread());
-  SetWindowText(pt_hwndEvent,
-                'PAUSED');
+ if (pr_MediaEngine<>nil) and SUCCEEDED(pr_MediaEngine.Pause) then pu_RenderingState:=rsPaused;
 end;
 
 
@@ -1021,11 +853,10 @@ end;
 // At stop the mediafilepointer will be reset to it's begin and starts all over again when playbutton is pressed.
 procedure TcMediaEngine.Stop();
 begin
-  pt_RequestMsg := rMsgStop;
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(GetCurrentThread());
-  SetWindowText(pt_hwndEvent,
-                'STOPPED');
+ if pr_MediaEngine=nil then Exit;
+ FStopped:=True;
+ pr_MediaEngine.Pause;pr_MediaEngine.SetCurrentTime(0);
+ pu_CurrPosition:=0;pu_RenderingState:=rsStopped;
 end;
 
 
@@ -1033,44 +864,31 @@ end;
 // The caller has to release the player object and re-initialize,
 // before playing a new mediasource.
 procedure TcMediaEngine.Flush();
+var Msg: TMsg;
 begin
-  // Stop the player and release all it's resources
-  if pu_RenderingState <> rsPlaying then
-    pr_MediaEngine.Shutdown()  //direct handling
-  else
-    begin
-      // Handled in the OnTime event
-      pt_RequestMsg := rMsgFlush;
-      while (pt_RequestMsg <> rMsgNone) do
-        HandleMessages(GetCurrentThread());
-    end;
+ if FClosing then Exit;
+ FClosing:=True;
+ 
+ if pr_MediaEngine<>nil then pr_MediaEngine.Shutdown;
+ pr_MediaEngine:=nil;
+ 
+ if FDispatchWindow<>0 then
+  while PeekMessage(Msg,FDispatchWindow,WM_APP+77,WM_APP+77,PM_REMOVE) do Dispose(PEngineEvent(Msg.LParam));
+ pu_RenderingState:=rsFlushed;
 end;
 
 
 procedure TcMediaEngine.SetVolume(dVol: Double);
 begin
-
-  // Result := gi_MediaEngine.SetVolume(dVol); >> Don't use this directly,
-  // but let it be done in the eventhandler, to prevent application is going into zombie state.
-
-  pt_RequestMsg := rMsgSetVolume;
-  pr_Volume := dVol;
+ pr_Volume:=dVol;
+ if pr_MediaEngine<>nil then pr_MediaEngine.SetVolume(dVol);
 end;
 
 
 procedure TcMediaEngine.SetBalance(dBal: Double);
-var
-  hMsg: Cardinal;
-
 begin
-  // Result := gi_MediaEngine.SetBalance(dBal); >> Don't use this directly,
-  // but let it be done in the eventhandler, to prevent application is going into zombie state.
-  // That is because the player runs in async state.
-  pr_Balance := dBal;
-  pt_RequestMsg := rMsgSetBalance;
-  hMsg := GetCurrentThread();
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(hMsg);
+ pr_Balance:=dBal;
+ if pr_MediaEngine<>nil then pr_MediaEngine.SetBalance(dBal);
 end;
 
 
@@ -1083,15 +901,9 @@ end;
 
 // Remember, this is async organisation, so we deal with this request in the event handler.
 procedure TcMediaEngine.SetPosition(sTime: Double);
-var
-  hMsg: Cardinal;
-
 begin
-  pr_Position := sTime;
-  pt_RequestMsg := rMsgSetPosition;
-  hMsg := GetCurrentThread();
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(hMsg);
+ pr_Position:=sTime;
+ if pr_MediaEngine<>nil then pr_MediaEngine.SetCurrentTime(sTime);
 end;
 
 
@@ -1126,38 +938,10 @@ end;
 
 
 function TcMediaEngine.ResizeVideo(nr: TRect): HResult;
-var
-  hr: HResult;  //debug purpose
-
 begin
-  hr := E_NOINTERFACE;
-try
-
-  pt_CritSec.Enter;
-
-  if Assigned(pr_MediaEngine) then
-    begin
-
-      // Stop repaint
-      SetRedraw();
-
-      // We have to wait for a stable frame. If not, the function will "hang" and
-      // freezes the application. For this the UpdateVideoStream function call is
-      // executed in the OnTick handler
-
-      pt_rcpdest := nr;
-      pt_RequestMsg := rMsgUpdateVideoStream;
-      // wait for any more events to be processed.
-      WaitForSingleObject(pt_hwndVideo,
-                          INFINITE);
-
-      // Start repaint again
-      SetRedraw();
-    end;
-finally
-  pt_CritSec.Leave;
-  Result := hr;
-end;
+ if pr_MediaEngine=nil then Exit(E_POINTER);
+ pt_rcpdest:=nr;
+ Result:=pr_MediaEngine.UpdateVideoStream(nil,@pt_rcpdest,nil);
 end;
 
 

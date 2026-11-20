@@ -14,6 +14,7 @@ object FrmMain: TFrmMain
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnCloseQuery = FormCloseQuery
   OnShow = HandlFormShow
   TextHeight = 15
   object pcSetup: TPageControl

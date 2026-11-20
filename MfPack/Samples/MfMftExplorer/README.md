@@ -1,6 +1,6 @@
 # MfMftExplorer
   
-Version: 4.0.0  
+Version: 4.1.0  
 
 `MfMftExplorer` is a small teaching sample for discovering Media Foundation
 Transforms (MFTs) installed on a Windows system.
@@ -143,6 +143,6 @@ https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack  
   
 First release date: 04-08-2026  
-Final release date: 15/09/2026  
+Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.

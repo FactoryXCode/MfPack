@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Revision Version: 4.0.0
+// Revision Version: 4.1.0
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/08/2026 All                 Moby release  SDK 10.0.28000.2705  (Windows 11)
+// 15/11/2026 All                 Eels release  SDK 10.0.28000.2705 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX400
+// Related projects: MfPackX410
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -168,6 +168,7 @@ type
     procedure WMSizing(var message: TMessage); message WM_SIZING;
 
   public
+    destructor Destroy; override;
     { Public declarations }
 
     procedure SetWindowStyle(bFullScreen: Boolean);
@@ -195,6 +196,13 @@ uses
 
 
 // Subtitle routines ///////////////////////////////////////////////////////////
+destructor TFeMediaEnginePlayer.Destroy;
+begin
+ ReleaseEngine;
+ FreeAndNil(FloatingForm);
+ inherited;
+end;
+
 procedure TFeMediaEnginePlayer.CreateSubTitleLayer(bShowCustomText: Boolean);
 begin
   // Create the FloatingForm
@@ -272,6 +280,7 @@ begin
   // WParam 1 is a subtitle text event
   if (message.WParam = 1) then
     begin
+      if FloatingForm=nil then CreateSubTitleLayer(False);
       // Set font and show the subtitle
       FloatingForm.LayerFont := gi_MediaEngine.pr_TimedTextNotify.Font;
       FloatingForm.SubtitleText := gi_MediaEngine.pr_TimedTextNotify.SubTitle;
