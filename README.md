@@ -45,6 +45,9 @@ Those you can buy from Microsoft Store or download elsewhere.
 # Samples
   
 **MfVideoThumbNails sample**
+
+Demonstrates how to use the source reader to get video thumbnail images.  
+For indepth information see the [VideoThumbNails example and documentation.](https://learn.microsoft.com/en-us/windows/win32/medfound/videothumbnail-sample)
   
 *This sample app needs the D2D1 Api. If your Delphi version doesn't have the  
 D2D1 API, May 2019 update or later, use the D2D1 MfPack version.*
