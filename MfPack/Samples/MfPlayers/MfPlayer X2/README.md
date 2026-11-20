@@ -1,86 +1,58 @@
-﻿# MfPlayer X2
+﻿# MfCaptureVideoFromGPU
   
-MfPlayer X2 is an advanced Media Foundation player sample for Delphi.  
+Version: 4.1.0  
   
-The sample is based on the earlier MfPlayer X project, but replaces the floating  
-subtitle overlay with a real video-frame subtitle pipeline. Subtitle pixels can  
-now be composed into the decoded video for local playback, MP4 export, and  
-Chromecast streaming.  
+Description:  
+Demonstrates how to capture from screen using your videocard GPU.  
   
-MfPlayer X2 also demonstrates how Media Foundation playback, timed text,  
-custom MFT processing, Source Reader/Sink Writer transcoding, `IMFByteStream`,  
-mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together  
-inside one Delphi application.  
+NOTES:  
   
----
+* This release is updated for compiler version 3.2.2 (64 bit).
+* SDK version: 10.0.28000.2705 (Win 11)
+* Requires Windows 10 or later.
+* Minimum supported MfPack version: 4.1.0
   
-# Main differences from MfPlayer X
+\*\*This sample demonstrates how to capture from screen using the GPU of your video card\*\*  
   
-The earlier MfPlayer X sample demonstrates `IMFTimer`, language tags, media  
-properties, regular expressions, and subtitle formats such as SubRip,  
-MicroDVD, and WebVTT.  
+This is how it globally works:  
   
-MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture:
+1. TCaptureStreamEngine  
   
-* The floating subtitle form is no longer used for playback.
-* Subtitle text is composed directly into RGB32 video frames.
-* A custom synchronous `IMFTransform` inserts subtitles into the local playback
-  topology before the Enhanced Video Renderer.
-* The same compositor is reused by the export and Chromecast transcode paths.
-* Media Session topology construction and stream selection have been revised.
-* Player shutdown and COM/interface lifetime handling have been hardened.
-* H.264/AAC MP4 export with burned subtitles is included.
-* Chromecast device discovery, control, HTTP publication, and automatic
-  transcoding fallback are integrated.
+- Creates a \*\*D3D11\*\* device + immediate context.
+- Sets up Desktop Duplication on output 0.
   
----
+Each frame:  
+- AcquireNextFrame → \*\*ID3D11Texture2D\*\* (BGRA desktop).
+- Shows it via TPreviewRenderer.
+- Maps a \*\*DXGI\_FORMAT\_NV12\*\* staging texture for CPU write.
+- Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
+- Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
   
-# Features
+2. TGpuNV12Converter  
   
-## Local playback
+- Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
+- Draws a fullscreen quad:
+  - Pass 1: BGRA → Y.
+  - Pass 2: BGRA → UV (half res).
+- Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
   
-* Media Foundation Media Session based audio/video playback.
-* Play, pause, resume, stop, seek, and playback-rate control.
-* Audio-only, video-only, and audio/video source handling.
-* Stream selection dialog.
-* Corrected selection of usable audio and video streams.
-* Metadata and unsupported data streams are excluded from the playback topology.
-* Media properties and language-tag support.
-* Presentation-clock and `IMFTimer` integration.
-* Deterministic Media Session shutdown.
+3. TPreviewRenderer  
   
-## Timed text and subtitles
+- Keeps a DXGI swap chain bound to your panel handle.
+- For each frame, CopyResource the desktop texture into the backbuffer and Present.
   
-* SubRip (`.srt`) support.
-* MicroDVD (`.sub`) support.
-* WebVTT (`.vtt`) support.
-* Embedded textual subtitle streams exposed by Media Foundation.
-* Matroska SRT/UTF-8 and SSA/ASS subtitle import.
-* Sidecar-first, embedded-subtitle fallback selection by preferred language.
-* Language-tag parsing and subtitle-language selection.
-* Timestamp-based subtitle lookup.
-* `TMfMediaTimeline` fallback when samples do not provide usable timestamps.
-* Shared RGB32 subtitle compositor.
-* Custom in-place subtitle video MFT for local playback.
-* Subtitle bitmap caching and reset handling.
-* Subtitle burn-in without modifying the original source file.
-* The same embedded cue model feeds local playback, export, and Chromecast.
+4. Form  
   
-## Export
+- Creates the engine in FormCreate, hardcoded 1920x1080 @ 60fps.
+- Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
   
-* Source Reader based video and audio decoding.
-* RGB32 video-frame subtitle composition.
-* Media Foundation H.264 video encoding.
-* Media Foundation AAC audio encoding.
-* MP4 output through a Sink Writer.
-* Output to a normal file or an injected `IMFByteStream`.
-* Local preview while exporting.
-* Progress reporting.
-* Pause, resume, and cancellation support.
-* Video-only source support.
+The application is kept as simple as possible to show you the workflow and concepts of  
+screen capturing to a MP4 file and preview screen.  
   
-## Chromecast
+Project: Media Foundation - MFPack - Samples  
+Project location: https://github.com/FactoryXCode/MfPack-FPC  
   
+<<<<<<< Updated upstream
 * Chromecast and Google/Android TV discovery through mDNS/DNS-SD.
 * Simple VLC-style device-selection dialog.
 * No normal-user IP address, interface, or port configuration.
@@ -200,3 +172,10 @@ First release date: 01-02-2022
 Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved. 
+=======
+First release date: 13/08/2025  
+Final release date: 18/11/2026  
+  
+Copyright © FactoryX. All rights reserved.
+
+>>>>>>> Stashed changes
