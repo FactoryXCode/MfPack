@@ -21,6 +21,7 @@
   
 - MfPack Cast V2.2 API.
 - MfPack FxServe V1.1 API.
+- MfPAck HEOS API.
 - Media Foundation, WASAPI, XAudio2 and streaming samples.
   
   
@@ -32,10 +33,8 @@ SDK version: 10.0.28000.2705 (Windows 11).
   
   
 # Free Pascal / Lazarus  
-We are working on a MfPack port to FPC 3.2.2.  
+MfPack has been ported to FPC 3.2.2 / Lazarus 4.8.  
 You can find FPC-MfPack [here](https://github.com/FactoryXCode/MfPack-FPC).  
-It can take some while before we're done completely.  
-  
   
 **Important note:**  
 The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders.  
