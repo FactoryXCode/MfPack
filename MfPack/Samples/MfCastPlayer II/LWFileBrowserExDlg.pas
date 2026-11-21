@@ -270,7 +270,9 @@ type
                             const ARect: TRect;
                             const AText: string;
                             const AIconIndex: Integer;
-                            const ASelected: Boolean);
+                            const ASelected: Boolean;
+                            const ABackgroundColor: TColor;
+                            const AFont: TFont);
 
 
   protected
@@ -1479,13 +1481,18 @@ procedure TLWFileBrowserExDlg.DrawShellItem(ACanvas: TCanvas;
                                             const ARect: TRect;
                                             const AText: string;
                                             const AIconIndex: Integer;
-                                            const ASelected: Boolean);
+                                            const ASelected: Boolean;
+                                            const ABackgroundColor: TColor;
+                                            const AFont: TFont);
 var
   TextRect: TRect;
   IconY: Integer;
   Flags: UINT;
 
 begin
+
+  ACanvas.Font.Assign(AFont);
+  ACanvas.Brush.Style := bsSolid;
 
   if ASelected then
     begin
@@ -1494,8 +1501,8 @@ begin
     end
   else
     begin
-      ACanvas.Brush.Color := clWindow;
-      ACanvas.Font.Color := clWindowText;
+      ACanvas.Brush.Color := ABackgroundColor;
+      ACanvas.Font.Color := AFont.Color;
     end;
   ACanvas.FillRect(ARect);
 
@@ -1553,7 +1560,9 @@ begin
                 Rect,
                 TextValue,
                 IconIndex,
-                odSelected in State);
+                odSelected in State,
+                cbxLocations.Color,
+                cbxLocations.Font);
 end;
 
 
@@ -1615,7 +1624,9 @@ begin
                 Rect,
                 TextValue,
                 IconIndex,
-                odSelected in State);
+                odSelected in State,
+                lbFolders.Color,
+                lbFolders.Font);
 end;
 
 
