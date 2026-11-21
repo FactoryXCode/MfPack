@@ -21,15 +21,16 @@
   
 - MfPack Cast V2.2 API.
 - MfPack FxServe V1.1 API.
-- MfPAck HEOS API.
+- MfPack HEOS-CLI API.
 - Media Foundation, WASAPI, XAudio2 and streaming samples.
   
   
 # <u>Latest release:</u> 
   
-# MfPack  Version 4.1.0  
+# MfPack Version 4.1.0  
 Delphi XE2 (minimum recommended version: Delphi XE7) up to and including Delphi 13.1  
 SDK version: 10.0.28000.2705 (Windows 11).  
+This completely revised MfPack version covers many bug fixes and updates.
   
   
 # Free Pascal / Lazarus  
@@ -48,7 +49,7 @@ Those you can buy from Microsoft Store or download elsewhere.
 Demonstrates how to use the source reader to get video thumbnail images.  
 For indepth information see the [VideoThumbNails example and documentation.](https://learn.microsoft.com/en-us/windows/win32/medfound/videothumbnail-sample)
   
-*This sample app needs the D2D1 Api. If your Delphi version doesn't have the  
+*This sample app needs the D2D1 Api. If your Delphi version doesn't have the 
 D2D1 API, May 2019 update or later, use the D2D1 MfPack version.*
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
