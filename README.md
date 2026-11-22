@@ -366,11 +366,12 @@ Demonstrates how to use the SinkWriter to create a video from one or more bitmap
 Demonstrates how to use the SinkWriter to create a video from one or more image files including audio.
   
 ![](MfPack/Pic/ImageToVideo_3.jpg)
+
   
-![RL](MfPack/Pic/RL.svg)   
-
+![RL](MfPack/Pic/RL.svg)
+  
 ## LoopBackCapture Samples  
-
+  
 **LoopBackCapture Sample 1**
   
 This sample shows, how to capture sound from your soundcard using  and save this capture  
