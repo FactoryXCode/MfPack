@@ -44,52 +44,71 @@ Those you can buy from Microsoft Store or download elsewhere.
   
 # Samples
   
-**MfVideoThumbNails sample**
+## MfVideoThumbNails Sample
 
 Demonstrates how to use the source reader to get video thumbnail images.  
 For indepth information see the [VideoThumbNails example and documentation.](https://learn.microsoft.com/en-us/windows/win32/medfound/videothumbnail-sample)
   
-*This sample app needs the D2D1 Api. If your Delphi version doesn't have the 
-D2D1 API, May 2019 update or later, use the D2D1 MfPack version.*
+*This sample app needs the D2D1 Api. If your Delphi version doesn't have the D2D1 API, May 2019 update or later, use the D2D1 MfPack version.*
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
+![](MfPack/Pic/VideoThumbNailsSample.jpg)
   
----
+![RL](MfPack/Pic/RL.svg)
+
+## MediaEngine Player Samples  
+
+**MfMediaEnginePlayer 1 Sample**  
+
+This is the basic class of MfMediaEnginePlayer (IMFMediaEngine), containing the necessary methodes to play a mediafile.
   
-**MediaEngine Player 2 & IMFTimedText sample**
   
-*MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using  
-the IMFTimedTextNotify interface.*
+**MfMediaEnginePlayer 2 & IMFTimedText Sample**
+  
+MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using the IMFTimedTextNotify interface.
+The application has options to use a layer to project subtitles or burned in subtitles in the videostream.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
   
 ---
+---  
   
-**MfTranscode sample**
+## MfTranscode Samples
   
 Demonstrates using the transcode API to transcode a source file (audio or video) to  
-a different format (audio or video) supported by Media Foundation.  
+a different format (audio or video).  
   
-Supported, but not limited, formats in this sample are:
+**MfTranscode Sample 1**
+
+Demonstrates using the transcode API to transcode a source file to a Windows Media format (wma or wmv).  
+
   
-- Audio
-   * Waveform Audio File Format (wav)
-   * MPEG Audio Layer III (mp3)
-   * Free Lossless Audio Codec (flac)
-   * MPEG-4 Audio (m4a)
-   * Windows Media Audio (wma)
+**MfTranscode Sample 2**  
   
-- Video
-   * Audio Video Interleave (avi)
-   * MPEG-4 Video with AAC Audio (mp4)
-   * MPEG-4 Video with Dolby AC-3 Audio (mp4) 
-   * Windows Media Video (wmv)
+Demonstrates using the transcode API to transcode a source file (audio or video) to a different format (audio or video) supported by Media Foundation.  
+The sample audio can be configured in detail, dependent of the audio codec supported by Media Foundation.  
+The video format can be configured within the margins of the resolution format.  
+  
+Supported, but not limited, formats in this sample are:  
+  
+Audio  
+Waveform Audio File Format (wav)  
+MPEG Audio Layer III (mp3)  
+Free Lossless Audio Codec (flac)  
+MPEG-4 Audio (m4a)  
+Windows Media Audio (wma)  
+  
+Video   
+Audio Video Interleave (avi)  
+MPEG-4 Video with AAC Audio (mp4)  
+MPEG-4 Video with Dolby AC-3 Audio (mp4)  
+Windows Media Video (wmv)  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
   
 ---
+---  
   
-**MfSimpleCapture sample**
+## MfSimpleCapture Sample
   
 This example shows, how you have to implement capturing within a session.  
 Note: The old MS sample used the deprecated IMFplayer interface.  
@@ -97,75 +116,101 @@ Note: The old MS sample used the deprecated IMFplayer interface.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
   
 ---
+---  
+
+## MfComponents Samples
+
+This package contains the following -installable- components:  
   
+* TQTimer - Queue Timer component. For precise timing.
+* MfAudioEndPoint - Audio EndPoint component that responds to volume changes.
+  Uses: IAudioEndpointVolumeEx, IAudioEndpointVolumeCallback and IMMDeviceEnumerator.
+* TThreadedQTimer - A threaded queue timer (experimental)
+
+***Visual controls***
+
 **MfPeakMeter, MfPeakMeterEx MfPeakMeterMmcs component samples**
   
-An example about how to create a MfPeakMeter control. This sample is part of the  
-Samples/MfComponents package.  
+An example about how to create a MfPeakMeter control.
+This sample is part of the Samples\MfComponents package.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
   
-An example about how to create a MfAudioVisualizer control - A visual component that  
-uses  loopback, Peak/RMS, optional spectrum bars or VU.  
+An example about how to create a MfAudioVisualizer control - A visual component that uses loopback, Peak/RMS, optional spectrum bars or VU.  
 This sample is part of the Samples/MfComponents package.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
   
+**WASAPI player / dsp / mft components:**
+  
+* MfWasApiPlayerEngineComponent - WasApi renderer component supporting the MfWasApiEffectsRack and effects.
+* MfParametricEqComponent - Parametric equalizer component.
+* MfFlangerEchoComponent - Flanger / Echo component.
+* MfCompressorLimiterComponent - Compressor / Limiter component.
+* MfPitchTempoComponent - Pitching / tempo component.
+* MfChorusComponent - Chorus component.
+* MfWasApiEffectsRack - Effects rack component that controls FX DSP's and MFT's.
+  
+Note: On how to use these components, please read the WasApiPlayer sample 5 documentation.
+  
+**Other files and helpers for the components.**  
+  
+* PcmLib.pas - A very convenient unit that is capable of recoding diverse WAV formats.
+* WASAPIEngine.pas - Universal WASAPIEngine .
+  
 ---
+---  
   
-**AudioClip, AudioClipEx and AudioClipEx2 samples**
+## AudioClip, AudioClipEx and AudioClipEx2 samples
   
-Demonstrates using the IMFSourceReader API to extract uncompressed media data from  
-a media file. This sample application reads audio data from a media file and writes  
-the uncompressed audio to a WAVE file.  
-The AudioClipEx sample demonstrates using the IMFSourceReader and 
-IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.  
+Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file.
+This sample application reads audio data from a media file and writes the uncompressed audio to a WAVE file.  
+The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.  
   
 The AudioClipEx2 sample demonstrates using the IMFSourceReader,  
-IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a  
-media file and write the audio to a wav. It also uses threads for better responsiveness.  
+IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a media file and write the audio to a wav.
+It also uses threads for better responsiveness.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
   
 ---
+---  
 
-**MfPlayer**
+## MfPlayer Samples  
   
 Player samples, based on the original Microsoft CPlayer sample.  
 There are 4 samples in 4 project degrees.  
   
-- *MfPlayer I : The basic player sample.*
-- *MfPlayer II : The extended version I sample.*
-- *MfPlayer X : This is an example that shows how to use the IMFTimer, language tags,*  
-  *subtitles (SubRip, MicroDvd and WebVTT), RegEx (Regular Expressions) and how to get media properties.*
-- *MfPlayer X2 : This example is based on the MfPlayer X project, but replaces the floating*
-  *subtitle overlay with a real video-frame subtitle pipeline.*
-  *Subtitles are now injected into the decoded video for local playback.*
-  *Added MP4 export and Chromecast/Android TV/Google TV streaming support.*
-  *The Player also demonstrates how Media Foundation playback, timed text,*
-  *MFT processing, Source Reader/Sink Writer transcoding, IMFByteStream,*
-  *mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together*
-  *inside a Delphi application, without using 3th party components.*
+- **MfPlayer I** : The basic player sample.  
+- **MfPlayer II** : The extended version I sample.  
+- **MfPlayer X** : This is an example that shows how to use the IMFTimer, language tags, subtitles (SubRip, MicroDvd and WebVTT), RegEx (Regular Expressions) and how to get media properties.  
+- **MfPlayer X2** : This example is based on the MfPlayer X project, but replaces the floating subtitle overlay with a real video-frame subtitle pipeline.  
+  Subtitles are now injected into the decoded video for local playback.  
+  Added MP4 export and Chromecast/Android TV/Google TV streaming support.  
+  The Player also demonstrates how Media Foundation playback, timed text,  
+  MFT processing, Source Reader/Sink Writer transcoding, IMFByteStream,  
+  mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together  
+  inside a Delphi application, without using 3th party components.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
 
-
 ---
+---  
   
-**MfProtectedPlayback**
+## MfProtectedPlayback Sample
   
-This sample demonstrates playback of clear and protected media with  
-Microsoft Media Foundation and the Protected Media Path (PMP). It is a close  
-Delphi translation of Microsoft's `ProtectedPlayback` C++ sample and uses the  
-Media Foundation declarations supplied by MfPack.  
+This sample demonstrates playback of clear and protected media with Microsoft Media Foundation and the Protected Media Path (PMP).
+It is a close Delphi translation of Microsoft's `ProtectedPlayback` C++ sample and uses the Media Foundation declarations supplied by MfPack.  
   
-The translation of this Microsoft sample preserves the structure, class names, method names, and
-control flow of the original sample wherever Delphi permits them. 
+The translation of this Microsoft sample preserves the structure, class names, method names, and control flow of the original sample wherever Delphi permits them. 
 The sample includes the original C++ code for references.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfProtectedPlayback.png)
 
 ---
+---  
+  
+## Volume Ducking Samples  
   
 **Ducking Media Player**
   
@@ -187,6 +232,9 @@ Select 'Use default input device' in the application to hear the routed input.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
   
 ---
+---  
+
+## WebCamStreamer Samples  
   
 **MfSimpleWebCamStreamer**
   
@@ -201,6 +249,7 @@ media server on a local network.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleWebCamStreamer.png)
   
 ---
+---  
   
 **MfWebCamStreamer**
   
@@ -221,10 +270,14 @@ The browser player includes:
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfWebCamStreamer.png)
   
 ---
+---  
+
+## CastPlayer Samples  
+
   
-**MfSimpleCastPlayer Sample**
+**MfSimpleCastPlayer Sample**  
   
-**This sample demonstrates:**
+**This sample demonstrates:**  
   
 - Asynchronous Chromecast discovery.
 - Device selection.
@@ -235,11 +288,10 @@ The browser player includes:
   files are preferred when the same language exists in both sources.
 - Exact embedded-track selection and subtitle switching while casting.
   
-The sample enables the optional Media Foundation conversion stack. Compatible  
-MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. Containers such  
-as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
-Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for  
-full details using the MfPack Cast API.  
+The sample enables the optional Media Foundation conversion stack.
+Compatible MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play.
+Containers such as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
+Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCastPlayer.png)
   
@@ -251,25 +303,18 @@ This it the extended version of MfSimpleCastPlayer.
   
 **This sample demonstrates the following additions of MfSimpleCastPlayer:**
   
-- Casting a YouTube URL through an application-provided
-  `IMfCastSourceResolver` implementation;
-- A fast YouTube mode that resolves a combined H.264/AAC stream for direct
-  playback;
-- A best-quality YouTube mode that downloads separate video and audio streams
-  and merges them into an MP4 file;
+- Casting a YouTube URL through an application-provided `IMfCastSourceResolver` implementation;
+- A fast YouTube mode that resolves a combined H.264/AAC stream for direct playback;
+- A best-quality YouTube mode that downloads separate video and audio streams and merges them into an MP4 file;
 - Local video and audio preview through the `TMfCast` main interface;
 - Audio-only playback with optional JPG, PNG, BMP, or GIF artwork;
-- Heartbeat monitoring and automatic cleanup when the receiver is switched
-  off or stops responding.
+- Heartbeat monitoring and automatic cleanup when the receiver is switched off or stops responding.
   
 The sample enables the optional Media Foundation conversion stack.  
-Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct  
-playback. Other containers and codecs, including AVI and MKV when required,  
-are remuxed or converted to fragmented MP4 and published by the local HTTP  
-server.  
+Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct playback.
+Other containers and codecs, including AVI and MKV when required, are remuxed or converted to fragmented MP4 and published by the build-in HTTP server.  
   
-Please read `MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt` for full details  
-about using the MfPack Cast API.  
+Please read [MfPack_Chromecast_API_White_Paper.txt](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details about using the MfPack Cast API.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCastPlayer.png)
   
@@ -286,6 +331,9 @@ It avoids installing 3th party apps viewing web content like YouTube.
 There is some trade off: The quality of origin is downgraded to the monitor resolution it play's on.
 
 ---
+---  
+
+## Frame/Snapshot Capture Samples  
   
 **MFFrameCapture sample**
   
@@ -313,21 +361,29 @@ This sample also demonstrates how to use the MfMediaTypeDebug API.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
   
 ---
+---  
+
+## SinkWriterToEncodeVideo Samples  
   
-**SinkWriterToEncodeVideo Sample**
   
-Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.  
-Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.  
+**Example 1**  
+Creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.  
+  
+**Example 2**  
+Demonstrates how to use the SinkWriter to create a video from one or more bitmap files.  
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
   
-*Example 3*  
+**Example 3**  
 Demonstrates how to use the SinkWriter to create a video from one or more image files including audio.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
   
 ---
-  
+---  
+
+## LoopBackCapture Samples  
+
 **LoopBackCapture Sample 1**
   
 This sample shows, how to capture sound from your soundcard using  and save this capture  
@@ -341,30 +397,22 @@ with the quality that is supported by your soundcard.
   
 This sample demonstrates how to capture system audio either from a  
 specific process tree or for all process except  
-a process tree and the use of ActivateAudioInterfaceAsync Win32 API  
-with a new initialization structure.  
-The new data structure makes it possible to restrict captured  
-audio data to that rendered by a specific process and any of its child processes.  
-Windows 10 has always supported capturing all audio that is played on  
-an audio endpoint (referred to as "system" loopback capture),  
-which captures all audio from all apps that are playing sounds on  
-the chosen audio endpoint.  
+a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.  
+The new data structure makes it possible to restrict captured audio data to that rendered by a specific process and any of its child processes.  
+Windows 10 has always supported capturing all audio that is played on an audio endpoint (referred to as "system" loopback capture),  
+which captures all audio from all apps that are playing sounds on the chosen audio endpoint.  
   
 With the new structure, only audio from the specified process,  
 and its children, will be captured. Audio rendered by other processes will not be captured.  
-A flag is also provided to reverse the behavior, capturing all system  
-audio *except* those from the the specified process (and its children).  
+A flag is also provided to reverse the behavior, capturing all system audio *except* those from the the specified process (and its children).  
 Furthermore, the capture is not tied to a specific audio endpoint,  
-eliminating the need to create a separate IAudioClient to capture from each physical  
-audio endpoint.  
+eliminating the need to create a separate IAudioClient to capture from each physical audio endpoint.  
   
 If the processes whose audio will be captured does not have any audio rendering streams,  
 then the capturing process receives silence.  
   
-It also demonstrates how to get a process by using the tlhelp32 API,  
-to list a snapshot of running processes and be able to pick one.  
-The application is provided with a dialog to select a running process from  
-the process tree you want to pick and has a button to get the current PID of your application.  
+It also demonstrates how to get a process by using the tlhelp32 API, to list a snapshot of running processes and be able to pick one.  
+The application is provided with a dialog to select a running process from the process tree you want to pick and has a button to get the current PID of your application.  
   
 The application is using MMCSS and runs the rendering part in a separate thread.  
   
@@ -389,12 +437,14 @@ buffersize for better sound to eliminate buffer related gliches.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
   
 ---
-  
-**XAudio2Player Basic Player**
+
+## XAudio2Player Samples  
   
 XAudio2 is the long-awaited replacement for DirectSound.  
 It addresses several outstanding issues and feature requests, like low latency etc.  
   
+**XAudio2Player Basic Player Sample**
+    
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.  
 The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.  
 It shows you the basics of using XAudio2 without formatting the mediatypes yourself.  
@@ -453,8 +503,9 @@ making it suitable for large audio files (e.g. FLAC > 100 MB).
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
   
 ---
+---  
 
-## WASAPI Player samples
+## WASAPI Player Samples
   
 **Player Sample 1**
   
@@ -503,7 +554,7 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 - Thread-safe **GUI and engine** command routing
 - Persistent EQ settings stored via **INI file**
   
-## Features
+**Features**
   
 - Glitch-free real-time playback.
 - Low / Mid / High EQ with live control.
@@ -519,13 +570,13 @@ This is not a sample for absolute beginners. Please read the documents included 
   
 ---
   
-** Player Sample 5**
+**Player Sample 5**
   
 This is a non-visual components application sample.  
 The sample shows you how to build a real-time audio playback engine for  
 Windows using Delphi style components.  
   
-## Features  
+**Features**  
 This sample also demonstrates how to create and implement a:
   
 - Compressor/Limiter component using a MFT.
@@ -541,8 +592,11 @@ Please read the documents included with this sample.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer5.png)
   
 ---
+---  
+
+## Capture Video From GPU Samples
   
-**MfCaptureVideoFromGPU Sample 1**
+**MfCaptureVideoFromGPU Sample 1**  
   
 This sample demonstrates how to capture from screen using your videocard GPU.  
   
@@ -566,8 +620,36 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
   
 ---
+---  
+
+---
+**MfMftExplorer sample**
+
+This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
+Windows system and their properties. 
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMftExplorer.png)
   
-***Complex samples***
+---
+  
+***Educational samples***
+  
+**MfCustomMFT samples**  
+Small, beginner-oriented examples that introduce custom Media Foundation  
+Transforms one step at a time.  
+The project has 15 samples where each sample is lifted from the previous one.  
+At sample 7 a programmer should be able to build a simple registered MFT and  
+how to use it in Media Foundation.  
+  
+[Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
+  
+  
+![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
+
+---
+---  
+  
+## Complex Samples
   
 **RDJ Mixer sample**  
 This application demonstrates how to build an audio mixer,  
@@ -617,32 +699,9 @@ This sample has been moved to the [RDJ repository](https://github.com/FactoryXCo
 ![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJPro_Interface_s.png)
   
 ---
-**MfMftExplorer sample**
-
-This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
-Windows system and their properties. 
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMftExplorer.png)
+---  
   
----
-***Educational samples***
-  
-**MfCustomMFT samples**  
-Small, beginner-oriented examples that introduce custom Media Foundation  
-Transforms one step at a time.  
-The project has 15 samples where each sample is lifted from the previous one.  
-At sample 7 a programmer should be able to build a simple registered MFT and  
-how to use it in Media Foundation.  
-  
-[Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
-  
-  
-![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
-Sample 1
-  
----
-  
-***Media Servers***
+# Media Servers
 
 **FxServe**
   
@@ -670,7 +729,8 @@ The Caddy version in MfPack is packed in a zip file together with the needed fil
 local PC. The Caddy version also has a CaddyAdmin app, to install,  
 configure and control Caddy as a Windows service.  
   
----
+---  
+
 ***MfCast V2.2***
   
 MfCast is an independent Chromecast subsystem for Delphi.
@@ -695,7 +755,8 @@ Samples using MfCast are:
 - MfPlayer X2
 - RDJ Pro.
   
----
+---  
+  
 ***HEOS CLI and AVR***
 
 FactoryX HEOS CLI provides Delphi APIs for controlling HEOS-enabled audio devices from Denon and Marantz.
@@ -724,7 +785,7 @@ You can find the complete HEOS/AVR Delphi API and samples [HERE](https://github.
   
 ---
   
-***Tools***
+# Tools
   
 **HResult Lookup Tool Application**
   
