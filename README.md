@@ -187,7 +187,7 @@ There are 4 samples in 4 project degrees.
   mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together  
   inside a Delphi application, without using 3th party components.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
+![](MfPack/Pic/MfMediaPlayer_X.jfif)
 
 ![RL](MfPack/Pic/RL.svg)   
   
@@ -199,7 +199,7 @@ It is a close Delphi translation of Microsoft's `ProtectedPlayback` C++ sample a
 The translation of this Microsoft sample preserves the structure, class names, method names, and control flow of the original sample wherever Delphi permits them. 
 The sample includes the original C++ code for references.  
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfProtectedPlayback.png)
+![](MfPack/Pic/MfProtectedPlayback.png)
 
 ![RL](MfPack/Pic/RL.svg)   
   
@@ -211,7 +211,7 @@ This sample implements a simple media player that responds to the "ducking"
 feature in Windows 7 and later. It also implements a volume control which tracks  
 to the volume control in the volume mixer.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
+![](MfPack/Pic/DuckingMediaPlayerSample.jpg)
   
 ---
   
@@ -222,7 +222,7 @@ ducking feature. In capture mode, audio from the default communications
 capture endpoint is routed to the default playback endpoint.  
 Select 'Use default input device' in the application to hear the routed input.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
+![](MfPack/Pic/ChatDemo.jfif)
   
 ![RL](MfPack/Pic/RL.svg)  
 
@@ -238,7 +238,7 @@ It demonstrates the complete path from Media Foundation capture to a
 browser-playable live stream without requiring another external  
 media server on a local network.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleWebCamStreamer.png)
+![](MfPack/Pic/MfSimpleWebCamStreamer.png)
   
 ![RL](MfPack/Pic/RL.svg)  
   
@@ -258,7 +258,7 @@ The browser player includes:
 - Live viewer count with privacy-masked IP addresses;
 - Sound, playback, reconnect, and live-edge controls.
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfWebCamStreamer.png)
+![](MfPack/Pic/MfWebCamStreamer.png)
   
 ![RL](MfPack/Pic/RL.svg)  
 
@@ -283,7 +283,7 @@ Compatible MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play.
 Containers such as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
 Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCastPlayer.png)
+![](MfPack/Pic/MfSimpleCastPlayer.png)
   
 ---
   
@@ -304,9 +304,9 @@ The sample enables the optional Media Foundation conversion stack.
 Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct playback.
 Other containers and codecs, including AVI and MKV when required, are remuxed or converted to fragmented MP4 and published by the build-in HTTP server.  
   
-Please read [MfPack_Chromecast_API_White_Paper.txt](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details about using the MfPack Cast API.  
+Please read [MfPack_Chromecast_API_White_Paper.txt](MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details about using the MfPack Cast API.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCastPlayer.png)
+![](MfPack/Pic/MfCastPlayer.png)
   
 ---
 
@@ -328,7 +328,7 @@ There is some trade off: The quality of origin is downgraded to the monitor reso
   
 Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
+![](MfPack/Pic/MfFrameCapture.png)
 
 ---
   
@@ -337,7 +337,7 @@ Demonstrates how to capture an image (synchronous or A-synchronous) using the IM
 Demonstrates how to capture a still image or so called snapshot (A-synchronous) from a    
 capture device such as a webcam or camera using the IMFSourceReader.
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CameraFrameCaptureSample.png)
+![](MfPack/Pic/CameraFrameCaptureSample.png)
   
 ---
   
@@ -347,7 +347,7 @@ Demonstrates how to capture a snapshot or a recording (A-synchronous) from a cap
 such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.  
 This sample also demonstrates how to use the MfMediaTypeDebug API.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
+![](MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
   
 ![RL](MfPack/Pic/RL.svg)  
 
@@ -360,12 +360,12 @@ Creates a simple green bitmap (640x480) and store it to a file with a length of 
 **Example 2**  
 Demonstrates how to use the SinkWriter to create a video from one or more bitmap files.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
+![](MfPack/Pic/SinkWriterSample.png)
   
 **Example 3**  
 Demonstrates how to use the SinkWriter to create a video from one or more image files including audio.
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
+![](MfPack/Pic/ImageToVideo_3.jpg)
   
 ![RL](MfPack/Pic/RL.svg)   
 
@@ -376,7 +376,7 @@ Demonstrates how to use the SinkWriter to create a video from one or more image 
 This sample shows, how to capture sound from your soundcard using  and save this capture  
 with the quality that is supported by your soundcard.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
+![](MfPack/Pic/LoopBackCapture.png)
   
 ---
   
@@ -403,7 +403,7 @@ The application is provided with a dialog to select a running process from the p
   
 The application is using MMCSS and runs the rendering part in a separate thread.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
+![](MfPack/Pic/LoopbackCapture2.png)
   
 ---
   
@@ -421,7 +421,7 @@ buffersize for better sound to eliminate buffer related gliches.
    - *Possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or* 
      *the soundcard's audio format (including Uncompressed IEEE floating-point audio).*
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
+![](MfPack/Pic/ThreadedLoopbackCapture.png)
   
 ---
 
@@ -438,7 +438,7 @@ It shows you the basics of using XAudio2 without formatting the mediatypes yours
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
+![](MfPack/Pic/XAudio_Basic_Sample.png)
   
 ---
   
@@ -449,7 +449,7 @@ The sample uses the MfPeakMeter component. This requires that you install the Mf
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
 It also has a pitch control.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)
+![](MfPack/Pic/XAudio2_Sample2.png)
   
 ---
   
@@ -462,7 +462,7 @@ It shows you how to implement events and methods instead of using messages from 
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
+![](MfPack/Pic/XAudio2_Sample3.png)
   
 ---
   
@@ -487,7 +487,7 @@ Unlike earlier samples, this version does not load the entire audio file into me
 It uses Media Foundation streaming decode + multiple XAudio2 buffers,  
 making it suitable for large audio files (e.g. FLAC > 100 MB).  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
+![](MfPack/Pic/XAudio2_Sample4.png)
   
 ![RL](MfPack/Pic/RL.svg)   
 
@@ -506,7 +506,7 @@ IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.  
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
+![](MfPack/Pic/WasApiPlayer1.png)
   
 ---
   
@@ -515,7 +515,7 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 This sample is based on Sample 1, but includes full threaded code,  
 using threadsafe events and also uses a custom MFT for bass and treble control.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
+![](MfPack/Pic/WasApiPlayer2.png)
   
 ---
   
@@ -525,7 +525,7 @@ This sample is based on Sample 2, instead of a bass/treble MFT, this one is equi
 a 3 band High, Mid(Peaking or Notch) and Low EQ MFT and a spectrum analizer.  
 It also stores and read back settings for the MFT.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
+![](MfPack/Pic/WasApiPlayer3.png)
   
 ---
   
@@ -552,7 +552,7 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 **Note:**  
 This is not a sample for absolute beginners. Please read the documents included with this sample.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer4.png)
+![](MfPack/Pic/WasApiPlayer4.png)
   
 ---
   
@@ -575,7 +575,7 @@ This sample also demonstrates how to create and implement a:
 This is not a sample for absolute beginners.  
 Please read the documents included with this sample.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer5.png)
+![](MfPack/Pic/WasApiPlayer5.png)
   
 ![RL](MfPack/Pic/RL.svg)   
 
@@ -585,7 +585,7 @@ Please read the documents included with this sample.
   
 This sample demonstrates how to capture from screen using your videocard GPU.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
+![](MfPack/Pic/CaptureVideoFromGPUSample.png)
   
 ---
   
@@ -602,7 +602,7 @@ dedicated recorder unit.
 **Note:**  
 You need good knowledge of Media Foundation, DirectX and GPU processing.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
+![](MfPack/Pic/MfCaptureVideoFromScreen2s.png)
   
 ![RL](MfPack/Pic/RL.svg)   
   
@@ -611,7 +611,7 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
 This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
 Windows system and their properties. 
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMftExplorer.png)
+![](MfPack/Pic/MfMftExplorer.png)
   
 ---
   
@@ -624,10 +624,10 @@ The project has 15 samples where each sample is lifted from the previous one.
 At sample 7 a programmer should be able to build a simple registered MFT and  
 how to use it in Media Foundation.  
   
-[Read about it in details](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Samples/MfCustomMFT/Readme.md)
+[Read about it in details](MfPack/Samples/MfCustomMFT/Readme.md)
   
   
-![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
+![Sample 1](MfPack/Pic/MfCustomMft_S1.png)
 
 ![RL](MfPack/Pic/RL.svg)   
   
@@ -775,7 +775,7 @@ This tool can be used to determine HResult or Error codes returned by the Window
 featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and  
 the "System.SysUtils.SysErrorMessage" function, that provides the localized translation (language of your OS) of the HResult.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png)
+![](MfPack/Pic/HResultLookUpToolApp.png)
   
   
 **(c) FactoryX. All rights reserved.**
