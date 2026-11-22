@@ -71,6 +71,7 @@ uses
   WinApi.WinApiTypes,
   {System}
   System.Types,
+  System.Math,
   System.SysUtils,
   System.Variants,
   System.Classes,
@@ -98,6 +99,8 @@ uses
 
 
 type
+  TSubtitleMode = (smTransparentWindow, smBurnedIn);
+
   TFeMediaEnginePlayer = class(TForm)
     pnlControls: TPanel;
     butStop: TButton;
@@ -118,6 +121,9 @@ type
     smFourByThree: TMenuItem;
     smSixteenByNine: TMenuItem;
     smCinema: TMenuItem;
+    mnuSubtitles: TMenuItem;
+    mnuTransparentSubtitles: TMenuItem;
+    mnuBurnedSubtitles: TMenuItem;
     dlgOpenUrl: TOpenDialog;
     trbBalance: TTrackBar;
     cbMute: TCheckBox;
@@ -144,14 +150,31 @@ type
     procedure smSixteenByNineClick(Sender: TObject);
     procedure smCinemaClick(Sender: TObject);
     procedure smFourByThreeClick(Sender: TObject);
+    procedure SubtitleModeClick(Sender: TObject);
 
   private
     { Private declarations }
+    FSubtitleMode: TSubtitleMode;
+    FSubtitleText: string;
+    FSubtitleFont: TFont;
+    FVideoFrame, FPresentedFrame: TBitmap;
+    FFrameSurface: IWICBitmap;
+    FFramePixels: TBytes;
+    FVideoPaint: TPaintBox;
+    FFrameTimer: TTimer;
+    FCompositeDirty, FHaveVideoFrame: Boolean;
+
     pb_IsFullScreen: Boolean;
     ph_FloatingForm: HWnd;
     pi_AspectRatio: Single;
     wic_ImagingFactory: IWICImagingFactory;
 
+    procedure UpdateSubtitles;
+    procedure ClearSubtitles;
+    procedure FrameTimer(Sender: TObject);
+    procedure PaintVideo(Sender: TObject);
+    procedure ComposeFrame;
+    procedure DrawBurnedSubtitles;
     procedure OnMeTimerUpdate(var message: TMessage); message WM_TIMERUPDATE;
     // TimedTextNotify messages
     procedure OnTextNotify(var message: TMessage); message WM_TIMEDTEXTNOTIFY;
@@ -175,8 +198,7 @@ type
     procedure ResetInterface();
     procedure RealignInterface();
     function ReleaseEngine(): HResult;
-    // test
-    function GetBitmap(): HResult;
+
 
   end;
 
@@ -198,13 +220,20 @@ uses
 // Subtitle routines ///////////////////////////////////////////////////////////
 destructor TFeMediaEnginePlayer.Destroy;
 begin
+ if FFrameTimer<>nil then FFrameTimer.Enabled:=False;
  ReleaseEngine;
  FreeAndNil(FloatingForm);
+ FreeAndNil(FVideoFrame);
+ FreeAndNil(FPresentedFrame);
+ FreeAndNil(FSubtitleFont);
+ FFrameSurface:=nil;
+ wic_ImagingFactory:=nil;
  inherited;
 end;
 
 procedure TFeMediaEnginePlayer.CreateSubTitleLayer(bShowCustomText: Boolean);
 begin
+  if FSubtitleMode<>smTransparentWindow then Exit;
   // Create the FloatingForm
   if (FloatingForm = nil) then
     FloatingForm := TFloatingForm.Create(Self);
@@ -239,6 +268,7 @@ var
 
 begin
 
+  if FloatingForm=nil then Exit;
   lp.X := 0;
   lp.Y := 0;
   lo := pnlVideo.ClientToScreen(lp);
@@ -277,14 +307,135 @@ end;
 //------------------------------------------------------------------------------
 procedure TFeMediaEnginePlayer.OnTextNotify(var message: TMessage);
 begin
-  // WParam 1 is a subtitle text event
-  if (message.WParam = 1) then
+  if (message.WParam<>1) or (gi_MediaEngine=nil) or
+     (gi_MediaEngine.pr_TimedTextNotify=nil) then Exit;
+  FSubtitleFont.Assign(gi_MediaEngine.pr_TimedTextNotify.Font);
+  FSubtitleText:=gi_MediaEngine.pr_TimedTextNotify.SubTitle;
+  UpdateSubtitles;
+end;
+
+procedure TFeMediaEnginePlayer.SubtitleModeClick(Sender: TObject);
+begin
+  if Sender=mnuBurnedSubtitles then FSubtitleMode:=smBurnedIn
+  else FSubtitleMode:=smTransparentWindow;
+  mnuTransparentSubtitles.Checked:=FSubtitleMode=smTransparentWindow;
+  mnuBurnedSubtitles.Checked:=FSubtitleMode=smBurnedIn;
+  UpdateSubtitles;
+end;
+
+procedure TFeMediaEnginePlayer.UpdateSubtitles;
+begin
+  if (FSubtitleMode=smTransparentWindow) and (FSubtitleText<>'') then
+  begin
+    if FloatingForm=nil then CreateSubTitleLayer(False);
+    FloatingForm.LayerFont:=FSubtitleFont;
+    FloatingForm.SubtitleText:=FSubtitleText;
+    FloatingForm.Show;
+  end
+  else if FloatingForm<>nil then
+  begin
+    FloatingForm.SubtitleText:='';
+    FloatingForm.Hide;
+  end;
+  FCompositeDirty:=True;
+  if FVideoPaint<>nil then ComposeFrame;
+end;
+
+procedure TFeMediaEnginePlayer.ClearSubtitles;
+begin
+  FSubtitleText:='';
+  UpdateSubtitles;
+end;
+
+procedure TFeMediaEnginePlayer.DrawBurnedSubtitles;
+var R, MeasuredRect, ShadowRect: TRect; Text: string; X,Y,H,Flags: Integer;
+begin
+  if (FSubtitleMode<>smBurnedIn) or (FSubtitleText='') then Exit;
+  Text:=AdjustLineBreaks(FSubtitleText);
+  with FPresentedFrame.Canvas do
+  begin
+    Font.Assign(FSubtitleFont);
+    Font.Size:=Max(12,MulDiv(Max(12,FSubtitleFont.Size),FPresentedFrame.Height,480));
+    Brush.Style:=bsClear;
+    R:=Rect(FPresentedFrame.Width div 20,0,
+      FPresentedFrame.Width-FPresentedFrame.Width div 20,FPresentedFrame.Height);
+    Flags:=DT_CENTER or DT_WORDBREAK or DT_NOPREFIX;
+    MeasuredRect:=R;
+    H:=Winapi.Windows.DrawText(Handle,PChar(Text),Length(Text),MeasuredRect,Flags or DT_CALCRECT);
+    R.Top:=Max(0,R.Bottom-Max(12,FPresentedFrame.Height div 20)-H);
+    R.Bottom:=R.Top+H;
+    SetBkMode(Handle,TRANSPARENT);
+    Font.Color:=clBlack;
+    for X:=-1 to 1 do for Y:=-1 to 1 do
+      if (X<>0) or (Y<>0) then
+      begin
+        ShadowRect:=R;OffsetRect(ShadowRect,X*2,Y*2);
+        Winapi.Windows.DrawText(Handle,PChar(Text),Length(Text),ShadowRect,Flags);
+      end;
+    Font.Color:=FSubtitleFont.Color;
+    Winapi.Windows.DrawText(Handle,PChar(Text),Length(Text),R,Flags);
+    Brush.Style:=bsSolid;
+  end;
+end;
+
+procedure TFeMediaEnginePlayer.ComposeFrame;
+begin
+  if not FHaveVideoFrame or (FPresentedFrame=nil) then Exit;
+  // Always start from the clean frame: switching modes or clearing a cue
+  // cannot leave old text permanently painted on a paused frame.
+  FPresentedFrame.Assign(FVideoFrame);
+  DrawBurnedSubtitles;
+  FCompositeDirty:=False;
+  FVideoPaint.Invalidate;
+end;
+
+procedure TFeMediaEnginePlayer.PaintVideo(Sender: TObject);
+begin
+  if FHaveVideoFrame then
+    FVideoPaint.Canvas.StretchDraw(FVideoPaint.ClientRect,FPresentedFrame)
+  else
+  begin
+    FVideoPaint.Canvas.Brush.Color:=clBlack;
+    FVideoPaint.Canvas.FillRect(FVideoPaint.ClientRect);
+  end;
+end;
+
+procedure TFeMediaEnginePlayer.FrameTimer(Sender: TObject);
+var W,H,Y,Stride: Integer; Tick: Int64; HR: HRESULT;
+    Source: TRectF; Dest: TRect; Resized: Boolean;
+begin
+  if (gi_MediaEngine<>nil) and (gi_MediaEngine.pu_RenderingState=rsStopped) and
+     (FSubtitleText<>'') then ClearSubtitles;
+  if (gi_MediaEngine=nil) or not (gi_MediaEngine.pu_RenderingState in
+    [rsPlaying,rsPaused]) then Exit;
+  W:=pnlVideo.ClientWidth;H:=pnlVideo.ClientHeight;
+  if (W<=0) or (H<=0) then Exit;
+  Resized:=(FVideoFrame.Width<>W) or (FVideoFrame.Height<>H);
+  HR:=gi_MediaEngine.GetVideoStreamTick(Tick);
+  if (HR=S_OK) or (Resized and FHaveVideoFrame) then
+  begin
+    if Resized or (FFrameSurface=nil) then
     begin
-      if FloatingForm=nil then CreateSubTitleLayer(False);
-      // Set font and show the subtitle
-      FloatingForm.LayerFont := gi_MediaEngine.pr_TimedTextNotify.Font;
-      FloatingForm.SubtitleText := gi_MediaEngine.pr_TimedTextNotify.SubTitle;
+      FFrameSurface:=nil;
+      OleCheck(wic_ImagingFactory.CreateBitmap(W,H,GUID_WICPixelFormat32bppBGRA,
+        WICBitmapCacheOnLoad,FFrameSurface));
+      FVideoFrame.PixelFormat:=pf32bit;
+      FVideoFrame.SetSize(W,H);
+      SetLength(FFramePixels,W*H*4);
     end;
+    Source:=TRectF.Create(0,0,1,1);Dest:=Rect(0,0,W,H);
+    HR:=gi_MediaEngine.GetVideoFrame(Source,Dest,FFrameSurface);
+    if HR=S_OK then
+    begin
+      Stride:=W*4;
+      OleCheck(FFrameSurface.CopyPixels(nil,Stride,Length(FFramePixels),@FFramePixels[0]));
+      for Y:=0 to H-1 do
+        Move(FFramePixels[Y*Stride],FVideoFrame.ScanLine[H-1-Y]^,Stride);
+      FHaveVideoFrame:=True;
+      FCompositeDirty:=True;
+    end;
+  end;
+  if FCompositeDirty then ComposeFrame;
 end;
 
 
@@ -365,6 +516,10 @@ end;
 
 function TFeMediaEnginePlayer.ReleaseEngine(): HResult;
 begin
+  ClearSubtitles;
+  FHaveVideoFrame:=False;
+  FFrameSurface:=nil;
+  if FVideoPaint<>nil then FVideoPaint.Invalidate;
   if Assigned(gi_MediaEngine) then
     begin
       // To safely release all resources from the IMFMEdiaEngineEx,
@@ -379,96 +534,12 @@ begin
 end;
 
 
-function TFeMediaEnginePlayer.GetBitmap(): HResult;
-var
-  rct: TRect;
-  nrct: TRectF;
-  WICdestSurf: IWICBitmap;
-  hr: HResult;
-
-begin
-  nrct.Left := pnlVideo.BoundsRect.Left;
-  nrct.Right := pnlVideo.BoundsRect.Right;
-  nrct.Top := pnlVideo.BoundsRect.Top;
-  nrct.Bottom := pnlVideo.BoundsRect.Bottom;
-
-  rct.Left := pnlVideo.BoundsRect.Left;
-  rct.Right := pnlVideo.BoundsRect.Right;
-  rct.Top := pnlVideo.BoundsRect.Top;
-  rct.Bottom := pnlVideo.BoundsRect.Bottom;
-  rct.Width := pnlVideo.BoundsRect.Width;
-  rct.Height :=  pnlVideo.BoundsRect.Height;
-
-  // create the WICImagingFactory
-  wic_ImagingFactory := CreateCOMObject(CLSID_WICImagingFactory) as IWICImagingFactory;
-
-  // create the wicbitmap
-  hr := wic_ImagingFactory.CreateBitmap(UINT(rct.Width),
-                                        UINT(rct.Height),
-                                        GUID_WICPixelFormat32bppRGB, // or GUID_WICPixelFormat24bppRGB
-                                        WICBitmapCacheOnDemand,
-                                        WICdestSurf);
-  if SUCCEEDED(hr) then
-    hr := gi_MediaEngine.GetVideoFrame(nrct,
-                                       rct,
-                                       WICdestSurf);
-
-  Result := hr;
-
-end;
-
-
-// There is no way of getting a picture frame while the MediaEngine is in rendering mode.
-// As work a round we take a 1:1 snapshot from the video surface.
 procedure TFeMediaEnginePlayer.mnuTakeScreenshotClick(Sender: TObject);
-var
-  rc: TRect;
-  ScrCanvas: TCanvas;
-  bm: TBitmap;
-
 begin
-
-  if Assigned(gi_MediaEngine) then
-    if gi_MediaEngine.pu_RenderingState in [rsPlaying, rsPaused] then
-      begin
-
-        //test
-        GetBitmap;
-        exit;
-
-        rc := pnlVideo.BoundsRect;
-
-        MapWindowPoints(Handle,
-                        HWND_DESKTOP,
-                        rc, // A pointer to an array of POINT structures that contain the set of points to be converted. The points are in device units. This parameter can also point to a RECT structure, in which case the cPoints parameter should be set to 2.
-                        2);
-        // Create canvas
-        ScrCanvas := TCanvas.Create;
-        // Create bitmap
-        bm := TBitmap.Create();
-      try
-        // Get canvas handle
-        ScrCanvas.Handle := GetDC(0);
-        // Set bitmap properties
-        bm := TBitmap.Create();
-        bm.PixelFormat := pf32bit;
-        bm.Width := pnlVideo.Width;
-        bm.Height := pnlVideo.Height;
-
-        bm.Canvas.CopyRect(bm.Canvas.ClipRect,
-                           ScrCanvas,
-                           rc);
-
-        ClipBoard.Assign(bm);
-
-      finally
-        bm.free;
-        ReleaseDC(0,
-                  ScrCanvas.Handle);
-        ScrCanvas.Handle := 0;
-        ScrCanvas.Free;
-      end;
-  end;
+  if not FHaveVideoFrame then Exit;
+  // Burned-in text is already part of this bitmap; no screen scraping.
+  ComposeFrame;
+  ClipBoard.Assign(FPresentedFrame);
 end;
 
 
@@ -493,7 +564,9 @@ begin
 
   if FAILED(hr) then
     begin
-      Close();
+      ReleaseEngine;
+      ShowMessage(Format('Unable to create Media Engine (0x%.8x).',[hr]));
+      Exit;
     end;
 
   // Get the mediafile to play
@@ -502,7 +575,10 @@ begin
 
       hr := gi_MediaEngine.OpenURL(PWideChar(dlgOpenUrl.Filename));
       if SUCCEEDED(hr) then
-        CreateSubTitleLayer(True);
+      begin
+        gi_MediaEngine.SetVolume(trbVolume.Position*0.01);
+        cbMuteClick(nil);
+      end;
     end
   else // User pressed cancel
     ReleaseEngine();
@@ -615,8 +691,7 @@ begin
     begin
       mnuTakeScreenshot.Enabled:= True;
       // Clear custom subtitletext, if this has been set.
-      if Assigned(FloatingForm) then
-        FloatingForm.SubtitleText := '';
+      ClearSubtitles;
     end;
 end;
 
@@ -627,7 +702,9 @@ begin
   //       The file pointer will be set to 0.0
   //       So, if hitting Play, the file will start at position 0.0
   //       See explanation at method gi_MediaEngine.Stop()
+  if gi_MediaEngine=nil then Exit;
   {void} gi_MediaEngine.Stop();
+  ClearSubtitles;
   mnuTakeScreenshot.Enabled := False;
   prbProgress.Position := 0;
 end;
@@ -679,6 +756,22 @@ end;
 
 procedure TFeMediaEnginePlayer.FormCreate(Sender: TObject);
 begin
+  FVideoFrame:=TBitmap.Create;
+  FPresentedFrame:=TBitmap.Create;
+  FSubtitleFont:=TFont.Create;
+  FSubtitleFont.Name:='Segoe UI';FSubtitleFont.Size:=12;
+  FSubtitleFont.Style:=[fsBold];FSubtitleFont.Color:=clWhite;
+  wic_ImagingFactory:=CreateCOMObject(CLSID_WICImagingFactory) as IWICImagingFactory;
+  FVideoPaint:=TPaintBox.Create(Self);
+  FVideoPaint.Parent:=pnlVideo;
+  FVideoPaint.Align:=alClient;
+  FVideoPaint.OnPaint:=PaintVideo;
+  pnlVideo.DoubleBuffered:=True;
+  FFrameTimer:=TTimer.Create(Self);
+  FFrameTimer.Interval:=15;
+  FFrameTimer.OnTimer:=FrameTimer;
+  FSubtitleMode:=smTransparentWindow;
+  mnuTransparentSubtitles.Checked:=True;
   pb_IsFullScreen := False;
   // Initial aspectratio is 16:9
   smSixteenByNineClick(nil);

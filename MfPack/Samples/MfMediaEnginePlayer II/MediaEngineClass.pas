@@ -312,7 +312,7 @@ begin
  if FAILED(hres) then Exit;
  hres:=MFCreateAttributes(Attributes,2);
  if SUCCEEDED(hres) then hres:=Attributes.SetUnknown(MF_MEDIA_ENGINE_CALLBACK,Self);
- if SUCCEEDED(hres) then hres:=Attributes.SetUINT64(MF_MEDIA_ENGINE_PLAYBACK_HWND,hwndVideo);
+ if SUCCEEDED(hres) then hres:=Attributes.SetUINT32(MF_MEDIA_ENGINE_VIDEO_OUTPUT_FORMAT,87) { DXGI_FORMAT_B8G8R8A8_UNORM };
  if SUCCEEDED(hres) then hres:=Factory.CreateInstance(0,Attributes,Base);
  if SUCCEEDED(hres) then hres:=Base.QueryInterface(IMFMediaEngineEx,pr_MediaEngine);
 end;
@@ -832,40 +832,20 @@ end;
 function TcMediaEngine.GetVideoFrame(SourceRect: TRectF;
                                      DestRecr: TRect;
                                      var wicbmp: IWICBitmap): HResult;
-var
-  lrStrTick: LongLong;
-  vMFARGB: MFARGB;
-  hr: HResult;
-
+var Border: MFARGB;
 begin
-
+  // Frame-server mode: the caller controls ticking and presentation.
+  // Transfer again while paused when the destination size changes.
+  if (pr_MediaEngine=nil) or (wicbmp=nil) then Exit(E_POINTER);
+  FillChar(Border,SizeOf(Border),0);
+  Border.rgbAlpha:=255;
   pt_CritSec.Enter;
-  //while hr = S_False do
-  //  begin
-      //hr := GetVideoStreamTick(lrStrTick);
-      hr := pr_MediaEngine.OnVideoStreamTick(lrStrTick);
-   // end;
-
-  if SUCCEEDED(hr) then
-    begin
-      vMFARGB.rgbBlue  := 0;
-      vMFARGB.rgbGreen := 0;
-      vMFARGB.rgbRed   := 0;
-      vMFARGB.rgbAlpha := 0;
-      pause;
-
-      hr := pr_MediaEngine.TransferVideoFrame(IUnknown(wicbmp),
-                                              @SourceRect,
-                                              @DestRecr,
-                                              @vMFARGB);
-    end;
-
-  if SUCCEEDED(hr) then
-    begin
-
-    end;
-  pt_CritSec.Leave;
-  Result := hr;
+  try
+    Result:=pr_MediaEngine.TransferVideoFrame(IUnknown(wicbmp),
+      @SourceRect,@DestRecr,@Border);
+  finally
+    pt_CritSec.Leave;
+  end;
 end;
 
 
@@ -1123,7 +1103,7 @@ function TcMediaEngine.ResizeVideo(nr: TRect): HResult;
 begin
  if pr_MediaEngine=nil then Exit(E_POINTER);
  pt_rcpdest:=nr;
- Result:=pr_MediaEngine.UpdateVideoStream(nil,@pt_rcpdest,nil);
+ Result:=S_OK; // Frame-server destination is supplied to TransferVideoFrame.
 end;
 
 

@@ -412,6 +412,22 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
         Enabled = False
         OnClick = mnuTakeScreenshotClick
       end
+      object mnuSubtitles: TMenuItem
+        Caption = 'Subtitles'
+        object mnuTransparentSubtitles: TMenuItem
+          Caption = 'Transparent window'
+          Checked = True
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = SubtitleModeClick
+        end
+        object mnuBurnedSubtitles: TMenuItem
+          Caption = 'Burned into video'
+          GroupIndex = 2
+          RadioItem = True
+          OnClick = SubtitleModeClick
+        end
+      end
       object mnuAspectRatio: TMenuItem
         Caption = 'Aspectratio'
         object smCinema: TMenuItem
