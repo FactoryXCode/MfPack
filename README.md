@@ -67,10 +67,9 @@ This is the basic class of MfMediaEnginePlayer (IMFMediaEngine), containing the 
 MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using the IMFTimedTextNotify interface.
 The application has options to use a layer to project subtitles or burned in subtitles in the videostream.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
+![](MfPack/Pic/MediaEnginePlayer2.jfif)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
   
 ## MfTranscode Samples
   
@@ -103,20 +102,18 @@ MPEG-4 Video with AAC Audio (mp4)
 MPEG-4 Video with Dolby AC-3 Audio (mp4)  
 Windows Media Video (wmv)  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
+![](MfPack/Pic/MfTranscode%20Sample%202.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg) 
   
 ## MfSimpleCapture Sample
   
 This example shows, how you have to implement capturing within a session.  
 Note: The old MS sample used the deprecated IMFplayer interface.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
+![](MfPack/Pic/MfSimpleCapture.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
 
 ## MfComponents Samples
 
@@ -134,12 +131,12 @@ This package contains the following -installable- components:
 An example about how to create a MfPeakMeter control.
 This sample is part of the Samples\MfComponents package.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
+![](MfPack/Pic/MfPeakmeter.jfif)
   
 An example about how to create a MfAudioVisualizer control - A visual component that uses loopback, Peak/RMS, optional spectrum bars or VU.  
 This sample is part of the Samples/MfComponents package.  
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
+![](MfPack/Pic/MfAudioVisualizer.png)
   
 **WASAPI player / dsp / mft components:**
   
@@ -158,8 +155,7 @@ Note: On how to use these components, please read the WasApiPlayer sample 5 docu
 * PcmLib.pas - A very convenient unit that is capable of recoding diverse WAV formats.
 * WASAPIEngine.pas - Universal WASAPIEngine .
   
----
----  
+![RL](MfPack/Pic/RL.svg) 
   
 ## AudioClip, AudioClipEx and AudioClipEx2 samples
   
@@ -171,10 +167,9 @@ The AudioClipEx2 sample demonstrates using the IMFSourceReader,
 IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a media file and write the audio to a wav.
 It also uses threads for better responsiveness.  
   
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
+![](MfPack/Pic/AudioClipExSample.jpg)
   
----
----  
+![RL](MfPack/Pic/RL.svg) 
 
 ## MfPlayer Samples  
   
@@ -194,8 +189,7 @@ There are 4 samples in 4 project degrees.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
 
----
----  
+![RL](MfPack/Pic/RL.svg)   
   
 ## MfProtectedPlayback Sample
   
@@ -207,8 +201,7 @@ The sample includes the original C++ code for references.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfProtectedPlayback.png)
 
----
----  
+![RL](MfPack/Pic/RL.svg)   
   
 ## Volume Ducking Samples  
   
@@ -231,8 +224,7 @@ Select 'Use default input device' in the application to hear the routed input.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
 
 ## WebCamStreamer Samples  
   
@@ -248,8 +240,7 @@ media server on a local network.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleWebCamStreamer.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
   
 **MfWebCamStreamer**
   
@@ -269,8 +260,7 @@ The browser player includes:
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfWebCamStreamer.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
 
 ## CastPlayer Samples  
 
@@ -330,8 +320,7 @@ The sample uses DXGI desktop duplication to make it possible casting from for ex
 It avoids installing 3th party apps viewing web content like YouTube.  
 There is some trade off: The quality of origin is downgraded to the monitor resolution it play's on.
 
----
----  
+![RL](MfPack/Pic/RL.svg)  
 
 ## Frame/Snapshot Capture Samples  
   
@@ -360,8 +349,7 @@ This sample also demonstrates how to use the MfMediaTypeDebug API.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
   
----
----  
+![RL](MfPack/Pic/RL.svg)  
 
 ## SinkWriterToEncodeVideo Samples  
   
@@ -379,8 +367,7 @@ Demonstrates how to use the SinkWriter to create a video from one or more image 
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
   
----
----  
+![RL](MfPack/Pic/RL.svg)   
 
 ## LoopBackCapture Samples  
 
@@ -502,8 +489,7 @@ making it suitable for large audio files (e.g. FLAC > 100 MB).
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)   
 
 ## WASAPI Player Samples
   
@@ -591,8 +577,7 @@ Please read the documents included with this sample.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer5.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)   
 
 ## Capture Video From GPU Samples
   
@@ -619,10 +604,8 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
   
----
----  
-
----
+![RL](MfPack/Pic/RL.svg)   
+  
 **MfMftExplorer sample**
 
 This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
@@ -646,8 +629,7 @@ how to use it in Media Foundation.
   
 ![Sample 1](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCustomMft_S1.png)
 
----
----  
+![RL](MfPack/Pic/RL.svg)   
   
 ## Complex Samples
   
@@ -698,8 +680,8 @@ This sample has been moved to the [RDJ repository](https://github.com/FactoryXCo
 
 ![](https://github.com/FactoryXCode/FactoryX-RDJ/blob/main/RadioDJ/Pic/RDJPro_Interface_s.png)
   
----
----  
+![RL](MfPack/Pic/RL.svg)   
+
   
 # Media Servers
 
@@ -721,7 +703,7 @@ typically a remote server in your network. No installation app is needed.
 FxServe has an FxServeAdmin app, to install, configure and control FxServe as  
 a Windows service.
   
-**Caddy**
+***Caddy***
   
 Caddy is a 3th party proxy server with much more features than FxServe. Use this  
 app as a service, just like FxServe for LAN/WAN streaming.  
@@ -755,9 +737,9 @@ Samples using MfCast are:
 - MfPlayer X2
 - RDJ Pro.
   
----  
+![RL](MfPack/Pic/RL.svg)   
   
-***HEOS CLI and AVR***
+# HEOS CLI and AVR
 
 FactoryX HEOS CLI provides Delphi APIs for controlling HEOS-enabled audio devices from Denon and Marantz.
 It supports player control, volume and mute, music browsing, queues, playlists, grouping and receiver events.
@@ -783,7 +765,7 @@ Its controls and form layouts are included for editing in the Delphi IDE.
   
 You can find the complete HEOS/AVR Delphi API and samples [HERE](https://github.com/FactoryXCode/FactoryX-HEOS-CLI)  
   
----
+![RL](MfPack/Pic/RL.svg) 
   
 # Tools
   
