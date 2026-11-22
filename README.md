@@ -424,8 +424,9 @@ buffersize for better sound to eliminate buffer related gliches.
   
 ![](MfPack/Pic/ThreadedLoopbackCapture.png)
   
----
+![RL](MfPack/Pic/RL.svg)
 
+  
 ## XAudio2Player Samples  
   
 XAudio2 is the long-awaited replacement for DirectSound.  
