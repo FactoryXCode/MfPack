@@ -1,0 +1,23 @@
+# Compiler output
+*.dcu
+*.exe
+*.dll
+*.bpl
+*.dcp
+*.map
+*.rsm
+*.tds
+*.drc
+*.obj
+*.hpp
+
+# Delphi user state and backups
+*.dproj.local
+*.identcache
+*.dsk
+*.stat
+*.local
+*.~*
+__history/
+__recovery/
+
