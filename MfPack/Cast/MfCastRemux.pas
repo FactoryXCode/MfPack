@@ -494,7 +494,7 @@ begin
     end;
 
   Result := Reader.SetCurrentMediaType(VideoStream,
-                                       0,
+                                       nil,
                                        VideoType);
   if FAILED(Result) then
     Exit;
@@ -502,7 +502,7 @@ begin
   if HasAudio then
     begin
       Result := Reader.SetCurrentMediaType(AudioStream,
-                                           0,
+                                           nil,
                                            AudioType);
       if FAILED(Result) then
         Exit;

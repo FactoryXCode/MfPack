@@ -297,7 +297,7 @@ begin
   // decoder. It succeeds for a compatible registered third-party MFT as well
   // as for an in-box decoder.
   if FAILED(Reader.SetCurrentMediaType(AStreamIndex,
-                                       0,
+                                       nil,
                                        RequestedType)) then
     Exit;
     

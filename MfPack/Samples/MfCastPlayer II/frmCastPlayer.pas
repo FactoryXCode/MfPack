@@ -86,6 +86,7 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   {Cast}
+  dlgCastRename,
   MfCast,
   MfCastInterfaces,
   MfCastTypes,
@@ -98,7 +99,9 @@ type
 
   TMfCastDesktopWorker = class(TThread)
   private
+
     FCast: TMfCast;
+
     FDevice: TMfCastDevice;
     FSettings: TMfCastCaptureSettings;
     FNotifyWindow: HWND;
@@ -127,6 +130,7 @@ type
     lblSeek: TLabel;
     lblVolume: TLabel;
     cbxDevices: TComboBox;
+    btnRenameDevice:TButton;
     edtSource: TEdit;
     edtArtwork: TEdit;
     cbxSubtitleLanguage: TComboBox;
@@ -158,6 +162,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
 
+    procedure RenameDeviceClick(Sender:TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnDiscoverClick(Sender: TObject);
@@ -189,6 +194,7 @@ type
     FSubtitleWorker: TMfCastSubtitleWorker;
     FAudioTrackWorker: TMfCastAudioTrackWorker;
     FClosing: Boolean;
+    FUpdatingReceiverVolume: Boolean;
     FDesktopCaptureExcluded: Boolean;
     FPreviousDisplayAffinity: DWORD;
     FUpdatingSeekPosition: Boolean;
@@ -213,6 +219,9 @@ type
     procedure CastStateChanged(const AOldState: TMfCastState;
                                const ANewState: TMfCastState);
 
+    procedure ReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
+    procedure RefreshReceiverVolume();
+    procedure WmReceiverVolume(var message: Tmessage); message WM_MFCAST_RECEIVER_VOLUME;
     procedure CastMediaStatus(const AStatus: TMfCastMediaStatus);
     procedure PreviewSubtitleTimer(Sender: TObject);
 
@@ -480,8 +489,31 @@ begin
 end;
 
 
+procedure TCastPlayerForm.RenameDeviceClick(Sender:TObject);
+var Device:TMfCastDevice;I,Index:Integer;
+begin
+ if FClosing or (FCast=nil) or not btnRenameDevice.Enabled then Exit;
+ Index:=cbxDevices.ItemIndex;
+ if (Index<0) or (Index>=Length(FDevices)) then Exit;
+ Device:=FDevices[Index];
+ if TCastRenameDialog.ExecuteDialog(Self,FCast,Device) then
+ begin
+  for I:=0 to Length(FDevices)-1 do
+   if ((Device.Id<>'') and SameText(FDevices[I].Id,Device.Id)) or
+      ((Device.Id='') and SameText(FDevices[I].Address,Device.Address)) then
+   begin
+    FDevices[I]:=Device;
+    cbxDevices.Items[I]:=Format('%s  (%s:%d)',[Device.FriendlyName,Device.Address,Device.Port]);
+    cbxDevices.ItemIndex:=I;Break;
+   end;
+ end;
+ UpdateControls;
+end;
+
 procedure TCastPlayerForm.FormCreate(Sender: TObject);
 begin
+
+  FUpdatingReceiverVolume := True;
 
   FClosing := False;
   FActiveDesktopMode := -1;
@@ -513,6 +545,7 @@ begin
   FCast.OnDeviceRemoved := DeviceRemoved;
   FCast.OnStateChanged := CastStateChanged;
   FCast.OnMediaStatus := CastMediaStatus;
+  FCast.OnReceiverVolumeChanged := ReceiverVolumeChanged;
   FCast.OnError := CastError;
   FCast.OnLog := CastLog;
 
@@ -521,6 +554,7 @@ begin
   trkVolume.Position := 0;
   AddLog('Ready. Choose a local file/URL, or cast the desktop with DXGI and WASAPI.');
   RegisterGlobalHotKeys();
+  FUpdatingReceiverVolume := False;
   UpdateControls;
 end;
 
@@ -550,6 +584,7 @@ begin
       FCast.OnDeviceUpdated := nil;
       FCast.OnDeviceRemoved := nil;
       FCast.OnStateChanged := nil;
+      FCast.OnReceiverVolumeChanged := nil;
       FCast.OnMediaStatus := nil;
       FCast.OnError := nil;
       FCast.OnLog := nil;
@@ -747,6 +782,73 @@ begin
                 WM_MFCAST_STATE,
                 Ord(ANewState),
                 0);
+end;
+
+
+procedure TCastPlayerForm.ReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
+
+begin
+
+  if not FClosing then
+    PostMessage(Handle,
+                WM_MFCAST_RECEIVER_VOLUME,
+                0,
+                0);
+end;
+
+
+procedure TCastPlayerForm.WmReceiverVolume(var message: Tmessage);
+
+begin
+
+  if not FClosing then
+    RefreshReceiverVolume();
+end;
+
+
+procedure TCastPlayerForm.RefreshReceiverVolume();
+var
+  Status: TMfCastReceiverVolumeStatus;
+  HaveStatus: Boolean;
+  CanControl: Boolean;
+
+begin
+
+  if FUpdatingReceiverVolume then
+    Exit;
+
+  Status.Reset();
+  HaveStatus := Assigned(FCast) and (not FClosing);
+  if HaveStatus then
+    HaveStatus := (FCast.GetReceiverVolume(Status) = S_OK);
+
+  CanControl := HaveStatus and (not Assigned(FWorker)) and
+                (FCast.State() in [csConnected, csLaunchingReceiver, csBuffering,
+                                   csPlaying, csPaused, csStopped]) and
+                (not SameText(Status.ControlType,
+                              'fixed'));
+  FUpdatingReceiverVolume := True;
+  try
+    trkVolume.Enabled := CanControl and Status.HasLevel;
+    chkMuted.Enabled := CanControl and Status.HasMuted;
+    if Status.HasLevel then
+      trkVolume.Position := Round(Status.Level * 100.0)
+    else
+      trkVolume.Position := trkVolume.Min;
+
+    chkMuted.Checked := Status.HasMuted and Status.Muted;
+    if SameText(Status.ControlType,
+                'fixed') then
+      lblVolume.Caption := 'Volume fixed'
+    else
+      if Status.HasLevel then
+        lblVolume.Caption := Format('Volume %d%%',
+                                    [trkVolume.Position])
+      else
+        lblVolume.Caption := 'Volume unavailable';
+  finally
+    FUpdatingReceiverVolume := False;
+  end;
 end;
 
 
@@ -1410,8 +1512,7 @@ begin
 
   btnSeek.Enabled := CanControlReceiver and (State in [csPlaying, csPaused]);
   trkSeek.Enabled := btnSeek.Enabled;
-  trkVolume.Enabled := CanControlReceiver;
-  chkMuted.Enabled := CanControlReceiver;
+  RefreshReceiverVolume();
   chkEmbeddedSubtitles.Enabled := not Busy;
 
   cbxSubtitleLanguage.Enabled := chkEmbeddedSubtitles.Checked and
@@ -1423,6 +1524,8 @@ begin
 
   cbxCaptureCodec.Enabled := (not Busy) and (cbxCaptureMode.ItemIndex <> 1);
   cbxCaptureMode.Enabled := not Busy;
+  if btnRenameDevice<>nil then btnRenameDevice.Enabled:=Assigned(FCast) and not FClosing and not Busy and
+    (cbxDevices.ItemIndex>=0) and (cbxDevices.ItemIndex<Length(FDevices));
 end;
 
 
@@ -1554,10 +1657,7 @@ begin
   if SUCCEEDED(Hr) then
     begin
 
-      // Apply the UI settings to a receiver that may have retained a muted
-      // state from an earlier session.
-      FCast.SetVolume(trkVolume.Position / 100.0);
-      FCast.SetMuted(chkMuted.Checked);
+      RefreshReceiverVolume();
 
       // Also pick up an artwork selection made while the cast worker connected.
       if FileExists(Trim(edtArtwork.Text)) then
@@ -1914,9 +2014,6 @@ begin
   if (not Settings.AudioOnly) and (Settings.ArtworkSourceName = '') then
     AddLog('Local preview enabled; player window excluded from desktop capture to prevent feedback.');
 
-  // Every new desktop cast starts silent; raise the slider after connecting.
-  trkVolume.Position := 0;
-
   FActiveDesktopMode := cbxCaptureMode.ItemIndex;
   FWorker := TMfCastDesktopWorker.Create(FCast,
                                          FDevices[cbxDevices.ItemIndex],
@@ -2021,9 +2118,9 @@ end;
 procedure TCastPlayerForm.trkVolumeChange(Sender: TObject);
 begin
 
-  if trkVolume.Enabled then
+  if (not FUpdatingReceiverVolume) and trkVolume.Enabled then
     begin
-      FCast.SetVolume(trkVolume.Position / 100.0);
+      FCast.SetReceiverVolume(trkVolume.Position / 100.0);
       lblVolume.Caption := Format('Volume %d%%',
                                   [trkVolume.Position]);
     end;
@@ -2057,8 +2154,8 @@ end;
 procedure TCastPlayerForm.chkMutedClick(Sender: TObject);
 begin
 
-  if chkMuted.Enabled then
-    FCast.SetMuted(chkMuted.Checked);
+  if (not FUpdatingReceiverVolume) and chkMuted.Enabled then
+    FCast.SetReceiverMuted(chkMuted.Checked);
 end;
 
 

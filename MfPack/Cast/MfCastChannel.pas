@@ -95,7 +95,9 @@ type
     function IsStopping(): Boolean;
   end;
 
-  TMfCastChannel = class(TInterfacedObject, IMfCastChannel)
+  TMfCastChannel = class(TInterfacedObject,
+                         IMfCastChannel,
+                         IMfCastReceiverVolume)
   private
     FSettings: TMfCastProtocolSettings;
     FTransport: IMfCastTransport;
@@ -106,6 +108,7 @@ type
     FSessionId: string;
     FTransportId: string;
     FMediaSessionId: Int64;
+    FMediaDuration100ns: Int64;
     FLastNamespace: string;
     FLastPayload: string;
     FReceivedMediaStatus: Boolean;
@@ -117,9 +120,13 @@ type
     FLastReportedPlayerState: string;
     FLastMediaCallbackTick: Cardinal;
     FReceiverVolumeControlType: string;
+    FReceiverVolume: TMfCastReceiverVolumeStatus;
+    FReceiverVolumeLock: TCriticalSection;
     FLastReceiverVolumeStatus: string;
     FLastMediaVolumeStatus: string;
 
+    procedure UpdateReceiverVolume(const AJson: string);
+    procedure ClearReceiverVolume();
     function NextRequestId(): Cardinal;
     function SendLaunchReceiverRequest(): HRESULT;
     function SendJson(const ADestinationId: string;
@@ -157,6 +164,10 @@ type
     function Seek(const APosition100ns: Int64): HRESULT;
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
+    function GetReceiverVolume(out AStatus: TMfCastReceiverVolumeStatus): HRESULT;
+    function SetReceiverVolume(const AVolume: Single): HRESULT;
+    function SetReceiverMuted(const AMuted: Boolean): HRESULT;
+    function RequestReceiverVolumeStatus(): HRESULT;
     function RequestReceiverStatus(): HRESULT;
     function RequestMediaStatus(): HRESULT;
     function SynchronizeMediaStatus(const ATimeoutMs: Cardinal): HRESULT;
@@ -767,10 +778,13 @@ begin
   FState := csIdle;
   FRequestId := 0;
   FMediaSessionId := 0;
+  FMediaDuration100ns := 0;
   FStopInProgress := 0;
   FWorker := nil;
   FWorkerLock := TCriticalSection.Create();
   FSendLock := TCriticalSection.Create();
+  FReceiverVolumeLock := TCriticalSection.Create();
+  FReceiverVolume.Reset();
   FLastReportedPlayerState := '';
   FLastMediaCallbackTick := 0;
   FReceiverVolumeControlType := '';
@@ -784,6 +798,7 @@ destructor TMfCastChannel.Destroy();
 begin
 
   StopWorker(True);
+  FReceiverVolumeLock.Free();
   FSendLock.Free();
   FWorkerLock.Free();
   inherited Destroy();
@@ -852,6 +867,7 @@ begin
   if (Port = 0) then
     Port := FSettings.ControlPort;
 
+  ClearReceiverVolume();
   SetState(csConnecting);
   Result := FTransport.Connect(Host,
                                Port);
@@ -889,11 +905,13 @@ begin
   FSessionId := '';
   FTransportId := '';
   FMediaSessionId := 0;
+  FMediaDuration100ns := 0;
   FLastReportedPlayerState := '';
   FLastMediaCallbackTick := 0;
   FReceiverVolumeControlType := '';
   FLastReceiverVolumeStatus := '';
   FLastMediaVolumeStatus := '';
+  ClearReceiverVolume();
 
   if Assigned(FTransport) then
     Result := FTransport.Disconnect
@@ -1072,8 +1090,11 @@ begin
   // LOAD creates a new media session. Do not attach an ID learned from the
   // receiver's previous media item to the status request that follows.
   FMediaSessionId := 0;
+  FMediaDuration100ns := 0;
   FReceivedMediaStatus := False;
   FPendingLoadContentId := ARequest.ContentId;
+  FMediaDuration100ns := 0;
+  FLastMediaCallbackTick := 0;
   FLastReportedPlayerState := '';
   FLastMediaCallbackTick := 0;
   FLastMediaVolumeStatus := '';
@@ -1284,6 +1305,161 @@ begin
 
   if FAILED(Result) then
     SetState(csError);
+end;
+
+
+function TMfCastChannel.GetReceiverVolume(out AStatus: TMfCastReceiverVolumeStatus): HRESULT;
+
+begin
+
+  FReceiverVolumeLock.Acquire();
+  try
+    AStatus := FReceiverVolume;
+  finally
+    FReceiverVolumeLock.Release();
+  end;
+
+  if AStatus.HasLevel or AStatus.HasMuted or (AStatus.ControlType <> '') then
+    Result := S_OK
+  else
+    Result := S_FALSE;
+end;
+
+
+procedure TMfCastChannel.ClearReceiverVolume();
+var
+  Status: TMfCastReceiverVolumeStatus;
+
+begin
+
+  Status.Reset();
+  FReceiverVolumeLock.Acquire();
+  try
+    FReceiverVolume := Status;
+  finally
+    FReceiverVolumeLock.Release();
+  end;
+
+  if Assigned(FCallbacks.OnReceiverVolumeChanged) then
+    FCallbacks.OnReceiverVolumeChanged(Status);
+end;
+
+
+procedure TMfCastChannel.UpdateReceiverVolume(const AJson: string);
+var
+  Status: TMfCastReceiverVolumeStatus;
+  Level: Single;
+  ControlType: string;
+  Muted: Boolean;
+  Changed: Boolean;
+
+begin
+
+  FReceiverVolumeLock.Acquire();
+  try
+    Status := FReceiverVolume;
+    Level := MfCastExtractJsonSingle(AJson,
+                                     'level',
+                                     -1.0);
+    if (Level >= 0.0) and (Level <= 1.0) then
+      begin
+        Status.Level := Level;
+        Status.HasLevel := True;
+      end;
+
+    // Different defaults distinguish a missing/invalid Boolean from False.
+    Muted := MfCastExtractJsonBoolean(AJson,
+                                      'muted',
+                                      False);
+    if (Muted = MfCastExtractJsonBoolean(AJson,
+                                         'muted',
+                                         True)) then
+      begin
+        Status.Muted := Muted;
+        Status.HasMuted := True;
+      end;
+
+    ControlType := MfCastExtractJsonString(AJson,
+                                           'controlType');
+    if (ControlType <> '') then
+      Status.ControlType := ControlType;
+
+    Changed := (Status.HasLevel <> FReceiverVolume.HasLevel) or
+               (Status.HasMuted <> FReceiverVolume.HasMuted) or
+               (Status.Level <> FReceiverVolume.Level) or
+               (Status.Muted <> FReceiverVolume.Muted) or
+               (Status.ControlType <> FReceiverVolume.ControlType);
+    FReceiverVolume := Status;
+    FReceiverVolumeControlType := Status.ControlType;
+  finally
+    FReceiverVolumeLock.Release();
+  end;
+
+  // Never invoke application code while holding the snapshot lock.
+  if Changed and Assigned(FCallbacks.OnReceiverVolumeChanged) then
+    FCallbacks.OnReceiverVolumeChanged(Status);
+end;
+
+
+function TMfCastChannel.SetReceiverVolume(const AVolume: Single): HRESULT;
+var
+  Status: TMfCastReceiverVolumeStatus;
+  LevelText: string;
+  Payload: string;
+
+begin
+
+  if not ((AVolume >= 0.0) and (AVolume <= 1.0)) then
+    Exit(E_INVALIDARG);
+
+  GetReceiverVolume(Status);
+  if SameText(Status.ControlType,
+              'fixed') then
+    Exit(E_NOTIMPL);
+
+  LevelText := StringReplace(FloatToStr(AVolume),
+                             ',',
+                             '.',
+                             []);
+  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(NextRequestId()) +
+             ',"volume":{"level":' + LevelText + '}}';
+  Result := SendJson(FSettings.ReceiverId,
+                     FSettings.NamespaceReceiver,
+                     Payload);
+end;
+
+
+function TMfCastChannel.SetReceiverMuted(const AMuted: Boolean): HRESULT;
+var
+  Status: TMfCastReceiverVolumeStatus;
+  MutedText: string;
+  Payload: string;
+
+begin
+
+  GetReceiverVolume(Status);
+  if SameText(Status.ControlType,
+              'fixed') then
+    Exit(E_NOTIMPL);
+
+  if AMuted then
+    MutedText := 'true'
+  else
+    MutedText := 'false';
+
+  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(NextRequestId()) +
+             ',"volume":{"muted":' + MutedText + '}}';
+  Result := SendJson(FSettings.ReceiverId,
+                     FSettings.NamespaceReceiver,
+                     Payload);
+end;
+
+
+function TMfCastChannel.RequestReceiverVolumeStatus(): HRESULT;
+
+begin
+
+  Result := RequestReceiverStatus();
 end;
 
 
@@ -1599,6 +1775,8 @@ var
   HeartbeatTimeoutMs: Cardinal;
   LastHeartbeatTick: Cardinal;
   LastReceiveTick: Cardinal;
+  LastMediaStatusTick: Cardinal;
+  MediaStatusResult: HRESULT;
 
 begin
 
@@ -1612,6 +1790,7 @@ begin
 
   LastHeartbeatTick := GetTickCount();
   LastReceiveTick := LastHeartbeatTick;
+  LastMediaStatusTick := LastHeartbeatTick;
 
   while not AWorker.IsStopping() do
     begin
@@ -1650,6 +1829,28 @@ begin
 
       if AWorker.IsStopping() then
         Break;
+
+      // Receivers need not broadcast currentTime while playback is unchanged.
+      // Poll only an acknowledged media session, on the existing receive worker.
+      if (FSettings.MediaStatusIntervalMs > 0) and (FMediaSessionId <> 0) and
+         (InterlockedCompareExchange(FStopInProgress,
+                                     0,
+                                     0) = 0) and
+         (FState in [csBuffering, csPlaying, csPaused]) and
+         ((GetTickCount() - LastMediaStatusTick) >= FSettings.MediaStatusIntervalMs) then
+        begin
+          MediaStatusResult := RequestMediaStatus();
+          LastMediaStatusTick := GetTickCount();
+          if FAILED(MediaStatusResult) then
+            begin
+              if Assigned(FLogger) then
+                FLogger.Log(cllWarning,
+                            'Channel',
+                            Format('Media status request failed: HRESULT $%.8x.',
+                                   [DWORD(MediaStatusResult)]));
+              Break;
+            end;
+        end;
 
       if (GetTickCount() - LastHeartbeatTick) >= HeartbeatIntervalMs then
         begin
@@ -1820,9 +2021,7 @@ begin
 
       if (VolumeStatus <> '') then
         begin
-          FReceiverVolumeControlType := MfCastExtractJsonString(
-            VolumeStatus,
-            'controlType');
+          UpdateReceiverVolume(VolumeStatus);
 
           if (VolumeStatus <> FLastReceiverVolumeStatus) and
              Assigned(FLogger) then
@@ -1892,6 +2091,7 @@ begin
         FSessionId := '';
         FTransportId := FSettings.ReceiverId;
         FMediaSessionId := 0;
+  FMediaDuration100ns := 0;
 
         if Assigned(FCallbacks.OnReceiverClosed) then
           FCallbacks.OnReceiverClosed();
@@ -2044,9 +2244,15 @@ begin
   Status.CurrentTime100ns := MfCastExtractJsonTime100ns(AJsonPayload,
                                                        'currentTime',
                                                        0);
+  // Periodic MEDIA_STATUS replies can omit media.duration. Preserve it for
+  // this session, but never carry it into a new LOAD or media-session ID.
+  if (Status.MediaSessionId <> 0) and (Status.MediaSessionId <> FMediaSessionId) then
+    FMediaDuration100ns := 0;
+
   Status.Duration100ns := MfCastExtractJsonTime100ns(AJsonPayload,
                                                     'duration',
-                                                    0);
+                                                    FMediaDuration100ns);
+  FMediaDuration100ns := Status.Duration100ns;
 
   if Status.MediaSessionId <> 0 then
     FMediaSessionId := Status.MediaSessionId;

@@ -186,11 +186,21 @@ object CastPlayerForm: TCastPlayerForm
     object cbxDevices: TComboBox
       Left = 16
       Top = 49
-      Width = 279
+      Width = 189
       Height = 21
       Style = csDropDownList
       TabOrder = 0
       OnChange = SourceOrDeviceChanged
+    end
+    object btnRenameDevice: TButton
+      Left = 211
+      Top = 49
+      Width = 84
+      Height = 21
+      Caption = 'Rename...'
+      Enabled = False
+      TabOrder = 30
+      OnClick = RenameDeviceClick
     end
     object btnDiscover: TButton
       Left = 151

@@ -73,6 +73,7 @@ uses
   System.SysUtils,
   {Cast}
   MfCastTypes,
+  MfCastEureka,
   MfCastInterfaces,
   MfCastMediaInterfaces,
   MfCastCaptureCapabilities,
@@ -104,6 +105,7 @@ type
     FOnDeviceRemoved: TMfCastDeviceRemovedEvent;
     FOnStateChanged: TMfCastStateChangedEvent;
     FOnMediaStatus: TMfCastMediaStatusEvent;
+    FOnReceiverVolumeChanged: TMfCastReceiverVolumeEvent;
     FOnError: TMfCastErrorEvent;
     FOnLog: TMfCastLogEvent;
 
@@ -114,6 +116,7 @@ type
     procedure ControllerStateChanged(const AOldState: TMfCastState;
                                      const ANewState: TMfCastState);
 
+    procedure ControllerReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
     procedure ControllerMediaStatus(const AStatus: TMfCastMediaStatus);
     procedure ControllerError(const AError: TMfCastErrorInfo);
 
@@ -138,6 +141,18 @@ type
     function RefreshDiscovery(): HRESULT; overload;
     function RefreshDiscovery(const ADevice: TMfCastDevice): HRESULT; overload;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
+
+    // Eureka setup service; blocking. Use a worker for GUI applications.
+    function GetDeviceName(const ADevice: TMfCastDevice;
+      out AName: string; out ADetail: string): HRESULT; overload;
+    function GetDeviceName(const ADevice: TMfCastDevice;
+      const AOptions: TMfCastEurekaOptions; out AName: string;
+      out ADetail: string): HRESULT; overload;
+    // ADevice is changed only after readback verifies the receiver's new name.
+    function RenameDevice(var ADevice: TMfCastDevice; const AName: string;
+      out ADetail: string): HRESULT; overload;
+    function RenameDevice(var ADevice: TMfCastDevice; const AName: string;
+      const AOptions: TMfCastEurekaOptions; out ADetail: string): HRESULT; overload;
 
     function GetMediaTracks(const ASource: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
@@ -193,6 +208,12 @@ type
     function SelectSubtitle(const ATrackId: Int64): HRESULT; overload;
     function SelectSubtitle(const ASubtitle: TMfCastSubtitleAsset): HRESULT; overload;
     function DisableSubtitles(): HRESULT;
+    // Device volume only; SetVolume remains available for stream/PCM gain.
+    // GetReceiverVolume returns S_FALSE until the receiver reports a value.
+    function GetReceiverVolume(out AStatus: TMfCastReceiverVolumeStatus): HRESULT;
+    function SetReceiverVolume(const AVolume: Single): HRESULT;
+    function SetReceiverMuted(const AMuted: Boolean): HRESULT;
+    function RequestReceiverVolumeStatus(): HRESULT;
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
 
@@ -219,6 +240,7 @@ type
     property OnDeviceUpdated: TMfCastDeviceEvent read FOnDeviceUpdated write FOnDeviceUpdated;
     property OnDeviceRemoved: TMfCastDeviceRemovedEvent read FOnDeviceRemoved write FOnDeviceRemoved;
     property OnStateChanged: TMfCastStateChangedEvent read FOnStateChanged write FOnStateChanged;
+    property OnReceiverVolumeChanged: TMfCastReceiverVolumeEvent read FOnReceiverVolumeChanged write FOnReceiverVolumeChanged;
     property OnMediaStatus: TMfCastMediaStatusEvent read FOnMediaStatus write FOnMediaStatus;
     property OnError: TMfCastErrorEvent read FOnError write FOnError;
     property OnLog: TMfCastLogEvent read FOnLog write FOnLog;
@@ -364,6 +386,7 @@ begin
   Callbacks.OnDeviceRemoved := ControllerDeviceRemoved;
   Callbacks.OnStateChanged := ControllerStateChanged;
   Callbacks.OnMediaStatus := ControllerMediaStatus;
+  Callbacks.OnReceiverVolumeChanged := ControllerReceiverVolumeChanged;
   Callbacks.OnError := ControllerError;
   FController.SetCallbacks(Callbacks);
 
@@ -451,6 +474,50 @@ function TMfCast.GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
 begin
 
   Result := FController.GetDevices(ADevices);
+end;
+
+
+function TMfCast.GetDeviceName(const ADevice: TMfCastDevice;
+  out AName: string; out ADetail: string): HRESULT;
+begin
+  Result:=GetDeviceName(ADevice,TMfCastEurekaOptions.CreateDefault,AName,ADetail);
+end;
+
+function TMfCast.GetDeviceName(const ADevice: TMfCastDevice;
+  const AOptions: TMfCastEurekaOptions; out AName: string;
+  out ADetail: string): HRESULT;
+var Info:TMfCastEurekaInfo;
+begin
+  AName:='';
+  Result:=MfCastEurekaGetInfo(ADevice,AOptions,Info,ADetail);
+  if Succeeded(Result) then AName:=Info.Name;
+  if Failed(Result) then DispatchLog(cllWarning,'Eureka',ADetail)
+  else DispatchLog(cllDebug,'Eureka',ADetail);
+end;
+
+function TMfCast.RenameDevice(var ADevice: TMfCastDevice; const AName: string;
+  out ADetail: string): HRESULT;
+begin
+  Result:=RenameDevice(ADevice,AName,TMfCastEurekaOptions.CreateDefault,ADetail);
+end;
+
+function TMfCast.RenameDevice(var ADevice: TMfCastDevice; const AName: string;
+  const AOptions: TMfCastEurekaOptions; out ADetail: string): HRESULT;
+var RenameResult:TMfCastEurekaRenameResult;I:Integer;
+begin
+  Result:=MfCastEurekaRenameDevice(ADevice,AName,AOptions,RenameResult,ADetail);
+  if Succeeded(Result) and RenameResult.Verified then
+  begin
+    ADevice.FriendlyName:=RenameResult.Info.Name;
+    for I:=0 to Length(ADevice.TxtEntries)-1 do
+      if SameText(ADevice.TxtEntries[I].Name,'fn') then
+        ADevice.TxtEntries[I].Value:=RenameResult.Info.Name;
+    // mDNS remains authoritative for the controller's device list and events.
+    // Discovery is asynchronous; its outcome cannot undo a verified rename.
+    RefreshDiscovery(ADevice);
+    DispatchLog(cllInfo,'Eureka',ADetail);
+  end
+  else DispatchLog(cllWarning,'Eureka',ADetail);
 end;
 
 
@@ -761,6 +828,67 @@ begin
 end;
 
 
+function TMfCast.GetReceiverVolume(out AStatus: TMfCastReceiverVolumeStatus): HRESULT;
+var
+  ReceiverVolume: IMfCastReceiverVolume;
+
+begin
+
+  AStatus.Reset();
+  if Supports(FController,
+               IMfCastReceiverVolume,
+               ReceiverVolume) then
+    Result := ReceiverVolume.GetReceiverVolume(AStatus)
+  else
+    Result := E_NOINTERFACE;
+end;
+
+
+function TMfCast.SetReceiverVolume(const AVolume: Single): HRESULT;
+var
+  ReceiverVolume: IMfCastReceiverVolume;
+
+begin
+
+  if Supports(FController,
+               IMfCastReceiverVolume,
+               ReceiverVolume) then
+    Result := ReceiverVolume.SetReceiverVolume(AVolume)
+  else
+    Result := E_NOINTERFACE;
+end;
+
+
+function TMfCast.SetReceiverMuted(const AMuted: Boolean): HRESULT;
+var
+  ReceiverVolume: IMfCastReceiverVolume;
+
+begin
+
+  if Supports(FController,
+               IMfCastReceiverVolume,
+               ReceiverVolume) then
+    Result := ReceiverVolume.SetReceiverMuted(AMuted)
+  else
+    Result := E_NOINTERFACE;
+end;
+
+
+function TMfCast.RequestReceiverVolumeStatus(): HRESULT;
+var
+  ReceiverVolume: IMfCastReceiverVolume;
+
+begin
+
+  if Supports(FController,
+               IMfCastReceiverVolume,
+               ReceiverVolume) then
+    Result := ReceiverVolume.RequestReceiverVolumeStatus()
+  else
+    Result := E_NOINTERFACE;
+end;
+
+
 function TMfCast.SetVolume(const AVolume: Single): HRESULT;
 var
   Volume: Single;
@@ -905,6 +1033,15 @@ begin
   if Assigned(FOnStateChanged) then
     FOnStateChanged(AOldState, 
                     ANewState);
+end;
+
+
+procedure TMfCast.ControllerReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
+
+begin
+
+  if Assigned(FOnReceiverVolumeChanged) then
+    FOnReceiverVolumeChanged(AStatus);
 end;
 
 

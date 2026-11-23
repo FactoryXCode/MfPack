@@ -124,3 +124,36 @@ First release date: 02/08/2026
 Final release date: 18/11/2026  
   
 Copyright © FactoryX. All rights reserved.
+
+## Rename a receiver
+
+Select a receiver, then choose **Rename...** beside the receiver selector. Enter
+its new name and choose **Rename**. This changes the receiver's own name through
+TMfCast's Eureka setup API. Readback must confirm the name before the dialog
+accepts it. Selection follows the stable receiver ID when discovery reorders
+or refreshes the list.
+
+The dialog uses HTTPS on port 8443 by default and explicitly trusts the selected
+receiver's local device certificate, including the client-authentication usage
+found on JBL Link devices. Certificate expiry is still checked. You can clear
+that checkbox to require
+normal certificate validation. Older receivers may require HTTP on port 8008;
+changing the HTTPS checkbox selects the usual port. A local authorization token
+can be entered when the receiver requires one. It is masked, kept only for the
+dialog's lifetime and never saved or included in diagnostic messages. Tokens
+are not sent over plain HTTP.
+
+Network requests run on a worker so the dialog remains responsive. Controls
+and Close are disabled until the request finishes. A failed response does not
+necessarily mean the receiver kept its old name: use **Read current name**
+after an uncertain result before retrying. Failed or unverified writes do not
+replace the selected receiver's displayed name.
+
+Receiver setup support and token requirements depend on device firmware. No
+playback or volume command is sent by this dialog.
+
+
+The Rename button is declared in the main form resource and is visible in the
+form designer. The rename dialog is a normal designer-backed VCL form (`dlgCastRename.pas` / `.dfm`).
+It retains its worker-based network operations; controls and their event
+handlers can be edited in the IDE.

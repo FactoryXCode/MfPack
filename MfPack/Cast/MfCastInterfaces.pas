@@ -128,6 +128,15 @@ type
     function DiscoverDevice(const ADevice: TMfCastDevice): HRESULT;
   end;
 
+  // Optional extension keeps existing channel/controller interface layouts intact.
+  IMfCastReceiverVolume = interface
+    ['{3EB39313-64AD-42CF-8616-7C294C835E58}']
+    function GetReceiverVolume(out AStatus: TMfCastReceiverVolumeStatus): HRESULT;
+    function SetReceiverVolume(const AVolume: Single): HRESULT;
+    function SetReceiverMuted(const AMuted: Boolean): HRESULT;
+    function RequestReceiverVolumeStatus(): HRESULT;
+  end;
+
   IMfCastTransport = interface
     ['{692D05FC-96A1-44DC-ABF4-4AD172AE84D7}']
     function Configure(const ASettings: TMfCastProtocolSettings): HRESULT;

@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -618,7 +618,9 @@ begin
 
   TargetName := AnsiString(AHost);
   HaveContext := False;
+  {$IFDEF  WIN32}
   Status := S_OK;
+  {$ENDIF}
 
   // Always perform the initial handshake, and retry incomplete input after
   // receiving more bytes. Status is assigned by SSPI on every iteration.

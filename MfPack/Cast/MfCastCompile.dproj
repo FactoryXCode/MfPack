@@ -1,0 +1,134 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{4DE5E109-28D4-47E4-A769-5F2B51E771BB}</ProjectGuid>
+        <ProjectVersion>16.0</ProjectVersion>
+        <FrameworkType>VCL</FrameworkType>
+        <MainSource>MfCastCompile.dpk</MainSource>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <TargetedPlatforms>3</TargetedPlatforms>
+        <AppType>Package</AppType>
+        <GenDll>true</GenDll>
+        <GenPackage>true</GenPackage>
+        <SkipResGeneration>false</SkipResGeneration>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <GenDll>true</GenDll>
+        <GenPackage>true</GenPackage>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <SanitizedProjectName>MfCastCompile</SanitizedProjectName>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_MajorVer>4</VerInfo_MajorVer>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=FactoryX;FileDescription=MfPack Cast API;FileVersion=4.1.0.0;ProductName=MfPack Cast API;ProductVersion=4.1.0.0</VerInfo_Keys>
+        <DCC_DcuOutput>.\build\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
+        <DCC_BplOutput>.\build\$(Platform)\$(Config)\bpl</DCC_BplOutput>
+        <DCC_DcpOutput>.\build\$(Platform)\$(Config)\dcp</DCC_DcpOutput>
+        <DCC_UnitSearchPath>.;.\Media;..\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
+        <DCC_Optimize>false</DCC_Optimize>
+        <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="rtl.dcp"/>
+        <DCCReference Include="vcl.dcp"/>
+        <DCCReference Include="MfPackX400.dcp"/>
+        <DCCReference Include="MfCast.pas"/>
+        <DCCReference Include="MfCastEureka.pas"/>
+        <DCCReference Include="MfCastAndroidTvRemote.pas"/>
+        <DCCReference Include="MfCastChannel.pas"/>
+        <DCCReference Include="MfCastCaptureCapabilities.pas"/>
+        <DCCReference Include="MfCastCaptureWriter.pas"/>
+        <DCCReference Include="MfCastController.pas"/>
+        <DCCReference Include="MfCastDiscovery.pas"/>
+        <DCCReference Include="MfCastDesktopCapture.pas"/>
+        <DCCReference Include="MfCastHttpServer.pas"/>
+        <DCCReference Include="MfCastInterfaces.pas"/>
+        <DCCReference Include="MfCastMedia.pas"/>
+        <DCCReference Include="MfCastMediaInterfaces.pas"/>
+        <DCCReference Include="MfCastProtocol.pas"/>
+        <DCCReference Include="MfCastRemux.pas"/>
+        <DCCReference Include="MfCastTranscode.pas"/>
+        <DCCReference Include="MfCastTransport.pas"/>
+        <DCCReference Include="MfCastTypes.pas"/>
+        <DCCReference Include="MfCastWakeOnLan.pas"/>
+        <DCCReference Include="MfCastWindowsSupport.pas"/>
+        <DCCReference Include="Media\LangTags.pas"/>
+        <DCCReference Include="Media\MfCastArtwork.pas"/>
+        <DCCReference Include="Media\MfEmbeddedSubtitleReader.pas"/>
+        <DCCReference Include="Media\MfVobSubReader.pas"/>
+        <DCCReference Include="Media\MfMatroskaSubtitleReader.pas"/>
+        <DCCReference Include="Media\MfPCXConstants.pas"/>
+        <DCCReference Include="Media\MfCastWindowPreview.pas"/>
+        <DCCReference Include="Media\MfSubtitleCompositor.pas"/>
+        <DCCReference Include="Media\MfSubtitleFramePump.pas"/>
+        <DCCReference Include="Media\TimedTextClass.pas"/>
+        <DCCReference Include="Media\MfCastDirectPreviewPlayer.pas"/>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>Package</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">MfCastCompile.dpk</Source>
+                </Source>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">True</Platform>
+            </Platforms>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <Import Project="$(APPDATA)\Embarcadero\BDS\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\BDS\$(PRODUCTVERSION)\UserTools.proj')"/>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+</Project>

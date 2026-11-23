@@ -77,6 +77,7 @@ uses
   Vcl.Dialogs,
   Vcl.ExtCtrls,
   {Cast}
+  dlgCastRename,
   MfCast,
   MfCastInterfaces,
   MfCastTypes,
@@ -101,6 +102,7 @@ type
     lblSeek: TLabel;
     lblVolume: TLabel;
     cbxDevices: TComboBox;
+    btnRenameDevice:TButton;
     btnDiscover: TButton;
     btnRefresh: TButton;
     edtSource: TEdit;
@@ -127,6 +129,7 @@ type
     btnDisconnect: TButton;
     Label2: TLabel;
 
+    procedure RenameDeviceClick(Sender:TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnDiscoverClick(Sender: TObject);
@@ -149,12 +152,14 @@ type
 
   private
     FCast: TMfCast;
+
     FSourceResolver: IMfCastSourceResolver;
     FYouTubeSourceResolver: TMfYouTubeSourceResolver;
     FDevices: TMfCastDeviceArray;
     FWorker: TMfCastFileWorker;
     FSubtitleWorker: TMfCastSubtitleWorker;
     FClosing: Boolean;
+    FUpdatingReceiverVolume: Boolean;
     FUpdatingSeekPosition: Boolean;
     FSeekPositionPending: Boolean;
     FSeekTargetSeconds: Integer;
@@ -166,6 +171,9 @@ type
     procedure DeviceRemoved(const ADeviceId: string);
     procedure CastStateChanged(const AOldState: TMfCastState;
                                const ANewState: TMfCastState);
+    procedure ReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
+    procedure RefreshReceiverVolume();
+    procedure WmReceiverVolume(var message: Tmessage); message WM_MFCAST_RECEIVER_VOLUME;
     procedure CastMediaStatus(const AStatus: TMfCastMediaStatus);
 
     procedure CastError(const AError: TMfCastErrorInfo);
@@ -204,8 +212,31 @@ implementation
 {$R *.dfm}
 
 
+procedure TCastPlayerForm.RenameDeviceClick(Sender:TObject);
+var Device:TMfCastDevice;I,Index:Integer;
+begin
+ if FClosing or (FCast=nil) or not btnRenameDevice.Enabled then Exit;
+ Index:=cbxDevices.ItemIndex;
+ if (Index<0) or (Index>=Length(FDevices)) then Exit;
+ Device:=FDevices[Index];
+ if TCastRenameDialog.ExecuteDialog(Self,FCast,Device) then
+ begin
+  for I:=0 to Length(FDevices)-1 do
+   if ((Device.Id<>'') and SameText(FDevices[I].Id,Device.Id)) or
+      ((Device.Id='') and SameText(FDevices[I].Address,Device.Address)) then
+   begin
+    FDevices[I]:=Device;
+    cbxDevices.Items[I]:=Format('%s  (%s:%d)',[Device.FriendlyName,Device.Address,Device.Port]);
+    cbxDevices.ItemIndex:=I;Break;
+   end;
+ end;
+ UpdateControls;
+end;
+
 procedure TCastPlayerForm.FormCreate(Sender: TObject);
 begin
+
+  FUpdatingReceiverVolume := True;
 
   FClosing := False;
   FUpdatingSeekPosition := False;
@@ -233,14 +264,16 @@ begin
   FCast.OnDeviceRemoved := DeviceRemoved;
   FCast.OnStateChanged := CastStateChanged;
   FCast.OnMediaStatus := CastMediaStatus;
+  FCast.OnReceiverVolumeChanged := ReceiverVolumeChanged;
   FCast.OnError := CastError;
   FCast.OnLog := CastLog;
 
   trkSeek.Max := 7200;
   trkSeek.Frequency := 300;
   trkVolume.Max := 100;
-  trkVolume.Position := 75;
+  trkVolume.Position := 0;
   memLog.Lines.Add('Ready. Choose a local file, direct media URL, or YouTube URL.');
+  FUpdatingReceiverVolume := False;
   UpdateControls;
 end;
 
@@ -272,6 +305,7 @@ begin
       FCast.OnDeviceUpdated := nil;
       FCast.OnDeviceRemoved := nil;
       FCast.OnStateChanged := nil;
+      FCast.OnReceiverVolumeChanged := nil;
       FCast.OnMediaStatus := nil;
       FCast.OnError := nil;
       FCast.OnLog := nil;
@@ -338,6 +372,73 @@ begin
                 WM_MFCAST_STATE,
                 Ord(ANewState),
                 0);
+end;
+
+
+procedure TCastPlayerForm.ReceiverVolumeChanged(const AStatus: TMfCastReceiverVolumeStatus);
+
+begin
+
+  if not FClosing then
+    PostMessage(Handle,
+                WM_MFCAST_RECEIVER_VOLUME,
+                0,
+                0);
+end;
+
+
+procedure TCastPlayerForm.WmReceiverVolume(var message: Tmessage);
+
+begin
+
+  if not FClosing then
+    RefreshReceiverVolume();
+end;
+
+
+procedure TCastPlayerForm.RefreshReceiverVolume();
+var
+  Status: TMfCastReceiverVolumeStatus;
+  HaveStatus: Boolean;
+  CanControl: Boolean;
+
+begin
+
+  if FUpdatingReceiverVolume then
+    Exit;
+
+  Status.Reset();
+  HaveStatus := Assigned(FCast) and (not FClosing);
+  if HaveStatus then
+    HaveStatus := (FCast.GetReceiverVolume(Status) = S_OK);
+
+  CanControl := HaveStatus and (not Assigned(FWorker)) and
+                (FCast.State() in [csConnected, csLaunchingReceiver, csBuffering,
+                                   csPlaying, csPaused, csStopped]) and
+                (not SameText(Status.ControlType,
+                              'fixed'));
+  FUpdatingReceiverVolume := True;
+  try
+    trkVolume.Enabled := CanControl and Status.HasLevel;
+    chkMuted.Enabled := CanControl and Status.HasMuted;
+    if Status.HasLevel then
+      trkVolume.Position := Round(Status.Level * 100.0)
+    else
+      trkVolume.Position := trkVolume.Min;
+
+    chkMuted.Checked := Status.HasMuted and Status.Muted;
+    if SameText(Status.ControlType,
+                'fixed') then
+      lblVolume.Caption := 'Volume fixed'
+    else
+      if Status.HasLevel then
+        lblVolume.Caption := Format('Volume %d%%',
+                                    [trkVolume.Position])
+      else
+        lblVolume.Caption := 'Volume unavailable';
+  finally
+    FUpdatingReceiverVolume := False;
+  end;
 end;
 
 
@@ -409,11 +510,13 @@ procedure TCastPlayerForm.ReloadDevices;
 var
   I: Integer;
   OldIndex: Integer;
+  OldId:string;
   Hr: HRESULT;
 
 begin
 
   OldIndex := cbxDevices.ItemIndex;
+  OldId:='';if (OldIndex>=0) and (OldIndex<Length(FDevices)) then OldId:=FDevices[OldIndex].Id;
 
   Hr := FCast.GetDevices(FDevices);
   if FAILED(Hr) then
@@ -432,6 +535,8 @@ begin
       cbxDevices.Items.Add(Format('%s  (%s:%d)',
                                   [FDevices[I].FriendlyName, FDevices[I].Address, FDevices[I].Port]));
 
+    if OldId<>'' then for I:=0 to Length(FDevices)-1 do
+      if SameText(FDevices[I].Id,OldId) then begin OldIndex:=I;Break;end;
     if (OldIndex >= 0) and (OldIndex < cbxDevices.Items.Count) then
       cbxDevices.ItemIndex := OldIndex
     else
@@ -709,14 +814,15 @@ begin
   btnDisconnect.Enabled := Active;
   btnSeek.Enabled := Active;
   trkSeek.Enabled := Active;
-  trkVolume.Enabled := Active;
-  chkMuted.Enabled := Active;
+  RefreshReceiverVolume();
   chkEmbeddedSubtitles.Enabled := not Busy;
   cbxSubtitleLanguage.Enabled := chkEmbeddedSubtitles.Checked and
                                  (cbxSubtitleLanguage.Items.Count > 0) and
                                  (not Assigned(FWorker)) and
                                  (not Assigned(FSubtitleWorker));
   cbxYouTubeMode.Enabled := not Busy;
+  if btnRenameDevice<>nil then btnRenameDevice.Enabled:=Assigned(FCast) and not FClosing and not Busy and
+    (cbxDevices.ItemIndex>=0) and (cbxDevices.ItemIndex<Length(FDevices));
 end;
 
 
@@ -832,10 +938,7 @@ begin
   LogResult('Cast media', Hr);
   if SUCCEEDED(Hr) then
     begin
-      // Apply the UI settings to a receiver that may have retained a muted
-      // state from an earlier session.
-      FCast.SetVolume(trkVolume.Position / 100.0);
-      FCast.SetMuted(chkMuted.Checked);
+      RefreshReceiverVolume();
     end;
   UpdateControls;
 end;
@@ -1033,16 +1136,16 @@ end;
 procedure TCastPlayerForm.trkVolumeChange(Sender: TObject);
 begin
 
-  if trkVolume.Enabled then
-    FCast.SetVolume(trkVolume.Position / 100.0);
+  if (not FUpdatingReceiverVolume) and trkVolume.Enabled then
+    FCast.SetReceiverVolume(trkVolume.Position / 100.0);
 end;
 
 
 procedure TCastPlayerForm.chkMutedClick(Sender: TObject);
 begin
 
-  if chkMuted.Enabled then
-    FCast.SetMuted(chkMuted.Checked);
+  if (not FUpdatingReceiverVolume) and chkMuted.Enabled then
+    FCast.SetReceiverMuted(chkMuted.Checked);
 end;
 
 

@@ -263,7 +263,7 @@ object CastPlayerForm: TCastPlayerForm
     object cbxDevices: TComboBox
       Left = 18
       Top = 51
-      Width = 412
+      Width = 334
       Height = 24
       BevelInner = bvNone
       BevelKind = bkSoft
@@ -276,6 +276,16 @@ object CastPlayerForm: TCastPlayerForm
       ParentFont = False
       TabOrder = 0
       OnChange = SourceOrDeviceChanged
+    end
+    object btnRenameDevice: TButton
+      Left = 514
+      Top = 51
+      Width = 73
+      Height = 24
+      Caption = 'Rename...'
+      Enabled = False
+      TabOrder = 24
+      OnClick = RenameDeviceClick
     end
     object edtSource: TEdit
       Left = 18
@@ -373,8 +383,8 @@ object CastPlayerForm: TCastPlayerForm
       OnChange = AudioSelectionChanged
     end
     object btnCastDiscover: TButton
-      Left = 435
-      Top = 49
+      Left = 357
+      Top = 50
       Width = 74
       Height = 25
       Margins.Left = 2
@@ -387,7 +397,7 @@ object CastPlayerForm: TCastPlayerForm
       OnClick = btnDiscoverClick
     end
     object btnRefresh: TButton
-      Left = 513
+      Left = 435
       Top = 50
       Width = 74
       Height = 25
@@ -457,7 +467,7 @@ object CastPlayerForm: TCastPlayerForm
     object chkEmbeddedSubtitles: TCheckBox
       Left = 946
       Top = 84
-      Width = 56
+      Width = 74
       Height = 42
       Hint = 'Use a static image instead of the camera.'
       Caption = 'Enable subtitles'
