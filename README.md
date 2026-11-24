@@ -208,7 +208,8 @@ This is a VCL implementation of Microsoft's [How to Create a Playlist](https://l
 | 6. Queue the first topology | `BuildPlaylist` obtains the **sequencer's** presentation descriptor; `QueuePresentation` gets the provider's rewritten topology and submits it to the session |
 | 7. Handle session events | `ProcessEvent`: `MENewPresentation` supplies the next descriptor to `QueuePresentation`; status events drive the UI and active segment |
 | 8. Shut down | `ClosePlaylist`: shut down the sequencer's media source, close and await the session's close notification, then shut down the session |
-  
+
+![](MfPack/Pic/MfPlaylist_s.png)
   
 ![RL](MfPack/Pic/RL.svg)   
     
