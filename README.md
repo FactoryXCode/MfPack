@@ -191,6 +191,27 @@ There are 4 samples in 4 project degrees.
 
 ![RL](MfPack/Pic/RL.svg)   
   
+  
+## MfPlaylist Sample  
+  
+This is a VCL implementation of Microsoft's [How to Create a Playlist](https://learn.microsoft.com/en-us/windows/win32/medfound/how-to-create-a-playlist).  
+
+**About this sample**
+
+| Microsoft step | Sample implementation |
+| --- | --- |
+| 1. Create the Media Session | `TMfPlaylistPlayer.BuildPlaylist`: `MFCreateMediaSession`, callback subscription and presentation clock |
+| 2. Create the Sequencer Source | `BuildPlaylist`: `MFCreateSequencerSource`, query `IMFMediaSource` and `IMFMediaSourceTopologyProvider` |
+| 3. Create native media sources | `AddSegment`: `IMFSourceResolver.CreateObjectFromURL` and the native source's presentation descriptor |
+| 4. Create partial topologies | `CreateTopology`: source-stream nodes connected to audio renderer and EVR output nodes; the topology loader inserts decoders |
+| 5. Append topologies | `AddSegment`: `AppendTopology`, with `SequencerTopologyFlags_Last` on the final entry; clear the previous last flag as each entry is added |
+| 6. Queue the first topology | `BuildPlaylist` obtains the **sequencer's** presentation descriptor; `QueuePresentation` gets the provider's rewritten topology and submits it to the session |
+| 7. Handle session events | `ProcessEvent`: `MENewPresentation` supplies the next descriptor to `QueuePresentation`; status events drive the UI and active segment |
+| 8. Shut down | `ClosePlaylist`: shut down the sequencer's media source, close and await the session's close notification, then shut down the session |
+  
+  
+![RL](MfPack/Pic/RL.svg)   
+    
 ## MfProtectedPlayback Sample
   
 This sample demonstrates playback of clear and protected media with Microsoft Media Foundation and the Protected Media Path (PMP).
