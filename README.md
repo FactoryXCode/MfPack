@@ -244,10 +244,9 @@ media server on a local network.
   
 **MfWebCamStreamer**
   
-This sample is the extended version of MfSimpleWebCamStreamer, that uses FxServe to  
-stream over the internet. Within the browser or installable PWA,  
-users can watch the video and are able to take snapshots or record the camera stream. 
-Note: The PWA operates like an app, that can be installed via the Install button in the browser.  
+This sample is the extended version of MfSimpleWebCamStreamer, that uses FxServe to stream over the internet.
+Within the browser or installable PWA users can watch the video and are able to take snapshots or record the camera stream. 
+Note: The PWA operates like an app that can be installed via the Install option in any modern browser.  
 There is no need to get the PWA from any "Store".
   
 The browser player includes:
@@ -280,7 +279,7 @@ The browser player includes:
   
 The sample enables the optional Media Foundation conversion stack.
 Compatible MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play.
-Containers such as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
+Containers such as MKV are converted to fragmented MP4 and published by the build in HTTP server.  
 Please read the white paper document MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API.  
   
 ![](MfPack/Pic/MfSimpleCastPlayer.png)
@@ -302,7 +301,7 @@ This it the extended version of MfSimpleCastPlayer.
   
 The sample enables the optional Media Foundation conversion stack.  
 Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct playback.
-Other containers and codecs, including AVI and MKV when required, are remuxed or converted to fragmented MP4 and published by the build-in HTTP server.  
+Other containers and codecs, including AVI and MKV when required, are remuxed or converted to fragmented MP4 and published by the build in HTTP server.  
   
 Please read [MfPack_Chromecast_API_White_Paper.txt](MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details about using the MfPack Cast API.  
   
@@ -334,7 +333,7 @@ Demonstrates how to capture an image (synchronous or A-synchronous) using the IM
   
 **CameraFrameCapture sample**
   
-Demonstrates how to capture a still image or so called snapshot (A-synchronous) from a    
+Demonstrates how to capture a still image or so called snapshot (A-synchronous) from a
 capture device such as a webcam or camera using the IMFSourceReader.
   
 ![](MfPack/Pic/CameraFrameCaptureSample.png)
@@ -343,7 +342,7 @@ capture device such as a webcam or camera using the IMFSourceReader.
   
 **CaptureEngineVideoCapture sample**
   
-Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device,  
+Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device 
 such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.  
 This sample also demonstrates how to use the MfMediaTypeDebug API.  
   
@@ -374,8 +373,7 @@ Demonstrates how to use the SinkWriter to create a video from one or more image 
   
 **LoopBackCapture Sample 1**
   
-This sample shows, how to capture sound from your soundcard using  and save this capture  
-with the quality that is supported by your soundcard.  
+This sample shows, how to capture sound from your soundcard using and save this capture with the quality that is supported by your soundcard.  
   
 ![](MfPack/Pic/LoopBackCapture.png)
   
@@ -384,22 +382,21 @@ with the quality that is supported by your soundcard.
 **LoopBackCapture Sample 2**
   
 This sample demonstrates how to capture system audio either from a  
-specific process tree or for all process except  
-a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.  
+specific process tree or for all process except a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.  
 The new data structure makes it possible to restrict captured audio data to that rendered by a specific process and any of its child processes.  
-Windows 10 has always supported capturing all audio that is played on an audio endpoint (referred to as "system" loopback capture),  
+Windows 10 has always supported capturing all audio that is played on an audio endpoint (referred to as "system" loopback capture), 
 which captures all audio from all apps that are playing sounds on the chosen audio endpoint.  
   
-With the new structure, only audio from the specified process,  
+With the new structure, only audio from the specified process, 
 and its children, will be captured. Audio rendered by other processes will not be captured.  
 A flag is also provided to reverse the behavior, capturing all system audio *except* those from the the specified process (and its children).  
-Furthermore, the capture is not tied to a specific audio endpoint,  
+Furthermore, the capture is not tied to a specific audio endpoint, 
 eliminating the need to create a separate IAudioClient to capture from each physical audio endpoint.  
   
 If the processes whose audio will be captured does not have any audio rendering streams,  
 then the capturing process receives silence.  
   
-It also demonstrates how to get a process by using the tlhelp32 API, to list a snapshot of running processes and be able to pick one.  
+It also demonstrates how to get a process by using the tlhelp32 API to list a snapshot of running processes and be able to pick one.  
 The application is provided with a dialog to select a running process from the process tree you want to pick and has a button to get the current PID of your application.  
   
 The application is using MMCSS and runs the rendering part in a separate thread.  
@@ -416,11 +413,11 @@ This sample lets you to choose between different latency's and
 buffersize for better sound to eliminate buffer related gliches.  
   
 *It has some more advanced features like:*  
-   - *The rendering part is running in a separate thread to eliminate glitches.*
-   - *Able to use MMCSS (Multimedia Class Scheduler service).
-   - *Stream switch detection.*
-   - *Possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or* 
-     *the soundcard's audio format (including Uncompressed IEEE floating-point audio).*
+   - The rendering part is running in a separate thread to eliminate glitches.
+   - Able to use MMCSS (Multimedia Class Scheduler service).
+   - Stream switch detection.
+   - Possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or 
+     the soundcard's audio format (including Uncompressed IEEE floating-point audio).
   
 ![](MfPack/Pic/ThreadedLoopbackCapture.png)
   
@@ -598,8 +595,7 @@ connected with the graphics card GPU using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview,  
 and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC audio).  
   
-Audio-only recording can be done separately to WAV or FLAC using the  
-dedicated recorder unit.  
+Audio-only recording can be done separately to WAV or FLAC using the dedicated recorder unit.  
   
 **Note:**  
 You need good knowledge of Media Foundation, DirectX and GPU processing.  
@@ -610,8 +606,7 @@ You need good knowledge of Media Foundation, DirectX and GPU processing.
   
 **MfMftExplorer sample**
 
-This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a  
-Windows system and their properties. 
+This sample demonstrates how to discover Media Foundation Transforms (MFTs) installed on a Windows system and their properties. 
 
 ![](MfPack/Pic/MfMftExplorer.png)
   
@@ -620,11 +615,9 @@ Windows system and their properties.
 ***Educational samples***
   
 **MfCustomMFT samples**  
-Small, beginner-oriented examples that introduce custom Media Foundation  
-Transforms one step at a time.  
+Small, beginner-oriented examples that introduce custom Media Foundation Transforms one step at a time.  
 The project has 15 samples where each sample is lifted from the previous one.  
-At sample 7 a programmer should be able to build a simple registered MFT and  
-how to use it in Media Foundation.  
+At sample 7 a programmer should be able to build a simple registered MFT and how to use it in Media Foundation.  
   
 [Read about it in details](MfPack/Samples/MfCustomMFT/Readme.md)
   
@@ -636,8 +629,7 @@ how to use it in Media Foundation.
 ## Complex Samples
   
 **RDJ Mixer sample**  
-This application demonstrates how to build an audio mixer,  
-effects and how to implement IceCast/Caddy for internet broadcasting.  
+This application demonstrates how to build an audio mixer, effects and how to implement IceCast/Caddy for internet broadcasting.  
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.  
 All WASAPI and MFT sample code comes together in this sample.  
   
@@ -660,19 +652,17 @@ loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing,
 tag editing, and local recording.  
   
 The Pro version expands this into an audio/video streaming application.  
-It can combine the live program audio with camera video or a static video source,  
+It can combine the live program audio with camera video or a static video source, 
 encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.  
 The main technical difference is the broadcast pipeline.  
 MfRDJ Pro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4.  
-MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments,  
+MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, 
 writes a rolling live.json manifest, and serves the result through FxServe or an alternative proxy server like Caddy.  
 Modern browsers can then play the stream using Media Source Extensions.  
-MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and  
-listener counts to JSON files for the web interface.  
-It includes safeguards for long-running broadcasts, such as bounded queues,  
+MfRDJ Pro also writes now-playing metadata, artwork links, on-air state and listener counts to JSON files for the web interface.  
+It includes safeguards for long-running broadcasts, such as bounded queues, 
 fragment cleanup, FxServe mirroring, sleep prevention options, and clean shutdown handling.  
-MfRDJ Pro supports casting to Cromecast devices on your local network using the  
-MfPack Cast V2 protocols.  
+MfRDJ Pro supports casting to Cromecast devices on your local network using the MfPack Cast V2 protocols.  
   
 **Note:**  
 You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2, FxServe and audio manipulation.  
@@ -694,24 +684,22 @@ RDJ Pro or other apps that stream audio/video on LAN/WAN.
 It serves web and local network players and generated media files and forwards the  
 small set of live endpoints, in the same way 3th party servers as Caddy do.  
   
-FxServe can run interactively as a console application or as a native Windows  
-service. Its LAN listener remains on port 8080. An optional HTTP.sys front end  
-adds HTTPS on port 443 and redirects port 80 to HTTPS for WAN use. WAN mode is  
-disabled by default. When WAN HTTPS is enabled, FxServe obtains, installs,  
-renews, validates, and binds its certificate itself.  
-MfPack includes a Zip file that contains the necessary files that needs to be  
-copied to your server of local machine that should run the service,  
-typically a remote server in your network. No installation app is needed.  
-FxServe has an FxServeAdmin app, to install, configure and control FxServe as  
-a Windows service.
+FxServe can run interactively as a console application or as a native Windows service.  
+Its LAN listener remains on port 8080.  
+An optional HTTP.sys front end adds HTTPS on port 443 and redirects port 80 to HTTPS for WAN use.  
+WAN mode is disabled by default.  
+When WAN HTTPS is enabled, FxServe obtains, installs, renews, validates, and binds its certificate itself.  
+MfPack includes a Zip file that contains the necessary files that needs to be copied to your server of local machine that should run the service,  
+typically a remote server in your network.  
+No installation app is needed.  
+FxServe has an FxServeAdmin app, to install, configure and control FxServe as a Windows service.  
   
 ***Caddy***
   
-Caddy is a 3th party proxy server with much more features than FxServe. Use this  
-app as a service, just like FxServe for LAN/WAN streaming.  
-The Caddy version in MfPack is packed in a zip file together with the needed files to run on a server or   
-local PC. The Caddy version also has a CaddyAdmin app, to install,  
-configure and control Caddy as a Windows service.  
+Caddy is a 3th party proxy server with much more features than FxServe.  
+Use this app as a service, just like FxServe for LAN/WAN streaming.  
+The Caddy version in MfPack is packed in a zip file together with the needed files to run on a server or local PC.  
+The Caddy version also has a CaddyAdmin app, to install, configure and control Caddy as a Windows service.  
   
 ---  
 
@@ -774,7 +762,7 @@ You can find the complete HEOS/AVR Delphi API and samples [HERE](https://github.
 **HResult Lookup Tool Application**
   
 This tool can be used to determine HResult or Error codes returned by the Windows OS,  
-featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and  
+featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and 
 the "System.SysUtils.SysErrorMessage" function, that provides the localized translation (language of your OS) of the HResult.  
   
 ![](MfPack/Pic/HResultLookUpToolApp.png)
