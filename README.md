@@ -123,8 +123,8 @@ This sample uses the DirectShow IAMCameraControl and IAMVideoProcAmp interfaces 
 This sample is based on MfSimpleCapture Sample 2.  
 It uses the Media Foundation camera source, Media Session, partial capture topology and EVR preview and uses native source controls and the newer MF camera interfaces for configuration.  
   
-![](MfPack/Pic/MfSimpleCapture3.png)  
-  
+![](MfPack/Pic/MfSimpleCapture_3.png)  
+
 ![RL](MfPack/Pic/RL.svg)  
 
 ## MfComponents Samples
