@@ -95,6 +95,7 @@ type
     FDefaultsStatus: HRESULT;
     FMonitorStatus: HRESULT;
     FHasStreamed: Boolean;
+    FIniRestoreStatus: HRESULT;
 
     procedure InitializeDescriptions();
     function ReadStandard(const AIndex: Integer): HRESULT;
@@ -116,6 +117,10 @@ type
                            const AFlags: ULONG): HRESULT;
     function ApplyExtended(const AIndex: Integer;
                            const AFlags: UInt64): HRESULT;
+    function SaveIniSetting(const AIndex: Integer): HRESULT;
+    function RemoveIniSetting(const AIndex: Integer): HRESULT;
+    function DescribeIniSettings(const AItems: TStrings): HRESULT;
+    function ApplyIniSettings(): HRESULT;
     function SaveStandardDefault(const AIndex: Integer): HRESULT;
     function RemoveStandardDefault(const AIndex: Integer): HRESULT;
     function DescribeDefaults(const AItems: TStrings): HRESULT;
@@ -132,6 +137,7 @@ type
 
     property Standard[const AIndex: Integer]: TMfCameraControlInfo read GetStandard;
     property Extended[const AIndex: Integer]: TMfExtendedCameraInfo read GetExtended;
+    property IniRestoreStatus: HRESULT read FIniRestoreStatus;
     property DefaultsStatus: HRESULT read FDefaultsStatus;
     property MonitorStatus: HRESULT read FMonitorStatus;
     property Generation: NativeUInt read FGeneration;
@@ -141,6 +147,7 @@ type
 implementation
 
 uses
+  MfCameraSettings,
   WinApi.WinError,
   WinApi.ComBaseApi,
   WinApi.MediaFoundationApi.MfApi,
@@ -334,6 +341,13 @@ begin
                                         IID_IMFCameraConfigurationManager,
                                         FManager);
   Refresh();
+  FIniRestoreStatus := S_OK;
+  try
+    if TMfCameraSettings.UsesIni(TMfCameraSettings.FileName()) then
+      FIniRestoreStatus := ApplyIniSettings();
+  except
+    on E: Exception do FIniRestoreStatus := E_FAIL;
+  end;
   // An unsupported optional control API must not prevent camera preview.
   Result := S_OK;
 end;
@@ -721,6 +735,106 @@ begin
     Result := Control.CommitSettings();
   if SUCCEEDED(Result) then
     Refresh();
+end;
+
+
+
+function TMfCameraControls.SaveIniSetting(const AIndex: Integer): HRESULT;
+var
+  Info: TMfCameraControlInfo;
+begin
+  if (AIndex < 0) or (AIndex >= MF_CAMERA_STANDARD_COUNT) then
+    Exit(E_INVALIDARG);
+  if FSymbolicLink = '' then Exit(MF_E_INVALIDREQUEST);
+  Result := ReadStandard(AIndex);
+  if FAILED(Result) then Exit;
+  Info := Standard[AIndex];
+  if (Info.Flags = KSPROPERTY_CAMERACONTROL_FLAGS_MANUAL) and
+     not IsValidManualValue(Info, Info.Value) then Exit(E_INVALIDARG);
+  try
+    Result := TMfCameraSettings.Write(TMfCameraSettings.FileName(), FSymbolicLink,
+                                      Info.ControlSet, Info.Id, Info.Value, Info.Flags);
+  except
+    on E: Exception do Result := E_FAIL;
+  end;
+end;
+
+
+function TMfCameraControls.RemoveIniSetting(const AIndex: Integer): HRESULT;
+var
+  Info: TMfCameraControlInfo;
+begin
+  if (AIndex < 0) or (AIndex >= MF_CAMERA_STANDARD_COUNT) then
+    Exit(E_INVALIDARG);
+  if FSymbolicLink = '' then Exit(MF_E_INVALIDREQUEST);
+  Info := Standard[AIndex];
+  try
+    Result := TMfCameraSettings.Remove(TMfCameraSettings.FileName(), FSymbolicLink,
+                                       Info.ControlSet, Info.Id);
+  except
+    on E: Exception do Result := E_FAIL;
+  end;
+end;
+
+
+function TMfCameraControls.DescribeIniSettings(const AItems: TStrings): HRESULT;
+var
+  I: Integer;
+  Value: Longint;
+  Flags: Cardinal;
+  Status: HRESULT;
+  Info: TMfCameraControlInfo;
+begin
+  if not Assigned(AItems) then Exit(E_POINTER);
+  AItems.Clear();
+  if FSymbolicLink = '' then Exit(MF_E_INVALIDREQUEST);
+  Result := S_OK;
+  try
+    for I := 0 to MF_CAMERA_STANDARD_COUNT - 1 do
+      begin
+        Info := Standard[I];
+        Status := TMfCameraSettings.Read(TMfCameraSettings.FileName(), FSymbolicLink,
+                                         Info.ControlSet, Info.Id, Value, Flags);
+        if Status = S_OK then
+          AItems.Add(Format('%s: %d  Flags: $%.8x', [Info.Name, Value, Flags]))
+        else if FAILED(Status) then
+          begin
+            AItems.Add(Format('%s: invalid/unreadable INI setting ($%.8x)',
+                              [Info.Name, Cardinal(Status)]));
+            if SUCCEEDED(Result) then Result := Status;
+          end;
+      end;
+  except
+    on E: Exception do Result := E_FAIL;
+  end;
+end;
+
+
+function TMfCameraControls.ApplyIniSettings(): HRESULT;
+var
+  I: Integer;
+  Value: Longint;
+  Flags: Cardinal;
+  Status: HRESULT;
+  Info: TMfCameraControlInfo;
+begin
+  if FSymbolicLink = '' then Exit(MF_E_INVALIDREQUEST);
+  Result := S_OK;
+  try
+    for I := 0 to MF_CAMERA_STANDARD_COUNT - 1 do
+      begin
+        Info := Standard[I];
+        Status := TMfCameraSettings.Read(TMfCameraSettings.FileName(), FSymbolicLink,
+                                         Info.ControlSet, Info.Id, Value, Flags);
+        // Every loaded value goes through the same capability/range checks as live edits.
+        // Keep applying other controls if one entry is corrupt or no longer supported.
+        if Status = S_OK then Status := ApplyStandard(I, Value, Flags);
+        if FAILED(Status) and SUCCEEDED(Result) then Result := Status;
+      end;
+  except
+    on E: Exception do Result := E_FAIL;
+  end;
+  FIniRestoreStatus := Result;
 end;
 
 

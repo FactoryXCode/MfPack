@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1015">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WebCam">
+  <link rel="manifest" href="webcam-manifest.json">
+  <link rel="icon" href="webcam-icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="webcam-icon-192.png">
+  <title>MfWebCamStreamer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f7f7f2;
+      --muted: #a8b0b8;
+      --panel: rgba(19, 25, 31, .88);
+      --line: rgba(255,255,255,.12);
+      --accent: #61d6a8;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 0, #254559 0, transparent 35rem),
+        linear-gradient(145deg, #0a1015, #111b22 55%, #07100e);
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    main { width: min(1080px, calc(100% - 32px)); margin: 32px auto; }
+    header { display: flex; justify-content: space-between; gap: 20px; align-items: end; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 3.2rem); letter-spacing: -.04em; }
+    .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .16em; font-size: .75rem; }
+    .status { color: var(--muted); text-align: right; }
+    .viewers { margin-top: 3px; color: var(--accent); font-size: .86rem; }
+    .stage { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: #000; box-shadow: 0 25px 70px rgba(0,0,0,.38); }
+    video { display: block; width: 100%; max-height: 70vh; aspect-ratio: 16/9; background: #000; object-fit: contain; }
+    .clock { position: absolute; top: 14px; right: 14px; padding: 7px 11px; border-radius: 999px; background: rgba(0,0,0,.7); font: 600 14px/1 ui-monospace, Consolas, monospace; backdrop-filter: blur(8px); }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+    button { border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; color: var(--ink); background: #202a32; cursor: pointer; font: inherit; font-weight: 650; }
+    button:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+    button:disabled { opacity: .42; cursor: default; }
+    button[hidden] { display: none; }
+    .primary { color: #05130e; background: var(--accent); }
+    .recording { color: white; background: var(--danger); }
+    .details { margin-top: 16px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+    summary { cursor: pointer; color: var(--muted); }
+    pre { max-height: 220px; overflow: auto; white-space: pre-wrap; color: #c9d2d9; font: 12px/1.55 ui-monospace, Consolas, monospace; }
+    @media (max-width: 620px) { header { align-items: start; flex-direction: column; } .status { text-align: left; } main { margin: 18px auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div><div class="eyebrow">FxServe live camera</div><h1>MfWebCamStreamer</h1></div>
+    <div class="status"><div id="status">Ready</div><div class="viewers" id="viewers">No active viewers</div></div>
+  </header>
+
+  <section class="stage">
+    <video id="video" controls playsinline muted></video>
+    <div class="clock" id="clock">00:00:00</div>
+  </section>
+
+  <section class="controls" aria-label="Camera stream controls">
+    <button class="primary" id="start">Start live video</button>
+    <button id="sound" disabled>Enable sound</button>
+    <button id="snapshot" disabled>Take snapshot</button>
+    <button id="record" disabled>Start recording</button>
+    <button id="install" hidden>Install app</button>
+    <button id="stop" disabled>Stop viewer</button>
+  </section>
+
+  <details class="details">
+    <summary>Connection diagnostics</summary>
+    <pre id="log"></pre>
+  </details>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const video = document.getElementById('video');
+  const statusBox = document.getElementById('status');
+  const viewersBox = document.getElementById('viewers');
+  const clockBox = document.getElementById('clock');
+  const logBox = document.getElementById('log');
+  const startButton = document.getElementById('start');
+  const stopButton = document.getElementById('stop');
+  const soundButton = document.getElementById('sound');
+  const snapshotButton = document.getElementById('snapshot');
+  const recordButton = document.getElementById('record');
+  const installButton = document.getElementById('install');
+
+  let mediaSource = null;
+  let sourceBuffer = null;
+  let running = false;
+  let sessionId = '';
+  let nextSequence = 0;
+  let viewerStartedAt = 0;
+  let clockTimer = 0;
+  let recorder = null;
+  let recordedChunks = [];
+  let deferredInstallPrompt = null;
+  let consecutiveStreamErrors = 0;
+  let viewerTimer = 0;
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  function createViewerId() {
+    try {
+      let value = window.sessionStorage.getItem('mfWebCamViewerId');
+      if (!value) {
+        value = window.crypto && crypto.randomUUID ? crypto.randomUUID() :
+          Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+        window.sessionStorage.setItem('mfWebCamViewerId', value);
+      }
+      return value;
+    } catch (_) {
+      return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    }
+  }
+
+  const viewerId = createViewerId();
+  const fresh = (name, identifyViewer = false) => {
+    let url = name + (name.includes('?') ? '&' : '?') + 't=' + Date.now();
+    if (identifyViewer) url += '&viewer=' + encodeURIComponent(viewerId);
+    return url;
+  };
+
+  function log(text) {
+    const line = new Date().toLocaleTimeString() + '  ' + text;
+    logBox.textContent += line + '\n';
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function setStatus(text) {
+    statusBox.textContent = text;
+  }
+
+  function formatElapsed(ms) {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const hours = String(Math.floor(total / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+    const seconds = String(total % 60).padStart(2, '0');
+    return hours + ':' + minutes + ':' + seconds;
+  }
+
+  function startClock() {
+    if (viewerStartedAt) return;
+    viewerStartedAt = Date.now();
+    clockTimer = window.setInterval(() => {
+      clockBox.textContent = formatElapsed(Date.now() - viewerStartedAt);
+    }, 250);
+  }
+
+  function resetClock() {
+    window.clearInterval(clockTimer);
+    viewerStartedAt = 0;
+    clockBox.textContent = '00:00:00';
+  }
+
+  async function fetchJson(name, identifyViewer = false) {
+    const response = await fetch(fresh(name, identifyViewer), { cache: 'no-store' });
+    if (!response.ok) throw new Error(name + ': HTTP ' + response.status);
+    return response.json();
+  }
+
+  async function updateViewerPresence() {
+    try {
+      const presence = await fetchJson('viewers.json');
+      const count = Number(presence.count) || 0;
+      const grouped = new Map();
+      for (const viewer of presence.viewers || []) {
+        const address = viewer.ip || 'unknown';
+        grouped.set(address, (grouped.get(address) || 0) + 1);
+      }
+      const addresses = [...grouped].map(([address, amount]) =>
+        address + (amount > 1 ? ' ×' + amount : '')).join(', ');
+      viewersBox.textContent = count + (count === 1 ? ' watching' : ' watching') +
+        (addresses ? ' · ' + addresses : '');
+    } catch (_) {
+      viewersBox.textContent = 'Viewer count unavailable';
+    }
+  }
+
+  function startViewerPresence() {
+    window.clearInterval(viewerTimer);
+    updateViewerPresence();
+    viewerTimer = window.setInterval(updateViewerPresence, 2000);
+  }
+
+  function stopViewerPresence() {
+    window.clearInterval(viewerTimer);
+    viewerTimer = 0;
+    viewersBox.textContent = 'Not watching';
+  }
+
+  async function fetchBytes(name) {
+    const response = await fetch(fresh(name), { cache: 'no-store' });
+    if (!response.ok) throw new Error(name + ': HTTP ' + response.status);
+    return response.arrayBuffer();
+  }
+
+  async function waitForLiveManifest() {
+    while (running) {
+      try {
+        const manifest = await fetchJson('live.json', true);
+        if (manifest.live) return manifest;
+        setStatus('Waiting for the camera publisher…');
+      } catch (_) {
+        setStatus('Waiting for the camera publisher…');
+      }
+      await sleep(500);
+    }
+    throw new Error('Viewer stopped');
+  }
+
+  function fragmentName(sequence, manifest) {
+    return (manifest.prefix || 'patched_frag_') +
+      String(sequence).padStart(Number(manifest.digits) || 6, '0') +
+      (manifest.ext || '.m4s');
+  }
+
+  function waitFor(target, eventName, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        target.removeEventListener(eventName, done);
+        reject(new Error(eventName + ' timeout'));
+      }, timeoutMs);
+      function done() {
+        window.clearTimeout(timeout);
+        target.removeEventListener(eventName, done);
+        resolve();
+      }
+      target.addEventListener(eventName, done);
+    });
+  }
+
+  async function append(bytes) {
+    if (!sourceBuffer) throw new Error('SourceBuffer is unavailable');
+    if (sourceBuffer.updating) await waitFor(sourceBuffer, 'updateend', 10000);
+    sourceBuffer.appendBuffer(bytes);
+    await waitFor(sourceBuffer, 'updateend', 10000);
+  }
+
+  async function createMse(manifest) {
+    mediaSource = new MediaSource();
+    video.src = URL.createObjectURL(mediaSource);
+    await waitFor(mediaSource, 'sourceopen', 5000);
+
+    const codec = manifest.codec || 'video/mp4; codecs="avc1.42C01F, mp4a.40.2"';
+    if (!MediaSource.isTypeSupported(codec)) throw new Error('Unsupported media type: ' + codec);
+    sourceBuffer = mediaSource.addSourceBuffer(codec);
+    sourceBuffer.mode = 'segments';
+    await append(await fetchBytes(manifest.init || 'init.mp4'));
+    log('Initialization segment appended.');
+  }
+
+  async function keepNearLiveEdge() {
+    if (!video.buffered.length) return;
+    const start = video.buffered.start(video.buffered.length - 1);
+    const end = video.buffered.end(video.buffered.length - 1);
+    if (video.currentTime < start || end - video.currentTime > 8) {
+      video.currentTime = Math.max(start, end - 2);
+    }
+    if (video.paused && running) {
+      try { await video.play(); } catch (_) { setStatus('Streaming — press play for audio'); }
+    }
+    if (video.currentTime > 30 && !sourceBuffer.updating) {
+      try {
+        sourceBuffer.remove(0, video.currentTime - 20);
+        await waitFor(sourceBuffer, 'updateend', 10000);
+      } catch (_) {}
+    }
+  }
+
+  async function pump() {
+    while (running) {
+      try {
+        const manifest = await fetchJson('live.json', true);
+        if (sessionId && manifest.sessionId && manifest.sessionId !== sessionId) {
+          log('A new camera session is available; reconnecting.');
+          stopViewer(false);
+          window.setTimeout(startViewer, 200);
+          return;
+        }
+        sessionId = manifest.sessionId || sessionId;
+
+        if (!manifest.live) {
+          setStatus('Camera is offline');
+          await sleep(750);
+          continue;
+        }
+
+        if (nextSequence < Number(manifest.first)) {
+          nextSequence = Math.max(Number(manifest.first), Number(manifest.last) - 2);
+          log('Moved to current live window at fragment ' + nextSequence + '.');
+        }
+
+        if (nextSequence <= Number(manifest.last)) {
+          const name = fragmentName(nextSequence, manifest);
+          await append(await fetchBytes(name));
+          nextSequence++;
+          await keepNearLiveEdge();
+          setStatus('Live · fragment ' + (nextSequence - 1));
+          snapshotButton.disabled = false;
+          recordButton.disabled = false;
+          soundButton.disabled = false;
+        } else {
+          await sleep(Math.max(100, Number(manifest.pollMs) || 250));
+        }
+
+        if (consecutiveStreamErrors >= 3) log('Connection restored.');
+        consecutiveStreamErrors = 0;
+      } catch (error) {
+        consecutiveStreamErrors++;
+        if (consecutiveStreamErrors === 3) {
+          log('Connection interrupted; retrying.');
+          setStatus('Reconnecting…');
+        }
+        await sleep(750);
+      }
+    }
+  }
+
+  async function startViewer() {
+    if (running) return;
+    if (!('MediaSource' in window)) {
+      setStatus('This browser does not support Media Source Extensions');
+      return;
+    }
+
+    running = true;
+    startViewerPresence();
+    startButton.disabled = true;
+    stopButton.disabled = false;
+    setStatus('Connecting…');
+    try {
+      const manifest = await waitForLiveManifest();
+      sessionId = manifest.sessionId || '';
+      nextSequence = Math.max(Number(manifest.first), Number(manifest.last) - 2);
+      await createMse(manifest);
+      startClock();
+      pump();
+    } catch (error) {
+      log('Start failed: ' + error.message);
+      stopViewer(false);
+      setStatus(error.message);
+    }
+  }
+
+  function stopViewer(resetTimer = true) {
+    running = false;
+    stopViewerPresence();
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    snapshotButton.disabled = true;
+    soundButton.disabled = true;
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+    try { video.pause(); } catch (_) {}
+    try { video.removeAttribute('src'); video.load(); } catch (_) {}
+    mediaSource = null;
+    sourceBuffer = null;
+    sessionId = '';
+    nextSequence = 0;
+    if (resetTimer) resetClock();
+    setStatus('Stopped');
+  }
+
+  function downloadBlob(blob, extension) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'webcam_' + new Date().toISOString().replace(/[:.]/g, '-') + extension;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  }
+
+  function takeSnapshot() {
+    if (!video.videoWidth || !video.videoHeight) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(blob => {
+      if (blob) downloadBlob(blob, '.png');
+    }, 'image/png');
+  }
+
+  function bestRecorderType() {
+    const choices = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    return choices.find(type => MediaRecorder.isTypeSupported(type)) || '';
+  }
+
+  function toggleRecording() {
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.stop();
+      return;
+    }
+    if (!window.MediaRecorder) {
+      setStatus('MediaRecorder is not supported by this browser');
+      return;
+    }
+    const capture = video.captureStream || video.mozCaptureStream;
+    if (!capture) {
+      setStatus('Video recording is not supported by this browser');
+      return;
+    }
+
+    try {
+      recordedChunks = [];
+      const mimeType = bestRecorderType();
+      recorder = new MediaRecorder(capture.call(video), mimeType ? { mimeType } : undefined);
+      recorder.ondataavailable = event => {
+        if (event.data && event.data.size) recordedChunks.push(event.data);
+      };
+      recorder.onstop = () => {
+        const type = recorder.mimeType || 'video/webm';
+        if (recordedChunks.length) downloadBlob(new Blob(recordedChunks, { type }), '.webm');
+        recordButton.textContent = 'Start recording';
+        recordButton.classList.remove('recording');
+        setStatus(running ? 'Live' : 'Stopped');
+      };
+      recorder.start(1000);
+      recordButton.textContent = 'Stop & download recording';
+      recordButton.classList.add('recording');
+      setStatus('Recording in this browser');
+    } catch (error) {
+      log('Recording failed: ' + error.message);
+      setStatus('Recording could not start');
+    }
+  }
+
+  startButton.addEventListener('click', startViewer);
+  stopButton.addEventListener('click', () => stopViewer(true));
+  snapshotButton.addEventListener('click', takeSnapshot);
+  recordButton.addEventListener('click', toggleRecording);
+  soundButton.addEventListener('click', () => {
+    video.muted = !video.muted;
+    soundButton.textContent = video.muted ? 'Enable sound' : 'Mute sound';
+    if (!video.muted) video.play().catch(() => {});
+  });
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+  }
+
+  const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (!isStandalone()) installButton.hidden = false;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installButton.hidden = true;
+    log('MfWebCamStreamer was installed.');
+  });
+
+  installButton.addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installButton.hidden = true;
+      return;
+    }
+
+    if (isIos) {
+      window.alert('On iPhone or iPad: tap Share, then choose Add to Home Screen.');
+    }
+  });
+
+  if (isIos && !isStandalone()) installButton.hidden = false;
+
+  if ('serviceWorker' in navigator &&
+      (window.isSecureContext || window.location.hostname === 'localhost' ||
+       window.location.hostname === '127.0.0.1')) {
+    navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
+      .then(registration => {
+        registration.update();
+        log('PWA service worker ready.');
+      })
+      .catch(error => log('PWA service worker registration failed: ' + error.message));
+  } else if (window.location.protocol === 'http:') {
+    log('PWA installation requires the FxServe HTTPS address. Streaming still works over LAN HTTP.');
+  }
+
+  video.addEventListener('play', startClock);
+  window.addEventListener('beforeunload', () => { running = false; });
+  if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+    startButton.disabled = true;
+    setStatus('Open this page through FxServe over HTTP/HTTPS');
+    log('ERROR: This page was opened as a file. Use the HTTP/HTTPS Browser URL from MfWebCamStreamer.');
+  } else {
+    log('Ready. The media files are delivered by FxServe.');
+  }
+})();
+</script>
+</body>
+</html>

@@ -159,10 +159,38 @@ object MfCameraControlsDialog: TMfCameraControlsDialog
       end
     end
     object tsDefaults: TTabSheet
-      Caption = 'Saved camera defaults'
+      Caption = 'Saved camera settings'
+      object lblStorage: TLabel
+        Left = 20
+        Top = 20
+        Width = 70
+        Height = 17
+        Caption = 'Storage:'
+      end
+      object cbxStorage: TComboBox
+        Left = 100
+        Top = 16
+        Width = 608
+        Height = 25
+        Style = csDropDownList
+        TabOrder = 4
+        OnChange = StorageChanged
+        Items.Strings = (
+          'INI file (this sample)'
+          'Windows camera defaults (companion app)')
+      end
+      object btnApplyIni: TButton
+        Left = 724
+        Top = 310
+        Width = 146
+        Height = 32
+        Caption = 'Apply saved INI'
+        TabOrder = 5
+        OnClick = ApplyIniClick
+      end
       object lblDefaults: TLabel
         Left = 20
-        Top = 16
+        Top = 50
         Width = 850
         Height = 45
         AutoSize = False
@@ -171,9 +199,9 @@ object MfCameraControlsDialog: TMfCameraControlsDialog
       end
       object lstDefaults: TListBox
         Left = 20
-        Top = 72
+        Top = 110
         Width = 850
-        Height = 220
+        Height = 182
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 17
         TabOrder = 0

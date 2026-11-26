@@ -28,6 +28,9 @@ type
     tsLive: TTabSheet;
     tsExtended: TTabSheet;
     tsDefaults: TTabSheet;
+    cbxStorage: TComboBox;
+    lblStorage: TLabel;
+    btnApplyIni: TButton;
     lstControls: TListBox;
     pnlValue: TPanel;
     lblName: TLabel;
@@ -66,6 +69,8 @@ type
     procedure ResetClick(Sender: TObject);
     procedure ExtendedChanged(Sender: TObject);
     procedure ApplyExtendedClick(Sender: TObject);
+    procedure StorageChanged(Sender: TObject);
+    procedure ApplyIniClick(Sender: TObject);
     procedure ReadDefaultsClick(Sender: TObject);
     procedure SaveDefaultClick(Sender: TObject);
     procedure RemoveDefaultClick(Sender: TObject);
@@ -73,14 +78,19 @@ type
 
   private
     FControls: TMfCameraControls;
+    FLoadingStorage: Boolean;
+    FStorageIndex: Integer;
     FNotifyWindow: HWND;
     FModeValues: array of UInt64;
 
+    function UsingIni(): Boolean;
     procedure NotifyWindowProc(var Message: TMessage);
     procedure UpdateSelected();
     procedure UpdateExtended();
     procedure Report(const AAction: string;
                      const AStatus: HRESULT);
+    procedure ReportDefaultAction(const AAction: string;
+                                  const AStatus: HRESULT);
     procedure AddMode(const ACaption: string;
                       const AFlags: UInt64);
 
@@ -92,6 +102,7 @@ type
 implementation
 
 uses
+  MfCameraSettings,
   WinApi.WinError,
   WinApi.KsMedia;
 
@@ -102,6 +113,19 @@ procedure TMfCameraControlsDialog.FormCreate(Sender: TObject);
 begin
 
   FNotifyWindow := AllocateHWnd(NotifyWindowProc);
+  FLoadingStorage := True;
+  try
+    FStorageIndex := 0;
+    try
+      if not TMfCameraSettings.UsesIni(TMfCameraSettings.FileName()) then
+        FStorageIndex := 1;
+    except
+      on E: Exception do FStorageIndex := 0;
+    end;
+    cbxStorage.ItemIndex := FStorageIndex;
+  finally
+    FLoadingStorage := False;
+  end;
   Bind(nil);
 end;
 
@@ -149,6 +173,8 @@ begin
     lblMonitor.Caption := 'Open a camera to inspect its controls.';
   RefreshView();
   ReadDefaultsClick(nil);
+  if Assigned(FControls) and UsingIni() and FAILED(FControls.IniRestoreStatus) then
+    Report('Restore INI settings (some controls failed)', FControls.IniRestoreStatus);
 end;
 
 
@@ -245,7 +271,23 @@ begin
   edValue.Enabled := False;
   chkAuto.Enabled := False;
   btnSaveDefault.Enabled := False;
-  btnRemoveDefault.Enabled := False;
+  btnRemoveDefault.Enabled := Selected and UsingIni();
+  btnApplyIni.Enabled := Assigned(FControls) and UsingIni();
+  if UsingIni() then
+    begin
+      btnReadDefaults.Caption := 'Read INI settings';
+      btnSaveDefault.Caption := 'Save selected live control to INI';
+      btnRemoveDefault.Caption := 'Remove selected INI setting';
+      lblDefaults.Caption := 'INI settings are stored per camera for this sample. ' +
+        'They are restored on camera open when INI storage is selected. Use Apply saved INI to restore them now.';
+    end
+  else
+    begin
+      btnReadDefaults.Caption := 'Reload saved defaults';
+      btnSaveDefault.Caption := 'Save selected live control as default';
+      btnRemoveDefault.Caption := 'Remove selected saved default';
+      lblDefaults.Caption := 'Windows default writes require a registered camera companion app.';
+    end;
   lblName.Caption := 'Select a live control';
   lblCurrent.Caption := '';
   lblRange.Caption := '';
@@ -278,9 +320,13 @@ begin
   chkAuto.Enabled := ((Info.Capabilities and KSPROPERTY_CAMERACONTROL_FLAGS_AUTO) <> 0);
   btnApply.Enabled := edValue.Enabled or chkAuto.Enabled;
   btnReset.Enabled := Info.DefaultKnown and edValue.Enabled;
-  btnSaveDefault.Enabled := SUCCEEDED(FControls.DefaultsStatus);
+  // API availability does not guarantee permission to persist Windows defaults.
+  btnSaveDefault.Enabled := UsingIni() or SUCCEEDED(FControls.DefaultsStatus);
   btnRemoveDefault.Enabled := btnSaveDefault.Enabled;
-  lblDefaults.Caption := 'Selected live control: ' + Info.Name + '. Saved values affect future camera opens for this Windows user.';
+  if not UsingIni() then
+    lblDefaults.Caption := 'Selected live control: ' + Info.Name +
+      '. Windows default writes require a registered camera companion app. ' +
+      'Use Windows Settings > Bluetooth & devices > Cameras for this desktop sample.';
 end;
 
 
@@ -294,6 +340,21 @@ begin
   else
     lblResult.Caption := Format('%s failed ($%.8x).',
                                 [AAction, Cardinal(AStatus)]);
+end;
+
+
+procedure TMfCameraControlsDialog.ReportDefaultAction(const AAction: string;
+                                                      const AStatus: HRESULT);
+
+begin
+
+  // Reload first so the result of the write remains visible on the defaults tab.
+  ReadDefaultsClick(nil);
+  Report(AAction,
+         AStatus);
+  if (AStatus = E_ACCESSDENIED) and not UsingIni() then
+    lblDefaultsStatus.Caption := 'Access denied ($80070005). Windows reserves default writes ' +
+      'for a registered camera companion app. Use Windows Settings > Bluetooth & devices > Cameras.';
 end;
 
 
@@ -459,6 +520,47 @@ begin
 end;
 
 
+function TMfCameraControlsDialog.UsingIni(): Boolean;
+begin
+  Result := cbxStorage.ItemIndex = 0;
+end;
+
+
+procedure TMfCameraControlsDialog.StorageChanged(Sender: TObject);
+var
+  Status: HRESULT;
+begin
+  if FLoadingStorage then Exit;
+  try
+    Status := TMfCameraSettings.SetUsesIni(TMfCameraSettings.FileName(), UsingIni());
+  except
+    on E: Exception do Status := E_FAIL;
+  end;
+  if FAILED(Status) then
+    begin
+      FLoadingStorage := True;
+      try
+        cbxStorage.ItemIndex := FStorageIndex;
+      finally
+        FLoadingStorage := False;
+      end;
+      Report('Save storage choice', Status);
+    end
+  else
+    FStorageIndex := cbxStorage.ItemIndex;
+  UpdateSelected();
+  ReadDefaultsClick(nil);
+end;
+
+
+procedure TMfCameraControlsDialog.ApplyIniClick(Sender: TObject);
+begin
+  if not Assigned(FControls) or not UsingIni() then Exit;
+  ReportDefaultAction('Apply saved INI settings', FControls.ApplyIniSettings());
+  UpdateSelected();
+end;
+
+
 procedure TMfCameraControlsDialog.ReadDefaultsClick(Sender: TObject);
 var
   Status: HRESULT;
@@ -466,10 +568,25 @@ var
 begin
 
   lstDefaults.Items.Clear();
+  lblDefaultsStatus.Hint := '';
+  lblDefaultsStatus.ShowHint := False;
   btnReadDefaults.Enabled := Assigned(FControls);
   if not Assigned(FControls) then
     begin
       lblDefaultsStatus.Caption := 'Open a camera first.';
+      Exit;
+    end;
+  if UsingIni() then
+    begin
+      Status := FControls.DescribeIniSettings(lstDefaults.Items);
+      if SUCCEEDED(Status) then
+        lblDefaultsStatus.Caption := Format('%d INI settings. File: %s',
+          [lstDefaults.Items.Count, TMfCameraSettings.FileName()])
+      else
+        lblDefaultsStatus.Caption := Format('INI read failed ($%.8x). File: %s',
+          [Cardinal(Status), TMfCameraSettings.FileName()]);
+      lblDefaultsStatus.Hint := lblDefaultsStatus.Caption;
+      lblDefaultsStatus.ShowHint := True;
       Exit;
     end;
   Status := FControls.DescribeDefaults(lstDefaults.Items);
@@ -488,9 +605,14 @@ begin
 
   if not Assigned(FControls) or (lstControls.ItemIndex < 0) then
     Exit;
-  Report('Save selected camera default',
-         FControls.SaveStandardDefault(lstControls.ItemIndex));
-  ReadDefaultsClick(nil);
+  if UsingIni() then
+    begin
+      ReportDefaultAction('Save selected INI setting',
+                          FControls.SaveIniSetting(lstControls.ItemIndex));
+      Exit;
+    end;
+  ReportDefaultAction('Save selected camera default',
+                      FControls.SaveStandardDefault(lstControls.ItemIndex));
 end;
 
 
@@ -500,9 +622,14 @@ begin
 
   if not Assigned(FControls) or (lstControls.ItemIndex < 0) then
     Exit;
-  Report('Remove selected camera default',
-         FControls.RemoveStandardDefault(lstControls.ItemIndex));
-  ReadDefaultsClick(nil);
+  if UsingIni() then
+    begin
+      ReportDefaultAction('Remove selected INI setting',
+                          FControls.RemoveIniSetting(lstControls.ItemIndex));
+      Exit;
+    end;
+  ReportDefaultAction('Remove selected camera default',
+                      FControls.RemoveStandardDefault(lstControls.ItemIndex));
 end;
 
 
