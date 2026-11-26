@@ -59,11 +59,6 @@
 // their product.
 //
 //==============================================================================
-// FactoryX
-// Project: MfPack - camera sample settings
-// Description: Per-user, per-camera INI settings, separate from Windows defaults.
-// License: Mozilla Public License 2.0, https://mozilla.org/MPL/2.0/
-
 unit MfCameraSettings;
 
 {$IFDEF FPC}
@@ -412,3 +407,4 @@ begin
 end;
 
 end.
+
