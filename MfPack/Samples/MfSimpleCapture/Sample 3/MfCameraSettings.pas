@@ -1,6 +1,6 @@
 // FactoryX
 // Project: MfPack - camera sample settings
-// Description: Per-user, per-camera INI settings, separate from Windows defaults.
+// Description: Per-camera INI settings beside the executable, separate from Windows defaults.
 // License: Mozilla Public License 2.0, https://mozilla.org/MPL/2.0/
 unit MfCameraSettings;
 
@@ -54,14 +54,8 @@ begin
 end;
 
 class function TMfCameraSettings.FileName(): string;
-var
-  Root: string;
 begin
-  Root := GetEnvironmentVariable('LOCALAPPDATA');
-  if Root = '' then
-    raise Exception.Create('LOCALAPPDATA is unavailable.');
-  Result := IncludeTrailingPathDelimiter(Root) + 'MfPack\' +
-    ChangeFileExt(ExtractFileName(ParamStr(0)), '') + '\CameraSettings.ini';
+  Result := ExtractFilePath(ExpandFileName(ParamStr(0))) + 'CameraSettings.ini';
 end;
 
 class function TMfCameraSettings.CameraSection(const ACamera: string): string;
