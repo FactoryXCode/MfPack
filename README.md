@@ -35,10 +35,10 @@ This completely revised MfPack version covers many bug fixes and updates.
   
 # Free Pascal / Lazarus  
 MfPack has been ported to FPC 3.2.2 / Lazarus 4.8.  
-You can find FPC-MfPack [here](https://github.com/FactoryXCode/MfPack-FPC).  
+You can find MfPack-FPC [here](https://github.com/FactoryXCode/MfPack-FPC).  
   
 **Important note:**  
-The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders.  
+The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders, except for those versions that where updated from version 22H2.  
 Those you can buy from Microsoft Store or download elsewhere.
   
   
