@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: ï¿½ FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -130,7 +130,7 @@ begin
   Stream := TFileStream.Create(AFileName,
                                fmOpenRead or fmShareDenyWrite);
   try
-    if Stream.Size > MaxInt then
+    if (Stream.Size > MaxInt) then
       raise EReadError.Create('The playlist is too large.');
 
     SetLength(Bytes,
@@ -152,7 +152,7 @@ begin
   if (Pos(AnsiChar(#0), Bytes) > 0) then
     raise EConvertError.Create('The playlist contains a null character.');
 
-  Text := UTF8Decode(Bytes);
+  Text := UTF8ToString(Bytes);   // Symbol 'UTF8Decode' is deprecated: Use UTF8ToWideString or UTF8ToString
 
   if (UTF8Encode(Text) <> Bytes) then
     raise EConvertError.Create('The playlist is not valid UTF-8.');
