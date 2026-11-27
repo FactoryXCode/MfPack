@@ -35,10 +35,10 @@ This completely revised MfPack version covers many bug fixes and updates.
   
 # Free Pascal / Lazarus  
 MfPack has been ported to FPC 3.2.2 / Lazarus 4.8.  
-You can find FPC-MfPack [here](https://github.com/FactoryXCode/MfPack-FPC).  
+You can find MfPack-FPC [here](https://github.com/FactoryXCode/MfPack-FPC).  
   
 **Important note:**  
-The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders.  
+The latest Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) encoders, except for those versions that where updated from version 22H2.  
 Those you can buy from Microsoft Store or download elsewhere.
   
   
@@ -196,7 +196,7 @@ There are 4 samples in 4 project degrees.
   Added MP4 export and Chromecast/Android TV/Google TV streaming support.  
   The Player also demonstrates how Media Foundation playback, timed text,  
   MFT processing, Source Reader/Sink Writer transcoding, IMFByteStream,  
-  mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together  
+  mDNS, TLS, MfPack Cast V2.2 messages and a local HTTP server can work together  
   inside a Delphi application, without using 3th party components.  
   
 ![](MfPack/Pic/MfMediaPlayer_X.jfif)
@@ -230,7 +230,7 @@ This is a VCL implementation of Microsoft's [How to Create a Playlist](https://l
 This sample demonstrates playback of clear and protected media with Microsoft Media Foundation and the Protected Media Path (PMP).
 It is a close Delphi translation of Microsoft's `ProtectedPlayback` C++ sample and uses the Media Foundation declarations supplied by MfPack.  
   
-The translation of this Microsoft sample preserves the structure, class names, method names, and control flow of the original sample wherever Delphi permits them. 
+The translation of this Microsoft sample preserves the structure, class names, method names and control flow of the original sample wherever Delphi permits them. 
 The sample includes the original C++ code for references.  
 
 ![](MfPack/Pic/MfProtectedPlayback.png)
@@ -263,7 +263,7 @@ Select 'Use default input device' in the application to hear the routed input.
 **MfSimpleWebCamStreamer**
   
 This sample demonstrates how to capture from a webcam and microphone with Microsoft Media Foundation, encoding the result as H.264  
-and AAC, and publishing the live stream directly to a web browser through fragmented MP4 and Media Source Extensions (MSE).  
+and AAC and publishing the live stream directly to a web browser through fragmented MP4 and Media Source Extensions (MSE).  
 It demonstrates the complete path from Media Foundation capture to a browser-playable live stream without requiring another external media server on a local network.
 
 ![](MfPack/Pic/MfSimpleWebCamStreamer.png)
@@ -283,7 +283,7 @@ The browser player includes:
 - PNG snapshots of the current camera frame;
 - Client-side recording through `MediaRecorder` (downloaded as WebM);
 - Live viewer count with privacy-masked IP addresses;
-- Sound, playback, reconnect, and live-edge controls.
+- Sound, playback, reconnect and live-edge controls.
   
 ![](MfPack/Pic/MfWebCamStreamer.png)
 
@@ -305,12 +305,12 @@ It shows how to implement the Media Foundation IMFExtendedCameraControl interfac
 - Device selection.
 - Casting a compatible local file through a built-in HTTP server.
 - Casting a directly reachable HTTP/HTTPS media URL.
-- Play, pause, stop, seek, volume, mute, and disconnect.
+- Play, pause, stop, seek, volume, mute and disconnect.
 - External subtitle files and embedded text-subtitle enumeration. External subtitle files are preferred when the same language exists in both sources.
 - Exact embedded-track selection and subtitle switching while casting.
   
 The sample enables the optional Media Foundation conversion stack.
-Compatible MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play.
+Compatible MP4/H.264/AAC, WebM, MP3, M4A and AAC sources use direct play.
 Containers such as MKV are converted to fragmented MP4 and published by the build-in HTTP server.  
 Please read the white paper document [MfPack_Chromecast_API_White_Paper.txt](MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details using the MfPack Cast API.  
   
@@ -332,7 +332,7 @@ This it the extended version of MfSimpleCastPlayer.
 - Heartbeat monitoring and automatic cleanup when the receiver is switched off or stops responding.
   
 The sample enables the optional Media Foundation conversion stack.  
-Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV, and Ogg sources can use direct playback.
+Compatible MP4/H.264/AAC, WebM, MP3, M4A, AAC, FLAC, WAV and Ogg sources can use direct playback.
 Other containers and codecs, including AVI and MKV when required, are remuxed or converted to fragmented MP4 and published by the build-in HTTP server.  
   
 Please read [MfPack_Chromecast_API_White_Paper.txt](MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt) for full details about using the MfPack Cast API.  
@@ -678,25 +678,25 @@ RDJ Pro is the extended version of RDJ.
   
 Where RDJ mainly demonstrates DJ-style audio playback and mixing with MfPack, 
 RDJ Pro adds a complete live broadcast layer around the mixer.  
-RDJ Pro still provides the familiar RDJ functions: channel decks, 
-loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing, 
-tag editing, and local recording.  
+RDJ Pro include all RDJ functions: channel decks, 
+loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing, tag editing and local recording.  
   
 The Pro version expands this into an audio/video streaming application.  
 It can combine the live program audio with camera video or a static video source, 
-encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.  
+encode the result with Microsoft Media Foundation and publish it as a browser-playable stream.  
 The main technical difference is the broadcast pipeline.  
+  
 MfRDJ Pro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4.  
-MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, 
-writes a rolling live.json manifest, and serves the result through FxServe or an alternative proxy server like Caddy.  
+The application observes the generated MP4 byte stream, extracts and patches fMP4 fragments, 
+writes a rolling live.json manifest and serves the result through FxServe or an alternative proxy server like Caddy.  
 Modern browsers can then play the stream using Media Source Extensions.  
 MfRDJ Pro also writes now-playing metadata, artwork links, on-air state and listener counts to JSON files for the web interface.  
 It includes safeguards for long-running broadcasts, such as bounded queues, 
-fragment cleanup, FxServe mirroring, sleep prevention options, and clean shutdown handling.  
+fragment cleanup, FxServe mirroring, sleep prevention options and clean shutdown handling.  
 MfRDJ Pro supports casting to Cromecast devices on your local network using the MfPack Cast V2 protocols.  
   
 **Note:**  
-You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2, FxServe and audio manipulation.  
+You have to know the principles of WASAPI, MFT's (see MFT samples), MfPack Cast V2.2, FxServe and audio manipulation.  
 Before compiling this sample make sure, you have all needed components compiled and installed (see instructions). 
 
 This sample has been moved to the [RDJ repository](https://github.com/FactoryXCode/FactoryX-RDJ)  
@@ -719,7 +719,7 @@ FxServe can run interactively as a console application or as a native Windows
 service. Its LAN listener remains on port 8080. An optional HTTP.sys front end 
 adds HTTPS on port 443 and redirects port 80 to HTTPS for WAN use.  
 WAN mode is disabled by default.  
-When WAN HTTPS is enabled, FxServe obtains, installs, renews, validates, and binds its certificate itself.  
+When WAN HTTPS is enabled, FxServe obtains, installs, renews, validates and binds its certificate itself.  
 MfPack includes a Zip file that contains the necessary files that needs to be 
 copied to your server of local machine that should run the service, 
 typically a remote server in your network. No installation app is needed.  
@@ -738,7 +738,7 @@ The Caddy version also has a CaddyAdmin app, to install, configure and control C
   
 MfCast is an independent Chromecast subsystem for Delphi.
 It handles device discovery, receiver control, local media serving, 
-media preparation, subtitles, track selection, 
+media preparation, subtitles, track selection  
 and optional remuxing/transcoding behind a small public API.  
   
 MfCast can be used by:
@@ -762,7 +762,7 @@ Samples using MfCast are:
   
 # HEOS CLI and AVR
 
-FactoryX HEOS CLI provides Delphi APIs for controlling HEOS-enabled audio devices from Denon and Marantz.
+MfPack HEOS CLI provides Delphi APIs for controlling HEOS-enabled audio devices from Denon and Marantz.
 It supports player control, volume and mute, music browsing, queues, playlists, grouping and receiver events.
 The APIs use native Windows sockets; no Indy or third-party JSON libraries are needed.
 
