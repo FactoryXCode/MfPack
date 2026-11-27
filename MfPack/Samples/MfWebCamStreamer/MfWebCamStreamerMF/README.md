@@ -220,7 +220,7 @@ The native save/remove code remains as an API example for an appropriately regis
 Packaging and camera association are separate deployment requirements; the sample's ordinary EXE manifest does not provide them.  
   
 Reference: [Microsoft camera companion app requirements](https://learn.microsoft.com/en-us/windows-hardware/drivers/stream/camera-companion-apps).  
-
+  
   
 Project: Media Foundation - MFPack - Samples  
   

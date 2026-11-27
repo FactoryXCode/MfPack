@@ -11,7 +11,7 @@
 // Language: ENU
 //
 // Revision Version: 4.1.0
-// Description: Per-camera INI settings beside the executable, separate from Windows defaults.
+// Description: Per-user, per-camera INI settings, separate from Windows defaults.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Carmen (carmenh)
@@ -61,7 +61,6 @@
 //==============================================================================
 unit MfCameraSettings;
 
-
 {$IFDEF FPC}
 {$MODE DELPHIUNICODE}
 {$ENDIF}
@@ -69,26 +68,28 @@ unit MfCameraSettings;
 interface
 
 uses
-{$IFDEF FPC}
+  {$IFDEF FPC}
   Windows,
   SysUtils,
   Classes,
   IniFiles;
-{$ELSE}
+  {$ELSE}
   {WinApi}
   WinApi.Windows,
   {System}
   System.SysUtils,
   System.Classes,
   System.IniFiles;
-{$ENDIF}
+  {$ENDIF}
 
 type
 
   TMfCameraSettings = class
   private
     class function CameraSection(const ACamera: string): string; static;
-    class function ControlKey(const ASet: TGUID; const AId: Cardinal): string; static;
+
+    class function ControlKey(const ASet: TGUID;
+                              const AId: Cardinal): string; static;
 
     class function Change(const AFile: string;
                           const ASection: string;
@@ -131,6 +132,7 @@ const
   SettingsFailure = HRESULT($80004005);
   SettingsInvalidArg = HRESULT($80070057);
 
+
 function SettingsError(const AError: DWORD): HRESULT;
 begin
 
@@ -142,17 +144,18 @@ end;
 
 
 class function TMfCameraSettings.FileName(): string;
+var
+  Root: string;
 
 begin
 
+  Root := GetEnvironmentVariable('LOCALAPPDATA');
 
+  if (Root = '') then
+    raise Exception.Create('LOCALAPPDATA is unavailable.');
 
-  Result := ExtractFilePath(ExpandFileName(ParamStr(0))) + 'CameraSettings.ini';
-
+  Result := IncludeTrailingPathDelimiter(Root) + 'MfPack\' + ChangeFileExt(ExtractFileName(ParamStr(0)), '') + '\CameraSettings.ini';
 end;
-
-
-
 
 
 class function TMfCameraSettings.CameraSection(const ACamera: string): string;
@@ -165,6 +168,7 @@ begin
   // Encode the full symbolic link, including INI delimiters and Unicode.
   // This avoids collisions between cameras with the same friendly name.
   Camera := UpperCase(ACamera);
+
   Result := 'Camera.';
 
   for I := 1 to Length(Camera) do
@@ -211,9 +215,9 @@ begin
     try
       if ARemove then
         begin
-          if not Ini.ValueExists(ASection, AKey) then
+          if not Ini.ValueExists(ASection,
+                                 AKey) then
             Exit(S_FALSE);
-
           Ini.DeleteKey(ASection,
                         AKey);
         end
@@ -247,6 +251,7 @@ begin
 
       finally
         Lines.Free();
+
         if (TemporaryName <> '') then
           DeleteFileW(PWideChar(TemporaryName));
       end;
@@ -328,7 +333,9 @@ begin
     Exit(SettingsInvalidArg);
 
   try
+
     Ini := TMemIniFile.Create(AFile);
+
     try
       if not Ini.ValueExists(CameraSection(ACamera),
                              ControlKey(ASet, AId)) then
@@ -337,15 +344,17 @@ begin
       Text := Ini.ReadString(CameraSection(ACamera),
                              ControlKey(ASet, AId),
                              '');
+      Separator := Pos(',',
+                       Text);
 
-      Separator := Pos(',', Text);
-
-      if (Separator = 0) or
-         not TryStrToInt(Copy(Text, 1, Separator - 1), AValue) or
-         not TryStrToInt(Copy(Text, Separator + 1, MaxInt), Flags) then
+      if (Separator = 0) or not
+         TryStrToInt(Copy(Text, 1, Separator - 1), AValue) or not
+         TryStrToInt(Copy(Text, Separator + 1, MaxInt), Flags) then
         Exit(SettingsInvalidData);
 
-      if (Flags <> 1) and (Flags <> 2) then Exit(SettingsInvalidData);
+      if (Flags <> 1) and (Flags <> 2) then
+        Exit(SettingsInvalidData);
+
       AFlags := Flags;
       Result := S_OK;
 
@@ -357,8 +366,8 @@ begin
     on E: EOSError do
       Result := SettingsError(E.ErrorCode);
 
-    on E: Exception do
-      Result := SettingsFailure;
+    on E: Exception
+      do Result := SettingsFailure;
   end;
 end;
 
@@ -377,8 +386,7 @@ begin
   Result := Change(AFile,
                    CameraSection(ACamera),
                    ControlKey(ASet, AId),
-                   IntToStr(AValue) + ',' + IntToStr(AFlags),
-                   False);
+                   IntToStr(AValue) + ',' + IntToStr(AFlags), False);
 end;
 
 
